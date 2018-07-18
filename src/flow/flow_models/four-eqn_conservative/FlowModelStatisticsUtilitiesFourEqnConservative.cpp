@@ -151,6 +151,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             {
                 f_out << "\t" << "RE_HOMO_YZ_IN_ML_X   ";
             }
+            else if (statistical_quantity_key == "T_MA_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "T_MA_HOMO_Y_IN_ML_X  ";
+            }
+            else if (statistical_quantity_key == "T_MA_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "T_MA_HOMO_YZ_IN_ML_X ";
+            }
             else if (statistical_quantity_key == "TKE_HOMO_Y_IN_ML_X")
             {
                 f_out << "\t" << "TKE_HOMO_Y_IN_ML_X   ";
@@ -570,6 +578,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "RE_HOMO_YZ_IN_ML_X")
         {
             outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "T_MA_HOMO_Y_IN_ML_X")
+        {
+            outputTurbulentMachNumberMeanInMixingLayerWithHomogeneityInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "T_MA_HOMO_YZ_IN_ML_X")
+        {
+            outputTurbulentMachNumberMeanInMixingLayerWithHomogeneityInYZPlane(
                 stat_dump_filename,
                 patch_hierarchy,
                 data_context);
@@ -15995,8 +16017,8 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
         const double L_x = x_hi[0] - x_lo[0];
         const double L_y = x_hi[1] - x_lo[1];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -16008,8 +16030,8 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_u_avg_local[i] = 0.0;
@@ -16063,7 +16085,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density, velocity, pressure and temperature in
+                 * Register the patch, mass fraction, mole fraction, density, velocity, pressure and temperature in
                  * the flow model and compute the corresponding cell data.
                  */
                 
@@ -16075,6 +16097,9 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -16093,12 +16118,15 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density, velocity, pressure and temperature
+                 * Get the pointers to mass fraction, mole fraction, density, velocity, pressure and temperature
                  * data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -16117,6 +16145,12 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                std::vector<double*> X;
+                X.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -16137,6 +16171,9 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
+                
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
@@ -16152,6 +16189,10 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
                 const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
                 const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
                 const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -16222,6 +16263,9 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
                             const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
                             
+                            const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction;
+                            
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
                             
@@ -16249,7 +16293,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
                             
                             const double weight_local = weight/((double) n_overlapped);
                             
-                            const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                            const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                             const double rho_to_add = rho[idx_density]*weight_local;
                             const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
                             const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
@@ -16259,7 +16303,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                 
-                                Y_avg_local[idx_fine] += Y_to_add;
+                                X_avg_local[idx_fine] += X_to_add;
                                 rho_avg_local[idx_fine] += rho_to_add;
                                 rho_u_avg_local[idx_fine] += rho_u_to_add;
                                 rho_v_avg_local[idx_fine] += rho_v_to_add;
@@ -16278,8 +16322,8 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -16506,7 +16550,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                W += Y_avg_global[i]*(1.0 - Y_avg_global[i]);
+                W += X_avg_global[i]*(1.0 - X_avg_global[i]);
             }
             
             const double dx_finest = L_x/finest_level_dim_0;
@@ -16520,7 +16564,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     rho_sum += rho_avg_global[i];
                     TKE_sum += TKE_avg_global[i];
@@ -16537,8 +16581,8 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
                   << "\t" << rho_mean*sqrt(TKE_mean)*W/mu_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_u_avg_local);
@@ -16674,8 +16718,8 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -16689,8 +16733,8 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_u_avg_local[i] = 0.0;
@@ -16746,7 +16790,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density, velocity, pressure and temperature in
+                 * Register the patch, mass fraction, mole fraction, density, velocity, pressure and temperature in
                  * the flow model and compute the corresponding cell data.
                  */
                 
@@ -16758,6 +16802,9 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -16776,12 +16823,15 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density, velocity, pressure and temperature
+                 * Get the pointers to mass fraction, mole fraction, density, velocity, pressure and temperature
                  * data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -16800,6 +16850,12 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                std::vector<double*> X;
+                X.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -16821,6 +16877,9 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
+                
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
@@ -16838,6 +16897,12 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
                 const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
                 const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
                 const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -16923,6 +16988,11 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
                                     (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                         ghostcell_dim_1_mass_fraction;
                                 
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
+                                
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
                                     (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
@@ -16958,7 +17028,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
                                 
                                 const double weight_local = weight/((double) n_overlapped);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                                 const double rho_to_add = rho[idx_density]*weight_local;
                                 const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
                                 const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
@@ -16969,7 +17039,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     rho_avg_local[idx_fine] += rho_to_add;
                                     rho_u_avg_local[idx_fine] += rho_u_to_add;
                                     rho_v_avg_local[idx_fine] += rho_v_to_add;
@@ -16990,8 +17060,8 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -17240,7 +17310,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                W += Y_avg_global[i]*(1.0 - Y_avg_global[i]);
+                W += X_avg_global[i]*(1.0 - X_avg_global[i]);
             }
             
             const double dx_finest = L_x/finest_level_dim_0;
@@ -17254,7 +17324,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     rho_sum += rho_avg_global[i];
                     TKE_sum += TKE_avg_global[i];
@@ -17271,8 +17341,8 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
                   << "\t" << rho_mean*sqrt(TKE_mean)*W/mu_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_u_avg_local);
@@ -17283,6 +17353,1312 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(rho_w_avg_global);
         std::free(mu_avg_local);
         std::free(mu_avg_global);
+        std::free(TKE_avg_local);
+        std::free(TKE_avg_global);
+    }
+}
+
+
+/*
+ * Output mean turbulent Mach number inside mixing layer with assumed homogeneity in y-direction to a file.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::
+outputTurbulentMachNumberMeanInMixingLayerWithHomogeneityInYDirection(
+    const std::string& stat_dump_filename,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context)
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'T_MA_HOMO_Y_IN_ML_X' can be computed with two species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    /*
+     * Get the refinement ratio from the finest level to the coarest level.
+     */
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    hier::IntVector ratioFinestLevelToCoarestLevel =
+        patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
+    for (int li = num_levels - 2; li > 0 ; li--)
+    {
+        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+    }
+    
+    /*
+     * Get the flattened hierarchy where only the finest existing grid is visible at any given
+     * location in the problem space.
+     */
+    
+    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
+            *patch_hierarchy,
+            0,
+            num_levels - 1));
+    
+    /*
+     * Get the number of cells of physical domain refined to the finest level.
+     */
+    
+    const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
+    const hier::Box& physical_domain_box = physical_domain.front();
+    const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    
+    /*
+     * Get the indices of the physical domain.
+     */
+    
+    const double* x_lo = d_grid_geometry->getXLower();
+    const double* x_hi = d_grid_geometry->getXUpper();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no 'T_MA_HOMO_Y_IN_ML_X' for one-dimensional problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        const int finest_level_dim_0 = finest_level_dims[0];
+        
+        /*
+         * Get the size of the physical domain.
+         */
+        
+        const double L_y = x_hi[1] - x_lo[1];
+        
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_u_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_v_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_v_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* c_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* c_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
+            rho_avg_local[i] = 0.0;
+            rho_avg_global[i] = 0.0;
+            rho_u_avg_local[i] = 0.0;
+            rho_u_avg_global[i] = 0.0;
+            rho_v_avg_local[i] = 0.0;
+            rho_v_avg_global[i] = 0.0;
+            c_avg_local[i] = 0.0;
+            c_avg_global[i] = 0.0;
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratioToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            
+            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                // Get the dimensions of box that covers the interior of patch.
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch, mole fraction, density, velocity and sound speed in the flow model
+                 * and compute the corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("SOUND_SPEED", hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                
+                d_flow_model_tmp->computeGlobalDerivedCellData();
+                
+                /*
+                 * Get the pointers to mole fraction, density, velocity and sound speed data inside
+                 * the flow model.
+                 */
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_density =
+                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_sound_speed =
+                    d_flow_model_tmp->getGlobalCellData("SOUND_SPEED");
+                
+                std::vector<double*> X;
+                X.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    X.push_back(data_mole_fraction->getPointer(si));
+                }
+                double* rho = data_density->getPointer(0);
+                double* u = data_velocity->getPointer(0);
+                double* v = data_velocity->getPointer(1);
+                double* c = data_sound_speed->getPointer(0);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_sound_speed = data_sound_speed->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_sound_speed = data_sound_speed->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                
+                const int num_ghosts_0_sound_speed = num_ghosts_sound_speed[0];
+                const int num_ghosts_1_sound_speed = num_ghosts_sound_speed[1];
+                const int ghostcell_dim_0_sound_speed = ghostcell_dims_sound_speed[0];
+                
+                const double weight = dx[1]/L_y;
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            /*
+                             * Compute the index of the data point and count how many times the data is repeated.
+                             */
+                            
+                            const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j);
+                            
+                            int n_overlapped = 1;
+                            
+                            for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                    patch_overlapped_visible_boxes.begin());
+                                 iob != patch_overlapped_visible_boxes.end();
+                                 iob++)
+                            {
+                                const hier::Box& patch_overlapped_visible_box = *iob;
+                                
+                                if (patch_overlapped_visible_box.contains(idx_pt))
+                                {
+                                    n_overlapped++;
+                                }
+                            }
+                            
+                            /*
+                             * Compute the linear indices and the data to add.
+                             */
+                            
+                            const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction;
+                            
+                            const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                            
+                            const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const int idx_sound_speed = (relative_idx_lo_0 + i + num_ghosts_0_sound_speed) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_sound_speed)*ghostcell_dim_0_sound_speed;
+                            
+                            const double weight_local = weight/((double) n_overlapped);
+                            
+                            const double X_to_add = X[0][idx_mole_fraction]*weight_local;
+                            const double rho_to_add = rho[idx_density]*weight_local;
+                            const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
+                            const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
+                            const double c_to_add = c[idx_sound_speed]*weight_local;
+                            
+                            for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                            {
+                                const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                
+                                X_avg_local[idx_fine] += X_to_add;
+                                rho_avg_local[idx_fine] += rho_to_add;
+                                rho_u_avg_local[idx_fine] += rho_u_to_add;
+                                rho_v_avg_local[idx_fine] += rho_v_to_add;
+                                c_avg_local[idx_fine] += c_to_add;
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        mpi.Allreduce(
+            X_avg_local,
+            X_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_avg_local,
+            rho_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_u_avg_local,
+            rho_u_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_v_avg_local,
+            rho_v_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Reduce(
+            c_avg_local,
+            c_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM,
+            0);
+        
+        double* TKE_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* TKE_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            TKE_avg_local[i] = 0.0;
+            TKE_avg_global[i] = 0.0;
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratioToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            
+            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                // Get the dimensions of box that covers the interior of patch.
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch and velocity in the flow model and compute the corresponding
+                 * cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                
+                d_flow_model_tmp->computeGlobalDerivedCellData();
+                
+                /*
+                 * Get the pointers to velocity data inside the flow model.
+                 */
+                
+                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                
+                double* u = data_velocity->getPointer(0);
+                double* v = data_velocity->getPointer(1);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                
+                const double weight = dx[1]/L_y;
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            /*
+                             * Compute the index of the data point and count how many times the data is repeated.
+                             */
+                            
+                            const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j);
+                            
+                            int n_overlapped = 1;
+                            
+                            for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                    patch_overlapped_visible_boxes.begin());
+                                 iob != patch_overlapped_visible_boxes.end();
+                                 iob++)
+                            {
+                                const hier::Box& patch_overlapped_visible_box = *iob;
+                                
+                                if (patch_overlapped_visible_box.contains(idx_pt))
+                                {
+                                    n_overlapped++;
+                                }
+                            }
+                            
+                            /*
+                             * Compute the linear indices and the data to add.
+                             */
+                            
+                            const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const double weight_local = weight/((double) n_overlapped);
+                            
+                            for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                            {
+                                const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                
+                                double u_pp = u[idx_velocity] -
+                                    rho_u_avg_global[idx_fine]/rho_avg_global[idx_fine];
+                                
+                                double v_pp = v[idx_velocity] -
+                                    rho_v_avg_global[idx_fine]/rho_avg_global[idx_fine];
+                                
+                                TKE_avg_local[idx_fine] += (u_pp*u_pp + v_pp*v_pp)*weight_local;
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        mpi.Reduce(
+            TKE_avg_local,
+            TKE_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM,
+            0);
+        
+        /*
+         * Compute and output the mean of turbulent Mach number inside mixing layer (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            double TKE_sum = 0.0;
+            double c_sum = 0.0;
+            int count = 0;
+            
+            for (int i = 0; i < finest_level_dim_0; i++)
+            {
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
+                {
+                    TKE_sum += TKE_avg_global[i];
+                    c_sum += c_avg_global[i];
+                    count++;
+                }
+            }
+            
+            const double TKE_mean = TKE_sum/count;
+            const double c_mean = c_sum/count;
+            
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << sqrt(TKE_mean)/c_mean;
+        }
+        
+        std::free(X_avg_local);
+        std::free(X_avg_global);
+        std::free(rho_avg_local);
+        std::free(rho_avg_global);
+        std::free(rho_u_avg_local);
+        std::free(rho_u_avg_global);
+        std::free(rho_v_avg_local);
+        std::free(rho_v_avg_global);
+        std::free(c_avg_local);
+        std::free(c_avg_global);
+        std::free(TKE_avg_local);
+        std::free(TKE_avg_global);
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'T_MA_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
+            << std::endl);
+    }
+}
+
+
+/*
+ * Output mean turbulent Mach number inside mixing layer with assumed homogeneity in yz-plane to a file.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::
+outputTurbulentMachNumberMeanInMixingLayerWithHomogeneityInYZPlane(
+    const std::string& stat_dump_filename,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context)
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'T_MA_HOMO_YZ_IN_ML_X' can be computed with two species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    /*
+     * Get the refinement ratio from the finest level to the coarest level.
+     */
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    hier::IntVector ratioFinestLevelToCoarestLevel =
+        patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
+    for (int li = num_levels - 2; li > 0 ; li--)
+    {
+        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+    }
+    
+    /*
+     * Get the flattened hierarchy where only the finest existing grid is visible at any given
+     * location in the problem space.
+     */
+    
+    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
+            *patch_hierarchy,
+            0,
+            num_levels - 1));
+    
+    /*
+     * Get the number of cells of physical domain refined to the finest level.
+     */
+    
+    const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
+    const hier::Box& physical_domain_box = physical_domain.front();
+    const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    
+    /*
+     * Get the indices of the physical domain.
+     */
+    
+    const double* x_lo = d_grid_geometry->getXLower();
+    const double* x_hi = d_grid_geometry->getXUpper();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no 'T_MA_HOMO_YZ_IN_ML_X' for one-dimensional problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no 'T_MA_HOMO_YZ_IN_ML_X' for two-dimensional problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const int finest_level_dim_0 = finest_level_dims[0];
+        
+        /*
+         * Get the size of the physical domain.
+         */
+        
+        const double L_y = x_hi[1] - x_lo[1];
+        const double L_z = x_hi[2] - x_lo[2];
+        
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_u_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_v_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_v_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_w_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_w_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* c_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* c_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
+            rho_avg_local[i] = 0.0;
+            rho_avg_global[i] = 0.0;
+            rho_u_avg_local[i] = 0.0;
+            rho_u_avg_global[i] = 0.0;
+            rho_v_avg_local[i] = 0.0;
+            rho_v_avg_global[i] = 0.0;
+            rho_w_avg_local[i] = 0.0;
+            rho_w_avg_global[i] = 0.0;
+            c_avg_local[i] = 0.0;
+            c_avg_global[i] = 0.0;
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratioToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            
+            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                // Get the dimensions of box that covers the interior of patch.
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch, mole fraction, density, velocity and sound speed in the flow model
+                 * and compute the corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("SOUND_SPEED", hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                
+                d_flow_model_tmp->computeGlobalDerivedCellData();
+                
+                /*
+                 * Get the pointers to mole fraction, density, velocity and sound speed data inside
+                 * the flow model.
+                 */
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_density =
+                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_sound_speed =
+                    d_flow_model_tmp->getGlobalCellData("SOUND_SPEED");
+                
+                std::vector<double*> X;
+                X.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    X.push_back(data_mole_fraction->getPointer(si));
+                }
+                double* rho = data_density->getPointer(0);
+                double* u = data_velocity->getPointer(0);
+                double* v = data_velocity->getPointer(1);
+                double* w = data_velocity->getPointer(2);
+                double* c = data_sound_speed->getPointer(0);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_sound_speed = data_sound_speed->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_sound_speed = data_sound_speed->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int num_ghosts_2_density = num_ghosts_density[2];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                const int ghostcell_dim_1_density = ghostcell_dims_density[1];
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int num_ghosts_2_velocity = num_ghosts_velocity[2];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+                
+                const int num_ghosts_0_sound_speed = num_ghosts_sound_speed[0];
+                const int num_ghosts_1_sound_speed = num_ghosts_sound_speed[1];
+                const int num_ghosts_2_sound_speed = num_ghosts_sound_speed[2];
+                const int ghostcell_dim_0_sound_speed = ghostcell_dims_sound_speed[0];
+                const int ghostcell_dim_1_sound_speed = ghostcell_dims_sound_speed[1];
+                
+                const double weight = dx[1]*dx[2]/(L_y*L_z);
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    const int relative_idx_lo_2 = relative_index_lo[2];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear indices and the data to add.
+                                 */
+                                
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
+                                
+                                const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                                        ghostcell_dim_1_density;
+                                
+                                const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                        ghostcell_dim_1_velocity;
+                                
+                                const int idx_sound_speed = (relative_idx_lo_0 + i + num_ghosts_0_sound_speed) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_sound_speed)*ghostcell_dim_0_sound_speed +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_sound_speed)*ghostcell_dim_0_sound_speed*
+                                        ghostcell_dim_1_sound_speed;
+                                
+                                const double weight_local = weight/((double) n_overlapped);
+                                
+                                const double X_to_add = X[0][idx_mole_fraction]*weight_local;
+                                const double rho_to_add = rho[idx_density]*weight_local;
+                                const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
+                                const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
+                                const double rho_w_to_add = rho[idx_density]*w[idx_velocity]*weight_local;
+                                const double c_to_add = c[idx_sound_speed]*weight_local;
+                                
+                                for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                                {
+                                    const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                    
+                                    X_avg_local[idx_fine] += X_to_add;
+                                    rho_avg_local[idx_fine] += rho_to_add;
+                                    rho_u_avg_local[idx_fine] += rho_u_to_add;
+                                    rho_v_avg_local[idx_fine] += rho_v_to_add;
+                                    rho_w_avg_local[idx_fine] += rho_w_to_add;
+                                    c_avg_local[idx_fine] += c_to_add;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        mpi.Allreduce(
+            X_avg_local,
+            X_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_avg_local,
+            rho_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_u_avg_local,
+            rho_u_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_v_avg_local,
+            rho_v_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_w_avg_local,
+            rho_w_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Reduce(
+            c_avg_local,
+            c_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM,
+            0);
+        
+        double* TKE_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* TKE_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            TKE_avg_local[i] = 0.0;
+            TKE_avg_global[i] = 0.0;
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratioToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            
+            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                // Get the dimensions of box that covers the interior of patch.
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch and velocity in the flow model and compute the corresponding
+                 * cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                
+                d_flow_model_tmp->computeGlobalDerivedCellData();
+                
+                /*
+                 * Get the pointers to velocity data inside the flow model.
+                 */
+                
+                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                
+                double* u = data_velocity->getPointer(0);
+                double* v = data_velocity->getPointer(1);
+                double* w = data_velocity->getPointer(2);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int num_ghosts_2_velocity = num_ghosts_velocity[2];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+                
+                const double weight = dx[1]*dx[2]/(L_y*L_z);
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    const int relative_idx_lo_2 = relative_index_lo[2];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear index and the data to add.
+                                 */
+                                
+                                const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                        ghostcell_dim_1_velocity;
+                                
+                                const double weight_local = weight/((double) n_overlapped);
+                                
+                                for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                                {
+                                    const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                    
+                                    const double u_pp = u[idx_velocity] - rho_u_avg_global[idx_fine]/
+                                        rho_avg_global[idx_fine];
+                                    
+                                    const double v_pp = v[idx_velocity] - rho_v_avg_global[idx_fine]/
+                                        rho_avg_global[idx_fine];
+                                    
+                                    const double w_pp = w[idx_velocity] - rho_w_avg_global[idx_fine]/
+                                        rho_avg_global[idx_fine];
+                                    
+                                    TKE_avg_local[idx_fine] +=
+                                        (u_pp*u_pp + v_pp*v_pp + w_pp*w_pp)*weight_local;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        mpi.Reduce(
+            TKE_avg_local,
+            TKE_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM,
+            0);
+        
+        /*
+         * Compute and output the mean of turbulent Mach number inside mixing layer (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            double TKE_sum = 0.0;
+            double c_sum = 0.0;
+            int count = 0;
+            
+            for (int i = 0; i < finest_level_dim_0; i++)
+            {
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
+                {
+                    TKE_sum += TKE_avg_global[i];
+                    c_sum += c_avg_global[i];
+                    count++;
+                }
+            }
+            
+            const double TKE_mean = TKE_sum/count;
+            const double c_mean = c_sum/count;
+            
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << sqrt(TKE_mean)/c_mean;
+        }
+        
+        std::free(X_avg_local);
+        std::free(X_avg_global);
+        std::free(rho_avg_local);
+        std::free(rho_avg_global);
+        std::free(rho_u_avg_local);
+        std::free(rho_u_avg_global);
+        std::free(rho_v_avg_local);
+        std::free(rho_v_avg_global);
+        std::free(rho_w_avg_local);
+        std::free(rho_w_avg_global);
+        std::free(c_avg_local);
+        std::free(c_avg_global);
         std::free(TKE_avg_local);
         std::free(TKE_avg_global);
     }
@@ -17393,8 +18769,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
         
         const double L_y = x_hi[1] - x_lo[1];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -17404,8 +18780,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_u_avg_local[i] = 0.0;
@@ -17457,7 +18833,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -17468,7 +18844,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -17481,11 +18857,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -17493,11 +18869,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -17513,8 +18889,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -17522,9 +18898,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -17584,8 +18960,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
                              * Compute the linear indices and the data to add.
                              */
                             
-                            const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                            const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction;
                             
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
@@ -17595,7 +18971,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
                             
                             const double weight_local = weight/((double) n_overlapped);
                             
-                            const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                            const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                             const double rho_to_add = rho[idx_density]*weight_local;
                             const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
                             const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
@@ -17604,7 +18980,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                 
-                                Y_avg_local[idx_fine] += Y_to_add;
+                                X_avg_local[idx_fine] += X_to_add;
                                 rho_avg_local[idx_fine] += rho_to_add;
                                 rho_u_avg_local[idx_fine] += rho_u_to_add;
                                 rho_v_avg_local[idx_fine] += rho_v_to_add;
@@ -17622,8 +18998,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -17861,7 +19237,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     TKE_sum += TKE_avg_global[i];
                     count++;
@@ -17874,8 +19250,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
                   << "\t" << TKE_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_u_avg_local);
@@ -18001,8 +19377,8 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
         
         const double L_y = x_hi[1] - x_lo[1];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -18010,8 +19386,8 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_u_avg_local[i] = 0.0;
@@ -18061,7 +19437,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -18072,7 +19448,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -18085,11 +19461,11 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -18097,11 +19473,11 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -18116,8 +19492,8 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -18125,9 +19501,9 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -18187,8 +19563,8 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                              * Compute the linear indices and the data to add.
                              */
                             
-                            const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                            const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction;
                             
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
@@ -18198,7 +19574,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                             
                             const double weight_local = weight/((double) n_overlapped);
                             
-                            const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                            const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                             const double rho_to_add = rho[idx_density]*weight_local;
                             const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
                             
@@ -18206,7 +19582,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                 
-                                Y_avg_local[idx_fine] += Y_to_add;
+                                X_avg_local[idx_fine] += X_to_add;
                                 rho_avg_local[idx_fine] += rho_to_add;
                                 rho_u_avg_local[idx_fine] += rho_u_to_add;
                             }
@@ -18223,8 +19599,8 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -18451,7 +19827,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     TKE_x_sum += TKE_x_avg_global[i];
                     count++;
@@ -18464,8 +19840,8 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                   << "\t" << TKE_x_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_u_avg_local);
@@ -18589,8 +19965,8 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
         
         const double L_y = x_hi[1] - x_lo[1];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_v_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -18598,8 +19974,8 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_v_avg_local[i] = 0.0;
@@ -18649,7 +20025,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -18660,7 +20036,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -18673,11 +20049,11 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -18685,11 +20061,11 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* v = data_velocity->getPointer(1);
@@ -18704,8 +20080,8 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -18713,9 +20089,9 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -18775,8 +20151,8 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                              * Compute the linear indices and the data to add.
                              */
                             
-                            const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                            const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction;
                             
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
@@ -18786,7 +20162,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                             
                             const double weight_local = weight/((double) n_overlapped);
                             
-                            const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                            const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                             const double rho_to_add = rho[idx_density]*weight_local;
                             const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
                             
@@ -18794,7 +20170,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                 
-                                Y_avg_local[idx_fine] += Y_to_add;
+                                X_avg_local[idx_fine] += X_to_add;
                                 rho_avg_local[idx_fine] += rho_to_add;
                                 rho_v_avg_local[idx_fine] += rho_v_to_add;
                             }
@@ -18811,8 +20187,8 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -19039,7 +20415,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     TKE_y_sum += TKE_y_avg_global[i];
                     count++;
@@ -19052,8 +20428,8 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                   << "\t" << TKE_y_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_v_avg_local);
@@ -19183,8 +20559,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -19196,8 +20572,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_u_avg_local[i] = 0.0;
@@ -19251,7 +20627,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -19262,7 +20638,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -19275,11 +20651,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -19287,11 +20663,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -19308,8 +20684,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -19317,11 +20693,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -19390,10 +20766,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
                                  * Compute the linear indices and the data to add.
                                  */
                                 
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
                                 
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
@@ -19407,7 +20783,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
                                 
                                 const double weight_local = weight/((double) n_overlapped);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                                 const double rho_to_add = rho[idx_density]*weight_local;
                                 const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
                                 const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
@@ -19417,7 +20793,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     rho_avg_local[idx_fine] += rho_to_add;
                                     rho_u_avg_local[idx_fine] += rho_u_to_add;
                                     rho_v_avg_local[idx_fine] += rho_v_to_add;
@@ -19437,8 +20813,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -19701,7 +21077,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     TKE_sum += TKE_avg_global[i];
                     count++;
@@ -19714,8 +21090,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
                   << "\t" << TKE_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_u_avg_local);
@@ -19844,8 +21220,8 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -19853,8 +21229,8 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_u_avg_local[i] = 0.0;
@@ -19904,7 +21280,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -19915,7 +21291,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -19928,11 +21304,11 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -19940,11 +21316,11 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -19959,8 +21335,8 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -19968,11 +21344,11 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -20041,10 +21417,10 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                                  * Compute the linear indices and the data to add.
                                  */
                                 
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
                                 
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
@@ -20058,7 +21434,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                                 
                                 const double weight_local = weight/((double) n_overlapped);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                                 const double rho_to_add = rho[idx_density]*weight_local;
                                 const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
                                 
@@ -20066,7 +21442,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     rho_avg_local[idx_fine] += rho_to_add;
                                     rho_u_avg_local[idx_fine] += rho_u_to_add;
                                 }
@@ -20084,8 +21460,8 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -20326,7 +21702,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     TKE_x_sum += TKE_x_avg_global[i];
                     count++;
@@ -20339,8 +21715,8 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                   << "\t" << TKE_x_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_u_avg_local);
@@ -20465,8 +21841,8 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_v_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -20474,8 +21850,8 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_v_avg_local[i] = 0.0;
@@ -20525,7 +21901,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -20536,7 +21912,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -20549,11 +21925,11 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -20561,11 +21937,11 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* v = data_velocity->getPointer(1);
@@ -20580,8 +21956,8 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -20589,11 +21965,11 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -20662,10 +22038,10 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                                  * Compute the linear indices and the data to add.
                                  */
                                 
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
                                 
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
@@ -20679,7 +22055,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                                 
                                 const double weight_local = weight/((double) n_overlapped);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                                 const double rho_to_add = rho[idx_density]*weight_local;
                                 const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
                                 
@@ -20687,7 +22063,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     rho_avg_local[idx_fine] += rho_to_add;
                                     rho_v_avg_local[idx_fine] += rho_v_to_add;
                                 }
@@ -20705,8 +22081,8 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -20947,7 +22323,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     TKE_y_sum += TKE_y_avg_global[i];
                     count++;
@@ -20960,8 +22336,8 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                   << "\t" << TKE_y_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_v_avg_local);
@@ -21086,8 +22462,8 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_w_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -21095,8 +22471,8 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_w_avg_local[i] = 0.0;
@@ -21146,7 +22522,7 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -21157,7 +22533,7 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -21170,11 +22546,11 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -21182,11 +22558,11 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* w = data_velocity->getPointer(2);
@@ -21201,8 +22577,8 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -21210,11 +22586,11 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -21283,10 +22659,10 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                                  * Compute the linear indices and the data to add.
                                  */
                                 
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
                                 
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
@@ -21300,7 +22676,7 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                                 
                                 const double weight_local = weight/((double) n_overlapped);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                                 const double rho_to_add = rho[idx_density]*weight_local;
                                 const double rho_w_to_add = rho[idx_density]*w[idx_velocity]*weight_local;
                                 
@@ -21308,7 +22684,7 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     rho_avg_local[idx_fine] += rho_to_add;
                                     rho_w_avg_local[idx_fine] += rho_w_to_add;
                                 }
@@ -21326,8 +22702,8 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -21568,7 +22944,7 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     TKE_z_sum += TKE_z_avg_global[i];
                     count++;
@@ -21581,8 +22957,8 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                   << "\t" << TKE_z_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_w_avg_local);
@@ -21699,8 +23075,8 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
         
         const double L_y = x_hi[1] - x_lo[1];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -21708,8 +23084,8 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_u_avg_local[i] = 0.0;
@@ -21759,7 +23135,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -21770,7 +23146,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -21783,11 +23159,11 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -21795,11 +23171,11 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -21814,8 +23190,8 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -21823,9 +23199,9 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -21885,8 +23261,8 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                              * Compute the linear indices and the data to add.
                              */
                             
-                            const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                            const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction;
                             
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
@@ -21896,7 +23272,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                             
                             const double weight_local = weight/((double) n_overlapped);
                             
-                            const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                            const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                             const double rho_to_add = rho[idx_density]*weight_local;
                             const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
                             
@@ -21904,7 +23280,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                 
-                                Y_avg_local[idx_fine] += Y_to_add;
+                                X_avg_local[idx_fine] += X_to_add;
                                 rho_avg_local[idx_fine] += rho_to_add;
                                 rho_u_avg_local[idx_fine] += rho_u_to_add;
                             }
@@ -21921,8 +23297,8 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -22150,7 +23526,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     R11_sum += rho_u_pp_u_pp_avg_global[i]/rho_avg_global[i];
                     count++;
@@ -22163,8 +23539,8 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                   << "\t" << R11_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_u_avg_local);
@@ -22288,8 +23664,8 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
         
         const double L_y = x_hi[1] - x_lo[1];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_v_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -22297,8 +23673,8 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_v_avg_local[i] = 0.0;
@@ -22348,7 +23724,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -22359,7 +23735,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -22372,11 +23748,11 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -22384,11 +23760,11 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* v = data_velocity->getPointer(1);
@@ -22403,8 +23779,8 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -22412,9 +23788,9 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -22474,8 +23850,8 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                              * Compute the linear indices and the data to add.
                              */
                             
-                            const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                            const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction;
                             
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
@@ -22485,7 +23861,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                             
                             const double weight_local = weight/((double) n_overlapped);
                             
-                            const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                            const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                             const double rho_to_add = rho[idx_density]*weight_local;
                             const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
                             
@@ -22493,7 +23869,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                 
-                                Y_avg_local[idx_fine] += Y_to_add;
+                                X_avg_local[idx_fine] += X_to_add;
                                 rho_avg_local[idx_fine] += rho_to_add;
                                 rho_v_avg_local[idx_fine] += rho_v_to_add;
                             }
@@ -22510,8 +23886,8 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -22739,7 +24115,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     R22_sum += rho_v_pp_v_pp_avg_global[i]/rho_avg_global[i];
                     count++;
@@ -22752,8 +24128,8 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                   << "\t" << R22_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_v_avg_local);
@@ -22885,8 +24261,8 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -22894,8 +24270,8 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_u_avg_local[i] = 0.0;
@@ -22945,7 +24321,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -22956,7 +24332,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -22969,11 +24345,11 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -22981,11 +24357,11 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -23000,8 +24376,8 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -23009,11 +24385,11 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -23082,10 +24458,10 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                                  * Compute the linear indices and the data to add.
                                  */
                                 
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
                                 
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
@@ -23099,7 +24475,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                                 
                                 const double weight_local = weight/((double) n_overlapped);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                                 const double rho_to_add = rho[idx_density]*weight_local;
                                 const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
                                 
@@ -23107,7 +24483,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     rho_avg_local[idx_fine] += rho_to_add;
                                     rho_u_avg_local[idx_fine] += rho_u_to_add;
                                 }
@@ -23125,8 +24501,8 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -23368,7 +24744,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     R11_sum += rho_u_pp_u_pp_avg_global[i]/rho_avg_global[i];
                     count++;
@@ -23381,8 +24757,8 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                   << "\t" << R11_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_u_avg_local);
@@ -23507,8 +24883,8 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_v_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -23516,8 +24892,8 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_v_avg_local[i] = 0.0;
@@ -23567,7 +24943,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -23578,7 +24954,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -23591,11 +24967,11 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -23603,11 +24979,11 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* v = data_velocity->getPointer(1);
@@ -23622,8 +24998,8 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -23631,11 +25007,11 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -23704,10 +25080,10 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                                  * Compute the linear indices and the data to add.
                                  */
                                 
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
                                 
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
@@ -23721,7 +25097,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                                 
                                 const double weight_local = weight/((double) n_overlapped);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                                 const double rho_to_add = rho[idx_density]*weight_local;
                                 const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
                                 
@@ -23729,7 +25105,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     rho_avg_local[idx_fine] += rho_to_add;
                                     rho_v_avg_local[idx_fine] += rho_v_to_add;
                                 }
@@ -23747,8 +25123,8 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -23990,7 +25366,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     R22_sum += rho_v_pp_v_pp_avg_global[i]/rho_avg_global[i];
                     count++;
@@ -24003,8 +25379,8 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                   << "\t" << R22_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_v_avg_local);
@@ -24129,8 +25505,8 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_w_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -24138,8 +25514,8 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_w_avg_local[i] = 0.0;
@@ -24189,7 +25565,7 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -24200,7 +25576,7 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -24213,11 +25589,11 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -24225,11 +25601,11 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* w = data_velocity->getPointer(2);
@@ -24244,8 +25620,8 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -24253,11 +25629,11 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -24326,10 +25702,10 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                                  * Compute the linear indices and the data to add.
                                  */
                                 
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
                                 
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
@@ -24343,7 +25719,7 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                                 
                                 const double weight_local = weight/((double) n_overlapped);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                                 const double rho_to_add = rho[idx_density]*weight_local;
                                 const double rho_w_to_add = rho[idx_density]*w[idx_velocity]*weight_local;
                                 
@@ -24351,7 +25727,7 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     rho_avg_local[idx_fine] += rho_to_add;
                                     rho_w_avg_local[idx_fine] += rho_w_to_add;
                                 }
@@ -24369,8 +25745,8 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -24612,7 +25988,7 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     R33_sum += rho_w_pp_w_pp_avg_global[i]/rho_avg_global[i];
                     count++;
@@ -24625,8 +26001,8 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                   << "\t" << R33_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_w_avg_local);
@@ -24743,8 +26119,8 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
         
         const double L_y = x_hi[1] - x_lo[1];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -24754,8 +26130,8 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_u_avg_local[i] = 0.0;
@@ -24807,7 +26183,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -24818,7 +26194,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -24831,11 +26207,11 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -24843,11 +26219,11 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -24863,8 +26239,8 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -24872,9 +26248,9 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -24934,8 +26310,8 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
                              * Compute the linear indices and the data to add.
                              */
                             
-                            const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                            const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction;
                             
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
@@ -24945,7 +26321,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
                             
                             const double weight_local = weight/((double) n_overlapped);
                             
-                            const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                            const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                             const double rho_to_add = rho[idx_density]*weight_local;
                             const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
                             const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
@@ -24954,7 +26330,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                 
-                                Y_avg_local[idx_fine] += Y_to_add;
+                                X_avg_local[idx_fine] += X_to_add;
                                 rho_avg_local[idx_fine] += rho_to_add;
                                 rho_u_avg_local[idx_fine] += rho_u_to_add;
                                 rho_v_avg_local[idx_fine] += rho_v_to_add;
@@ -24972,8 +26348,8 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -25212,7 +26588,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     R12_sum += rho_u_pp_v_pp_avg_global[i]/rho_avg_global[i];
                     count++;
@@ -25225,8 +26601,8 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
                   << "\t" << R12_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_u_avg_local);
@@ -25360,8 +26736,8 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -25371,8 +26747,8 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_u_avg_local[i] = 0.0;
@@ -25424,7 +26800,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -25435,7 +26811,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -25448,11 +26824,11 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -25460,11 +26836,11 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -25480,8 +26856,8 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -25489,11 +26865,11 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -25562,10 +26938,10 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                                  * Compute the linear indices and the data to add.
                                  */
                                 
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
                                 
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
@@ -25579,7 +26955,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                                 
                                 const double weight_local = weight/((double) n_overlapped);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                                 const double rho_to_add = rho[idx_density]*weight_local;
                                 const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
                                 const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
@@ -25588,7 +26964,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     rho_avg_local[idx_fine] += rho_to_add;
                                     rho_u_avg_local[idx_fine] += rho_u_to_add;
                                     rho_v_avg_local[idx_fine] += rho_v_to_add;
@@ -25607,8 +26983,8 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -25861,7 +27237,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     R12_sum += rho_u_pp_v_pp_avg_global[i]/rho_avg_global[i];
                     count++;
@@ -25874,8 +27250,8 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                   << "\t" << R12_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_u_avg_local);
@@ -26002,8 +27378,8 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -26013,8 +27389,8 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_u_avg_local[i] = 0.0;
@@ -26066,7 +27442,7 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -26077,7 +27453,7 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -26090,11 +27466,11 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -26102,11 +27478,11 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -26122,8 +27498,8 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -26131,11 +27507,11 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -26204,10 +27580,10 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                                  * Compute the linear indices and the data to add.
                                  */
                                 
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
                                 
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
@@ -26221,7 +27597,7 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                                 
                                 const double weight_local = weight/((double) n_overlapped);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                                 const double rho_to_add = rho[idx_density]*weight_local;
                                 const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
                                 const double rho_w_to_add = rho[idx_density]*w[idx_velocity]*weight_local;
@@ -26230,7 +27606,7 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     rho_avg_local[idx_fine] += rho_to_add;
                                     rho_u_avg_local[idx_fine] += rho_u_to_add;
                                     rho_w_avg_local[idx_fine] += rho_w_to_add;
@@ -26249,8 +27625,8 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -26503,7 +27879,7 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     R13_sum += rho_u_pp_w_pp_avg_global[i]/rho_avg_global[i];
                     count++;
@@ -26516,8 +27892,8 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                   << "\t" << R13_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_u_avg_local);
@@ -26644,8 +28020,8 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_v_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -26655,8 +28031,8 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_v_avg_local[i] = 0.0;
@@ -26708,7 +28084,7 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -26719,7 +28095,7 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -26732,11 +28108,11 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -26744,11 +28120,11 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* v = data_velocity->getPointer(1);
@@ -26764,8 +28140,8 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -26773,11 +28149,11 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -26846,10 +28222,10 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                                  * Compute the linear indices and the data to add.
                                  */
                                 
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
                                 
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
@@ -26863,7 +28239,7 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                                 
                                 const double weight_local = weight/((double) n_overlapped);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                                 const double rho_to_add = rho[idx_density]*weight_local;
                                 const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
                                 const double rho_w_to_add = rho[idx_density]*w[idx_velocity]*weight_local;
@@ -26872,7 +28248,7 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     rho_avg_local[idx_fine] += rho_to_add;
                                     rho_v_avg_local[idx_fine] += rho_v_to_add;
                                     rho_w_avg_local[idx_fine] += rho_w_to_add;
@@ -26891,8 +28267,8 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -27145,7 +28521,7 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     R23_sum += rho_v_pp_w_pp_avg_global[i]/rho_avg_global[i];
                     count++;
@@ -27158,8 +28534,8 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                   << "\t" << R23_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_v_avg_local);
@@ -27278,8 +28654,8 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
         
         const double L_y = x_hi[1] - x_lo[1];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -27289,8 +28665,8 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_u_avg_local[i] = 0.0;
@@ -27342,7 +28718,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -27353,7 +28729,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -27366,11 +28742,11 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -27378,11 +28754,11 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -27398,8 +28774,8 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -27407,9 +28783,9 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -27469,8 +28845,8 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                              * Compute the linear indices and the data to add.
                              */
                             
-                            const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                            const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction;
                             
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
@@ -27480,7 +28856,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                             
                             const double weight_local = weight/((double) n_overlapped);
                             
-                            const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                            const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                             const double rho_to_add = rho[idx_density]*weight_local;
                             const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
                             const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
@@ -27489,7 +28865,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                 
-                                Y_avg_local[idx_fine] += Y_to_add;
+                                X_avg_local[idx_fine] += X_to_add;
                                 rho_avg_local[idx_fine] += rho_to_add;
                                 rho_u_avg_local[idx_fine] += rho_u_to_add;
                                 rho_v_avg_local[idx_fine] += rho_v_to_add;
@@ -27507,8 +28883,8 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -27762,7 +29138,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     const double R11 = rho_u_pp_u_pp_avg_global[i]/rho_avg_global[i];
                     const double R22 = rho_v_pp_v_pp_avg_global[i]/rho_avg_global[i];
@@ -27778,8 +29154,8 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                   << "\t" << b11_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_u_avg_local);
@@ -27907,8 +29283,8 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
         
         const double L_y = x_hi[1] - x_lo[1];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -27918,8 +29294,8 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_u_avg_local[i] = 0.0;
@@ -27971,7 +29347,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -27982,7 +29358,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -27995,11 +29371,11 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -28007,11 +29383,11 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -28027,8 +29403,8 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -28036,9 +29412,9 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -28098,8 +29474,8 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                              * Compute the linear indices and the data to add.
                              */
                             
-                            const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                            const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction;
                             
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
@@ -28109,7 +29485,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                             
                             const double weight_local = weight/((double) n_overlapped);
                             
-                            const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                            const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                             const double rho_to_add = rho[idx_density]*weight_local;
                             const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
                             const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
@@ -28118,7 +29494,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                 
-                                Y_avg_local[idx_fine] += Y_to_add;
+                                X_avg_local[idx_fine] += X_to_add;
                                 rho_avg_local[idx_fine] += rho_to_add;
                                 rho_u_avg_local[idx_fine] += rho_u_to_add;
                                 rho_v_avg_local[idx_fine] += rho_v_to_add;
@@ -28136,8 +29512,8 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -28391,7 +29767,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     const double R11 = rho_u_pp_u_pp_avg_global[i]/rho_avg_global[i];
                     const double R22 = rho_v_pp_v_pp_avg_global[i]/rho_avg_global[i];
@@ -28407,8 +29783,8 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                   << "\t" << b22_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_u_avg_local);
@@ -28544,8 +29920,8 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -28557,8 +29933,8 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_u_avg_local[i] = 0.0;
@@ -28612,7 +29988,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -28623,7 +29999,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -28636,11 +30012,11 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -28648,11 +30024,11 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -28669,8 +30045,8 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -28678,11 +30054,11 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -28751,10 +30127,10 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                                  * Compute the linear indices and the data to add.
                                  */
                                 
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
                                 
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
@@ -28768,7 +30144,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                                 
                                 const double weight_local = weight/((double) n_overlapped);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                                 const double rho_to_add = rho[idx_density]*weight_local;
                                 const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
                                 const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
@@ -28778,7 +30154,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     rho_avg_local[idx_fine] += rho_to_add;
                                     rho_u_avg_local[idx_fine] += rho_u_to_add;
                                     rho_v_avg_local[idx_fine] += rho_v_to_add;
@@ -28798,8 +30174,8 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -29093,7 +30469,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     const double R11 = rho_u_pp_u_pp_avg_global[i]/rho_avg_global[i];
                     const double R22 = rho_v_pp_v_pp_avg_global[i]/rho_avg_global[i];
@@ -29110,8 +30486,8 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                   << "\t" << b11_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_u_avg_local);
@@ -29244,8 +30620,8 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -29257,8 +30633,8 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_u_avg_local[i] = 0.0;
@@ -29312,7 +30688,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -29323,7 +30699,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -29336,11 +30712,11 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -29348,11 +30724,11 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -29369,8 +30745,8 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -29378,11 +30754,11 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -29451,10 +30827,10 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                                  * Compute the linear indices and the data to add.
                                  */
                                 
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
                                 
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
@@ -29468,7 +30844,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                                 
                                 const double weight_local = weight/((double) n_overlapped);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                                 const double rho_to_add = rho[idx_density]*weight_local;
                                 const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
                                 const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
@@ -29478,7 +30854,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     rho_avg_local[idx_fine] += rho_to_add;
                                     rho_u_avg_local[idx_fine] += rho_u_to_add;
                                     rho_v_avg_local[idx_fine] += rho_v_to_add;
@@ -29498,8 +30874,8 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -29793,7 +31169,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     const double R11 = rho_u_pp_u_pp_avg_global[i]/rho_avg_global[i];
                     const double R22 = rho_v_pp_v_pp_avg_global[i]/rho_avg_global[i];
@@ -29810,8 +31186,8 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                   << "\t" << b22_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_u_avg_local);
@@ -29944,8 +31320,8 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -29957,8 +31333,8 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_u_avg_local[i] = 0.0;
@@ -30012,7 +31388,7 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -30023,7 +31399,7 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -30036,11 +31412,11 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -30048,11 +31424,11 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -30069,8 +31445,8 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -30078,11 +31454,11 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -30151,10 +31527,10 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
                                  * Compute the linear indices and the data to add.
                                  */
                                 
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
                                 
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
@@ -30168,7 +31544,7 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
                                 
                                 const double weight_local = weight/((double) n_overlapped);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                                 const double rho_to_add = rho[idx_density]*weight_local;
                                 const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
                                 const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
@@ -30178,7 +31554,7 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     rho_avg_local[idx_fine] += rho_to_add;
                                     rho_u_avg_local[idx_fine] += rho_u_to_add;
                                     rho_v_avg_local[idx_fine] += rho_v_to_add;
@@ -30198,8 +31574,8 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -30493,7 +31869,7 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     const double R11 = rho_u_pp_u_pp_avg_global[i]/rho_avg_global[i];
                     const double R22 = rho_v_pp_v_pp_avg_global[i]/rho_avg_global[i];
@@ -30510,8 +31886,8 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
                   << "\t" << b33_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_u_avg_local);
@@ -30636,8 +32012,8 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
         
         const double L_y = x_hi[1] - x_lo[1];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -30647,8 +32023,8 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_u_avg_local[i] = 0.0;
@@ -30700,7 +32076,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -30711,7 +32087,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -30724,11 +32100,11 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -30736,11 +32112,11 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -30756,8 +32132,8 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -30765,9 +32141,9 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -30827,8 +32203,8 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                              * Compute the linear indices and the data to add.
                              */
                             
-                            const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                            const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction;
                             
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
@@ -30838,7 +32214,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                             
                             const double weight_local = weight/((double) n_overlapped);
                             
-                            const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                            const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                             const double rho_to_add = rho[idx_density]*weight_local;
                             const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
                             const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
@@ -30847,7 +32223,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                 
-                                Y_avg_local[idx_fine] += Y_to_add;
+                                X_avg_local[idx_fine] += X_to_add;
                                 rho_avg_local[idx_fine] += rho_to_add;
                                 rho_u_avg_local[idx_fine] += rho_u_to_add;
                                 rho_v_avg_local[idx_fine] += rho_v_to_add;
@@ -30865,8 +32241,8 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -31137,7 +32513,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     const double R11 = rho_u_pp_u_pp_avg_global[i]/rho_avg_global[i];
                     const double R22 = rho_v_pp_v_pp_avg_global[i]/rho_avg_global[i];
@@ -31155,8 +32531,8 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                   << "\t" << b12_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_u_avg_local);
@@ -31294,8 +32670,8 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -31307,8 +32683,8 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_u_avg_local[i] = 0.0;
@@ -31362,7 +32738,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -31373,7 +32749,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -31386,11 +32762,11 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -31398,11 +32774,11 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -31419,8 +32795,8 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -31428,11 +32804,11 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -31501,10 +32877,10 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                                  * Compute the linear indices and the data to add.
                                  */
                                 
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
                                 
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
@@ -31518,7 +32894,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                                 
                                 const double weight_local = weight/((double) n_overlapped);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                                 const double rho_to_add = rho[idx_density]*weight_local;
                                 const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
                                 const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
@@ -31528,7 +32904,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     rho_avg_local[idx_fine] += rho_to_add;
                                     rho_u_avg_local[idx_fine] += rho_u_to_add;
                                     rho_v_avg_local[idx_fine] += rho_v_to_add;
@@ -31548,8 +32924,8 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -31860,7 +33236,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     const double R11 = rho_u_pp_u_pp_avg_global[i]/rho_avg_global[i];
                     const double R22 = rho_v_pp_v_pp_avg_global[i]/rho_avg_global[i];
@@ -31879,8 +33255,8 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                   << "\t" << b12_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_u_avg_local);
@@ -32015,8 +33391,8 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -32028,8 +33404,8 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_u_avg_local[i] = 0.0;
@@ -32083,7 +33459,7 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -32094,7 +33470,7 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -32107,11 +33483,11 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -32119,11 +33495,11 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -32140,8 +33516,8 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -32149,11 +33525,11 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -32222,10 +33598,10 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
                                  * Compute the linear indices and the data to add.
                                  */
                                 
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
                                 
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
@@ -32239,7 +33615,7 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
                                 
                                 const double weight_local = weight/((double) n_overlapped);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                                 const double rho_to_add = rho[idx_density]*weight_local;
                                 const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
                                 const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
@@ -32249,7 +33625,7 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     rho_avg_local[idx_fine] += rho_to_add;
                                     rho_u_avg_local[idx_fine] += rho_u_to_add;
                                     rho_v_avg_local[idx_fine] += rho_v_to_add;
@@ -32269,8 +33645,8 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -32581,7 +33957,7 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     const double R11 = rho_u_pp_u_pp_avg_global[i]/rho_avg_global[i];
                     const double R22 = rho_v_pp_v_pp_avg_global[i]/rho_avg_global[i];
@@ -32600,8 +33976,8 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
                   << "\t" << b13_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_u_avg_local);
@@ -32736,8 +34112,8 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -32749,8 +34125,8 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             rho_u_avg_local[i] = 0.0;
@@ -32804,7 +34180,7 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -32815,7 +34191,7 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -32828,11 +34204,11 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -32840,11 +34216,11 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -32861,8 +34237,8 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -32870,11 +34246,11 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -32943,10 +34319,10 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
                                  * Compute the linear indices and the data to add.
                                  */
                                 
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
                                 
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
@@ -32960,7 +34336,7 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
                                 
                                 const double weight_local = weight/((double) n_overlapped);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                                 const double rho_to_add = rho[idx_density]*weight_local;
                                 const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
                                 const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
@@ -32970,7 +34346,7 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     rho_avg_local[idx_fine] += rho_to_add;
                                     rho_u_avg_local[idx_fine] += rho_u_to_add;
                                     rho_v_avg_local[idx_fine] += rho_v_to_add;
@@ -32990,8 +34366,8 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -33302,7 +34678,7 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     const double R11 = rho_u_pp_u_pp_avg_global[i]/rho_avg_global[i];
                     const double R22 = rho_v_pp_v_pp_avg_global[i]/rho_avg_global[i];
@@ -33321,8 +34697,8 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
                   << "\t" << b23_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(rho_u_avg_local);
@@ -33449,8 +34825,8 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
         
         const double L_y = x_hi[1] - x_lo[1];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -33458,8 +34834,8 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             u_avg_local[i] = 0.0;
@@ -33509,7 +34885,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -33520,7 +34896,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -33533,11 +34909,11 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -33545,11 +34921,11 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -33564,8 +34940,8 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -33573,9 +34949,9 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -33635,8 +35011,8 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                              * Compute the linear indices and the data to add.
                              */
                             
-                            const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                            const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction;
                             
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
@@ -33646,7 +35022,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                             
                             const double weight_local = weight/((double) n_overlapped);
                             
-                            const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                            const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                             const double rho_to_add = rho[idx_density]*weight_local;
                             const double u_to_add = u[idx_velocity]*weight_local;
                             
@@ -33654,7 +35030,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                 
-                                Y_avg_local[idx_fine] += Y_to_add;
+                                X_avg_local[idx_fine] += X_to_add;
                                 rho_avg_local[idx_fine] += rho_to_add;
                                 u_avg_local[idx_fine] += u_to_add;
                             }
@@ -33671,8 +35047,8 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -33898,7 +35274,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     a_sum += rho_p_u_p_avg_global[i]/rho_avg_global[i];
                     count++;
@@ -33911,8 +35287,8 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                   << "\t" << a_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(u_avg_local);
@@ -34044,8 +35420,8 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -34053,8 +35429,8 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             u_avg_local[i] = 0.0;
@@ -34104,7 +35480,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * Register the patch, mole fraction, density and velocity in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -34115,7 +35491,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -34128,11 +35504,11 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 * Get the pointers to mole fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -34140,11 +35516,11 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
                     d_flow_model_tmp->getGlobalCellData("VELOCITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -34159,8 +35535,8 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -34168,11 +35544,11 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -34241,10 +35617,10 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                                  * Compute the linear indices and the data to add.
                                  */
                                 
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
                                 
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
@@ -34258,7 +35634,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                                 
                                 const double weight_local = weight/((double) n_overlapped);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                                 const double rho_to_add = rho[idx_density]*weight_local;
                                 const double u_to_add = u[idx_velocity]*weight_local;
                                 
@@ -34266,7 +35642,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     rho_avg_local[idx_fine] += rho_to_add;
                                     u_avg_local[idx_fine] += u_to_add;
                                 }
@@ -34284,8 +35660,8 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -34525,7 +35901,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     a_sum += rho_p_u_p_avg_global[i]/rho_avg_global[i];
                     count++;
@@ -34538,8 +35914,8 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                   << "\t" << a_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(u_avg_local);
@@ -34656,8 +36032,8 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
         
         const double L_y = x_hi[1] - x_lo[1];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* v_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -34665,8 +36041,8 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             v_avg_local[i] = 0.0;
@@ -34716,7 +36092,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction and density in the flow model and compute
+                 * Register the patch, mole fraction and density in the flow model and compute
                  * the corresponding cell data.
                  */
                 
@@ -34727,7 +36103,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -34737,20 +36113,20 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction and density data inside the flow model.
+                 * Get the pointers to mole fraction and density data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 
@@ -34764,15 +36140,15 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -34828,15 +36204,15 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
                              * Compute the linear indices and the data to add.
                              */
                             
-                            const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                            const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction;
                             
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
                             
                             const double weight_local = weight/((double) n_overlapped);
                             
-                            const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                            const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                             const double rho_to_add = rho[idx_density]*weight_local;
                             const double v_to_add = 1.0/rho[idx_density]*weight_local;
                             
@@ -34844,7 +36220,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                 
-                                Y_avg_local[idx_fine] += Y_to_add;
+                                X_avg_local[idx_fine] += X_to_add;
                                 rho_avg_local[idx_fine] += rho_to_add;
                                 v_avg_local[idx_fine] += v_to_add;
                             }
@@ -34861,8 +36237,8 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -35071,7 +36447,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     b_sum += -rho_p_v_p_avg_global[i];
                     count++;
@@ -35084,8 +36460,8 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
                   << "\t" << b_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(v_avg_local);
@@ -35217,8 +36593,8 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* v_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -35226,8 +36602,8 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             v_avg_local[i] = 0.0;
@@ -35277,7 +36653,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction and density in the flow model and compute the
+                 * Register the patch, mole fraction and density in the flow model and compute the
                  * corresponding cell data.
                  */
                 
@@ -35288,7 +36664,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -35298,20 +36674,20 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction and density data inside the flow model.
+                 * Get the pointers to mole fraction and density data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 
@@ -35325,17 +36701,17 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -35398,10 +36774,10 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
                                  * Compute the linear indices and the data to add.
                                  */
                                 
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
                                 
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
@@ -35410,7 +36786,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
                                 
                                 const double weight_local = weight/((double) n_overlapped);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                                 const double rho_to_add = rho[idx_density]*weight_local;
                                 const double v_to_add = 1.0/rho[idx_density]*weight_local;
                                 
@@ -35418,7 +36794,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     rho_avg_local[idx_fine] += rho_to_add;
                                     v_avg_local[idx_fine] += v_to_add;
                                 }
@@ -35436,8 +36812,8 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -35656,7 +37032,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     b_sum += -rho_p_v_p_avg_global[i];
                     count++;
@@ -35669,8 +37045,8 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
                   << "\t" << b_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(v_avg_local);
@@ -35785,15 +37161,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDensityMeanInMixingLayerW
         
         const double L_y = x_hi[1] - x_lo[1];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
         }
@@ -35841,7 +37217,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDensityMeanInMixingLayerW
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction and density in the flow model and compute the
+                 * Register the patch, mole fraction and density in the flow model and compute the
                  * corresponding cell data.
                  */
                 
@@ -35852,7 +37228,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDensityMeanInMixingLayerW
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -35862,20 +37238,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDensityMeanInMixingLayerW
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction and density data inside the flow model.
+                 * Get the pointers to mole fraction and density data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 
@@ -35889,15 +37265,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDensityMeanInMixingLayerW
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -35953,22 +37329,22 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDensityMeanInMixingLayerW
                              * Compute the linear indices and the data to add.
                              */
                             
-                            const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                            const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction;
                             
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
                             
                             const double weight_local = weight/((double) n_overlapped);
                             
-                            const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                            const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                             const double rho_to_add = rho[idx_density]*weight_local;
                             
                             for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                 
-                                Y_avg_local[idx_fine] += Y_to_add;
+                                X_avg_local[idx_fine] += X_to_add;
                                 rho_avg_local[idx_fine] += rho_to_add;
                             }
                         }
@@ -35984,8 +37360,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDensityMeanInMixingLayerW
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -36008,7 +37384,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDensityMeanInMixingLayerW
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     rho_sum += rho_avg_global[i];
                     count++;
@@ -36021,8 +37397,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDensityMeanInMixingLayerW
                   << "\t" << rho_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
     }
@@ -36148,15 +37524,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDensityMeanInMixingLayerW
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
         }
@@ -36204,7 +37580,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDensityMeanInMixingLayerW
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction and density in the flow model and compute the
+                 * Register the patch, mole fraction and density in the flow model and compute the
                  * corresponding cell data.
                  */
                 
@@ -36215,7 +37591,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDensityMeanInMixingLayerW
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -36225,20 +37601,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDensityMeanInMixingLayerW
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction and density data inside the flow model.
+                 * Get the pointers to mole fraction and density data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 
@@ -36252,17 +37628,17 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDensityMeanInMixingLayerW
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
-                int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -36325,10 +37701,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDensityMeanInMixingLayerW
                                  * Compute the linear indices and the data to add.
                                  */
                                 
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
                                 
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
@@ -36337,14 +37713,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDensityMeanInMixingLayerW
                                 
                                 const double weight_local = weight/((double) n_overlapped);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                                 const double rho_to_add = rho[idx_density]*weight_local;
                                 
                                 for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     rho_avg_local[idx_fine] += rho_to_add;
                                 }
                             }
@@ -36361,8 +37737,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDensityMeanInMixingLayerW
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -36385,7 +37761,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDensityMeanInMixingLayerW
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     rho_sum += rho_avg_global[i];
                     count++;
@@ -36398,8 +37774,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDensityMeanInMixingLayerW
                   << "\t" << rho_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
     }
@@ -36512,8 +37888,8 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
         
         const double L_y = x_hi[1] - x_lo[1];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* v_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -36521,8 +37897,8 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             v_avg_local[i] = 0.0;
@@ -36572,7 +37948,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction and density and in the flow model and compute the
+                 * Register the patch, mole fraction and density and in the flow model and compute the
                  * corresponding cell data.
                  */
                 
@@ -36583,7 +37959,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -36593,20 +37969,20 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction and density data inside the flow model.
+                 * Get the pointers to mole fraction and density data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 
@@ -36620,15 +37996,15 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -36684,15 +38060,15 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
                              * Compute the linear indices and the data to add.
                              */
                             
-                            const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                            const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction;
                             
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
                             
                             const double weight_local = weight/((double) n_overlapped);
                             
-                            const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                            const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                             const double rho_to_add = rho[idx_density]*weight_local;
                             const double v_to_add = 1.0/rho[idx_density]*weight_local;
                             
@@ -36700,7 +38076,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                 
-                                Y_avg_local[idx_fine] += Y_to_add;
+                                X_avg_local[idx_fine] += X_to_add;
                                 rho_avg_local[idx_fine] += rho_to_add;
                                 v_avg_local[idx_fine] += v_to_add;
                             }
@@ -36717,8 +38093,8 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -36942,7 +38318,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     Boussinesq_dev_sum +=
                         -rho_avg_global[i]*rho_avg_global[i]*rho_p_v_p_avg_global[i]/
@@ -36957,8 +38333,8 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
                   << "\t" << Boussinesq_dev_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(v_avg_local);
@@ -37092,8 +38468,8 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* v_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
@@ -37101,8 +38477,8 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             rho_avg_local[i] = 0.0;
             rho_avg_global[i] = 0.0;
             v_avg_local[i] = 0.0;
@@ -37152,7 +38528,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction and density in the flow model and compute the
+                 * Register the patch, mole fraction and density in the flow model and compute the
                  * corresponding cell data.
                  */
                 
@@ -37163,7 +38539,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -37173,20 +38549,20 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction and density data inside the flow model.
+                 * Get the pointers to mole fraction and density data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
                 
-                std::vector<double*> Y;
-                Y.reserve(d_num_species);
+                std::vector<double*> X;
+                X.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 
@@ -37200,17 +38576,17 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -37273,10 +38649,10 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
                                  * Compute the linear indices and the data to add.
                                  */
                                 
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
                                 
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
@@ -37285,7 +38661,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
                                 
                                 const double weight_local = weight/((double) n_overlapped);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double X_to_add = X[0][idx_mole_fraction]*weight_local;
                                 const double rho_to_add = rho[idx_density]*weight_local;
                                 const double v_to_add = 1.0/rho[idx_density]*weight_local;
                                 
@@ -37293,7 +38669,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     rho_avg_local[idx_fine] += rho_to_add;
                                     v_avg_local[idx_fine] += v_to_add;
                                 }
@@ -37311,8 +38687,8 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
         }
         
         mpi.Allreduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM);
@@ -37546,7 +38922,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     Boussinesq_dev_sum +=
                         -rho_avg_global[i]*rho_avg_global[i]*rho_p_v_p_avg_global[i]/
@@ -37561,8 +38937,8 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
                   << "\t" << Boussinesq_dev_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
         std::free(v_avg_local);
@@ -37666,15 +39042,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
     {
         const int finest_level_dim_0 = finest_level_dims[0];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* D_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* D_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             D_avg_local[i] = 0.0;
             D_avg_global[i] = 0.0;
         }
@@ -37719,7 +39095,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
                 /*
-                 * Register the patch, mass fraction, pressure and temperature in the flow model
+                 * Register the patch, mass fraction, mole fraction, pressure and temperature in the flow model
                  * and compute the corresponding cell data.
                  */
                 
@@ -37733,6 +39109,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
@@ -37743,11 +39122,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
+                 * Get the pointers to mass fraction, mole fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getGlobalCellData("PRESSURE");
@@ -37760,6 +39142,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                std::vector<double*> X;
+                X.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* p = data_pressure->getPointer(0);
                 double* T = data_temperature->getPointer(0);
@@ -37775,10 +39163,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                         li);
                 
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
                 const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
                 const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
                 
                 const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
                 const int num_ghosts_0_pressure = num_ghosts_pressure[0];
                 const int num_ghosts_0_temperature = num_ghosts_temperature[0];
                 
@@ -37826,6 +39216,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                          */
                         
                         const int idx_mass_fraction = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
+                        const int idx_mole_fraction = relative_idx_lo_0 + i + num_ghosts_0_mole_fraction;
                         const int idx_pressure = relative_idx_lo_0 + i + num_ghosts_0_pressure;
                         const int idx_temperature = relative_idx_lo_0 + i + num_ghosts_0_temperature;
                         
@@ -37853,14 +39244,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                                 &T[idx_temperature],
                                 Y_ptr);
                         
-                        const double Y_to_add = Y[0][idx_mass_fraction]/((double) n_overlapped);
+                        const double X_to_add = X[0][idx_mole_fraction]/((double) n_overlapped);
                         const double D_to_add = D[0]/((double) n_overlapped);
                         
                         for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                         {
                             const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                             
-                            Y_avg_local[idx_fine] += Y_to_add;
+                            X_avg_local[idx_fine] += X_to_add;
                             D_avg_local[idx_fine] += D_to_add;
                         }
                     }
@@ -37879,8 +39270,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
          */
         
         mpi.Reduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
@@ -37905,7 +39296,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     D_sum += D_avg_global[i];
                     count++;
@@ -37918,8 +39309,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                   << "\t" << D_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(D_avg_local);
         std::free(D_avg_global);
     }
@@ -37933,15 +39324,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
         
         const double L_y = x_hi[1] - x_lo[1];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* D_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* D_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             D_avg_local[i] = 0.0;
             D_avg_global[i] = 0.0;
         }
@@ -37992,7 +39383,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, pressure and temperature in the flow model
+                 * Register the patch, mass fraction, mole fraction, pressure and temperature in the flow model
                  * and compute the corresponding cell data.
                  */
                 
@@ -38006,6 +39397,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
@@ -38016,11 +39410,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
+                 * Get the pointers to mass fraction, mole fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getGlobalCellData("PRESSURE");
@@ -38033,6 +39430,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                std::vector<double*> X;
+                X.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* p = data_pressure->getPointer(0);
                 double* T = data_temperature->getPointer(0);
@@ -38050,6 +39453,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
+                
                 const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
                 
@@ -38059,6 +39465,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                 const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
                 const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
                 const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
                 
                 const int num_ghosts_0_pressure = num_ghosts_pressure[0];
                 const int num_ghosts_1_pressure = num_ghosts_pressure[1];
@@ -38121,6 +39531,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                             const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
                             
+                            const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction;
+                            
                             const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
                             
@@ -38151,14 +39564,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                                     &T[idx_temperature],
                                     Y_ptr);
                             
-                            const double Y_to_add = Y[0][idx_mass_fraction]*weight/((double) n_overlapped);
+                            const double X_to_add = X[0][idx_mole_fraction]*weight/((double) n_overlapped);
                             const double D_to_add = D[0]*weight/((double) n_overlapped);
                             
                             for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                 
-                                Y_avg_local[idx_fine] += Y_to_add;
+                                X_avg_local[idx_fine] += X_to_add;
                                 D_avg_local[idx_fine] += D_to_add;
                             }
                         }
@@ -38178,8 +39591,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
          */
         
         mpi.Reduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
@@ -38204,7 +39617,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     D_sum += D_avg_global[i];
                     count++;
@@ -38217,8 +39630,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                   << "\t" << D_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(D_avg_local);
         std::free(D_avg_global);
     }
@@ -38233,15 +39646,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* D_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* D_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             D_avg_local[i] = 0.0;
             D_avg_global[i] = 0.0;
         }
@@ -38292,7 +39705,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, pressure and temperature in the flow model
+                 * Register the patch, mass fraction, mole fraction, pressure and temperature in the flow model
                  * and compute the corresponding cell data.
                  */
                 
@@ -38306,6 +39719,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
@@ -38316,11 +39732,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
+                 * Get the pointers to mass fraction, mole fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getGlobalCellData("PRESSURE");
@@ -38333,6 +39752,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                std::vector<double*> X;
+                X.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* p = data_pressure->getPointer(0);
                 double* T = data_temperature->getPointer(0);
@@ -38350,6 +39775,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
+                
                 const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
                 
@@ -38361,6 +39789,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                 const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
                 const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
                 const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_pressure = num_ghosts_pressure[0];
                 const int num_ghosts_1_pressure = num_ghosts_pressure[1];
@@ -38434,6 +39868,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                                     (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                         ghostcell_dim_1_mass_fraction;
                                 
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
+                                
                                 const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
                                     (relative_idx_lo_2 + k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
@@ -38468,14 +39907,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                                         &T[idx_temperature],
                                         Y_ptr);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight/((double) n_overlapped);
+                                const double X_to_add = X[0][idx_mole_fraction]*weight/((double) n_overlapped);
                                 const double D_to_add = D[0]*weight/((double) n_overlapped);
                                 
                                 for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     D_avg_local[idx_fine] += D_to_add;
                                 }
                             }
@@ -38496,8 +39935,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
          */
         
         mpi.Reduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
@@ -38522,7 +39961,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     D_sum += D_avg_global[i];
                     count++;
@@ -38535,8 +39974,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
                   << "\t" << D_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(D_avg_local);
         std::free(D_avg_global);
     }
@@ -38634,15 +40073,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
     {
         const int finest_level_dim_0 = finest_level_dims[0];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* mu_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* mu_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             mu_avg_local[i] = 0.0;
             mu_avg_global[i] = 0.0;
         }
@@ -38687,7 +40126,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
                 /*
-                 * Register the patch, mass fraction, pressure and temperature in the flow model
+                 * Register the patch, mass fraction, mole fraction, pressure and temperature in the flow model
                  * and compute the corresponding cell data.
                  */
                 
@@ -38701,6 +40140,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
@@ -38711,11 +40153,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
+                 * Get the pointers to mass fraction, mole fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getGlobalCellData("PRESSURE");
@@ -38728,6 +40173,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                std::vector<double*> X;
+                X.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* p = data_pressure->getPointer(0);
                 double* T = data_temperature->getPointer(0);
@@ -38743,10 +40194,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                         li);
                 
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
                 const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
                 const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
                 
                 const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
                 const int num_ghosts_0_pressure = num_ghosts_pressure[0];
                 const int num_ghosts_0_temperature = num_ghosts_temperature[0];
                 
@@ -38794,6 +40247,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                          */
                         
                         const int idx_mass_fraction = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
+                        const int idx_mole_fraction = relative_idx_lo_0 + i + num_ghosts_0_mole_fraction;
                         const int idx_pressure = relative_idx_lo_0 + i + num_ghosts_0_pressure;
                         const int idx_temperature = relative_idx_lo_0 + i + num_ghosts_0_temperature;
                         
@@ -38810,14 +40264,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                                 &T[idx_temperature],
                                 Y_ptr);
                         
-                        const double Y_to_add = Y[0][idx_mass_fraction]/((double) n_overlapped);
+                        const double X_to_add = X[0][idx_mole_fraction]/((double) n_overlapped);
                         const double mu_to_add = mu/((double) n_overlapped);
                         
                         for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                         {
                             const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                             
-                            Y_avg_local[idx_fine] += Y_to_add;
+                            X_avg_local[idx_fine] += X_to_add;
                             mu_avg_local[idx_fine] += mu_to_add;
                         }
                     }
@@ -38836,8 +40290,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
          */
         
         mpi.Reduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
@@ -38862,7 +40316,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     mu_sum += mu_avg_global[i];
                     count++;
@@ -38875,8 +40329,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                   << "\t" << mu_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(mu_avg_local);
         std::free(mu_avg_global);
     }
@@ -38890,15 +40344,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
         
         const double L_y = x_hi[1] - x_lo[1];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* mu_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* mu_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             mu_avg_local[i] = 0.0;
             mu_avg_global[i] = 0.0;
         }
@@ -38949,7 +40403,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, pressure and temperature in the flow model
+                 * Register the patch, mass fraction, mole fraction, pressure and temperature in the flow model
                  * and compute the corresponding cell data.
                  */
                 
@@ -38963,6 +40417,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
@@ -38973,11 +40430,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
+                 * Get the pointers to mass fraction, mole fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getGlobalCellData("PRESSURE");
@@ -38990,6 +40450,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                std::vector<double*> X;
+                X.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* p = data_pressure->getPointer(0);
                 double* T = data_temperature->getPointer(0);
@@ -39007,6 +40473,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
+                
                 const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
                 
@@ -39016,6 +40485,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                 const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
                 const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
                 const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
                 
                 const int num_ghosts_0_pressure = num_ghosts_pressure[0];
                 const int num_ghosts_1_pressure = num_ghosts_pressure[1];
@@ -39078,6 +40551,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                             const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
                             
+                            const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction;
+                            
                             const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
                             
@@ -39097,14 +40573,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                                     &T[idx_temperature],
                                     Y_ptr);
                             
-                            const double Y_to_add = Y[0][idx_mass_fraction]*weight/((double) n_overlapped);
+                            const double X_to_add = X[0][idx_mole_fraction]*weight/((double) n_overlapped);
                             const double mu_to_add = mu*weight/((double) n_overlapped);
                             
                             for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                 
-                                Y_avg_local[idx_fine] += Y_to_add;
+                                X_avg_local[idx_fine] += X_to_add;
                                 mu_avg_local[idx_fine] += mu_to_add;
                             }
                         }
@@ -39124,8 +40600,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
          */
         
         mpi.Reduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
@@ -39150,7 +40626,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     mu_sum += mu_avg_global[i];
                     count++;
@@ -39163,8 +40639,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                   << "\t" << mu_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(mu_avg_local);
         std::free(mu_avg_global);
     }
@@ -39179,15 +40655,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* mu_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* mu_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             mu_avg_local[i] = 0.0;
             mu_avg_global[i] = 0.0;
         }
@@ -39238,7 +40714,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, pressure and temperature in the flow model
+                 * Register the patch, mass fraction, mole fraction, pressure and temperature in the flow model
                  * and compute the corresponding cell data.
                  */
                 
@@ -39252,6 +40728,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
@@ -39262,11 +40741,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
+                 * Get the pointers to mass fraction, mole fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getGlobalCellData("PRESSURE");
@@ -39279,6 +40761,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                std::vector<double*> X;
+                X.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* p = data_pressure->getPointer(0);
                 double* T = data_temperature->getPointer(0);
@@ -39296,6 +40784,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
+                
                 const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
                 
@@ -39307,6 +40798,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                 const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
                 const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
                 const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_pressure = num_ghosts_pressure[0];
                 const int num_ghosts_1_pressure = num_ghosts_pressure[1];
@@ -39380,6 +40877,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                                     (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                         ghostcell_dim_1_mass_fraction;
                                 
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
+                                
                                 const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
                                     (relative_idx_lo_2 + k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
@@ -39403,14 +40905,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                                         &T[idx_temperature],
                                         Y_ptr);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight/((double) n_overlapped);
+                                const double X_to_add = X[0][idx_mole_fraction]*weight/((double) n_overlapped);
                                 const double mu_to_add = mu*weight/((double) n_overlapped);
                                 
                                 for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     mu_avg_local[idx_fine] += mu_to_add;
                                 }
                             }
@@ -39431,8 +40933,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
          */
         
         mpi.Reduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
@@ -39457,7 +40959,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     mu_sum += mu_avg_global[i];
                     count++;
@@ -39470,8 +40972,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
                   << "\t" << mu_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(mu_avg_local);
         std::free(mu_avg_global);
     }
@@ -39569,15 +41071,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
     {
         const int finest_level_dim_0 = finest_level_dims[0];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* nu_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* nu_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             nu_avg_local[i] = 0.0;
             nu_avg_global[i] = 0.0;
         }
@@ -39622,7 +41124,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
                 /*
-                 * Register the patch, mass fraction, density, pressure and temperature in the flow
+                 * Register the patch, mass fraction, mole fraction, density, pressure and temperature in the flow
                  * model and compute the corresponding cell data.
                  */
                 
@@ -39634,6 +41136,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -39649,12 +41154,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density, pressure and temperature data inside
+                 * Get the pointers to mass fraction, mole fraction, density, pressure and temperature data inside
                  * the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -39671,6 +41179,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                 {
                     Y.push_back(data_mass_fraction->getPointer(si));
                 }
+                std::vector<double*> X;
+                X.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    X.push_back(data_mole_fraction->getPointer(si));
+                }
                 double* rho = data_density->getPointer(0);
                 double* p = data_pressure->getPointer(0);
                 double* T = data_temperature->getPointer(0);
@@ -39686,11 +41200,13 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                         li);
                 
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
                 const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
                 
                 const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_0_pressure = num_ghosts_pressure[0];
                 const int num_ghosts_0_temperature = num_ghosts_temperature[0];
@@ -39739,6 +41255,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                          */
                         
                         const int idx_mass_fraction = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
+                        const int idx_mole_fraction = relative_idx_lo_0 + i + num_ghosts_0_mole_fraction;
                         const int idx_density = relative_idx_lo_0 + i + num_ghosts_0_density;
                         const int idx_pressure = relative_idx_lo_0 + i + num_ghosts_0_pressure;
                         const int idx_temperature = relative_idx_lo_0 + i + num_ghosts_0_temperature;
@@ -39758,14 +41275,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                         
                         const double nu = mu/rho[idx_density];
                         
-                        const double Y_to_add = Y[0][idx_mass_fraction]/((double) n_overlapped);
+                        const double X_to_add = X[0][idx_mole_fraction]/((double) n_overlapped);
                         const double nu_to_add = nu/((double) n_overlapped);
                         
                         for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                         {
                             const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                             
-                            Y_avg_local[idx_fine] += Y_to_add;
+                            X_avg_local[idx_fine] += X_to_add;
                             nu_avg_local[idx_fine] += nu_to_add;
                         }
                     }
@@ -39784,8 +41301,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
          */
         
         mpi.Reduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
@@ -39810,7 +41327,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     nu_sum += nu_avg_global[i];
                     count++;
@@ -39823,8 +41340,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                   << "\t" << nu_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(nu_avg_local);
         std::free(nu_avg_global);
     }
@@ -39838,15 +41355,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
         
         const double L_y = x_hi[1] - x_lo[1];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* nu_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* nu_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             nu_avg_local[i] = 0.0;
             nu_avg_global[i] = 0.0;
         }
@@ -39897,7 +41414,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density, pressure and temperature in the flow
+                 * Register the patch, mass fraction, mole fraction, density, pressure and temperature in the flow
                  * model and compute the corresponding cell data.
                  */
                 
@@ -39909,6 +41426,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -39924,12 +41444,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density, pressure and temperature data inside
+                 * Get the pointers to mass fraction, mole fraction, density, pressure and temperature data inside
                  * the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -39945,6 +41468,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                std::vector<double*> X;
+                X.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* p = data_pressure->getPointer(0);
@@ -39963,6 +41492,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
+                
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
@@ -39975,6 +41507,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                 const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
                 const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
                 const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -40041,6 +41577,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                             const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
                             
+                            const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction;
+                            
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
                             
@@ -40065,14 +41604,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                             
                             const double nu = mu/rho[idx_density];
                             
-                            const double Y_to_add = Y[0][idx_mass_fraction]*weight/((double) n_overlapped);
+                            const double X_to_add = X[0][idx_mole_fraction]*weight/((double) n_overlapped);
                             const double nu_to_add = nu*weight/((double) n_overlapped);
                             
                             for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                 
-                                Y_avg_local[idx_fine] += Y_to_add;
+                                X_avg_local[idx_fine] += X_to_add;
                                 nu_avg_local[idx_fine] += nu_to_add;
                             }
                         }
@@ -40092,8 +41631,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
          */
         
         mpi.Reduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
@@ -40118,7 +41657,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     nu_sum += nu_avg_global[i];
                     count++;
@@ -40131,8 +41670,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                   << "\t" << nu_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(nu_avg_local);
         std::free(nu_avg_global);
     }
@@ -40147,15 +41686,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* nu_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* nu_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             nu_avg_local[i] = 0.0;
             nu_avg_global[i] = 0.0;
         }
@@ -40206,7 +41745,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density, pressure and temperature in the flow
+                 * Register the patch, mass fraction, mole fraction, density, pressure and temperature in the flow
                  * model and compute the corresponding cell data.
                  */
                 
@@ -40218,6 +41757,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -40233,12 +41775,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density, pressure and temperature data inside
+                 * Get the pointers to mass fraction, mole fraction, density, pressure and temperature data inside
                  * the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -40254,6 +41799,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                std::vector<double*> X;
+                X.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* p = data_pressure->getPointer(0);
@@ -40272,6 +41823,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
+                
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
@@ -40286,6 +41840,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                 const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
                 const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
                 const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -40365,6 +41925,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                                     (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                         ghostcell_dim_1_mass_fraction;
                                 
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
+                                
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
                                     (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
@@ -40395,14 +41960,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                                 
                                 const double nu = mu/rho[idx_density];
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight/((double) n_overlapped);
+                                const double X_to_add = X[0][idx_mole_fraction]*weight/((double) n_overlapped);
                                 const double nu_to_add = nu*weight/((double) n_overlapped);
                                 
                                 for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     nu_avg_local[idx_fine] += nu_to_add;
                                 }
                             }
@@ -40423,8 +41988,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
          */
         
         mpi.Reduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
@@ -40449,7 +42014,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     nu_sum += nu_avg_global[i];
                     count++;
@@ -40462,8 +42027,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
                   << "\t" << nu_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(nu_avg_local);
         std::free(nu_avg_global);
     }
@@ -40561,15 +42126,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
     {
         const int finest_level_dim_0 = finest_level_dims[0];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* mu_v_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* mu_v_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             mu_v_avg_local[i] = 0.0;
             mu_v_avg_global[i] = 0.0;
         }
@@ -40614,7 +42179,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
                 /*
-                 * Register the patch, mass fraction, pressure and temperature in the flow model
+                 * Register the patch, mass fraction, mole fraction, pressure and temperature in the flow model
                  * and compute the corresponding cell data.
                  */
                 
@@ -40628,6 +42193,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
@@ -40638,11 +42206,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
+                 * Get the pointers to mass fraction, mole fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getGlobalCellData("PRESSURE");
@@ -40655,6 +42226,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                std::vector<double*> X;
+                X.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* p = data_pressure->getPointer(0);
                 double* T = data_temperature->getPointer(0);
@@ -40670,10 +42247,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                         li);
                 
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
                 const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
                 const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
                 
                 const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
                 const int num_ghosts_0_pressure = num_ghosts_pressure[0];
                 const int num_ghosts_0_temperature = num_ghosts_temperature[0];
                 
@@ -40721,6 +42300,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                          */
                         
                         const int idx_mass_fraction = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
+                        const int idx_mole_fraction = relative_idx_lo_0 + i + num_ghosts_0_mole_fraction;
                         const int idx_pressure = relative_idx_lo_0 + i + num_ghosts_0_pressure;
                         const int idx_temperature = relative_idx_lo_0 + i + num_ghosts_0_temperature;
                         
@@ -40737,14 +42317,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                                 &T[idx_temperature],
                                 Y_ptr);
                         
-                        const double Y_to_add = Y[0][idx_mass_fraction]/((double) n_overlapped);
+                        const double X_to_add = X[0][idx_mole_fraction]/((double) n_overlapped);
                         const double mu_v_to_add = mu_v/((double) n_overlapped);
                         
                         for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                         {
                             const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                             
-                            Y_avg_local[idx_fine] += Y_to_add;
+                            X_avg_local[idx_fine] += X_to_add;
                             mu_v_avg_local[idx_fine] += mu_v_to_add;
                         }
                     }
@@ -40763,8 +42343,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
          */
         
         mpi.Reduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
@@ -40789,7 +42369,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     mu_v_sum += mu_v_avg_global[i];
                     count++;
@@ -40802,8 +42382,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                   << "\t" << mu_v_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(mu_v_avg_local);
         std::free(mu_v_avg_global);
     }
@@ -40817,15 +42397,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
         
         const double L_y = x_hi[1] - x_lo[1];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* mu_v_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* mu_v_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             mu_v_avg_local[i] = 0.0;
             mu_v_avg_global[i] = 0.0;
         }
@@ -40876,7 +42456,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, pressure and temperature in the flow model
+                 * Register the patch, mass fraction, mole fraction, pressure and temperature in the flow model
                  * and compute the corresponding cell data.
                  */
                 
@@ -40890,6 +42470,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
@@ -40900,11 +42483,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
+                 * Get the pointers to mass fraction, mole fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getGlobalCellData("PRESSURE");
@@ -40917,6 +42503,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                std::vector<double*> X;
+                X.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* p = data_pressure->getPointer(0);
                 double* T = data_temperature->getPointer(0);
@@ -40934,6 +42526,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
+                
                 const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
                 
@@ -40943,6 +42538,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                 const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
                 const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
                 const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
                 
                 const int num_ghosts_0_pressure = num_ghosts_pressure[0];
                 const int num_ghosts_1_pressure = num_ghosts_pressure[1];
@@ -41005,6 +42604,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                             const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
                             
+                            const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction;
+                            
                             const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
                             
@@ -41024,14 +42626,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                                     &T[idx_temperature],
                                     Y_ptr);
                             
-                            const double Y_to_add = Y[0][idx_mass_fraction]*weight/((double) n_overlapped);
+                            const double X_to_add = X[0][idx_mole_fraction]*weight/((double) n_overlapped);
                             const double mu_v_to_add = mu_v*weight/((double) n_overlapped);
                             
                             for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                 
-                                Y_avg_local[idx_fine] += Y_to_add;
+                                X_avg_local[idx_fine] += X_to_add;
                                 mu_v_avg_local[idx_fine] += mu_v_to_add;
                             }
                         }
@@ -41051,8 +42653,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
          */
         
         mpi.Reduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
@@ -41077,7 +42679,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     mu_v_sum += mu_v_avg_global[i];
                     count++;
@@ -41090,8 +42692,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                   << "\t" << mu_v_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(mu_v_avg_local);
         std::free(mu_v_avg_global);
     }
@@ -41106,15 +42708,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* mu_v_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* mu_v_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             mu_v_avg_local[i] = 0.0;
             mu_v_avg_global[i] = 0.0;
         }
@@ -41165,7 +42767,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, pressure and temperature in the flow model
+                 * Register the patch, mass fraction, mole fraction, pressure and temperature in the flow model
                  * and compute the corresponding cell data.
                  */
                 
@@ -41179,6 +42781,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
@@ -41189,11 +42794,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
+                 * Get the pointers to mass fraction, mole fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getGlobalCellData("PRESSURE");
@@ -41206,6 +42814,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                std::vector<double*> X;
+                X.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* p = data_pressure->getPointer(0);
                 double* T = data_temperature->getPointer(0);
@@ -41223,6 +42837,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
+                
                 const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
                 
@@ -41234,6 +42851,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                 const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
                 const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
                 const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_pressure = num_ghosts_pressure[0];
                 const int num_ghosts_1_pressure = num_ghosts_pressure[1];
@@ -41307,6 +42930,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                                     (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                         ghostcell_dim_1_mass_fraction;
                                 
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
+                                
                                 const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
                                     (relative_idx_lo_2 + k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
@@ -41330,14 +42958,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                                         &T[idx_temperature],
                                         Y_ptr);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight/((double) n_overlapped);
+                                const double X_to_add = X[0][idx_mole_fraction]*weight/((double) n_overlapped);
                                 const double mu_v_to_add = mu_v*weight/((double) n_overlapped);
                                 
                                 for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     mu_v_avg_local[idx_fine] += mu_v_to_add;
                                 }
                             }
@@ -41358,8 +42986,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
          */
         
         mpi.Reduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
@@ -41384,7 +43012,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     mu_v_sum += mu_v_avg_global[i];
                     count++;
@@ -41397,8 +43025,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
                   << "\t" << mu_v_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(mu_v_avg_local);
         std::free(mu_v_avg_global);
     }
@@ -41496,15 +43124,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
     {
         const int finest_level_dim_0 = finest_level_dims[0];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* nu_v_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* nu_v_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             nu_v_avg_local[i] = 0.0;
             nu_v_avg_global[i] = 0.0;
         }
@@ -41549,7 +43177,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
                 /*
-                 * Register the patch, mass fraction, density, pressure and temperature in the flow
+                 * Register the patch, mass fraction, mole fraction, density, pressure and temperature in the flow
                  * model and compute the corresponding cell data.
                  */
                 
@@ -41561,6 +43189,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -41576,12 +43207,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density, pressure and temperature data inside
+                 * Get the pointers to mass fraction, mole fraction, density, pressure and temperature data inside
                  * the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -41598,6 +43232,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                 {
                     Y.push_back(data_mass_fraction->getPointer(si));
                 }
+                std::vector<double*> X;
+                X.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    X.push_back(data_mole_fraction->getPointer(si));
+                }
                 double* rho = data_density->getPointer(0);
                 double* p = data_pressure->getPointer(0);
                 double* T = data_temperature->getPointer(0);
@@ -41613,11 +43253,13 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                         li);
                 
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
                 const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
                 
                 const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_0_pressure = num_ghosts_pressure[0];
                 const int num_ghosts_0_temperature = num_ghosts_temperature[0];
@@ -41666,6 +43308,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                          */
                         
                         const int idx_mass_fraction = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
+                        const int idx_mole_fraction = relative_idx_lo_0 + i + num_ghosts_0_mole_fraction;
                         const int idx_density = relative_idx_lo_0 + i + num_ghosts_0_density;
                         const int idx_pressure = relative_idx_lo_0 + i + num_ghosts_0_pressure;
                         const int idx_temperature = relative_idx_lo_0 + i + num_ghosts_0_temperature;
@@ -41685,14 +43328,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                         
                         const double nu_v = mu_v/rho[idx_density];
                         
-                        const double Y_to_add = Y[0][idx_mass_fraction]/((double) n_overlapped);
+                        const double X_to_add = X[0][idx_mole_fraction]/((double) n_overlapped);
                         const double nu_v_to_add = nu_v/((double) n_overlapped);
                         
                         for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                         {
                             const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                             
-                            Y_avg_local[idx_fine] += Y_to_add;
+                            X_avg_local[idx_fine] += X_to_add;
                             nu_v_avg_local[idx_fine] += nu_v_to_add;
                         }
                     }
@@ -41711,8 +43354,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
          */
         
         mpi.Reduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
@@ -41737,7 +43380,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     nu_v_sum += nu_v_avg_global[i];
                     count++;
@@ -41750,8 +43393,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                   << "\t" << nu_v_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(nu_v_avg_local);
         std::free(nu_v_avg_global);
     }
@@ -41765,15 +43408,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
         
         const double L_y = x_hi[1] - x_lo[1];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* nu_v_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* nu_v_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             nu_v_avg_local[i] = 0.0;
             nu_v_avg_global[i] = 0.0;
         }
@@ -41824,7 +43467,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density, pressure and temperature in the flow
+                 * Register the patch, mass fraction, mole fraction, density, pressure and temperature in the flow
                  * model and compute the corresponding cell data.
                  */
                 
@@ -41836,6 +43479,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -41851,12 +43497,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density, pressure and temperature data inside
+                 * Get the pointers to mass fraction, mole fraction, density, pressure and temperature data inside
                  * the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -41872,6 +43521,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                std::vector<double*> X;
+                X.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* p = data_pressure->getPointer(0);
@@ -41890,6 +43545,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
+                
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
@@ -41902,6 +43560,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                 const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
                 const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
                 const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -41968,6 +43630,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                             const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
                             
+                            const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction;
+                            
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
                             
@@ -41992,14 +43657,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                             
                             const double nu_v = mu_v/rho[idx_density];
                             
-                            const double Y_to_add = Y[0][idx_mass_fraction]*weight/((double) n_overlapped);
+                            const double X_to_add = X[0][idx_mole_fraction]*weight/((double) n_overlapped);
                             const double nu_v_to_add = nu_v*weight/((double) n_overlapped);
                             
                             for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                 
-                                Y_avg_local[idx_fine] += Y_to_add;
+                                X_avg_local[idx_fine] += X_to_add;
                                 nu_v_avg_local[idx_fine] += nu_v_to_add;
                             }
                         }
@@ -42019,8 +43684,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
          */
         
         mpi.Reduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
@@ -42045,7 +43710,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     nu_v_sum += nu_v_avg_global[i];
                     count++;
@@ -42058,8 +43723,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                   << "\t" << nu_v_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(nu_v_avg_local);
         std::free(nu_v_avg_global);
     }
@@ -42074,15 +43739,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* nu_v_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* nu_v_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             nu_v_avg_local[i] = 0.0;
             nu_v_avg_global[i] = 0.0;
         }
@@ -42133,7 +43798,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density, pressure and temperature in the flow
+                 * Register the patch, mass fraction, mole fraction, density, pressure and temperature in the flow
                  * model and compute the corresponding cell data.
                  */
                 
@@ -42145,6 +43810,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -42160,12 +43828,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density, pressure and temperature data inside
+                 * Get the pointers to mass fraction, mole fraction, density, pressure and temperature data inside
                  * the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -42181,6 +43852,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                std::vector<double*> X;
+                X.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* p = data_pressure->getPointer(0);
@@ -42199,6 +43876,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
+                
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
@@ -42213,6 +43893,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                 const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
                 const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
                 const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -42292,6 +43978,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                                     (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                         ghostcell_dim_1_mass_fraction;
                                 
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
+                                
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
                                     (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
@@ -42322,14 +44013,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                                 
                                 const double nu_v = mu_v/rho[idx_density];
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight/((double) n_overlapped);
+                                const double X_to_add = X[0][idx_mole_fraction]*weight/((double) n_overlapped);
                                 const double nu_v_to_add = nu_v*weight/((double) n_overlapped);
                                 
                                 for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     nu_v_avg_local[idx_fine] += nu_v_to_add;
                                 }
                             }
@@ -42350,8 +44041,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
          */
         
         mpi.Reduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
@@ -42376,7 +44067,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     nu_v_sum += nu_v_avg_global[i];
                     count++;
@@ -42389,8 +44080,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
                   << "\t" << nu_v_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(nu_v_avg_local);
         std::free(nu_v_avg_global);
     }
@@ -42488,15 +44179,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
     {
         const int finest_level_dim_0 = finest_level_dims[0];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* kappa_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* kappa_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             kappa_avg_local[i] = 0.0;
             kappa_avg_global[i] = 0.0;
         }
@@ -42541,7 +44232,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
                 /*
-                 * Register the patch, mass fraction, pressure and temperature in the flow model
+                 * Register the patch, mass fraction, mole fraction, pressure and temperature in the flow model
                  * and compute the corresponding cell data.
                  */
                 
@@ -42555,6 +44246,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
@@ -42565,11 +44259,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
+                 * Get the pointers to mass fraction, mole fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getGlobalCellData("PRESSURE");
@@ -42582,6 +44279,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                std::vector<double*> X;
+                X.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* p = data_pressure->getPointer(0);
                 double* T = data_temperature->getPointer(0);
@@ -42597,10 +44300,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                         li);
                 
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
                 const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
                 const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
                 
                 const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
                 const int num_ghosts_0_pressure = num_ghosts_pressure[0];
                 const int num_ghosts_0_temperature = num_ghosts_temperature[0];
                 
@@ -42648,6 +44353,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                          */
                         
                         const int idx_mass_fraction = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
+                        const int idx_mole_fraction = relative_idx_lo_0 + i + num_ghosts_0_mole_fraction;
                         const int idx_pressure = relative_idx_lo_0 + i + num_ghosts_0_pressure;
                         const int idx_temperature = relative_idx_lo_0 + i + num_ghosts_0_temperature;
                         
@@ -42664,14 +44370,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                                 &T[idx_temperature],
                                 Y_ptr);
                         
-                        const double Y_to_add = Y[0][idx_mass_fraction]/((double) n_overlapped);
+                        const double X_to_add = X[0][idx_mole_fraction]/((double) n_overlapped);
                         const double kappa_to_add = kappa/((double) n_overlapped);
                         
                         for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                         {
                             const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                             
-                            Y_avg_local[idx_fine] += Y_to_add;
+                            X_avg_local[idx_fine] += X_to_add;
                             kappa_avg_local[idx_fine] += kappa_to_add;
                         }
                     }
@@ -42690,8 +44396,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
          */
         
         mpi.Reduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
@@ -42716,7 +44422,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     kappa_sum += kappa_avg_global[i];
                     count++;
@@ -42729,8 +44435,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                   << "\t" << kappa_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(kappa_avg_local);
         std::free(kappa_avg_global);
     }
@@ -42744,15 +44450,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
         
         const double L_y = x_hi[1] - x_lo[1];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* kappa_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* kappa_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             kappa_avg_local[i] = 0.0;
             kappa_avg_global[i] = 0.0;
         }
@@ -42803,7 +44509,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, pressure and temperature in the flow model
+                 * Register the patch, mass fraction, mole fraction, pressure and temperature in the flow model
                  * and compute the corresponding cell data.
                  */
                 
@@ -42817,6 +44523,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
@@ -42827,11 +44536,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
+                 * Get the pointers to mass fraction, mole fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getGlobalCellData("PRESSURE");
@@ -42844,6 +44556,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                std::vector<double*> X;
+                X.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* p = data_pressure->getPointer(0);
                 double* T = data_temperature->getPointer(0);
@@ -42861,6 +44579,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
+                
                 const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
                 
@@ -42870,6 +44591,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                 const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
                 const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
                 const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
                 
                 const int num_ghosts_0_pressure = num_ghosts_pressure[0];
                 const int num_ghosts_1_pressure = num_ghosts_pressure[1];
@@ -42932,6 +44657,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                             const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
                             
+                            const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction;
+                            
                             const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
                             
@@ -42951,14 +44679,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                                     &T[idx_temperature],
                                     Y_ptr);
                             
-                            const double Y_to_add = Y[0][idx_mass_fraction]*weight/((double) n_overlapped);
+                            const double X_to_add = X[0][idx_mole_fraction]*weight/((double) n_overlapped);
                             const double kappa_to_add = kappa*weight/((double) n_overlapped);
                             
                             for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                 
-                                Y_avg_local[idx_fine] += Y_to_add;
+                                X_avg_local[idx_fine] += X_to_add;
                                 kappa_avg_local[idx_fine] += kappa_to_add;
                             }
                         }
@@ -42978,8 +44706,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
          */
         
         mpi.Reduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
@@ -43004,7 +44732,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     kappa_sum += kappa_avg_global[i];
                     count++;
@@ -43017,8 +44745,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                   << "\t" << kappa_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(kappa_avg_local);
         std::free(kappa_avg_global);
     }
@@ -43033,15 +44761,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* kappa_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* kappa_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             kappa_avg_local[i] = 0.0;
             kappa_avg_global[i] = 0.0;
         }
@@ -43092,7 +44820,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, pressure and temperature in the flow model
+                 * Register the patch, mass fraction, mole fraction, pressure and temperature in the flow model
                  * and compute the corresponding cell data.
                  */
                 
@@ -43106,6 +44834,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
@@ -43116,11 +44847,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
+                 * Get the pointers to mass fraction, mole fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getGlobalCellData("PRESSURE");
@@ -43133,6 +44867,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                std::vector<double*> X;
+                X.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* p = data_pressure->getPointer(0);
                 double* T = data_temperature->getPointer(0);
@@ -43150,6 +44890,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
+                
                 const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
                 
@@ -43161,6 +44904,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                 const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
                 const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
                 const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_pressure = num_ghosts_pressure[0];
                 const int num_ghosts_1_pressure = num_ghosts_pressure[1];
@@ -43234,6 +44983,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                                     (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                         ghostcell_dim_1_mass_fraction;
                                 
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
+                                
                                 const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
                                     (relative_idx_lo_2 + k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
@@ -43257,14 +45011,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                                         &T[idx_temperature],
                                         Y_ptr);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight/((double) n_overlapped);
+                                const double X_to_add = X[0][idx_mole_fraction]*weight/((double) n_overlapped);
                                 const double kappa_to_add = kappa*weight/((double) n_overlapped);
                                 
                                 for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     kappa_avg_local[idx_fine] += kappa_to_add;
                                 }
                             }
@@ -43285,8 +45039,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
          */
         
         mpi.Reduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
@@ -43311,7 +45065,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     kappa_sum += kappa_avg_global[i];
                     count++;
@@ -43324,8 +45078,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
                   << "\t" << kappa_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(kappa_avg_local);
         std::free(kappa_avg_global);
     }
@@ -43423,15 +45177,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
     {
         const int finest_level_dim_0 = finest_level_dims[0];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* alpha_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* alpha_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             alpha_avg_local[i] = 0.0;
             alpha_avg_global[i] = 0.0;
         }
@@ -43476,7 +45230,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
                 /*
-                 * Register the patch, mass fraction, density, pressure and temperature in the flow
+                 * Register the patch, mass fraction, mole fraction, density, pressure and temperature in the flow
                  * model and compute the corresponding cell data.
                  */
                 
@@ -43488,6 +45242,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -43503,12 +45260,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density, pressure and temperature data inside
+                 * Get the pointers to mass fraction, mole fraction, density, pressure and temperature data inside
                  * the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -43525,6 +45285,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                 {
                     Y.push_back(data_mass_fraction->getPointer(si));
                 }
+                std::vector<double*> X;
+                X.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    X.push_back(data_mole_fraction->getPointer(si));
+                }
                 double* rho = data_density->getPointer(0);
                 double* p = data_pressure->getPointer(0);
                 double* T = data_temperature->getPointer(0);
@@ -43540,11 +45306,13 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                         li);
                 
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
                 const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
                 
                 const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_0_pressure = num_ghosts_pressure[0];
                 const int num_ghosts_0_temperature = num_ghosts_temperature[0];
@@ -43593,6 +45361,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                          */
                         
                         const int idx_mass_fraction = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
+                        const int idx_mole_fraction = relative_idx_lo_0 + i + num_ghosts_0_mole_fraction;
                         const int idx_density = relative_idx_lo_0 + i + num_ghosts_0_density;
                         const int idx_pressure = relative_idx_lo_0 + i + num_ghosts_0_pressure;
                         const int idx_temperature = relative_idx_lo_0 + i + num_ghosts_0_temperature;
@@ -43618,14 +45387,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                         
                         const double alpha = kappa/(rho[idx_density]*c_p);
                         
-                        const double Y_to_add = Y[0][idx_mass_fraction]/((double) n_overlapped);
+                        const double X_to_add = X[0][idx_mole_fraction]/((double) n_overlapped);
                         const double alpha_to_add = alpha/((double) n_overlapped);
                         
                         for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                         {
                             const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                             
-                            Y_avg_local[idx_fine] += Y_to_add;
+                            X_avg_local[idx_fine] += X_to_add;
                             alpha_avg_local[idx_fine] += alpha_to_add;
                         }
                     }
@@ -43644,8 +45413,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
          */
         
         mpi.Reduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
@@ -43670,7 +45439,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     alpha_sum += alpha_avg_global[i];
                     count++;
@@ -43683,8 +45452,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                   << "\t" << alpha_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(alpha_avg_local);
         std::free(alpha_avg_global);
     }
@@ -43698,15 +45467,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
         
         const double L_y = x_hi[1] - x_lo[1];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* alpha_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* alpha_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             alpha_avg_local[i] = 0.0;
             alpha_avg_global[i] = 0.0;
         }
@@ -43757,7 +45526,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density, pressure and temperature in the flow
+                 * Register the patch, mass fraction, mole fraction, density, pressure and temperature in the flow
                  * model and compute the corresponding cell data.
                  */
                 
@@ -43769,6 +45538,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -43784,12 +45556,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density, pressure and temperature data inside
+                 * Get the pointers to mass fraction, mole fraction, density, pressure and temperature data inside
                  * the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -43805,6 +45580,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                std::vector<double*> X;
+                X.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* p = data_pressure->getPointer(0);
@@ -43823,6 +45604,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
+                
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
@@ -43835,6 +45619,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                 const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
                 const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
                 const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -43901,6 +45689,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                             const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
                             
+                            const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction;
+                            
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
                             
@@ -43931,14 +45722,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                             
                             const double alpha = kappa/(rho[idx_density]*c_p);
                             
-                            const double Y_to_add = Y[0][idx_mass_fraction]*weight/((double) n_overlapped);
+                            const double X_to_add = X[0][idx_mole_fraction]*weight/((double) n_overlapped);
                             const double alpha_to_add = alpha*weight/((double) n_overlapped);
                             
                             for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                 
-                                Y_avg_local[idx_fine] += Y_to_add;
+                                X_avg_local[idx_fine] += X_to_add;
                                 alpha_avg_local[idx_fine] += alpha_to_add;
                             }
                         }
@@ -43958,8 +45749,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
          */
         
         mpi.Reduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
@@ -43984,7 +45775,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     alpha_sum += alpha_avg_global[i];
                     count++;
@@ -43997,8 +45788,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                   << "\t" << alpha_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(alpha_avg_local);
         std::free(alpha_avg_global);
     }
@@ -44013,15 +45804,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
         const double L_y = x_hi[1] - x_lo[1];
         const double L_z = x_hi[2] - x_lo[2];
         
-        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
-        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* X_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* alpha_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* alpha_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            Y_avg_local[i] = 0.0;
-            Y_avg_global[i] = 0.0;
+            X_avg_local[i] = 0.0;
+            X_avg_global[i] = 0.0;
             alpha_avg_local[i] = 0.0;
             alpha_avg_global[i] = 0.0;
         }
@@ -44072,7 +45863,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, density, pressure and temperature in the flow
+                 * Register the patch, mass fraction, mole fraction, density, pressure and temperature in the flow
                  * model and compute the corresponding cell data.
                  */
                 
@@ -44084,6 +45875,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOLE_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
@@ -44099,12 +45893,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointers to mass fraction, density, pressure and temperature data inside
+                 * Get the pointers to mass fraction, mole fraction, density, pressure and temperature data inside
                  * the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mole_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
                     d_flow_model_tmp->getGlobalCellData("DENSITY");
@@ -44120,6 +45917,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                 for (int si = 0; si < d_num_species; si++)
                 {
                     Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                std::vector<double*> X;
+                X.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    X.push_back(data_mole_fraction->getPointer(si));
                 }
                 double* rho = data_density->getPointer(0);
                 double* p = data_pressure->getPointer(0);
@@ -44138,6 +45941,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
+                const hier::IntVector num_ghosts_mole_fraction = data_mole_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mole_fraction = data_mole_fraction->getGhostBox().numberCells();
+                
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
@@ -44152,6 +45958,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                 const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
                 const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
                 const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                
+                const int num_ghosts_0_mole_fraction = num_ghosts_mole_fraction[0];
+                const int num_ghosts_1_mole_fraction = num_ghosts_mole_fraction[1];
+                const int num_ghosts_2_mole_fraction = num_ghosts_mole_fraction[2];
+                const int ghostcell_dim_0_mole_fraction = ghostcell_dims_mole_fraction[0];
+                const int ghostcell_dim_1_mole_fraction = ghostcell_dims_mole_fraction[1];
                 
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
@@ -44231,6 +46043,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                                     (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                         ghostcell_dim_1_mass_fraction;
                                 
+                                const int idx_mole_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mole_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mole_fraction)*ghostcell_dim_0_mole_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mole_fraction)*ghostcell_dim_0_mole_fraction*
+                                        ghostcell_dim_1_mole_fraction;
+                                
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
                                     (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
@@ -44267,14 +46084,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                                 
                                 const double alpha = kappa/(rho[idx_density]*c_p);
                                 
-                                const double Y_to_add = Y[0][idx_mass_fraction]*weight/((double) n_overlapped);
+                                const double X_to_add = X[0][idx_mole_fraction]*weight/((double) n_overlapped);
                                 const double alpha_to_add = alpha*weight/((double) n_overlapped);
                                 
                                 for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                                 {
                                     const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    X_avg_local[idx_fine] += X_to_add;
                                     alpha_avg_local[idx_fine] += alpha_to_add;
                                 }
                             }
@@ -44295,8 +46112,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
          */
         
         mpi.Reduce(
-            Y_avg_local,
-            Y_avg_global,
+            X_avg_local,
+            X_avg_global,
             finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
@@ -44321,7 +46138,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
             
             for (int i = 0; i < finest_level_dim_0; i++)
             {
-                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                if (4.0*X_avg_global[i]*(1.0 - X_avg_global[i]) > 0.9)
                 {
                     alpha_sum += alpha_avg_global[i];
                     count++;
@@ -44334,8 +46151,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
                   << "\t" << alpha_mean;
         }
         
-        std::free(Y_avg_local);
-        std::free(Y_avg_global);
+        std::free(X_avg_local);
+        std::free(X_avg_global);
         std::free(alpha_avg_local);
         std::free(alpha_avg_global);
     }

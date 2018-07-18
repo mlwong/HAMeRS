@@ -298,6 +298,24 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
+         * Output mean turbulent Mach number inside mixing layer with assumed homogeneity in y-direction to a file.
+         */
+        void
+        outputTurbulentMachNumberMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean turbulent Mach number inside mixing layer with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputTurbulentMachNumberMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
          * Output mean TKE inside mixing layer with assumed homogeneity in y-direction to a file.
          */
         void
