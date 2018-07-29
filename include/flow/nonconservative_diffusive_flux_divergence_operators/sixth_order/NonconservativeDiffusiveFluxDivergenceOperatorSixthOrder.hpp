@@ -43,6 +43,20 @@ class NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder: public Nonconser
         
     private:
         /*
+         * Add derivatives to divergence.
+         */
+        void addDerivativeToDivergence(
+            hier::Patch& patch,
+            boost::shared_ptr<pdat::CellData<double> > & divergence,
+            const std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& var_first_derivative,
+            const std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& var_derivative_cross_derivative,
+            const std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& diffusivities_data,
+            const std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& diffusivities_first_derivative,
+            const std::vector<std::vector<int> >& var_component_idx,
+            const std::vector<std::vector<int> >& diffusivities_component_idx,
+            const double dt);
+        
+        /*
          * Compute the first derivatives in the x-direction.
          */
         void computeFirstDerivativesInX(

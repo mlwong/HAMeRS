@@ -101,14 +101,6 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the dimension and number of ghost cells.
-         */
-        
-        const int interior_dim_0 = interior_dims[0];
-        
-        const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
-        
-        /*
          * Register the patch and derived cell variables in the flow model and compute the corresponding cell data.
          */
         
@@ -187,68 +179,18 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_data_x,
             var_component_idx_x);
         
-        /*
-         * Add the derivatives to the divergence of diffusive flux.
-         */
+        // Add the derivatives to the divergence of diffusive flux.
         
-        for (int ei = 0; ei < d_num_eqn; ei++)
-        {
-            TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_x[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_data_x[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_x[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_xx[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_derivative_x[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            double* nabla_F = diffusive_flux_divergence->getPointer(ei);
-            
-            for (int vi = 0; vi < static_cast<int>(var_data_x[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int mu_idx = diffusivities_component_idx_x[ei][vi];
-                
-                // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_x[ei][vi]->getPointer(mu_idx);
-                
-                // Get the pointer to derivatives.
-                double* dudx = var_derivative_x[ei][vi]->getPointer(0);
-                double* d2udxdx = var_derivative_xx[ei][vi]->getPointer(0);
-                double* dmudx = diffusivities_derivative_x[ei][vi]->getPointer(0);
-                
-                /*
-                 * Get the sub-ghost cell width of the diffusivity.
-                 */
-                
-                hier::IntVector num_subghosts_diffusivity =
-                    diffusivities_data_x[ei][vi]->getGhostCellWidth();
-                
-                const int num_subghosts_0_diffusivity = num_subghosts_diffusivity[0];
-                
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
-                for (int i = 0; i < interior_dim_0; i++)
-                {
-                    // Compute the linear indices.
-                    const int idx_nghost = i;
-                    
-                    const int idx_diffusivity = i + num_subghosts_0_diffusivity;
-                    
-                    const int idx_diff = i + num_diff_ghosts_0;
-                    
-                    nabla_F[idx_nghost] += dt*(dmudx[idx_diff]*dudx[idx_diff] +
-                        mu[idx_diffusivity]*d2udxdx[idx_diff]);
-                }
-            }
-        }
+        addDerivativeToDivergence(
+            patch,
+            diffusive_flux_divergence,
+            var_derivative_x,
+            var_derivative_xx,
+            diffusivities_data_x,
+            diffusivities_derivative_x,
+            var_component_idx_x,
+            diffusivities_component_idx_x,
+            dt);
         
         var_data_x.clear();
         
@@ -270,18 +212,6 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        /*
-         * Get the dimensions and number of ghost cells.
-         */
-        
-        const int interior_dim_0 = interior_dims[0];
-        const int interior_dim_1 = interior_dims[1];
-        
-        const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
-        const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
-        
-        const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
-        
         /*
          * Register the patch and derived cell variables in the flow model and compute the corresponding cell data.
          */
@@ -377,79 +307,18 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_data_x,
             var_component_idx_x);
         
-        /*
-         * Add the derivatives to the divergence of diffusive flux.
-         */
+        // Add the derivatives to the divergence of diffusive flux.
         
-        for (int ei = 0; ei < d_num_eqn; ei++)
-        {
-            TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_x[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_data_x[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_x[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_xx[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_derivative_x[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            double* nabla_F = diffusive_flux_divergence->getPointer(ei);
-            
-            for (int vi = 0; vi < static_cast<int>(var_data_x[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int mu_idx = diffusivities_component_idx_x[ei][vi];
-                
-                // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_x[ei][vi]->getPointer(mu_idx);
-                
-                // Get the pointer to derivatives.
-                double* dudx = var_derivative_x[ei][vi]->getPointer(0);
-                double* d2udxdx = var_derivative_xx[ei][vi]->getPointer(0);
-                double* dmudx = diffusivities_derivative_x[ei][vi]->getPointer(0);
-                
-                /*
-                 * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
-                 */
-                
-                hier::IntVector num_subghosts_diffusivity =
-                    diffusivities_data_x[ei][vi]->getGhostCellWidth();
-                
-                hier::IntVector subghostcell_dims_diffusivity =
-                    diffusivities_data_x[ei][vi]->getGhostBox().numberCells();
-                
-                const int num_subghosts_0_diffusivity = num_subghosts_diffusivity[0];
-                const int num_subghosts_1_diffusivity = num_subghosts_diffusivity[1];
-                const int subghostcell_dim_0_diffusivity = subghostcell_dims_diffusivity[0];
-                
-                for (int j = 0; j < interior_dim_1; j++)
-                {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = 0; i < interior_dim_0; i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx_nghost = i +
-                            j*(interior_dim_0);
-                        
-                        const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
-                            (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity;
-                        
-                        const int idx_diff = (i + num_diff_ghosts_0) +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        nabla_F[idx_nghost] += dt*(dmudx[idx_diff]*dudx[idx_diff] +
-                            mu[idx_diffusivity]*d2udxdx[idx_diff]);
-                    }
-                }
-            }
-        }
+        addDerivativeToDivergence(
+            patch,
+            diffusive_flux_divergence,
+            var_derivative_x,
+            var_derivative_xx,
+            diffusivities_data_x,
+            diffusivities_derivative_x,
+            var_component_idx_x,
+            diffusivities_component_idx_x,
+            dt);
         
         var_data_x.clear();
         
@@ -516,79 +385,18 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_derivative_y,
             var_derivative_component_idx_y);
         
-        /*
-         * Add the derivatives to the divergence of diffusive flux.
-         */
+        // Add the derivatives to the divergence of diffusive flux.
         
-        for (int ei = 0; ei < d_num_eqn; ei++)
-        {
-            TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_y[ei].size()) ==
-                        static_cast<int>(var_component_idx_y[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_data_y[ei].size()) ==
-                        static_cast<int>(var_component_idx_y[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_y[ei].size()) ==
-                        static_cast<int>(var_component_idx_y[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_xy[ei].size()) ==
-                        static_cast<int>(var_component_idx_y[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_derivative_x[ei].size()) ==
-                        static_cast<int>(var_component_idx_y[ei].size()));
-            
-            double* nabla_F = diffusive_flux_divergence->getPointer(ei);
-            
-            for (int vi = 0; vi < static_cast<int>(var_data_y[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int mu_idx = diffusivities_component_idx_y[ei][vi];
-                
-                // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_y[ei][vi]->getPointer(mu_idx);
-                
-                // Get the pointer to derivatives.
-                double* dudy = var_derivative_y[ei][vi]->getPointer(0);
-                double* d2udxdy = var_derivative_xy[ei][vi]->getPointer(0);
-                double* dmudx = diffusivities_derivative_x[ei][vi]->getPointer(0);
-                
-                /*
-                 * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
-                 */
-                
-                hier::IntVector num_subghosts_diffusivity =
-                    diffusivities_data_y[ei][vi]->getGhostCellWidth();
-                
-                hier::IntVector subghostcell_dims_diffusivity =
-                    diffusivities_data_y[ei][vi]->getGhostBox().numberCells();
-                
-                const int num_subghosts_0_diffusivity = num_subghosts_diffusivity[0];
-                const int num_subghosts_1_diffusivity = num_subghosts_diffusivity[1];
-                const int subghostcell_dim_0_diffusivity = subghostcell_dims_diffusivity[0];
-                
-                for (int j = 0; j < interior_dim_1; j++)
-                {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = 0; i < interior_dim_0; i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx_nghost = i +
-                            j*(interior_dim_0);
-                        
-                        const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
-                            (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity;
-                        
-                        const int idx_diff = (i + num_diff_ghosts_0) +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        nabla_F[idx_nghost] += dt*(dmudx[idx_diff]*dudy[idx_diff] +
-                            mu[idx_diffusivity]*d2udxdy[idx_diff]);
-                    }
-                }
-            }
-        }
+        addDerivativeToDivergence(
+            patch,
+            diffusive_flux_divergence,
+            var_derivative_y,
+            var_derivative_xy,
+            diffusivities_data_y,
+            diffusivities_derivative_x,
+            var_component_idx_y,
+            diffusivities_component_idx_y,
+            dt);
         
         var_data_y.clear();
         
@@ -661,79 +469,18 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_derivative_x,
             var_derivative_component_idx_x);
         
-        /*
-         * Add the derivatives to the divergence of diffusive flux.
-         */
+        // Add the derivatives to the divergence of diffusive flux.
         
-        for (int ei = 0; ei < d_num_eqn; ei++)
-        {
-            TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_x[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_data_x[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_x[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_yx[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_derivative_y[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            double* nabla_F = diffusive_flux_divergence->getPointer(ei);
-            
-            for (int vi = 0; vi < static_cast<int>(var_data_x[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int mu_idx = diffusivities_component_idx_x[ei][vi];
-                
-                // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_x[ei][vi]->getPointer(mu_idx);
-                
-                // Get the pointer to derivatives.
-                double* dudx = var_derivative_x[ei][vi]->getPointer(0);
-                double* d2udydx = var_derivative_yx[ei][vi]->getPointer(0);
-                double* dmudy = diffusivities_derivative_y[ei][vi]->getPointer(0);
-                
-                /*
-                 * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
-                 */
-                
-                hier::IntVector num_subghosts_diffusivity =
-                    diffusivities_data_x[ei][vi]->getGhostCellWidth();
-                
-                hier::IntVector subghostcell_dims_diffusivity =
-                    diffusivities_data_x[ei][vi]->getGhostBox().numberCells();
-                
-                const int num_subghosts_0_diffusivity = num_subghosts_diffusivity[0];
-                const int num_subghosts_1_diffusivity = num_subghosts_diffusivity[1];
-                const int subghostcell_dim_0_diffusivity = subghostcell_dims_diffusivity[0];
-                
-                for (int j = 0; j < interior_dim_1; j++)
-                {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = 0; i < interior_dim_0; i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx_nghost = i +
-                            j*(interior_dim_0);
-                        
-                        const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
-                            (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity;
-                        
-                        const int idx_diff = (i + num_diff_ghosts_0) +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        nabla_F[idx_nghost] += dt*(dmudy[idx_diff]*dudx[idx_diff] +
-                            mu[idx_diffusivity]*d2udydx[idx_diff]);
-                    }
-                }
-            }
-        }
+        addDerivativeToDivergence(
+            patch,
+            diffusive_flux_divergence,
+            var_derivative_x,
+            var_derivative_yx,
+            diffusivities_data_x,
+            diffusivities_derivative_y,
+            var_component_idx_x,
+            diffusivities_component_idx_x,
+            dt);
         
         var_data_x.clear();
         
@@ -792,79 +539,18 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_data_y,
             var_component_idx_y);
         
-        /*
-         * Add the derivatives to the divergence of diffusive flux.
-         */
+        // Add the derivatives to the divergence of diffusive flux.
         
-        for (int ei = 0; ei < d_num_eqn; ei++)
-        {
-            TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_y[ei].size()) ==
-                        static_cast<int>(var_component_idx_y[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_data_y[ei].size()) ==
-                        static_cast<int>(var_component_idx_y[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_y[ei].size()) ==
-                        static_cast<int>(var_component_idx_y[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_yy[ei].size()) ==
-                        static_cast<int>(var_component_idx_y[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_derivative_y[ei].size()) ==
-                        static_cast<int>(var_component_idx_y[ei].size()));
-            
-            double* nabla_F = diffusive_flux_divergence->getPointer(ei);
-            
-            for (int vi = 0; vi < static_cast<int>(var_data_y[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int mu_idx = diffusivities_component_idx_y[ei][vi];
-                
-                // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_y[ei][vi]->getPointer(mu_idx);
-                
-                // Get the pointer to derivatives.
-                double* dudy = var_derivative_y[ei][vi]->getPointer(0);
-                double* d2udydy = var_derivative_yy[ei][vi]->getPointer(0);
-                double* dmudy = diffusivities_derivative_y[ei][vi]->getPointer(0);
-                
-                /*
-                 * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
-                 */
-                
-                hier::IntVector num_subghosts_diffusivity =
-                    diffusivities_data_y[ei][vi]->getGhostCellWidth();
-                
-                hier::IntVector subghostcell_dims_diffusivity =
-                    diffusivities_data_y[ei][vi]->getGhostBox().numberCells();
-                
-                const int num_subghosts_0_diffusivity = num_subghosts_diffusivity[0];
-                const int num_subghosts_1_diffusivity = num_subghosts_diffusivity[1];
-                const int subghostcell_dim_0_diffusivity = subghostcell_dims_diffusivity[0];
-                
-                for (int j = 0; j < interior_dim_1; j++)
-                {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = 0; i < interior_dim_0; i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx_nghost = i +
-                            j*(interior_dim_0);
-                        
-                        const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
-                            (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity;
-                        
-                        const int idx_diff = (i + num_diff_ghosts_0) +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        nabla_F[idx_nghost] += dt*(dmudy[idx_diff]*dudy[idx_diff] +
-                            mu[idx_diffusivity]*d2udydy[idx_diff]);
-                    }
-                }
-            }
-        }
+        addDerivativeToDivergence(
+            patch,
+            diffusive_flux_divergence,
+            var_derivative_y,
+            var_derivative_yy,
+            diffusivities_data_y,
+            diffusivities_derivative_y,
+            var_component_idx_y,
+            diffusivities_component_idx_y,
+            dt);
         
         var_data_y.clear();
         
@@ -886,21 +572,6 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        /*
-         * Get the dimensions and number of ghost cells.
-         */
-        
-        const int interior_dim_0 = interior_dims[0];
-        const int interior_dim_1 = interior_dims[1];
-        const int interior_dim_2 = interior_dims[2];
-        
-        const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
-        const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
-        const int num_diff_ghosts_2 = d_num_diff_ghosts[2];
-        
-        const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
-        const int diff_ghostcell_dim_1 = diff_ghostcell_dims[1];
-        
         /*
          * Register the patch and derived cell variables in the flow model and compute the corresponding cell data.
          */
@@ -1014,89 +685,18 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_data_x,
             var_component_idx_x);
         
-        /*
-         * Add the derivatives to the divergence of diffusive flux.
-         */
+        // Add the derivatives to the divergence of diffusive flux.
         
-        for (int ei = 0; ei < d_num_eqn; ei++)
-        {
-            TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_x[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_data_x[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_x[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_xx[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_derivative_x[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            double* nabla_F = diffusive_flux_divergence->getPointer(ei);
-            
-            for (int vi = 0; vi < static_cast<int>(var_data_x[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int mu_idx = diffusivities_component_idx_x[ei][vi];
-                
-                // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_x[ei][vi]->getPointer(mu_idx);
-                
-                // Get the pointer to derivatives.
-                double* dudx = var_derivative_x[ei][vi]->getPointer(0);
-                double* d2udxdx = var_derivative_xx[ei][vi]->getPointer(0);
-                double* dmudx = diffusivities_derivative_x[ei][vi]->getPointer(0);
-                
-                /*
-                 * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
-                 */
-                
-                hier::IntVector num_subghosts_diffusivity =
-                    diffusivities_data_x[ei][vi]->getGhostCellWidth();
-                
-                hier::IntVector subghostcell_dims_diffusivity =
-                    diffusivities_data_x[ei][vi]->getGhostBox().numberCells();
-                
-                const int num_subghosts_0_diffusivity = num_subghosts_diffusivity[0];
-                const int num_subghosts_1_diffusivity = num_subghosts_diffusivity[1];
-                const int num_subghosts_2_diffusivity = num_subghosts_diffusivity[2];
-                const int subghostcell_dim_0_diffusivity = subghostcell_dims_diffusivity[0];
-                const int subghostcell_dim_1_diffusivity = subghostcell_dims_diffusivity[1];
-                
-                for (int k = 0; k < interior_dim_2; k++)
-                {
-                    for (int j = 0; j < interior_dim_1; j++)
-                    {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = 0; i < interior_dim_0; i++)
-                        {
-                            // Compute the linear indices.
-                            const int idx_nghost = i +
-                                j*interior_dim_0 +
-                                k*interior_dim_0*interior_dim_1;
-                            
-                            const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
-                                (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity +
-                                (k + num_subghosts_2_diffusivity)*subghostcell_dim_0_diffusivity*
-                                    subghostcell_dim_1_diffusivity;
-                            
-                            const int idx_diff = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            nabla_F[idx_nghost] += dt*(dmudx[idx_diff]*dudx[idx_diff] +
-                                mu[idx_diffusivity]*d2udxdx[idx_diff]);
-                        }
-                    }
-                }
-            }
-        }
+        addDerivativeToDivergence(
+            patch,
+            diffusive_flux_divergence,
+            var_derivative_x,
+            var_derivative_xx,
+            diffusivities_data_x,
+            diffusivities_derivative_x,
+            var_component_idx_x,
+            diffusivities_component_idx_x,
+            dt);
         
         var_data_x.clear();
         
@@ -1163,89 +763,18 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_derivative_y,
             var_derivative_component_idx_y);
         
-        /*
-         * Add the derivatives to the divergence of diffusive flux.
-         */
+        // Add the derivatives to the divergence of diffusive flux.
         
-        for (int ei = 0; ei < d_num_eqn; ei++)
-        {
-            TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_y[ei].size()) ==
-                        static_cast<int>(var_component_idx_y[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_data_y[ei].size()) ==
-                        static_cast<int>(var_component_idx_y[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_y[ei].size()) ==
-                        static_cast<int>(var_component_idx_y[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_xy[ei].size()) ==
-                        static_cast<int>(var_component_idx_y[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_derivative_x[ei].size()) ==
-                        static_cast<int>(var_component_idx_y[ei].size()));
-            
-            double* nabla_F = diffusive_flux_divergence->getPointer(ei);
-            
-            for (int vi = 0; vi < static_cast<int>(var_data_y[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int mu_idx = diffusivities_component_idx_y[ei][vi];
-                
-                // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_y[ei][vi]->getPointer(mu_idx);
-                
-                // Get the pointer to derivatives.
-                double* dudy = var_derivative_y[ei][vi]->getPointer(0);
-                double* d2udxdy = var_derivative_xy[ei][vi]->getPointer(0);
-                double* dmudx = diffusivities_derivative_x[ei][vi]->getPointer(0);
-                
-                /*
-                 * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
-                 */
-                
-                hier::IntVector num_subghosts_diffusivity =
-                    diffusivities_data_y[ei][vi]->getGhostCellWidth();
-                
-                hier::IntVector subghostcell_dims_diffusivity =
-                    diffusivities_data_y[ei][vi]->getGhostBox().numberCells();
-                
-                const int num_subghosts_0_diffusivity = num_subghosts_diffusivity[0];
-                const int num_subghosts_1_diffusivity = num_subghosts_diffusivity[1];
-                const int num_subghosts_2_diffusivity = num_subghosts_diffusivity[2];
-                const int subghostcell_dim_0_diffusivity = subghostcell_dims_diffusivity[0];
-                const int subghostcell_dim_1_diffusivity = subghostcell_dims_diffusivity[1];
-                
-                for (int k = 0; k < interior_dim_2; k++)
-                {
-                    for (int j = 0; j < interior_dim_1; j++)
-                    {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = 0; i < interior_dim_0; i++)
-                        {
-                            // Compute the linear indices.
-                            const int idx_nghost = i +
-                                j*interior_dim_0 +
-                                k*interior_dim_0*interior_dim_1;
-                            
-                            const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
-                                (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity +
-                                (k + num_subghosts_2_diffusivity)*subghostcell_dim_0_diffusivity*
-                                    subghostcell_dim_1_diffusivity;
-                            
-                            const int idx_diff = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            nabla_F[idx_nghost] += dt*(dmudx[idx_diff]*dudy[idx_diff] +
-                                mu[idx_diffusivity]*d2udxdy[idx_diff]);
-                        }
-                    }
-                }
-            }
-        }
+        addDerivativeToDivergence(
+            patch,
+            diffusive_flux_divergence,
+            var_derivative_y,
+            var_derivative_xy,
+            diffusivities_data_y,
+            diffusivities_derivative_x,
+            var_component_idx_y,
+            diffusivities_component_idx_y,
+            dt);
         
         var_data_y.clear();
         
@@ -1314,89 +843,18 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_derivative_z,
             var_derivative_component_idx_z);
         
-        /*
-         * Add the derivatives to the divergence of diffusive flux.
-         */
+        // Add the derivatives to the divergence of diffusive flux.
         
-        for (int ei = 0; ei < d_num_eqn; ei++)
-        {
-            TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_z[ei].size()) ==
-                        static_cast<int>(var_component_idx_z[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_data_z[ei].size()) ==
-                        static_cast<int>(var_component_idx_z[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_z[ei].size()) ==
-                        static_cast<int>(var_component_idx_z[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_xz[ei].size()) ==
-                        static_cast<int>(var_component_idx_z[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_derivative_x[ei].size()) ==
-                        static_cast<int>(var_component_idx_z[ei].size()));
-            
-            double* nabla_F = diffusive_flux_divergence->getPointer(ei);
-            
-            for (int vi = 0; vi < static_cast<int>(var_data_z[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int mu_idx = diffusivities_component_idx_z[ei][vi];
-                
-                // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_z[ei][vi]->getPointer(mu_idx);
-                
-                // Get the pointer to derivatives.
-                double* dudz = var_derivative_z[ei][vi]->getPointer(0);
-                double* d2udxdz = var_derivative_xz[ei][vi]->getPointer(0);
-                double* dmudx = diffusivities_derivative_x[ei][vi]->getPointer(0);
-                
-                /*
-                 * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
-                 */
-                
-                hier::IntVector num_subghosts_diffusivity =
-                    diffusivities_data_z[ei][vi]->getGhostCellWidth();
-                
-                hier::IntVector subghostcell_dims_diffusivity =
-                    diffusivities_data_z[ei][vi]->getGhostBox().numberCells();
-                
-                const int num_subghosts_0_diffusivity = num_subghosts_diffusivity[0];
-                const int num_subghosts_1_diffusivity = num_subghosts_diffusivity[1];
-                const int num_subghosts_2_diffusivity = num_subghosts_diffusivity[2];
-                const int subghostcell_dim_0_diffusivity = subghostcell_dims_diffusivity[0];
-                const int subghostcell_dim_1_diffusivity = subghostcell_dims_diffusivity[1];
-                
-                for (int k = 0; k < interior_dim_2; k++)
-                {
-                    for (int j = 0; j < interior_dim_1; j++)
-                    {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = 0; i < interior_dim_0; i++)
-                        {
-                            // Compute the linear indices.
-                            const int idx_nghost = i +
-                                j*interior_dim_0 +
-                                k*interior_dim_0*interior_dim_1;
-                            
-                            const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
-                                (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity +
-                                (k + num_subghosts_2_diffusivity)*subghostcell_dim_0_diffusivity*
-                                    subghostcell_dim_1_diffusivity;
-                            
-                            const int idx_diff = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            nabla_F[idx_nghost] += dt*(dmudx[idx_diff]*dudz[idx_diff] +
-                                mu[idx_diffusivity]*d2udxdz[idx_diff]);
-                        }
-                    }
-                }
-            }
-        }
+        addDerivativeToDivergence(
+            patch,
+            diffusive_flux_divergence,
+            var_derivative_z,
+            var_derivative_xz,
+            diffusivities_data_z,
+            diffusivities_derivative_x,
+            var_component_idx_z,
+            diffusivities_component_idx_z,
+            dt);
         
         var_data_z.clear();
         
@@ -1469,89 +927,18 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_derivative_x,
             var_derivative_component_idx_x);
         
-        /*
-         * Add the derivatives to the divergence of diffusive flux.
-         */
+        // Add the derivatives to the divergence of diffusive flux.
         
-        for (int ei = 0; ei < d_num_eqn; ei++)
-        {
-            TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_x[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_data_x[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_x[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_yx[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_derivative_y[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            double* nabla_F = diffusive_flux_divergence->getPointer(ei);
-            
-            for (int vi = 0; vi < static_cast<int>(var_data_x[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int mu_idx = diffusivities_component_idx_x[ei][vi];
-                
-                // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_x[ei][vi]->getPointer(mu_idx);
-                
-                // Get the pointer to derivatives.
-                double* dudx = var_derivative_x[ei][vi]->getPointer(0);
-                double* d2udydx = var_derivative_yx[ei][vi]->getPointer(0);
-                double* dmudy = diffusivities_derivative_y[ei][vi]->getPointer(0);
-                
-                /*
-                 * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
-                 */
-                
-                hier::IntVector num_subghosts_diffusivity =
-                    diffusivities_data_x[ei][vi]->getGhostCellWidth();
-                
-                hier::IntVector subghostcell_dims_diffusivity =
-                    diffusivities_data_x[ei][vi]->getGhostBox().numberCells();
-                
-                const int num_subghosts_0_diffusivity = num_subghosts_diffusivity[0];
-                const int num_subghosts_1_diffusivity = num_subghosts_diffusivity[1];
-                const int num_subghosts_2_diffusivity = num_subghosts_diffusivity[2];
-                const int subghostcell_dim_0_diffusivity = subghostcell_dims_diffusivity[0];
-                const int subghostcell_dim_1_diffusivity = subghostcell_dims_diffusivity[1];
-                
-                for (int k = 0; k < interior_dim_2; k++)
-                {
-                    for (int j = 0; j < interior_dim_1; j++)
-                    {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = 0; i < interior_dim_0; i++)
-                        {
-                            // Compute the linear indices.
-                            const int idx_nghost = i +
-                                j*interior_dim_0 +
-                                k*interior_dim_0*interior_dim_1;
-                            
-                            const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
-                                (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity +
-                                (k + num_subghosts_2_diffusivity)*subghostcell_dim_0_diffusivity*
-                                    subghostcell_dim_1_diffusivity;
-                            
-                            const int idx_diff = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            nabla_F[idx_nghost] += dt*(dmudy[idx_diff]*dudx[idx_diff] +
-                                mu[idx_diffusivity]*d2udydx[idx_diff]);
-                        }
-                    }
-                }
-            }
-        }
+        addDerivativeToDivergence(
+            patch,
+            diffusive_flux_divergence,
+            var_derivative_x,
+            var_derivative_yx,
+            diffusivities_data_x,
+            diffusivities_derivative_y,
+            var_component_idx_x,
+            diffusivities_component_idx_x,
+            dt);
         
         var_data_x.clear();
         
@@ -1610,89 +997,18 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_data_y,
             var_component_idx_y);
         
-        /*
-         * Add the derivatives to the divergence of diffusive flux.
-         */
+        // Add the derivatives to the divergence of diffusive flux.
         
-        for (int ei = 0; ei < d_num_eqn; ei++)
-        {
-            TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_y[ei].size()) ==
-                        static_cast<int>(var_component_idx_y[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_data_y[ei].size()) ==
-                        static_cast<int>(var_component_idx_y[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_y[ei].size()) ==
-                        static_cast<int>(var_component_idx_y[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_yy[ei].size()) ==
-                        static_cast<int>(var_component_idx_y[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_derivative_y[ei].size()) ==
-                        static_cast<int>(var_component_idx_y[ei].size()));
-            
-            double* nabla_F = diffusive_flux_divergence->getPointer(ei);
-            
-            for (int vi = 0; vi < static_cast<int>(var_data_y[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int mu_idx = diffusivities_component_idx_y[ei][vi];
-                
-                // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_y[ei][vi]->getPointer(mu_idx);
-                
-                // Get the pointer to derivatives.
-                double* dudy = var_derivative_y[ei][vi]->getPointer(0);
-                double* d2udydy = var_derivative_yy[ei][vi]->getPointer(0);
-                double* dmudy = diffusivities_derivative_y[ei][vi]->getPointer(0);
-                
-                /*
-                 * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
-                 */
-                
-                hier::IntVector num_subghosts_diffusivity =
-                    diffusivities_data_y[ei][vi]->getGhostCellWidth();
-                
-                hier::IntVector subghostcell_dims_diffusivity =
-                    diffusivities_data_y[ei][vi]->getGhostBox().numberCells();
-                
-                const int num_subghosts_0_diffusivity = num_subghosts_diffusivity[0];
-                const int num_subghosts_1_diffusivity = num_subghosts_diffusivity[1];
-                const int num_subghosts_2_diffusivity = num_subghosts_diffusivity[2];
-                const int subghostcell_dim_0_diffusivity = subghostcell_dims_diffusivity[0];
-                const int subghostcell_dim_1_diffusivity = subghostcell_dims_diffusivity[1];
-                
-                for (int k = 0; k < interior_dim_2; k++)
-                {
-                    for (int j = 0; j < interior_dim_1; j++)
-                    {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = 0; i < interior_dim_0; i++)
-                        {
-                            // Compute the linear indices.
-                            const int idx_nghost = i +
-                                j*interior_dim_0 +
-                                k*interior_dim_0*interior_dim_1;
-                            
-                            const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
-                                (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity +
-                                (k + num_subghosts_2_diffusivity)*subghostcell_dim_0_diffusivity*
-                                    subghostcell_dim_1_diffusivity;
-                            
-                            const int idx_diff = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            nabla_F[idx_nghost] += dt*(dmudy[idx_diff]*dudy[idx_diff] +
-                                mu[idx_diffusivity]*d2udydy[idx_diff]);
-                        }
-                    }
-                }
-            }
-        }
+        addDerivativeToDivergence(
+            patch,
+            diffusive_flux_divergence,
+            var_derivative_y,
+            var_derivative_yy,
+            diffusivities_data_y,
+            diffusivities_derivative_y,
+            var_component_idx_y,
+            diffusivities_component_idx_y,
+            dt);
         
         var_data_y.clear();
         
@@ -1759,89 +1075,18 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_derivative_z,
             var_derivative_component_idx_z);
         
-        /*
-         * Add the derivatives to the divergence of diffusive flux.
-         */
+        // Add the derivatives to the divergence of diffusive flux.
         
-        for (int ei = 0; ei < d_num_eqn; ei++)
-        {
-            TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_z[ei].size()) ==
-                        static_cast<int>(var_component_idx_z[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_data_z[ei].size()) ==
-                        static_cast<int>(var_component_idx_z[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_z[ei].size()) ==
-                        static_cast<int>(var_component_idx_z[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_yz[ei].size()) ==
-                        static_cast<int>(var_component_idx_z[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_derivative_y[ei].size()) ==
-                        static_cast<int>(var_component_idx_z[ei].size()));
-            
-            double* nabla_F = diffusive_flux_divergence->getPointer(ei);
-            
-            for (int vi = 0; vi < static_cast<int>(var_data_z[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int mu_idx = diffusivities_component_idx_z[ei][vi];
-                
-                // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_z[ei][vi]->getPointer(mu_idx);
-                
-                // Get the pointer to derivatives.
-                double* dudz = var_derivative_z[ei][vi]->getPointer(0);
-                double* d2udydz = var_derivative_yz[ei][vi]->getPointer(0);
-                double* dmudy = diffusivities_derivative_y[ei][vi]->getPointer(0);
-                
-                /*
-                 * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
-                 */
-                
-                hier::IntVector num_subghosts_diffusivity =
-                    diffusivities_data_z[ei][vi]->getGhostCellWidth();
-                
-                hier::IntVector subghostcell_dims_diffusivity =
-                    diffusivities_data_z[ei][vi]->getGhostBox().numberCells();
-                
-                const int num_subghosts_0_diffusivity = num_subghosts_diffusivity[0];
-                const int num_subghosts_1_diffusivity = num_subghosts_diffusivity[1];
-                const int num_subghosts_2_diffusivity = num_subghosts_diffusivity[2];
-                const int subghostcell_dim_0_diffusivity = subghostcell_dims_diffusivity[0];
-                const int subghostcell_dim_1_diffusivity = subghostcell_dims_diffusivity[1];
-                
-                for (int k = 0; k < interior_dim_2; k++)
-                {
-                    for (int j = 0; j < interior_dim_1; j++)
-                    {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = 0; i < interior_dim_0; i++)
-                        {
-                            // Compute the linear indices.
-                            const int idx_nghost = i +
-                                j*interior_dim_0 +
-                                k*interior_dim_0*interior_dim_1;
-                            
-                            const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
-                                (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity +
-                                (k + num_subghosts_2_diffusivity)*subghostcell_dim_0_diffusivity*
-                                    subghostcell_dim_1_diffusivity;
-                            
-                            const int idx_diff = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            nabla_F[idx_nghost] += dt*(dmudy[idx_diff]*dudz[idx_diff] +
-                                mu[idx_diffusivity]*d2udydz[idx_diff]);
-                        }
-                    }
-                }
-            }
-        }
+        addDerivativeToDivergence(
+            patch,
+            diffusive_flux_divergence,
+            var_derivative_z,
+            var_derivative_yz,
+            diffusivities_data_z,
+            diffusivities_derivative_y,
+            var_component_idx_z,
+            diffusivities_component_idx_z,
+            dt);
         
         var_data_z.clear();
         
@@ -1914,89 +1159,18 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_derivative_x,
             var_derivative_component_idx_x);
         
-        /*
-         * Add the derivatives to the divergence of diffusive flux.
-         */
+        // Add the derivatives to the divergence of diffusive flux.
         
-        for (int ei = 0; ei < d_num_eqn; ei++)
-        {
-            TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_x[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_data_x[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_x[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_zx[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_derivative_z[ei].size()) ==
-                        static_cast<int>(var_component_idx_x[ei].size()));
-            
-            double* nabla_F = diffusive_flux_divergence->getPointer(ei);
-            
-            for (int vi = 0; vi < static_cast<int>(var_data_x[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int mu_idx = diffusivities_component_idx_x[ei][vi];
-                
-                // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_x[ei][vi]->getPointer(mu_idx);
-                
-                // Get the pointer to derivatives.
-                double* dudx = var_derivative_x[ei][vi]->getPointer(0);
-                double* d2udzdx = var_derivative_zx[ei][vi]->getPointer(0);
-                double* dmudz = diffusivities_derivative_z[ei][vi]->getPointer(0);
-                
-                /*
-                 * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
-                 */
-                
-                hier::IntVector num_subghosts_diffusivity =
-                    diffusivities_data_x[ei][vi]->getGhostCellWidth();
-                
-                hier::IntVector subghostcell_dims_diffusivity =
-                    diffusivities_data_x[ei][vi]->getGhostBox().numberCells();
-                
-                const int num_subghosts_0_diffusivity = num_subghosts_diffusivity[0];
-                const int num_subghosts_1_diffusivity = num_subghosts_diffusivity[1];
-                const int num_subghosts_2_diffusivity = num_subghosts_diffusivity[2];
-                const int subghostcell_dim_0_diffusivity = subghostcell_dims_diffusivity[0];
-                const int subghostcell_dim_1_diffusivity = subghostcell_dims_diffusivity[1];
-                
-                for (int k = 0; k < interior_dim_2; k++)
-                {
-                    for (int j = 0; j < interior_dim_1; j++)
-                    {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = 0; i < interior_dim_0; i++)
-                        {
-                            // Compute the linear indices.
-                            const int idx_nghost = i +
-                                j*interior_dim_0 +
-                                k*interior_dim_0*interior_dim_1;
-                            
-                            const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
-                                (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity +
-                                (k + num_subghosts_2_diffusivity)*subghostcell_dim_0_diffusivity*
-                                    subghostcell_dim_1_diffusivity;
-                            
-                            const int idx_diff = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            nabla_F[idx_nghost] += dt*(dmudz[idx_diff]*dudx[idx_diff] +
-                                mu[idx_diffusivity]*d2udzdx[idx_diff]);
-                        }
-                    }
-                }
-            }
-        }
+        addDerivativeToDivergence(
+            patch,
+            diffusive_flux_divergence,
+            var_derivative_x,
+            var_derivative_zx,
+            diffusivities_data_x,
+            diffusivities_derivative_z,
+            var_component_idx_x,
+            diffusivities_component_idx_x,
+            dt);
         
         var_data_x.clear();
         
@@ -2065,89 +1239,18 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_derivative_y,
             var_derivative_component_idx_y);
         
-        /*
-         * Add the derivatives to the divergence of diffusive flux.
-         */
+        // Add the derivatives to the divergence of diffusive flux.
         
-        for (int ei = 0; ei < d_num_eqn; ei++)
-        {
-            TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_y[ei].size()) ==
-                        static_cast<int>(var_component_idx_y[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_data_y[ei].size()) ==
-                        static_cast<int>(var_component_idx_y[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_y[ei].size()) ==
-                        static_cast<int>(var_component_idx_y[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(var_derivative_zy[ei].size()) ==
-                        static_cast<int>(var_component_idx_y[ei].size()));
-            
-            TBOX_ASSERT(static_cast<int>(diffusivities_derivative_z[ei].size()) ==
-                        static_cast<int>(var_component_idx_y[ei].size()));
-            
-            double* nabla_F = diffusive_flux_divergence->getPointer(ei);
-            
-            for (int vi = 0; vi < static_cast<int>(var_data_y[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int mu_idx = diffusivities_component_idx_y[ei][vi];
-                
-                // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_y[ei][vi]->getPointer(mu_idx);
-                
-                // Get the pointer to derivatives.
-                double* dudy = var_derivative_y[ei][vi]->getPointer(0);
-                double* d2udzdy = var_derivative_zy[ei][vi]->getPointer(0);
-                double* dmudz = diffusivities_derivative_z[ei][vi]->getPointer(0);
-                
-                /*
-                 * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
-                 */
-                
-                hier::IntVector num_subghosts_diffusivity =
-                    diffusivities_data_y[ei][vi]->getGhostCellWidth();
-                
-                hier::IntVector subghostcell_dims_diffusivity =
-                    diffusivities_data_y[ei][vi]->getGhostBox().numberCells();
-                
-                const int num_subghosts_0_diffusivity = num_subghosts_diffusivity[0];
-                const int num_subghosts_1_diffusivity = num_subghosts_diffusivity[1];
-                const int num_subghosts_2_diffusivity = num_subghosts_diffusivity[2];
-                const int subghostcell_dim_0_diffusivity = subghostcell_dims_diffusivity[0];
-                const int subghostcell_dim_1_diffusivity = subghostcell_dims_diffusivity[1];
-                
-                for (int k = 0; k < interior_dim_2; k++)
-                {
-                    for (int j = 0; j < interior_dim_1; j++)
-                    {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = 0; i < interior_dim_0; i++)
-                        {
-                            // Compute the linear indices.
-                            const int idx_nghost = i +
-                                j*interior_dim_0 +
-                                k*interior_dim_0*interior_dim_1;
-                            
-                            const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
-                                (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity +
-                                (k + num_subghosts_2_diffusivity)*subghostcell_dim_0_diffusivity*
-                                    subghostcell_dim_1_diffusivity;
-                            
-                            const int idx_diff = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            nabla_F[idx_nghost] += dt*(dmudz[idx_diff]*dudy[idx_diff] +
-                                mu[idx_diffusivity]*d2udzdy[idx_diff]);
-                        }
-                    }
-                }
-            }
-        }
+        addDerivativeToDivergence(
+            patch,
+            diffusive_flux_divergence,
+            var_derivative_y,
+            var_derivative_zy,
+            diffusivities_data_y,
+            diffusivities_derivative_z,
+            var_component_idx_y,
+            diffusivities_component_idx_y,
+            dt);
         
         var_data_y.clear();
         
@@ -2206,51 +1309,278 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_data_z,
             var_component_idx_z);
         
+        // Add the derivatives to the divergence of diffusive flux.
+        
+        addDerivativeToDivergence(
+            patch,
+            diffusive_flux_divergence,
+            var_derivative_z,
+            var_derivative_zz,
+            diffusivities_data_z,
+            diffusivities_derivative_z,
+            var_component_idx_z,
+            diffusivities_component_idx_z,
+            dt);
+        
+        var_data_z.clear();
+        
+        diffusivities_data_z.clear();
+        
+        var_component_idx_z.clear();
+        
+        diffusivities_component_idx_z.clear();
+        
+        var_derivative_z.clear();
+        diffusivities_derivative_z.clear();
+        var_derivative_zz.clear();
+        
         /*
-         * Add the derivatives to the divergence of diffusive flux.
+         * Unregister the patch and data of all registered derived cell variables in the flow model.
          */
+        
+        d_flow_model->unregisterPatch();
+    }
+}
+
+
+/*
+ * Add derivatives to divergence.
+ */
+void
+NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::addDerivativeToDivergence(
+    hier::Patch& patch,
+    boost::shared_ptr<pdat::CellData<double> > & divergence,
+    const std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& var_first_derivative,
+    const std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& var_derivative_cross_derivative,
+    const std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& diffusivities_data,
+    const std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& diffusivities_first_derivative,
+    const std::vector<std::vector<int> >& var_component_idx,
+    const std::vector<std::vector<int> >& diffusivities_component_idx,
+    const double dt)
+{
+    // Get the dimensions of box that covers the interior of patch.
+    hier::Box interior_box = patch.getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+    // Get the dimensions of box that covers interior of patch plus
+    // diffusive ghost cells.
+    hier::Box diff_ghost_box = interior_box;
+    diff_ghost_box.grow(d_num_diff_ghosts);
+    const hier::IntVector diff_ghostcell_dims = diff_ghost_box.numberCells();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        /*
+         * Get the dimensions and number of ghost cells.
+         */
+        
+        const int interior_dim_0 = interior_dims[0];
+        
+        const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_z[ei].size()) ==
-                        static_cast<int>(var_component_idx_z[ei].size()));
+            TBOX_ASSERT(static_cast<int>(diffusivities_component_idx[ei].size()) ==
+                        static_cast<int>(var_component_idx[ei].size()));
             
-            TBOX_ASSERT(static_cast<int>(diffusivities_data_z[ei].size()) ==
-                        static_cast<int>(var_component_idx_z[ei].size()));
+            TBOX_ASSERT(static_cast<int>(diffusivities_data[ei].size()) ==
+                        static_cast<int>(var_component_idx[ei].size()));
             
-            TBOX_ASSERT(static_cast<int>(var_derivative_z[ei].size()) ==
-                        static_cast<int>(var_component_idx_z[ei].size()));
+            TBOX_ASSERT(static_cast<int>(var_first_derivative[ei].size()) ==
+                        static_cast<int>(var_component_idx[ei].size()));
             
-            TBOX_ASSERT(static_cast<int>(var_derivative_zz[ei].size()) ==
-                        static_cast<int>(var_component_idx_z[ei].size()));
+            TBOX_ASSERT(static_cast<int>(var_derivative_cross_derivative[ei].size()) ==
+                        static_cast<int>(var_component_idx[ei].size()));
             
-            TBOX_ASSERT(static_cast<int>(diffusivities_derivative_z[ei].size()) ==
-                        static_cast<int>(var_component_idx_z[ei].size()));
+            TBOX_ASSERT(static_cast<int>(diffusivities_first_derivative[ei].size()) ==
+                        static_cast<int>(var_component_idx[ei].size()));
             
-            double* nabla_F = diffusive_flux_divergence->getPointer(ei);
+            double* nabla_F = divergence->getPointer(ei);
             
-            for (int vi = 0; vi < static_cast<int>(var_data_z[ei].size()); vi++)
+            for (int vi = 0; vi < static_cast<int>(var_component_idx[ei].size()); vi++)
             {
                 // Get the index of variable for derivative.
-                const int mu_idx = diffusivities_component_idx_z[ei][vi];
+                const int mu_idx = diffusivities_component_idx[ei][vi];
                 
                 // Get the pointer to diffusivity.
-                double* mu = diffusivities_data_z[ei][vi]->getPointer(mu_idx);
+                double* mu = diffusivities_data[ei][vi]->getPointer(mu_idx);
                 
                 // Get the pointer to derivatives.
-                double* dudz = var_derivative_z[ei][vi]->getPointer(0);
-                double* d2udzdz = var_derivative_zz[ei][vi]->getPointer(0);
-                double* dmudz = diffusivities_derivative_z[ei][vi]->getPointer(0);
+                double* dudx = var_first_derivative[ei][vi]->getPointer(0);
+                double* d2udxdy = var_derivative_cross_derivative[ei][vi]->getPointer(0);
+                double* dmudy = diffusivities_first_derivative[ei][vi]->getPointer(0);
                 
                 /*
                  * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
                  */
                 
                 hier::IntVector num_subghosts_diffusivity =
-                    diffusivities_data_z[ei][vi]->getGhostCellWidth();
+                    diffusivities_data[ei][vi]->getGhostCellWidth();
                 
                 hier::IntVector subghostcell_dims_diffusivity =
-                    diffusivities_data_z[ei][vi]->getGhostBox().numberCells();
+                    diffusivities_data[ei][vi]->getGhostBox().numberCells();
+                
+                const int num_subghosts_0_diffusivity = num_subghosts_diffusivity[0];
+                
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_nghost = i;
+                    
+                    const int idx_diffusivity = i + num_subghosts_0_diffusivity;
+                    
+                    const int idx_diff = i + num_diff_ghosts_0;
+                    
+                    nabla_F[idx_nghost] += dt*(dmudy[idx_diff]*dudx[idx_diff] +
+                        mu[idx_diffusivity]*d2udxdy[idx_diff]);
+                }
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        /*
+         * Get the dimensions and number of ghost cells.
+         */
+        
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        
+        const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
+        const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
+        
+        const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            TBOX_ASSERT(static_cast<int>(diffusivities_component_idx[ei].size()) ==
+                        static_cast<int>(var_component_idx[ei].size()));
+            
+            TBOX_ASSERT(static_cast<int>(diffusivities_data[ei].size()) ==
+                        static_cast<int>(var_component_idx[ei].size()));
+            
+            TBOX_ASSERT(static_cast<int>(var_first_derivative[ei].size()) ==
+                        static_cast<int>(var_component_idx[ei].size()));
+            
+            TBOX_ASSERT(static_cast<int>(var_derivative_cross_derivative[ei].size()) ==
+                        static_cast<int>(var_component_idx[ei].size()));
+            
+            TBOX_ASSERT(static_cast<int>(diffusivities_first_derivative[ei].size()) ==
+                        static_cast<int>(var_component_idx[ei].size()));
+            
+            double* nabla_F = divergence->getPointer(ei);
+            
+            for (int vi = 0; vi < static_cast<int>(var_component_idx[ei].size()); vi++)
+            {
+                // Get the index of variable for derivative.
+                const int mu_idx = diffusivities_component_idx[ei][vi];
+                
+                // Get the pointer to diffusivity.
+                double* mu = diffusivities_data[ei][vi]->getPointer(mu_idx);
+                
+                // Get the pointer to derivatives.
+                double* dudx = var_first_derivative[ei][vi]->getPointer(0);
+                double* d2udxdy = var_derivative_cross_derivative[ei][vi]->getPointer(0);
+                double* dmudy = diffusivities_first_derivative[ei][vi]->getPointer(0);
+                
+                /*
+                 * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
+                 */
+                
+                hier::IntVector num_subghosts_diffusivity =
+                    diffusivities_data[ei][vi]->getGhostCellWidth();
+                
+                hier::IntVector subghostcell_dims_diffusivity =
+                    diffusivities_data[ei][vi]->getGhostBox().numberCells();
+                
+                const int num_subghosts_0_diffusivity = num_subghosts_diffusivity[0];
+                const int num_subghosts_1_diffusivity = num_subghosts_diffusivity[1];
+                const int subghostcell_dim_0_diffusivity = subghostcell_dims_diffusivity[0];
+                
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_nghost = i + j*interior_dim_0;
+                        
+                        const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
+                            (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity;
+                        
+                        const int idx_diff = (i + num_diff_ghosts_0) +
+                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
+                        
+                        nabla_F[idx_nghost] += dt*(dmudy[idx_diff]*dudx[idx_diff] +
+                            mu[idx_diffusivity]*d2udxdy[idx_diff]);
+                    }
+                }
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        /*
+         * Get the dimensions and number of ghost cells.
+         */
+        
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        const int interior_dim_2 = interior_dims[2];
+        
+        const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
+        const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
+        const int num_diff_ghosts_2 = d_num_diff_ghosts[2];
+        
+        const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
+        const int diff_ghostcell_dim_1 = diff_ghostcell_dims[1];
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            TBOX_ASSERT(static_cast<int>(diffusivities_component_idx[ei].size()) ==
+                        static_cast<int>(var_component_idx[ei].size()));
+            
+            TBOX_ASSERT(static_cast<int>(diffusivities_data[ei].size()) ==
+                        static_cast<int>(var_component_idx[ei].size()));
+            
+            TBOX_ASSERT(static_cast<int>(var_first_derivative[ei].size()) ==
+                        static_cast<int>(var_component_idx[ei].size()));
+            
+            TBOX_ASSERT(static_cast<int>(var_derivative_cross_derivative[ei].size()) ==
+                        static_cast<int>(var_component_idx[ei].size()));
+            
+            TBOX_ASSERT(static_cast<int>(diffusivities_first_derivative[ei].size()) ==
+                        static_cast<int>(var_component_idx[ei].size()));
+            
+            double* nabla_F = divergence->getPointer(ei);
+            
+            for (int vi = 0; vi < static_cast<int>(var_component_idx[ei].size()); vi++)
+            {
+                // Get the index of variable for derivative.
+                const int mu_idx = diffusivities_component_idx[ei][vi];
+                
+                // Get the pointer to diffusivity.
+                double* mu = diffusivities_data[ei][vi]->getPointer(mu_idx);
+                
+                // Get the pointer to derivatives.
+                double* dudx = var_first_derivative[ei][vi]->getPointer(0);
+                double* d2udxdy = var_derivative_cross_derivative[ei][vi]->getPointer(0);
+                double* dmudy = diffusivities_first_derivative[ei][vi]->getPointer(0);
+                
+                /*
+                 * Get the sub-ghost cell width and ghost box dimensions of the diffusivity.
+                 */
+                
+                hier::IntVector num_subghosts_diffusivity =
+                    diffusivities_data[ei][vi]->getGhostCellWidth();
+                
+                hier::IntVector subghostcell_dims_diffusivity =
+                    diffusivities_data[ei][vi]->getGhostBox().numberCells();
                 
                 const int num_subghosts_0_diffusivity = num_subghosts_diffusivity[0];
                 const int num_subghosts_1_diffusivity = num_subghosts_diffusivity[1];
@@ -2282,31 +1612,13 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
                                 (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
                                     diff_ghostcell_dim_1;
                             
-                            nabla_F[idx_nghost] += dt*(dmudz[idx_diff]*dudz[idx_diff] +
-                                mu[idx_diffusivity]*d2udzdz[idx_diff]);
+                            nabla_F[idx_nghost] += dt*(dmudy[idx_diff]*dudx[idx_diff] +
+                                mu[idx_diffusivity]*d2udxdy[idx_diff]);
                         }
                     }
                 }
             }
         }
-        
-        var_data_z.clear();
-        
-        diffusivities_data_z.clear();
-        
-        var_component_idx_z.clear();
-        
-        diffusivities_component_idx_z.clear();
-        
-        var_derivative_z.clear();
-        diffusivities_derivative_z.clear();
-        var_derivative_zz.clear();
-        
-        /*
-         * Unregister the patch and data of all registered derived cell variables in the flow model.
-         */
-        
-        d_flow_model->unregisterPatch();
     }
 }
 
