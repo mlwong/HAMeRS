@@ -13,7 +13,8 @@ NavierStokesInitialConditions::initializeDataOnPatch(
     NULL_USE(data_time);
     
     if ((d_project_name != "3D binary mass diffusion in x-direction") &&
-        (d_project_name != "3D binary mass diffusion in y-direction"))
+        (d_project_name != "3D binary mass diffusion in y-direction") &&
+        (d_project_name != "3D binary mass diffusion in z-direction"))
     {
         TBOX_ERROR(d_object_name
             << ": "
