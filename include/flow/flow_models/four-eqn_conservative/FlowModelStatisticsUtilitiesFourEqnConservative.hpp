@@ -642,6 +642,26 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
+         * Output mean effective Atwood number inside mixing layer with assumed homogeneity in
+         * y-direction to a file.
+         */
+        void
+        outputEffectiveAtwoodNumberMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean effective Atwood number inside mixing layer with assumed homogeneity in
+         * yz-plane to a file.
+         */
+        void
+        outputEffectiveAtwoodNumberMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
          * Output mean mass diffusivity inside mixing layer in x-direction to a file.
          */
         void
