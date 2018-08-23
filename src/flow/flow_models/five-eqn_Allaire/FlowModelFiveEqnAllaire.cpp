@@ -1207,7 +1207,7 @@ FlowModelFiveEqnAllaire::getGlobalCellData(
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFiveEqnAllaire::getGlobalCellData()\n"
-                << "Cell data of 'MASS_FRACTION' is not registered/computed yet."
+                << "Cell data of 'MASS_FRACTIONS' is not registered/computed yet."
                 << std::endl);
         }
         cell_data = d_data_mass_fractions;
@@ -10375,7 +10375,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMassFractionsWithDensity(
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFiveEqnAllaire::computeGlobalCellDataMassFractionsWithDensity()\n"
-            << "Cell data of 'MASS_FRACTION' is not yet registered."
+            << "Cell data of 'MASS_FRACTIONS' is not yet registered."
             << std::endl);
     }
 }
