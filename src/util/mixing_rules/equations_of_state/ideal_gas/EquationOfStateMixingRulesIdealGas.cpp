@@ -118,6 +118,16 @@ EquationOfStateMixingRulesIdealGas::EquationOfStateMixingRulesIdealGas(
     {
         d_species_c_v.push_back(double(1)/(d_species_gamma[si] - double(1))*d_species_R[si]);
     }
+    
+    /*
+     * Compute the molecular weight of each species.
+     */
+    
+    d_species_M.reserve(d_num_species);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        d_species_M.push_back(double(8.3144598)/d_species_R[si]);
+    }
 }
 
 

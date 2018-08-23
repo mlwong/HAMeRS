@@ -893,6 +893,71 @@ class EquationOfStateMixingRules
             const int species_index = 0) const = 0;
         
         /*
+         * Get the molecular weight of a species.
+         */
+        double
+        getSpeciesMolecularWeight(
+            const int species_index = 0) const;
+        
+        /*
+         * Compute the molecular weight of mixture.
+         */
+        double
+        getMixtureMolecularWeight(
+            const std::vector<const double*>& mass_fractions) const;
+        
+        /*
+         * Compute the molecular weight of mixture.
+         */
+        void
+        computeMixtureMolecularWeight(
+            boost::shared_ptr<pdat::CellData<double> >& data_mixture_molecular_weight,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeMixtureMolecularWeight(
+                data_mixture_molecular_weight,
+                data_mass_fractions,
+                empty_box);
+        }
+        
+        /*
+         * Compute the molecular weight of mixture.
+         */
+        void
+        computeMixtureMolecularWeight(
+            boost::shared_ptr<pdat::CellData<double> >& data_mixture_molecular_weight,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the molecular weight of mixture.
+         */
+        void
+        computeMixtureMolecularWeight(
+            boost::shared_ptr<pdat::SideData<double> >& data_mixture_molecular_weight,
+            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeMixtureMolecularWeight(
+                data_mixture_molecular_weight,
+                data_mass_fractions,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the molecular weight of mixture.
+         */
+        void
+        computeMixtureMolecularWeight(
+            boost::shared_ptr<pdat::SideData<double> >& data_mixture_molecular_weight,
+            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            int side_normal,
+            const hier::Box& domain) const;
+        
+        /*
          * Helper function to compute the density of mixture given the partial densities.
          */
         double
@@ -952,6 +1017,34 @@ class EquationOfStateMixingRules
         
     protected:
         /*
+         * Compute the molecular weight of mixture given the mass fractions.
+         */
+        void
+        computeMixtureMolecularWeight(
+            double* const M,
+            const std::vector<const double*>& Y,
+            const hier::IntVector& num_ghosts_mixture_molecular_weight,
+            const hier::IntVector& num_ghosts_mass_fractions,
+            const hier::IntVector& ghostcell_dims_mixture_molecular_weight,
+            const hier::IntVector& ghostcell_dims_mass_fractions,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims) const;
+        
+        /*
+         * Compute the density of mixture given the partial densities.
+         */
+        void
+        computeMixtureDensity(
+            double* const rho,
+            const std::vector<const double*>& Z_rho,
+            const hier::IntVector& num_ghosts_mixture_density,
+            const hier::IntVector& num_ghosts_partial_densities,
+            const hier::IntVector& ghostcell_dims_mixture_density,
+            const hier::IntVector& ghostcell_dims_partial_densities,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims) const;
+        
+        /*
          * The object name is used for error/warning reporting.
          */
         const std::string d_object_name;
@@ -977,18 +1070,9 @@ class EquationOfStateMixingRules
         const boost::shared_ptr<tbox::Database> d_equation_of_state_mixing_rules_db;
         
         /*
-         * Compute the density of mixture given the partial densities.
+         * Molecular weights of different species.
          */
-        void
-        computeMixtureDensity(
-            double* const rho,
-            const std::vector<const double*>& Z_rho,
-            const hier::IntVector& num_ghosts_mixture_density,
-            const hier::IntVector& num_ghosts_partial_densities,
-            const hier::IntVector& ghostcell_dims_mixture_density,
-            const hier::IntVector& ghostcell_dims_partial_densities,
-            const hier::IntVector& domain_lo,
-            const hier::IntVector& domain_dims) const;
+        std::vector<double> d_species_M;
         
 };
 
