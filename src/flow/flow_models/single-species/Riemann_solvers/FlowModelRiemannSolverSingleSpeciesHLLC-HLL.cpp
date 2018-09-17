@@ -1290,8 +1290,8 @@ computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC_HLL2D(
      * Calulate the weights beta for hybridization.
      */
     
-    const double u_y_diff = V_y_T[1] - V_y_B[1];
-    const double v_y_diff = V_y_T[2] - V_y_B[2];
+    const double u_y_diff = V_y_T[1][idx] - V_y_B[1][idx];
+    const double v_y_diff = V_y_T[2][idx] - V_y_B[2][idx];
     const double vel_mag = sqrt(u_y_diff*u_y_diff + v_y_diff*v_y_diff);
     
     double alpha_1, alpha_2;
@@ -1441,9 +1441,9 @@ computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC_HLL3D(
      * Calulate the weights beta for hybridization.
      */
     
-    const double u_y_diff = V_y_T[1] - V_y_B[1];
-    const double v_y_diff = V_y_T[2] - V_y_B[2];
-    const double w_y_diff = V_y_T[3] - V_y_B[3];
+    const double u_y_diff = V_y_T[1][idx] - V_y_B[1][idx];
+    const double v_y_diff = V_y_T[2][idx] - V_y_B[2][idx];
+    const double w_y_diff = V_y_T[3][idx] - V_y_B[3][idx];
     const double vel_mag = sqrt(u_y_diff*u_y_diff + v_y_diff*v_y_diff + w_y_diff*w_y_diff);
     
     double alpha_1, alpha_2;
@@ -1594,9 +1594,9 @@ computeLocalConvectiveFluxInZDirectionFromPrimitiveVariablesHLLC_HLL3D(
      * Calulate the weights beta for hybridization.
      */
     
-    const double u_z_diff = V_z_F[1] - V_z_B[1];
-    const double v_z_diff = V_z_F[2] - V_z_B[2];
-    const double w_z_diff = V_z_F[3] - V_z_B[3];
+    const double u_z_diff = V_z_F[1][idx] - V_z_B[1][idx];
+    const double v_z_diff = V_z_F[2][idx] - V_z_B[2][idx];
+    const double w_z_diff = V_z_F[3][idx] - V_z_B[3][idx];
     const double vel_mag = sqrt(u_z_diff*u_z_diff + v_z_diff*v_z_diff + w_z_diff*w_z_diff);
     
     double alpha_1, alpha_2;
