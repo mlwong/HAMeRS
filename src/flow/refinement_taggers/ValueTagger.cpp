@@ -828,6 +828,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             d_flow_model->registerPatchWithDataContext(patch, data_context);
             
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+            const hier::IntVector& num_ghosts = d_flow_model->getNumberOfGhostCells();
             TBOX_ASSERT(num_ghosts >= hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative);
 #endif
             
@@ -1076,6 +1077,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             d_flow_model->registerPatchWithDataContext(patch, data_context);
             
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+            const hier::IntVector& num_ghosts = d_flow_model->getNumberOfGhostCells();
             TBOX_ASSERT(num_ghosts >= hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative);
 #endif
             
