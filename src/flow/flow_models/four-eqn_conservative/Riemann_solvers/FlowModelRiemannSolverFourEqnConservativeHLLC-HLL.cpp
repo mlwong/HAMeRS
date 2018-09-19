@@ -1593,8 +1593,8 @@ computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC_HLL2D(
      * Calulate the weights beta for hybridization.
      */
     
-    const double u_y_diff = V_y_T[num_species] - V_y_B[num_species];
-    const double v_y_diff = V_y_T[num_species + 1] - V_y_B[num_species + 1];
+    const double u_y_diff = V_y_T[num_species][idx] - V_y_B[num_species][idx];
+    const double v_y_diff = V_y_T[num_species + 1][idx] - V_y_B[num_species + 1][idx];
     const double vel_mag = sqrt(u_y_diff*u_y_diff + v_y_diff*v_y_diff);
     
     double alpha_1, alpha_2;
@@ -1786,9 +1786,9 @@ computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC_HLL3D(
      * Calulate the weights beta for hybridization.
      */
     
-    const double u_y_diff = V_y_T[num_species] - V_y_B[num_species];
-    const double v_y_diff = V_y_T[num_species + 1] - V_y_B[num_species + 1];
-    const double w_y_diff = V_y_T[num_species + 2] - V_y_B[num_species + 2];
+    const double u_y_diff = V_y_T[num_species][idx] - V_y_B[num_species][idx];
+    const double v_y_diff = V_y_T[num_species + 1][idx] - V_y_B[num_species + 1][idx];
+    const double w_y_diff = V_y_T[num_species + 2][idx] - V_y_B[num_species + 2][idx];
     const double vel_mag = sqrt(u_y_diff*u_y_diff + v_y_diff*v_y_diff + w_y_diff*w_y_diff);
     
     double alpha_1, alpha_2;
@@ -1981,9 +1981,9 @@ computeLocalConvectiveFluxInZDirectionFromPrimitiveVariablesHLLC_HLL3D(
      * Calulate the weights beta for hybridization.
      */
     
-    const double u_z_diff = V_z_F[num_species] - V_z_B[num_species];
-    const double v_z_diff = V_z_F[num_species + 1] - V_z_B[num_species + 1];
-    const double w_z_diff = V_z_F[num_species + 2] - V_z_B[num_species + 2];
+    const double u_z_diff = V_z_F[num_species][idx] - V_z_B[num_species][idx];
+    const double v_z_diff = V_z_F[num_species + 1][idx] - V_z_B[num_species + 1][idx];
+    const double w_z_diff = V_z_F[num_species + 2][idx] - V_z_B[num_species + 2][idx];
     const double vel_mag = sqrt(u_z_diff*u_z_diff + v_z_diff*v_z_diff + w_z_diff*w_z_diff);
     
     double alpha_1, alpha_2;

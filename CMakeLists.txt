@@ -61,7 +61,7 @@ endif()
 # Intel compiler suite
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
     if (CMAKE_BUILD_TYPE MATCHES "Release")
-        set(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wall -Wno-deprecated -qopenmp -qoverride-limits -xhost -qopt-report")
+        set(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wall -Wno-deprecated -qopenmp -xhost -qopt-report")
     elseif (CMAKE_BUILD_TYPE MATCHES "KNL")
         set(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wall -Wno-deprecated -qopenmp -xCORE-AVX2 -axCORE-AVX512,MIC-AVX512 -qopt-report")
     elseif (CMAKE_BUILD_TYPE MATCHES "Debug")

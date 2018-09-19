@@ -134,6 +134,16 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         std::map<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_x_computed;
         
+        std::vector<boost::shared_ptr<pdat::CellData<double> > > diffusive_flux_node(1);
+        diffusive_flux_node[0].reset(new pdat::CellData<double>(interior_box, d_num_eqn, d_num_diff_ghosts));
+        
+        std::vector<double*> F_node_x;
+        F_node_x.reserve(d_num_eqn);
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            F_node_x.push_back(diffusive_flux_node[0]->getPointer(ei));
+        }
+        
         /*
          * (1) Compute the flux in the x-direction.
          */
@@ -169,8 +179,10 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
             var_component_idx_x);
         
         /*
-         * Reconstruct the flux in x-direction.
+         * Compute diffusive flux in x-direction at nodes.
          */
+        
+        diffusive_flux_node[0]->fillAll(double(0));
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
@@ -179,8 +191,6 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
             
             TBOX_ASSERT(static_cast<int>(diffusivities_data_x[ei].size()) ==
                         static_cast<int>(diffusivities_component_idx_x[ei].size()));
-            
-            double* F_face_x = diffusive_flux->getPointer(0, ei);
             
             for (int vi = 0; vi < static_cast<int>(var_data_x[ei].size()); vi++)
             {
@@ -205,23 +215,43 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
-                for (int i = 0; i < interior_dim_0 + 1; i++)
+                for (int i = -3; i < interior_dim_0 + 3; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_face_x = i;
+                    const int idx = i + num_diff_ghosts_0;
                     const int idx_diffusivity = i + num_subghosts_0_diffusivity;
-                    const int idx_node_LLL = i - 3 + num_diff_ghosts_0;
-                    const int idx_node_LL  = i - 2 + num_diff_ghosts_0;
-                    const int idx_node_L   = i - 1 + num_diff_ghosts_0;
-                    const int idx_node_R   = i + num_diff_ghosts_0;
-                    const int idx_node_RR  = i + 1 + num_diff_ghosts_0;
-                    const int idx_node_RRR = i + 2 + num_diff_ghosts_0;
                     
-                    F_face_x[idx_face_x] += dt*mu[idx_diffusivity]*(
-                        double(37)/double(60)*(dudx[idx_node_L] + dudx[idx_node_R]) +
-                        double(-2)/double(15)*(dudx[idx_node_LL] + dudx[idx_node_RR]) +
-                        double(1)/double(60)*(dudx[idx_node_LLL] + dudx[idx_node_RRR]));
+                    F_node_x[ei][idx] += mu[idx_diffusivity]*dudx[idx];
                 }
+            }
+        }
+        
+        /*
+         * Reconstruct the flux in x-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            double* F_face_x = diffusive_flux->getPointer(0, ei);
+            
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0 + 1; i++)
+            {
+                // Compute the linear indices.
+                const int idx_face_x = i;
+                const int idx_node_LLL = i - 3 + num_diff_ghosts_0;
+                const int idx_node_LL  = i - 2 + num_diff_ghosts_0;
+                const int idx_node_L   = i - 1 + num_diff_ghosts_0;
+                const int idx_node_R   = i + num_diff_ghosts_0;
+                const int idx_node_RR  = i + 1 + num_diff_ghosts_0;
+                const int idx_node_RRR = i + 2 + num_diff_ghosts_0;
+                
+                F_face_x[idx_face_x] += dt*(
+                    double(37)/double(60)*(F_node_x[ei][idx_node_L] + F_node_x[ei][idx_node_R]) +
+                    double(-2)/double(15)*(F_node_x[ei][idx_node_LL] + F_node_x[ei][idx_node_RR]) +
+                    double(1)/double(60)*(F_node_x[ei][idx_node_LLL] + F_node_x[ei][idx_node_RRR]));
             }
         }
         
@@ -283,6 +313,20 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         std::map<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_x_computed;
         std::map<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_y_computed;
+        
+        std::vector<boost::shared_ptr<pdat::CellData<double> > > diffusive_flux_node(2);
+        diffusive_flux_node[0].reset(new pdat::CellData<double>(interior_box, d_num_eqn, d_num_diff_ghosts));
+        diffusive_flux_node[1].reset(new pdat::CellData<double>(interior_box, d_num_eqn, d_num_diff_ghosts));
+        
+        std::vector<double*> F_node_x;
+        std::vector<double*> F_node_y;
+        F_node_x.reserve(d_num_eqn);
+        F_node_y.reserve(d_num_eqn);
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            F_node_x.push_back(diffusive_flux_node[0]->getPointer(ei));
+            F_node_y.push_back(diffusive_flux_node[1]->getPointer(ei));
+        }
         
         /*
          * (1) Compute the flux in the x-direction.
@@ -346,8 +390,10 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
             var_component_idx_y);
         
         /*
-         * Reconstruct the flux in x-direction.
+         * Compute diffusive flux in x-direction at nodes.
          */
+        
+        diffusive_flux_node[0]->fillAll(double(0));
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
@@ -356,8 +402,6 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
             
             TBOX_ASSERT(static_cast<int>(diffusivities_data_x[ei].size()) ==
                         static_cast<int>(diffusivities_component_idx_x[ei].size()));
-            
-            double* F_face_x = diffusive_flux->getPointer(0, ei);
             
             for (int vi = 0; vi < static_cast<int>(var_data_x[ei].size()); vi++)
             {
@@ -389,37 +433,16 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
-                    for (int i = 0; i < interior_dim_0 + 1; i++)
+                    for (int i = -3; i < interior_dim_0 + 3; i++)
                     {
                         // Compute the linear indices.
-                        const int idx_face_x = i +
-                            j*(interior_dim_0 + 1);
+                        const int idx = (i + num_diff_ghosts_0) +
+                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
                         
                         const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
                             (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity;
                         
-                        const int idx_node_LLL = (i - 3 + num_diff_ghosts_0) +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        const int idx_node_LL = (i - 2 + num_diff_ghosts_0) +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        const int idx_node_L = (i - 1 + num_diff_ghosts_0) +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        const int idx_node_R = (i + num_diff_ghosts_0) +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        const int idx_node_RR = (i + 1 + num_diff_ghosts_0) +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        const int idx_node_RRR = (i + 2 + num_diff_ghosts_0) +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        F_face_x[idx_face_x] += dt*mu[idx_diffusivity]*(
-                            double(37)/double(60)*(dudx[idx_node_L] + dudx[idx_node_R]) +
-                            double(-2)/double(15)*(dudx[idx_node_LL] + dudx[idx_node_RR]) +
-                            double(1)/double(60)*(dudx[idx_node_LLL] + dudx[idx_node_RRR]));
+                        F_node_x[ei][idx] += mu[idx_diffusivity]*dudx[idx];
                     }
                 }
             }
@@ -460,38 +483,62 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
-                    for (int i = 0; i < interior_dim_0 + 1; i++)
+                    for (int i = -3; i < interior_dim_0 + 3; i++)
                     {
                         // Compute the linear indices.
-                        const int idx_face_x = i +
-                            j*(interior_dim_0 + 1);
+                        const int idx = (i + num_diff_ghosts_0) +
+                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
                         
                         const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
                             (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity;
                         
-                        const int idx_node_LLL = (i - 3 + num_diff_ghosts_0) +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        const int idx_node_LL  = i - 2 + num_diff_ghosts_0 +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        const int idx_node_L   = i - 1 + num_diff_ghosts_0 +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        const int idx_node_R   = i + num_diff_ghosts_0 +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        const int idx_node_RR  = i + 1 + num_diff_ghosts_0 +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        const int idx_node_RRR = i + 2 + num_diff_ghosts_0 +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        F_face_x[idx_face_x] += dt*mu[idx_diffusivity]*(
-                            double(37)/double(60)*(dudy[idx_node_L] + dudy[idx_node_R]) +
-                            double(-2)/double(15)*(dudy[idx_node_LL] + dudy[idx_node_RR]) +
-                            double(1)/double(60)*(dudy[idx_node_LLL] + dudy[idx_node_RRR]));
+                        F_node_x[ei][idx] += mu[idx_diffusivity]*dudy[idx];
                     }
+                }
+            }
+        }
+        
+        /*
+         * Reconstruct the flux in x-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            double* F_face_x = diffusive_flux->getPointer(0, ei);
+            
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0 + 1; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_face_x = i +
+                        j*(interior_dim_0 + 1);
+                    
+                    const int idx_node_LLL = (i - 3 + num_diff_ghosts_0) +
+                        (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
+                    
+                    const int idx_node_LL = (i - 2 + num_diff_ghosts_0) +
+                        (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
+                    
+                    const int idx_node_L = (i - 1 + num_diff_ghosts_0) +
+                        (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
+                    
+                    const int idx_node_R = (i + num_diff_ghosts_0) +
+                        (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
+                    
+                    const int idx_node_RR = (i + 1 + num_diff_ghosts_0) +
+                        (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
+                    
+                    const int idx_node_RRR = (i + 2 + num_diff_ghosts_0) +
+                        (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
+                    
+                    F_face_x[idx_face_x] += dt*(
+                        double(37)/double(60)*(F_node_x[ei][idx_node_L] + F_node_x[ei][idx_node_R]) +
+                        double(-2)/double(15)*(F_node_x[ei][idx_node_LL] + F_node_x[ei][idx_node_RR]) +
+                        double(1)/double(60)*(F_node_x[ei][idx_node_LLL] + F_node_x[ei][idx_node_RRR]));
                 }
             }
         }
@@ -573,8 +620,10 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
             var_component_idx_y);
         
         /*
-         * Reconstruct the flux in y-direction.
+         * Compute diffusive flux in y-direction at nodes.
          */
+        
+        diffusive_flux_node[1]->fillAll(double(0));
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
@@ -583,8 +632,6 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
             
             TBOX_ASSERT(static_cast<int>(diffusivities_data_x[ei].size()) ==
                         static_cast<int>(diffusivities_component_idx_x[ei].size()));
-            
-            double* F_face_y = diffusive_flux->getPointer(1, ei);
             
             for (int vi = 0; vi < static_cast<int>(var_data_x[ei].size()); vi++)
             {
@@ -611,7 +658,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 const int num_subghosts_1_diffusivity = num_subghosts_diffusivity[1];
                 const int subghostcell_dim_0_diffusivity = subghostcell_dims_diffusivity[0];
                 
-                for (int j = 0; j < interior_dim_1 + 1; j++)
+                for (int j = -3; j < interior_dim_1 + 3; j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
@@ -619,34 +666,13 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx_face_y = i +
-                            j*interior_dim_0;
+                        const int idx = (i + num_diff_ghosts_0) +
+                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
                         
                         const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
                             (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity;
                         
-                        const int idx_node_BBB = (i + num_diff_ghosts_0) +
-                            (j - 3 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        const int idx_node_BB = (i + num_diff_ghosts_0) +
-                            (j - 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        const int idx_node_B = (i + num_diff_ghosts_0) +
-                            (j - 1 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        const int idx_node_T = (i + num_diff_ghosts_0) +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        const int idx_node_TT = (i + num_diff_ghosts_0) +
-                            (j + 1 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        const int idx_node_TTT = (i + num_diff_ghosts_0) +
-                            (j + 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        F_face_y[idx_face_y] += dt*mu[idx_diffusivity]*(
-                            double(37)/double(60)*(dudx[idx_node_B] + dudx[idx_node_T]) +
-                            double(-2)/double(15)*(dudx[idx_node_BB] + dudx[idx_node_TT]) +
-                            double(1)/double(60)*(dudx[idx_node_BBB] + dudx[idx_node_TTT]));
+                        F_node_y[ei][idx] += mu[idx_diffusivity]*dudx[idx];
                     }
                 }
             }
@@ -682,7 +708,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 const int num_subghosts_1_diffusivity = num_subghosts_diffusivity[1];
                 const int subghostcell_dim_0_diffusivity = subghostcell_dims_diffusivity[0];
                 
-                for (int j = 0; j < interior_dim_1 + 1; j++)
+                for (int j = -3; j < interior_dim_1 + 3; j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
@@ -690,35 +716,59 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx_face_y = i +
-                            j*interior_dim_0;
+                        const int idx = (i + num_diff_ghosts_0) +
+                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
                         
                         const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
                             (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity;
                         
-                        const int idx_node_BBB = (i + num_diff_ghosts_0) +
-                            (j - 3 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        const int idx_node_BB = (i + num_diff_ghosts_0) +
-                            (j - 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        const int idx_node_B = (i + num_diff_ghosts_0) +
-                            (j - 1 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        const int idx_node_T = (i + num_diff_ghosts_0) +
-                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        const int idx_node_TT = (i + num_diff_ghosts_0) +
-                            (j + 1 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        const int idx_node_TTT = (i + num_diff_ghosts_0) +
-                            (j + 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                        
-                        F_face_y[idx_face_y] += dt*mu[idx_diffusivity]*(
-                            double(37)/double(60)*(dudy[idx_node_B] + dudy[idx_node_T]) +
-                            double(-2)/double(15)*(dudy[idx_node_BB] + dudy[idx_node_TT]) +
-                            double(1)/double(60)*(dudy[idx_node_BBB] + dudy[idx_node_TTT]));
+                        F_node_y[ei][idx] += mu[idx_diffusivity]*dudy[idx];
                     }
+                }
+            }
+        }
+        
+        /*
+         * Reconstruct the flux in y-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            double* F_face_y = diffusive_flux->getPointer(1, ei);
+            
+            for (int j = 0; j < interior_dim_1 + 1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_face_y = i +
+                        j*interior_dim_0;
+                    
+                    const int idx_node_BBB = (i + num_diff_ghosts_0) +
+                        (j - 3 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
+                    
+                    const int idx_node_BB = (i + num_diff_ghosts_0) +
+                        (j - 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
+                    
+                    const int idx_node_B = (i + num_diff_ghosts_0) +
+                        (j - 1 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
+                    
+                    const int idx_node_T = (i + num_diff_ghosts_0) +
+                        (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
+                    
+                    const int idx_node_TT = (i + num_diff_ghosts_0) +
+                        (j + 1 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
+                    
+                    const int idx_node_TTT = (i + num_diff_ghosts_0) +
+                        (j + 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
+                    
+                    F_face_y[idx_face_y] += dt*(
+                        double(37)/double(60)*(F_node_y[ei][idx_node_B] + F_node_y[ei][idx_node_T]) +
+                        double(-2)/double(15)*(F_node_y[ei][idx_node_BB] + F_node_y[ei][idx_node_TT]) +
+                        double(1)/double(60)*(F_node_y[ei][idx_node_BBB] + F_node_y[ei][idx_node_TTT]));
                 }
             }
         }
@@ -799,6 +849,24 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         std::map<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_x_computed;
         std::map<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_y_computed;
         std::map<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_z_computed;
+        
+        std::vector<boost::shared_ptr<pdat::CellData<double> > > diffusive_flux_node(3);
+        diffusive_flux_node[0].reset(new pdat::CellData<double>(interior_box, d_num_eqn, d_num_diff_ghosts));
+        diffusive_flux_node[1].reset(new pdat::CellData<double>(interior_box, d_num_eqn, d_num_diff_ghosts));
+        diffusive_flux_node[2].reset(new pdat::CellData<double>(interior_box, d_num_eqn, d_num_diff_ghosts));
+        
+        std::vector<double*> F_node_x;
+        std::vector<double*> F_node_y;
+        std::vector<double*> F_node_z;
+        F_node_x.reserve(d_num_eqn);
+        F_node_y.reserve(d_num_eqn);
+        F_node_z.reserve(d_num_eqn);
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            F_node_x.push_back(diffusive_flux_node[0]->getPointer(ei));
+            F_node_y.push_back(diffusive_flux_node[1]->getPointer(ei));
+            F_node_z.push_back(diffusive_flux_node[2]->getPointer(ei));
+        }
         
         /*
          * (1) Compute the flux in the x-direction.
@@ -889,8 +957,10 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
             var_component_idx_z);
         
         /*
-         * Reconstruct the flux in x-direction.
+         * Compute diffusive flux in x-direction at nodes.
          */
+        
+        diffusive_flux_node[0]->fillAll(double(0));
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
@@ -899,8 +969,6 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
             
             TBOX_ASSERT(static_cast<int>(diffusivities_data_x[ei].size()) ==
                         static_cast<int>(diffusivities_component_idx_x[ei].size()));
-            
-            double* F_face_x = diffusive_flux->getPointer(0, ei);
             
             for (int vi = 0; vi < static_cast<int>(var_data_x[ei].size()); vi++)
             {
@@ -936,52 +1004,20 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
-                        for (int i = 0; i < interior_dim_0 + 1; i++)
+                        for (int i = -3; i < interior_dim_0 + 3; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_face_x = i +
-                                j*(interior_dim_0 + 1) +
-                                k*(interior_dim_0 + 1)*interior_dim_1;
+                            const int idx = (i + num_diff_ghosts_0) +
+                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                    diff_ghostcell_dim_1;
                             
                             const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
                                 (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity +
                                 (k + num_subghosts_2_diffusivity)*subghostcell_dim_0_diffusivity*
                                     subghostcell_dim_1_diffusivity;
                             
-                            const int idx_node_LLL = (i - 3 + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_LL = (i - 2 + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_L = (i - 1 + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_R = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_RR = (i + 1 + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_RRR = (i + 2 + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            F_face_x[idx_face_x] += dt*mu[idx_diffusivity]*(
-                                double(37)/double(60)*(dudx[idx_node_L] + dudx[idx_node_R]) +
-                                double(-2)/double(15)*(dudx[idx_node_LL] + dudx[idx_node_RR]) +
-                                double(1)/double(60)*(dudx[idx_node_LLL] + dudx[idx_node_RRR]));
+                            F_node_x[ei][idx] += mu[idx_diffusivity]*dudx[idx];
                         }
                     }
                 }
@@ -1027,52 +1063,20 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
-                        for (int i = 0; i < interior_dim_0 + 1; i++)
+                        for (int i = -3; i < interior_dim_0 + 3; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_face_x = i +
-                                j*(interior_dim_0 + 1) +
-                                k*(interior_dim_0 + 1)*interior_dim_1;
+                            const int idx = (i + num_diff_ghosts_0) +
+                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                    diff_ghostcell_dim_1;
                             
                             const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
                                 (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity +
                                 (k + num_subghosts_2_diffusivity)*subghostcell_dim_0_diffusivity*
                                     subghostcell_dim_1_diffusivity;
                             
-                            const int idx_node_LLL = (i - 3 + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_LL = (i - 2 + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_L = (i - 1 + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_R = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_RR = (i + 1 + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_RRR = (i + 2 + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            F_face_x[idx_face_x] += dt*mu[idx_diffusivity]*(
-                                double(37)/double(60)*(dudy[idx_node_L] + dudy[idx_node_R]) +
-                                double(-2)/double(15)*(dudy[idx_node_LL] + dudy[idx_node_RR]) +
-                                double(1)/double(60)*(dudy[idx_node_LLL] + dudy[idx_node_RRR]));
+                            F_node_x[ei][idx] += mu[idx_diffusivity]*dudy[idx];
                         }
                     }
                 }
@@ -1118,53 +1122,82 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
-                        for (int i = 0; i < interior_dim_0 + 1; i++)
+                        for (int i = -3; i < interior_dim_0 + 3; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_face_x = i +
-                                j*(interior_dim_0 + 1) +
-                                k*(interior_dim_0 + 1)*interior_dim_1;
+                            const int idx = (i + num_diff_ghosts_0) +
+                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                    diff_ghostcell_dim_1;
                             
                             const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
                                 (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity +
                                 (k + num_subghosts_2_diffusivity)*subghostcell_dim_0_diffusivity*
                                     subghostcell_dim_1_diffusivity;
                             
-                            const int idx_node_LLL = (i - 3 + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_LL = (i - 2 + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_L = (i - 1 + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_R = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_RR = (i + 1 + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_RRR = (i + 2 + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            F_face_x[idx_face_x] += dt*mu[idx_diffusivity]*(
-                                double(37)/double(60)*(dudz[idx_node_L] + dudz[idx_node_R]) +
-                                double(-2)/double(15)*(dudz[idx_node_LL] + dudz[idx_node_RR]) +
-                                double(1)/double(60)*(dudz[idx_node_LLL] + dudz[idx_node_RRR]));
+                            F_node_x[ei][idx] += mu[idx_diffusivity]*dudz[idx];
                         }
+                    }
+                }
+            }
+        }
+        
+        /*
+         * Reconstruct the flux in x-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            double* F_face_x = diffusive_flux->getPointer(0, ei);
+            
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0 + 1; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face_x = i +
+                            j*(interior_dim_0 + 1) +
+                            k*(interior_dim_0 + 1)*interior_dim_1;
+                        
+                        const int idx_node_LLL = (i - 3 + num_diff_ghosts_0) +
+                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                diff_ghostcell_dim_1;
+                        
+                        const int idx_node_LL = (i - 2 + num_diff_ghosts_0) +
+                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                diff_ghostcell_dim_1;
+                        
+                        const int idx_node_L = (i - 1 + num_diff_ghosts_0) +
+                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                diff_ghostcell_dim_1;
+                        
+                        const int idx_node_R = (i + num_diff_ghosts_0) +
+                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                diff_ghostcell_dim_1;
+                        
+                        const int idx_node_RR = (i + 1 + num_diff_ghosts_0) +
+                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                diff_ghostcell_dim_1;
+                        
+                        const int idx_node_RRR = (i + 2 + num_diff_ghosts_0) +
+                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                diff_ghostcell_dim_1;
+                        
+                        F_face_x[idx_face_x] += dt*(
+                            double(37)/double(60)*(F_node_x[ei][idx_node_L] + F_node_x[ei][idx_node_R]) +
+                            double(-2)/double(15)*(F_node_x[ei][idx_node_LL] + F_node_x[ei][idx_node_RR]) +
+                            double(1)/double(60)*(F_node_x[ei][idx_node_LLL] + F_node_x[ei][idx_node_RRR]));
                     }
                 }
             }
@@ -1279,8 +1312,10 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
             var_component_idx_z);
         
         /*
-         * Reconstruct the flux in y-direction.
+         * Compute diffusive flux in y-direction at nodes.
          */
+        
+        diffusive_flux_node[1]->fillAll(double(0));
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
@@ -1289,8 +1324,6 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
             
             TBOX_ASSERT(static_cast<int>(diffusivities_data_x[ei].size()) ==
                         static_cast<int>(diffusivities_component_idx_x[ei].size()));
-            
-            double* F_face_y = diffusive_flux->getPointer(1, ei);
             
             for (int vi = 0; vi < static_cast<int>(var_data_x[ei].size()); vi++)
             {
@@ -1321,7 +1354,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 
                 for (int k = 0; k < interior_dim_2; k++)
                 {
-                    for (int j = 0; j < interior_dim_1 + 1; j++)
+                    for (int j = -3; j < interior_dim_1 + 3; j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
@@ -1329,49 +1362,17 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_face_y = i +
-                                j*interior_dim_0 +
-                                k*interior_dim_0*(interior_dim_1 + 1);
+                            const int idx = (i + num_diff_ghosts_0) +
+                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                    diff_ghostcell_dim_1;
                             
                             const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
                                 (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity +
                                 (k + num_subghosts_2_diffusivity)*subghostcell_dim_0_diffusivity*
                                     subghostcell_dim_1_diffusivity;
                             
-                            const int idx_node_BBB = (i + num_diff_ghosts_0) +
-                                (j - 3 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_BB = (i + num_diff_ghosts_0) +
-                                (j - 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_B = (i + num_diff_ghosts_0) +
-                                (j - 1 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_T = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_TT = (i + num_diff_ghosts_0) +
-                                (j + 1 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_TTT = (i + num_diff_ghosts_0) +
-                                (j + 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            F_face_y[idx_face_y] += dt*mu[idx_diffusivity]*(
-                                double(37)/double(60)*(dudx[idx_node_B] + dudx[idx_node_T]) +
-                                double(-2)/double(15)*(dudx[idx_node_BB] + dudx[idx_node_TT]) +
-                                double(1)/double(60)*(dudx[idx_node_BBB] + dudx[idx_node_TTT]));
+                            F_node_y[ei][idx] += mu[idx_diffusivity]*dudx[idx];
                         }
                     }
                 }
@@ -1412,7 +1413,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 
                 for (int k = 0; k < interior_dim_2; k++)
                 {
-                    for (int j = 0; j < interior_dim_1 + 1; j++)
+                    for (int j = -3; j < interior_dim_1 + 3; j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
@@ -1420,49 +1421,17 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_face_y = i +
-                                j*interior_dim_0 +
-                                k*interior_dim_0*(interior_dim_1 + 1);
+                            const int idx = (i + num_diff_ghosts_0) +
+                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                    diff_ghostcell_dim_1;
                             
                             const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
                                 (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity +
                                 (k + num_subghosts_2_diffusivity)*subghostcell_dim_0_diffusivity*
                                     subghostcell_dim_1_diffusivity;
                             
-                            const int idx_node_BBB = (i + num_diff_ghosts_0) +
-                                (j - 3 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_BB = (i + num_diff_ghosts_0) +
-                                (j - 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_B = (i + num_diff_ghosts_0) +
-                                (j - 1 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_T = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_TT = (i + num_diff_ghosts_0) +
-                                (j + 1 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_TTT = (i + num_diff_ghosts_0) +
-                                (j + 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            F_face_y[idx_face_y] += dt*mu[idx_diffusivity]*(
-                                double(37)/double(60)*(dudy[idx_node_B] + dudy[idx_node_T]) +
-                                double(-2)/double(15)*(dudy[idx_node_BB] + dudy[idx_node_TT]) +
-                                double(1)/double(60)*(dudy[idx_node_BBB] + dudy[idx_node_TTT]));
+                            F_node_y[ei][idx] += mu[idx_diffusivity]*dudy[idx];
                         }
                     }
                 }
@@ -1503,7 +1472,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 
                 for (int k = 0; k < interior_dim_2; k++)
                 {
-                    for (int j = 0; j < interior_dim_1 + 1; j++)
+                    for (int j = -3; j < interior_dim_1 + 3; j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
@@ -1511,50 +1480,79 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_face_y = i +
-                                j*interior_dim_0 +
-                                k*interior_dim_0*(interior_dim_1 + 1);
+                            const int idx = (i + num_diff_ghosts_0) +
+                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                    diff_ghostcell_dim_1;
                             
                             const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
                                 (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity +
                                 (k + num_subghosts_2_diffusivity)*subghostcell_dim_0_diffusivity*
                                     subghostcell_dim_1_diffusivity;
                             
-                            const int idx_node_BBB = (i + num_diff_ghosts_0) +
-                                (j - 3 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_BB = (i + num_diff_ghosts_0) +
-                                (j - 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_B = (i + num_diff_ghosts_0) +
-                                (j - 1 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_T = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_TT = (i + num_diff_ghosts_0) +
-                                (j + 1 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_TTT = (i + num_diff_ghosts_0) +
-                                (j + 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            F_face_y[idx_face_y] += dt*mu[idx_diffusivity]*(
-                                double(37)/double(60)*(dudz[idx_node_B] + dudz[idx_node_T]) +
-                                double(-2)/double(15)*(dudz[idx_node_BB] + dudz[idx_node_TT]) +
-                                double(1)/double(60)*(dudz[idx_node_BBB] + dudz[idx_node_TTT]));
+                            F_node_y[ei][idx] += mu[idx_diffusivity]*dudz[idx];
                         }
+                    }
+                }
+            }
+        }
+        
+        /*
+         * Reconstruct the flux in y-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            double* F_face_y = diffusive_flux->getPointer(1, ei);
+            
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = 0; j < interior_dim_1 + 1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face_y = i +
+                            j*interior_dim_0 +
+                            k*interior_dim_0*(interior_dim_1 + 1);
+                        
+                        const int idx_node_BBB = (i + num_diff_ghosts_0) +
+                            (j - 3 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                diff_ghostcell_dim_1;
+                        
+                        const int idx_node_BB = (i + num_diff_ghosts_0) +
+                            (j - 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                diff_ghostcell_dim_1;
+                        
+                        const int idx_node_B = (i + num_diff_ghosts_0) +
+                            (j - 1 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                diff_ghostcell_dim_1;
+                        
+                        const int idx_node_T = (i + num_diff_ghosts_0) +
+                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                diff_ghostcell_dim_1;
+                        
+                        const int idx_node_TT = (i + num_diff_ghosts_0) +
+                            (j + 1 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                diff_ghostcell_dim_1;
+                        
+                        const int idx_node_TTT = (i + num_diff_ghosts_0) +
+                            (j + 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                diff_ghostcell_dim_1;
+                        
+                        F_face_y[idx_face_y] += dt*(
+                            double(37)/double(60)*(F_node_y[ei][idx_node_B] + F_node_y[ei][idx_node_T]) +
+                            double(-2)/double(15)*(F_node_y[ei][idx_node_BB] + F_node_y[ei][idx_node_TT]) +
+                            double(1)/double(60)*(F_node_y[ei][idx_node_BBB] + F_node_y[ei][idx_node_TTT]));
                     }
                 }
             }
@@ -1669,8 +1667,10 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
             var_component_idx_z);
         
         /*
-         * Reconstruct the flux in z-direction.
+         * Compute diffusive flux in z-direction at nodes.
          */
+        
+        diffusive_flux_node[2]->fillAll(double(0));
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
@@ -1679,8 +1679,6 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
             
             TBOX_ASSERT(static_cast<int>(diffusivities_data_x[ei].size()) ==
                         static_cast<int>(diffusivities_component_idx_x[ei].size()));
-            
-            double* F_face_z = diffusive_flux->getPointer(2, ei);
             
             for (int vi = 0; vi < static_cast<int>(var_data_x[ei].size()); vi++)
             {
@@ -1709,7 +1707,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 const int subghostcell_dim_0_diffusivity = subghostcell_dims_diffusivity[0];
                 const int subghostcell_dim_1_diffusivity = subghostcell_dims_diffusivity[1];
                 
-                for (int k = 0; k < interior_dim_2 + 1; k++)
+                for (int k = -3; k < interior_dim_2 + 3; k++)
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
@@ -1719,49 +1717,17 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_face_z = i +
-                                j*interior_dim_0 +
-                                k*interior_dim_0*interior_dim_1;
+                            const int idx = (i + num_diff_ghosts_0) +
+                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                    diff_ghostcell_dim_1;
                             
                             const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
                                 (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity +
                                 (k + num_subghosts_2_diffusivity)*subghostcell_dim_0_diffusivity*
                                     subghostcell_dim_1_diffusivity;
                             
-                            const int idx_node_BBB = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k - 3 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_BB = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k - 2 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_B = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k - 1 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_F = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_FF = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + 1 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_FFF = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + 2 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            F_face_z[idx_face_z] += dt*mu[idx_diffusivity]*(
-                                double(37)/double(60)*(dudx[idx_node_B] + dudx[idx_node_F]) +
-                                double(-2)/double(15)*(dudx[idx_node_BB] + dudx[idx_node_FF]) +
-                                double(1)/double(60)*(dudx[idx_node_BBB] + dudx[idx_node_FFF]));
+                            F_node_z[ei][idx] += mu[idx_diffusivity]*dudx[idx];
                         }
                     }
                 }
@@ -1800,7 +1766,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 const int subghostcell_dim_0_diffusivity = subghostcell_dims_diffusivity[0];
                 const int subghostcell_dim_1_diffusivity = subghostcell_dims_diffusivity[1];
                 
-                for (int k = 0; k < interior_dim_2 + 1; k++)
+                for (int k = -3; k < interior_dim_2 + 3; k++)
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
@@ -1810,49 +1776,17 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_face_z = i +
-                                j*interior_dim_0 +
-                                k*interior_dim_0*interior_dim_1;
+                            const int idx = (i + num_diff_ghosts_0) +
+                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                    diff_ghostcell_dim_1;
                             
                             const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
                                 (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity +
                                 (k + num_subghosts_2_diffusivity)*subghostcell_dim_0_diffusivity*
                                     subghostcell_dim_1_diffusivity;
                             
-                            const int idx_node_BBB = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k - 3 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_BB = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k - 2 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_B = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k - 1 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_F = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_FF = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + 1 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_FFF = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + 2 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            F_face_z[idx_face_z] += dt*mu[idx_diffusivity]*(
-                                double(37)/double(60)*(dudy[idx_node_B] + dudy[idx_node_F]) +
-                                double(-2)/double(15)*(dudy[idx_node_BB] + dudy[idx_node_FF]) +
-                                double(1)/double(60)*(dudy[idx_node_BBB] + dudy[idx_node_FFF]));
+                            F_node_z[ei][idx] += mu[idx_diffusivity]*dudy[idx];
                         }
                     }
                 }
@@ -1891,7 +1825,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                 const int subghostcell_dim_0_diffusivity = subghostcell_dims_diffusivity[0];
                 const int subghostcell_dim_1_diffusivity = subghostcell_dims_diffusivity[1];
                 
-                for (int k = 0; k < interior_dim_2 + 1; k++)
+                for (int k = -3; k < interior_dim_2 + 3; k++)
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
@@ -1901,50 +1835,79 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_face_z = i +
-                                j*interior_dim_0 +
-                                k*interior_dim_0*interior_dim_1;
+                            const int idx = (i + num_diff_ghosts_0) +
+                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                    diff_ghostcell_dim_1;
                             
                             const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
                                 (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity +
                                 (k + num_subghosts_2_diffusivity)*subghostcell_dim_0_diffusivity*
                                     subghostcell_dim_1_diffusivity;
                             
-                            const int idx_node_BBB = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k - 3 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_BB = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k - 2 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_B = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k - 1 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_F = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_FF = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + 1 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            const int idx_node_FFF = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                (k + 2 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                    diff_ghostcell_dim_1;
-                            
-                            F_face_z[idx_face_z] += dt*mu[idx_diffusivity]*(
-                                double(37)/double(60)*(dudz[idx_node_B] + dudz[idx_node_F]) +
-                                double(-2)/double(15)*(dudz[idx_node_BB] + dudz[idx_node_FF]) +
-                                double(1)/double(60)*(dudz[idx_node_BBB] + dudz[idx_node_FFF]));
+                            F_node_z[ei][idx] += mu[idx_diffusivity]*dudz[idx];
                         }
+                    }
+                }
+            }
+        }
+        
+        /*
+         * Reconstruct the flux in z-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            double* F_face_z = diffusive_flux->getPointer(2, ei);
+            
+            for (int k = 0; k < interior_dim_2 + 1; k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face_z = i +
+                            j*interior_dim_0 +
+                            k*interior_dim_0*interior_dim_1;
+                        
+                        const int idx_node_BBB = (i + num_diff_ghosts_0) +
+                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                            (k - 3 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                diff_ghostcell_dim_1;
+                        
+                        const int idx_node_BB = (i + num_diff_ghosts_0) +
+                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                            (k - 2 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                diff_ghostcell_dim_1;
+                        
+                        const int idx_node_B = (i + num_diff_ghosts_0) +
+                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                            (k - 1 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                diff_ghostcell_dim_1;
+                        
+                        const int idx_node_F = (i + num_diff_ghosts_0) +
+                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                            (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                diff_ghostcell_dim_1;
+                        
+                        const int idx_node_FF = (i + num_diff_ghosts_0) +
+                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                            (k + 1 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                diff_ghostcell_dim_1;
+                        
+                        const int idx_node_FFF = (i + num_diff_ghosts_0) +
+                            (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                            (k + 2 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                diff_ghostcell_dim_1;
+                        
+                        F_face_z[idx_face_z] += dt*(
+                            double(37)/double(60)*(F_node_z[ei][idx_node_B] + F_node_z[ei][idx_node_F]) +
+                            double(-2)/double(15)*(F_node_z[ei][idx_node_BB] + F_node_z[ei][idx_node_FF]) +
+                            double(1)/double(60)*(F_node_z[ei][idx_node_BBB] + F_node_z[ei][idx_node_FFF]));
                     }
                 }
             }

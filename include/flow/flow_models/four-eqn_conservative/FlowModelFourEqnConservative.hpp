@@ -347,6 +347,12 @@ class FlowModelFourEqnConservative: public FlowModel
             const hier::Box& domain);
         
         /*
+         * Compute the global cell data of mole fractions with mass fractions in the registered patch.
+         */
+        void computeGlobalCellDataMoleFractionsWithMassFractions(
+            const hier::Box& domain);
+        
+        /*
          * Compute the global cell data of velocity with density in the registered patch.
          */
         void computeGlobalCellDataVelocityWithDensity(
@@ -415,6 +421,7 @@ class FlowModelFourEqnConservative: public FlowModel
          */
         hier::IntVector d_num_subghosts_density;
         hier::IntVector d_num_subghosts_mass_fractions;
+        hier::IntVector d_num_subghosts_mole_fractions;
         hier::IntVector d_num_subghosts_velocity;
         hier::IntVector d_num_subghosts_internal_energy;
         hier::IntVector d_num_subghosts_pressure;
@@ -434,6 +441,7 @@ class FlowModelFourEqnConservative: public FlowModel
          */
         hier::Box d_subghost_box_density;
         hier::Box d_subghost_box_mass_fractions;
+        hier::Box d_subghost_box_mole_fractions;
         hier::Box d_subghost_box_velocity;
         hier::Box d_subghost_box_internal_energy;
         hier::Box d_subghost_box_pressure;
@@ -453,6 +461,7 @@ class FlowModelFourEqnConservative: public FlowModel
          */
         hier::IntVector d_subghostcell_dims_density;
         hier::IntVector d_subghostcell_dims_mass_fractions;
+        hier::IntVector d_subghostcell_dims_mole_fractions;
         hier::IntVector d_subghostcell_dims_velocity;
         hier::IntVector d_subghostcell_dims_internal_energy;
         hier::IntVector d_subghostcell_dims_pressure;
@@ -472,6 +481,7 @@ class FlowModelFourEqnConservative: public FlowModel
          */
         boost::shared_ptr<pdat::CellData<double> > d_data_density;
         boost::shared_ptr<pdat::CellData<double> > d_data_mass_fractions;
+        boost::shared_ptr<pdat::CellData<double> > d_data_mole_fractions;
         boost::shared_ptr<pdat::CellData<double> > d_data_velocity;
         boost::shared_ptr<pdat::CellData<double> > d_data_internal_energy;
         boost::shared_ptr<pdat::CellData<double> > d_data_pressure;
