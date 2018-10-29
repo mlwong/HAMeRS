@@ -47086,8 +47086,8 @@ RMIStatisticsUtilities::outputNumberOfCells(
     
     if (d_dim == tbox::Dimension(1))
     {
-        int num_cells_local = 0;
-        int num_cells_global = 0;
+        double num_cells_local = double(0);
+        double num_cells_global = double(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -47112,7 +47112,7 @@ RMIStatisticsUtilities::outputNumberOfCells(
                 
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
-                num_cells_local += interior_dims[0];
+                num_cells_local += double(interior_dims[0]);
             }
         }
         
@@ -47124,7 +47124,7 @@ RMIStatisticsUtilities::outputNumberOfCells(
             &num_cells_local,
             &num_cells_global,
             1,
-            MPI_INT,
+            MPI_DOUBLE,
             MPI_SUM,
             0);
         
@@ -47135,13 +47135,13 @@ RMIStatisticsUtilities::outputNumberOfCells(
         if (mpi.getRank() == 0)
         {
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << double(num_cells_global);
+                  << "\t" << num_cells_global;
         }
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        int num_cells_local = 0;
-        int num_cells_global = 0;
+        double num_cells_local = double(0);
+        double num_cells_global = double(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -47166,7 +47166,7 @@ RMIStatisticsUtilities::outputNumberOfCells(
                 
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
-                num_cells_local += interior_dims[0]*interior_dims[1];
+                num_cells_local += double(interior_dims[0])*double(interior_dims[1]);
             }
         }
         
@@ -47178,7 +47178,7 @@ RMIStatisticsUtilities::outputNumberOfCells(
             &num_cells_local,
             &num_cells_global,
             1,
-            MPI_INT,
+            MPI_DOUBLE,
             MPI_SUM,
             0);
         
@@ -47189,13 +47189,13 @@ RMIStatisticsUtilities::outputNumberOfCells(
         if (mpi.getRank() == 0)
         {
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << double(num_cells_global);
+                  << "\t" << num_cells_global;
         }
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        int num_cells_local = 0;
-        int num_cells_global = 0;
+        double num_cells_local = double(0);
+        double num_cells_global = double(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -47220,7 +47220,7 @@ RMIStatisticsUtilities::outputNumberOfCells(
                 
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
-                num_cells_local += interior_dims[0]*interior_dims[1]*interior_dims[2];
+                num_cells_local += double(interior_dims[0])*double(interior_dims[1])*double(interior_dims[2]);
             }
         }
         
@@ -47232,7 +47232,7 @@ RMIStatisticsUtilities::outputNumberOfCells(
             &num_cells_local,
             &num_cells_global,
             1,
-            MPI_INT,
+            MPI_DOUBLE,
             MPI_SUM,
             0);
         
@@ -47243,7 +47243,7 @@ RMIStatisticsUtilities::outputNumberOfCells(
         if (mpi.getRank() == 0)
         {
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << double(num_cells_global);
+                  << "\t" << num_cells_global;
         }
     }
     
@@ -47287,8 +47287,8 @@ RMIStatisticsUtilities::outputWeightedNumberOfCells(
     
     if (d_dim == tbox::Dimension(1))
     {
-        int weighted_num_cells_local = 0;
-        int weighted_num_cells_global = 0;
+        double weighted_num_cells_local = double(0);
+        double weighted_num_cells_global = double(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -47329,7 +47329,7 @@ RMIStatisticsUtilities::outputWeightedNumberOfCells(
                 
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
-                weighted_num_cells_local += interior_dims[0]*ratioCurrentLevelToCoarestLevel[0];;
+                weighted_num_cells_local += double(interior_dims[0])*double(ratioCurrentLevelToCoarestLevel[0]);
             }
         }
         
@@ -47341,7 +47341,7 @@ RMIStatisticsUtilities::outputWeightedNumberOfCells(
             &weighted_num_cells_local,
             &weighted_num_cells_global,
             1,
-            MPI_INT,
+            MPI_DOUBLE,
             MPI_SUM,
             0);
         
@@ -47352,13 +47352,13 @@ RMIStatisticsUtilities::outputWeightedNumberOfCells(
         if (mpi.getRank() == 0)
         {
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << double(weighted_num_cells_global);
+                  << "\t" << weighted_num_cells_global;
         }
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        int weighted_num_cells_local = 0;
-        int weighted_num_cells_global = 0;
+        double weighted_num_cells_local = double(0);
+        double weighted_num_cells_global = double(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -47399,7 +47399,8 @@ RMIStatisticsUtilities::outputWeightedNumberOfCells(
                 
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
-                weighted_num_cells_local += interior_dims[0]*interior_dims[1]*ratioCurrentLevelToCoarestLevel[0];
+                weighted_num_cells_local += double(interior_dims[0])*double(interior_dims[1])*
+                    double(ratioCurrentLevelToCoarestLevel[0]);
             }
         }
         
@@ -47411,7 +47412,7 @@ RMIStatisticsUtilities::outputWeightedNumberOfCells(
             &weighted_num_cells_local,
             &weighted_num_cells_global,
             1,
-            MPI_INT,
+            MPI_DOUBLE,
             MPI_SUM,
             0);
         
@@ -47422,13 +47423,13 @@ RMIStatisticsUtilities::outputWeightedNumberOfCells(
         if (mpi.getRank() == 0)
         {
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << double(weighted_num_cells_global);
+                  << "\t" << weighted_num_cells_global;
         }
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        int weighted_num_cells_local = 0;
-        int weighted_num_cells_global = 0;
+        double weighted_num_cells_local = double(0);
+        double weighted_num_cells_global = double(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -47469,7 +47470,8 @@ RMIStatisticsUtilities::outputWeightedNumberOfCells(
                 
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
-                weighted_num_cells_local += interior_dims[0]*interior_dims[1]*interior_dims[2]*ratioCurrentLevelToCoarestLevel[0];
+                weighted_num_cells_local += double(interior_dims[0])*double(interior_dims[1])*double(interior_dims[2])*
+                    double(ratioCurrentLevelToCoarestLevel[0]);
             }
         }
         
@@ -47481,7 +47483,7 @@ RMIStatisticsUtilities::outputWeightedNumberOfCells(
             &weighted_num_cells_local,
             &weighted_num_cells_global,
             1,
-            MPI_INT,
+            MPI_DOUBLE,
             MPI_SUM,
             0);
         
@@ -47492,7 +47494,7 @@ RMIStatisticsUtilities::outputWeightedNumberOfCells(
         if (mpi.getRank() == 0)
         {
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << double(weighted_num_cells_global);
+                  << "\t" << weighted_num_cells_global;
         }
     }
     
