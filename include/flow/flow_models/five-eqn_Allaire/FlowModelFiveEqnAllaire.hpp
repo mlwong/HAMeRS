@@ -78,7 +78,7 @@ class FlowModelFiveEqnAllaire: public FlowModel
          * in the map is ignored.
          */
         void
-        registerDerivedCellVariable(
+        registerDerivedVariables(
             const std::unordered_map<std::string, hier::IntVector>& num_subghosts_of_data);
         
         /*
@@ -88,7 +88,7 @@ class FlowModelFiveEqnAllaire: public FlowModel
         void
         registerDerivedVariablesForCharacteristicProjectionOfConservativeVariables(
             const hier::IntVector& num_subghosts,
-            const AVERAGING::TYPE& averaging);
+            const AVERAGING::TYPE& averaging_type);
         
         /*
          * Register the required derived variables for transformation between primitive variables
@@ -97,63 +97,62 @@ class FlowModelFiveEqnAllaire: public FlowModel
         void
         registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
             const hier::IntVector& num_subghosts,
-            const AVERAGING::TYPE& averaging);
+            const AVERAGING::TYPE& averaging_type);
         
         /*
-         * Register the required variables for the computation of diffusive flux in the
-         * registered patch.
+         * Register the required variables for the computation of diffusive fluxes in the registered patch.
          */
         void
-        registerDiffusiveFlux(
+        registerDiffusiveFluxes(
             const hier::IntVector& num_subghosts);
         
         /*
-         * Unregister the registered patch. The registered data context and all global derived
-         * cell data in the patch are dumped.
+         * Unregister the registered patch. The registered data context and the cell data of all derived variables in
+         * the patch are dumped.
          */
         void unregisterPatch();
         
         /*
-         * Compute global cell data of different registered derived variables with the registered data context.
+         * Compute the cell data of different registered derived variables with the registered data context.
          */
         void
-        computeGlobalDerivedCellData(const hier::Box& domain);
+        computeDerivedCellData(const hier::Box& domain);
         
         /*
-         * Get the global cell data of one cell variable in the registered patch.
+         * Get the cell data of one cell variable in the registered patch.
          */
         boost::shared_ptr<pdat::CellData<double> >
-        getGlobalCellData(const std::string& variable_key);
+        getCellData(const std::string& variable_key);
         
         /*
-         * Get the global cell data of different cell variables in the registered patch.
+         * Get the cell data of different cell variables in the registered patch.
          */
         std::vector<boost::shared_ptr<pdat::CellData<double> > >
-        getGlobalCellData(const std::vector<std::string>& variable_keys);
+        getCellData(const std::vector<std::string>& variable_keys);
         
         /*
-         * Fill the interior global cell data of conservative variables with zeros.
+         * Fill the cell data of conservative variables in the interior box with value zero.
          */
         void
-        fillZeroGlobalCellDataConservativeVariables();
+        fillCellDataOfConservativeVariablesWithZero();
         
         /*
-         * Update the interior global cell data of conservative variables.
+         * Update the cell data of conservative variables in the interior box after time advancement.
          */
         void
-        updateGlobalCellDataConservativeVariables();
+        updateCellDataOfConservativeVariables();
         
         /*
-         * Get the global cell data of the conservative variables in the registered patch.
+         * Get the cell data of the conservative variables in the registered patch.
          */
         std::vector<boost::shared_ptr<pdat::CellData<double> > >
-        getGlobalCellDataConservativeVariables();
+        getCellDataOfConservativeVariables();
         
         /*
-         * Get the global cell data of the primitive variables in the registered patch.
+         * Get the cell data of the primitive variables in the registered patch.
          */
         std::vector<boost::shared_ptr<pdat::CellData<double> > >
-        getGlobalCellDataPrimitiveVariables();
+        getCellDataOfPrimitiveVariables();
         
         /*
          * Get the number of projection variables for transformation between conservative
@@ -170,55 +169,55 @@ class FlowModelFiveEqnAllaire: public FlowModel
         getNumberOfProjectionVariablesForPrimitiveVariables() const;
         
         /*
-         * Compute global side data of the projection variables for transformation between
-         * conservative variables and characteristic variables.
+         * Compute the side data of the projection variables for transformation between conservative variables and
+         * characteristic variables.
          */
         void
-        computeGlobalSideDataProjectionVariablesForConservativeVariables(
+        computeSideDataOfProjectionVariablesForConservativeVariables(
             std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables);
         
         /*
-         * Compute global side data of the projection variables for transformation between
-         * primitive variables and characteristic variables.
+         * Compute the side data of the projection variables for transformation between primitive variables and
+         * characteristic variables.
          */
         void
-        computeGlobalSideDataProjectionVariablesForPrimitiveVariables(
+        computeSideDataOfProjectionVariablesForPrimitiveVariables(
             std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables);
         
         /*
-         * Compute global side data of characteristic variables from conservative variables.
+         * Compute the side data of characteristic variables from conservative variables.
          */
         void
-        computeGlobalSideDataCharacteristicVariablesFromConservativeVariables(
+        computeSideDataOfCharacteristicVariablesFromConservativeVariables(
             std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
             const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
             const int& idx_offset);
         
         /*
-         * Compute global side data of characteristic variables from primitive variables.
+         * Compute the side data of characteristic variables from primitive variables.
          */
         void
-        computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables(
+        computeSideDataOfCharacteristicVariablesFromPrimitiveVariables(
             std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
             const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
             const int& idx_offset);
         
         /*
-         * Compute global side data of conservative variables from characteristic variables.
+         * Compute the side data of conservative variables from characteristic variables.
          */
         void
-        computeGlobalSideDataConservativeVariablesFromCharacteristicVariables(
+        computeSideDataOfConservativeVariablesFromCharacteristicVariables(
             std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables);
         
         /*
-         * Compute global side data of primitive variables from characteristic variables.
+         * Compute the side data of primitive variables from characteristic variables.
          */
         void
-        computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
+        computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
             std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables);
@@ -227,7 +226,7 @@ class FlowModelFiveEqnAllaire: public FlowModel
          * Check whether the given side conservative variables are within the bounds.
          */
         void
-        checkGlobalSideDataConservativeVariablesBounded(
+        checkSideDataOfConservativeVariablesBounded(
             boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables);
         
@@ -235,23 +234,23 @@ class FlowModelFiveEqnAllaire: public FlowModel
          * Check whether the given side primitive variables are within the bounds.
          */
         void
-        checkGlobalSideDataPrimitiveVariablesBounded(
+        checkSideDataOfPrimitiveVariablesBounded(
             boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables);
         
         /*
-         * Convert vector of pointers of conservative cell data to vectors of pointers of primitive cell data.
+         * Convert conservative variables to primitive variables.
          */
         void
-        convertLocalCellDataPointersConservativeVariablesToPrimitiveVariables(
+        convertConservativeVariablesToPrimitiveVariables(
             const std::vector<const double*>& conservative_variables,
             const std::vector<double*>& primitive_variables);
         
         /*
-         * Convert vector of pointers of primitive cell data to vectors of pointers of conservative cell data.
+         * Convert primitive variables to conservative variables.
          */
         void
-        convertLocalCellDataPointersPrimitiveVariablesToConservativeVariables(
+        convertPrimitiveVariablesToConservativeVariables(
             const std::vector<const double*>& primitive_variables,
             const std::vector<double*>& conservative_variables);
         
@@ -309,101 +308,101 @@ class FlowModelFiveEqnAllaire: public FlowModel
             const std::string& parent_variable_name);
         
         /*
-         * Set the ghost boxes and their dimensions of derived cell variables.
+         * Set the ghost boxes of derived cell variables.
          */
         void
-        setGhostBoxesAndDimensionsDerivedCellVariables();
+        setDerivedCellVariableGhostBoxes();
         
         /*
-         * Get the global cell data of partial densities in the registered patch.
+         * Get the cell data of partial densities in the registered patch.
          */
         boost::shared_ptr<pdat::CellData<double> >
-        getGlobalCellDataPartialDensities();
+        getCellDataOfPartialDensities();
         
         /*
-         * Get the global cell data of momentum in the registered patch.
+         * Get the cell data of momentum in the registered patch.
          */
         boost::shared_ptr<pdat::CellData<double> >
-        getGlobalCellDataMomentum();
+        getCellDataOfMomentum();
         
         /*
-         * Get the global cell data of total energy in the registered patch.
+         * Get the cell data of total energy in the registered patch.
          */
         boost::shared_ptr<pdat::CellData<double> >
-        getGlobalCellDataTotalEnergy();
+        getCellDataOfTotalEnergy();
         
         /*
-         * Get the global cell data of volume fractions in the registered patch.
+         * Get the cell data of volume fractions in the registered patch.
          */
         boost::shared_ptr<pdat::CellData<double> >
-        getGlobalCellDataVolumeFractions();
+        getCellDataOfVolumeFractions();
         
         /*
-         * Compute the global cell data of density in the registered patch.
+         * Compute the cell data of density in the registered patch.
          */
-        void computeGlobalCellDataDensity(
+        void computeCellDataOfDensity(
             const hier::Box& domain);
         
         /*
-         * Compute the global cell data of mass fractions with density in the registered patch.
+         * Compute the cell data of mass fractions with density in the registered patch.
          */
-        void computeGlobalCellDataMassFractionsWithDensity(
+        void computeCellDataOfMassFractionsWithDensity(
             const hier::Box& domain);
         
         /*
-         * Compute the global cell data of velocity with density in the registered patch.
+         * Compute the cell data of velocity with density in the registered patch.
          */
-        void computeGlobalCellDataVelocityWithDensity(
+        void computeCellDataOfVelocityWithDensity(
             const hier::Box& domain);
         
         /*
-         * Compute the global cell data of internal energy with density and velocity in the registered
+         * Compute the cell data of internal energy with density and velocity in the registered
          * patch.
          */
-        void computeGlobalCellDataInternalEnergyWithDensityAndVelocity(
+        void computeCellDataOfInternalEnergyWithDensityAndVelocity(
             const hier::Box& domain);
         
         /*
-         * Compute the global cell data of pressure with density, mass fractions and internal energy in
+         * Compute the cell data of pressure with density, mass fractions and internal energy in
          * the registered patch.
          */
-        void computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(
+        void computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(
             const hier::Box& domain);
         
         /*
-         * Compute the global cell data of sound speed with density, mass fractions and pressure in the
+         * Compute the cell data of sound speed with density, mass fractions and pressure in the
          * registered patch.
          */
-        void computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure(
+        void computeCellDataOfSoundSpeedWithDensityMassFractionsAndPressure(
             const hier::Box& domain);
         
         /*
-         * Compute the global cell data of species temperatures with pressure in the registered patch.
+         * Compute the cell data of species temperatures with pressure in the registered patch.
          */
-        void computeGlobalCellDataSpeciesTemperaturesWithPressure(
+        void computeCellDataOfSpeciesTemperaturesWithPressure(
             const hier::Box& domain);
         
         /*
-         * Compute the global cell data of convective flux with velocity and pressure in the registered
+         * Compute the cell data of convective flux with velocity and pressure in the registered
          * patch.
          */
-        void computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
+        void computeCellDataOfConvectiveFluxWithVelocityAndPressure(
             const DIRECTION::TYPE& direction,
             const hier::Box& domain);
         
         /*
-         * Compute the global cell data of maximum wave speed with velocity and sound speed in the
+         * Compute the cell data of maximum wave speed with velocity and sound speed in the
          * registered patch.
          */
-        void computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
+        void computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
             const DIRECTION::TYPE& direction,
             const hier::Box& domain);
         
         /*
-         * Compute the global cell data of maximum diffusivity with density, mass fractions, pressure
+         * Compute the cell data of maximum diffusivity with density, mass fractions, pressure
          * and temperature in the registered patch.
          */
-        void computeGlobalCellDataMaxDiffusivityWithDensityMassFractionsPressureAndTemperature(
+        void computeCellDataOfMaxDiffusivityWithDensityMassFractionsPressureAndTemperature(
             const hier::Box& domain);
         
         /*

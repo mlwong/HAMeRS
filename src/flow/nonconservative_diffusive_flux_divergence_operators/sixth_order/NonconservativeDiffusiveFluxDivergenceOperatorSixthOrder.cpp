@@ -106,9 +106,9 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         
         d_flow_model->registerPatchWithDataContext(patch, data_context);
         
-        d_flow_model->registerDiffusiveFlux(d_num_diff_ghosts);
+        d_flow_model->registerDiffusiveFluxes(d_num_diff_ghosts);
         
-        d_flow_model->computeGlobalDerivedCellData();
+        d_flow_model->computeDerivedCellData();
         
         /*
          * Delcare containers for computing flux derivatives in different directions.
@@ -218,9 +218,9 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         
         d_flow_model->registerPatchWithDataContext(patch, data_context);
         
-        d_flow_model->registerDiffusiveFlux(d_num_diff_ghosts);
+        d_flow_model->registerDiffusiveFluxes(d_num_diff_ghosts);
         
-        d_flow_model->computeGlobalDerivedCellData();
+        d_flow_model->computeDerivedCellData();
         
         /*
          * Delcare containers for computing flux derivatives in different directions.
@@ -578,9 +578,9 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         
         d_flow_model->registerPatchWithDataContext(patch, data_context);
         
-        d_flow_model->registerDiffusiveFlux(d_num_diff_ghosts);
+        d_flow_model->registerDiffusiveFluxes(d_num_diff_ghosts);
         
-        d_flow_model->computeGlobalDerivedCellData();
+        d_flow_model->computeDerivedCellData();
         
         /*
          * Delcare containers for computing flux derivatives in different directions.

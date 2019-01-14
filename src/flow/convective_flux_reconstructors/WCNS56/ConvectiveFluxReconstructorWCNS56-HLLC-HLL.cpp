@@ -148,24 +148,23 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("CONVECTIVE_FLUX_X", d_num_conv_ghosts));
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("PRIMITIVE_VARIABLES", d_num_conv_ghosts));
         
-        d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+        d_flow_model->registerDerivedVariables(num_subghosts_of_data);
         
         d_flow_model->registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
             d_num_conv_ghosts,
             AVERAGING::SIMPLE);
         
-        d_flow_model->computeGlobalDerivedCellData();
+        d_flow_model->computeDerivedCellData();
         
         /*
          * Get the pointers to the velocity and convective flux cell data inside the flow model.
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        boost::shared_ptr<pdat::CellData<double> > velocity =
-            d_flow_model->getGlobalCellData("VELOCITY");
+        boost::shared_ptr<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
         
         std::vector<boost::shared_ptr<pdat::CellData<double> > > convective_flux_node(1);
-        convective_flux_node[0] = d_flow_model->getGlobalCellData("CONVECTIVE_FLUX_X");
+        convective_flux_node[0] = d_flow_model->getCellData("CONVECTIVE_FLUX_X");
         
         hier::IntVector num_subghosts_velocity = velocity->getGhostCellWidth();
         hier::IntVector num_subghosts_convective_flux_x = convective_flux_node[0]->getGhostCellWidth();
@@ -195,10 +194,10 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          */
         
         std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
-            d_flow_model->getGlobalCellDataConservativeVariables();
+            d_flow_model->getCellDataOfConservativeVariables();
         
         std::vector<boost::shared_ptr<pdat::CellData<double> > > primitive_variables =
-            d_flow_model->getGlobalCellDataPrimitiveVariables();
+            d_flow_model->getCellDataOfPrimitiveVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
         num_subghosts_conservative_var.reserve(d_num_eqn);
@@ -321,11 +320,11 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
             new pdat::SideData<int>(interior_box, 1, hier::IntVector::getOne(d_dim)));
         
         /*
-         * Compute global side data of the projection variables for transformation between
-         * primitive variables and characteristic variables.
+         * Compute the side data of the projection variables for transformation between primitive variables and
+         * characteristic variables.
          */
         
-        d_flow_model->computeGlobalSideDataProjectionVariablesForPrimitiveVariables(
+        d_flow_model->computeSideDataOfProjectionVariablesForPrimitiveVariables(
             projection_variables);
         
         /*
@@ -334,7 +333,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int m = 0; m < 6; m++)
         {
-            d_flow_model->computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables(
+            d_flow_model->computeSideDataOfCharacteristicVariablesFromPrimitiveVariables(
                 characteristic_variables[m],
                 primitive_variables,
                 projection_variables,
@@ -354,12 +353,12 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * Transform characteristic variables back to primitive variables.
          */
         
-        d_flow_model->computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
+        d_flow_model->computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
             primitive_variables_minus,
             characteristic_variables_minus,
             projection_variables);
         
-        d_flow_model->computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
+        d_flow_model->computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
             primitive_variables_plus,
             characteristic_variables_plus,
             projection_variables);
@@ -380,11 +379,11 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * Check whether the interpolated side primitive variables are within the bounds.
          */
         
-        d_flow_model->checkGlobalSideDataPrimitiveVariablesBounded(
+        d_flow_model->checkSideDataOfPrimitiveVariablesBounded(
             bounded_flag_minus,
             primitive_variables_minus);
         
-        d_flow_model->checkGlobalSideDataPrimitiveVariablesBounded(
+        d_flow_model->checkSideDataOfPrimitiveVariablesBounded(
             bounded_flag_plus,
             primitive_variables_plus);
         
@@ -557,25 +556,24 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("CONVECTIVE_FLUX_Y", d_num_conv_ghosts));
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("PRIMITIVE_VARIABLES", d_num_conv_ghosts));
         
-        d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+        d_flow_model->registerDerivedVariables(num_subghosts_of_data);
         
         d_flow_model->registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
             d_num_conv_ghosts,
             AVERAGING::SIMPLE);
         
-        d_flow_model->computeGlobalDerivedCellData();
+        d_flow_model->computeDerivedCellData();
         
         /*
          * Get the pointers to the velocity and convective flux cell data inside the flow model.
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        boost::shared_ptr<pdat::CellData<double> > velocity =
-            d_flow_model->getGlobalCellData("VELOCITY");
+        boost::shared_ptr<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
         
         std::vector<boost::shared_ptr<pdat::CellData<double> > > convective_flux_node(2);
-        convective_flux_node[0] = d_flow_model->getGlobalCellData("CONVECTIVE_FLUX_X");
-        convective_flux_node[1] = d_flow_model->getGlobalCellData("CONVECTIVE_FLUX_Y");
+        convective_flux_node[0] = d_flow_model->getCellData("CONVECTIVE_FLUX_X");
+        convective_flux_node[1] = d_flow_model->getCellData("CONVECTIVE_FLUX_Y");
         
         hier::IntVector num_subghosts_velocity = velocity->getGhostCellWidth();
         hier::IntVector subghostcell_dims_velocity = velocity->getGhostBox().numberCells();
@@ -729,10 +727,10 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          */
         
         std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
-            d_flow_model->getGlobalCellDataConservativeVariables();
+            d_flow_model->getCellDataOfConservativeVariables();
         
         std::vector<boost::shared_ptr<pdat::CellData<double> > > primitive_variables =
-            d_flow_model->getGlobalCellDataPrimitiveVariables();
+            d_flow_model->getCellDataOfPrimitiveVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
         num_subghosts_conservative_var.reserve(d_num_eqn);
@@ -865,11 +863,11 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
             new pdat::SideData<int>(interior_box, 1, hier::IntVector::getOne(d_dim)));
         
         /*
-         * Compute global side data of the projection variables for transformation between
-         * primitive variables and characteristic variables.
+         * Compute the side data of the projection variables for transformation between primitive variables and
+         * characteristic variables.
          */
         
-        d_flow_model->computeGlobalSideDataProjectionVariablesForPrimitiveVariables(
+        d_flow_model->computeSideDataOfProjectionVariablesForPrimitiveVariables(
             projection_variables);
         
         /*
@@ -878,7 +876,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int m = 0; m < 6; m++)
         {
-            d_flow_model->computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables(
+            d_flow_model->computeSideDataOfCharacteristicVariablesFromPrimitiveVariables(
                 characteristic_variables[m],
                 primitive_variables,
                 projection_variables,
@@ -898,12 +896,12 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * Transform characteristic variables back to primitive variables.
          */
         
-        d_flow_model->computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
+        d_flow_model->computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
             primitive_variables_minus,
             characteristic_variables_minus,
             projection_variables);
         
-        d_flow_model->computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
+        d_flow_model->computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
             primitive_variables_plus,
             characteristic_variables_plus,
             projection_variables);
@@ -924,11 +922,11 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * Check whether the interpolated side primitive variables are within the bounds.
          */
         
-        d_flow_model->checkGlobalSideDataPrimitiveVariablesBounded(
+        d_flow_model->checkSideDataOfPrimitiveVariablesBounded(
             bounded_flag_minus,
             primitive_variables_minus);
         
-        d_flow_model->checkGlobalSideDataPrimitiveVariablesBounded(
+        d_flow_model->checkSideDataOfPrimitiveVariablesBounded(
             bounded_flag_plus,
             primitive_variables_plus);
         
@@ -1392,26 +1390,25 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("CONVECTIVE_FLUX_Z", d_num_conv_ghosts));
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("PRIMITIVE_VARIABLES", d_num_conv_ghosts));
         
-        d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+        d_flow_model->registerDerivedVariables(num_subghosts_of_data);
         
         d_flow_model->registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
             d_num_conv_ghosts,
             AVERAGING::SIMPLE);
         
-        d_flow_model->computeGlobalDerivedCellData();
+        d_flow_model->computeDerivedCellData();
         
         /*
          * Get the pointers to the velocity and convective flux cell data inside the flow model.
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        boost::shared_ptr<pdat::CellData<double> > velocity =
-            d_flow_model->getGlobalCellData("VELOCITY");
+        boost::shared_ptr<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
         
         std::vector<boost::shared_ptr<pdat::CellData<double> > > convective_flux_node(3);
-        convective_flux_node[0] = d_flow_model->getGlobalCellData("CONVECTIVE_FLUX_X");
-        convective_flux_node[1] = d_flow_model->getGlobalCellData("CONVECTIVE_FLUX_Y");
-        convective_flux_node[2] = d_flow_model->getGlobalCellData("CONVECTIVE_FLUX_Z");
+        convective_flux_node[0] = d_flow_model->getCellData("CONVECTIVE_FLUX_X");
+        convective_flux_node[1] = d_flow_model->getCellData("CONVECTIVE_FLUX_Y");
+        convective_flux_node[2] = d_flow_model->getCellData("CONVECTIVE_FLUX_Z");
         
         hier::IntVector num_subghosts_velocity = velocity->getGhostCellWidth();
         hier::IntVector subghostcell_dims_velocity = velocity->getGhostBox().numberCells();
@@ -1656,10 +1653,10 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          */
         
         std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
-            d_flow_model->getGlobalCellDataConservativeVariables();
+            d_flow_model->getCellDataOfConservativeVariables();
         
         std::vector<boost::shared_ptr<pdat::CellData<double> > > primitive_variables =
-            d_flow_model->getGlobalCellDataPrimitiveVariables();
+            d_flow_model->getCellDataOfPrimitiveVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
         num_subghosts_conservative_var.reserve(d_num_eqn);
@@ -1792,11 +1789,11 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
             new pdat::SideData<int>(interior_box, 1, hier::IntVector::getOne(d_dim)));
         
         /*
-         * Compute global side data of the projection variables for transformation between
-         * primitive variables and characteristic variables.
+         * Compute the side data of the projection variables for transformation between primitive variables and
+         * characteristic variables.
          */
         
-        d_flow_model->computeGlobalSideDataProjectionVariablesForPrimitiveVariables(
+        d_flow_model->computeSideDataOfProjectionVariablesForPrimitiveVariables(
             projection_variables);
         
         /*
@@ -1805,7 +1802,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int m = 0; m < 6; m++)
         {
-            d_flow_model->computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables(
+            d_flow_model->computeSideDataOfCharacteristicVariablesFromPrimitiveVariables(
                 characteristic_variables[m],
                 primitive_variables,
                 projection_variables,
@@ -1825,12 +1822,12 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * Transform characteristic variables back to primitive variables.
          */
         
-        d_flow_model->computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
+        d_flow_model->computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
             primitive_variables_minus,
             characteristic_variables_minus,
             projection_variables);
         
-        d_flow_model->computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
+        d_flow_model->computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
             primitive_variables_plus,
             characteristic_variables_plus,
             projection_variables);
@@ -1851,11 +1848,11 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * Check whether the interpolated side primitive variables are within the bounds.
          */
         
-        d_flow_model->checkGlobalSideDataPrimitiveVariablesBounded(
+        d_flow_model->checkSideDataOfPrimitiveVariablesBounded(
             bounded_flag_minus,
             primitive_variables_minus);
         
-        d_flow_model->checkGlobalSideDataPrimitiveVariablesBounded(
+        d_flow_model->checkSideDataOfPrimitiveVariablesBounded(
             bounded_flag_plus,
             primitive_variables_plus);
         

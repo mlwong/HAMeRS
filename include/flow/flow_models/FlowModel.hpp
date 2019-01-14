@@ -49,7 +49,7 @@ class FlowModelRiemannSolver;
 class FlowModelStatisticsUtilities;
 
 /*
- * The class should at least be able to register, compute and get the following cell data of the single-species/mixture:
+ * The class should at least be able to provide the following cell data of the single-species/mixture:
  * DENSITY, MOMENTUM, TOTAL_ENERGY, PRESSURE, VELOCITY, SOUND_SPEED, PRIMITIVE_VARIABLES, CONVECTIVE_FLUX_X,
  * CONVECTIVE_FLUX_Y, CONVECTIVE_FLUX_Z, MAX_WAVE_SPEED_X, MAX_WAVE_SPEED_Y, MAX_WAVE_SPEED_Z.
  */
@@ -77,8 +77,8 @@ class FlowModel:
                 d_ghost_box(hier::Box::getEmptyBox(dim)),
                 d_interior_dims(hier::IntVector::getZero(d_dim)),
                 d_ghostcell_dims(hier::IntVector::getZero(d_dim)),
-                d_proj_var_conservative_averaging(AVERAGING::SIMPLE),
-                d_proj_var_primitive_averaging(AVERAGING::SIMPLE),
+                d_proj_var_conservative_averaging_type(AVERAGING::SIMPLE),
+                d_proj_var_primitive_averaging_type(AVERAGING::SIMPLE),
                 d_global_derived_cell_data_computed(false)
         {
             NULL_USE(flow_model_db);
@@ -226,7 +226,7 @@ class FlowModel:
          * in the map is ignored.
          */
         virtual void
-        registerDerivedCellVariable(
+        registerDerivedVariables(
             const std::unordered_map<std::string, hier::IntVector>& num_subghosts_of_data) = 0;
         
         /*
@@ -236,7 +236,7 @@ class FlowModel:
         virtual void
         registerDerivedVariablesForCharacteristicProjectionOfConservativeVariables(
             const hier::IntVector& num_subghosts,
-            const AVERAGING::TYPE& averaging) = 0;
+            const AVERAGING::TYPE& averaging_type) = 0;
         
         /*
          * Register the required derived variables for transformation between primitive variables
@@ -245,73 +245,72 @@ class FlowModel:
         virtual void
         registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
             const hier::IntVector& num_subghosts,
-            const AVERAGING::TYPE& averaging) = 0;
+            const AVERAGING::TYPE& averaging_type) = 0;
         
         /*
-         * Register the required variables for the computation of diffusive flux in the
-         * registered patch.
+         * Register the required variables for the computation of diffusive fluxes in the registered patch.
          */
         virtual void
-        registerDiffusiveFlux(
+        registerDiffusiveFluxes(
             const hier::IntVector& num_subghosts);
         
         /*
-         * Unregister the registered patch. The registered data context and all global derived
-         * cell data in the patch are dumped.
+         * Unregister the registered patch. The registered data context and the cell data of all derived variables in
+         * the patch are dumped.
          */
         virtual void unregisterPatch() = 0;
         
         /*
-         * Compute global cell data of different registered derived variables with the registered data context.
+         * Compute the cell data of different registered derived variables with the registered data context.
          */
         void
-        computeGlobalDerivedCellData()
+        computeDerivedCellData()
         {
             const hier::Box empty_box(d_dim);
-            computeGlobalDerivedCellData(empty_box);
+            computeDerivedCellData(empty_box);
         }
         
         /*
-         * Compute global cell data of different registered derived variables with the registered data context.
+         * Compute the cell data of different registered derived variables with the registered data context.
          */
         virtual void
-        computeGlobalDerivedCellData(const hier::Box& domain) = 0;
+        computeDerivedCellData(const hier::Box& domain) = 0;
         
         /*
-         * Get the global cell data of one cell variable in the registered patch.
+         * Get the cell data of one cell variable in the registered patch.
          */
         virtual boost::shared_ptr<pdat::CellData<double> >
-        getGlobalCellData(const std::string& variable_key) = 0;
+        getCellData(const std::string& variable_key) = 0;
         
         /*
-         * Get the global cell data of different cell variables in the registered patch.
+         * Get the cell data of different cell variables in the registered patch.
          */
         virtual std::vector<boost::shared_ptr<pdat::CellData<double> > >
-        getGlobalCellData(const std::vector<std::string>& variable_keys) = 0;
+        getCellData(const std::vector<std::string>& variable_keys) = 0;
         
         /*
-         * Fill the interior global cell data of conservative variables with zeros.
+         * Fill the cell data of conservative variables in the interior box with value zero.
          */
         virtual void
-        fillZeroGlobalCellDataConservativeVariables() = 0;
+        fillCellDataOfConservativeVariablesWithZero() = 0;
         
         /*
-         * Update the interior global cell data of conservative variables after time advancement.
+         * Update the cell data of conservative variables in the interior box after time advancement.
          */
         virtual void
-        updateGlobalCellDataConservativeVariables() = 0;
+        updateCellDataOfConservativeVariables() = 0;
         
         /*
-         * Get the global cell data of the conservative variables in the registered patch.
+         * Get the cell data of the conservative variables in the registered patch.
          */
         virtual std::vector<boost::shared_ptr<pdat::CellData<double> > >
-        getGlobalCellDataConservativeVariables() = 0;
+        getCellDataOfConservativeVariables() = 0;
         
         /*
-         * Get the global cell data of the primitive variables in the registered patch.
+         * Get the cell data of the primitive variables in the registered patch.
          */
         virtual std::vector<boost::shared_ptr<pdat::CellData<double> > >
-        getGlobalCellDataPrimitiveVariables() = 0;
+        getCellDataOfPrimitiveVariables() = 0;
         
         /*
          * Get the number of projection variables for transformation between conservative
@@ -328,55 +327,55 @@ class FlowModel:
         getNumberOfProjectionVariablesForPrimitiveVariables() const = 0;
         
         /*
-         * Compute global side data of the projection variables for transformation between
-         * conservative variables and characteristic variables.
+         * Compute the side data of the projection variables for transformation between conservative variables and
+         * characteristic variables.
          */
         virtual void
-        computeGlobalSideDataProjectionVariablesForConservativeVariables(
+        computeSideDataOfProjectionVariablesForConservativeVariables(
             std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
         
         /*
-         * Compute global side data of the projection variables for transformation between
-         * primitive variables and characteristic variables.
+         * Compute the side data of the projection variables for transformation between primitive variables and
+         * characteristic variables.
          */
         virtual void
-        computeGlobalSideDataProjectionVariablesForPrimitiveVariables(
+        computeSideDataOfProjectionVariablesForPrimitiveVariables(
             std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
         
         /*
-         * Compute global side data of characteristic variables from conservative variables.
+         * Compute the side data of characteristic variables from conservative variables.
          */
         virtual void
-        computeGlobalSideDataCharacteristicVariablesFromConservativeVariables(
+        computeSideDataOfCharacteristicVariablesFromConservativeVariables(
             std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
             const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
             const int& idx_offset) = 0;
         
         /*
-         * Compute global side data of characteristic variables from primitive variables.
+         * Compute the side data of characteristic variables from primitive variables.
          */
         virtual void
-        computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables(
+        computeSideDataOfCharacteristicVariablesFromPrimitiveVariables(
             std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
             const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
             const int& idx_offset) = 0;
         
         /*
-         * Compute global side data of conservative variables from characteristic variables.
+         * Compute the side data of conservative variables from characteristic variables.
          */
         virtual void
-        computeGlobalSideDataConservativeVariablesFromCharacteristicVariables(
+        computeSideDataOfConservativeVariablesFromCharacteristicVariables(
             std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
         
         /*
-         * Compute global side data of primitive variables from characteristic variables.
+         * Compute the side data of primitive variables from characteristic variables.
          */
         virtual void
-        computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
+        computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
             std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
@@ -385,7 +384,7 @@ class FlowModel:
          * Check whether the given side conservative variables are within the bounds.
          */
         virtual void
-        checkGlobalSideDataConservativeVariablesBounded(
+        checkSideDataOfConservativeVariablesBounded(
             boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables) = 0;
         
@@ -393,23 +392,23 @@ class FlowModel:
          * Check whether the given side primitive variables are within the bounds.
          */
         virtual void
-        checkGlobalSideDataPrimitiveVariablesBounded(
+        checkSideDataOfPrimitiveVariablesBounded(
             boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables) = 0;
         
         /*
-         * Convert vector of pointers of conservative cell data to vectors of pointers of primitive cell data.
+         * Convert conservative variables to primitive variables.
          */
         virtual void
-        convertLocalCellDataPointersConservativeVariablesToPrimitiveVariables(
+        convertConservativeVariablesToPrimitiveVariables(
             const std::vector<const double*>& conservative_variables,
             const std::vector<double*>& primitive_variables) = 0;
         
         /*
-         * Convert vector of pointers of primitive cell data to vectors of pointers of conservative cell data.
+         * Convert primitive variables to conservative variables.
          */
         virtual void
-        convertLocalCellDataPointersPrimitiveVariablesToConservativeVariables(
+        convertPrimitiveVariablesToConservativeVariables(
             const std::vector<const double*>& primitive_variables,
             const std::vector<double*>& conservative_variables) = 0;
         
@@ -585,8 +584,8 @@ class FlowModel:
         /*
          * Settings for projection variables.
          */
-        AVERAGING::TYPE d_proj_var_conservative_averaging;
-        AVERAGING::TYPE d_proj_var_primitive_averaging;
+        AVERAGING::TYPE d_proj_var_conservative_averaging_type;
+        AVERAGING::TYPE d_proj_var_primitive_averaging_type;
         
         /*
          * Whether all or part of global derived cell data is computed.

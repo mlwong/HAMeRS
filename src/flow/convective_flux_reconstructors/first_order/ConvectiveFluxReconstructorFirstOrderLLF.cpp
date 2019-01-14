@@ -146,9 +146,9 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("MAX_WAVE_SPEED_X", d_num_conv_ghosts));
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("CONVECTIVE_FLUX_X", d_num_conv_ghosts));
         
-        d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+        d_flow_model->registerDerivedVariables(num_subghosts_of_data);
         
-        d_flow_model->computeGlobalDerivedCellData();
+        d_flow_model->computeDerivedCellData();
         
         /*
          * Get the pointer to the cell data inside the flow model.
@@ -161,16 +161,15 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
         
         if (has_advection_eqn)
         {
-            density = d_flow_model->getGlobalCellData("DENSITY");
-            pressure = d_flow_model->getGlobalCellData("PRESSURE");
-            velocity = d_flow_model->getGlobalCellData("VELOCITY");
+            density = d_flow_model->getCellData("DENSITY");
+            pressure = d_flow_model->getCellData("PRESSURE");
+            velocity = d_flow_model->getCellData("VELOCITY");
         }
         
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x =
-            d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_X");
+        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
         
         std::vector<boost::shared_ptr<pdat::CellData<double> > > convective_flux_node(1);
-        convective_flux_node[0] = d_flow_model->getGlobalCellData("CONVECTIVE_FLUX_X");
+        convective_flux_node[0] = d_flow_model->getCellData("CONVECTIVE_FLUX_X");
         
         hier::IntVector num_subghosts_density(d_dim);
         hier::IntVector num_subghosts_pressure(d_dim);
@@ -224,7 +223,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
          */
         
         std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
-            d_flow_model->getGlobalCellDataConservativeVariables();
+            d_flow_model->getCellDataOfConservativeVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
         num_subghosts_conservative_var.reserve(d_num_eqn);
@@ -356,9 +355,9 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("CONVECTIVE_FLUX_X", d_num_conv_ghosts));
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("CONVECTIVE_FLUX_Y", d_num_conv_ghosts));
         
-        d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+        d_flow_model->registerDerivedVariables(num_subghosts_of_data);
         
-        d_flow_model->computeGlobalDerivedCellData();
+        d_flow_model->computeDerivedCellData();
         
         /*
          * Get the pointer to the cell data inside the flow model.
@@ -371,20 +370,17 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
         
         if (has_advection_eqn)
         {
-            density = d_flow_model->getGlobalCellData("DENSITY");
-            pressure = d_flow_model->getGlobalCellData("PRESSURE");
-            velocity = d_flow_model->getGlobalCellData("VELOCITY");
+            density = d_flow_model->getCellData("DENSITY");
+            pressure = d_flow_model->getCellData("PRESSURE");
+            velocity = d_flow_model->getCellData("VELOCITY");
         }
         
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x =
-            d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_X");
-        
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_y =
-            d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_Y");
+        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
+        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_y = d_flow_model->getCellData("MAX_WAVE_SPEED_Y");
         
         std::vector<boost::shared_ptr<pdat::CellData<double> > > convective_flux_node(2);
-        convective_flux_node[0] = d_flow_model->getGlobalCellData("CONVECTIVE_FLUX_X");
-        convective_flux_node[1] = d_flow_model->getGlobalCellData("CONVECTIVE_FLUX_Y");
+        convective_flux_node[0] = d_flow_model->getCellData("CONVECTIVE_FLUX_X");
+        convective_flux_node[1] = d_flow_model->getCellData("CONVECTIVE_FLUX_Y");
         
         hier::IntVector num_subghosts_density(d_dim);
         hier::IntVector num_subghosts_pressure(d_dim);
@@ -450,7 +446,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
          */
         
         std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
-            d_flow_model->getGlobalCellDataConservativeVariables();
+            d_flow_model->getCellDataOfConservativeVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
         num_subghosts_conservative_var.reserve(d_num_eqn);
@@ -713,9 +709,9 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("CONVECTIVE_FLUX_Y", d_num_conv_ghosts));
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("CONVECTIVE_FLUX_Z", d_num_conv_ghosts));
         
-        d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+        d_flow_model->registerDerivedVariables(num_subghosts_of_data);
         
-        d_flow_model->computeGlobalDerivedCellData();
+        d_flow_model->computeDerivedCellData();
         
         /*
          * Get the pointer to the cell data inside the flow model.
@@ -728,24 +724,19 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
         
         if (has_advection_eqn)
         {
-            density = d_flow_model->getGlobalCellData("DENSITY");
-            pressure = d_flow_model->getGlobalCellData("PRESSURE");
-            velocity = d_flow_model->getGlobalCellData("VELOCITY");
+            density = d_flow_model->getCellData("DENSITY");
+            pressure = d_flow_model->getCellData("PRESSURE");
+            velocity = d_flow_model->getCellData("VELOCITY");
         }
         
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x =
-            d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_X");
-        
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_y =
-            d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_Y");
-        
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_z =
-            d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_Z");
+        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
+        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_y = d_flow_model->getCellData("MAX_WAVE_SPEED_Y");
+        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_z = d_flow_model->getCellData("MAX_WAVE_SPEED_Z");
         
         std::vector<boost::shared_ptr<pdat::CellData<double> > > convective_flux_node(3);
-        convective_flux_node[0] = d_flow_model->getGlobalCellData("CONVECTIVE_FLUX_X");
-        convective_flux_node[1] = d_flow_model->getGlobalCellData("CONVECTIVE_FLUX_Y");
-        convective_flux_node[2] = d_flow_model->getGlobalCellData("CONVECTIVE_FLUX_Z");
+        convective_flux_node[0] = d_flow_model->getCellData("CONVECTIVE_FLUX_X");
+        convective_flux_node[1] = d_flow_model->getCellData("CONVECTIVE_FLUX_Y");
+        convective_flux_node[2] = d_flow_model->getCellData("CONVECTIVE_FLUX_Z");
         
         hier::IntVector num_subghosts_density(d_dim);
         hier::IntVector num_subghosts_pressure(d_dim);
@@ -823,7 +814,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
          */
         
         std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
-            d_flow_model->getGlobalCellDataConservativeVariables();
+            d_flow_model->getCellDataOfConservativeVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
         num_subghosts_conservative_var.reserve(d_num_eqn);

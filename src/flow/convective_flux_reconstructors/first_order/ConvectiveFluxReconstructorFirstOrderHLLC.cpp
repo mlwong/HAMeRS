@@ -151,7 +151,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
          */
         
         std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
-            d_flow_model->getGlobalCellDataConservativeVariables();
+            d_flow_model->getCellDataOfConservativeVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
         num_subghosts_conservative_var.reserve(d_num_eqn);
@@ -330,7 +330,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
          */
         
         std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
-            d_flow_model->getGlobalCellDataConservativeVariables();
+            d_flow_model->getCellDataOfConservativeVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
         num_subghosts_conservative_var.reserve(d_num_eqn);
@@ -618,7 +618,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
          */
         
         std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
-            d_flow_model->getGlobalCellDataConservativeVariables();
+            d_flow_model->getCellDataOfConservativeVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
         num_subghosts_conservative_var.reserve(d_num_eqn);

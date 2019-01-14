@@ -1569,13 +1569,12 @@ GradientTagger::computeGradientSensorValuesOnPatch(
                     num_subghosts_of_data.insert(
                         std::pair<std::string, hier::IntVector>("DENSITY", d_num_gradient_ghosts));
                     
-                    d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+                    d_flow_model->registerDerivedVariables(num_subghosts_of_data);
                     
-                    d_flow_model->computeGlobalDerivedCellData();
+                    d_flow_model->computeDerivedCellData();
                     
                     // Get the pointer to density data inside the flow model.
-                    boost::shared_ptr<pdat::CellData<double> > data_density =
-                        d_flow_model->getGlobalCellData("DENSITY");
+                    boost::shared_ptr<pdat::CellData<double> > data_density = d_flow_model->getCellData("DENSITY");
                     
                     // Get the cell data of the difference.
                     boost::shared_ptr<pdat::CellData<double> > difference(
@@ -1626,13 +1625,13 @@ GradientTagger::computeGradientSensorValuesOnPatch(
                     num_subghosts_of_data.insert(
                         std::pair<std::string, hier::IntVector>("TOTAL_ENERGY", d_num_gradient_ghosts));
                     
-                    d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+                    d_flow_model->registerDerivedVariables(num_subghosts_of_data);
                     
-                    d_flow_model->computeGlobalDerivedCellData();
+                    d_flow_model->computeDerivedCellData();
                     
                     // Get the pointer to total energy data inside the flow model.
                     boost::shared_ptr<pdat::CellData<double> > data_total_energy =
-                        d_flow_model->getGlobalCellData("TOTAL_ENERGY");
+                        d_flow_model->getCellData("TOTAL_ENERGY");
                     
                     // Get the cell data of the difference.
                     boost::shared_ptr<pdat::CellData<double> > difference(
@@ -1685,13 +1684,12 @@ GradientTagger::computeGradientSensorValuesOnPatch(
                     num_subghosts_of_data.insert(
                         std::pair<std::string, hier::IntVector>("PRESSURE", d_num_gradient_ghosts));
                     
-                    d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+                    d_flow_model->registerDerivedVariables(num_subghosts_of_data);
                     
-                    d_flow_model->computeGlobalDerivedCellData();
+                    d_flow_model->computeDerivedCellData();
                     
                     // Get the pointer to pressure data inside the flow model.
-                    boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                        d_flow_model->getGlobalCellData("PRESSURE");
+                    boost::shared_ptr<pdat::CellData<double> > data_pressure = d_flow_model->getCellData("PRESSURE");
                     
                     // Get the cell data of the difference.
                     boost::shared_ptr<pdat::CellData<double> > difference(
@@ -1764,13 +1762,12 @@ GradientTagger::computeGradientSensorValuesOnPatch(
                     num_subghosts_of_data.insert(
                         std::pair<std::string, hier::IntVector>("DENSITY", d_num_gradient_ghosts));
                     
-                    d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+                    d_flow_model->registerDerivedVariables(num_subghosts_of_data);
                     
-                    d_flow_model->computeGlobalDerivedCellData();
+                    d_flow_model->computeDerivedCellData();
                     
                     // Get the pointer to density data inside the flow model.
-                    boost::shared_ptr<pdat::CellData<double> > data_density =
-                        d_flow_model->getGlobalCellData("DENSITY");
+                    boost::shared_ptr<pdat::CellData<double> > data_density = d_flow_model->getCellData("DENSITY");
                     
                     // Get the cell data of the difference.
                     boost::shared_ptr<pdat::CellData<double> > difference(
@@ -1823,13 +1820,13 @@ GradientTagger::computeGradientSensorValuesOnPatch(
                     num_subghosts_of_data.insert(
                         std::pair<std::string, hier::IntVector>("TOTAL_ENERGY", d_num_gradient_ghosts));
                     
-                    d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+                    d_flow_model->registerDerivedVariables(num_subghosts_of_data);
                     
-                    d_flow_model->computeGlobalDerivedCellData();
+                    d_flow_model->computeDerivedCellData();
                     
                     // Get the pointer to total energy data inside the flow model.
                     boost::shared_ptr<pdat::CellData<double> > data_total_energy =
-                        d_flow_model->getGlobalCellData("TOTAL_ENERGY");
+                        d_flow_model->getCellData("TOTAL_ENERGY");
                     
                     // Get the cell data of the difference.
                     boost::shared_ptr<pdat::CellData<double> > difference(
@@ -1882,13 +1879,12 @@ GradientTagger::computeGradientSensorValuesOnPatch(
                     num_subghosts_of_data.insert(
                         std::pair<std::string, hier::IntVector>("PRESSURE", d_num_gradient_ghosts));
                     
-                    d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+                    d_flow_model->registerDerivedVariables(num_subghosts_of_data);
                     
-                    d_flow_model->computeGlobalDerivedCellData();
+                    d_flow_model->computeDerivedCellData();
                     
                     // Get the pointer to pressure data inside the flow model.
-                    boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                        d_flow_model->getGlobalCellData("PRESSURE");
+                    boost::shared_ptr<pdat::CellData<double> > data_pressure = d_flow_model->getCellData("PRESSURE");
                     
                     // Get the cell data of the difference.
                     boost::shared_ptr<pdat::CellData<double> > difference(
@@ -2409,16 +2405,15 @@ GradientTagger::tagCellsOnPatch(
                     num_subghosts_of_data.insert(
                         std::pair<std::string, hier::IntVector>("DENSITY", d_num_gradient_ghosts));
                     
-                    d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+                    d_flow_model->registerDerivedVariables(num_subghosts_of_data);
                     
-                    d_flow_model->computeGlobalDerivedCellData();
+                    d_flow_model->computeDerivedCellData();
                     
                     /*
                      * Get the pointer to density data inside the flow model.
                      */
                     
-                    boost::shared_ptr<pdat::CellData<double> > data_density =
-                        d_flow_model->getGlobalCellData("DENSITY");
+                    boost::shared_ptr<pdat::CellData<double> > data_density = d_flow_model->getCellData("DENSITY");
                     
                     // Get the cell data of the density gradient.
                     boost::shared_ptr<pdat::CellData<double> > gradient(
@@ -2460,16 +2455,16 @@ GradientTagger::tagCellsOnPatch(
                     num_subghosts_of_data.insert(
                         std::pair<std::string, hier::IntVector>("TOTAL_ENERGY", d_num_gradient_ghosts));
                     
-                    d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+                    d_flow_model->registerDerivedVariables(num_subghosts_of_data);
                     
-                    d_flow_model->computeGlobalDerivedCellData();
+                    d_flow_model->computeDerivedCellData();
                     
                     /*
                      * Get the pointer to total energy data inside the flow model.
                      */
                     
                     boost::shared_ptr<pdat::CellData<double> > data_total_energy =
-                        d_flow_model->getGlobalCellData("TOTAL_ENERGY");
+                        d_flow_model->getCellData("TOTAL_ENERGY");
                     
                     // Get the cell data of the total energy gradient.
                     boost::shared_ptr<pdat::CellData<double> > gradient(
@@ -2511,16 +2506,15 @@ GradientTagger::tagCellsOnPatch(
                     num_subghosts_of_data.insert(
                         std::pair<std::string, hier::IntVector>("PRESSURE", d_num_gradient_ghosts));
                     
-                    d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+                    d_flow_model->registerDerivedVariables(num_subghosts_of_data);
                     
-                    d_flow_model->computeGlobalDerivedCellData();
+                    d_flow_model->computeDerivedCellData();
                     
                     /*
                      * Get the pointer to pressure data inside the flow model.
                      */
                     
-                    boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                        d_flow_model->getGlobalCellData("PRESSURE");
+                    boost::shared_ptr<pdat::CellData<double> > data_pressure = d_flow_model->getCellData("PRESSURE");
                     
                     // Get the cell data of the pressure gradient.
                     boost::shared_ptr<pdat::CellData<double> > gradient(

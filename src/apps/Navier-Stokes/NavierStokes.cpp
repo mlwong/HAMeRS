@@ -568,7 +568,7 @@ NavierStokes::initializeDataOnPatch(
     d_flow_model->registerPatchWithDataContext(patch, getDataContext());
     
     std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_var_data =
-        d_flow_model->getGlobalCellDataConservativeVariables();
+        d_flow_model->getCellDataOfConservativeVariables();
     
     d_Navier_Stokes_initial_conditions->initializeDataOnPatch(
         patch,
@@ -649,20 +649,17 @@ NavierStokes::computeStableDtOnPatch(
             std::pair<std::string, hier::IntVector>(
                 "MAX_DIFFUSIVITY", num_ghosts));
         
-        d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+        d_flow_model->registerDerivedVariables(num_subghosts_of_data);
         
-        d_flow_model->computeGlobalDerivedCellData();
+        d_flow_model->computeDerivedCellData();
         
         /*
          * Get the pointers to the maximum wave speed and maximum diffusivity inside the flow model.
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x =
-            d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_X");
-        
-        boost::shared_ptr<pdat::CellData<double> > max_diffusivity =
-            d_flow_model->getGlobalCellData("MAX_DIFFUSIVITY");
+        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
+        boost::shared_ptr<pdat::CellData<double> > max_diffusivity = d_flow_model->getCellData("MAX_DIFFUSIVITY");
         
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
         hier::IntVector num_subghosts_max_diffusivity = max_diffusivity->getGhostCellWidth();
@@ -748,23 +745,18 @@ NavierStokes::computeStableDtOnPatch(
             std::pair<std::string, hier::IntVector>(
                 "MAX_DIFFUSIVITY", num_ghosts));
         
-        d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+        d_flow_model->registerDerivedVariables(num_subghosts_of_data);
         
-        d_flow_model->computeGlobalDerivedCellData();
+        d_flow_model->computeDerivedCellData();
         
         /*
          * Get the pointers to the maximum wave speeds and maximum diffusivity inside the flow model.
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x =
-            d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_X");
-        
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_y =
-            d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_Y");
-        
-        boost::shared_ptr<pdat::CellData<double> > max_diffusivity =
-            d_flow_model->getGlobalCellData("MAX_DIFFUSIVITY");
+        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
+        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_y = d_flow_model->getCellData("MAX_WAVE_SPEED_Y");
+        boost::shared_ptr<pdat::CellData<double> > max_diffusivity = d_flow_model->getCellData("MAX_DIFFUSIVITY");
         
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
         hier::IntVector num_subghosts_max_wave_speed_y = max_wave_speed_y->getGhostCellWidth();
@@ -875,26 +867,19 @@ NavierStokes::computeStableDtOnPatch(
             std::pair<std::string, hier::IntVector>(
                 "MAX_DIFFUSIVITY", num_ghosts));
         
-        d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+        d_flow_model->registerDerivedVariables(num_subghosts_of_data);
         
-        d_flow_model->computeGlobalDerivedCellData();
+        d_flow_model->computeDerivedCellData();
         
         /*
          * Get the pointers to the maximum wave speeds and maximum diffusivity inside the flow model.
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x =
-            d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_X");
-        
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_y =
-            d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_Y");
-        
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_z =
-            d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_Z");
-        
-        boost::shared_ptr<pdat::CellData<double> > max_diffusivity =
-            d_flow_model->getGlobalCellData("MAX_DIFFUSIVITY");
+        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
+        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_y = d_flow_model->getCellData("MAX_WAVE_SPEED_Y");
+        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_z = d_flow_model->getCellData("MAX_WAVE_SPEED_Z");
+        boost::shared_ptr<pdat::CellData<double> > max_diffusivity = d_flow_model->getCellData("MAX_DIFFUSIVITY");
         
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
         hier::IntVector num_subghosts_max_wave_speed_y = max_wave_speed_y->getGhostCellWidth();
@@ -1136,7 +1121,7 @@ NavierStokes::advanceSingleStepOnPatch(
     d_flow_model->registerPatchWithDataContext(patch, getDataContext());
     
     std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
-        d_flow_model->getGlobalCellDataConservativeVariables();
+        d_flow_model->getCellDataOfConservativeVariables();
     
     std::vector<hier::IntVector> num_ghosts_conservative_var;
     num_ghosts_conservative_var.reserve(d_flow_model->getNumberOfEquations());
@@ -1168,7 +1153,7 @@ NavierStokes::advanceSingleStepOnPatch(
         }
     }
     
-    d_flow_model->fillZeroGlobalCellDataConservativeVariables();
+    d_flow_model->fillCellDataOfConservativeVariablesWithZero();
     
     // Unregister the patch.
     d_flow_model->unregisterPatch();
@@ -1286,7 +1271,7 @@ NavierStokes::advanceSingleStepOnPatch(
         d_flow_model->registerPatchWithDataContext(patch, intermediate_context[n]);
         
         std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables_intermediate =
-            d_flow_model->getGlobalCellDataConservativeVariables();
+            d_flow_model->getCellDataOfConservativeVariables();
         
         std::vector<hier::IntVector> num_ghosts_conservative_var_intermediate;
         num_ghosts_conservative_var_intermediate.reserve(d_flow_model->getNumberOfEquations());
@@ -2265,7 +2250,7 @@ NavierStokes::advanceSingleStepOnPatch(
         {
             d_flow_model->registerPatchWithDataContext(patch, getDataContext());
             
-            d_flow_model->updateGlobalCellDataConservativeVariables();
+            d_flow_model->updateCellDataOfConservativeVariables();
             
             d_flow_model->unregisterPatch();
         }
@@ -2308,7 +2293,7 @@ NavierStokes::synchronizeFluxes(
     d_flow_model->registerPatchWithDataContext(patch, getDataContext());
     
     std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
-        d_flow_model->getGlobalCellDataConservativeVariables();
+        d_flow_model->getCellDataOfConservativeVariables();
     
     std::vector<hier::IntVector> num_ghosts_conservative_var;
     num_ghosts_conservative_var.reserve(d_flow_model->getNumberOfEquations());
@@ -2729,7 +2714,7 @@ NavierStokes::synchronizeFluxes(
     
     d_flow_model->registerPatchWithDataContext(patch, getDataContext());
     
-    d_flow_model->updateGlobalCellDataConservativeVariables();
+    d_flow_model->updateCellDataOfConservativeVariables();
     
     d_flow_model->unregisterPatch();
     

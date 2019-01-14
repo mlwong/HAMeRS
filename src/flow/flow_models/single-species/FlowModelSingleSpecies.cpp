@@ -668,7 +668,7 @@ FlowModelSingleSpecies::registerPatchWithDataContext(
  * in the map is ignored.
  */
 void
-FlowModelSingleSpecies::registerDerivedCellVariable(
+FlowModelSingleSpecies::registerDerivedVariables(
     const std::unordered_map<std::string, hier::IntVector>& num_subghosts_of_data)
 
 {
@@ -676,7 +676,7 @@ FlowModelSingleSpecies::registerDerivedCellVariable(
     if (!d_patch)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::registerDerivedCellVariable()\n"
+            << ": FlowModelSingleSpecies::registerDerivedVariables()\n"
             << "No patch is registered yet."
             << std::endl);
     }
@@ -685,8 +685,8 @@ FlowModelSingleSpecies::registerDerivedCellVariable(
     if (d_global_derived_cell_data_computed)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::registerDerivedCellVariable()\n"
-            << "Global derived cell data is already computed."
+            << ": FlowModelSingleSpecies::registerDerivedVariables()\n"
+            << "Derived cell data is already computed."
             << std::endl);
     }
     
@@ -698,7 +698,7 @@ FlowModelSingleSpecies::registerDerivedCellVariable(
             (it->second > d_num_ghosts))
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::registerDerivedCellVariable()\n"
+                << ": FlowModelSingleSpecies::registerDerivedVariables()\n"
                 << "The number of sub-ghost cells of variables '"
                 << it->first
                 << "' is not between zero and d_num_ghosts."
@@ -843,7 +843,7 @@ FlowModelSingleSpecies::registerDerivedCellVariable(
 void
 FlowModelSingleSpecies::registerDerivedVariablesForCharacteristicProjectionOfConservativeVariables(
     const hier::IntVector& num_subghosts,
-    const AVERAGING::TYPE& averaging)
+    const AVERAGING::TYPE& averaging_type)
 {
     // Check whether a patch is already registered.
     if (!d_patch)
@@ -861,13 +861,13 @@ FlowModelSingleSpecies::registerDerivedVariablesForCharacteristicProjectionOfCon
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
             << "registerDerivedVariablesForCharacteristicProjectionOfConservativeVariables()\n"
-            << "Global derived cell data is already computed."
+            << "Derived cell data is already computed."
             << std::endl);
     }
     
     NULL_USE(num_subghosts);
     
-    d_proj_var_conservative_averaging = averaging;
+    d_proj_var_conservative_averaging_type = averaging_type;
 }
 
 
@@ -878,7 +878,7 @@ FlowModelSingleSpecies::registerDerivedVariablesForCharacteristicProjectionOfCon
 void
 FlowModelSingleSpecies::registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
     const hier::IntVector& num_subghosts,
-    const AVERAGING::TYPE& averaging)
+    const AVERAGING::TYPE& averaging_type)
 {
     // Check whether a patch is already registered.
     if (!d_patch)
@@ -896,11 +896,11 @@ FlowModelSingleSpecies::registerDerivedVariablesForCharacteristicProjectionOfPri
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
             << "registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables()\n"
-            << "Global derived cell data is computed."
+            << "Derived cell data is already computed."
             << std::endl);
     }
     
-    d_proj_var_primitive_averaging = averaging;
+    d_proj_var_primitive_averaging_type = averaging_type;
     
     setNumberOfSubGhosts(
         num_subghosts,
@@ -910,18 +910,17 @@ FlowModelSingleSpecies::registerDerivedVariablesForCharacteristicProjectionOfPri
 
 
 /*
- * Register the required variables for the computation of diffusive flux in the
- * registered patch.
+ * Register the required variables for the computation of diffusive fluxes in the registered patch.
  */
 void
-FlowModelSingleSpecies::registerDiffusiveFlux(const hier::IntVector& num_subghosts)
+FlowModelSingleSpecies::registerDiffusiveFluxes(const hier::IntVector& num_subghosts)
 {
     // Check whether a patch is already registered.
     if (!d_patch)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "registerDiffusiveFlux()\n"
+            << "registerDiffusiveFluxes()\n"
             << "No patch is registered yet."
             << std::endl);
     }
@@ -931,8 +930,8 @@ FlowModelSingleSpecies::registerDiffusiveFlux(const hier::IntVector& num_subghos
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "registerDiffusiveFlux()\n"
-            << "Global derived cell data is already computed."
+            << "registerDiffusiveFluxes()\n"
+            << "Derived cell data is already computed."
             << std::endl);
     }
     
@@ -1045,16 +1044,16 @@ FlowModelSingleSpecies::unregisterPatch()
 
 
 /*
- * Compute global cell data of different registered derived variables with the registered data context.
+ * Compute the cell data of different registered derived variables with the registered data context.
  */
 void
-FlowModelSingleSpecies::computeGlobalDerivedCellData(const hier::Box& domain)
+FlowModelSingleSpecies::computeDerivedCellData(const hier::Box& domain)
 {
     // Check whether a patch is already registered.
     if (!d_patch)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::computeGlobalDerivedCellData()\n"
+            << ": FlowModelSingleSpecies::computeDerivedCellData()\n"
             << "No patch is registered yet."
             << std::endl);
     }
@@ -1064,7 +1063,7 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData(const hier::Box& domain)
      */
     if (!d_global_derived_cell_data_computed)
     {
-        setGhostBoxesAndDimensionsDerivedCellVariables();
+        setDerivedCellVariableGhostBoxes();
     }
     
     // Compute the velocity cell data.
@@ -1072,7 +1071,7 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData(const hier::Box& domain)
     {
         if (!d_data_velocity)
         {
-            computeGlobalCellDataVelocity(
+            computeCellDataOfVelocity(
                 domain);
         }
     }
@@ -1082,7 +1081,7 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData(const hier::Box& domain)
     {
         if (!d_data_internal_energy)
         {
-            computeGlobalCellDataInternalEnergyWithVelocity(
+            computeCellDataOfInternalEnergyWithVelocity(
                 domain);
         }
     }
@@ -1092,7 +1091,7 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData(const hier::Box& domain)
     {
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithInternalEnergy(
+            computeCellDataOfPressureWithInternalEnergy(
                 domain);
         }
     }
@@ -1102,7 +1101,7 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData(const hier::Box& domain)
     {
         if (!d_data_sound_speed)
         {
-            computeGlobalCellDataSoundSpeedWithPressure(
+            computeCellDataOfSoundSpeedWithPressure(
                 domain);
         }
     }
@@ -1112,7 +1111,7 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData(const hier::Box& domain)
     {
         if (!d_data_temperature)
         {
-            computeGlobalCellDataTemperatureWithPressure(
+            computeCellDataOfTemperatureWithPressure(
                 domain);
         }
     }
@@ -1122,7 +1121,7 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData(const hier::Box& domain)
     {
         if (!d_data_convective_flux_x)
         {
-            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
+            computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 DIRECTION::X_DIRECTION,
                 domain);
         }
@@ -1133,7 +1132,7 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData(const hier::Box& domain)
     {
         if (!d_data_convective_flux_y)
         {
-            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
+            computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 DIRECTION::Y_DIRECTION,
                 domain);
         }
@@ -1144,7 +1143,7 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData(const hier::Box& domain)
     {
         if (!d_data_convective_flux_z)
         {
-            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
+            computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 DIRECTION::Z_DIRECTION,
                 domain);
         }
@@ -1155,7 +1154,7 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData(const hier::Box& domain)
     {
         if (!d_data_max_wave_speed_x)
         {
-            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
+            computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                 DIRECTION::X_DIRECTION,
                 domain);
         }
@@ -1166,7 +1165,7 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData(const hier::Box& domain)
     {
         if (!d_data_max_wave_speed_y)
         {
-            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
+            computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                 DIRECTION::Y_DIRECTION,
                 domain);
         }
@@ -1177,7 +1176,7 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData(const hier::Box& domain)
     {
         if (!d_data_max_wave_speed_z)
         {
-            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
+            computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                 DIRECTION::Z_DIRECTION,
                 domain);
         }
@@ -1188,7 +1187,7 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData(const hier::Box& domain)
     {
         if (!d_data_max_diffusivity)
         {
-            computeGlobalCellDataMaxDiffusivityWithPressureAndTemperature(
+            computeCellDataOfMaxDiffusivityWithPressureAndTemperature(
                 domain);
         }
     }
@@ -1198,16 +1197,16 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData(const hier::Box& domain)
 
 
 /*
- * Get the global cell data of one cell variable in the registered patch.
+ * Get the cell data of one cell variable in the registered patch.
  */
 boost::shared_ptr<pdat::CellData<double> >
-FlowModelSingleSpecies::getGlobalCellData(const std::string& variable_key)
+FlowModelSingleSpecies::getCellData(const std::string& variable_key)
 {
     // Check whether a patch is already registered.
     if (!d_patch)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+            << ": FlowModelSingleSpecies::getCellData()\n"
             << "No patch is registered yet."
             << std::endl);
     }
@@ -1216,22 +1215,22 @@ FlowModelSingleSpecies::getGlobalCellData(const std::string& variable_key)
     
     if (variable_key == "DENSITY")
     {
-        cell_data = getGlobalCellDataDensity();
+        cell_data = getCellDataOfDensity();
     }
     else if (variable_key == "MOMENTUM")
     {
-        cell_data = getGlobalCellDataMomentum();
+        cell_data = getCellDataOfMomentum();
     }
     else if (variable_key == "TOTAL_ENERGY")
     {
-        cell_data = getGlobalCellDataTotalEnergy();
+        cell_data = getCellDataOfTotalEnergy();
     }
     else if (variable_key == "VELOCITY")
     {
         if (!d_data_velocity)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+                << ": FlowModelSingleSpecies::getCellData()\n"
                 << "Cell data of 'VELOCITY' is not registered/computed yet."
                 << std::endl);
         }
@@ -1242,7 +1241,7 @@ FlowModelSingleSpecies::getGlobalCellData(const std::string& variable_key)
         if (!d_data_internal_energy)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+                << ": FlowModelSingleSpecies::getCellData()\n"
                 << "Cell data of 'INTERNAL_ENERGY' is not registered/computed yet."
                 << std::endl);
         }
@@ -1253,7 +1252,7 @@ FlowModelSingleSpecies::getGlobalCellData(const std::string& variable_key)
         if (!d_data_pressure)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+                << ": FlowModelSingleSpecies::getCellData()\n"
                 << "Cell data of 'PRESSURE' is not registered/computed yet."
                 << std::endl);
         }
@@ -1264,7 +1263,7 @@ FlowModelSingleSpecies::getGlobalCellData(const std::string& variable_key)
         if (!d_data_sound_speed)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+                << ": FlowModelSingleSpecies::getCellData()\n"
                 << "Cell data of 'SOUND_SPEED' is not registered/computed yet."
                 << std::endl);
         }
@@ -1275,7 +1274,7 @@ FlowModelSingleSpecies::getGlobalCellData(const std::string& variable_key)
         if (!d_data_temperature)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+                << ": FlowModelSingleSpecies::getCellData()\n"
                 << "Cell data of 'TEMPERATURE' is not registered/computed yet."
                 << std::endl);
         }
@@ -1286,7 +1285,7 @@ FlowModelSingleSpecies::getGlobalCellData(const std::string& variable_key)
         if (!d_data_convective_flux_x)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+                << ": FlowModelSingleSpecies::getCellData()\n"
                 << "Cell data of 'CONVECTIVE_FLUX_X' is not registered/computed yet."
                 << std::endl);
         }
@@ -1297,7 +1296,7 @@ FlowModelSingleSpecies::getGlobalCellData(const std::string& variable_key)
         if (!d_data_convective_flux_y)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+                << ": FlowModelSingleSpecies::getCellData()\n"
                 << "Cell data of 'CONVECTIVE_FLUX_Y' is not registered/computed yet."
                 << std::endl);
         }
@@ -1308,7 +1307,7 @@ FlowModelSingleSpecies::getGlobalCellData(const std::string& variable_key)
         if (!d_data_convective_flux_z)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+                << ": FlowModelSingleSpecies::getCellData()\n"
                 << "Cell data of 'CONVECTIVE_FLUX_Z' is not registered/computed yet."
                 << std::endl);
         }
@@ -1319,7 +1318,7 @@ FlowModelSingleSpecies::getGlobalCellData(const std::string& variable_key)
         if (!d_data_max_wave_speed_x)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+                << ": FlowModelSingleSpecies::getCellData()\n"
                 << "Cell data of 'MAX_WAVE_SPEED_X' is not registered/computed yet."
                 << std::endl);
         }
@@ -1330,7 +1329,7 @@ FlowModelSingleSpecies::getGlobalCellData(const std::string& variable_key)
         if (!d_data_max_wave_speed_y)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+                << ": FlowModelSingleSpecies::getCellData()\n"
                 << "Cell data of 'MAX_WAVE_SPEED_Y' is not registered/computed yet."
                 << std::endl);
         }
@@ -1341,7 +1340,7 @@ FlowModelSingleSpecies::getGlobalCellData(const std::string& variable_key)
         if (!d_data_max_wave_speed_z)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+                << ": FlowModelSingleSpecies::getCellData()\n"
                 << "Cell data of 'MAX_WAVE_SPEED_Z' is not registered/computed yet."
                 << std::endl);
         }
@@ -1352,7 +1351,7 @@ FlowModelSingleSpecies::getGlobalCellData(const std::string& variable_key)
         if (!d_data_max_diffusivity)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+                << ": FlowModelSingleSpecies::getCellData()\n"
                 << "Cell data of 'MAX_DIFFUSIVITY' is not registered/computed yet."
                 << std::endl);
         }
@@ -1361,7 +1360,7 @@ FlowModelSingleSpecies::getGlobalCellData(const std::string& variable_key)
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+            << ": FlowModelSingleSpecies::getCellData()\n"
             << "Unknown cell data with variable_key = '" << variable_key
             << "' requested."
             << std::endl);
@@ -1372,10 +1371,10 @@ FlowModelSingleSpecies::getGlobalCellData(const std::string& variable_key)
 
 
 /*
- * Get the global cell data of different cell variables in the registered patch.
+ * Get the cell data of different cell variables in the registered patch.
  */
 std::vector<boost::shared_ptr<pdat::CellData<double> > >
-FlowModelSingleSpecies::getGlobalCellData(
+FlowModelSingleSpecies::getCellData(
     const std::vector<std::string>& variable_keys)
 {
     std::vector<boost::shared_ptr<pdat::CellData<double> > > cell_data(
@@ -1383,7 +1382,7 @@ FlowModelSingleSpecies::getGlobalCellData(
     
     for (int vi = 0; static_cast<int>(variable_keys.size()); vi++)
     {
-        cell_data[vi] = getGlobalCellData(variable_keys[vi]);
+        cell_data[vi] = getCellData(variable_keys[vi]);
     }
     
     return cell_data;
@@ -1391,23 +1390,23 @@ FlowModelSingleSpecies::getGlobalCellData(
 
 
 /*
- * Fill the interior global cell data of conservative variables with zeros.
+ * Fill the cell data of conservative variables in the interior box with value zero.
  */
 void
-FlowModelSingleSpecies::fillZeroGlobalCellDataConservativeVariables()
+FlowModelSingleSpecies::fillCellDataOfConservativeVariablesWithZero()
 {
     // Check whether a patch is already registered.
     if (!d_patch)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::fillZeroGlobalCellDataConservativeVariables()\n"
+            << ": FlowModelSingleSpecies::fillCellDataOfConservativeVariablesWithZero()\n"
             << "No patch is registered yet."
             << std::endl);
     }
     
-    boost::shared_ptr<pdat::CellData<double> > data_density = getGlobalCellDataDensity();
-    boost::shared_ptr<pdat::CellData<double> > data_momentum = getGlobalCellDataMomentum();
-    boost::shared_ptr<pdat::CellData<double> > data_total_energy = getGlobalCellDataTotalEnergy();
+    boost::shared_ptr<pdat::CellData<double> > data_density = getCellDataOfDensity();
+    boost::shared_ptr<pdat::CellData<double> > data_momentum = getCellDataOfMomentum();
+    boost::shared_ptr<pdat::CellData<double> > data_total_energy = getCellDataOfTotalEnergy();
     
     data_density->fillAll(double(0), d_interior_box);
     data_momentum->fillAll(double(0), d_interior_box);
@@ -1416,16 +1415,16 @@ FlowModelSingleSpecies::fillZeroGlobalCellDataConservativeVariables()
 
 
 /*
- * Update the interior global cell data of conservative variables.
+ * Update the cell data of conservative variables in the interior box after time advancement.
  */
 void
-FlowModelSingleSpecies::updateGlobalCellDataConservativeVariables()
+FlowModelSingleSpecies::updateCellDataOfConservativeVariables()
 {
     // Check whether a patch is already registered.
     if (!d_patch)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::updateGlobalCellDataConservativeVariables()\n"
+            << ": FlowModelSingleSpecies::updateCellDataOfConservativeVariables()\n"
             << "No patch is registered yet."
             << std::endl);
     }
@@ -1433,68 +1432,68 @@ FlowModelSingleSpecies::updateGlobalCellDataConservativeVariables()
 
 
 /*
- * Get the global cell data of the conservative variables in the registered patch.
+ * Get the cell data of the conservative variables in the registered patch.
  */
 std::vector<boost::shared_ptr<pdat::CellData<double> > >
-FlowModelSingleSpecies::getGlobalCellDataConservativeVariables()
+FlowModelSingleSpecies::getCellDataOfConservativeVariables()
 {
     // Check whether a patch is already registered.
     if (!d_patch)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::getGlobalCellDataConservativeVariables()\n"
+            << ": FlowModelSingleSpecies::getCellDataOfConservativeVariables()\n"
             << "No patch is registered yet."
             << std::endl);
     }
     
-    std::vector<boost::shared_ptr<pdat::CellData<double> > > global_cell_data;
-    global_cell_data.reserve(3);
+    std::vector<boost::shared_ptr<pdat::CellData<double> > > cell_data;
+    cell_data.reserve(3);
     
-    global_cell_data.push_back(getGlobalCellDataDensity());
-    global_cell_data.push_back(getGlobalCellDataMomentum());
-    global_cell_data.push_back(getGlobalCellDataTotalEnergy());
+    cell_data.push_back(getCellDataOfDensity());
+    cell_data.push_back(getCellDataOfMomentum());
+    cell_data.push_back(getCellDataOfTotalEnergy());
     
-    return global_cell_data;
+    return cell_data;
 }
 
 
 /*
- * Get the global cell data of the primitive variables in the registered patch.
+ * Get the cell data of the primitive variables in the registered patch.
  */
 std::vector<boost::shared_ptr<pdat::CellData<double> > >
-FlowModelSingleSpecies::getGlobalCellDataPrimitiveVariables()
+FlowModelSingleSpecies::getCellDataOfPrimitiveVariables()
 {
     // Check whether a patch is already registered.
     if (!d_patch)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::getGlobalCellDataPrimitiveVariables()\n"
+            << ": FlowModelSingleSpecies::getCellDataOfPrimitiveVariables()\n"
             << "No patch is registered yet."
             << std::endl);
     }
     
-    std::vector<boost::shared_ptr<pdat::CellData<double> > > global_cell_data;
-    global_cell_data.reserve(3);
+    std::vector<boost::shared_ptr<pdat::CellData<double> > > cell_data;
+    cell_data.reserve(3);
     
-    global_cell_data.push_back(getGlobalCellDataDensity());
+    cell_data.push_back(getCellDataOfDensity());
     if (!d_data_velocity)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::getGlobalCellDataPrimitiveVariables()\n"
+            << ": FlowModelSingleSpecies::getCellDataOfPrimitiveVariables()\n"
             << "Cell data of 'VELOCITY' is not registered/computed yet."
             << std::endl);
     }
-    global_cell_data.push_back(d_data_velocity);
+    cell_data.push_back(d_data_velocity);
     if (!d_data_pressure)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::getGlobalCellDataPrimitiveVariables()\n"
+            << ": FlowModelSingleSpecies::getCellDataOfPrimitiveVariables()\n"
             << "Cell data of 'PRESSURE' is not registered/computed yet."
             << std::endl);
     }
-    global_cell_data.push_back(d_data_pressure);
+    cell_data.push_back(d_data_pressure);
     
-    return global_cell_data;
+    return cell_data;
 }
 
 
@@ -1525,30 +1524,30 @@ FlowModelSingleSpecies::getNumberOfProjectionVariablesForPrimitiveVariables() co
 
 
 /*
- * Compute global side data of the projection variables for transformation between
- * conservative variables and characteristic variables.
+ * Compute the side data of the projection variables for transformation between conservative variables and
+ * characteristic variables.
  */
 void
-FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForConservativeVariables(
+FlowModelSingleSpecies::computeSideDataOfProjectionVariablesForConservativeVariables(
     std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
 {
     NULL_USE(projection_variables);
     
     TBOX_ERROR(d_object_name
         << ": FlowModelSingleSpecies::"
-        << "computeGlobalSideDataProjectionVariablesForConservativeVariables()\n"
-        << "Method computeGlobalSideDataProjectionVariablesForConservativeVariables() is not"
+        << "computeSideDataOfProjectionVariablesForConservativeVariables()\n"
+        << "Method computeSideDataOfProjectionVariablesForConservativeVariables() is not"
         << " yet implemented."
         << std::endl);
 }
 
 
 /*
- * Compute global side data of the projection variables for transformation between
- * primitive variables and characteristic variables.
+ * Compute the side data of the projection variables for transformation between primitive variables and characteristic
+ * variables.
  */
 void
-FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVariables(
+FlowModelSingleSpecies::computeSideDataOfProjectionVariablesForPrimitiveVariables(
     std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
 {
     // Create empty box.
@@ -1570,7 +1569,7 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+            << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
             << "There should be two projection variables."
             << std::endl);
     }
@@ -1587,7 +1586,7 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::"
-                << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+                << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
                 << "The interior dimension of the projection variables does not match that of patch."
                 << std::endl);
         }
@@ -1597,7 +1596,7 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+            << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
             << "The projection variables don't have same ghost cell width."
             << std::endl);
     }
@@ -1606,7 +1605,7 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+            << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
             << "The projection variables have ghost cell width larger than that of density."
             << std::endl);
     }
@@ -1615,20 +1614,20 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+            << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
             << "The projection variables have ghost cell width larger than that of sound speed."
             << std::endl);
     }
     
     // Get the cell data of the variable density.
     boost::shared_ptr<pdat::CellData<double> > data_density =
-        getGlobalCellDataDensity();
+        getCellDataOfDensity();
     
     // Get the pointers to the cell data of density and sound speed.
     double* rho = data_density->getPointer(0);
     if (!d_data_sound_speed)
     {
-        computeGlobalCellDataSoundSpeedWithPressure(empty_box);
+        computeCellDataOfSoundSpeedWithPressure(empty_box);
     }
     double* c = d_data_sound_speed->getPointer(0);
     
@@ -1647,7 +1646,7 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
         const int num_ghosts_0_projection_var = num_ghosts_projection_var[0];
         const int num_subghosts_0_sound_speed = d_num_subghosts_sound_speed[0];
         
-        switch (d_proj_var_primitive_averaging)
+        switch (d_proj_var_primitive_averaging_type)
         {
             case AVERAGING::SIMPLE:
             {
@@ -1682,7 +1681,7 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelSingleSpecies::"
-                    << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+                    << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
                     << "Roe averaging is not yet implemented."
                     << std::endl);
                 
@@ -1692,8 +1691,8 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelSingleSpecies::"
-                    << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
-                    << "Unknown d_proj_var_primitive_averaging given."
+                    << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
+                    << "Unknown d_proj_var_primitive_averaging_type given."
                     << std::endl);
             }
         }
@@ -1715,7 +1714,7 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
         const int num_subghosts_1_sound_speed = d_num_subghosts_sound_speed[1];
         const int subghostcell_dim_0_sound_speed = d_subghostcell_dims_sound_speed[0];
         
-        switch (d_proj_var_primitive_averaging)
+        switch (d_proj_var_primitive_averaging_type)
         {
             case AVERAGING::SIMPLE:
             {
@@ -1798,7 +1797,7 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelSingleSpecies::"
-                    << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+                    << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
                     << "Roe averaging is not yet implemented."
                     << std::endl);
                 
@@ -1808,8 +1807,8 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelSingleSpecies::"
-                    << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
-                    << "Unknown d_proj_var_primitive_averaging given."
+                    << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
+                    << "Unknown d_proj_var_primitive_averaging_type given."
                     << std::endl);
             }
         }
@@ -1838,7 +1837,7 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
         const int subghostcell_dim_0_sound_speed = d_subghostcell_dims_sound_speed[0];
         const int subghostcell_dim_1_sound_speed = d_subghostcell_dims_sound_speed[1];
         
-        switch (d_proj_var_primitive_averaging)
+        switch (d_proj_var_primitive_averaging_type)
         {
             case AVERAGING::SIMPLE:
             {
@@ -1998,7 +1997,7 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelSingleSpecies::"
-                    << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+                    << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
                     << "Roe averaging is not yet implemented."
                     << std::endl);
                 
@@ -2008,8 +2007,8 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelSingleSpecies::"
-                    << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
-                    << "Unknown d_proj_var_primitive_averaging given."
+                    << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
+                    << "Unknown d_proj_var_primitive_averaging_type given."
                     << std::endl);
             }
         }
@@ -2018,10 +2017,10 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
 
 
 /*
- * Compute global side data of characteristic variables from conservative variables.
+ * Compute the side data of characteristic variables from conservative variables.
  */
 void
-FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromConservativeVariables(
+FlowModelSingleSpecies::computeSideDataOfCharacteristicVariablesFromConservativeVariables(
     std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
     const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
@@ -2034,18 +2033,18 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromConserva
     
     TBOX_ERROR(d_object_name
         << ": FlowModelSingleSpecies::"
-        << "computeGlobalSideDataCharacteristicVariablesFromConservativeVariables()\n"
-        << "Method computeGlobalSideDataCharacteristicVariablesFromConservativeVariables()"
+        << "computeSideDataOfCharacteristicVariablesFromConservativeVariables()\n"
+        << "Method computeSideDataOfCharacteristicVariablesFromConservativeVariables()"
         << " is not yet implemented."
         << std::endl);
 }
 
 
 /*
- * Compute global side data of characteristic variables from primitive variables.
+ * Compute the side data of characteristic variables from primitive variables.
  */
 void
-FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables(
+FlowModelSingleSpecies::computeSideDataOfCharacteristicVariablesFromPrimitiveVariables(
     std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
     const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
@@ -2091,7 +2090,7 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+            << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
             << "The number of characteristic variables are incorrect."
             << std::endl);
     }
@@ -2099,7 +2098,7 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+            << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
             << "The number of primitive variables are incorrect."
             << std::endl);
     }
@@ -2109,7 +2108,7 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+            << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
             << "The depths of one or more primitive variables are incorrect."
             << std::endl);
     }
@@ -2117,7 +2116,7 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+            << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
             << "There should be two projection variables."
             << std::endl);
     }
@@ -2135,7 +2134,7 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::"
-                << "computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+                << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
                 << "The interior dimension of the characteristic variables does not match that of patch."
                 << std::endl);
         }
@@ -2149,7 +2148,7 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::"
-                << "computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+                << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
                 << "The interior dimension of the primitive variables does not match that of patch."
                 << std::endl);
         }
@@ -2161,7 +2160,7 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::"
-                << "computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+                << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
                 << "The interior dimension of the projection variables does not match that of patch."
                 << std::endl);
         }
@@ -2173,7 +2172,7 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::"
-                << "computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+                << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
                 << "The characteristic variables don't have same ghost cell width."
                 << std::endl);
         }
@@ -2182,7 +2181,7 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+            << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
             << "The projection variables don't have same ghost cell width."
             << std::endl);
     }
@@ -2191,7 +2190,7 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+            << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
             << "The ghost cell width of the projection variables does not match that of"
             << " characteristic variables."
             << std::endl);
@@ -2206,7 +2205,7 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::"
-                << "computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+                << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
                 << "The offset index is too large or the number of ghost of characteristic variable"
                 << " is too large."
                 << std::endl);
@@ -2595,10 +2594,10 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
 
 
 /*
- * Compute global side data of conservative variables from characteristic variables.
+ * Compute the side data of conservative variables from characteristic variables.
  */
 void
-FlowModelSingleSpecies::computeGlobalSideDataConservativeVariablesFromCharacteristicVariables(
+FlowModelSingleSpecies::computeSideDataOfConservativeVariablesFromCharacteristicVariables(
     std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
@@ -2609,18 +2608,18 @@ FlowModelSingleSpecies::computeGlobalSideDataConservativeVariablesFromCharacteri
     
     TBOX_ERROR(d_object_name
         << ": FlowModelSingleSpecies::"
-        << "computeGlobalSideDataConservativeVariablesFromCharacteristicVariables()\n"
-        << "Method computeGlobalSideDataConservativeVariablesFromCharacteristicVariables() is not"
+        << "computeSideDataOfConservativeVariablesFromCharacteristicVariables()\n"
+        << "Method computeSideDataOfConservativeVariablesFromCharacteristicVariables() is not"
         << " yet implemented."
         << std::endl);
 }
 
 
 /*
- * Compute global side data of primitive variables from characteristic variables.
+ * Compute the side data of primitive variables from characteristic variables.
  */
 void
-FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
+FlowModelSingleSpecies::computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
     std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
@@ -2652,7 +2651,7 @@ FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristi
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+            << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
             << "The number of characteristic variables are incorrect."
             << std::endl);
     }
@@ -2660,7 +2659,7 @@ FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristi
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+            << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
             << "The number of primitive variables are incorrect."
             << std::endl);
     }
@@ -2668,7 +2667,7 @@ FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristi
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+            << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
             << "There should be two projection variables."
             << std::endl);
     }
@@ -2686,7 +2685,7 @@ FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristi
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::"
-                << "computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+                << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
                 << "The interior dimension of the primitive variables does not match that of patch."
                 << std::endl);
         }
@@ -2700,7 +2699,7 @@ FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristi
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::"
-                << "computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+                << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
                 << "The interior dimension of the characteristic variables does not match that of patch."
                 << std::endl);
         }
@@ -2712,7 +2711,7 @@ FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristi
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::"
-                << "computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+                << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
                 << "The interior dimension of the projection variables does not match that of patch."
                 << std::endl);
         }
@@ -2724,7 +2723,7 @@ FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristi
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::"
-                << "computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+                << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
                 << "The primitive variables don't have same ghost cell width."
                 << std::endl);
         }
@@ -2735,7 +2734,7 @@ FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristi
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::"
-                << "computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+                << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
                 << "The characteristic variables don't have same ghost cell width."
                 << std::endl);
         }
@@ -2744,7 +2743,7 @@ FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristi
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+            << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
             << "The projection variables don't have same ghost cell width."
             << std::endl);
     }
@@ -2753,7 +2752,7 @@ FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristi
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+            << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
             << "The ghost cell width of the projection variables does not match that of primitive"
             << " variables."
             << std::endl);
@@ -2762,7 +2761,7 @@ FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristi
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+            << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
             << "The ghost cell width of the projection variables does not match that of characteristic"
             << " variables."
             << std::endl);
@@ -3061,7 +3060,7 @@ FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristi
  * Check whether the given side conservative variables are within the bounds.
  */
 void
-FlowModelSingleSpecies::checkGlobalSideDataConservativeVariablesBounded(
+FlowModelSingleSpecies::checkSideDataOfConservativeVariablesBounded(
     boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables)
 {
@@ -3089,7 +3088,7 @@ FlowModelSingleSpecies::checkGlobalSideDataConservativeVariablesBounded(
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "checkGlobalSideDataConservativeVariablesBounded()\n"
+            << "checkSideDataOfConservativeVariablesBounded()\n"
             << "The number of conservative variables are incorrect."
             << std::endl);
     }
@@ -3107,7 +3106,7 @@ FlowModelSingleSpecies::checkGlobalSideDataConservativeVariablesBounded(
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::"
-                << "checkGlobalSideDataConservativeVariablesBounded()\n"
+                << "checkSideDataOfConservativeVariablesBounded()\n"
                 << "The interior dimension of the conservative variables does not match that of patch."
                 << std::endl);
         }
@@ -3117,7 +3116,7 @@ FlowModelSingleSpecies::checkGlobalSideDataConservativeVariablesBounded(
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "checkGlobalSideDataConservativeVariablesBounded()\n"
+            << "checkSideDataOfConservativeVariablesBounded()\n"
             << "The interior dimension of the flag does not match that of patch."
             << std::endl);
     }
@@ -3128,7 +3127,7 @@ FlowModelSingleSpecies::checkGlobalSideDataConservativeVariablesBounded(
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::"
-                << "checkGlobalSideDataConservativeVariablesBounded()\n"
+                << "checkSideDataOfConservativeVariablesBounded()\n"
                 << "The conservative variables don't have same ghost cell width."
                 << std::endl);
         }
@@ -3138,7 +3137,7 @@ FlowModelSingleSpecies::checkGlobalSideDataConservativeVariablesBounded(
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "checkGlobalSideDataConservativeVariablesBounded()\n"
+            << "checkSideDataOfConservativeVariablesBounded()\n"
             << "The ghost cell width of the flag does not match that of conservative variables."
             << std::endl);
     }
@@ -3469,7 +3468,7 @@ FlowModelSingleSpecies::checkGlobalSideDataConservativeVariablesBounded(
  * Check whether the given side primitive variables are within the bounds.
  */
 void
-FlowModelSingleSpecies::checkGlobalSideDataPrimitiveVariablesBounded(
+FlowModelSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
     boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables)
 {
@@ -3497,7 +3496,7 @@ FlowModelSingleSpecies::checkGlobalSideDataPrimitiveVariablesBounded(
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "checkGlobalSideDataPrimitiveVariablesBounded()\n"
+            << "checkSideDataOfPrimitiveVariablesBounded()\n"
             << "The number of primitive variables are incorrect."
             << std::endl);
     }
@@ -3515,7 +3514,7 @@ FlowModelSingleSpecies::checkGlobalSideDataPrimitiveVariablesBounded(
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::"
-                << "checkGlobalSideDataPrimitiveVariablesBounded()\n"
+                << "checkSideDataOfPrimitiveVariablesBounded()\n"
                 << "The interior dimension of the primitive variables does not match that of patch."
                 << std::endl);
         }
@@ -3525,7 +3524,7 @@ FlowModelSingleSpecies::checkGlobalSideDataPrimitiveVariablesBounded(
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "checkGlobalSideDataPrimitiveVariablesBounded()\n"
+            << "checkSideDataOfPrimitiveVariablesBounded()\n"
             << "The interior dimension of the flag does not match that of patch."
             << std::endl);
     }
@@ -3536,7 +3535,7 @@ FlowModelSingleSpecies::checkGlobalSideDataPrimitiveVariablesBounded(
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::"
-                << "checkGlobalSideDataPrimitiveVariablesBounded()\n"
+                << "checkSideDataOfPrimitiveVariablesBounded()\n"
                 << "The primitive variables don't have same ghost cell width."
                 << std::endl);
         }
@@ -3546,7 +3545,7 @@ FlowModelSingleSpecies::checkGlobalSideDataPrimitiveVariablesBounded(
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "checkGlobalSideDataPrimitiveVariablesBounded()\n"
+            << "checkSideDataOfPrimitiveVariablesBounded()\n"
             << "The ghost cell width of the flag does not match that of primitive variables."
             << std::endl);
     }
@@ -3874,10 +3873,10 @@ FlowModelSingleSpecies::checkGlobalSideDataPrimitiveVariablesBounded(
 
 
 /*
- * Convert vector of pointers of conservative cell data to vectors of pointers of primitive cell data.
+ * Convert conservative variables to primitive variables.
  */
 void
-FlowModelSingleSpecies::convertLocalCellDataPointersConservativeVariablesToPrimitiveVariables(
+FlowModelSingleSpecies::convertConservativeVariablesToPrimitiveVariables(
     const std::vector<const double*>& conservative_variables,
     const std::vector<double*>& primitive_variables)
 {
@@ -3932,10 +3931,10 @@ FlowModelSingleSpecies::convertLocalCellDataPointersConservativeVariablesToPrimi
 
 
 /*
- * Convert vector of pointers of primitive cell data to vectors of pointers of conservative cell data.
+ * Convert primitive variables to conservative variables.
  */
 void
-FlowModelSingleSpecies::convertLocalCellDataPointersPrimitiveVariablesToConservativeVariables(
+FlowModelSingleSpecies::convertPrimitiveVariablesToConservativeVariables(
     const std::vector<const double*>& primitive_variables,
     const std::vector<double*>& conservative_variables)
 {
@@ -3999,12 +3998,12 @@ FlowModelSingleSpecies::getDiffusiveFluxVariablesForDerivative(
     
     if (!d_data_velocity)
     {
-        computeGlobalCellDataVelocity(empty_box);
+        computeCellDataOfVelocity(empty_box);
     }
     
     if (!d_data_temperature)
     {
-        computeGlobalCellDataTemperatureWithPressure(empty_box);
+        computeCellDataOfTemperatureWithPressure(empty_box);
     }
     
     if (d_dim == tbox::Dimension(1))
@@ -4852,17 +4851,17 @@ FlowModelSingleSpecies::getDiffusiveFluxDiffusivities(
     {
         if (!d_data_velocity)
         {
-            computeGlobalCellDataVelocity(empty_box);
+            computeCellDataOfVelocity(empty_box);
         }
         
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithInternalEnergy(empty_box);
+            computeCellDataOfPressureWithInternalEnergy(empty_box);
         }
         
         if (!d_data_temperature)
         {
-            computeGlobalCellDataTemperatureWithPressure(empty_box);
+            computeCellDataOfTemperatureWithPressure(empty_box);
         }
         
         /*
@@ -6719,10 +6718,10 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
 
 
 /*
- * Set the ghost boxes and their dimensions of derived cell variables.
+ * Set the ghost boxes of derived cell variables.
  */
 void
-FlowModelSingleSpecies::setGhostBoxesAndDimensionsDerivedCellVariables()
+FlowModelSingleSpecies::setDerivedCellVariableGhostBoxes()
 {
     if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
     {
@@ -6818,10 +6817,10 @@ FlowModelSingleSpecies::setGhostBoxesAndDimensionsDerivedCellVariables()
 
 
 /*
- * Get the global cell data of density in the registered patch.
+ * Get the cell data of density in the registered patch.
  */
 boost::shared_ptr<pdat::CellData<double> >
-FlowModelSingleSpecies::getGlobalCellDataDensity()
+FlowModelSingleSpecies::getCellDataOfDensity()
 {
     // Get the cell data of the registered variable density.
     boost::shared_ptr<pdat::CellData<double> > data_density(
@@ -6833,10 +6832,10 @@ FlowModelSingleSpecies::getGlobalCellDataDensity()
 
 
 /*
- * Get the global cell data of momentum in the registered patch.
+ * Get the cell data of momentum in the registered patch.
  */
 boost::shared_ptr<pdat::CellData<double> >
-FlowModelSingleSpecies::getGlobalCellDataMomentum()
+FlowModelSingleSpecies::getCellDataOfMomentum()
 {
     // Get the cell data of the registered variable momentum.
     boost::shared_ptr<pdat::CellData<double> > data_momentum(
@@ -6848,10 +6847,10 @@ FlowModelSingleSpecies::getGlobalCellDataMomentum()
 
 
 /*
- * Get the global cell data of total energy in the registered patch.
+ * Get the cell data of total energy in the registered patch.
  */
 boost::shared_ptr<pdat::CellData<double> >
-FlowModelSingleSpecies::getGlobalCellDataTotalEnergy()
+FlowModelSingleSpecies::getCellDataOfTotalEnergy()
 {
     // Get the cell data of the registered variable total energy.
     boost::shared_ptr<pdat::CellData<double> > data_total_energy(
@@ -6863,10 +6862,10 @@ FlowModelSingleSpecies::getGlobalCellDataTotalEnergy()
 
 
 /*
- * Compute the global cell data of velocity in the registered patch.
+ * Compute the cell data of velocity in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataVelocity(
+FlowModelSingleSpecies::computeCellDataOfVelocity(
     const hier::Box& domain)
 {
     if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
@@ -6899,10 +6898,10 @@ FlowModelSingleSpecies::computeGlobalCellDataVelocity(
         
         // Get the cell data of the variables density and momentum.
         boost::shared_ptr<pdat::CellData<double> > data_density =
-            getGlobalCellDataDensity();
+            getCellDataOfDensity();
         
         boost::shared_ptr<pdat::CellData<double> > data_momentum =
-            getGlobalCellDataMomentum();
+            getCellDataOfMomentum();
         
         // Get the pointer to the cell data of density.
         double* rho = data_density->getPointer(0);
@@ -7051,7 +7050,7 @@ FlowModelSingleSpecies::computeGlobalCellDataVelocity(
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::computeGlobalCellDataVelocity()\n"
+            << ": FlowModelSingleSpecies::computeCellDataOfVelocity()\n"
             << "Cell data of 'VELOCITY' is not yet registered."
             << std::endl);
     }
@@ -7059,10 +7058,10 @@ FlowModelSingleSpecies::computeGlobalCellDataVelocity(
 
 
 /*
- * Compute the global cell data of internal energy with velocity in the registered patch.
+ * Compute the cell data of internal energy with velocity in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataInternalEnergyWithVelocity(
+FlowModelSingleSpecies::computeCellDataOfInternalEnergyWithVelocity(
     const hier::Box& domain)
 {
     if (d_num_subghosts_internal_energy > -hier::IntVector::getOne(d_dim))
@@ -7095,14 +7094,14 @@ FlowModelSingleSpecies::computeGlobalCellDataInternalEnergyWithVelocity(
         
         // Get the cell data of the variables density, momentum and total energy.
         boost::shared_ptr<pdat::CellData<double> > data_density =
-            getGlobalCellDataDensity();
+            getCellDataOfDensity();
         
         boost::shared_ptr<pdat::CellData<double> > data_total_energy =
-            getGlobalCellDataTotalEnergy();
+            getCellDataOfTotalEnergy();
         
         if (!d_data_velocity)
         {
-            computeGlobalCellDataVelocity(domain);
+            computeCellDataOfVelocity(domain);
         }
         
         // Get the pointers to the cell data of internal energy, density and total energy.
@@ -7271,7 +7270,7 @@ FlowModelSingleSpecies::computeGlobalCellDataInternalEnergyWithVelocity(
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::computeGlobalCellDataInternalEnergyWithVelocity()\n"
+            << ": FlowModelSingleSpecies::computeCellDataOfInternalEnergyWithVelocity()\n"
             << "Cell data of 'INTERNAL_ENERGY' is not yet registered."
             << std::endl);
     }
@@ -7279,10 +7278,10 @@ FlowModelSingleSpecies::computeGlobalCellDataInternalEnergyWithVelocity(
 
 
 /*
- * Compute the global cell data of pressure with internal energy in the registered patch.
+ * Compute the cell data of pressure with internal energy in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataPressureWithInternalEnergy(
+FlowModelSingleSpecies::computeCellDataOfPressureWithInternalEnergy(
     const hier::Box& domain)
 {
     if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
@@ -7293,11 +7292,11 @@ FlowModelSingleSpecies::computeGlobalCellDataPressureWithInternalEnergy(
         
         // Get the cell data of the variables density, momentum and total energy.
         boost::shared_ptr<pdat::CellData<double> > data_density =
-            getGlobalCellDataDensity();
+            getCellDataOfDensity();
         
         if (!d_data_internal_energy)
         {
-            computeGlobalCellDataInternalEnergyWithVelocity(domain);
+            computeCellDataOfInternalEnergyWithVelocity(domain);
         }
         
         // Get the thermodynamic properties of the species.
@@ -7319,7 +7318,7 @@ FlowModelSingleSpecies::computeGlobalCellDataPressureWithInternalEnergy(
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::computeGlobalCellDataPressureWithInternalEnergy()\n"
+            << ": FlowModelSingleSpecies::computeCellDataOfPressureWithInternalEnergy()\n"
             << "Cell data of 'PRESSURE' is not yet registered."
             << std::endl);
     }
@@ -7327,10 +7326,10 @@ FlowModelSingleSpecies::computeGlobalCellDataPressureWithInternalEnergy(
 
 
 /*
- * Compute the global cell data of sound speed with pressure in the registered patch.
+ * Compute the cell data of sound speed with pressure in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure(
+FlowModelSingleSpecies::computeCellDataOfSoundSpeedWithPressure(
     const hier::Box& domain)
 {
     if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
@@ -7341,11 +7340,11 @@ FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure(
         
         // Get the cell data of the variable density and pressure.
         boost::shared_ptr<pdat::CellData<double> > data_density =
-            getGlobalCellDataDensity();
+            getCellDataOfDensity();
         
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithInternalEnergy(domain);
+            computeCellDataOfPressureWithInternalEnergy(domain);
         }
         
         // Get the thermodynamic properties of the species.
@@ -7367,7 +7366,7 @@ FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure(
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()\n"
+            << ": FlowModelSingleSpecies::computeCellDataOfSoundSpeedWithPressure()\n"
             << "Cell data of 'SOUND_SPEED' is not yet registered."
             << std::endl);
     }
@@ -7375,10 +7374,10 @@ FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure(
 
 
 /*
- * Compute the global cell data of temperature with pressure in the registered patch.
+ * Compute the cell data of temperature with pressure in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataTemperatureWithPressure(
+FlowModelSingleSpecies::computeCellDataOfTemperatureWithPressure(
     const hier::Box& domain)
 {
     if (d_num_subghosts_temperature > -hier::IntVector::getOne(d_dim))
@@ -7389,11 +7388,11 @@ FlowModelSingleSpecies::computeGlobalCellDataTemperatureWithPressure(
         
         // Get the cell data of the variable density and pressure.
         boost::shared_ptr<pdat::CellData<double> > data_density =
-            getGlobalCellDataDensity();
+            getCellDataOfDensity();
         
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithInternalEnergy(domain);
+            computeCellDataOfPressureWithInternalEnergy(domain);
         }
         
         // Get the thermodynamic properties of the species.
@@ -7415,7 +7414,7 @@ FlowModelSingleSpecies::computeGlobalCellDataTemperatureWithPressure(
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::computeGlobalCellDataTemperatureWithPressure()\n"
+            << ": FlowModelSingleSpecies::computeCellDataOfTemperatureWithPressure()\n"
             << "Cell data of 'TEMPERATURE' is not yet registered."
             << std::endl);
     }
@@ -7423,10 +7422,10 @@ FlowModelSingleSpecies::computeGlobalCellDataTemperatureWithPressure(
 
 
 /*
- * Compute the global cell data of convective flux with velocity and pressure in the registered patch.
+ * Compute the cell data of convective flux with velocity and pressure in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
+FlowModelSingleSpecies::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
     const DIRECTION::TYPE& direction,
     const hier::Box& domain)
 {
@@ -7469,19 +7468,19 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithVelocityAndPressu
             }
             
             boost::shared_ptr<pdat::CellData<double> > data_momentum =
-                getGlobalCellDataMomentum();
+                getCellDataOfMomentum();
             
             boost::shared_ptr<pdat::CellData<double> > data_total_energy =
-                getGlobalCellDataTotalEnergy();
+                getCellDataOfTotalEnergy();
             
             if (!d_data_velocity)
             {
-                computeGlobalCellDataVelocity(domain);
+                computeCellDataOfVelocity(domain);
             }
             
             if (!d_data_pressure)
             {
-                computeGlobalCellDataPressureWithInternalEnergy(domain);
+                computeCellDataOfPressureWithInternalEnergy(domain);
             }
             
             // Get the pointers to the cell data of total energy and pressure.
@@ -7674,7 +7673,7 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithVelocityAndPressu
         else
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithVelocityAndPressure()\n"
+                << ": FlowModelSingleSpecies::computeCellDataOfConvectiveFluxWithVelocityAndPressure()\n"
                 << "Cell data of 'CONVECTIVE_FLUX_X' is not yet registered."
                 << std::endl);
         }
@@ -7718,19 +7717,19 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithVelocityAndPressu
             }
             
             boost::shared_ptr<pdat::CellData<double> > data_momentum =
-                getGlobalCellDataMomentum();
+                getCellDataOfMomentum();
             
             boost::shared_ptr<pdat::CellData<double> > data_total_energy =
-                getGlobalCellDataTotalEnergy();
+                getCellDataOfTotalEnergy();
             
             if (!d_data_velocity)
             {
-                computeGlobalCellDataVelocity(domain);
+                computeCellDataOfVelocity(domain);
             }
             
             if (!d_data_pressure)
             {
-                computeGlobalCellDataPressureWithInternalEnergy(domain);
+                computeCellDataOfPressureWithInternalEnergy(domain);
             }
             
             // Get the pointers to the cell data of total energy and pressure.
@@ -7740,7 +7739,7 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithVelocityAndPressu
             if (d_dim == tbox::Dimension(1))
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithVelocityAndPressure()\n"
+                    << ": FlowModelSingleSpecies::computeCellDataOfConvectiveFluxWithVelocityAndPressure()\n"
                     << "'CONVECTIVE_FLUX_Y' cannot be obtained for problem with dimension less than two."
                     << std::endl);
             }
@@ -7893,7 +7892,7 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithVelocityAndPressu
         else
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithVelocityAndPressure()\n"
+                << ": FlowModelSingleSpecies::computeCellDataOfConvectiveFluxWithVelocityAndPressure()\n"
                 << "Cell data of 'CONVECTIVE_FLUX_Y' is not yet registered."
                 << std::endl);
         }
@@ -7937,19 +7936,19 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithVelocityAndPressu
             }
             
             boost::shared_ptr<pdat::CellData<double> > data_momentum =
-                getGlobalCellDataMomentum();
+                getCellDataOfMomentum();
             
             boost::shared_ptr<pdat::CellData<double> > data_total_energy =
-                getGlobalCellDataTotalEnergy();
+                getCellDataOfTotalEnergy();
             
             if (!d_data_velocity)
             {
-                computeGlobalCellDataVelocity(domain);
+                computeCellDataOfVelocity(domain);
             }
             
             if (!d_data_pressure)
             {
-                computeGlobalCellDataPressureWithInternalEnergy(domain);
+                computeCellDataOfPressureWithInternalEnergy(domain);
             }
             
             // Get the pointers to the cell data of total energy and pressure.
@@ -7959,7 +7958,7 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithVelocityAndPressu
             if (d_dim == tbox::Dimension(1) || d_dim == tbox::Dimension(2))
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithVelocityAndPressure()\n"
+                    << ": FlowModelSingleSpecies::computeCellDataOfConvectiveFluxWithVelocityAndPressure()\n"
                     << "'CONVECTIVE_FLUX_Z' cannot be obtained for problem with dimension less than three."
                     << std::endl);
             }
@@ -8051,7 +8050,7 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithVelocityAndPressu
         else
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithVelocityAndPressure()\n"
+                << ": FlowModelSingleSpecies::computeCellDataOfConvectiveFluxWithVelocityAndPressure()\n"
                 << "Cell data of 'CONVECTIVE_FLUX_Z' is not yet registered."
                 << std::endl);
         }
@@ -8060,10 +8059,10 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithVelocityAndPressu
 
 
 /*
- * Compute the global cell data of maximum wave speed with velocity and sound speed in the registered patch.
+ * Compute the cell data of maximum wave speed with velocity and sound speed in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
+FlowModelSingleSpecies::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
     const DIRECTION::TYPE& direction,
     const hier::Box& domain)
 {
@@ -8099,12 +8098,12 @@ FlowModelSingleSpecies::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpe
             
             if (!d_data_velocity)
             {
-                computeGlobalCellDataVelocity(domain);
+                computeCellDataOfVelocity(domain);
             }
             
             if (!d_data_sound_speed)
             {
-                computeGlobalCellDataSoundSpeedWithPressure(domain);
+                computeCellDataOfSoundSpeedWithPressure(domain);
             }
             
             // Get the pointers to the cell data of maximum wave speed and velocity in x-direction, and sound speed.
@@ -8250,7 +8249,7 @@ FlowModelSingleSpecies::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpe
         else
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed()\n"
+                << ": FlowModelSingleSpecies::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed()\n"
                 << "Cell data of 'MAX_WAVE_SPEED_X' is not yet registered."
                 << std::endl);
         }
@@ -8287,12 +8286,12 @@ FlowModelSingleSpecies::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpe
             
             if (!d_data_velocity)
             {
-                computeGlobalCellDataVelocity(domain);
+                computeCellDataOfVelocity(domain);
             }
             
             if (!d_data_sound_speed)
             {
-                computeGlobalCellDataSoundSpeedWithPressure(domain);
+                computeCellDataOfSoundSpeedWithPressure(domain);
             }
             
             // Get the pointers to the cell data of maximum wave speed and velocity in y-direction, and sound speed.
@@ -8303,7 +8302,7 @@ FlowModelSingleSpecies::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpe
             if (d_dim == tbox::Dimension(1))
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed()\n"
+                    << ": FlowModelSingleSpecies::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed()\n"
                     << "'MAX_WAVE_SPEED_Y' cannot be obtained for problem with dimension less than two."
                     << std::endl);
             }
@@ -8418,7 +8417,7 @@ FlowModelSingleSpecies::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpe
         else
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed()\n"
+                << ": FlowModelSingleSpecies::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed()\n"
                 << "Cell data of 'MAX_WAVE_SPEED_Y' is not yet registered."
                 << std::endl);
         }
@@ -8455,12 +8454,12 @@ FlowModelSingleSpecies::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpe
             
             if (!d_data_velocity)
             {
-                computeGlobalCellDataVelocity(domain);
+                computeCellDataOfVelocity(domain);
             }
             
             if (!d_data_sound_speed)
             {
-                computeGlobalCellDataSoundSpeedWithPressure(domain);
+                computeCellDataOfSoundSpeedWithPressure(domain);
             }
             
             // Get the pointers to the cell data of maximum wave speed and velocity in z-direction, and sound speed.
@@ -8471,7 +8470,7 @@ FlowModelSingleSpecies::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpe
             if (d_dim == tbox::Dimension(1) || d_dim == tbox::Dimension(2))
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed()\n"
+                    << ": FlowModelSingleSpecies::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed()\n"
                     << "'MAX_WAVE_SPEED_Z' cannot be obtained for problem with dimension less than three."
                     << std::endl);
             }
@@ -8541,7 +8540,7 @@ FlowModelSingleSpecies::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpe
         else
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed()\n"
+                << ": FlowModelSingleSpecies::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed()\n"
                 << "Cell data of 'MAX_WAVE_SPEED_Z' is not yet registered."
                 << std::endl);
         }
@@ -8550,10 +8549,10 @@ FlowModelSingleSpecies::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpe
 
 
 /*
- * Compute the global cell data of maximum diffusivity with pressure and temperature in the registered patch.
+ * Compute the cell data of maximum diffusivity with pressure and temperature in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataMaxDiffusivityWithPressureAndTemperature(
+FlowModelSingleSpecies::computeCellDataOfMaxDiffusivityWithPressureAndTemperature(
     const hier::Box& domain)
 {
     if (!d_equation_of_shear_viscosity_mixing_rules ||
@@ -8562,7 +8561,7 @@ FlowModelSingleSpecies::computeGlobalCellDataMaxDiffusivityWithPressureAndTemper
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "computeGlobalCellDataMaxDiffusivityWithPressureAndTemperature()\n"
+            << "computeCellDataOfMaxDiffusivityWithPressureAndTemperature()\n"
             << "Either mixing rule of shear viscosity, bulk viscosity or"
             << " thermal conductivity is not initialized."
             << std::endl);
@@ -8598,16 +8597,16 @@ FlowModelSingleSpecies::computeGlobalCellDataMaxDiffusivityWithPressureAndTemper
         
         // Get the cell data of the variable density and pressure.
         boost::shared_ptr<pdat::CellData<double> > data_density =
-            getGlobalCellDataDensity();
+            getCellDataOfDensity();
         
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithInternalEnergy(domain);
+            computeCellDataOfPressureWithInternalEnergy(domain);
         }
         
         if (!d_data_temperature)
         {
-            computeGlobalCellDataTemperatureWithPressure(domain);
+            computeCellDataOfTemperatureWithPressure(domain);
         }
         
         /*
@@ -8837,7 +8836,7 @@ FlowModelSingleSpecies::computeGlobalCellDataMaxDiffusivityWithPressureAndTemper
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::"
-            << "computeGlobalCellDataMaxDiffusivityWithPressureAndTemperature()\n"
+            << "computeCellDataOfMaxDiffusivityWithPressureAndTemperature()\n"
             << "Cell data of 'MAX_DIFFUSIVITY' is not yet registered."
             << std::endl);
     }

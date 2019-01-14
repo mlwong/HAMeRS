@@ -697,14 +697,14 @@ FlowModelFourEqnConservative::registerPatchWithDataContext(
  * in the map is ignored.
  */
 void
-FlowModelFourEqnConservative::registerDerivedCellVariable(
+FlowModelFourEqnConservative::registerDerivedVariables(
     const std::unordered_map<std::string, hier::IntVector>& num_subghosts_of_data)
 {
     // Check whether a patch is already registered.
     if (!d_patch)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::registerDerivedCellVariable()\n"
+            << ": FlowModelFourEqnConservative::registerDerivedVariables()\n"
             << "No patch is registered yet."
             << std::endl);
     }
@@ -713,8 +713,8 @@ FlowModelFourEqnConservative::registerDerivedCellVariable(
     if (d_global_derived_cell_data_computed)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::registerDerivedCellVariable()\n"
-            << "Global derived cell data is already computed."
+            << ": FlowModelFourEqnConservative::registerDerivedVariables()\n"
+            << "Derived cell data is already computed."
             << std::endl);
     }
     
@@ -726,7 +726,7 @@ FlowModelFourEqnConservative::registerDerivedCellVariable(
             (it->second > d_num_ghosts))
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::registerDerivedCellVariable()\n"
+                << ": FlowModelFourEqnConservative::registerDerivedVariables()\n"
                 << "The number of sub-ghost cells of variables '"
                 << it->first
                 << "' is not between zero and d_num_ghosts."
@@ -895,7 +895,7 @@ FlowModelFourEqnConservative::registerDerivedCellVariable(
 void
 FlowModelFourEqnConservative::registerDerivedVariablesForCharacteristicProjectionOfConservativeVariables(
     const hier::IntVector& num_subghosts,
-    const AVERAGING::TYPE& averaging)
+    const AVERAGING::TYPE& averaging_type)
 {
     // Check whether a patch is already registered.
     if (!d_patch)
@@ -913,13 +913,13 @@ FlowModelFourEqnConservative::registerDerivedVariablesForCharacteristicProjectio
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
             << "registerDerivedVariablesForCharacteristicProjectionOfConservativeVariables()\n"
-            << "Global derived cell data is already computed."
+            << "Derived cell data is already computed."
             << std::endl);
     }
     
     NULL_USE(num_subghosts);
     
-    d_proj_var_conservative_averaging = averaging;
+    d_proj_var_conservative_averaging_type = averaging_type;
 }
 
 
@@ -930,7 +930,7 @@ FlowModelFourEqnConservative::registerDerivedVariablesForCharacteristicProjectio
 void
 FlowModelFourEqnConservative::registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
     const hier::IntVector& num_subghosts,
-    const AVERAGING::TYPE& averaging)
+    const AVERAGING::TYPE& averaging_type)
 {
     // Check whether a patch is already registered.
     if (!d_patch)
@@ -948,11 +948,11 @@ FlowModelFourEqnConservative::registerDerivedVariablesForCharacteristicProjectio
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
             << "registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables()\n"
-            << "Global derived cell data is already computed."
+            << "Derived cell data is already computed."
             << std::endl);
     }
     
-    d_proj_var_primitive_averaging = averaging;
+    d_proj_var_primitive_averaging_type = averaging_type;
     
     setNumberOfSubGhosts(
         num_subghosts,
@@ -962,18 +962,17 @@ FlowModelFourEqnConservative::registerDerivedVariablesForCharacteristicProjectio
 
 
 /*
- * Register the required variables for the computation of diffusive flux in the
- * registered patch.
+ * Register the required variables for the computation of diffusive fluxes in the registered patch.
  */
 void
-FlowModelFourEqnConservative::registerDiffusiveFlux(const hier::IntVector& num_subghosts)
+FlowModelFourEqnConservative::registerDiffusiveFluxes(const hier::IntVector& num_subghosts)
 {
     // Check whether a patch is already registered.
     if (!d_patch)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "registerDiffusiveFlux()\n"
+            << "registerDiffusiveFluxes()\n"
             << "No patch is registered yet."
             << std::endl);
     }
@@ -983,8 +982,8 @@ FlowModelFourEqnConservative::registerDiffusiveFlux(const hier::IntVector& num_s
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "registerDiffusiveFlux()\n"
-            << "Global derived cell data is already computed."
+            << "registerDiffusiveFluxes()\n"
+            << "Derived cell data is already computed."
             << std::endl);
     }
     
@@ -1125,16 +1124,16 @@ FlowModelFourEqnConservative::unregisterPatch()
 
 
 /*
- * Compute global cell data of different registered derived variables with the registered data context.
+ * Compute the cell data of different registered derived variables with the registered data context.
  */
 void
-FlowModelFourEqnConservative::computeGlobalDerivedCellData(const hier::Box& domain)
+FlowModelFourEqnConservative::computeDerivedCellData(const hier::Box& domain)
 {
     // Check whether a patch is already registered.
     if (!d_patch)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::computeGlobalDerivedCellData()\n"
+            << ": FlowModelFourEqnConservative::computeDerivedCellData()\n"
             << "No patch is registered yet."
             << std::endl);
     }
@@ -1144,7 +1143,7 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData(const hier::Box& doma
      */
     if (!d_global_derived_cell_data_computed)
     {
-        setGhostBoxesAndDimensionsDerivedCellVariables();
+        setDerivedCellVariableGhostBoxes();
     }
     
     // Compute the total density cell data.
@@ -1152,7 +1151,7 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData(const hier::Box& doma
     {
         if (!d_data_density)
         {
-            computeGlobalCellDataDensity(
+            computeCellDataOfDensity(
                 domain);
         }
     }
@@ -1162,7 +1161,7 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData(const hier::Box& doma
     {
         if (!d_data_mass_fractions)
         {
-            computeGlobalCellDataMassFractionsWithDensity(
+            computeCellDataOfMassFractionsWithDensity(
                 domain);
         }
     }
@@ -1172,7 +1171,7 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData(const hier::Box& doma
     {
         if (!d_data_mole_fractions)
         {
-            computeGlobalCellDataMoleFractionsWithMassFractions(
+            computeCellDataOfMoleFractionsWithMassFractions(
                 domain);
         }
     }
@@ -1182,7 +1181,7 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData(const hier::Box& doma
     {
         if (!d_data_velocity)
         {
-            computeGlobalCellDataVelocityWithDensity(
+            computeCellDataOfVelocityWithDensity(
                 domain);
         }
     }
@@ -1192,7 +1191,7 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData(const hier::Box& doma
     {
         if (!d_data_internal_energy)
         {
-            computeGlobalCellDataInternalEnergyWithDensityAndVelocity(
+            computeCellDataOfInternalEnergyWithDensityAndVelocity(
                 domain);
         }
     }
@@ -1202,7 +1201,7 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData(const hier::Box& doma
     {
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(
+            computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(
                 domain);
         }
     }
@@ -1212,7 +1211,7 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData(const hier::Box& doma
     {
         if (!d_data_sound_speed)
         {
-            computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure(
+            computeCellDataOfSoundSpeedWithDensityMassFractionsAndPressure(
                 domain);
         }
     }
@@ -1222,7 +1221,7 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData(const hier::Box& doma
     {
         if (!d_data_temperature)
         {
-            computeGlobalCellDataTemperatureWithDensityMassFractionsAndPressure(
+            computeCellDataOfTemperatureWithDensityMassFractionsAndPressure(
                 domain);
         }
     }
@@ -1232,7 +1231,7 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData(const hier::Box& doma
     {
         if (!d_data_convective_flux_x)
         {
-            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
+            computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 DIRECTION::X_DIRECTION,
                 domain);
         }
@@ -1243,7 +1242,7 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData(const hier::Box& doma
     {
         if (!d_data_convective_flux_y)
         {
-            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
+            computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 DIRECTION::Y_DIRECTION,
                 domain);
         }
@@ -1254,7 +1253,7 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData(const hier::Box& doma
     {
         if (!d_data_convective_flux_z)
         {
-            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
+            computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 DIRECTION::Z_DIRECTION,
                 domain);
         }
@@ -1265,7 +1264,7 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData(const hier::Box& doma
     {
         if (!d_data_max_wave_speed_x)
         {
-            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
+            computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                 DIRECTION::X_DIRECTION,
                 domain);
         }
@@ -1276,7 +1275,7 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData(const hier::Box& doma
     {
         if (!d_data_max_wave_speed_y)
         {
-            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
+            computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                 DIRECTION::Y_DIRECTION,
                 domain);
         }
@@ -1287,7 +1286,7 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData(const hier::Box& doma
     {
         if (!d_data_max_wave_speed_z)
         {
-            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
+            computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                 DIRECTION::Z_DIRECTION,
                 domain);
         }
@@ -1298,7 +1297,7 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData(const hier::Box& doma
     {
         if (!d_data_max_diffusivity)
         {
-            computeGlobalCellDataMaxDiffusivityWithDensityMassFractionsPressureAndTemperature(
+            computeCellDataOfMaxDiffusivityWithDensityMassFractionsPressureAndTemperature(
                 domain);
         }
     }
@@ -1308,16 +1307,16 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData(const hier::Box& doma
 
 
 /*
- * Get the global cell data of one cell variable in the registered patch.
+ * Get the cell data of one cell variable in the registered patch.
  */
 boost::shared_ptr<pdat::CellData<double> >
-FlowModelFourEqnConservative::getGlobalCellData(const std::string& variable_key)
+FlowModelFourEqnConservative::getCellData(const std::string& variable_key)
 {
     // Check whether a patch is already registered.
     if (!d_patch)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
+            << ": FlowModelFourEqnConservative::getCellData()\n"
             << "No patch is registered yet."
             << std::endl);
     }
@@ -1326,22 +1325,22 @@ FlowModelFourEqnConservative::getGlobalCellData(const std::string& variable_key)
     
     if (variable_key == "PARTIAL_DENSITY")
     {
-        cell_data = getGlobalCellDataPartialDensities();
+        cell_data = getCellDataOfPartialDensities();
     }
     else if (variable_key == "MOMENTUM")
     {
-        cell_data = getGlobalCellDataMomentum();
+        cell_data = getCellDataOfMomentum();
     }
     else if (variable_key == "TOTAL_ENERGY")
     {
-        cell_data = getGlobalCellDataTotalEnergy();
+        cell_data = getCellDataOfTotalEnergy();
     }
     else if (variable_key == "DENSITY")
     {
         if (!d_data_density)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
+                << ": FlowModelFourEqnConservative::getCellData()\n"
                 << "Cell data of 'DENSITY' is not registered/computed yet."
                 << std::endl);
         }
@@ -1352,7 +1351,7 @@ FlowModelFourEqnConservative::getGlobalCellData(const std::string& variable_key)
         if (!d_data_mass_fractions)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
+                << ": FlowModelFourEqnConservative::getCellData()\n"
                 << "Cell data of 'MASS_FRACTIONS' is not registered/computed yet."
                 << std::endl);
         }
@@ -1363,7 +1362,7 @@ FlowModelFourEqnConservative::getGlobalCellData(const std::string& variable_key)
         if (!d_data_mole_fractions)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
+                << ": FlowModelFourEqnConservative::getCellData()\n"
                 << "Cell data of 'MOLE_FRACTIONS' is not registered/computed yet."
                 << std::endl);
         }
@@ -1374,7 +1373,7 @@ FlowModelFourEqnConservative::getGlobalCellData(const std::string& variable_key)
         if (!d_data_velocity)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
+                << ": FlowModelFourEqnConservative::getCellData()\n"
                 << "Cell data of 'VELOCITY' is not registered/computed yet."
                 << std::endl);
         }
@@ -1385,7 +1384,7 @@ FlowModelFourEqnConservative::getGlobalCellData(const std::string& variable_key)
         if (!d_data_internal_energy)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
+                << ": FlowModelFourEqnConservative::getCellData()\n"
                 << "Cell data of 'INTERNAL_ENERGY' is not registered/computed yet."
                 << std::endl);
         }
@@ -1396,7 +1395,7 @@ FlowModelFourEqnConservative::getGlobalCellData(const std::string& variable_key)
         if (!d_data_pressure)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
+                << ": FlowModelFourEqnConservative::getCellData()\n"
                 << "Cell data of 'PRESSURE' is not registered/computed yet."
                 << std::endl);
         }
@@ -1407,7 +1406,7 @@ FlowModelFourEqnConservative::getGlobalCellData(const std::string& variable_key)
         if (!d_data_sound_speed)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
+                << ": FlowModelFourEqnConservative::getCellData()\n"
                 << "Cell data of 'SOUND_SPEED' is not registered/computed yet."
                 << std::endl);
         }
@@ -1418,7 +1417,7 @@ FlowModelFourEqnConservative::getGlobalCellData(const std::string& variable_key)
         if (!d_data_temperature)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
+                << ": FlowModelFourEqnConservative::getCellData()\n"
                 << "Cell data of 'TEMPERATURE' is not registered/computed yet."
                 << std::endl);
         }
@@ -1429,7 +1428,7 @@ FlowModelFourEqnConservative::getGlobalCellData(const std::string& variable_key)
         if (!d_data_convective_flux_x)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
+                << ": FlowModelFourEqnConservative::getCellData()\n"
                 << "Cell data of 'CONVECTIVE_FLUX_X' is not registered/computed yet."
                 << std::endl);
         }
@@ -1440,7 +1439,7 @@ FlowModelFourEqnConservative::getGlobalCellData(const std::string& variable_key)
         if (!d_data_convective_flux_y)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
+                << ": FlowModelFourEqnConservative::getCellData()\n"
                 << "Cell data of 'CONVECTIVE_FLUX_Y' is not registered/computed yet."
                 << std::endl);
         }
@@ -1451,7 +1450,7 @@ FlowModelFourEqnConservative::getGlobalCellData(const std::string& variable_key)
         if (!d_data_convective_flux_z)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
+                << ": FlowModelFourEqnConservative::getCellData()\n"
                 << "Cell data of 'CONVECTIVE_FLUX_Z' is not registered/computed yet."
                 << std::endl);
         }
@@ -1462,7 +1461,7 @@ FlowModelFourEqnConservative::getGlobalCellData(const std::string& variable_key)
         if (!d_data_max_wave_speed_x)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
+                << ": FlowModelFourEqnConservative::getCellData()\n"
                 << "Cell data of 'MAX_WAVE_SPEED_X' is not registered/computed yet."
                 << std::endl);
         }
@@ -1473,7 +1472,7 @@ FlowModelFourEqnConservative::getGlobalCellData(const std::string& variable_key)
         if (!d_data_max_wave_speed_y)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
+                << ": FlowModelFourEqnConservative::getCellData()\n"
                 << "Cell data of 'MAX_WAVE_SPEED_Y' is not registered/computed yet."
                 << std::endl);
         }
@@ -1484,7 +1483,7 @@ FlowModelFourEqnConservative::getGlobalCellData(const std::string& variable_key)
         if (!d_data_max_wave_speed_z)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
+                << ": FlowModelFourEqnConservative::getCellData()\n"
                 << "Cell data of 'MAX_WAVE_SPEED_Z' is not registered/computed yet."
                 << std::endl);
         }
@@ -1495,7 +1494,7 @@ FlowModelFourEqnConservative::getGlobalCellData(const std::string& variable_key)
         if (!d_data_max_diffusivity)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
+                << ": FlowModelFourEqnConservative::getCellData()\n"
                 << "Cell data of 'MAX_DIFFUSIVITY' is not registered/computed yet."
                 << std::endl);
         }
@@ -1504,7 +1503,7 @@ FlowModelFourEqnConservative::getGlobalCellData(const std::string& variable_key)
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
+            << ": FlowModelFourEqnConservative::getCellData()\n"
             << "Unknown cell data with variable_key = '" << variable_key
             << "' requested."
             << std::endl);
@@ -1515,10 +1514,10 @@ FlowModelFourEqnConservative::getGlobalCellData(const std::string& variable_key)
 
 
 /*
- * Get the global cell data of different cell variables in the registered patch.
+ * Get the cell data of different cell variables in the registered patch.
  */
 std::vector<boost::shared_ptr<pdat::CellData<double> > >
-FlowModelFourEqnConservative::getGlobalCellData(
+FlowModelFourEqnConservative::getCellData(
     const std::vector<std::string>& variable_keys)
 {
     std::vector<boost::shared_ptr<pdat::CellData<double> > > cell_data(
@@ -1526,7 +1525,7 @@ FlowModelFourEqnConservative::getGlobalCellData(
     
     for (int vi = 0; static_cast<int>(variable_keys.size()); vi++)
     {
-        cell_data[vi] = getGlobalCellData(variable_keys[vi]);
+        cell_data[vi] = getCellData(variable_keys[vi]);
     }
     
     return cell_data;
@@ -1534,23 +1533,23 @@ FlowModelFourEqnConservative::getGlobalCellData(
 
 
 /*
- * Fill the interior global cell data of conservative variables with zeros.
+ * Fill the cell data of conservative variables in the interior box with value zero.
  */
 void
-FlowModelFourEqnConservative::fillZeroGlobalCellDataConservativeVariables()
+FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero()
 {
     // Check whether a patch is already registered.
     if (!d_patch)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::fillZeroGlobalCellDataConservativeVariables()\n"
+            << ": FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero()\n"
             << "No patch is registered yet."
             << std::endl);
     }
     
-    boost::shared_ptr<pdat::CellData<double> > data_partial_densities = getGlobalCellDataPartialDensities();
-    boost::shared_ptr<pdat::CellData<double> > data_momentum = getGlobalCellDataMomentum();
-    boost::shared_ptr<pdat::CellData<double> > data_total_energy = getGlobalCellDataTotalEnergy();
+    boost::shared_ptr<pdat::CellData<double> > data_partial_densities = getCellDataOfPartialDensities();
+    boost::shared_ptr<pdat::CellData<double> > data_momentum = getCellDataOfMomentum();
+    boost::shared_ptr<pdat::CellData<double> > data_total_energy = getCellDataOfTotalEnergy();
     
     data_partial_densities->fillAll(double(0), d_interior_box);
     data_momentum->fillAll(double(0), d_interior_box);
@@ -1559,16 +1558,16 @@ FlowModelFourEqnConservative::fillZeroGlobalCellDataConservativeVariables()
 
 
 /*
- * Update the interior global cell data of conservative variables.
+ * Update the cell data of conservative variables in the interior box after time advancement.
  */
 void
-FlowModelFourEqnConservative::updateGlobalCellDataConservativeVariables()
+FlowModelFourEqnConservative::updateCellDataOfConservativeVariables()
 {
     // Check whether a patch is already registered.
     if (!d_patch)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::updateGlobalCellDataConservativeVariables()\n"
+            << ": FlowModelFourEqnConservative::updateCellDataOfConservativeVariables()\n"
             << "No patch is registered yet."
             << std::endl);
     }
@@ -1576,68 +1575,68 @@ FlowModelFourEqnConservative::updateGlobalCellDataConservativeVariables()
 
 
 /*
- * Get the global cell data of the conservative variables in the registered patch.
+ * Get the cell data of the conservative variables in the registered patch.
  */
 std::vector<boost::shared_ptr<pdat::CellData<double> > >
-FlowModelFourEqnConservative::getGlobalCellDataConservativeVariables()
+FlowModelFourEqnConservative::getCellDataOfConservativeVariables()
 {
     // Check whether a patch is already registered.
     if (!d_patch)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::getGlobalCellDataConservativeVariables()\n"
+            << ": FlowModelFourEqnConservative::getCellDataOfConservativeVariables()\n"
             << "No patch is registered yet."
             << std::endl);
     }
     
-    std::vector<boost::shared_ptr<pdat::CellData<double> > > global_cell_data;
-    global_cell_data.reserve(3);
+    std::vector<boost::shared_ptr<pdat::CellData<double> > > cell_data;
+    cell_data.reserve(3);
     
-    global_cell_data.push_back(getGlobalCellDataPartialDensities());
-    global_cell_data.push_back(getGlobalCellDataMomentum());
-    global_cell_data.push_back(getGlobalCellDataTotalEnergy());
+    cell_data.push_back(getCellDataOfPartialDensities());
+    cell_data.push_back(getCellDataOfMomentum());
+    cell_data.push_back(getCellDataOfTotalEnergy());
     
-    return global_cell_data;
+    return cell_data;
 }
 
 
 /*
- * Get the global cell data of the primitive variables in the registered patch.
+ * Get the cell data of the primitive variables in the registered patch.
  */
 std::vector<boost::shared_ptr<pdat::CellData<double> > >
-FlowModelFourEqnConservative::getGlobalCellDataPrimitiveVariables()
+FlowModelFourEqnConservative::getCellDataOfPrimitiveVariables()
 {
     // Check whether a patch is already registered.
     if (!d_patch)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::getGlobalCellDataPrimitiveVariables()\n"
+            << ": FlowModelFourEqnConservative::getCellDataOfPrimitiveVariables()\n"
             << "No patch is registered yet."
             << std::endl);
     }
     
-    std::vector<boost::shared_ptr<pdat::CellData<double> > > global_cell_data;
-    global_cell_data.reserve(3);
+    std::vector<boost::shared_ptr<pdat::CellData<double> > > cell_data;
+    cell_data.reserve(3);
     
-    global_cell_data.push_back(getGlobalCellDataPartialDensities());
+    cell_data.push_back(getCellDataOfPartialDensities());
     if (!d_data_velocity)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::getGlobalCellDataPrimitiveVariables()\n"
+            << ": FlowModelFourEqnConservative::getCellDataOfPrimitiveVariables()\n"
             << "Cell data of 'VELOCITY' is not registered/computed yet."
             << std::endl);
     }
-    global_cell_data.push_back(d_data_velocity);
+    cell_data.push_back(d_data_velocity);
     if (!d_data_pressure)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::getGlobalCellDataPrimitiveVariables()\n"
+            << ": FlowModelFourEqnConservative::getCellDataOfPrimitiveVariables()\n"
             << "Cell data of 'PRESSURE' is not registered/computed yet."
             << std::endl);
     }
-    global_cell_data.push_back(d_data_pressure);
+    cell_data.push_back(d_data_pressure);
     
-    return global_cell_data;
+    return cell_data;
 }
 
 
@@ -1670,30 +1669,30 @@ FlowModelFourEqnConservative::getNumberOfProjectionVariablesForPrimitiveVariable
 
 
 /*
- * Compute global side data of the projection variables for transformation between
- * conservative variables and characteristic variables.
+ * Compute the side data of the projection variables for transformation between conservative variables and
+ * characteristic variables.
  */
 void
-FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForConservativeVariables(
+FlowModelFourEqnConservative::computeSideDataOfProjectionVariablesForConservativeVariables(
     std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
 {
     NULL_USE(projection_variables);
     
     TBOX_ERROR(d_object_name
         << ": FlowModelFourEqnConservative::"
-        << "computeGlobalSideDataProjectionVariablesForConservativeVariables()\n"
-        << "Method computeGlobalSideDataProjectionVariablesForConservativeVariables()"
+        << "computeSideDataOfProjectionVariablesForConservativeVariables()\n"
+        << "Method computeSideDataOfProjectionVariablesForConservativeVariables()"
         << " is not yet implemented."
         << std::endl);
 }
 
 
 /*
- * Compute global side data of the projection variables for transformation between
- * primitive variables and characteristic variables.
+ * Compute the side data of the projection variables for transformation between primitive variables and characteristic
+ * variables.
  */
 void
-FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimitiveVariables(
+FlowModelFourEqnConservative::computeSideDataOfProjectionVariablesForPrimitiveVariables(
     std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
 {
     // Create empty box.
@@ -1715,7 +1714,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+            << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
             << "There should be number of species projection plus two variables."
             << std::endl);
     }
@@ -1732,7 +1731,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::"
-                << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+                << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
                 << "The interior dimension of the projection variables does not match that of patch."
                 << std::endl);
         }
@@ -1744,7 +1743,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::"
-                << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+                << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
                 << "The projection variables don't have same ghost cell width."
                 << std::endl);
         }
@@ -1754,7 +1753,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+            << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
             << "The projection variables have ghost cell width larger than that of density."
             << std::endl);
     }
@@ -1763,14 +1762,14 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+            << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
             << "The projection variables have ghost cell width larger than that of sound speed."
             << std::endl);
     }
     
     // Get the cell data of the variable partial densities.
     boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
-        getGlobalCellDataPartialDensities();
+        getCellDataOfPartialDensities();
     
     // Get the pointers to the cell data of partial densities, total density and sound speed.
     std::vector<double*> rho_Y;
@@ -1781,12 +1780,12 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
     }
     if (!d_data_density)
     {
-        computeGlobalCellDataDensity(empty_box);
+        computeCellDataOfDensity(empty_box);
     }
     double* rho = d_data_density->getPointer(0);
     if (!d_data_sound_speed)
     {
-        computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure(empty_box);
+        computeCellDataOfSoundSpeedWithDensityMassFractionsAndPressure(empty_box);
     }
     double* c = d_data_sound_speed->getPointer(0);
     
@@ -1808,7 +1807,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
         const int num_subghosts_0_density = d_num_subghosts_density[0];
         const int num_subghosts_0_sound_speed = d_num_subghosts_sound_speed[0];
         
-        switch (d_proj_var_primitive_averaging)
+        switch (d_proj_var_primitive_averaging_type)
         {
             case AVERAGING::SIMPLE:
             {
@@ -1865,7 +1864,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelFourEqnConservative::"
-                    << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+                    << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
                     << "Roe averaging is not yet implemented."
                     << std::endl);
                 
@@ -1875,8 +1874,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelFourEqnConservative::"
-                    << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
-                    << "Unknown d_proj_var_primitive_averaging given."
+                    << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
+                    << "Unknown d_proj_var_primitive_averaging_type given."
                     << std::endl);
             }
         }
@@ -1902,7 +1901,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
         const int num_subghosts_1_sound_speed = d_num_subghosts_sound_speed[1];
         const int subghostcell_dim_0_sound_speed = d_subghostcell_dims_sound_speed[0];
         
-        switch (d_proj_var_primitive_averaging)
+        switch (d_proj_var_primitive_averaging_type)
         {
             case AVERAGING::SIMPLE:
             {
@@ -2046,7 +2045,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelFourEqnConservative::"
-                    << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+                    << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
                     << "Roe averaging is not yet implemented."
                     << std::endl);
                 
@@ -2056,8 +2055,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelFourEqnConservative::"
-                    << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
-                    << "Unknown d_proj_var_primitive_averaging given."
+                    << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
+                    << "Unknown d_proj_var_primitive_averaging_type given."
                     << std::endl);
             }
         }
@@ -2092,7 +2091,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
         const int subghostcell_dim_0_sound_speed = d_subghostcell_dims_sound_speed[0];
         const int subghostcell_dim_1_sound_speed = d_subghostcell_dims_sound_speed[1];
         
-        switch (d_proj_var_primitive_averaging)
+        switch (d_proj_var_primitive_averaging_type)
         {
             case AVERAGING::SIMPLE:
             {
@@ -2369,7 +2368,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelFourEqnConservative::"
-                    << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+                    << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
                     << "Roe averaging is not yet implemented."
                     << std::endl);
                 
@@ -2379,8 +2378,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelFourEqnConservative::"
-                    << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
-                    << "Unknown d_proj_var_primitive_averaging given."
+                    << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
+                    << "Unknown d_proj_var_primitive_averaging_type given."
                     << std::endl);
             }
         }
@@ -2389,10 +2388,10 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
 
 
 /*
- * Compute global side data of characteristic variables from conservative variables.
+ * Compute the side data of characteristic variables from conservative variables.
  */
 void
-FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromConservativeVariables(
+FlowModelFourEqnConservative::computeSideDataOfCharacteristicVariablesFromConservativeVariables(
     std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
     const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
@@ -2405,18 +2404,18 @@ FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromCo
     
     TBOX_ERROR(d_object_name
         << ": FlowModelFourEqnConservative::"
-        << "computeGlobalSideDataCharacteristicVariablesFromConservativeVariables()\n"
-        << "Method computeGlobalSideDataCharacteristicVariablesFromConservativeVariables()"
+        << "computeSideDataOfCharacteristicVariablesFromConservativeVariables()\n"
+        << "Method computeSideDataOfCharacteristicVariablesFromConservativeVariables()"
         << " is not yet implemented."
         << std::endl);
 }
 
 
 /*
- * Compute global side data of characteristic variables from primitive variables.
+ * Compute the side data of characteristic variables from primitive variables.
  */
 void
-FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables(
+FlowModelFourEqnConservative::computeSideDataOfCharacteristicVariablesFromPrimitiveVariables(
     std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
     const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
@@ -2462,7 +2461,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPr
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+            << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
             << "The number of characteristic variables are incorrect."
             << std::endl);
     }
@@ -2470,7 +2469,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPr
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+            << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
             << "The number of primitive variables are incorrect."
             << std::endl);
     }
@@ -2480,7 +2479,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPr
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+            << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
             << "The depths of one or more primitive variables are incorrect."
             << std::endl);
     }
@@ -2488,7 +2487,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPr
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+            << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
             << "There should be number of species projection plus two variables."
             << std::endl);
     }
@@ -2506,7 +2505,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPr
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::"
-                << "computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+                << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
                 << "The interior dimension of the characteristic variables does not match that of patch."
                 << std::endl);
         }
@@ -2520,7 +2519,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPr
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::"
-                << "computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+                << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
                 << "The interior dimension of the primitive variables does not match that of patch."
                 << std::endl);
         }
@@ -2532,7 +2531,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPr
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::"
-                << "computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+                << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
                 << "The interior dimension of the projection variables does not match that of patch."
                 << std::endl);
         }
@@ -2544,7 +2543,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPr
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::"
-                << "computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+                << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
                 << "The characteristic variables don't have same ghost cell width."
                 << std::endl);
         }
@@ -2555,7 +2554,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPr
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::"
-                << "computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+                << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
                 << "The projection variables don't have same ghost cell width."
                 << std::endl);
         }
@@ -2565,7 +2564,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPr
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+            << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
             << "The ghost cell width of the projection variables does not match that of"
             << " characteristic variables."
             << std::endl);
@@ -2580,7 +2579,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPr
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::"
-                << "computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+                << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
                 << "The offset index is too large or the number of ghost of characteristic variable"
                 << " is too large."
                 << std::endl);
@@ -3168,10 +3167,10 @@ FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPr
 
 
 /*
- * Compute global side data of conservative variables from characteristic variables.
+ * Compute the side data of conservative variables from characteristic variables.
  */
 void
-FlowModelFourEqnConservative::computeGlobalSideDataConservativeVariablesFromCharacteristicVariables(
+FlowModelFourEqnConservative::computeSideDataOfConservativeVariablesFromCharacteristicVariables(
     std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
@@ -3182,18 +3181,18 @@ FlowModelFourEqnConservative::computeGlobalSideDataConservativeVariablesFromChar
     
     TBOX_ERROR(d_object_name
         << ": FlowModelFourEqnConservative::"
-        << "computeGlobalSideDataConservativeVariablesFromCharacteristicVariables()\n"
-        << "Method computeGlobalSideDataConservativeVariablesFromCharacteristicVariables()"
+        << "computeSideDataOfConservativeVariablesFromCharacteristicVariables()\n"
+        << "Method computeSideDataOfConservativeVariablesFromCharacteristicVariables()"
         << " is not yet implemented."
         << std::endl);
 }
 
 
 /*
- * Compute global side data of primitive variables from characteristic variables.
+ * Compute the side data of primitive variables from characteristic variables.
  */
 void
-FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
+FlowModelFourEqnConservative::computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
     std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
@@ -3225,7 +3224,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharact
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+            << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
             << "The number of characteristic variables are incorrect."
             << std::endl);
     }
@@ -3233,7 +3232,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharact
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+            << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
             << "The number of primitive variables are incorrect."
             << std::endl);
     }
@@ -3241,7 +3240,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharact
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+            << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
             << "There should be number of species projection plus two variables."
             << std::endl);
     }
@@ -3259,7 +3258,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharact
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::"
-                << "computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+                << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
                 << "The interior dimension of the primitive variables does not match that of patch."
                 << std::endl);
         }
@@ -3273,7 +3272,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharact
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::"
-                << "computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+                << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
                 << "The interior dimension of the characteristic variables does not match that of patch."
                 << std::endl);
         }
@@ -3285,7 +3284,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharact
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::"
-                << "computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+                << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
                 << "The interior dimension of the projection variables does not match that of patch."
                 << std::endl);
         }
@@ -3297,7 +3296,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharact
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::"
-                << "computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+                << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
                 << "The primitive variables don't have same ghost cell width."
                 << std::endl);
         }
@@ -3308,7 +3307,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharact
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::"
-                << "computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+                << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
                 << "The characteristic variables don't have same ghost cell width."
                 << std::endl);
         }
@@ -3319,7 +3318,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharact
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::"
-                << "computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+                << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
                 << "The projection variables don't have same ghost cell width."
                 << std::endl);
         }
@@ -3329,7 +3328,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharact
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+            << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
             << "The ghost cell width of the projection variables does not match that of"
             << " primitive variables."
             << std::endl);
@@ -3338,7 +3337,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharact
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+            << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
             << "The ghost cell width of the projection variables does not match that of"
             << " characteristic variables."
             << std::endl);
@@ -3819,7 +3818,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharact
  * Check whether the given side conservative variables are within the bounds.
  */
 void
-FlowModelFourEqnConservative::checkGlobalSideDataConservativeVariablesBounded(
+FlowModelFourEqnConservative::checkSideDataOfConservativeVariablesBounded(
     boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables)
 {
@@ -3847,7 +3846,7 @@ FlowModelFourEqnConservative::checkGlobalSideDataConservativeVariablesBounded(
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "checkGlobalSideDataConservativeVariablesBounded()\n"
+            << "checkSideDataOfConservativeVariablesBounded()\n"
             << "The number of conservative variables are incorrect."
             << std::endl);
     }
@@ -3865,7 +3864,7 @@ FlowModelFourEqnConservative::checkGlobalSideDataConservativeVariablesBounded(
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::"
-                << "checkGlobalSideDataConservativeVariablesBounded()\n"
+                << "checkSideDataOfConservativeVariablesBounded()\n"
                 << "The interior dimension of the conservative variables does not match that of patch."
                 << std::endl);
         }
@@ -3875,7 +3874,7 @@ FlowModelFourEqnConservative::checkGlobalSideDataConservativeVariablesBounded(
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "checkGlobalSideDataConservativeVariablesBounded()\n"
+            << "checkSideDataOfConservativeVariablesBounded()\n"
             << "The interior dimension of the flag does not match that of patch."
             << std::endl);
     }
@@ -3886,7 +3885,7 @@ FlowModelFourEqnConservative::checkGlobalSideDataConservativeVariablesBounded(
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::"
-                << "checkGlobalSideDataConservativeVariablesBounded()\n"
+                << "checkSideDataOfConservativeVariablesBounded()\n"
                 << "The conservative variables don't have same ghost cell width."
                 << std::endl);
         }
@@ -3896,7 +3895,7 @@ FlowModelFourEqnConservative::checkGlobalSideDataConservativeVariablesBounded(
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "checkGlobalSideDataConservativeVariablesBounded()\n"
+            << "checkSideDataOfConservativeVariablesBounded()\n"
             << "The ghost cell width of the flag does not match that of conservative variables."
             << std::endl);
     }
@@ -4575,7 +4574,7 @@ FlowModelFourEqnConservative::checkGlobalSideDataConservativeVariablesBounded(
  * Check whether the given side primitive variables are within the bounds.
  */
 void
-FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
+FlowModelFourEqnConservative::checkSideDataOfPrimitiveVariablesBounded(
     boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables)
 {
@@ -4603,7 +4602,7 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "checkGlobalSideDataPrimitiveVariablesBounded()\n"
+            << "checkSideDataOfPrimitiveVariablesBounded()\n"
             << "The number of primitive variables are incorrect."
             << std::endl);
     }
@@ -4621,7 +4620,7 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::"
-                << "checkGlobalSideDataPrimitiveVariablesBounded()\n"
+                << "checkSideDataOfPrimitiveVariablesBounded()\n"
                 << "The interior dimension of the primitive variables does not match that of patch."
                 << std::endl);
         }
@@ -4631,7 +4630,7 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "checkGlobalSideDataPrimitiveVariablesBounded()\n"
+            << "checkSideDataOfPrimitiveVariablesBounded()\n"
             << "The interior dimension of the flag does not match that of patch."
             << std::endl);
     }
@@ -4642,7 +4641,7 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::"
-                << "checkGlobalSideDataPrimitiveVariablesBounded()\n"
+                << "checkSideDataOfPrimitiveVariablesBounded()\n"
                 << "The primitive variables don't have same ghost cell width."
                 << std::endl);
         }
@@ -4652,7 +4651,7 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "checkGlobalSideDataPrimitiveVariablesBounded()\n"
+            << "checkSideDataOfPrimitiveVariablesBounded()\n"
             << "The ghost cell width of the flag does not match that of primitive variables."
             << std::endl);
     }
@@ -5328,10 +5327,10 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
 
 
 /*
- * Convert vector of pointers of conservative cell data to vectors of pointers of primitive cell data.
+ * Convert conservative variables to primitive variables.
  */
 void
-FlowModelFourEqnConservative::convertLocalCellDataPointersConservativeVariablesToPrimitiveVariables(
+FlowModelFourEqnConservative::convertConservativeVariablesToPrimitiveVariables(
     const std::vector<const double*>& conservative_variables,
     const std::vector<double*>& primitive_variables)
 {
@@ -5410,10 +5409,10 @@ FlowModelFourEqnConservative::convertLocalCellDataPointersConservativeVariablesT
 
 
 /*
- * Convert vector of pointers of primitive cell data to vectors of pointers of conservative cell data.
+ * Convert primitive variables to conservative variables.
  */
 void
-FlowModelFourEqnConservative::convertLocalCellDataPointersPrimitiveVariablesToConservativeVariables(
+FlowModelFourEqnConservative::convertPrimitiveVariablesToConservativeVariables(
     const std::vector<const double*>& primitive_variables,
     const std::vector<double*>& conservative_variables)
 {
@@ -5490,17 +5489,17 @@ FlowModelFourEqnConservative::getDiffusiveFluxVariablesForDerivative(
     
     if (!d_data_mass_fractions)
     {
-        computeGlobalCellDataMassFractionsWithDensity(empty_box);
+        computeCellDataOfMassFractionsWithDensity(empty_box);
     }
     
     if (!d_data_velocity)
     {
-        computeGlobalCellDataVelocityWithDensity(empty_box);
+        computeCellDataOfVelocityWithDensity(empty_box);
     }
     
     if (!d_data_temperature)
     {
-        computeGlobalCellDataTemperatureWithDensityMassFractionsAndPressure(empty_box);
+        computeCellDataOfTemperatureWithDensityMassFractionsAndPressure(empty_box);
     }
     
     if (d_dim == tbox::Dimension(1))
@@ -6553,27 +6552,27 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
     {
         if (!d_data_density)
         {
-            computeGlobalCellDataDensity(empty_box);
+            computeCellDataOfDensity(empty_box);
         }
         
         if (!d_data_mass_fractions)
         {
-            computeGlobalCellDataMassFractionsWithDensity(empty_box);
+            computeCellDataOfMassFractionsWithDensity(empty_box);
         }
         
         if (!d_data_velocity)
         {
-            computeGlobalCellDataVelocityWithDensity(empty_box);
+            computeCellDataOfVelocityWithDensity(empty_box);
         }
         
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(empty_box);
+            computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(empty_box);
         }
         
         if (!d_data_temperature)
         {
-            computeGlobalCellDataTemperatureWithDensityMassFractionsAndPressure(empty_box);
+            computeCellDataOfTemperatureWithDensityMassFractionsAndPressure(empty_box);
         }
         
         /*
@@ -9784,10 +9783,10 @@ FlowModelFourEqnConservative::setNumberOfSubGhosts(
 
 
 /*
- * Set the ghost boxes and their dimensions of derived cell variables.
+ * Set the ghost boxes of derived cell variables.
  */
 void
-FlowModelFourEqnConservative::setGhostBoxesAndDimensionsDerivedCellVariables()
+FlowModelFourEqnConservative::setDerivedCellVariableGhostBoxes()
 {
     if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
     {
@@ -9904,10 +9903,10 @@ FlowModelFourEqnConservative::setGhostBoxesAndDimensionsDerivedCellVariables()
 
 
 /*
- * Get the global cell data of partial densities in the registered patch.
+ * Get the cell data of partial densities in the registered patch.
  */
 boost::shared_ptr<pdat::CellData<double> >
-FlowModelFourEqnConservative::getGlobalCellDataPartialDensities()
+FlowModelFourEqnConservative::getCellDataOfPartialDensities()
 {
     // Get the cell data of the registered variable partial densities.
     boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
@@ -9919,10 +9918,10 @@ FlowModelFourEqnConservative::getGlobalCellDataPartialDensities()
 
 
 /*
- * Get the global cell data of momentum in the registered patch.
+ * Get the cell data of momentum in the registered patch.
  */
 boost::shared_ptr<pdat::CellData<double> >
-FlowModelFourEqnConservative::getGlobalCellDataMomentum()
+FlowModelFourEqnConservative::getCellDataOfMomentum()
 {
     // Get the cell data of the registered variable momentum.
     boost::shared_ptr<pdat::CellData<double> > data_momentum(
@@ -9934,10 +9933,10 @@ FlowModelFourEqnConservative::getGlobalCellDataMomentum()
 
 
 /*
- * Get the global cell data of total energy in the registered patch.
+ * Get the cell data of total energy in the registered patch.
  */
 boost::shared_ptr<pdat::CellData<double> >
-FlowModelFourEqnConservative::getGlobalCellDataTotalEnergy()
+FlowModelFourEqnConservative::getCellDataOfTotalEnergy()
 {
     // Get the cell data of the registered variable total energy.
     boost::shared_ptr<pdat::CellData<double> > data_total_energy(
@@ -9949,10 +9948,10 @@ FlowModelFourEqnConservative::getGlobalCellDataTotalEnergy()
 
 
 /*
- * Compute the global cell data of density in the registered patch.
+ * Compute the cell data of density in the registered patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataDensity(
+FlowModelFourEqnConservative::computeCellDataOfDensity(
     const hier::Box& domain)
 {
     if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
@@ -9963,7 +9962,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataDensity(
         
         // Get the cell data of the variable partial densities.
         boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
-            getGlobalCellDataPartialDensities();
+            getCellDataOfPartialDensities();
         
         // Compute the density field.
         d_equation_of_state_mixing_rules->computeMixtureDensity(
@@ -9974,7 +9973,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataDensity(
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::computeGlobalCellDataDensity()\n"
+            << ": FlowModelFourEqnConservative::computeCellDataOfDensity()\n"
             << "Cell data of 'DENSITY' is not yet registered."
             << std::endl);
     }
@@ -9982,10 +9981,10 @@ FlowModelFourEqnConservative::computeGlobalCellDataDensity(
 
 
 /*
- * Compute the global cell data of mass fractions with density in the registered patch.
+ * Compute the cell data of mass fractions with density in the registered patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataMassFractionsWithDensity(
+FlowModelFourEqnConservative::computeCellDataOfMassFractionsWithDensity(
     const hier::Box& domain)
 {
     if (d_num_subghosts_mass_fractions > -hier::IntVector::getOne(d_dim))
@@ -10018,11 +10017,11 @@ FlowModelFourEqnConservative::computeGlobalCellDataMassFractionsWithDensity(
         
         // Get the cell data of the variable partial densities.
         boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
-            getGlobalCellDataPartialDensities();
+            getCellDataOfPartialDensities();
         
         if (!d_data_density)
         {
-            computeGlobalCellDataDensity(domain);
+            computeCellDataOfDensity(domain);
         }
         
         // Get the pointers to the cell data of mass fractions, denisty and partial densities.
@@ -10186,7 +10185,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMassFractionsWithDensity(
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::computeGlobalCellDataMassFractionsWithDensity()\n"
+            << ": FlowModelFourEqnConservative::computeCellDataOfMassFractionsWithDensity()\n"
             << "Cell data of 'MASS_FRACTIONS' is not yet registered."
             << std::endl);
     }
@@ -10194,10 +10193,10 @@ FlowModelFourEqnConservative::computeGlobalCellDataMassFractionsWithDensity(
 
 
 /*
- * Compute the global cell data of mole fractions with mass fractions in the registered patch.
+ * Compute the cell data of mole fractions with mass fractions in the registered patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataMoleFractionsWithMassFractions(
+FlowModelFourEqnConservative::computeCellDataOfMoleFractionsWithMassFractions(
     const hier::Box& domain)
 {
     if (d_num_subghosts_mole_fractions > -hier::IntVector::getOne(d_dim))
@@ -10230,7 +10229,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMoleFractionsWithMassFraction
         
         if (!d_data_mass_fractions)
         {
-            computeGlobalCellDataMassFractionsWithDensity(domain);
+            computeCellDataOfMassFractionsWithDensity(domain);
         }
         
         // Get the pointers to the cell data of mole fractions and mass fractions.
@@ -10397,7 +10396,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMoleFractionsWithMassFraction
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::computeGlobalCellDataMoleFractionsWithMassFractions()\n"
+            << ": FlowModelFourEqnConservative::computeCellDataOfMoleFractionsWithMassFractions()\n"
             << "Cell data of 'MOLE_FRACTIONS' is not yet registered."
             << std::endl);
     }
@@ -10405,10 +10404,10 @@ FlowModelFourEqnConservative::computeGlobalCellDataMoleFractionsWithMassFraction
 
 
 /*
- * Compute the global cell data of velocity with density in the registered patch.
+ * Compute the cell data of velocity with density in the registered patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataVelocityWithDensity(
+FlowModelFourEqnConservative::computeCellDataOfVelocityWithDensity(
     const hier::Box& domain)
 {
     if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
@@ -10441,11 +10440,11 @@ FlowModelFourEqnConservative::computeGlobalCellDataVelocityWithDensity(
         
         // Get the cell data of the variable momentum.
         boost::shared_ptr<pdat::CellData<double> > data_momentum =
-            getGlobalCellDataMomentum();
+            getCellDataOfMomentum();
         
         if (!d_data_density)
         {
-            computeGlobalCellDataDensity(domain);
+            computeCellDataOfDensity(domain);
         }
         
         // Get the pointer to the cell data of density.
@@ -10615,7 +10614,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataVelocityWithDensity(
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::computeGlobalCellDataVelocityWithDensity()\n"
+            << ": FlowModelFourEqnConservative::computeCellDataOfVelocityWithDensity()\n"
             << "Cell data of 'VELOCITY' is not yet registered."
             << std::endl);
     }
@@ -10623,11 +10622,11 @@ FlowModelFourEqnConservative::computeGlobalCellDataVelocityWithDensity(
 
 
 /*
- * Compute the global cell data of internal energy with density and velocity in the registered
+ * Compute the cell data of internal energy with density and velocity in the registered
  * patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataInternalEnergyWithDensityAndVelocity(
+FlowModelFourEqnConservative::computeCellDataOfInternalEnergyWithDensityAndVelocity(
     const hier::Box& domain)
 {
     if (d_num_subghosts_internal_energy > -hier::IntVector::getOne(d_dim))
@@ -10660,16 +10659,16 @@ FlowModelFourEqnConservative::computeGlobalCellDataInternalEnergyWithDensityAndV
         
         // Get the cell data of the variable total energy.
         boost::shared_ptr<pdat::CellData<double> > data_total_energy =
-            getGlobalCellDataTotalEnergy();
+            getCellDataOfTotalEnergy();
         
         if (!d_data_density)
         {
-            computeGlobalCellDataDensity(domain);
+            computeCellDataOfDensity(domain);
         }
         
         if (!d_data_velocity)
         {
-            computeGlobalCellDataVelocityWithDensity(domain);
+            computeCellDataOfVelocityWithDensity(domain);
         }
         
         // Get the pointers to the cell data of internal energy, total energy and density.
@@ -10851,7 +10850,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataInternalEnergyWithDensityAndV
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "computeGlobalCellDataInternalEnergyWithDensityAndVelocity()\n"
+            << "computeCellDataOfInternalEnergyWithDensityAndVelocity()\n"
             << "Cell data of 'INTERNAL_ENERGY' is not yet registered."
             << std::endl);
     }
@@ -10859,11 +10858,11 @@ FlowModelFourEqnConservative::computeGlobalCellDataInternalEnergyWithDensityAndV
 
 
 /*
- * Compute the global cell data of pressure with density, mass fractions and internal energy in
+ * Compute the cell data of pressure with density, mass fractions and internal energy in
  * the registered patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(
+FlowModelFourEqnConservative::computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(
     const hier::Box& domain)
 {
     if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
@@ -10874,17 +10873,17 @@ FlowModelFourEqnConservative::computeGlobalCellDataPressureWithDensityMassFracti
         
         if (!d_data_density)
         {
-            computeGlobalCellDataDensity(domain);
+            computeCellDataOfDensity(domain);
         }
         
         if (!d_data_mass_fractions)
         {
-            computeGlobalCellDataMassFractionsWithDensity(domain);
+            computeCellDataOfMassFractionsWithDensity(domain);
         }
         
         if (!d_data_internal_energy)
         {
-            computeGlobalCellDataInternalEnergyWithDensityAndVelocity(domain);
+            computeCellDataOfInternalEnergyWithDensityAndVelocity(domain);
         }
         
         // Compute the pressure field.
@@ -10899,7 +10898,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataPressureWithDensityMassFracti
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy()\n"
+            << "computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy()\n"
             << "Cell data of 'PRESSURE' is not yet registered."
             << std::endl);
     }
@@ -10907,11 +10906,11 @@ FlowModelFourEqnConservative::computeGlobalCellDataPressureWithDensityMassFracti
 
 
 /*
- * Compute the global cell data of sound speed with density, mass fractions and pressure in the
+ * Compute the cell data of sound speed with density, mass fractions and pressure in the
  * registered patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure(
+FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFractionsAndPressure(
     const hier::Box& domain)
 {
     if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
@@ -10922,17 +10921,17 @@ FlowModelFourEqnConservative::computeGlobalCellDataSoundSpeedWithDensityMassFrac
         
         if (!d_data_density)
         {
-            computeGlobalCellDataDensity(domain);
+            computeCellDataOfDensity(domain);
         }
         
         if (!d_data_mass_fractions)
         {
-            computeGlobalCellDataMassFractionsWithDensity(domain);
+            computeCellDataOfMassFractionsWithDensity(domain);
         }
         
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(domain);
+            computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(domain);
         }
         
         // Compute the sound speed field.
@@ -10947,7 +10946,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataSoundSpeedWithDensityMassFrac
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure()\n"
+            << "computeCellDataOfSoundSpeedWithDensityMassFractionsAndPressure()\n"
             << "Cell data of 'SOUND_SPEED' is not yet registered."
             << std::endl);
     }
@@ -10955,11 +10954,11 @@ FlowModelFourEqnConservative::computeGlobalCellDataSoundSpeedWithDensityMassFrac
 
 
 /*
- * Compute the global cell data of temperature with density, mass fractions and pressure in the
+ * Compute the cell data of temperature with density, mass fractions and pressure in the
  * registered patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataTemperatureWithDensityMassFractionsAndPressure(
+FlowModelFourEqnConservative::computeCellDataOfTemperatureWithDensityMassFractionsAndPressure(
     const hier::Box& domain)
 {
     if (d_num_subghosts_temperature > -hier::IntVector::getOne(d_dim))
@@ -10970,17 +10969,17 @@ FlowModelFourEqnConservative::computeGlobalCellDataTemperatureWithDensityMassFra
         
         if (!d_data_density)
         {
-            computeGlobalCellDataDensity(domain);
+            computeCellDataOfDensity(domain);
         }
         
         if (!d_data_mass_fractions)
         {
-            computeGlobalCellDataMassFractionsWithDensity(domain);
+            computeCellDataOfMassFractionsWithDensity(domain);
         }
         
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(domain);
+            computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(domain);
         }
         
         // Compute the temperature field.
@@ -10995,7 +10994,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataTemperatureWithDensityMassFra
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "computeGlobalCellDataTemperatureWithDensityMassFractionsAndPressure()\n"
+            << "computeCellDataOfTemperatureWithDensityMassFractionsAndPressure()\n"
             << "Cell data of 'TEMPERATURE' is not yet registered."
             << std::endl);
     }
@@ -11003,11 +11002,11 @@ FlowModelFourEqnConservative::computeGlobalCellDataTemperatureWithDensityMassFra
 
 
 /*
- * Compute the global cell data of convective flux with velocity and pressure in the registered
+ * Compute the cell data of convective flux with velocity and pressure in the registered
  * patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
+FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
     const DIRECTION::TYPE& direction,
     const hier::Box& domain)
 {
@@ -11050,22 +11049,22 @@ FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithVelocityAnd
             }
             
             boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
-                getGlobalCellDataPartialDensities();
+                getCellDataOfPartialDensities();
             
             boost::shared_ptr<pdat::CellData<double> > data_momentum =
-                getGlobalCellDataMomentum();
+                getCellDataOfMomentum();
             
             boost::shared_ptr<pdat::CellData<double> > data_total_energy =
-                getGlobalCellDataTotalEnergy();
+                getCellDataOfTotalEnergy();
             
             if (!d_data_velocity)
             {
-                computeGlobalCellDataVelocityWithDensity(domain);
+                computeCellDataOfVelocityWithDensity(domain);
             }
             
             if (!d_data_pressure)
             {
-                computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(domain);
+                computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(domain);
             }
             
             // Get the pointers to the cell data of partial densities, total energy and pressure.
@@ -11334,7 +11333,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithVelocityAnd
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::"
-                << "computeGlobalCellDataConvectiveFluxWithVelocityAndPressure()\n"
+                << "computeCellDataOfConvectiveFluxWithVelocityAndPressure()\n"
                 << "Cell data of 'CONVECTIVE_FLUX_X' is not yet registered."
                 << std::endl);
         }
@@ -11378,22 +11377,22 @@ FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithVelocityAnd
             }
             
             boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
-                getGlobalCellDataPartialDensities();
+                getCellDataOfPartialDensities();
             
             boost::shared_ptr<pdat::CellData<double> > data_momentum =
-                getGlobalCellDataMomentum();
+                getCellDataOfMomentum();
             
             boost::shared_ptr<pdat::CellData<double> > data_total_energy =
-                getGlobalCellDataTotalEnergy();
+                getCellDataOfTotalEnergy();
             
             if (!d_data_pressure)
             {
-                computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(domain);
+                computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(domain);
             }
             
             if (!d_data_velocity)
             {
-                computeGlobalCellDataVelocityWithDensity(domain);
+                computeCellDataOfVelocityWithDensity(domain);
             }
             
             // Get the pointers to the cell data of partial densities, total energy, volume fraction
@@ -11411,7 +11410,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithVelocityAnd
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelFourEqnConservative::"
-                    << "computeGlobalCellDataConvectiveFluxWithVelocityAndPressure()\n"
+                    << "computeCellDataOfConvectiveFluxWithVelocityAndPressure()\n"
                     << "'CONVECTIVE_FLUX_Y' cannot be obtained for problem with dimension less than two."
                     << std::endl);
             }
@@ -11618,7 +11617,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithVelocityAnd
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::"
-                << "computeGlobalCellDataConvectiveFluxWithVelocityAndPressure()\n"
+                << "computeCellDataOfConvectiveFluxWithVelocityAndPressure()\n"
                 << "Cell data of 'CONVECTIVE_FLUX_Y' is not yet registered."
                 << std::endl);
         }
@@ -11662,22 +11661,22 @@ FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithVelocityAnd
             }
             
             boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
-                getGlobalCellDataPartialDensities();
+                getCellDataOfPartialDensities();
             
             boost::shared_ptr<pdat::CellData<double> > data_momentum =
-                getGlobalCellDataMomentum();
+                getCellDataOfMomentum();
             
             boost::shared_ptr<pdat::CellData<double> > data_total_energy =
-                getGlobalCellDataTotalEnergy();
+                getCellDataOfTotalEnergy();
             
             if (!d_data_pressure)
             {
-                computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(domain);
+                computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(domain);
             }
             
             if (!d_data_velocity)
             {
-                computeGlobalCellDataVelocityWithDensity(domain);
+                computeCellDataOfVelocityWithDensity(domain);
             }
             
             // Get the pointers to the cell data of partial densities, total energy, volume fraction
@@ -11695,7 +11694,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithVelocityAnd
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelFourEqnConservative::"
-                    << "computeGlobalCellDataConvectiveFluxWithVelocityAndPressure()\n"
+                    << "computeCellDataOfConvectiveFluxWithVelocityAndPressure()\n"
                     << "'CONVECTIVE_FLUX_Z' cannot be obtained for problem with dimension less than three."
                     << std::endl);
             }
@@ -11819,7 +11818,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithVelocityAnd
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::"
-                << "computeGlobalCellDataConvectiveFluxWithVelocityAndPressure()\n"
+                << "computeCellDataOfConvectiveFluxWithVelocityAndPressure()\n"
                 << "Cell data of 'CONVECTIVE_FLUX_Z' is not yet registered."
                 << std::endl);
         }
@@ -11828,11 +11827,11 @@ FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithVelocityAnd
 
 
 /*
- * Compute the global cell data of maximum wave speed with velocity and sound speed in the
+ * Compute the cell data of maximum wave speed with velocity and sound speed in the
  * registered patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
+FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
     const DIRECTION::TYPE& direction,
     const hier::Box& domain)
 {
@@ -11868,12 +11867,12 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSo
             
             if (!d_data_velocity)
             {
-                computeGlobalCellDataVelocityWithDensity(domain);
+                computeCellDataOfVelocityWithDensity(domain);
             }
             
             if (!d_data_sound_speed)
             {
-                computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure(domain);
+                computeCellDataOfSoundSpeedWithDensityMassFractionsAndPressure(domain);
             }
             
             // Get the pointers to the cell data of maximum wave speed and velocity in x-direction and sound speed.
@@ -12020,7 +12019,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSo
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::"
-                << "computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed()\n"
+                << "computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed()\n"
                 << "Cell data of 'MAX_WAVE_SPEED_X' is not yet registered."
                 << std::endl);
         }
@@ -12057,12 +12056,12 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSo
             
             if (!d_data_sound_speed)
             {
-                computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure(domain);
+                computeCellDataOfSoundSpeedWithDensityMassFractionsAndPressure(domain);
             }
             
             if (!d_data_velocity)
             {
-                computeGlobalCellDataVelocityWithDensity(domain);
+                computeCellDataOfVelocityWithDensity(domain);
             }
             
             // Get the pointers to the cell data of maximum wave speed and velocity in y-direction, and sound speed.
@@ -12074,7 +12073,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSo
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelFourEqnConservative::"
-                    << "computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed()\n"
+                    << "computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed()\n"
                     << "'MAX_WAVE_SPEED_Y' cannot be obtained for problem with dimension less than two."
                     << std::endl);
             }
@@ -12190,7 +12189,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSo
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::"
-                << "computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed()\n"
+                << "computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed()\n"
                 << "Cell data of 'MAX_WAVE_SPEED_Y' is not yet registered."
                 << std::endl);
         }
@@ -12227,12 +12226,12 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSo
             
             if (!d_data_sound_speed)
             {
-                computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure(domain);
+                computeCellDataOfSoundSpeedWithDensityMassFractionsAndPressure(domain);
             }
             
             if (!d_data_velocity)
             {
-                computeGlobalCellDataVelocityWithDensity(domain);
+                computeCellDataOfVelocityWithDensity(domain);
             }
             
             // Get the pointers to the cell data of maximum wave speed and velocity in z-direction, and sound speed.
@@ -12244,7 +12243,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSo
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelFourEqnConservative::"
-                    << "computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed()\n"
+                    << "computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed()\n"
                     << "'MAX_WAVE_SPEED_Z' cannot be obtained for problem with dimension less than three."
                     << std::endl);
             }
@@ -12315,7 +12314,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSo
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::"
-                << "computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed()\n"
+                << "computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed()\n"
                 << "Cell data of 'MAX_WAVE_SPEED_Z' is not yet registered."
                 << std::endl);
         }
@@ -12324,11 +12323,11 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSo
 
 
 /*
- * Compute the global cell data of maximum diffusivity with density, mass fractions, pressure
+ * Compute the cell data of maximum diffusivity with density, mass fractions, pressure
  * and temperature in the registered patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataMaxDiffusivityWithDensityMassFractionsPressureAndTemperature(
+FlowModelFourEqnConservative::computeCellDataOfMaxDiffusivityWithDensityMassFractionsPressureAndTemperature(
     const hier::Box& domain)
 {
     if (!d_equation_of_mass_diffusivity_mixing_rules ||
@@ -12338,7 +12337,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxDiffusivityWithDensityMass
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "computeGlobalCellDataMaxDiffusivityWithDensityMassFractionsPressureAndTemperature()\n"
+            << "computeCellDataOfMaxDiffusivityWithDensityMassFractionsPressureAndTemperature()\n"
             << "Either mixing rule of mass diffusivity, shear viscosity, bulk viscosity or"
             << " thermal conductivity is not initialized."
             << std::endl);
@@ -12374,22 +12373,22 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxDiffusivityWithDensityMass
         
         if (!d_data_density)
         {
-            computeGlobalCellDataDensity(domain);
+            computeCellDataOfDensity(domain);
         }
         
         if (!d_data_mass_fractions)
         {
-            computeGlobalCellDataMassFractionsWithDensity(domain);
+            computeCellDataOfMassFractionsWithDensity(domain);
         }
         
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(domain);
+            computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(domain);
         }
         
         if (!d_data_temperature)
         {
-            computeGlobalCellDataTemperatureWithDensityMassFractionsAndPressure(domain);
+            computeCellDataOfTemperatureWithDensityMassFractionsAndPressure(domain);
         }
         
         /*
@@ -12653,7 +12652,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxDiffusivityWithDensityMass
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "computeGlobalCellDataMaxDiffusivityWithDensityMassFractionsPressureAndTemperature()\n"
+            << "computeCellDataOfMaxDiffusivityWithDensityMassFractionsPressureAndTemperature()\n"
             << "Cell data of 'MAX_DIFFUSIVITY' is not yet registered."
             << std::endl);
     }

@@ -474,7 +474,7 @@ Euler::initializeDataOnPatch(
     d_flow_model->registerPatchWithDataContext(patch, getDataContext());
     
     std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_var_data =
-        d_flow_model->getGlobalCellDataConservativeVariables();
+        d_flow_model->getCellDataOfConservativeVariables();
     
     d_Euler_initial_conditions->initializeDataOnPatch(
         patch,
@@ -551,17 +551,16 @@ Euler::computeStableDtOnPatch(
             std::pair<std::string, hier::IntVector>(
                 "MAX_WAVE_SPEED_X", num_ghosts));
         
-        d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+        d_flow_model->registerDerivedVariables(num_subghosts_of_data);
         
-        d_flow_model->computeGlobalDerivedCellData();
+        d_flow_model->computeDerivedCellData();
         
         /*
          * Get the pointer to the maximum wave speed inside the flow model.
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x =
-            d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_X");
+        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
         
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
         
@@ -624,20 +623,17 @@ Euler::computeStableDtOnPatch(
             std::pair<std::string, hier::IntVector>(
                 "MAX_WAVE_SPEED_Y", num_ghosts));
         
-        d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+        d_flow_model->registerDerivedVariables(num_subghosts_of_data);
         
-        d_flow_model->computeGlobalDerivedCellData();
+        d_flow_model->computeDerivedCellData();
         
         /*
          * Get the pointers to the maximum wave speeds inside the flow model.
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x =
-            d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_X");
-        
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_y =
-            d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_Y");
+        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
+        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_y = d_flow_model->getCellData("MAX_WAVE_SPEED_Y");
         
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
         hier::IntVector num_subghosts_max_wave_speed_y = max_wave_speed_y->getGhostCellWidth();
@@ -719,23 +715,18 @@ Euler::computeStableDtOnPatch(
             std::pair<std::string, hier::IntVector>(
                 "MAX_WAVE_SPEED_Z", num_ghosts));
         
-        d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+        d_flow_model->registerDerivedVariables(num_subghosts_of_data);
         
-        d_flow_model->computeGlobalDerivedCellData();
+        d_flow_model->computeDerivedCellData();
         
         /*
          * Get the pointers to the maximum wave speeds inside the flow model.
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x =
-            d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_X");
-        
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_y =
-            d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_Y");
-        
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_z =
-            d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_Z");
+        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
+        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_y = d_flow_model->getCellData("MAX_WAVE_SPEED_Y");
+        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_z = d_flow_model->getCellData("MAX_WAVE_SPEED_Z");
         
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
         hier::IntVector num_subghosts_max_wave_speed_y = max_wave_speed_y->getGhostCellWidth();
@@ -901,7 +892,7 @@ Euler::advanceSingleStepOnPatch(
     d_flow_model->registerPatchWithDataContext(patch, getDataContext());
     
     std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
-        d_flow_model->getGlobalCellDataConservativeVariables();
+        d_flow_model->getCellDataOfConservativeVariables();
     
     std::vector<hier::IntVector> num_ghosts_conservative_var;
     num_ghosts_conservative_var.reserve(d_flow_model->getNumberOfEquations());
@@ -933,7 +924,7 @@ Euler::advanceSingleStepOnPatch(
         }
     }
     
-    d_flow_model->fillZeroGlobalCellDataConservativeVariables();
+    d_flow_model->fillCellDataOfConservativeVariablesWithZero();
     
     // Unregister the patch.
     d_flow_model->unregisterPatch();
@@ -986,7 +977,7 @@ Euler::advanceSingleStepOnPatch(
         d_flow_model->registerPatchWithDataContext(patch, intermediate_context[n]);
         
         std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables_intermediate =
-            d_flow_model->getGlobalCellDataConservativeVariables();
+            d_flow_model->getCellDataOfConservativeVariables();
         
         std::vector<hier::IntVector> num_ghosts_conservative_var_intermediate;
         num_ghosts_conservative_var_intermediate.reserve(d_flow_model->getNumberOfEquations());
@@ -1533,7 +1524,7 @@ Euler::advanceSingleStepOnPatch(
         {
             d_flow_model->registerPatchWithDataContext(patch, getDataContext());
             
-            d_flow_model->updateGlobalCellDataConservativeVariables();
+            d_flow_model->updateCellDataOfConservativeVariables();
             
             d_flow_model->unregisterPatch();
         }
@@ -1576,7 +1567,7 @@ Euler::synchronizeFluxes(
     d_flow_model->registerPatchWithDataContext(patch, getDataContext());
     
     std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
-        d_flow_model->getGlobalCellDataConservativeVariables();
+        d_flow_model->getCellDataOfConservativeVariables();
     
     std::vector<hier::IntVector> num_ghosts_conservative_var;
     num_ghosts_conservative_var.reserve(d_flow_model->getNumberOfEquations());
@@ -1800,7 +1791,7 @@ Euler::synchronizeFluxes(
     
     d_flow_model->registerPatchWithDataContext(patch, getDataContext());
     
-    d_flow_model->updateGlobalCellDataConservativeVariables();
+    d_flow_model->updateCellDataOfConservativeVariables();
     
     d_flow_model->unregisterPatch();
     

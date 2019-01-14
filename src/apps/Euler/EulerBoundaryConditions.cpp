@@ -582,7 +582,7 @@ EulerBoundaryConditions::readDirichletBoundaryDataEntry(
     }
     
     // Convert the primitive boundary data to conservative boundary data.
-    d_flow_model->convertLocalCellDataPointersPrimitiveVariablesToConservativeVariables(V_ptr, Q_ptr);
+    d_flow_model->convertPrimitiveVariablesToConservativeVariables(V_ptr, Q_ptr);
     
     std::vector<boost::shared_ptr<pdat::CellVariable<double> > > conservative_var =
         d_flow_model->getConservativeVariables();
@@ -678,7 +678,7 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
     d_flow_model->registerPatchWithDataContext(patch, data_context);
     
     std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_var_data =
-        d_flow_model->getGlobalCellDataConservativeVariables();
+        d_flow_model->getCellDataOfConservativeVariables();
     
     if (d_dim == tbox::Dimension(1))
     {

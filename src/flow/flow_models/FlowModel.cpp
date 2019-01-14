@@ -1,16 +1,15 @@
 #include "flow/flow_models/FlowModel.hpp"
 
 /*
- * Register the required variables for the computation of diffusive flux in the
- * registered patch.
+ * Register the required variables for the computation of diffusive fluxes in the registered patch.
  */
 void
-FlowModel::registerDiffusiveFlux(const hier::IntVector& num_subghosts)
+FlowModel::registerDiffusiveFluxes(const hier::IntVector& num_subghosts)
 {
     NULL_USE(num_subghosts);
     
     TBOX_ERROR(d_object_name
-        << ": FlowModel::registerDiffusiveFlux()\n"
+        << ": FlowModel::registerDiffusiveFluxes()\n"
         << "Function is not yet implemented!"
         << std::endl);
 }
