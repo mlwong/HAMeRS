@@ -209,7 +209,7 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationM
      * Compute the weights omega.
      */
     
-    double R_tau = fabs(tau_6/(beta_avg + EPSILON));
+    double R_tau = tau_6/(beta_avg + EPSILON);
     
     if (R_tau > alpha_tau)
     {
@@ -305,7 +305,7 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationP
      * Compute the weights omega_tilde.
      */
     
-    double R_tau_tilde = fabs(tau_6_tilde/(beta_avg_tilde + EPSILON));
+    double R_tau_tilde = tau_6_tilde/(beta_avg_tilde + EPSILON);
     
     if (R_tau_tilde > alpha_tau)
     {
