@@ -3594,6 +3594,839 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
 }
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/*
+ * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
+ */
+double
+EquationOfStateIdealGas::getPartialPressurePartialDensity(
+    const double* const density,
+    const double* const pressure,
+    const std::vector<const double*>& thermo_properties) const
+{
+    NULL_USE(thermo_properties);
+    
+    const double& rho = *density;
+    const double& p = *pressure;
+    
+    return p/rho;
+}
+
+
+/*
+ * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
+ */
+void
+EquationOfStateIdealGas::computePartialPressurePartialDensity(
+    boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_density,
+    const boost::shared_ptr<pdat::CellData<double> >& data_density,
+    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const std::vector<const double*>& thermo_properties,
+    const hier::Box& domain) const
+{
+    NULL_USE(thermo_properties);
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_partial_pressure_partial_density);
+    TBOX_ASSERT(data_density);
+    TBOX_ASSERT(data_pressure);
+#endif
+    
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = data_partial_pressure_partial_density->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
+#endif
+    
+    /*
+     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
+     */
+    
+    const hier::IntVector num_ghosts_partial_pressure_partial_density = data_partial_pressure_partial_density->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_partial_pressure_partial_density =
+        data_partial_pressure_partial_density->getGhostBox().numberCells();
+    
+    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_density =
+        data_density->getGhostBox().numberCells();
+    
+    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_pressure =
+        data_pressure->getGhostBox().numberCells();
+    
+    /*
+     * Get the local lower indices and number of cells in each direction of the domain.
+     */
+    
+    hier::IntVector domain_lo(d_dim);
+    hier::IntVector domain_dims(d_dim);
+    
+    if (domain.empty())
+    {
+        hier::IntVector num_ghosts_min(d_dim);
+        
+        num_ghosts_min = num_ghosts_partial_pressure_partial_density;
+        num_ghosts_min = hier::IntVector::min(num_ghosts_density, num_ghosts_min);
+        num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
+        
+        hier::Box ghost_box = interior_box;
+        ghost_box.grow(num_ghosts_min);
+        
+        domain_lo = -num_ghosts_min;
+        domain_dims = ghost_box.numberCells();
+    }
+    else
+    {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_partial_pressure_partial_density->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_density->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_pressure->getGhostBox().contains(domain));
+#endif
+        
+        domain_lo = domain.lower() - interior_box.lower();
+        domain_dims = domain.numberCells();
+    }
+    
+    /*
+     * Get the pointers to the cell data.
+     */
+    
+    double* const Psi = data_partial_pressure_partial_density->getPointer(0);
+    const double* const rho = data_density->getPointer(0);
+    const double* const p = data_pressure->getPointer(0);
+    
+    computePartialPressurePartialDensity(
+        Psi,
+        rho,
+        p,
+        num_ghosts_partial_pressure_partial_density,
+        num_ghosts_density,
+        num_ghosts_pressure,
+        ghostcell_dims_partial_pressure_partial_density,
+        ghostcell_dims_density,
+        ghostcell_dims_pressure,
+        domain_lo,
+        domain_dims);
+}
+
+
+/*
+ * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
+ */
+void
+EquationOfStateIdealGas::computePartialPressurePartialDensity(
+    boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    const std::vector<const double*>& thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
+    NULL_USE(thermo_properties);
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_partial_pressure_partial_density);
+    TBOX_ASSERT(data_density);
+    TBOX_ASSERT(data_pressure);
+#endif
+    
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = data_partial_pressure_partial_density->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
+#endif
+    
+    /*
+     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
+     */
+    
+    const hier::IntVector num_ghosts_partial_pressure_partial_density = data_partial_pressure_partial_density->getGhostCellWidth();
+    hier::IntVector ghostcell_dims_partial_pressure_partial_density = data_partial_pressure_partial_density->getGhostBox().numberCells();
+    
+    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+    hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
+    
+    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+    hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
+    
+    /*
+     * Get the local lower indices and number of cells in each direction of the domain.
+     */
+    
+    hier::IntVector domain_lo(d_dim);
+    hier::IntVector domain_dims(d_dim);
+    
+    if (domain.empty())
+    {
+        hier::IntVector num_ghosts_min(d_dim);
+        
+        num_ghosts_min = num_ghosts_partial_pressure_partial_density;
+        num_ghosts_min = hier::IntVector::min(num_ghosts_density, num_ghosts_min);
+        num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
+        
+        hier::Box ghost_box = interior_box;
+        ghost_box.grow(num_ghosts_min);
+        
+        domain_lo = -num_ghosts_min;
+        domain_dims = ghost_box.numberCells();
+    }
+    else
+    {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_partial_pressure_partial_density->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_density->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_pressure->getGhostBox().contains(domain));
+#endif
+        
+        domain_lo = domain.lower() - interior_box.lower();
+        domain_dims = domain.numberCells();
+    }
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_partial_pressure_partial_density->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_density->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_pressure->getDirectionVector()[side_normal] > 0);
+#endif
+    
+    ghostcell_dims_partial_pressure_partial_density[side_normal]++;
+    ghostcell_dims_density[side_normal]++;
+    ghostcell_dims_pressure[side_normal]++;
+    domain_dims[side_normal]++;
+    
+    /*
+     * Get the pointers to the cell data.
+     */
+    
+    double* const Psi = data_partial_pressure_partial_density->getPointer(side_normal, 0);
+    const double* const rho = data_density->getPointer(side_normal, 0);
+    const double* const p = data_pressure->getPointer(side_normal, 0);
+    
+    computePartialPressurePartialDensity(
+        Psi,
+        rho,
+        p,
+        num_ghosts_partial_pressure_partial_density,
+        num_ghosts_density,
+        num_ghosts_pressure,
+        ghostcell_dims_partial_pressure_partial_density,
+        ghostcell_dims_density,
+        ghostcell_dims_pressure,
+        domain_lo,
+        domain_dims);
+}
+
+
+/*
+ * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
+ */
+void
+EquationOfStateIdealGas::computePartialPressurePartialDensity(
+    boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_density,
+    const boost::shared_ptr<pdat::CellData<double> >& data_density,
+    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+    const hier::Box& domain) const
+{
+    NULL_USE(data_thermo_properties);
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_partial_pressure_partial_density);
+    TBOX_ASSERT(data_density);
+    TBOX_ASSERT(data_pressure);
+#endif
+    
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = data_partial_pressure_partial_density->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
+#endif
+    
+    /*
+     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
+     */
+    
+    const hier::IntVector num_ghosts_partial_pressure_partial_density = data_partial_pressure_partial_density->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_partial_pressure_partial_density =
+        data_partial_pressure_partial_density->getGhostBox().numberCells();
+    
+    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_density =
+        data_density->getGhostBox().numberCells();
+    
+    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_pressure =
+        data_pressure->getGhostBox().numberCells();
+    
+    /*
+     * Get the local lower indices and number of cells in each direction of the domain.
+     */
+    
+    hier::IntVector domain_lo(d_dim);
+    hier::IntVector domain_dims(d_dim);
+    
+    if (domain.empty())
+    {
+        hier::IntVector num_ghosts_min(d_dim);
+        
+        num_ghosts_min = num_ghosts_partial_pressure_partial_density;
+        num_ghosts_min = hier::IntVector::min(num_ghosts_density, num_ghosts_min);
+        num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
+        
+        hier::Box ghost_box = interior_box;
+        ghost_box.grow(num_ghosts_min);
+        
+        domain_lo = -num_ghosts_min;
+        domain_dims = ghost_box.numberCells();
+    }
+    else
+    {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_partial_pressure_partial_density->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_density->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_pressure->getGhostBox().contains(domain));
+#endif
+        
+        domain_lo = domain.lower() - interior_box.lower();
+        domain_dims = domain.numberCells();
+    }
+    
+    /*
+     * Get the pointers to the cell data.
+     */
+    
+    double* const Psi = data_partial_pressure_partial_density->getPointer(0);
+    const double* const rho = data_density->getPointer(0);
+    const double* const p = data_pressure->getPointer(0);
+    
+    computePartialPressurePartialDensity(
+        Psi,
+        rho,
+        p,
+        num_ghosts_partial_pressure_partial_density,
+        num_ghosts_density,
+        num_ghosts_pressure,
+        ghostcell_dims_partial_pressure_partial_density,
+        ghostcell_dims_density,
+        ghostcell_dims_pressure,
+        domain_lo,
+        domain_dims);
+}
+
+
+/*
+ * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
+ */
+void
+EquationOfStateIdealGas::computePartialPressurePartialDensity(
+    boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
+    NULL_USE(data_thermo_properties);
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_partial_pressure_partial_density);
+    TBOX_ASSERT(data_density);
+    TBOX_ASSERT(data_pressure);
+#endif
+    
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = data_partial_pressure_partial_density->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
+#endif
+    
+    /*
+     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
+     */
+    
+    const hier::IntVector num_ghosts_partial_pressure_partial_density = data_partial_pressure_partial_density->getGhostCellWidth();
+    hier::IntVector ghostcell_dims_partial_pressure_partial_density = data_partial_pressure_partial_density->getGhostBox().numberCells();
+    
+    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+    hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
+    
+    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+    hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
+    
+    /*
+     * Get the local lower indices and number of cells in each direction of the domain.
+     */
+    
+    hier::IntVector domain_lo(d_dim);
+    hier::IntVector domain_dims(d_dim);
+    
+    if (domain.empty())
+    {
+        hier::IntVector num_ghosts_min(d_dim);
+        
+        num_ghosts_min = num_ghosts_partial_pressure_partial_density;
+        num_ghosts_min = hier::IntVector::min(num_ghosts_density, num_ghosts_min);
+        num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
+        
+        hier::Box ghost_box = interior_box;
+        ghost_box.grow(num_ghosts_min);
+        
+        domain_lo = -num_ghosts_min;
+        domain_dims = ghost_box.numberCells();
+    }
+    else
+    {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_partial_pressure_partial_density->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_density->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_pressure->getGhostBox().contains(domain));
+#endif
+        
+        domain_lo = domain.lower() - interior_box.lower();
+        domain_dims = domain.numberCells();
+    }
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_partial_pressure_partial_density->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_density->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_pressure->getDirectionVector()[side_normal] > 0);
+#endif
+    
+    ghostcell_dims_partial_pressure_partial_density[side_normal]++;
+    ghostcell_dims_density[side_normal]++;
+    ghostcell_dims_pressure[side_normal]++;
+    domain_dims[side_normal]++;
+    
+    /*
+     * Get the pointers to the cell data.
+     */
+    
+    double* const Psi = data_partial_pressure_partial_density->getPointer(side_normal, 0);
+    const double* const rho = data_density->getPointer(side_normal, 0);
+    const double* const p = data_pressure->getPointer(side_normal, 0);
+    
+    computePartialPressurePartialDensity(
+        Psi,
+        rho,
+        p,
+        num_ghosts_partial_pressure_partial_density,
+        num_ghosts_density,
+        num_ghosts_pressure,
+        ghostcell_dims_partial_pressure_partial_density,
+        ghostcell_dims_density,
+        ghostcell_dims_pressure,
+        domain_lo,
+        domain_dims);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/*
+ * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+ * constant density divided by density).
+ */
+double
+EquationOfStateIdealGas::getGruneisenParameter(
+    const double* const density,
+    const double* const pressure,
+    const std::vector<const double*>& thermo_properties) const
+{
+    NULL_USE(density);
+    NULL_USE(pressure);
+    
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 1);
+#endif
+    
+    const double& gamma = *(thermo_properties[0]);
+    
+    return (gamma - double(1));
+}
+
+
+/*
+ * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+ * constant density divided by density).
+ */
+void
+EquationOfStateIdealGas::computeGruneisenParameter(
+    boost::shared_ptr<pdat::CellData<double> >& data_gruneisen_parameter,
+    const boost::shared_ptr<pdat::CellData<double> >& data_density,
+    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const std::vector<const double*>& thermo_properties,
+    const hier::Box& domain) const
+{
+    NULL_USE(data_density);
+    NULL_USE(data_pressure);
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_gruneisen_parameter);
+    
+    TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 1);
+#endif
+    
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = data_gruneisen_parameter->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+    /*
+     * Get the numbers of ghost cells and the dimensions of the ghost cell box.
+     */
+    
+    const hier::IntVector num_ghosts_gruneisen_parameter =
+        data_gruneisen_parameter->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_gruneisen_parameter =
+        data_gruneisen_parameter->getGhostBox().numberCells();
+    
+    /*
+     * Get the local lower indices and number of cells in each direction of the domain.
+     */
+    
+    hier::IntVector domain_lo(d_dim);
+    hier::IntVector domain_dims(d_dim);
+    
+    if (domain.empty())
+    {
+        hier::Box ghost_box = interior_box;
+        ghost_box.grow(num_ghosts_gruneisen_parameter);
+        
+        domain_lo = -num_ghosts_gruneisen_parameter;
+        domain_dims = ghost_box.numberCells();
+    }
+    else
+    {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_gruneisen_parameter->getGhostBox().contains(domain));
+#endif
+        
+        domain_lo = domain.lower() - interior_box.lower();
+        domain_dims = domain.numberCells();
+    }
+    
+    /*
+     * Get the pointer to the cell data.
+     */
+    
+    double* const Gamma = data_gruneisen_parameter->getPointer(0);
+    
+    const double& gamma = *(thermo_properties[0]);
+    
+    computeGruneisenParameter(
+        Gamma,
+        gamma,
+        num_ghosts_gruneisen_parameter,
+        ghostcell_dims_gruneisen_parameter,
+        domain_lo,
+        domain_dims);
+}
+
+
+/*
+ * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+ * constant density divided by density).
+ */
+void
+EquationOfStateIdealGas::computeGruneisenParameter(
+    boost::shared_ptr<pdat::SideData<double> >& data_gruneisen_parameter,
+    const boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    const std::vector<const double*>& thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
+    NULL_USE(data_density);
+    NULL_USE(data_pressure);
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_gruneisen_parameter);
+    
+    TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 1);
+#endif
+    
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = data_gruneisen_parameter->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+    /*
+     * Get the numbers of ghost cells and the dimensions of the ghost cell box.
+     */
+    
+    const hier::IntVector num_ghosts_gruneisen_parameter =
+        data_gruneisen_parameter->getGhostCellWidth();
+    hier::IntVector ghostcell_dims_gruneisen_parameter =
+        data_gruneisen_parameter->getGhostBox().numberCells();
+    
+    /*
+     * Get the local lower indices and number of cells in each direction of the domain.
+     */
+    
+    hier::IntVector domain_lo(d_dim);
+    hier::IntVector domain_dims(d_dim);
+    
+    if (domain.empty())
+    {
+        hier::Box ghost_box = interior_box;
+        ghost_box.grow(num_ghosts_gruneisen_parameter);
+        
+        domain_lo = -num_ghosts_gruneisen_parameter;
+        domain_dims = ghost_box.numberCells();
+    }
+    else
+    {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_gruneisen_parameter->getGhostBox().contains(domain));
+#endif
+        
+        domain_lo = domain.lower() - interior_box.lower();
+        domain_dims = domain.numberCells();
+    }
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_gruneisen_parameter->getDirectionVector()[side_normal] > 0);
+#endif
+    
+    ghostcell_dims_gruneisen_parameter[side_normal]++;
+    domain_dims[side_normal]++;
+    
+    /*
+     * Get the pointer to the cell data.
+     */
+    
+    double* const Gamma = data_gruneisen_parameter->getPointer(side_normal, 0);
+    
+    const double& gamma = *(thermo_properties[0]);
+    
+    computeGruneisenParameter(
+        Gamma,
+        gamma,
+        num_ghosts_gruneisen_parameter,
+        ghostcell_dims_gruneisen_parameter,
+        domain_lo,
+        domain_dims);
+}
+
+
+/*
+ * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+ * constant density divided by density).
+ */
+void
+EquationOfStateIdealGas::computeGruneisenParameter(
+    boost::shared_ptr<pdat::CellData<double> >& data_gruneisen_parameter,
+    const boost::shared_ptr<pdat::CellData<double> >& data_density,
+    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+    const hier::Box& domain) const
+{
+    NULL_USE(data_density);
+    NULL_USE(data_pressure);
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_gruneisen_parameter);
+    TBOX_ASSERT(data_thermo_properties);
+    
+    TBOX_ASSERT(data_thermo_properties->getDepth() >= 1);
+#endif
+    
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = data_gruneisen_parameter->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_thermo_properties->getBox().numberCells() == interior_dims);
+#endif
+    
+    /*
+     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
+     */
+    
+    const hier::IntVector num_ghosts_gruneisen_parameter =
+        data_gruneisen_parameter->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_gruneisen_parameter =
+        data_gruneisen_parameter->getGhostBox().numberCells();
+    
+    const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_thermo_properties =
+        data_thermo_properties->getGhostBox().numberCells();
+    
+    /*
+     * Get the local lower indices and number of cells in each direction of the domain.
+     */
+    
+    hier::IntVector domain_lo(d_dim);
+    hier::IntVector domain_dims(d_dim);
+    
+    if (domain.empty())
+    {
+        hier::IntVector num_ghosts_min(d_dim);
+        
+        num_ghosts_min = num_ghosts_gruneisen_parameter;
+        num_ghosts_min = hier::IntVector::min(num_ghosts_thermo_properties, num_ghosts_min);
+        
+        hier::Box ghost_box = interior_box;
+        ghost_box.grow(num_ghosts_min);
+        
+        domain_lo = -num_ghosts_min;
+        domain_dims = ghost_box.numberCells();
+    }
+    else
+    {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_gruneisen_parameter->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_thermo_properties->getGhostBox().contains(domain));
+#endif
+        
+        domain_lo = domain.lower() - interior_box.lower();
+        domain_dims = domain.numberCells();
+    }
+    
+    /*
+     * Get the pointers to the cell data.
+     */
+    
+    double* const Gamma = data_gruneisen_parameter->getPointer(0);
+    const double* const gamma = data_thermo_properties->getPointer(0);
+    
+    computeGruneisenParameter(
+        Gamma,
+        gamma,
+        num_ghosts_gruneisen_parameter,
+        num_ghosts_thermo_properties,
+        ghostcell_dims_gruneisen_parameter,
+        ghostcell_dims_thermo_properties,
+        domain_lo,
+        domain_dims);
+}
+
+
+/*
+ * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+ * constant density divided by density).
+ */
+void
+EquationOfStateIdealGas::computeGruneisenParameter(
+    boost::shared_ptr<pdat::SideData<double> >& data_gruneisen_parameter,
+    const boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
+    NULL_USE(data_density);
+    NULL_USE(data_pressure);
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_gruneisen_parameter);
+    TBOX_ASSERT(data_thermo_properties);
+    
+    TBOX_ASSERT(data_thermo_properties->getDepth() >= 1);
+#endif
+    
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = data_gruneisen_parameter->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_thermo_properties->getBox().numberCells() == interior_dims);
+#endif
+    
+    /*
+     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
+     */
+    
+    const hier::IntVector num_ghosts_gruneisen_parameter =
+        data_gruneisen_parameter->getGhostCellWidth();
+    hier::IntVector ghostcell_dims_gruneisen_parameter =
+        data_gruneisen_parameter->getGhostBox().numberCells();
+    
+    const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
+    hier::IntVector ghostcell_dims_thermo_properties = data_thermo_properties->getGhostBox().numberCells();
+    
+    /*
+     * Get the local lower indices and number of cells in each direction of the domain.
+     */
+    
+    hier::IntVector domain_lo(d_dim);
+    hier::IntVector domain_dims(d_dim);
+    
+    if (domain.empty())
+    {
+        hier::IntVector num_ghosts_min(d_dim);
+        
+        num_ghosts_min = num_ghosts_gruneisen_parameter;
+        num_ghosts_min = hier::IntVector::min(num_ghosts_thermo_properties, num_ghosts_min);
+        
+        hier::Box ghost_box = interior_box;
+        ghost_box.grow(num_ghosts_min);
+        
+        domain_lo = -num_ghosts_min;
+        domain_dims = ghost_box.numberCells();
+    }
+    else
+    {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_gruneisen_parameter->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_thermo_properties->getGhostBox().contains(domain));
+#endif
+        
+        domain_lo = domain.lower() - interior_box.lower();
+        domain_dims = domain.numberCells();
+    }
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_gruneisen_parameter->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_thermo_properties->getDirectionVector()[side_normal] > 0);
+#endif
+    
+    ghostcell_dims_gruneisen_parameter[side_normal]++;
+    ghostcell_dims_thermo_properties[side_normal]++;
+    domain_dims[side_normal]++;
+    
+    /*
+     * Get the pointers to the cell data.
+     */
+    
+    double* const Gamma = data_gruneisen_parameter->getPointer(side_normal, 0);
+    const double* const gamma = data_thermo_properties->getPointer(side_normal, 0);
+    
+    computeGruneisenParameter(
+        Gamma,
+        gamma,
+        num_ghosts_gruneisen_parameter,
+        num_ghosts_thermo_properties,
+        ghostcell_dims_gruneisen_parameter,
+        ghostcell_dims_thermo_properties,
+        domain_lo,
+        domain_dims);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 /*
  * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
  */
@@ -7225,6 +8058,427 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
                             ghostcell_dim_1_thermo_properties;
                     
                     c_p[idx_isobaric_specific_heat_capacity] = c_p_src[idx_thermo_properties];
+                }
+            }
+        }
+    }
+}
+
+
+/*
+ * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
+ */
+void
+EquationOfStateIdealGas::computePartialPressurePartialDensity(
+    double* const Psi,
+    const double* const rho,
+    const double* const p,
+    const hier::IntVector& num_ghosts_partial_pressure_partial_density,
+    const hier::IntVector& num_ghosts_density,
+    const hier::IntVector& num_ghosts_pressure,
+    const hier::IntVector& ghostcell_dims_partial_pressure_partial_density,
+    const hier::IntVector& ghostcell_dims_density,
+    const hier::IntVector& ghostcell_dims_pressure,
+    const hier::IntVector& domain_lo,
+    const hier::IntVector& domain_dims) const
+{
+    if (d_dim == tbox::Dimension(1))
+    {
+        /*
+         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_dim_0 = domain_dims[0];
+        
+        const int num_ghosts_0_partial_pressure_partial_density = num_ghosts_partial_pressure_partial_density[0];
+        const int num_ghosts_0_density = num_ghosts_density[0];
+        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+        
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+        {
+            // Compute the linear indices.
+            const int idx_partial_pressure_partial_density = i + num_ghosts_0_partial_pressure_partial_density;
+            const int idx_density = i + num_ghosts_0_density;
+            const int idx_pressure = i + num_ghosts_0_pressure;
+            
+            Psi[idx_partial_pressure_partial_density] = p[idx_pressure]/rho[idx_density];
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        /*
+         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        
+        const int num_ghosts_0_partial_pressure_partial_density = num_ghosts_partial_pressure_partial_density[0];
+        const int num_ghosts_1_partial_pressure_partial_density = num_ghosts_partial_pressure_partial_density[1];
+        const int ghostcell_dim_0_partial_pressure_partial_density = ghostcell_dims_partial_pressure_partial_density[0];
+        
+        const int num_ghosts_0_density = num_ghosts_density[0];
+        const int num_ghosts_1_density = num_ghosts_density[1];
+        const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+        
+        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+        const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
+        
+        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx_partial_pressure_partial_density = (i + num_ghosts_0_partial_pressure_partial_density) +
+                    (j + num_ghosts_1_partial_pressure_partial_density)*ghostcell_dim_0_partial_pressure_partial_density;
+                
+                const int idx_density = (i + num_ghosts_0_density) +
+                    (j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                
+                const int idx_pressure = (i + num_ghosts_0_pressure) +
+                    (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                
+                Psi[idx_partial_pressure_partial_density] = p[idx_pressure]/rho[idx_density];
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        /*
+         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_lo_2 = domain_lo[2];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        const int domain_dim_2 = domain_dims[2];
+        
+        const int num_ghosts_0_partial_pressure_partial_density = num_ghosts_partial_pressure_partial_density[0];
+        const int num_ghosts_1_partial_pressure_partial_density = num_ghosts_partial_pressure_partial_density[1];
+        const int num_ghosts_2_partial_pressure_partial_density = num_ghosts_partial_pressure_partial_density[2];
+        const int ghostcell_dim_0_partial_pressure_partial_density = ghostcell_dims_partial_pressure_partial_density[0];
+        const int ghostcell_dim_1_partial_pressure_partial_density = ghostcell_dims_partial_pressure_partial_density[1];
+        
+        const int num_ghosts_0_density = num_ghosts_density[0];
+        const int num_ghosts_1_density = num_ghosts_density[1];
+        const int num_ghosts_2_density = num_ghosts_density[2];
+        const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+        const int ghostcell_dim_1_density = ghostcell_dims_density[1];
+        
+        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+        const int num_ghosts_2_pressure = num_ghosts_pressure[2];
+        const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
+        const int ghostcell_dim_1_pressure = ghostcell_dims_pressure[1];
+        
+        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_partial_pressure_partial_density = (i + num_ghosts_0_partial_pressure_partial_density) +
+                        (j + num_ghosts_1_partial_pressure_partial_density)*ghostcell_dim_0_partial_pressure_partial_density +
+                        (k + num_ghosts_2_partial_pressure_partial_density)*ghostcell_dim_0_partial_pressure_partial_density*
+                            ghostcell_dim_1_partial_pressure_partial_density;
+                    
+                    const int idx_density = (i + num_ghosts_0_density) +
+                        (j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                        (k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                            ghostcell_dim_1_density;
+                    
+                    const int idx_pressure = (i + num_ghosts_0_pressure) +
+                        (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
+                        (k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                            ghostcell_dim_1_pressure;
+                    
+                    Psi[idx_partial_pressure_partial_density] = p[idx_pressure]/rho[idx_density];
+                }
+            }
+        }
+    }
+}
+
+
+/*
+ * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+ * constant density divided by density).
+ */
+void
+EquationOfStateIdealGas::computeGruneisenParameter(
+    double* const Gamma,
+    const double& gamma,
+    const hier::IntVector& num_ghosts_gruneisen_parameter,
+    const hier::IntVector& ghostcell_dims_gruneisen_parameter,
+    const hier::IntVector& domain_lo,
+    const hier::IntVector& domain_dims) const
+{
+    const double Gamma_src = gamma - double(1);
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        /*
+         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_dim_0 = domain_dims[0];
+        
+        const int num_ghosts_0_gruneisen_parameter =
+            num_ghosts_gruneisen_parameter[0];
+        
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+        {
+            // Compute the linear indices.
+            const int idx_gruneisen_parameter =
+                i + num_ghosts_0_gruneisen_parameter;
+            
+            Gamma[idx_gruneisen_parameter] = Gamma_src;
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        /*
+         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        
+        const int num_ghosts_0_gruneisen_parameter =
+            num_ghosts_gruneisen_parameter[0];
+        const int num_ghosts_1_gruneisen_parameter =
+            num_ghosts_gruneisen_parameter[1];
+        const int ghostcell_dim_0_gruneisen_parameter =
+            ghostcell_dims_gruneisen_parameter[0];
+        
+        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx_gruneisen_parameter =
+                    (i + num_ghosts_0_gruneisen_parameter) +
+                    (j + num_ghosts_1_gruneisen_parameter)*
+                        ghostcell_dim_0_gruneisen_parameter;
+                
+                Gamma[idx_gruneisen_parameter] = Gamma_src;
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        /*
+         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_lo_2 = domain_lo[2];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        const int domain_dim_2 = domain_dims[2];
+        
+        const int num_ghosts_0_gruneisen_parameter =
+            num_ghosts_gruneisen_parameter[0];
+        const int num_ghosts_1_gruneisen_parameter =
+            num_ghosts_gruneisen_parameter[1];
+        const int num_ghosts_2_gruneisen_parameter =
+            num_ghosts_gruneisen_parameter[2];
+        const int ghostcell_dim_0_gruneisen_parameter =
+            ghostcell_dims_gruneisen_parameter[0];
+        const int ghostcell_dim_1_gruneisen_parameter =
+            ghostcell_dims_gruneisen_parameter[1];
+        
+        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_gruneisen_parameter =
+                        (i + num_ghosts_0_gruneisen_parameter) +
+                        (j + num_ghosts_1_gruneisen_parameter)*
+                            ghostcell_dim_0_gruneisen_parameter +
+                        (k + num_ghosts_2_gruneisen_parameter)*
+                            ghostcell_dim_0_gruneisen_parameter*
+                            ghostcell_dim_1_gruneisen_parameter;
+                    
+                    Gamma[idx_gruneisen_parameter] = Gamma_src;
+                }
+            }
+        }
+    }
+}
+
+
+/*
+ * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+ * constant density divided by density).
+ */
+void
+EquationOfStateIdealGas::computeGruneisenParameter(
+    double* const Gamma,
+    const double* const gamma,
+    const hier::IntVector& num_ghosts_gruneisen_parameter,
+    const hier::IntVector& num_ghosts_thermo_properties,
+    const hier::IntVector& ghostcell_dims_gruneisen_parameter,
+    const hier::IntVector& ghostcell_dims_thermo_properties,
+    const hier::IntVector& domain_lo,
+    const hier::IntVector& domain_dims) const
+{
+    if (d_dim == tbox::Dimension(1))
+    {
+        /*
+         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_dim_0 = domain_dims[0];
+        
+        const int num_ghosts_0_gruneisen_parameter =
+            num_ghosts_gruneisen_parameter[0];
+        
+        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
+        
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+        {
+            // Compute the linear indices.
+            const int idx_gruneisen_parameter =
+                i + num_ghosts_0_gruneisen_parameter;
+            
+            const int idx_thermo_properties = i + num_ghosts_0_thermo_properties;
+            
+            Gamma[idx_gruneisen_parameter] = gamma[idx_thermo_properties] - double(1);
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        /*
+         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        
+        const int num_ghosts_0_gruneisen_parameter =
+            num_ghosts_gruneisen_parameter[0];
+        const int num_ghosts_1_gruneisen_parameter =
+            num_ghosts_gruneisen_parameter[1];
+        const int ghostcell_dim_0_gruneisen_parameter =
+            ghostcell_dims_gruneisen_parameter[0];
+        
+        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
+        const int num_ghosts_1_thermo_properties = num_ghosts_thermo_properties[1];
+        const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
+        
+        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx_gruneisen_parameter =
+                    (i + num_ghosts_0_gruneisen_parameter) +
+                    (j + num_ghosts_1_gruneisen_parameter)*
+                        ghostcell_dim_0_gruneisen_parameter;
+                
+                const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
+                    (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
+                
+                Gamma[idx_gruneisen_parameter] = gamma[idx_thermo_properties] - double(1);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        /*
+         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_lo_2 = domain_lo[2];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        const int domain_dim_2 = domain_dims[2];
+        
+        const int num_ghosts_0_gruneisen_parameter =
+            num_ghosts_gruneisen_parameter[0];
+        const int num_ghosts_1_gruneisen_parameter =
+            num_ghosts_gruneisen_parameter[1];
+        const int num_ghosts_2_gruneisen_parameter =
+            num_ghosts_gruneisen_parameter[2];
+        const int ghostcell_dim_0_gruneisen_parameter =
+            ghostcell_dims_gruneisen_parameter[0];
+        const int ghostcell_dim_1_gruneisen_parameter =
+            ghostcell_dims_gruneisen_parameter[1];
+        
+        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
+        const int num_ghosts_1_thermo_properties = num_ghosts_thermo_properties[1];
+        const int num_ghosts_2_thermo_properties = num_ghosts_thermo_properties[2];
+        const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
+        const int ghostcell_dim_1_thermo_properties = ghostcell_dims_thermo_properties[1];
+        
+        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_gruneisen_parameter =
+                        (i + num_ghosts_0_gruneisen_parameter) +
+                        (j + num_ghosts_1_gruneisen_parameter)*
+                            ghostcell_dim_0_gruneisen_parameter +
+                        (k + num_ghosts_2_gruneisen_parameter)*
+                            ghostcell_dim_0_gruneisen_parameter*
+                            ghostcell_dim_1_gruneisen_parameter;
+                    
+                    const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
+                        (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties +
+                        (k + num_ghosts_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
+                            ghostcell_dim_1_thermo_properties;
+                    
+                    Gamma[idx_gruneisen_parameter] = gamma[idx_thermo_properties] - double(1);
                 }
             }
         }

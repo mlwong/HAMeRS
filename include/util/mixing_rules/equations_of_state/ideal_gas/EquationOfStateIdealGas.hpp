@@ -464,6 +464,127 @@ class EquationOfStateIdealGas: public EquationOfState
             int side_normal,
             const hier::Box& domain) const;
         
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        
+        /*
+         * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
+         */
+        double
+        getPartialPressurePartialDensity(
+            const double* const density,
+            const double* const pressure,
+            const std::vector<const double*>& thermo_properties) const;
+        
+        /*
+         * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
+         */
+        void
+        computePartialPressurePartialDensity(
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
+         */
+        void
+        computePartialPressurePartialDensity(
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
+         */
+        void
+        computePartialPressurePartialDensity(
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
+         */
+        void
+        computePartialPressurePartialDensity(
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const;
+        
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        
+        /*
+         * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+         * constant density divided by density).
+         */
+        double
+        getGruneisenParameter(
+            const double* const density,
+            const double* const pressure,
+            const std::vector<const double*>& thermo_properties) const;
+        
+        /*
+         * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+         * constant density divided by density).
+         */
+        void
+        computeGruneisenParameter(
+            boost::shared_ptr<pdat::CellData<double> >& data_gruneisen_parameter,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+         * constant density divided by density).
+         */
+        void
+        computeGruneisenParameter(
+            boost::shared_ptr<pdat::SideData<double> >& data_gruneisen_parameter,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+         * constant density divided by density).
+         */
+        void
+        computeGruneisenParameter(
+            boost::shared_ptr<pdat::CellData<double> >& data_gruneisen_parameter,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+         * constant density divided by density).
+         */
+        void
+        computeGruneisenParameter(
+            boost::shared_ptr<pdat::SideData<double> >& data_gruneisen_parameter,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const;
+        
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        
         /*
          * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
          */
@@ -902,6 +1023,51 @@ class EquationOfStateIdealGas: public EquationOfState
             const hier::IntVector& num_ghosts_isobaric_specific_heat_capacity,
             const hier::IntVector& num_ghosts_thermo_properties,
             const hier::IntVector& ghostcell_dims_isobaric_specific_heat_capacity,
+            const hier::IntVector& ghostcell_dims_thermo_properties,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims) const;
+        
+        /*
+         * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
+         */
+        void
+        computePartialPressurePartialDensity(
+            double* const Psi,
+            const double* const rho,
+            const double* const p,
+            const hier::IntVector& num_ghosts_partial_pressure_partial_density,
+            const hier::IntVector& num_ghosts_density,
+            const hier::IntVector& num_ghosts_pressure,
+            const hier::IntVector& ghostcell_dims_partial_pressure_partial_density,
+            const hier::IntVector& ghostcell_dims_density,
+            const hier::IntVector& ghostcell_dims_pressure,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims) const;
+        
+        /*
+         * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+         * constant density divided by density).
+         */
+        void
+        computeGruneisenParameter(
+            double* const Gamma,
+            const double& gamma,
+            const hier::IntVector& num_ghosts_gruneisen_parameter,
+            const hier::IntVector& ghostcell_dims_gruneisen_parameter,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims) const;
+        
+        /*
+         * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+         * constant density divided by density).
+         */
+        void
+        computeGruneisenParameter(
+            double* const Gamma,
+            const double* const gamma,
+            const hier::IntVector& num_ghosts_gruneisen_parameter,
+            const hier::IntVector& num_ghosts_thermo_properties,
+            const hier::IntVector& ghostcell_dims_gruneisen_parameter,
             const hier::IntVector& ghostcell_dims_thermo_properties,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims) const;
