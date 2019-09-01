@@ -1224,14 +1224,14 @@ FlowModelFiveEqnAllaire::getCellData(
     }
     else if (variable_key == "INTERNAL_ENERGY")
     {
-        if (!d_data_pressure)
+        if (!d_data_internal_energy)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFiveEqnAllaire::getCellData()\n"
                 << "Cell data of 'INTERNAL_ENERGY' is not registered/computed yet."
                 << std::endl);
         }
-        cell_data = d_data_pressure;
+        cell_data = d_data_internal_energy;
     }
     else if (variable_key == "PRESSURE")
     {

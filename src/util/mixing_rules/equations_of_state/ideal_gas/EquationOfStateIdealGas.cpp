@@ -3594,9 +3594,6 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
 }
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 /*
  * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
  */
@@ -4037,9 +4034,6 @@ EquationOfStateIdealGas::computePartialPressurePartialDensity(
 }
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 /*
  * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
  * constant density divided by density).
@@ -4422,9 +4416,6 @@ EquationOfStateIdealGas::computeGruneisenParameter(
         domain_lo,
         domain_dims);
 }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 /*

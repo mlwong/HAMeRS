@@ -464,8 +464,6 @@ class EquationOfStateIdealGas: public EquationOfState
             int side_normal,
             const hier::Box& domain) const;
         
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        
         /*
          * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
@@ -520,8 +518,6 @@ class EquationOfStateIdealGas: public EquationOfState
             const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
             int side_normal,
             const hier::Box& domain) const;
-        
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
         
         /*
          * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
@@ -582,8 +578,6 @@ class EquationOfStateIdealGas: public EquationOfState
             const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
             int side_normal,
             const hier::Box& domain) const;
-        
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
         
         /*
          * Compute the density.

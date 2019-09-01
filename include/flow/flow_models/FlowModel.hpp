@@ -50,8 +50,9 @@ class FlowModelStatisticsUtilities;
 
 /*
  * The class should at least be able to provide the following cell data of the single-species/mixture:
- * DENSITY, MOMENTUM, TOTAL_ENERGY, PRESSURE, VELOCITY, SOUND_SPEED, PRIMITIVE_VARIABLES, CONVECTIVE_FLUX_X,
- * CONVECTIVE_FLUX_Y, CONVECTIVE_FLUX_Z, MAX_WAVE_SPEED_X, MAX_WAVE_SPEED_Y, MAX_WAVE_SPEED_Z.
+ * DENSITY, MOMENTUM, TOTAL_ENERGY (per unit volume), VELOCITY, INTERNAL_ENERGY (per unit mass), PRESSURE,
+ * SOUND_SPEED, PRIMITIVE_VARIABLES, CONVECTIVE_FLUX_X, CONVECTIVE_FLUX_Y, CONVECTIVE_FLUX_Z,
+ * MAX_WAVE_SPEED_X, MAX_WAVE_SPEED_Y, MAX_WAVE_SPEED_Z.
  */
 class FlowModel:
     public appu::VisDerivedDataStrategy,
