@@ -30,7 +30,7 @@ class EquationOfMassDiffusivityMixingRulesConstant: public EquationOfMassDiffusi
             const boost::shared_ptr<tbox::Database>& restart_db) const;
         
         /*
-         * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         getMassDiffusivities(
@@ -40,7 +40,7 @@ class EquationOfMassDiffusivityMixingRulesConstant: public EquationOfMassDiffusi
             const std::vector<const double*>& mass_fractions) const;
         
         /*
-         * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeMassDiffusivities(

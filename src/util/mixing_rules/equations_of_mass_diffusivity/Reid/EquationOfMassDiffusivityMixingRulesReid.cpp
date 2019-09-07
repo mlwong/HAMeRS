@@ -236,7 +236,7 @@ EquationOfMassDiffusivityMixingRulesReid::putToRestart(
 
 
 /*
- * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 void
 EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivities(
@@ -406,7 +406,7 @@ EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivities(
 
 
 /*
- * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 void
 EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(

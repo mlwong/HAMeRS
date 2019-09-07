@@ -176,7 +176,7 @@ EquationOfBulkViscosityMixingRulesConstant::putToRestart(
 
 
 /*
- * Compute the bulk viscosity of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the bulk viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 double
 EquationOfBulkViscosityMixingRulesConstant::getBulkViscosity(
@@ -291,7 +291,7 @@ EquationOfBulkViscosityMixingRulesConstant::getBulkViscosity(
 
 
 /*
- * Compute the bulk viscosity of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the bulk viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 void
 EquationOfBulkViscosityMixingRulesConstant::computeBulkViscosity(

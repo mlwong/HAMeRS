@@ -42,7 +42,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
         }
         
         /*
-         * Compute the pressure of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the pressure of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         double
         getPressure(
@@ -51,7 +51,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const std::vector<const double*>& mass_fractions) const;
         
         /*
-         * Compute the pressure of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the pressure of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computePressure(
@@ -62,7 +62,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const hier::Box& domain) const;
         
         /*
-         * Compute the pressure of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the pressure of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computePressure(
@@ -109,7 +109,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const hier::Box& domain) const;
         
         /*
-         * Compute the sound speed of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the sound speed of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         double
         getSoundSpeed(
@@ -118,7 +118,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const std::vector<const double*>& mass_fractions) const;
         
         /*
-         * Compute the sound speed of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the sound speed of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeSoundSpeed(
@@ -129,7 +129,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const hier::Box& domain) const;
         
         /*
-         * Compute the sound speed of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the sound speed of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeSoundSpeed(
@@ -176,7 +176,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const hier::Box& domain) const;
         
         /*
-         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         double
         getInternalEnergy(
@@ -185,7 +185,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const std::vector<const double*>& mass_fractions) const;
         
         /*
-         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeInternalEnergy(
@@ -196,7 +196,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const hier::Box& domain) const;
         
         /*
-         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeInternalEnergy(
@@ -243,7 +243,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const hier::Box& domain) const;
         
         /*
-         * Compute the temperature of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the temperature of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         double
         getTemperature(
@@ -252,7 +252,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const std::vector<const double*>& mass_fractions) const;
         
         /*
-         * Compute the temperature of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the temperature of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeTemperature(
@@ -263,7 +263,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const hier::Box& domain) const;
         
         /*
-         * Compute the temperature of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the temperature of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeTemperature(
@@ -276,7 +276,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
         
         /*
          * Compute the specific internal energy of the mixture from temperature with isothermal
-         * and isobaric equilibria assumptions.
+         * and isobaric equilibrium assumptions.
          */
         double
         getInternalEnergyFromTemperature(
@@ -286,7 +286,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
         
         /*
          * Compute the specific internal energy of the mixture from temperature with isothermal
-         * and isobaric equilibria assumptions.
+         * and isobaric equilibrium assumptions.
          */
         void
         computeInternalEnergyFromTemperature(
@@ -298,7 +298,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
         
         /*
          * Compute the specific internal energy of the mixture from temperature with isothermal
-         * and isobaric equilibria assumptions.
+         * and isobaric equilibrium assumptions.
          */
         void
         computeInternalEnergyFromTemperature(
@@ -311,7 +311,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
         
         /*
          * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         double
         getIsochoricSpecificHeatCapacity(
@@ -321,7 +321,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
         
         /*
          * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         void
         computeIsochoricSpecificHeatCapacity(
@@ -333,7 +333,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
         
         /*
          * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         void
         computeIsochoricSpecificHeatCapacity(
@@ -346,7 +346,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
         
         /*
          * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         double
         getIsobaricSpecificHeatCapacity(
@@ -356,7 +356,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
         
         /*
          * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         void
         computeIsobaricSpecificHeatCapacity(
@@ -368,7 +368,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
         
         /*
          * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         void
         computeIsobaricSpecificHeatCapacity(
@@ -380,7 +380,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const hier::Box& domain) const;
         
         /*
-         * Compute the density of mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the density of mixture with isothermal and isobaric equilibrium assumptions.
          */
         double
         getMixtureDensity(
@@ -389,7 +389,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const std::vector<const double*>& mass_fractions) const;
         
         /*
-         * Compute the density of mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the density of mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeMixtureDensity(
@@ -400,7 +400,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const hier::Box& domain) const;
         
         /*
-         * Compute the density of mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the density of mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeMixtureDensity(
@@ -519,7 +519,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
         
         /*
          * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         void
         computeIsochoricSpecificHeatCapacity(
@@ -534,7 +534,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
         
         /*
          * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         void
         computeIsochoricSpecificHeatCapacity(
@@ -549,7 +549,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const hier::IntVector& domain_dims) const;
         
         /*
-         * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric equilibria
+         * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric equilibrium
          * assumptions.
          */
         void
@@ -564,7 +564,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const hier::IntVector& domain_dims) const;
         
         /*
-         * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric equilibria
+         * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric equilibrium
          * assumptions.
          */
         void

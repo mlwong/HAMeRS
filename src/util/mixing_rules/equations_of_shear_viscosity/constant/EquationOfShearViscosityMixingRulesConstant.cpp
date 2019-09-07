@@ -176,7 +176,7 @@ EquationOfShearViscosityMixingRulesConstant::putToRestart(
 
 
 /*
- * Compute the shear viscosity of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the shear viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 double
 EquationOfShearViscosityMixingRulesConstant::getShearViscosity(
@@ -291,7 +291,7 @@ EquationOfShearViscosityMixingRulesConstant::getShearViscosity(
 
 
 /*
- * Compute the shear viscosity of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the shear viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 void
 EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(

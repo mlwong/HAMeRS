@@ -236,7 +236,7 @@ EquationOfShearViscosityMixingRulesChapmanEnskog::putToRestart(
 
 
 /*
- * Compute the shear viscosity of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the shear viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 double
 EquationOfShearViscosityMixingRulesChapmanEnskog::getShearViscosity(
@@ -351,7 +351,7 @@ EquationOfShearViscosityMixingRulesChapmanEnskog::getShearViscosity(
 
 
 /*
- * Compute the shear viscosity of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the shear viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 void
 EquationOfShearViscosityMixingRulesChapmanEnskog::computeShearViscosity(

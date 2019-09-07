@@ -51,7 +51,7 @@ class EquationOfStateMixingRules
             const boost::shared_ptr<tbox::Database>& restart_db) const = 0;
         
         /*
-         * Compute the pressure of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the pressure of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual double
         getPressure(
@@ -60,7 +60,7 @@ class EquationOfStateMixingRules
             const std::vector<const double*>& mass_fractions) const = 0;
         
         /*
-         * Compute the pressure of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the pressure of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computePressure(
@@ -79,7 +79,7 @@ class EquationOfStateMixingRules
         }
         
         /*
-         * Compute the pressure of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the pressure of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual void
         computePressure(
@@ -90,7 +90,7 @@ class EquationOfStateMixingRules
             const hier::Box& domain) const = 0;
         
         /*
-         * Compute the pressure of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the pressure of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computePressure(
@@ -111,7 +111,7 @@ class EquationOfStateMixingRules
         }
         
         /*
-         * Compute the pressure of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the pressure of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual void
         computePressure(
@@ -202,7 +202,7 @@ class EquationOfStateMixingRules
             const hier::Box& domain) const = 0;
         
         /*
-         * Compute the sound speed of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the sound speed of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual double
         getSoundSpeed(
@@ -211,7 +211,7 @@ class EquationOfStateMixingRules
             const std::vector<const double*>& mass_fractions) const = 0;
         
         /*
-         * Compute the sound speed of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the sound speed of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeSoundSpeed(
@@ -230,7 +230,7 @@ class EquationOfStateMixingRules
         }
         
         /*
-         * Compute the sound speed of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the sound speed of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual void
         computeSoundSpeed(
@@ -241,7 +241,7 @@ class EquationOfStateMixingRules
             const hier::Box& domain) const = 0;
         
         /*
-         * Compute the sound speed of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the sound speed of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeSoundSpeed(
@@ -262,7 +262,7 @@ class EquationOfStateMixingRules
         }
         
         /*
-         * Compute the sound speed of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the sound speed of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual void
         computeSoundSpeed(
@@ -353,7 +353,7 @@ class EquationOfStateMixingRules
             const hier::Box& domain) const = 0;
         
         /*
-         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual double
         getInternalEnergy(
@@ -362,7 +362,7 @@ class EquationOfStateMixingRules
             const std::vector<const double*>& mass_fractions) const = 0;
         
         /*
-         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeInternalEnergy(
@@ -381,7 +381,7 @@ class EquationOfStateMixingRules
         }
         
         /*
-         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual void
         computeInternalEnergy(
@@ -392,7 +392,7 @@ class EquationOfStateMixingRules
             const hier::Box& domain) const = 0;
         
         /*
-         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeInternalEnergy(
@@ -413,7 +413,7 @@ class EquationOfStateMixingRules
         }
         
         /*
-         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual void
         computeInternalEnergy(
@@ -504,7 +504,7 @@ class EquationOfStateMixingRules
             const hier::Box& domain) const = 0;
         
         /*
-         * Compute the temperature of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the temperature of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual double
         getTemperature(
@@ -513,7 +513,7 @@ class EquationOfStateMixingRules
             const std::vector<const double*>& mass_fractions) const = 0;
         
         /*
-         * Compute the temperature of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the temperature of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeTemperature(
@@ -532,7 +532,7 @@ class EquationOfStateMixingRules
         } 
         
         /*
-         * Compute the temperature of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the temperature of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual void
         computeTemperature(
@@ -543,7 +543,7 @@ class EquationOfStateMixingRules
             const hier::Box& domain) const = 0;
         
         /*
-         * Compute the temperature of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the temperature of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeTemperature(
@@ -564,7 +564,7 @@ class EquationOfStateMixingRules
         } 
         
         /*
-         * Compute the temperature of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the temperature of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual void
         computeTemperature(
@@ -577,7 +577,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the specific internal energy of the mixture from temperature with isothermal
-         * and isobaric equilibria assumptions.
+         * and isobaric equilibrium assumptions.
          */
         virtual double
         getInternalEnergyFromTemperature(
@@ -587,7 +587,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the specific internal energy of the mixture from temperature with isothermal
-         * and isobaric equilibria assumptions.
+         * and isobaric equilibrium assumptions.
          */
         void
         computeInternalEnergyFromTemperature(
@@ -607,7 +607,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the specific internal energy of the mixture from temperature with isothermal
-         * and isobaric equilibria assumptions.
+         * and isobaric equilibrium assumptions.
          */
         virtual void
         computeInternalEnergyFromTemperature(
@@ -619,7 +619,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the specific internal energy of the mixture from temperature with isothermal
-         * and isobaric equilibria assumptions.
+         * and isobaric equilibrium assumptions.
          */
         void
         computeInternalEnergyFromTemperature(
@@ -641,7 +641,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the specific internal energy of the mixture from temperature with isothermal
-         * and isobaric equilibria assumptions.
+         * and isobaric equilibrium assumptions.
          */
         virtual void
         computeInternalEnergyFromTemperature(
@@ -654,7 +654,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         virtual double
         getIsochoricSpecificHeatCapacity(
@@ -664,7 +664,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         void
         computeIsochoricSpecificHeatCapacity(
@@ -684,7 +684,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         virtual void
         computeIsochoricSpecificHeatCapacity(
@@ -696,7 +696,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         void
         computeIsochoricSpecificHeatCapacity(
@@ -718,7 +718,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         virtual void
         computeIsochoricSpecificHeatCapacity(
@@ -731,7 +731,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         virtual double
         getIsobaricSpecificHeatCapacity(
@@ -741,7 +741,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         void
         computeIsobaricSpecificHeatCapacity(
@@ -761,7 +761,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         virtual void
         computeIsobaricSpecificHeatCapacity(
@@ -773,7 +773,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         void
         computeIsobaricSpecificHeatCapacity(
@@ -795,7 +795,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         virtual void
         computeIsobaricSpecificHeatCapacity(
@@ -807,7 +807,7 @@ class EquationOfStateMixingRules
             const hier::Box& domain) const = 0;
         
         /*
-         * Compute the density of mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the density of mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual double
         getMixtureDensity(
@@ -816,7 +816,7 @@ class EquationOfStateMixingRules
             const std::vector<const double*>& mass_fractions) const = 0;
         
         /*
-         * Compute the density of mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the density of mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeMixtureDensity(
@@ -835,7 +835,7 @@ class EquationOfStateMixingRules
         }
         
         /*
-         * Compute the density of mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the density of mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual void
         computeMixtureDensity(
@@ -846,7 +846,7 @@ class EquationOfStateMixingRules
             const hier::Box& domain) const = 0;
         
         /*
-         * Compute the density of mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the density of mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeMixtureDensity(
@@ -867,7 +867,7 @@ class EquationOfStateMixingRules
         }
         
         /*
-         * Compute the density of mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the density of mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual void
         computeMixtureDensity(

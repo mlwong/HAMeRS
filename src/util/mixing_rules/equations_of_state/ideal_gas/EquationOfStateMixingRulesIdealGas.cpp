@@ -194,7 +194,7 @@ EquationOfStateMixingRulesIdealGas::putToRestart(
 
 
 /*
- * Compute the pressure of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the pressure of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 double
 EquationOfStateMixingRulesIdealGas::getPressure(
@@ -238,7 +238,7 @@ EquationOfStateMixingRulesIdealGas::getPressure(
 
 
 /*
- * Compute the pressure of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the pressure of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 void
 EquationOfStateMixingRulesIdealGas::computePressure(
@@ -315,7 +315,7 @@ EquationOfStateMixingRulesIdealGas::computePressure(
 
 
 /*
- * Compute the pressure of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the pressure of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 void
 EquationOfStateMixingRulesIdealGas::computePressure(
@@ -628,7 +628,7 @@ EquationOfStateMixingRulesIdealGas::computePressure(
 
 
 /*
- * Compute the sound speed of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the sound speed of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 double
 EquationOfStateMixingRulesIdealGas::getSoundSpeed(
@@ -672,7 +672,7 @@ EquationOfStateMixingRulesIdealGas::getSoundSpeed(
 
 
 /*
- * Compute the sound speed of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the sound speed of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 void
 EquationOfStateMixingRulesIdealGas::computeSoundSpeed(
@@ -749,7 +749,7 @@ EquationOfStateMixingRulesIdealGas::computeSoundSpeed(
 
 
 /*
- * Compute the sound speed of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the sound speed of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 void
 EquationOfStateMixingRulesIdealGas::computeSoundSpeed(
@@ -1062,7 +1062,7 @@ EquationOfStateMixingRulesIdealGas::computeSoundSpeed(
 
 
 /*
- * Compute the specific internal energy of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the specific internal energy of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 double
 EquationOfStateMixingRulesIdealGas::getInternalEnergy(
@@ -1106,7 +1106,7 @@ EquationOfStateMixingRulesIdealGas::getInternalEnergy(
 
 
 /*
- * Compute the specific internal energy of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the specific internal energy of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 void
 EquationOfStateMixingRulesIdealGas::computeInternalEnergy(
@@ -1183,7 +1183,7 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergy(
 
 
 /*
- * Compute the specific internal energy of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the specific internal energy of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 void
 EquationOfStateMixingRulesIdealGas::computeInternalEnergy(
@@ -1496,7 +1496,7 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergy(
 
 
 /*
- * Compute the temperature of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the temperature of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 double
 EquationOfStateMixingRulesIdealGas::getTemperature(
@@ -1540,7 +1540,7 @@ EquationOfStateMixingRulesIdealGas::getTemperature(
 
 
 /*
- * Compute the temperature of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the temperature of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 void
 EquationOfStateMixingRulesIdealGas::computeTemperature(
@@ -1617,7 +1617,7 @@ EquationOfStateMixingRulesIdealGas::computeTemperature(
 
 
 /*
- * Compute the temperature of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the temperature of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 void
 EquationOfStateMixingRulesIdealGas::computeTemperature(
@@ -1711,7 +1711,7 @@ EquationOfStateMixingRulesIdealGas::computeTemperature(
 
 /*
  * Compute the specific internal energy of the mixture from temperature with isothermal
- * and isobaric equilibria assumptions.
+ * and isobaric equilibrium assumptions.
  */
 double
 EquationOfStateMixingRulesIdealGas::getInternalEnergyFromTemperature(
@@ -1756,7 +1756,7 @@ EquationOfStateMixingRulesIdealGas::getInternalEnergyFromTemperature(
 
 /*
  * Compute the specific internal energy of the mixture from temperature with isothermal
- * and isobaric equilibria assumptions.
+ * and isobaric equilibrium assumptions.
  */
 void
 EquationOfStateMixingRulesIdealGas::computeInternalEnergyFromTemperature(
@@ -1834,7 +1834,7 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergyFromTemperature(
 
 /*
  * Compute the specific internal energy of the mixture from temperature with isothermal
- * and isobaric equilibria assumptions.
+ * and isobaric equilibrium assumptions.
  */
 void
 EquationOfStateMixingRulesIdealGas::computeInternalEnergyFromTemperature(
@@ -1926,7 +1926,7 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergyFromTemperature(
 
 
 /*
- * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric equilibria
+ * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric equilibrium
  * assumptions.
  */
 double
@@ -1983,7 +1983,7 @@ EquationOfStateMixingRulesIdealGas::getIsochoricSpecificHeatCapacity(
 
 
 /*
- * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric equilibria
+ * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric equilibrium
  * assumptions.
  */
 void
@@ -2152,7 +2152,7 @@ EquationOfStateMixingRulesIdealGas::computeIsochoricSpecificHeatCapacity(
 
 
 /*
- * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric equilibria
+ * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric equilibrium
  * assumptions.
  */
 void
@@ -2338,7 +2338,7 @@ EquationOfStateMixingRulesIdealGas::computeIsochoricSpecificHeatCapacity(
 
 
 /*
- * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric equilibria
+ * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric equilibrium
  * assumptions.
  */
 double
@@ -2392,7 +2392,7 @@ EquationOfStateMixingRulesIdealGas::getIsobaricSpecificHeatCapacity(
 
 
 /*
- * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric equilibria
+ * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric equilibrium
  * assumptions.
  */
 void
@@ -2561,7 +2561,7 @@ EquationOfStateMixingRulesIdealGas::computeIsobaricSpecificHeatCapacity(
 
 
 /*
- * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric equilibria
+ * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric equilibrium
  * assumptions.
  */
 void
@@ -2746,7 +2746,7 @@ EquationOfStateMixingRulesIdealGas::computeIsobaricSpecificHeatCapacity(
 
 
 /*
- * Compute the density of mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the density of mixture with isothermal and isobaric equilibrium assumptions.
  */
 double
 EquationOfStateMixingRulesIdealGas::getMixtureDensity(
@@ -2790,7 +2790,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureDensity(
 
 
 /*
- * Compute the density of mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the density of mixture with isothermal and isobaric equilibrium assumptions.
  */
 void
 EquationOfStateMixingRulesIdealGas::computeMixtureDensity(
@@ -2867,7 +2867,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureDensity(
 
 
 /*
- * Compute the density of mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the density of mixture with isothermal and isobaric equilibrium assumptions.
  */
 void
 EquationOfStateMixingRulesIdealGas::computeMixtureDensity(
@@ -3948,7 +3948,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
 
 /*
  * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric
- * equilibria assumptions.
+ * equilibrium assumptions.
  */
 void
 EquationOfStateMixingRulesIdealGas::computeIsochoricSpecificHeatCapacity(
@@ -4098,7 +4098,7 @@ EquationOfStateMixingRulesIdealGas::computeIsochoricSpecificHeatCapacity(
 
 /*
  * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric
- * equilibria assumptions.
+ * equilibrium assumptions.
  */
 void
 EquationOfStateMixingRulesIdealGas::computeIsochoricSpecificHeatCapacity(
@@ -4320,7 +4320,7 @@ EquationOfStateMixingRulesIdealGas::computeIsochoricSpecificHeatCapacity(
 
 
 /*
- * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric equilibria
+ * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric equilibrium
  * assumptions.
  */
 void
@@ -4470,7 +4470,7 @@ EquationOfStateMixingRulesIdealGas::computeIsobaricSpecificHeatCapacity(
 
 
 /*
- * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric equilibria
+ * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric equilibrium
  * assumptions.
  */
 void

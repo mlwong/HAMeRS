@@ -51,7 +51,7 @@ class EquationOfThermalConductivityMixingRules
             const boost::shared_ptr<tbox::Database>& restart_db) const = 0;
         
         /*
-         * Compute the thermal conductivity of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the thermal conductivity of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual double
         getThermalConductivity(
@@ -60,7 +60,7 @@ class EquationOfThermalConductivityMixingRules
             const std::vector<const double*>& mass_fractions) const = 0;
         
         /*
-         * Compute the thermal conductivity of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the thermal conductivity of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeThermalConductivity(
@@ -79,7 +79,7 @@ class EquationOfThermalConductivityMixingRules
         }
         
         /*
-         * Compute the thermal conductivity of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the thermal conductivity of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual void
         computeThermalConductivity(

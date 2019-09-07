@@ -507,7 +507,7 @@ EquationOfBulkViscosityMixingRulesCramer::putToRestart(
 
 
 /*
- * Compute the bulk viscosity of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the bulk viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 double
 EquationOfBulkViscosityMixingRulesCramer::getBulkViscosity(
@@ -622,7 +622,7 @@ EquationOfBulkViscosityMixingRulesCramer::getBulkViscosity(
 
 
 /*
- * Compute the bulk viscosity of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the bulk viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 void
 EquationOfBulkViscosityMixingRulesCramer::computeBulkViscosity(

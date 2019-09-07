@@ -172,7 +172,7 @@ EquationOfThermalConductivityMixingRulesConstant::putToRestart(
 
 
 /*
- * Compute the thermal conductivity of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the thermal conductivity of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 double
 EquationOfThermalConductivityMixingRulesConstant::getThermalConductivity(
@@ -286,7 +286,7 @@ EquationOfThermalConductivityMixingRulesConstant::getThermalConductivity(
 
 
 /*
- * Compute the thermal conductivity of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the thermal conductivity of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 void
 EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(

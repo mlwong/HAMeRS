@@ -51,7 +51,7 @@ class EquationOfShearViscosityMixingRules
             const boost::shared_ptr<tbox::Database>& restart_db) const = 0;
         
         /*
-         * Compute the shear viscosity of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the shear viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual double
         getShearViscosity(
@@ -60,7 +60,7 @@ class EquationOfShearViscosityMixingRules
             const std::vector<const double*>& mass_fractions) const = 0;
         
         /*
-         * Compute the shear viscosity of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the shear viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeShearViscosity(
@@ -79,7 +79,7 @@ class EquationOfShearViscosityMixingRules
         }
         
         /*
-         * Compute the shear viscosity of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the shear viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual void
         computeShearViscosity(

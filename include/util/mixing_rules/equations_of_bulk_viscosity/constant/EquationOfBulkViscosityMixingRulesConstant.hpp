@@ -41,7 +41,7 @@ class EquationOfBulkViscosityMixingRulesConstant: public EquationOfBulkViscosity
             const boost::shared_ptr<tbox::Database>& restart_db) const;
         
         /*
-         * Compute the bulk viscosity of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the bulk viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         double
         getBulkViscosity(
@@ -50,7 +50,7 @@ class EquationOfBulkViscosityMixingRulesConstant: public EquationOfBulkViscosity
             const std::vector<const double*>& mass_fractions) const;
         
         /*
-         * Compute the bulk viscosity of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the bulk viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeBulkViscosity(
