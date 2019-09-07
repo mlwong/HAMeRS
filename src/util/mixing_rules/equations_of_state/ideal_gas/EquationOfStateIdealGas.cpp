@@ -3598,7 +3598,7 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
  * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
  */
 double
-EquationOfStateIdealGas::getPartialPressurePartialDensity(
+EquationOfStateIdealGas::getPressureDerivativeWithDensity(
     const double* const density,
     const double* const pressure,
     const std::vector<const double*>& thermo_properties) const
@@ -3616,7 +3616,7 @@ EquationOfStateIdealGas::getPartialPressurePartialDensity(
  * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
  */
 void
-EquationOfStateIdealGas::computePartialPressurePartialDensity(
+EquationOfStateIdealGas::computePressureDerivativeWithDensity(
     boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_density,
     const boost::shared_ptr<pdat::CellData<double> >& data_density,
     const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
@@ -3697,7 +3697,7 @@ EquationOfStateIdealGas::computePartialPressurePartialDensity(
     const double* const rho = data_density->getPointer(0);
     const double* const p = data_pressure->getPointer(0);
     
-    computePartialPressurePartialDensity(
+    computePressureDerivativeWithDensity(
         Psi,
         rho,
         p,
@@ -3716,7 +3716,7 @@ EquationOfStateIdealGas::computePartialPressurePartialDensity(
  * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
  */
 void
-EquationOfStateIdealGas::computePartialPressurePartialDensity(
+EquationOfStateIdealGas::computePressureDerivativeWithDensity(
     boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_density,
     const boost::shared_ptr<pdat::SideData<double> >& data_density,
     const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
@@ -3808,7 +3808,7 @@ EquationOfStateIdealGas::computePartialPressurePartialDensity(
     const double* const rho = data_density->getPointer(side_normal, 0);
     const double* const p = data_pressure->getPointer(side_normal, 0);
     
-    computePartialPressurePartialDensity(
+    computePressureDerivativeWithDensity(
         Psi,
         rho,
         p,
@@ -3827,7 +3827,7 @@ EquationOfStateIdealGas::computePartialPressurePartialDensity(
  * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
  */
 void
-EquationOfStateIdealGas::computePartialPressurePartialDensity(
+EquationOfStateIdealGas::computePressureDerivativeWithDensity(
     boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_density,
     const boost::shared_ptr<pdat::CellData<double> >& data_density,
     const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
@@ -3908,7 +3908,7 @@ EquationOfStateIdealGas::computePartialPressurePartialDensity(
     const double* const rho = data_density->getPointer(0);
     const double* const p = data_pressure->getPointer(0);
     
-    computePartialPressurePartialDensity(
+    computePressureDerivativeWithDensity(
         Psi,
         rho,
         p,
@@ -3927,7 +3927,7 @@ EquationOfStateIdealGas::computePartialPressurePartialDensity(
  * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
  */
 void
-EquationOfStateIdealGas::computePartialPressurePartialDensity(
+EquationOfStateIdealGas::computePressureDerivativeWithDensity(
     boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_density,
     const boost::shared_ptr<pdat::SideData<double> >& data_density,
     const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
@@ -4019,7 +4019,7 @@ EquationOfStateIdealGas::computePartialPressurePartialDensity(
     const double* const rho = data_density->getPointer(side_normal, 0);
     const double* const p = data_pressure->getPointer(side_normal, 0);
     
-    computePartialPressurePartialDensity(
+    computePressureDerivativeWithDensity(
         Psi,
         rho,
         p,
@@ -7356,7 +7356,7 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
  * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
  */
 void
-EquationOfStateIdealGas::computePartialPressurePartialDensity(
+EquationOfStateIdealGas::computePressureDerivativeWithDensity(
     double* const Psi,
     const double* const rho,
     const double* const p,

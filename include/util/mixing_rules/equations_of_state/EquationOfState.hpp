@@ -1114,7 +1114,7 @@ class EquationOfState
          * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         virtual double
-        getPartialPressurePartialDensity(
+        getPressureDerivativeWithDensity(
             const double* const density,
             const double* const pressure,
             const std::vector<const double*>& thermo_properties) const = 0;
@@ -1123,14 +1123,14 @@ class EquationOfState
          * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         void
-        computePartialPressurePartialDensity(
+        computePressureDerivativeWithDensity(
             boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const std::vector<const double*>& thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
-            computePartialPressurePartialDensity(
+            computePressureDerivativeWithDensity(
                 data_partial_pressure_partial_density,
                 data_density,
                 data_pressure,
@@ -1142,7 +1142,7 @@ class EquationOfState
          * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         virtual void
-        computePartialPressurePartialDensity(
+        computePressureDerivativeWithDensity(
             boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
@@ -1153,7 +1153,7 @@ class EquationOfState
          * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         void
-        computePartialPressurePartialDensity(
+        computePressureDerivativeWithDensity(
             boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
@@ -1161,7 +1161,7 @@ class EquationOfState
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
-            computePartialPressurePartialDensity(
+            computePressureDerivativeWithDensity(
                 data_partial_pressure_partial_density,
                 data_density,
                 data_pressure,
@@ -1174,7 +1174,7 @@ class EquationOfState
          * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         virtual void
-        computePartialPressurePartialDensity(
+        computePressureDerivativeWithDensity(
             boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
@@ -1186,14 +1186,14 @@ class EquationOfState
          * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         void
-        computePartialPressurePartialDensity(
+        computePressureDerivativeWithDensity(
             boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
-            computePartialPressurePartialDensity(
+            computePressureDerivativeWithDensity(
                 data_partial_pressure_partial_density,
                 data_density,
                 data_pressure,
@@ -1205,7 +1205,7 @@ class EquationOfState
          * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         virtual void
-        computePartialPressurePartialDensity(
+        computePressureDerivativeWithDensity(
             boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
@@ -1216,7 +1216,7 @@ class EquationOfState
          * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         void
-        computePartialPressurePartialDensity(
+        computePressureDerivativeWithDensity(
             boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
@@ -1224,7 +1224,7 @@ class EquationOfState
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
-            computePartialPressurePartialDensity(
+            computePressureDerivativeWithDensity(
                 data_partial_pressure_partial_density,
                 data_density,
                 data_pressure,
@@ -1237,7 +1237,7 @@ class EquationOfState
          * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         virtual void
-        computePartialPressurePartialDensity(
+        computePressureDerivativeWithDensity(
             boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_pressure,

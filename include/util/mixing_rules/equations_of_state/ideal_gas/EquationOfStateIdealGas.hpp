@@ -468,7 +468,7 @@ class EquationOfStateIdealGas: public EquationOfState
          * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         double
-        getPartialPressurePartialDensity(
+        getPressureDerivativeWithDensity(
             const double* const density,
             const double* const pressure,
             const std::vector<const double*>& thermo_properties) const;
@@ -477,7 +477,7 @@ class EquationOfStateIdealGas: public EquationOfState
          * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         void
-        computePartialPressurePartialDensity(
+        computePressureDerivativeWithDensity(
             boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
@@ -488,7 +488,7 @@ class EquationOfStateIdealGas: public EquationOfState
          * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         void
-        computePartialPressurePartialDensity(
+        computePressureDerivativeWithDensity(
             boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
@@ -500,7 +500,7 @@ class EquationOfStateIdealGas: public EquationOfState
          * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         void
-        computePartialPressurePartialDensity(
+        computePressureDerivativeWithDensity(
             boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
@@ -511,7 +511,7 @@ class EquationOfStateIdealGas: public EquationOfState
          * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         void
-        computePartialPressurePartialDensity(
+        computePressureDerivativeWithDensity(
             boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
@@ -915,7 +915,7 @@ class EquationOfStateIdealGas: public EquationOfState
          * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         void
-        computePartialPressurePartialDensity(
+        computePressureDerivativeWithDensity(
             double* const Psi,
             const double* const rho,
             const double* const p,

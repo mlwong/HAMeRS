@@ -1738,7 +1738,7 @@ FlowModelSingleSpecies::computeSideDataOfProjectionVariablesForConservativeVaria
                     thermo_properties_ptr,
                     0);
                 
-                d_equation_of_state_mixing_rules->getEquationOfState()->computePartialPressurePartialDensity(
+                d_equation_of_state_mixing_rules->getEquationOfState()->computePressureDerivativeWithDensity(
                     projection_variables[4],
                     data_density_averaged,
                     data_pressure_averaged,
@@ -1908,7 +1908,7 @@ FlowModelSingleSpecies::computeSideDataOfProjectionVariablesForConservativeVaria
                     thermo_properties_ptr,
                     0);
                 
-                d_equation_of_state_mixing_rules->getEquationOfState()->computePartialPressurePartialDensity(
+                d_equation_of_state_mixing_rules->getEquationOfState()->computePressureDerivativeWithDensity(
                     projection_variables[5],
                     data_density_averaged,
                     data_pressure_averaged,
@@ -2030,7 +2030,7 @@ FlowModelSingleSpecies::computeSideDataOfProjectionVariablesForConservativeVaria
                     thermo_properties_ptr,
                     1);
                 
-                d_equation_of_state_mixing_rules->getEquationOfState()->computePartialPressurePartialDensity(
+                d_equation_of_state_mixing_rules->getEquationOfState()->computePressureDerivativeWithDensity(
                     projection_variables[5],
                     data_density_averaged,
                     data_pressure_averaged,
@@ -2230,7 +2230,7 @@ FlowModelSingleSpecies::computeSideDataOfProjectionVariablesForConservativeVaria
                     thermo_properties_ptr,
                     0);
                 
-                d_equation_of_state_mixing_rules->getEquationOfState()->computePartialPressurePartialDensity(
+                d_equation_of_state_mixing_rules->getEquationOfState()->computePressureDerivativeWithDensity(
                     projection_variables[6],
                     data_density_averaged,
                     data_pressure_averaged,
@@ -2374,7 +2374,7 @@ FlowModelSingleSpecies::computeSideDataOfProjectionVariablesForConservativeVaria
                     thermo_properties_ptr,
                     1);
                 
-                d_equation_of_state_mixing_rules->getEquationOfState()->computePartialPressurePartialDensity(
+                d_equation_of_state_mixing_rules->getEquationOfState()->computePressureDerivativeWithDensity(
                     projection_variables[6],
                     data_density_averaged,
                     data_pressure_averaged,
@@ -2518,7 +2518,7 @@ FlowModelSingleSpecies::computeSideDataOfProjectionVariablesForConservativeVaria
                     thermo_properties_ptr,
                     2);
                 
-                d_equation_of_state_mixing_rules->getEquationOfState()->computePartialPressurePartialDensity(
+                d_equation_of_state_mixing_rules->getEquationOfState()->computePressureDerivativeWithDensity(
                     projection_variables[6],
                     data_density_averaged,
                     data_pressure_averaged,
