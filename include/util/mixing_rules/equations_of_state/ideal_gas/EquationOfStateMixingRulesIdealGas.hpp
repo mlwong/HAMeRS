@@ -379,8 +379,6 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             int side_normal,
             const hier::Box& domain) const;
         
-        ///////////////////////////////////////////////////////////////
-        
         /*
          * Compute the Gruneisen parameter of the mixture with isothermal and isobaric equilibrium assumptions
          * (partial derivative of pressure w.r.t. specific internal energy under constant partial densities
@@ -460,8 +458,6 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             int side_normal,
             const hier::Box& domain) const;
         
-        ///////////////////////////////////////////////////////////////
-        
         /*
          * Compute the mixture partial derivative of pressure w.r.t. partial densities under constant specific
          * internal energy with isothermal and isobaric equilibrium assumptions.
@@ -534,8 +530,6 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const boost::shared_ptr<pdat::SideData<double> >& data_volume_fractions,
             int side_normal,
             const hier::Box& domain) const;
-        
-        ///////////////////////////////////////////////////////////////
         
         /*
          * Compute the mixture partial derivative of pressure w.r.t. volume fractions under constant specific
@@ -574,8 +568,6 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const boost::shared_ptr<pdat::SideData<double> >& data_volume_fractions,
             int side_normal,
             const hier::Box& domain) const;
-        
-        ///////////////////////////////////////////////////////////////
         
         /*
          * Compute the density of mixture with isothermal and isobaric equilibrium assumptions.
