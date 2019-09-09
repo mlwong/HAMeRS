@@ -4028,7 +4028,8 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
      * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
      */
     
-    const hier::IntVector num_ghosts_partial_pressure_partial_density = data_partial_pressure_partial_density->getGhostCellWidth();
+    const hier::IntVector num_ghosts_partial_pressure_partial_density =
+        data_partial_pressure_partial_density->getGhostCellWidth();
     const hier::IntVector ghostcell_dims_partial_pressure_partial_density =
         data_partial_pressure_partial_density->getGhostBox().numberCells();
     
@@ -4129,8 +4130,10 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
      * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
      */
     
-    const hier::IntVector num_ghosts_partial_pressure_partial_density = data_partial_pressure_partial_density->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_partial_pressure_partial_density = data_partial_pressure_partial_density->getGhostBox().numberCells();
+    const hier::IntVector num_ghosts_partial_pressure_partial_density =
+        data_partial_pressure_partial_density->getGhostCellWidth();
+    hier::IntVector ghostcell_dims_partial_pressure_partial_density =
+        data_partial_pressure_partial_density->getGhostBox().numberCells();
     
     const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
     hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
@@ -4239,7 +4242,8 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
      * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
      */
     
-    const hier::IntVector num_ghosts_partial_pressure_partial_density = data_partial_pressure_partial_density->getGhostCellWidth();
+    const hier::IntVector num_ghosts_partial_pressure_partial_density =
+        data_partial_pressure_partial_density->getGhostCellWidth();
     const hier::IntVector ghostcell_dims_partial_pressure_partial_density =
         data_partial_pressure_partial_density->getGhostBox().numberCells();
     
@@ -4340,8 +4344,10 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
      * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
      */
     
-    const hier::IntVector num_ghosts_partial_pressure_partial_density = data_partial_pressure_partial_density->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_partial_pressure_partial_density = data_partial_pressure_partial_density->getGhostBox().numberCells();
+    const hier::IntVector num_ghosts_partial_pressure_partial_density =
+        data_partial_pressure_partial_density->getGhostCellWidth();
+    hier::IntVector ghostcell_dims_partial_pressure_partial_density =
+        data_partial_pressure_partial_density->getGhostBox().numberCells();
     
     const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
     hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();

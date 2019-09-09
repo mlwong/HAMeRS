@@ -478,7 +478,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computePressureDerivativeWithPartialDensities(
-            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_densities,
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_partial_densities,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
@@ -490,7 +490,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computePressureDerivativeWithPartialDensities(
-            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_densities,
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_partial_densities,
             const boost::shared_ptr<pdat::SideData<double> >& data_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
             const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
@@ -514,7 +514,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computePressureDerivativeWithPartialDensities(
-            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_densities,
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_partial_densities,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
@@ -527,7 +527,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computePressureDerivativeWithPartialDensities(
-            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_densities,
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_partial_densities,
             const boost::shared_ptr<pdat::SideData<double> >& data_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
             const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
@@ -774,6 +774,61 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const hier::IntVector& num_ghosts_mass_fractions,
             const hier::IntVector& ghostcell_dims_isobaric_specific_heat_capacity,
             const hier::IntVector& ghostcell_dims_mass_fractions,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims) const;
+        
+        /*
+         * Compute the mixture partial derivative of pressure w.r.t. partial densities under constant specific
+         * internal energy with isothermal and isobaric equilibrium assumptions.
+         */
+        void
+        computePressureDerivativeWithPartialDensities(
+            std::vector<double*> Psi,
+            const double* const epsilon,
+            const double* const gamma,
+            const double* const c_v,
+            const hier::IntVector& num_ghosts_partial_pressure_partial_partial_densities,
+            const hier::IntVector& num_ghosts_internal_energy,
+            const hier::IntVector& num_ghosts_mixture_thermo_properties,
+            const hier::IntVector& ghostcell_dims_partial_pressure_partial_partial_densities,
+            const hier::IntVector& ghostcell_dims_internal_energy,
+            const hier::IntVector& ghostcell_dims_mixture_thermo_properties,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims) const;
+        
+        /*
+         * Compute the mixture partial derivative of pressure w.r.t. partial densities under constant specific
+         * internal energy and volume fractions with isobaric equilibrium assumption.
+         */
+        void
+        computePressureDerivativeWithPartialDensities(
+            std::vector<double*> Psi,
+            const double* const rho,
+            const double* const p,
+            const hier::IntVector& num_ghosts_partial_pressure_partial_partial_densities,
+            const hier::IntVector& num_ghosts_density,
+            const hier::IntVector& num_ghosts_pressure,
+            const hier::IntVector& ghostcell_dims_partial_pressure_partial_partial_densities,
+            const hier::IntVector& ghostcell_dims_density,
+            const hier::IntVector& ghostcell_dims_pressure,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims) const;
+        
+        /*
+         * Compute the mixture partial derivative of pressure w.r.t. volume fractions under constant specific
+         * internal energy and partial densities with isobaric equilibrium assumption.
+         */
+        void
+        computePressureDerivativeWithVolumeFractions(
+            std::vector<double*> M,
+            const double* const p,
+            const double* const gamma,
+            const hier::IntVector& num_ghosts_partial_pressure_partial_volume_fractions,
+            const hier::IntVector& num_ghosts_pressure,
+            const hier::IntVector& num_ghosts_mixture_thermo_properties,
+            const hier::IntVector& ghostcell_dims_partial_pressure_partial_volume_fractions,
+            const hier::IntVector& ghostcell_dims_pressure,
+            const hier::IntVector& ghostcell_dims_mixture_thermo_properties,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims) const;
         
