@@ -10919,6 +10919,28 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
         d_data_sound_speed.reset(
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_sound_speed));
         
+        /*
+         * Get the local lower indices and number of cells in each direction of the domain.
+         */
+        
+        hier::IntVector domain_lo(d_dim);
+        hier::IntVector domain_dims(d_dim);
+        
+        if (domain.empty())
+        {
+            domain_lo = -d_num_subghosts_mass_fractions;
+            domain_dims = d_subghostcell_dims_mass_fractions;
+        }
+        else
+        {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(d_subghost_box_sound_speed.contains(domain));
+#endif
+            
+            domain_lo = domain.lower() - d_interior_box.lower();
+            domain_dims = domain.numberCells();
+        }
+        
         if (!d_data_density)
         {
             computeCellDataOfDensity(domain);
@@ -10934,19 +10956,7 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
             computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(domain);
         }
         
-        // Compute the sound speed field.
-        d_equation_of_state_mixing_rules->computeSoundSpeed(
-            d_data_sound_speed,
-            d_data_density,
-            d_data_pressure,
-            d_data_mass_fractions,
-            domain);
-        
-        ////// Test from here.
-        
-        boost::shared_ptr<pdat::CellData<double> > data_sound_speed_tmp(
-            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_sound_speed));
-        
+        // Compute the partial derivatives.
         boost::shared_ptr<pdat::CellData<double> > data_gruneisen_parameter(
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_sound_speed));
         
@@ -10967,33 +10977,11 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
             d_data_mass_fractions,
             domain);
         
-        /*
-         * Get the local lower indices and number of cells in each direction of the domain.
-         */
-        
-        hier::IntVector domain_lo(d_dim);
-        hier::IntVector domain_dims(d_dim);
-        
-        if (domain.empty())
-        {
-            domain_lo = -d_num_subghosts_mass_fractions;
-            domain_dims = d_subghostcell_dims_mass_fractions;
-        }
-        else
-        {
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-            TBOX_ASSERT(d_subghost_box_mass_fractions.contains(domain));
-#endif
-            
-            domain_lo = domain.lower() - d_interior_box.lower();
-            domain_dims = domain.numberCells();
-        }
-        
         // Get the pointers to the cell data of sound speed, density, mass fractions, pressure,
         // Gruneisen parameter and partial pressure partial partial densities.
-        double* c_temp = data_sound_speed_tmp->getPointer(0);
-        double* rho = d_data_density->getPointer(0);
-        double* p = d_data_pressure->getPointer(0);
+        double* c     = d_data_sound_speed->getPointer(0);
+        double* rho   = d_data_density->getPointer(0);
+        double* p     = d_data_pressure->getPointer(0);
         double* Gamma = data_gruneisen_parameter->getPointer(0);
         std::vector<double*> Y;
         std::vector<double*> Psi;
@@ -11004,6 +10992,8 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
             Y.push_back(d_data_mass_fractions->getPointer(si));
             Psi.push_back(data_partial_pressure_partial_partial_densities->getPointer(si));
         }
+        
+        // Compute the sound speed field.
         
         if (d_dim == tbox::Dimension(1))
         {
@@ -11019,7 +11009,6 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
             const int num_subghosts_0_pressure = d_num_subghosts_pressure[0];
             const int num_subghosts_0_sound_speed = d_num_subghosts_sound_speed[0];
             
-            // Compute the sound speed field.
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
 #endif
@@ -11030,7 +11019,7 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
                 const int idx_pressure = i + num_subghosts_0_pressure;
                 const int idx_sound_speed = i + num_subghosts_0_sound_speed;
                 
-                c_temp[idx_sound_speed] = Gamma[idx_sound_speed]*p[idx_pressure]/rho[idx_density];
+                c[idx_sound_speed] = Gamma[idx_sound_speed]*p[idx_pressure]/rho[idx_density];
             }
             
             for (int si = 0; si < d_num_species; si++)
@@ -11044,7 +11033,7 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
                     const int idx_mass_fractions = i + num_subghosts_0_mass_fractions;
                     const int idx_sound_speed = i + num_subghosts_0_sound_speed;
                     
-                    c_temp[idx_sound_speed] += Y[si][idx_mass_fractions]*Psi[si][idx_sound_speed];
+                    c[idx_sound_speed] += Y[si][idx_mass_fractions]*Psi[si][idx_sound_speed];
                 }
             }
             
@@ -11056,7 +11045,7 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
                 // Compute the linear index.
                 const int idx_sound_speed = i + num_subghosts_0_sound_speed;
                 
-                c_temp[idx_sound_speed] = sqrt(c_temp[idx_sound_speed]);
+                c[idx_sound_speed] = sqrt(c[idx_sound_speed]);
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -11086,7 +11075,6 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
             const int num_subghosts_1_sound_speed = d_num_subghosts_sound_speed[1];
             const int subghostcell_dim_0_sound_speed = d_subghostcell_dims_sound_speed[0];
             
-            // Compute the sound speed field.
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
@@ -11104,7 +11092,7 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
                     const int idx_sound_speed = (i + num_subghosts_0_sound_speed) +
                         (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed;
                     
-                    c_temp[idx_sound_speed] = Gamma[idx_sound_speed]*p[idx_pressure]/rho[idx_density];
+                    c[idx_sound_speed] = Gamma[idx_sound_speed]*p[idx_pressure]/rho[idx_density];
                 }
             }
             
@@ -11124,7 +11112,7 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
                         const int idx_sound_speed = (i + num_subghosts_0_sound_speed) +
                             (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed;
                         
-                        c_temp[idx_sound_speed] += Y[si][idx_mass_fractions]*Psi[si][idx_sound_speed];
+                        c[idx_sound_speed] += Y[si][idx_mass_fractions]*Psi[si][idx_sound_speed];
                     }
                 }
             }
@@ -11140,38 +11128,9 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
                     const int idx_sound_speed = (i + num_subghosts_0_sound_speed) +
                         (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed;
                     
-                    c_temp[idx_sound_speed] = sqrt(c_temp[idx_sound_speed]);
+                    c[idx_sound_speed] = sqrt(c[idx_sound_speed]);
                 }
             }
-            
-            // Check error.
-            double* c = d_data_sound_speed->getPointer(0);
-            
-            double error = double(0);
-            
-            // Compute the error.
-            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
-            {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
-                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
-                {
-                    // Compute the linear indices.
-                    const int idx_sound_speed = (i + num_subghosts_0_sound_speed) +
-                        (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed;
-                    
-                    error = fmax(fabs(c_temp[idx_sound_speed] - c[idx_sound_speed]), error);
-                }
-            }
-            
-            std::cout << "Error: " << error << std::endl;
-            
-            TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
-                << "computeCellDataOfSoundSpeedWithDensityMassFractionsAndPressure()\n"
-                << "Tested!"
-                << std::endl);
         }
         else if (d_dim == tbox::Dimension(3))
         {
@@ -11210,7 +11169,6 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
             const int subghostcell_dim_0_sound_speed = d_subghostcell_dims_sound_speed[0];
             const int subghostcell_dim_1_sound_speed = d_subghostcell_dims_sound_speed[1];
             
-            // Compute the sound speed field.
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -11236,7 +11194,7 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
                             (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
                                 subghostcell_dim_1_sound_speed;
                         
-                        c_temp[idx_sound_speed] = Gamma[idx_sound_speed]*p[idx_pressure]/rho[idx_density];
+                        c[idx_sound_speed] = Gamma[idx_sound_speed]*p[idx_pressure]/rho[idx_density];
                     }
                 }
             }
@@ -11263,7 +11221,7 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
                             (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
                                 subghostcell_dim_1_sound_speed;
                             
-                            c_temp[idx_sound_speed] += Y[si][idx_mass_fractions]*Psi[si][idx_sound_speed];
+                            c[idx_sound_speed] += Y[si][idx_mass_fractions]*Psi[si][idx_sound_speed];
                         }
                     }
                 }
@@ -11284,44 +11242,10 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
                             (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
                                 subghostcell_dim_1_sound_speed;
                         
-                        c_temp[idx_sound_speed] = sqrt(c_temp[idx_sound_speed]);
+                        c[idx_sound_speed] = sqrt(c[idx_sound_speed]);
                     }
                 }
             }
-            
-            // Check error.
-            double* c = d_data_sound_speed->getPointer(0);
-            
-            double error = double(0);
-            
-            // Compute the error.
-            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
-            {
-                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
-                {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx_sound_speed = (i + num_subghosts_0_sound_speed) +
-                            (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
-                            (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
-                                subghostcell_dim_1_sound_speed;
-                        
-                        error = fmax(fabs(c_temp[idx_sound_speed] - c[idx_sound_speed]), error);
-                    }
-                }
-            }
-            
-            std::cout << "Error: " << error << std::endl;
-            
-            TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
-                << "computeCellDataOfSoundSpeedWithDensityMassFractionsAndPressure()\n"
-                << "Tested!"
-                << std::endl);
         }
     }
     else
