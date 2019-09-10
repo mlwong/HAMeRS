@@ -993,14 +993,14 @@ class EquationOfStateMixingRules
          */
         void
         computePressureDerivativeWithPartialDensities(
-            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_densities,
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_partial_densities,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions) const
         {
             const hier::Box empty_box(d_dim);
             computePressureDerivativeWithPartialDensities(
-                data_partial_pressure_partial_densities,
+                data_partial_pressure_partial_partial_densities,
                 data_density,
                 data_pressure,
                 data_mass_fractions,
@@ -1013,7 +1013,7 @@ class EquationOfStateMixingRules
          */
         virtual void
         computePressureDerivativeWithPartialDensities(
-            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_densities,
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_partial_densities,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
@@ -1025,7 +1025,7 @@ class EquationOfStateMixingRules
          */
         void
         computePressureDerivativeWithPartialDensities(
-            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_densities,
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_partial_densities,
             const boost::shared_ptr<pdat::SideData<double> >& data_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
             const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
@@ -1033,7 +1033,7 @@ class EquationOfStateMixingRules
         {
             const hier::Box empty_box(d_dim);
             computePressureDerivativeWithPartialDensities(
-                data_partial_pressure_partial_densities,
+                data_partial_pressure_partial_partial_densities,
                 data_density,
                 data_pressure,
                 data_mass_fractions,
@@ -1047,7 +1047,7 @@ class EquationOfStateMixingRules
          */
         virtual void
         computePressureDerivativeWithPartialDensities(
-            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_densities,
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_partial_densities,
             const boost::shared_ptr<pdat::SideData<double> >& data_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
             const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
@@ -1071,7 +1071,7 @@ class EquationOfStateMixingRules
          */
         void
         computePressureDerivativeWithPartialDensities(
-            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_densities,
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_partial_densities,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
@@ -1079,7 +1079,7 @@ class EquationOfStateMixingRules
         {
             const hier::Box empty_box(d_dim);
             computePressureDerivativeWithPartialDensities(
-                data_partial_pressure_partial_densities,
+                data_partial_pressure_partial_partial_densities,
                 data_density,
                 data_pressure,
                 data_mass_fractions,
@@ -1093,7 +1093,7 @@ class EquationOfStateMixingRules
          */
         virtual void
         computePressureDerivativeWithPartialDensities(
-            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_densities,
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_partial_densities,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
@@ -1106,7 +1106,7 @@ class EquationOfStateMixingRules
          */
         void
         computePressureDerivativeWithPartialDensities(
-            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_densities,
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_partial_densities,
             const boost::shared_ptr<pdat::SideData<double> >& data_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
             const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
@@ -1115,7 +1115,7 @@ class EquationOfStateMixingRules
         {
             const hier::Box empty_box(d_dim);
             computePressureDerivativeWithPartialDensities(
-                data_partial_pressure_partial_densities,
+                data_partial_pressure_partial_partial_densities,
                 data_density,
                 data_pressure,
                 data_mass_fractions,
@@ -1130,7 +1130,7 @@ class EquationOfStateMixingRules
          */
         virtual void
         computePressureDerivativeWithPartialDensities(
-            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_densities,
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_partial_densities,
             const boost::shared_ptr<pdat::SideData<double> >& data_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
             const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
