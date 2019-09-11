@@ -2133,6 +2133,22 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_x));
     
+    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_x_L(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
+            direction_x));
+    
+    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_x_R(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
+            direction_x));
+    
+    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_x_L(
+            new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_conservative_variables,
+            direction_x));
+    
+    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_x_R(
+            new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_conservative_variables,
+            direction_x));
+    
     boost::shared_ptr<pdat::SideData<double> > sound_speed_x_L(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_x));
@@ -3197,6 +3213,22 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_y));
     
+    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_y_B(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
+            direction_y));
+    
+    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_y_T(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
+            direction_y));
+    
+    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_y_B(
+            new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_conservative_variables,
+            direction_y));
+    
+    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_y_T(
+            new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_conservative_variables,
+            direction_y));
+    
     boost::shared_ptr<pdat::SideData<double> > sound_speed_y_B(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_y));
@@ -4027,6 +4059,22 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_z));
     
+    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_z_B(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
+            direction_z));
+    
+    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_z_F(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
+            direction_z));
+    
+    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_z_B(
+            new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_conservative_variables,
+            direction_z));
+    
+    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_z_F(
+            new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_conservative_variables,
+            direction_z));
+    
     boost::shared_ptr<pdat::SideData<double> > sound_speed_z_B(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_z));
@@ -4550,6 +4598,22 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
     
     boost::shared_ptr<pdat::SideData<double> > mass_fractions_x_R(
         new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
+            direction_x));
+    
+    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_x_L(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
+            direction_x));
+    
+    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_x_R(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
+            direction_x));
+    
+    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_x_L(
+            new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
+            direction_x));
+    
+    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_x_R(
+            new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
             direction_x));
     
     boost::shared_ptr<pdat::SideData<double> > sound_speed_x_L(
@@ -5468,6 +5532,22 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
         new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
             direction_y));
     
+    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_y_B(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
+            direction_y));
+    
+    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_y_T(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
+            direction_y));
+    
+    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_y_B(
+            new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
+            direction_y));
+    
+    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_y_T(
+            new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
+            direction_y));
+    
     boost::shared_ptr<pdat::SideData<double> > sound_speed_y_B(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_y));
@@ -6182,6 +6262,22 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
     
     boost::shared_ptr<pdat::SideData<double> > mass_fractions_z_F(
         new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
+            direction_z));
+    
+    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_z_B(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
+            direction_z));
+    
+    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_z_F(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
+            direction_z));
+    
+    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_z_B(
+            new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
+            direction_z));
+    
+    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_z_F(
+            new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
             direction_z));
     
     boost::shared_ptr<pdat::SideData<double> > sound_speed_z_B(
