@@ -9063,13 +9063,38 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                         &epsilon,
                         Y_ptr,
                         Z_ptr);
-                
-                buffer[idx_region] = d_equation_of_state_mixing_rules->
-                    getSoundSpeed(
+                    
+                /*
+                 * Compute the Gruneisen parameter.
+                 */
+                const double Gamma = d_equation_of_state_mixing_rules->
+                    getGruneisenParameter(
                         &rho,
                         &p,
                         Y_ptr,
                         Z_ptr);
+                
+                /*
+                 * Compute the partial pressure partial partial densities.
+                 */
+                std::vector<double> Psi = d_equation_of_state_mixing_rules->
+                    getPressureDerivativeWithPartialDensities(
+                        &rho,
+                        &p,
+                        Y_ptr,
+                        Z_ptr);
+                
+                /*
+                 * Compute the sound speed.
+                 */
+                buffer[idx_region] = Gamma*p/rho;
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    buffer[idx_region] += Y[si]*Psi[si];
+                }
+                
+                buffer[idx_region] = sqrt(buffer[idx_region]);
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -9150,12 +9175,37 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                             Y_ptr,
                             Z_ptr);
                     
-                    buffer[idx_region] = d_equation_of_state_mixing_rules->
-                        getSoundSpeed(
+                    /*
+                     * Compute the Gruneisen parameter.
+                     */
+                    const double Gamma = d_equation_of_state_mixing_rules->
+                        getGruneisenParameter(
                             &rho,
                             &p,
                             Y_ptr,
                             Z_ptr);
+                    
+                    /*
+                     * Compute the partial pressure partial partial densities.
+                     */
+                    std::vector<double> Psi = d_equation_of_state_mixing_rules->
+                        getPressureDerivativeWithPartialDensities(
+                            &rho,
+                            &p,
+                            Y_ptr,
+                            Z_ptr);
+                    
+                    /*
+                     * Compute the sound speed.
+                     */
+                    buffer[idx_region] = Gamma*p/rho;
+                    
+                    for (int si = 0; si < d_num_species; si++)
+                    {
+                        buffer[idx_region] += Y[si]*Psi[si];
+                    }
+                    
+                    buffer[idx_region] = sqrt(buffer[idx_region]);
                 }
             }
         }
@@ -9241,12 +9291,37 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                                 Y_ptr,
                                 Z_ptr);
                         
-                        buffer[idx_region] = d_equation_of_state_mixing_rules->
-                            getSoundSpeed(
+                        /*
+                         * Compute the Gruneisen parameter.
+                         */
+                        const double Gamma = d_equation_of_state_mixing_rules->
+                            getGruneisenParameter(
                                 &rho,
                                 &p,
                                 Y_ptr,
                                 Z_ptr);
+                        
+                        /*
+                         * Compute the partial pressure partial partial densities.
+                         */
+                        std::vector<double> Psi = d_equation_of_state_mixing_rules->
+                            getPressureDerivativeWithPartialDensities(
+                                &rho,
+                                &p,
+                                Y_ptr,
+                                Z_ptr);
+                        
+                        /*
+                         * Compute the sound speed.
+                         */
+                        buffer[idx_region] = Gamma*p/rho;
+                        
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            buffer[idx_region] += Y[si]*Psi[si];
+                        }
+                        
+                        buffer[idx_region] = sqrt(buffer[idx_region]);
                     }
                 }
             }
