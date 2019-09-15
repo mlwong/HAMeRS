@@ -10949,6 +10949,28 @@ FlowModelFiveEqnAllaire::computeCellDataOfSoundSpeedWithDensityMassFractionsAndP
         d_data_sound_speed.reset(
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_sound_speed));
         
+        /*
+         * Get the local lower indices and number of cells in each direction of the domain.
+         */
+        
+        hier::IntVector domain_lo(d_dim);
+        hier::IntVector domain_dims(d_dim);
+        
+        if (domain.empty())
+        {
+            domain_lo = -d_num_subghosts_sound_speed;
+            domain_dims = d_subghostcell_dims_sound_speed;
+        }
+        else
+        {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(d_subghost_box_sound_speed.contains(domain));
+#endif
+            
+            domain_lo = domain.lower() - d_interior_box.lower();
+            domain_dims = domain.numberCells();
+        }
+        
         // Get the cell data of the variable volume fractions.
         boost::shared_ptr<pdat::CellData<double> > data_volume_fractions =
             getCellDataOfVolumeFractions();
@@ -10968,14 +10990,299 @@ FlowModelFiveEqnAllaire::computeCellDataOfSoundSpeedWithDensityMassFractionsAndP
             computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(domain);
         }
         
-        // Compute the sound speed field.
-        d_equation_of_state_mixing_rules->computeSoundSpeed(
-            d_data_sound_speed,
+        // Compute the partial derivatives.
+        boost::shared_ptr<pdat::CellData<double> > data_gruneisen_parameter(
+            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_sound_speed));
+        
+        boost::shared_ptr<pdat::CellData<double> > data_partial_pressure_partial_partial_densities(
+            new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_sound_speed));
+        
+        d_equation_of_state_mixing_rules->computeGruneisenParameter(
+            data_gruneisen_parameter,
             d_data_density,
             d_data_pressure,
             d_data_mass_fractions,
             data_volume_fractions,
             domain);
+        
+        d_equation_of_state_mixing_rules->computePressureDerivativeWithPartialDensities(
+            data_partial_pressure_partial_partial_densities,
+            d_data_density,
+            d_data_pressure,
+            d_data_mass_fractions,
+            data_volume_fractions,
+            domain);
+        
+        // Get the pointers to the cell data of sound speed, density, mass fractions, pressure,
+        // Gruneisen parameter and partial pressure partial partial densities.
+        double* c     = d_data_sound_speed->getPointer(0);
+        double* rho   = d_data_density->getPointer(0);
+        double* p     = d_data_pressure->getPointer(0);
+        double* Gamma = data_gruneisen_parameter->getPointer(0);
+        std::vector<double*> Y;
+        std::vector<double*> Psi;
+        Y.reserve(d_num_species);
+        Psi.reserve(d_num_species);
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Y.push_back(d_data_mass_fractions->getPointer(si));
+            Psi.push_back(data_partial_pressure_partial_partial_densities->getPointer(si));
+        }
+        
+        // Compute the sound speed field.
+        
+        if (d_dim == tbox::Dimension(1))
+        {
+            /*
+             * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_dim_0 = domain_dims[0];
+            
+            const int num_subghosts_0_density = d_num_subghosts_density[0];
+            const int num_subghosts_0_mass_fractions = d_num_subghosts_mass_fractions[0];
+            const int num_subghosts_0_pressure = d_num_subghosts_pressure[0];
+            const int num_subghosts_0_sound_speed = d_num_subghosts_sound_speed[0];
+            
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx_density = i + num_subghosts_0_density;
+                const int idx_pressure = i + num_subghosts_0_pressure;
+                const int idx_sound_speed = i + num_subghosts_0_sound_speed;
+                
+                c[idx_sound_speed] = Gamma[idx_sound_speed]*p[idx_pressure]/rho[idx_density];
+            }
+            
+            for (int si = 0; si < d_num_species; si++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_mass_fractions = i + num_subghosts_0_mass_fractions;
+                    const int idx_sound_speed = i + num_subghosts_0_sound_speed;
+                    
+                    c[idx_sound_speed] += Y[si][idx_mass_fractions]*Psi[si][idx_sound_speed];
+                }
+            }
+            
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear index.
+                const int idx_sound_speed = i + num_subghosts_0_sound_speed;
+                
+                c[idx_sound_speed] = sqrt(c[idx_sound_speed]);
+            }
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            
+            const int num_subghosts_0_density = d_num_subghosts_density[0];
+            const int num_subghosts_1_density = d_num_subghosts_density[1];
+            const int subghostcell_dim_0_density = d_subghostcell_dims_density[0];
+            
+            const int num_subghosts_0_mass_fractions = d_num_subghosts_mass_fractions[0];
+            const int num_subghosts_1_mass_fractions = d_num_subghosts_mass_fractions[1];
+            const int subghostcell_dim_0_mass_fractions = d_subghostcell_dims_mass_fractions[0];
+            
+            const int num_subghosts_0_pressure = d_num_subghosts_pressure[0];
+            const int num_subghosts_1_pressure = d_num_subghosts_pressure[1];
+            const int subghostcell_dim_0_pressure = d_subghostcell_dims_pressure[0];
+            
+            const int num_subghosts_0_sound_speed = d_num_subghosts_sound_speed[0];
+            const int num_subghosts_1_sound_speed = d_num_subghosts_sound_speed[1];
+            const int subghostcell_dim_0_sound_speed = d_subghostcell_dims_sound_speed[0];
+            
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_density = (i + num_subghosts_0_density) +
+                        (j + num_subghosts_1_density)*subghostcell_dim_0_density;
+                    
+                    const int idx_pressure = (i + num_subghosts_0_pressure) +
+                        (j + num_subghosts_1_pressure)*subghostcell_dim_0_pressure;
+                    
+                    const int idx_sound_speed = (i + num_subghosts_0_sound_speed) +
+                        (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed;
+                    
+                    c[idx_sound_speed] = Gamma[idx_sound_speed]*p[idx_pressure]/rho[idx_density];
+                }
+            }
+            
+            for (int si = 0; si < d_num_species; si++)
+            {
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_mass_fractions = (i + num_subghosts_0_mass_fractions) +
+                            (j + num_subghosts_1_mass_fractions)*subghostcell_dim_0_mass_fractions;
+                        
+                        const int idx_sound_speed = (i + num_subghosts_0_sound_speed) +
+                            (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed;
+                        
+                        c[idx_sound_speed] += Y[si][idx_mass_fractions]*Psi[si][idx_sound_speed];
+                    }
+                }
+            }
+            
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_sound_speed = (i + num_subghosts_0_sound_speed) +
+                        (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed;
+                    
+                    c[idx_sound_speed] = sqrt(c[idx_sound_speed]);
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_lo_2 = domain_lo[2];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            const int domain_dim_2 = domain_dims[2];
+            
+            const int num_subghosts_0_density = d_num_subghosts_density[0];
+            const int num_subghosts_1_density = d_num_subghosts_density[1];
+            const int num_subghosts_2_density = d_num_subghosts_density[2];
+            const int subghostcell_dim_0_density = d_subghostcell_dims_density[0];
+            const int subghostcell_dim_1_density = d_subghostcell_dims_density[1];
+            
+            const int num_subghosts_0_mass_fractions = d_num_subghosts_mass_fractions[0];
+            const int num_subghosts_1_mass_fractions = d_num_subghosts_mass_fractions[1];
+            const int num_subghosts_2_mass_fractions = d_num_subghosts_mass_fractions[2];
+            const int subghostcell_dim_0_mass_fractions = d_subghostcell_dims_mass_fractions[0];
+            const int subghostcell_dim_1_mass_fractions = d_subghostcell_dims_mass_fractions[1];
+            
+            const int num_subghosts_0_pressure = d_num_subghosts_pressure[0];
+            const int num_subghosts_1_pressure = d_num_subghosts_pressure[1];
+            const int num_subghosts_2_pressure = d_num_subghosts_pressure[2];
+            const int subghostcell_dim_0_pressure = d_subghostcell_dims_pressure[0];
+            const int subghostcell_dim_1_pressure = d_subghostcell_dims_pressure[1];
+            
+            const int num_subghosts_0_sound_speed = d_num_subghosts_sound_speed[0];
+            const int num_subghosts_1_sound_speed = d_num_subghosts_sound_speed[1];
+            const int num_subghosts_2_sound_speed = d_num_subghosts_sound_speed[2];
+            const int subghostcell_dim_0_sound_speed = d_subghostcell_dims_sound_speed[0];
+            const int subghostcell_dim_1_sound_speed = d_subghostcell_dims_sound_speed[1];
+            
+            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+            {
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_density = (i + num_subghosts_0_density) +
+                            (j + num_subghosts_1_density)*subghostcell_dim_0_density +
+                            (k + num_subghosts_2_density)*subghostcell_dim_0_density*
+                                subghostcell_dim_1_density;
+                        
+                        const int idx_pressure = (i + num_subghosts_0_pressure) +
+                            (j + num_subghosts_1_pressure)*subghostcell_dim_0_pressure +
+                            (k + num_subghosts_2_pressure)*subghostcell_dim_0_pressure*
+                                subghostcell_dim_1_pressure;
+                        
+                        const int idx_sound_speed = (i + num_subghosts_0_sound_speed) +
+                            (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                            (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                subghostcell_dim_1_sound_speed;
+                        
+                        c[idx_sound_speed] = Gamma[idx_sound_speed]*p[idx_pressure]/rho[idx_density];
+                    }
+                }
+            }
+            
+            for (int si = 0; si < d_num_species; si++)
+            {
+                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+                {
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_mass_fractions = (i + num_subghosts_0_mass_fractions) +
+                                (j + num_subghosts_1_mass_fractions)*subghostcell_dim_0_mass_fractions +
+                                (k + num_subghosts_2_mass_fractions)*subghostcell_dim_0_mass_fractions*
+                                    subghostcell_dim_1_mass_fractions;
+                            
+                            const int idx_sound_speed = (i + num_subghosts_0_sound_speed) +
+                            (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                            (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                subghostcell_dim_1_sound_speed;
+                            
+                            c[idx_sound_speed] += Y[si][idx_mass_fractions]*Psi[si][idx_sound_speed];
+                        }
+                    }
+                }
+            }
+            
+            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+            {
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_sound_speed = (i + num_subghosts_0_sound_speed) +
+                            (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                            (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                subghostcell_dim_1_sound_speed;
+                        
+                        c[idx_sound_speed] = sqrt(c[idx_sound_speed]);
+                    }
+                }
+            }
+        }
     }
     else
     {

@@ -2568,6 +2568,22 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_x));
     
+    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_x_L(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
+            direction_x));
+    
+    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_x_R(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
+            direction_x));
+    
+    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_x_L(
+            new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_conservative_variables,
+            direction_x));
+    
+    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_x_R(
+            new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_conservative_variables,
+            direction_x));
+    
     boost::shared_ptr<pdat::SideData<double> > sound_speed_x_L(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_x));
@@ -2608,6 +2624,19 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
     
     double* p_x_L = pressure_x_L->getPointer(0, 0);
     double* p_x_R = pressure_x_R->getPointer(0, 0);
+    
+    double* Gamma_x_L = gruneisen_parameter_x_L->getPointer(0, 0);
+    double* Gamma_x_R = gruneisen_parameter_x_R->getPointer(0, 0);
+    
+    std::vector<double*> Psi_x_L;
+    std::vector<double*> Psi_x_R;
+    Psi_x_L.reserve(d_num_species);
+    Psi_x_R.reserve(d_num_species);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        Psi_x_L.push_back(partial_pressure_partial_partial_densities_x_L->getPointer(0, si));
+        Psi_x_R.push_back(partial_pressure_partial_partial_densities_x_R->getPointer(0, si));
+    }
     
     double* c_x_L = sound_speed_x_L->getPointer(0, 0);
     double* c_x_R = sound_speed_x_R->getPointer(0, 0);
@@ -2775,9 +2804,13 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
+        /*
+         * Compute the sound speed field.
+         */
+        
         d_flow_model_tmp->getEquationOfStateMixingRules()->
-            computeSoundSpeed(
-                sound_speed_x_L,
+            computeGruneisenParameter(
+                gruneisen_parameter_x_L,
                 density_x_L,
                 pressure_x_L,
                 mass_fractions_x_L,
@@ -2786,14 +2819,73 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 domain);
         
         d_flow_model_tmp->getEquationOfStateMixingRules()->
-            computeSoundSpeed(
-                sound_speed_x_R,
+            computeGruneisenParameter(
+                gruneisen_parameter_x_R,
                 density_x_R,
                 pressure_x_R,
                 mass_fractions_x_R,
                 volume_fractions_x_R,
                 0,
                 domain);
+        
+        d_flow_model_tmp->getEquationOfStateMixingRules()->
+            computePressureDerivativeWithPartialDensities(
+                partial_pressure_partial_partial_densities_x_L,
+                density_x_L,
+                pressure_x_L,
+                mass_fractions_x_L,
+                volume_fractions_x_L,
+                0,
+                domain);
+        
+        d_flow_model_tmp->getEquationOfStateMixingRules()->
+            computePressureDerivativeWithPartialDensities(
+                partial_pressure_partial_partial_densities_x_R,
+                density_x_R,
+                pressure_x_R,
+                mass_fractions_x_R,
+                volume_fractions_x_R,
+                0,
+                domain);
+        
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
+        {
+            // Compute the linear index.
+            const int idx = i + num_ghosts_0_conservative_variables;
+            
+            c_x_L[idx] = Gamma_x_L[idx]*p_x_L[idx]/rho_x_L[idx];
+            c_x_R[idx] = Gamma_x_R[idx]*p_x_R[idx]/rho_x_R[idx];
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {   
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
+            {
+                // Compute the linear index.
+                const int idx = i + num_ghosts_0_conservative_variables;
+                
+                c_x_L[idx] += Y_x_L[si][idx]*Psi_x_L[si][idx];
+                c_x_R[idx] += Y_x_R[si][idx]*Psi_x_R[si][idx];
+            }
+        }
+        
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
+        {
+            // Compute the linear index.
+            const int idx = i + num_ghosts_0_conservative_variables;
+            
+            c_x_L[idx] = sqrt(c_x_L[idx]);
+            c_x_R[idx] = sqrt(c_x_R[idx]);
+        }
         
         if (compute_velocity)
         {
@@ -3081,9 +3173,13 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
+        /*
+         * Compute the sound speed field.
+         */
+        
         d_flow_model_tmp->getEquationOfStateMixingRules()->
-            computeSoundSpeed(
-                sound_speed_x_L,
+            computeGruneisenParameter(
+                gruneisen_parameter_x_L,
                 density_x_L,
                 pressure_x_L,
                 mass_fractions_x_L,
@@ -3092,14 +3188,85 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 domain);
         
         d_flow_model_tmp->getEquationOfStateMixingRules()->
-            computeSoundSpeed(
-                sound_speed_x_R,
+            computeGruneisenParameter(
+                gruneisen_parameter_x_R,
                 density_x_R,
                 pressure_x_R,
                 mass_fractions_x_R,
                 volume_fractions_x_R,
                 0,
                 domain);
+        
+        d_flow_model_tmp->getEquationOfStateMixingRules()->
+            computePressureDerivativeWithPartialDensities(
+                partial_pressure_partial_partial_densities_x_L,
+                density_x_L,
+                pressure_x_L,
+                mass_fractions_x_L,
+                volume_fractions_x_L,
+                0,
+                domain);
+        
+        d_flow_model_tmp->getEquationOfStateMixingRules()->
+            computePressureDerivativeWithPartialDensities(
+                partial_pressure_partial_partial_densities_x_R,
+                density_x_R,
+                pressure_x_R,
+                mass_fractions_x_R,
+                volume_fractions_x_R,
+                0,
+                domain);
+        
+        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
+            {
+                // Compute the linear index.
+                const int idx = (i + num_ghosts_0_conservative_variables) +
+                    (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables;
+                
+                c_x_L[idx] = Gamma_x_L[idx]*p_x_L[idx]/rho_x_L[idx];
+                c_x_R[idx] = Gamma_x_R[idx]*p_x_R[idx]/rho_x_R[idx];
+            }
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
+                {
+                    // Compute the linear index.
+                    const int idx = (i + num_ghosts_0_conservative_variables) +
+                        (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables;
+                    
+                    c_x_L[idx] += Y_x_L[si][idx]*Psi_x_L[si][idx];
+                    c_x_R[idx] += Y_x_R[si][idx]*Psi_x_R[si][idx];
+                }
+            }
+        }
+        
+        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
+            {
+                // Compute the linear index.
+                const int idx = (i + num_ghosts_0_conservative_variables) +
+                    (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables;
+                
+                c_x_L[idx] = sqrt(c_x_L[idx]);
+                c_x_R[idx] = sqrt(c_x_R[idx]);
+            }
+        }
         
         if (compute_velocity)
         {
@@ -3453,9 +3620,13 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
+        /*
+         * Compute the sound speed field.
+         */
+        
         d_flow_model_tmp->getEquationOfStateMixingRules()->
-            computeSoundSpeed(
-                sound_speed_x_L,
+            computeGruneisenParameter(
+                gruneisen_parameter_x_L,
                 density_x_L,
                 pressure_x_L,
                 mass_fractions_x_L,
@@ -3464,14 +3635,100 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 domain);
         
         d_flow_model_tmp->getEquationOfStateMixingRules()->
-            computeSoundSpeed(
-                sound_speed_x_R,
+            computeGruneisenParameter(
+                gruneisen_parameter_x_R,
                 density_x_R,
                 pressure_x_R,
                 mass_fractions_x_R,
                 volume_fractions_x_R,
                 0,
                 domain);
+        
+        d_flow_model_tmp->getEquationOfStateMixingRules()->
+            computePressureDerivativeWithPartialDensities(
+                partial_pressure_partial_partial_densities_x_L,
+                density_x_L,
+                pressure_x_L,
+                mass_fractions_x_L,
+                volume_fractions_x_L,
+                0,
+                domain);
+        
+        d_flow_model_tmp->getEquationOfStateMixingRules()->
+            computePressureDerivativeWithPartialDensities(
+                partial_pressure_partial_partial_densities_x_R,
+                density_x_R,
+                pressure_x_R,
+                mass_fractions_x_R,
+                volume_fractions_x_R,
+                0,
+                domain);
+        
+        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
+                {
+                    // Compute the linear index.
+                    const int idx = (i + num_ghosts_0_conservative_variables) +
+                        (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
+                        (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
+                            ghostcell_dim_1_conservative_variables;
+                    
+                    c_x_L[idx] = Gamma_x_L[idx]*p_x_L[idx]/rho_x_L[idx];
+                    c_x_R[idx] = Gamma_x_R[idx]*p_x_R[idx]/rho_x_R[idx];
+                }
+            }
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+            {
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx = (i + num_ghosts_0_conservative_variables) +
+                            (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
+                            (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
+                                ghostcell_dim_1_conservative_variables;
+                        
+                        c_x_L[idx] += Y_x_L[si][idx]*Psi_x_L[si][idx];
+                        c_x_R[idx] += Y_x_R[si][idx]*Psi_x_R[si][idx];
+                    }
+                }
+            }
+        }
+        
+        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
+                {
+                    // Compute the linear index.
+                    const int idx = (i + num_ghosts_0_conservative_variables) +
+                        (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
+                        (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
+                            ghostcell_dim_1_conservative_variables;
+                    
+                    c_x_L[idx] = sqrt(c_x_L[idx]);
+                    c_x_R[idx] = sqrt(c_x_R[idx]);
+                }
+            }
+        }
         
         if (compute_velocity)
         {
@@ -3739,6 +3996,22 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_y));
     
+    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_y_B(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
+            direction_y));
+    
+    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_y_T(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
+            direction_y));
+    
+    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_y_B(
+            new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_conservative_variables,
+            direction_y));
+    
+    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_y_T(
+            new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_conservative_variables,
+            direction_y));
+    
     boost::shared_ptr<pdat::SideData<double> > sound_speed_y_B(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_y));
@@ -3779,6 +4052,19 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
     
     double* p_y_B = pressure_y_B->getPointer(1, 0);
     double* p_y_T = pressure_y_T->getPointer(1, 0);
+    
+    double* Gamma_y_B = gruneisen_parameter_y_B->getPointer(1, 0);
+    double* Gamma_y_T = gruneisen_parameter_y_T->getPointer(1, 0);
+    
+    std::vector<double*> Psi_y_B;
+    std::vector<double*> Psi_y_T;
+    Psi_y_B.reserve(d_num_species);
+    Psi_y_T.reserve(d_num_species);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        Psi_y_B.push_back(partial_pressure_partial_partial_densities_y_B->getPointer(1, si));
+        Psi_y_T.push_back(partial_pressure_partial_partial_densities_y_T->getPointer(1, si));
+    }
     
     double* c_y_B = sound_speed_y_B->getPointer(1, 0);
     double* c_y_T = sound_speed_y_T->getPointer(1, 0);
@@ -3995,9 +4281,13 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
                 1,
                 domain);
         
+        /*
+         * Compute the sound speed field.
+         */
+        
         d_flow_model_tmp->getEquationOfStateMixingRules()->
-            computeSoundSpeed(
-                sound_speed_y_B,
+            computeGruneisenParameter(
+                gruneisen_parameter_y_B,
                 density_y_B,
                 pressure_y_B,
                 mass_fractions_y_B,
@@ -4006,14 +4296,85 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
                 domain);
         
         d_flow_model_tmp->getEquationOfStateMixingRules()->
-            computeSoundSpeed(
-                sound_speed_y_T,
+            computeGruneisenParameter(
+                gruneisen_parameter_y_T,
                 density_y_T,
                 pressure_y_T,
                 mass_fractions_y_T,
                 volume_fractions_y_T,
                 1,
                 domain);
+        
+        d_flow_model_tmp->getEquationOfStateMixingRules()->
+            computePressureDerivativeWithPartialDensities(
+                partial_pressure_partial_partial_densities_y_B,
+                density_y_B,
+                pressure_y_B,
+                mass_fractions_y_B,
+                volume_fractions_y_B,
+                1,
+                domain);
+        
+        d_flow_model_tmp->getEquationOfStateMixingRules()->
+            computePressureDerivativeWithPartialDensities(
+                partial_pressure_partial_partial_densities_y_T,
+                density_y_T,
+                pressure_y_T,
+                mass_fractions_y_T,
+                volume_fractions_y_T,
+                1,
+                domain);
+        
+        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear index.
+                const int idx = (i + num_ghosts_0_conservative_variables) +
+                    (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables;
+                
+                c_y_B[idx] = Gamma_y_B[idx]*p_y_B[idx]/rho_y_B[idx];
+                c_y_T[idx] = Gamma_y_T[idx]*p_y_T[idx]/rho_y_T[idx];
+            }
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx = (i + num_ghosts_0_conservative_variables) +
+                        (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables;
+                    
+                    c_y_B[idx] += Y_y_B[si][idx]*Psi_y_B[si][idx];
+                    c_y_T[idx] += Y_y_T[si][idx]*Psi_y_T[si][idx];
+                }
+            }
+        }
+        
+        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear index.
+                const int idx = (i + num_ghosts_0_conservative_variables) +
+                    (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables;
+                
+                c_y_B[idx] = sqrt(c_y_B[idx]);
+                c_y_T[idx] = sqrt(c_y_T[idx]);
+            }
+        }
         
         if (compute_velocity)
         {
@@ -4367,9 +4728,13 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
                 1,
                 domain);
         
+        /*
+         * Compute the sound speed field.
+         */
+        
         d_flow_model_tmp->getEquationOfStateMixingRules()->
-            computeSoundSpeed(
-                sound_speed_y_B,
+            computeGruneisenParameter(
+                gruneisen_parameter_y_B,
                 density_y_B,
                 pressure_y_B,
                 mass_fractions_y_B,
@@ -4378,14 +4743,100 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
                 domain);
         
         d_flow_model_tmp->getEquationOfStateMixingRules()->
-            computeSoundSpeed(
-                sound_speed_y_T,
+            computeGruneisenParameter(
+                gruneisen_parameter_y_T,
                 density_y_T,
                 pressure_y_T,
                 mass_fractions_y_T,
                 volume_fractions_y_T,
                 1,
                 domain);
+        
+        d_flow_model_tmp->getEquationOfStateMixingRules()->
+            computePressureDerivativeWithPartialDensities(
+                partial_pressure_partial_partial_densities_y_B,
+                density_y_B,
+                pressure_y_B,
+                mass_fractions_y_B,
+                volume_fractions_y_B,
+                1,
+                domain);
+        
+        d_flow_model_tmp->getEquationOfStateMixingRules()->
+            computePressureDerivativeWithPartialDensities(
+                partial_pressure_partial_partial_densities_y_T,
+                density_y_T,
+                pressure_y_T,
+                mass_fractions_y_T,
+                volume_fractions_y_T,
+                1,
+                domain);
+        
+        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx = (i + num_ghosts_0_conservative_variables) +
+                        (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
+                        (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
+                            ghostcell_dim_1_conservative_variables;
+                    
+                    c_y_B[idx] = Gamma_y_B[idx]*p_y_B[idx]/rho_y_B[idx];
+                    c_y_T[idx] = Gamma_y_T[idx]*p_y_T[idx]/rho_y_T[idx];
+                }
+            }
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+            {
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx = (i + num_ghosts_0_conservative_variables) +
+                            (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
+                            (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
+                                ghostcell_dim_1_conservative_variables;
+                        
+                        c_y_B[idx] += Y_y_B[si][idx]*Psi_y_B[si][idx];
+                        c_y_T[idx] += Y_y_T[si][idx]*Psi_y_T[si][idx];
+                    }
+                }
+            }
+        }
+        
+        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx = (i + num_ghosts_0_conservative_variables) +
+                        (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
+                        (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
+                            ghostcell_dim_1_conservative_variables;
+                    
+                    c_y_B[idx] = sqrt(c_y_B[idx]);
+                    c_y_T[idx] = sqrt(c_y_T[idx]);
+                }
+            }
+        }
         
         if (compute_velocity)
         {
@@ -4653,6 +5104,22 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_z));
     
+    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_z_B(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
+            direction_z));
+    
+    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_z_F(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
+            direction_z));
+    
+    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_z_B(
+            new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_conservative_variables,
+            direction_z));
+    
+    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_z_F(
+            new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_conservative_variables,
+            direction_z));
+    
     boost::shared_ptr<pdat::SideData<double> > sound_speed_z_B(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_z));
@@ -4693,6 +5160,19 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
     
     double* p_z_B = pressure_z_B->getPointer(2, 0);
     double* p_z_F = pressure_z_F->getPointer(2, 0);
+    
+    double* Gamma_z_B = gruneisen_parameter_z_B->getPointer(2, 0);
+    double* Gamma_z_F = gruneisen_parameter_z_F->getPointer(2, 0);
+    
+    std::vector<double*> Psi_z_B;
+    std::vector<double*> Psi_z_F;
+    Psi_z_B.reserve(d_num_species);
+    Psi_z_F.reserve(d_num_species);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        Psi_z_B.push_back(partial_pressure_partial_partial_densities_z_B->getPointer(2, si));
+        Psi_z_F.push_back(partial_pressure_partial_partial_densities_z_F->getPointer(2, si));
+    }
     
     double* c_z_B = sound_speed_z_B->getPointer(2, 0);
     double* c_z_F = sound_speed_z_F->getPointer(2, 0);
@@ -4965,9 +5445,13 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
                 2,
                 domain);
         
+        /*
+         * Compute the sound speed field.
+         */
+        
         d_flow_model_tmp->getEquationOfStateMixingRules()->
-            computeSoundSpeed(
-                sound_speed_z_B,
+            computeGruneisenParameter(
+                gruneisen_parameter_z_B,
                 density_z_B,
                 pressure_z_B,
                 mass_fractions_z_B,
@@ -4976,14 +5460,100 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
                 domain);
         
         d_flow_model_tmp->getEquationOfStateMixingRules()->
-            computeSoundSpeed(
-                sound_speed_z_F,
+            computeGruneisenParameter(
+                gruneisen_parameter_z_F,
                 density_z_F,
                 pressure_z_F,
                 mass_fractions_z_F,
                 volume_fractions_z_F,
                 2,
                 domain);
+        
+        d_flow_model_tmp->getEquationOfStateMixingRules()->
+            computePressureDerivativeWithPartialDensities(
+                partial_pressure_partial_partial_densities_z_B,
+                density_z_B,
+                pressure_z_B,
+                mass_fractions_z_B,
+                volume_fractions_z_B,
+                2,
+                domain);
+        
+        d_flow_model_tmp->getEquationOfStateMixingRules()->
+            computePressureDerivativeWithPartialDensities(
+                partial_pressure_partial_partial_densities_z_F,
+                density_z_F,
+                pressure_z_F,
+                mass_fractions_z_F,
+                volume_fractions_z_F,
+                2,
+                domain);
+        
+        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2 + 1; k++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx = (i + num_ghosts_0_conservative_variables) +
+                        (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
+                        (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
+                            ghostcell_dim_1_conservative_variables;
+                    
+                    c_z_B[idx] = Gamma_z_B[idx]*p_z_B[idx]/rho_z_B[idx];
+                    c_z_F[idx] = Gamma_z_F[idx]*p_z_F[idx]/rho_z_F[idx];
+                }
+            }
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2 + 1; k++)
+            {
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx = (i + num_ghosts_0_conservative_variables) +
+                            (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
+                            (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
+                                ghostcell_dim_1_conservative_variables;
+                        
+                        c_z_B[idx] += Y_z_B[si][idx]*Psi_z_B[si][idx];
+                        c_z_F[idx] += Y_z_F[si][idx]*Psi_z_F[si][idx];
+                    }
+                }
+            }
+        }
+        
+        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2 + 1; k++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx = (i + num_ghosts_0_conservative_variables) +
+                        (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
+                        (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
+                            ghostcell_dim_1_conservative_variables;
+                    
+                    c_z_B[idx] = sqrt(c_z_B[idx]);
+                    c_z_F[idx] = sqrt(c_z_F[idx]);
+                }
+            }
+        }
         
         if (compute_velocity)
         {
@@ -5235,6 +5805,22 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
         new pdat::SideData<double>(interior_box, d_num_species - 1, num_ghosts_primitive_variables,
             direction_x));
     
+    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_x_L(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
+            direction_x));
+    
+    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_x_R(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
+            direction_x));
+    
+    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_x_L(
+            new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
+            direction_x));
+    
+    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_x_R(
+            new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
+            direction_x));
+    
     boost::shared_ptr<pdat::SideData<double> > sound_speed_x_L(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_x));
@@ -5276,6 +5862,19 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
     {
         Z_x_L.push_back(volume_fractions_x_L->getPointer(0, si));
         Z_x_R.push_back(volume_fractions_x_R->getPointer(0, si));
+    }
+    
+    double* Gamma_x_L = gruneisen_parameter_x_L->getPointer(0, 0);
+    double* Gamma_x_R = gruneisen_parameter_x_R->getPointer(0, 0);
+    
+    std::vector<double*> Psi_x_L;
+    std::vector<double*> Psi_x_R;
+    Psi_x_L.reserve(d_num_species);
+    Psi_x_R.reserve(d_num_species);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        Psi_x_L.push_back(partial_pressure_partial_partial_densities_x_L->getPointer(0, si));
+        Psi_x_R.push_back(partial_pressure_partial_partial_densities_x_R->getPointer(0, si));
     }
     
     double* c_x_L = sound_speed_x_L->getPointer(0, 0);
@@ -5394,9 +5993,13 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
             }
         }
         
+        /*
+         * Compute the sound speed field.
+         */
+        
         d_flow_model_tmp->getEquationOfStateMixingRules()->
-            computeSoundSpeed(
-                sound_speed_x_L,
+            computeGruneisenParameter(
+                gruneisen_parameter_x_L,
                 density_x_L,
                 primitive_variables_L[d_num_species + 1],
                 mass_fractions_x_L,
@@ -5405,14 +6008,73 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 domain);
         
         d_flow_model_tmp->getEquationOfStateMixingRules()->
-            computeSoundSpeed(
-                sound_speed_x_R,
+            computeGruneisenParameter(
+                gruneisen_parameter_x_R,
                 density_x_R,
                 primitive_variables_R[d_num_species + 1],
                 mass_fractions_x_R,
                 volume_fractions_x_R,
                 0,
                 domain);
+        
+        d_flow_model_tmp->getEquationOfStateMixingRules()->
+            computePressureDerivativeWithPartialDensities(
+                partial_pressure_partial_partial_densities_x_L,
+                density_x_L,
+                primitive_variables_L[d_num_species + 1],
+                mass_fractions_x_L,
+                volume_fractions_x_L,
+                0,
+                domain);
+        
+        d_flow_model_tmp->getEquationOfStateMixingRules()->
+            computePressureDerivativeWithPartialDensities(
+                partial_pressure_partial_partial_densities_x_R,
+                density_x_R,
+                primitive_variables_R[d_num_species + 1],
+                mass_fractions_x_R,
+                volume_fractions_x_R,
+                0,
+                domain);
+        
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
+        {
+            // Compute the linear index.
+            const int idx = i + num_ghosts_0_primitive_variables;
+            
+            c_x_L[idx] = Gamma_x_L[idx]*V_x_L[d_num_species + 1][idx]/rho_x_L[idx];
+            c_x_R[idx] = Gamma_x_R[idx]*V_x_R[d_num_species + 1][idx]/rho_x_R[idx];
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {   
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
+            {
+                // Compute the linear index.
+                const int idx = i + num_ghosts_0_primitive_variables;
+                
+                c_x_L[idx] += Y_x_L[si][idx]*Psi_x_L[si][idx];
+                c_x_R[idx] += Y_x_R[si][idx]*Psi_x_R[si][idx];
+            }
+        }
+        
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
+        {
+            // Compute the linear index.
+            const int idx = i + num_ghosts_0_primitive_variables;
+            
+            c_x_L[idx] = sqrt(c_x_L[idx]);
+            c_x_R[idx] = sqrt(c_x_R[idx]);
+        }
         
         d_flow_model_tmp->getEquationOfStateMixingRules()->
             computeInternalEnergy(
@@ -5656,9 +6318,13 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
             }
         }
         
+        /*
+         * Compute the sound speed field.
+         */
+        
         d_flow_model_tmp->getEquationOfStateMixingRules()->
-            computeSoundSpeed(
-                sound_speed_x_L,
+            computeGruneisenParameter(
+                gruneisen_parameter_x_L,
                 density_x_L,
                 primitive_variables_L[d_num_species + 2],
                 mass_fractions_x_L,
@@ -5667,14 +6333,85 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 domain);
         
         d_flow_model_tmp->getEquationOfStateMixingRules()->
-            computeSoundSpeed(
-                sound_speed_x_R,
+            computeGruneisenParameter(
+                gruneisen_parameter_x_R,
                 density_x_R,
                 primitive_variables_R[d_num_species + 2],
                 mass_fractions_x_R,
                 volume_fractions_x_R,
                 0,
                 domain);
+        
+        d_flow_model_tmp->getEquationOfStateMixingRules()->
+            computePressureDerivativeWithPartialDensities(
+                partial_pressure_partial_partial_densities_x_L,
+                density_x_L,
+                primitive_variables_L[d_num_species + 2],
+                mass_fractions_x_L,
+                volume_fractions_x_L,
+                0,
+                domain);
+        
+        d_flow_model_tmp->getEquationOfStateMixingRules()->
+            computePressureDerivativeWithPartialDensities(
+                partial_pressure_partial_partial_densities_x_R,
+                density_x_R,
+                primitive_variables_R[d_num_species + 2],
+                mass_fractions_x_R,
+                volume_fractions_x_R,
+                0,
+                domain);
+        
+        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
+            {
+                // Compute the linear index.
+                const int idx = (i + num_ghosts_0_primitive_variables) +
+                    (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables;
+                
+                c_x_L[idx] = Gamma_x_L[idx]*V_x_L[d_num_species + 2][idx]/rho_x_L[idx];
+                c_x_R[idx] = Gamma_x_R[idx]*V_x_R[d_num_species + 2][idx]/rho_x_R[idx];
+            }
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
+                {
+                    // Compute the linear index.
+                    const int idx = (i + num_ghosts_0_primitive_variables) +
+                        (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables;
+                    
+                    c_x_L[idx] += Y_x_L[si][idx]*Psi_x_L[si][idx];
+                    c_x_R[idx] += Y_x_R[si][idx]*Psi_x_R[si][idx];
+                }
+            }
+        }
+        
+        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
+            {
+                // Compute the linear index.
+                const int idx = (i + num_ghosts_0_primitive_variables) +
+                    (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables;
+                
+                c_x_L[idx] = sqrt(c_x_L[idx]);
+                c_x_R[idx] = sqrt(c_x_R[idx]);
+            }
+        }
         
         d_flow_model_tmp->getEquationOfStateMixingRules()->
             computeInternalEnergy(
@@ -5972,9 +6709,13 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
             }
         }
         
+        /*
+         * Compute the sound speed field.
+         */
+        
         d_flow_model_tmp->getEquationOfStateMixingRules()->
-            computeSoundSpeed(
-                sound_speed_x_L,
+            computeGruneisenParameter(
+                gruneisen_parameter_x_L,
                 density_x_L,
                 primitive_variables_L[d_num_species + 3],
                 mass_fractions_x_L,
@@ -5983,14 +6724,100 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 domain);
         
         d_flow_model_tmp->getEquationOfStateMixingRules()->
-            computeSoundSpeed(
-                sound_speed_x_R,
+            computeGruneisenParameter(
+                gruneisen_parameter_x_R,
                 density_x_R,
                 primitive_variables_R[d_num_species + 3],
                 mass_fractions_x_R,
                 volume_fractions_x_R,
                 0,
                 domain);
+        
+        d_flow_model_tmp->getEquationOfStateMixingRules()->
+            computePressureDerivativeWithPartialDensities(
+                partial_pressure_partial_partial_densities_x_L,
+                density_x_L,
+                primitive_variables_L[d_num_species + 3],
+                mass_fractions_x_L,
+                volume_fractions_x_L,
+                0,
+                domain);
+        
+        d_flow_model_tmp->getEquationOfStateMixingRules()->
+            computePressureDerivativeWithPartialDensities(
+                partial_pressure_partial_partial_densities_x_R,
+                density_x_R,
+                primitive_variables_R[d_num_species + 3],
+                mass_fractions_x_R,
+                volume_fractions_x_R,
+                0,
+                domain);
+        
+        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
+                {
+                    // Compute the linear index.
+                    const int idx = (i + num_ghosts_0_primitive_variables) +
+                        (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
+                        (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
+                            ghostcell_dim_1_primitive_variables;
+                    
+                    c_x_L[idx] = Gamma_x_L[idx]*V_x_L[d_num_species + 3][idx]/rho_x_L[idx];
+                    c_x_R[idx] = Gamma_x_R[idx]*V_x_R[d_num_species + 3][idx]/rho_x_R[idx];
+                }
+            }
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+            {
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx = (i + num_ghosts_0_primitive_variables) +
+                            (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
+                            (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
+                                ghostcell_dim_1_primitive_variables;
+                        
+                        c_x_L[idx] += Y_x_L[si][idx]*Psi_x_L[si][idx];
+                        c_x_R[idx] += Y_x_R[si][idx]*Psi_x_R[si][idx];
+                    }
+                }
+            }
+        }
+        
+        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
+                {
+                    // Compute the linear index.
+                    const int idx = (i + num_ghosts_0_primitive_variables) +
+                        (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
+                        (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
+                            ghostcell_dim_1_primitive_variables;
+                    
+                    c_x_L[idx] = sqrt(c_x_L[idx]);
+                    c_x_R[idx] = sqrt(c_x_R[idx]);
+                }
+            }
+        }
         
         d_flow_model_tmp->getEquationOfStateMixingRules()->
             computeInternalEnergy(
@@ -6258,6 +7085,22 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
         new pdat::SideData<double>(interior_box, d_num_species - 1, num_ghosts_primitive_variables,
             direction_y));
     
+    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_y_B(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
+            direction_y));
+    
+    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_y_T(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
+            direction_y));
+    
+    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_y_B(
+            new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
+            direction_y));
+    
+    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_y_T(
+            new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
+            direction_y));
+    
     boost::shared_ptr<pdat::SideData<double> > sound_speed_y_B(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_y));
@@ -6299,6 +7142,19 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
     {
         Z_y_B.push_back(volume_fractions_y_B->getPointer(1, si));
         Z_y_T.push_back(volume_fractions_y_T->getPointer(1, si));
+    }
+    
+    double* Gamma_y_B = gruneisen_parameter_y_B->getPointer(1, 0);
+    double* Gamma_y_T = gruneisen_parameter_y_T->getPointer(1, 0);
+    
+    std::vector<double*> Psi_y_B;
+    std::vector<double*> Psi_y_T;
+    Psi_y_B.reserve(d_num_species);
+    Psi_y_T.reserve(d_num_species);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        Psi_y_B.push_back(partial_pressure_partial_partial_densities_y_B->getPointer(1, si));
+        Psi_y_T.push_back(partial_pressure_partial_partial_densities_y_T->getPointer(1, si));
     }
     
     double* c_y_B = sound_speed_y_B->getPointer(1, 0);
@@ -6456,9 +7312,13 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
             }
         }
         
+        /*
+         * Compute the sound speed field.
+         */
+        
         d_flow_model_tmp->getEquationOfStateMixingRules()->
-            computeSoundSpeed(
-                sound_speed_y_B,
+            computeGruneisenParameter(
+                gruneisen_parameter_y_B,
                 density_y_B,
                 primitive_variables_B[d_num_species + 2],
                 mass_fractions_y_B,
@@ -6467,14 +7327,85 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
                 domain);
         
         d_flow_model_tmp->getEquationOfStateMixingRules()->
-            computeSoundSpeed(
-                sound_speed_y_T,
+            computeGruneisenParameter(
+                gruneisen_parameter_y_T,
                 density_y_T,
                 primitive_variables_T[d_num_species + 2],
                 mass_fractions_y_T,
                 volume_fractions_y_T,
                 1,
                 domain);
+        
+        d_flow_model_tmp->getEquationOfStateMixingRules()->
+            computePressureDerivativeWithPartialDensities(
+                partial_pressure_partial_partial_densities_y_B,
+                density_y_B,
+                primitive_variables_B[d_num_species + 2],
+                mass_fractions_y_B,
+                volume_fractions_y_B,
+                1,
+                domain);
+        
+        d_flow_model_tmp->getEquationOfStateMixingRules()->
+            computePressureDerivativeWithPartialDensities(
+                partial_pressure_partial_partial_densities_y_T,
+                density_y_T,
+                primitive_variables_T[d_num_species + 2],
+                mass_fractions_y_T,
+                volume_fractions_y_T,
+                1,
+                domain);
+        
+        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear index.
+                const int idx = (i + num_ghosts_0_primitive_variables) +
+                    (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables;
+                
+                c_y_B[idx] = Gamma_y_B[idx]*V_y_B[d_num_species + 2][idx]/rho_y_B[idx];
+                c_y_T[idx] = Gamma_y_T[idx]*V_y_T[d_num_species + 2][idx]/rho_y_T[idx];
+            }
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx = (i + num_ghosts_0_primitive_variables) +
+                        (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables;
+                    
+                    c_y_B[idx] += Y_y_B[si][idx]*Psi_y_B[si][idx];
+                    c_y_T[idx] += Y_y_T[si][idx]*Psi_y_T[si][idx];
+                }
+            }
+        }
+        
+        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear index.
+                const int idx = (i + num_ghosts_0_primitive_variables) +
+                    (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables;
+                
+                c_y_B[idx] = sqrt(c_y_B[idx]);
+                c_y_T[idx] = sqrt(c_y_T[idx]);
+            }
+        }
         
         d_flow_model_tmp->getEquationOfStateMixingRules()->
             computeInternalEnergy(
@@ -6772,9 +7703,13 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
             }
         }
         
+        /*
+         * Compute the sound speed field.
+         */
+        
         d_flow_model_tmp->getEquationOfStateMixingRules()->
-            computeSoundSpeed(
-                sound_speed_y_B,
+            computeGruneisenParameter(
+                gruneisen_parameter_y_B,
                 density_y_B,
                 primitive_variables_B[d_num_species + 3],
                 mass_fractions_y_B,
@@ -6783,14 +7718,100 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
                 domain);
         
         d_flow_model_tmp->getEquationOfStateMixingRules()->
-            computeSoundSpeed(
-                sound_speed_y_T,
+            computeGruneisenParameter(
+                gruneisen_parameter_y_T,
                 density_y_T,
                 primitive_variables_T[d_num_species + 3],
                 mass_fractions_y_T,
                 volume_fractions_y_T,
                 1,
                 domain);
+        
+        d_flow_model_tmp->getEquationOfStateMixingRules()->
+            computePressureDerivativeWithPartialDensities(
+                partial_pressure_partial_partial_densities_y_B,
+                density_y_B,
+                primitive_variables_B[d_num_species + 3],
+                mass_fractions_y_B,
+                volume_fractions_y_B,
+                1,
+                domain);
+        
+        d_flow_model_tmp->getEquationOfStateMixingRules()->
+            computePressureDerivativeWithPartialDensities(
+                partial_pressure_partial_partial_densities_y_T,
+                density_y_T,
+                primitive_variables_T[d_num_species + 3],
+                mass_fractions_y_T,
+                volume_fractions_y_T,
+                1,
+                domain);
+        
+        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx = (i + num_ghosts_0_primitive_variables) +
+                        (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
+                        (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
+                            ghostcell_dim_1_primitive_variables;
+                    
+                    c_y_B[idx] = Gamma_y_B[idx]*V_y_B[d_num_species + 3][idx]/rho_y_B[idx];
+                    c_y_T[idx] = Gamma_y_T[idx]*V_y_T[d_num_species + 3][idx]/rho_y_T[idx];
+                }
+            }
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+            {
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx = (i + num_ghosts_0_primitive_variables) +
+                            (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
+                            (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
+                                ghostcell_dim_1_primitive_variables;
+                        
+                        c_y_B[idx] += Y_y_B[si][idx]*Psi_y_B[si][idx];
+                        c_y_T[idx] += Y_y_T[si][idx]*Psi_y_T[si][idx];
+                    }
+                }
+            }
+        }
+        
+        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx = (i + num_ghosts_0_primitive_variables) +
+                        (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
+                        (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
+                            ghostcell_dim_1_primitive_variables;
+                    
+                    c_y_B[idx] = sqrt(c_y_B[idx]);
+                    c_y_T[idx] = sqrt(c_y_T[idx]);
+                }
+            }
+        }
         
         d_flow_model_tmp->getEquationOfStateMixingRules()->
             computeInternalEnergy(
@@ -7058,6 +8079,22 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
         new pdat::SideData<double>(interior_box, d_num_species - 1, num_ghosts_primitive_variables,
             direction_z));
     
+    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_z_B(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
+            direction_z));
+    
+    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_z_F(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
+            direction_z));
+    
+    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_z_B(
+            new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
+            direction_z));
+    
+    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_z_F(
+            new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
+            direction_z));
+    
     boost::shared_ptr<pdat::SideData<double> > sound_speed_z_B(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_z));
@@ -7099,6 +8136,19 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
     {
         Z_z_B.push_back(volume_fractions_z_B->getPointer(2, si));
         Z_z_F.push_back(volume_fractions_z_F->getPointer(2, si));
+    }
+    
+    double* Gamma_z_B = gruneisen_parameter_z_B->getPointer(2, 0);
+    double* Gamma_z_F = gruneisen_parameter_z_F->getPointer(2, 0);
+    
+    std::vector<double*> Psi_z_B;
+    std::vector<double*> Psi_z_F;
+    Psi_z_B.reserve(d_num_species);
+    Psi_z_F.reserve(d_num_species);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        Psi_z_B.push_back(partial_pressure_partial_partial_densities_z_B->getPointer(2, si));
+        Psi_z_F.push_back(partial_pressure_partial_partial_densities_z_F->getPointer(2, si));
     }
     
     double* c_z_B = sound_speed_z_B->getPointer(2, 0);
@@ -7300,9 +8350,13 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
             }
         }
         
+        /*
+         * Compute the sound speed field.
+         */
+        
         d_flow_model_tmp->getEquationOfStateMixingRules()->
-            computeSoundSpeed(
-                sound_speed_z_B,
+            computeGruneisenParameter(
+                gruneisen_parameter_z_B,
                 density_z_B,
                 primitive_variables_B[d_num_species + 3],
                 mass_fractions_z_B,
@@ -7311,14 +8365,100 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
                 domain);
         
         d_flow_model_tmp->getEquationOfStateMixingRules()->
-            computeSoundSpeed(
-                sound_speed_z_F,
+            computeGruneisenParameter(
+                gruneisen_parameter_z_F,
                 density_z_F,
                 primitive_variables_F[d_num_species + 3],
                 mass_fractions_z_F,
                 volume_fractions_z_F,
                 2,
                 domain);
+        
+        d_flow_model_tmp->getEquationOfStateMixingRules()->
+            computePressureDerivativeWithPartialDensities(
+                partial_pressure_partial_partial_densities_z_B,
+                density_z_B,
+                primitive_variables_B[d_num_species + 3],
+                mass_fractions_z_B,
+                volume_fractions_z_B,
+                2,
+                domain);
+        
+        d_flow_model_tmp->getEquationOfStateMixingRules()->
+            computePressureDerivativeWithPartialDensities(
+                partial_pressure_partial_partial_densities_z_F,
+                density_z_F,
+                primitive_variables_F[d_num_species + 3],
+                mass_fractions_z_F,
+                volume_fractions_z_F,
+                2,
+                domain);
+        
+        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2 + 1; k++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx = (i + num_ghosts_0_primitive_variables) +
+                        (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
+                        (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
+                            ghostcell_dim_1_primitive_variables;
+                    
+                    c_z_B[idx] = Gamma_z_B[idx]*V_z_B[d_num_species + 3][idx]/rho_z_B[idx];
+                    c_z_F[idx] = Gamma_z_F[idx]*V_z_F[d_num_species + 3][idx]/rho_z_F[idx];
+                }
+            }
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2 + 1; k++)
+            {
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx = (i + num_ghosts_0_primitive_variables) +
+                            (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
+                            (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
+                                ghostcell_dim_1_primitive_variables;
+                        
+                        c_z_B[idx] += Y_z_B[si][idx]*Psi_z_B[si][idx];
+                        c_z_F[idx] += Y_z_F[si][idx]*Psi_z_F[si][idx];
+                    }
+                }
+            }
+        }
+        
+        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2 + 1; k++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx = (i + num_ghosts_0_primitive_variables) +
+                        (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
+                        (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
+                            ghostcell_dim_1_primitive_variables;
+                    
+                    c_z_B[idx] = sqrt(c_z_B[idx]);
+                    c_z_F[idx] = sqrt(c_z_F[idx]);
+                }
+            }
+        }
         
         d_flow_model_tmp->getEquationOfStateMixingRules()->
             computeInternalEnergy(
