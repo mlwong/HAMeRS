@@ -10928,8 +10928,8 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
         
         if (domain.empty())
         {
-            domain_lo = -d_num_subghosts_mass_fractions;
-            domain_dims = d_subghostcell_dims_mass_fractions;
+            domain_lo = -d_num_subghosts_sound_speed;
+            domain_dims = d_subghostcell_dims_sound_speed;
         }
         else
         {
