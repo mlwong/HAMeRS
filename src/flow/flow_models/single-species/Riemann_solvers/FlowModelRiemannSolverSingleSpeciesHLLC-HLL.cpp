@@ -828,7 +828,7 @@ computeLocalConvectiveFluxInXDirectionFromPrimitiveVariablesHLLC_HLL1D(
     
     s_x_star = (V_x_R[2][idx] - V_x_L[2][idx] + V_x_L[0][idx]*V_x_L[1][idx]*(s_x_L - V_x_L[1][idx]) -
         V_x_R[0][idx]*V_x_R[1][idx]*(s_x_R - V_x_R[1][idx]))/
-            (V_x_L[0][idx]*(s_x_L - V_x_L[1][idx]) - V_x_R[0][idx]*(s_x_R - V_x_R[1][idx]));
+        (V_x_L[0][idx]*(s_x_L - V_x_L[1][idx]) - V_x_R[0][idx]*(s_x_R - V_x_R[1][idx]));
     
     double Q_x_LR[3];
     double Q_x_star_LR[3];
@@ -912,7 +912,7 @@ computeLocalConvectiveFluxInXDirectionFromPrimitiveVariablesHLLC_HLL2D(
     
     s_x_star = (V_x_R[3][idx] - V_x_L[3][idx] + V_x_L[0][idx]*V_x_L[1][idx]*(s_x_L - V_x_L[1][idx]) -
         V_x_R[0][idx]*V_x_R[1][idx]*(s_x_R - V_x_R[1][idx]))/
-            (V_x_L[0][idx]*(s_x_L - V_x_L[1][idx]) - V_x_R[0][idx]*(s_x_R - V_x_R[1][idx]));
+        (V_x_L[0][idx]*(s_x_L - V_x_L[1][idx]) - V_x_R[0][idx]*(s_x_R - V_x_R[1][idx]));
     
     double Q_x_L[4];
     double Q_x_R[4];
@@ -1053,7 +1053,7 @@ computeLocalConvectiveFluxInXDirectionFromPrimitiveVariablesHLLC_HLL3D(
     
     s_x_star = (V_x_R[4][idx] - V_x_L[4][idx] + V_x_L[0][idx]*V_x_L[1][idx]*(s_x_L - V_x_L[1][idx]) -
         V_x_R[0][idx]*V_x_R[1][idx]*(s_x_R - V_x_R[1][idx]))/
-            (V_x_L[0][idx]*(s_x_L - V_x_L[1][idx]) - V_x_R[0][idx]*(s_x_R - V_x_R[1][idx]));
+        (V_x_L[0][idx]*(s_x_L - V_x_L[1][idx]) - V_x_R[0][idx]*(s_x_R - V_x_R[1][idx]));
     
     double Q_x_L[5];
     double Q_x_R[5];
@@ -1206,7 +1206,7 @@ computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC_HLL2D(
     
     s_y_star = (V_y_T[3][idx] - V_y_B[3][idx] + V_y_B[0][idx]*V_y_B[2][idx]*(s_y_B - V_y_B[2][idx]) -
         V_y_T[0][idx]*V_y_T[2][idx]*(s_y_T - V_y_T[2][idx]))/
-            (V_y_B[0][idx]*(s_y_B - V_y_B[2][idx]) - V_y_T[0][idx]*(s_y_T - V_y_T[2][idx]));
+        (V_y_B[0][idx]*(s_y_B - V_y_B[2][idx]) - V_y_T[0][idx]*(s_y_T - V_y_T[2][idx]));
     
     double Q_y_B[4];
     double Q_y_T[4];
@@ -1347,7 +1347,7 @@ computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC_HLL3D(
     
     s_y_star = (V_y_T[4][idx] - V_y_B[4][idx] + V_y_B[0][idx]*V_y_B[2][idx]*(s_y_B - V_y_B[2][idx]) -
         V_y_T[0][idx]*V_y_T[2][idx]*(s_y_T - V_y_T[2][idx]))/
-            (V_y_B[0][idx]*(s_y_B - V_y_B[2][idx]) - V_y_T[0][idx]*(s_y_T - V_y_T[2][idx]));
+        (V_y_B[0][idx]*(s_y_B - V_y_B[2][idx]) - V_y_T[0][idx]*(s_y_T - V_y_T[2][idx]));
     
     double Q_y_B[5];
     double Q_y_T[5];
@@ -1500,7 +1500,7 @@ computeLocalConvectiveFluxInZDirectionFromPrimitiveVariablesHLLC_HLL3D(
     
     s_z_star = (V_z_F[4][idx] - V_z_B[4][idx] + V_z_B[0][idx]*V_z_B[3][idx]*(s_z_B - V_z_B[3][idx]) -
         V_z_F[0][idx]*V_z_F[3][idx]*(s_z_F - V_z_F[3][idx]))/
-            (V_z_B[0][idx]*(s_z_B - V_z_B[3][idx]) - V_z_F[0][idx]*(s_z_F - V_z_F[3][idx]));
+        (V_z_B[0][idx]*(s_z_B - V_z_B[3][idx]) - V_z_F[0][idx]*(s_z_F - V_z_F[3][idx]));
     
     double Q_z_B[5];
     double Q_z_F[5];
@@ -1980,7 +1980,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 
                 epsilon_x_L[idx] = (Q_x_L[3][idx] -
                     double(1)/double(2)*(Q_x_L[1][idx]*Q_x_L[1][idx] + Q_x_L[2][idx]*Q_x_L[2][idx])/
-                        Q_x_L[0][idx])/Q_x_L[0][idx];
+                    Q_x_L[0][idx])/Q_x_L[0][idx];
             }
         }
         
@@ -1997,7 +1997,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 
                 epsilon_x_R[idx] = (Q_x_R[3][idx] -
                     double(1)/double(2)*(Q_x_R[1][idx]*Q_x_R[1][idx] + Q_x_R[2][idx]*Q_x_R[2][idx])/
-                        Q_x_R[0][idx])/Q_x_R[0][idx];
+                    Q_x_R[0][idx])/Q_x_R[0][idx];
             }
         }
         
@@ -2184,7 +2184,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                     
                     epsilon_x_L[idx] = (Q_x_L[4][idx] -
                         double(1)/double(2)*(Q_x_L[1][idx]*Q_x_L[1][idx] + Q_x_L[2][idx]*Q_x_L[2][idx] +
-                            Q_x_L[3][idx]*Q_x_L[3][idx])/Q_x_L[0][idx])/Q_x_L[0][idx];
+                        Q_x_L[3][idx]*Q_x_L[3][idx])/Q_x_L[0][idx])/Q_x_L[0][idx];
                 }
             }
         }
@@ -2206,7 +2206,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                     
                     epsilon_x_R[idx] = (Q_x_R[4][idx] -
                         double(1)/double(2)*(Q_x_R[1][idx]*Q_x_R[1][idx] + Q_x_R[2][idx]*Q_x_R[2][idx] +
-                            Q_x_R[3][idx]*Q_x_R[3][idx])/Q_x_R[0][idx])/Q_x_R[0][idx];
+                        Q_x_R[3][idx]*Q_x_R[3][idx])/Q_x_R[0][idx])/Q_x_R[0][idx];
                 }
             }
         }
@@ -2576,7 +2576,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
                 
                 epsilon_y_B[idx] = (Q_y_B[3][idx] -
                     double(1)/double(2)*(Q_y_B[1][idx]*Q_y_B[1][idx] + Q_y_B[2][idx]*Q_y_B[2][idx])/
-                        Q_y_B[0][idx])/Q_y_B[0][idx];
+                    Q_y_B[0][idx])/Q_y_B[0][idx];
             }
         }
         
@@ -2593,7 +2593,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
                 
                 epsilon_y_T[idx] = (Q_y_T[3][idx] -
                     double(1)/double(2)*(Q_y_T[1][idx]*Q_y_T[1][idx] + Q_y_T[2][idx]*Q_y_T[2][idx])/
-                        Q_y_T[0][idx])/Q_y_T[0][idx];
+                    Q_y_T[0][idx])/Q_y_T[0][idx];
             }
         }
         
@@ -2780,7 +2780,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
                     
                     epsilon_y_B[idx] = (Q_y_B[4][idx] -
                         double(1)/double(2)*(Q_y_B[1][idx]*Q_y_B[1][idx] + Q_y_B[2][idx]*Q_y_B[2][idx] +
-                            Q_y_B[3][idx]*Q_y_B[3][idx])/Q_y_B[0][idx])/Q_y_B[0][idx];
+                        Q_y_B[3][idx]*Q_y_B[3][idx])/Q_y_B[0][idx])/Q_y_B[0][idx];
                 }
             }
         }
@@ -2802,7 +2802,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
                     
                     epsilon_y_T[idx] = (Q_y_T[4][idx] -
                         double(1)/double(2)*(Q_y_T[1][idx]*Q_y_T[1][idx] + Q_y_T[2][idx]*Q_y_T[2][idx] +
-                            Q_y_T[3][idx]*Q_y_T[3][idx])/Q_y_T[0][idx])/Q_y_T[0][idx];
+                        Q_y_T[3][idx]*Q_y_T[3][idx])/Q_y_T[0][idx])/Q_y_T[0][idx];
                 }
             }
         }
@@ -3190,7 +3190,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
                     
                     epsilon_z_B[idx] = (Q_z_B[4][idx] -
                         double(1)/double(2)*(Q_z_B[1][idx]*Q_z_B[1][idx] + Q_z_B[2][idx]*Q_z_B[2][idx] +
-                            Q_z_B[3][idx]*Q_z_B[3][idx])/Q_z_B[0][idx])/Q_z_B[0][idx];
+                        Q_z_B[3][idx]*Q_z_B[3][idx])/Q_z_B[0][idx])/Q_z_B[0][idx];
                 }
             }
         }
@@ -3212,7 +3212,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
                     
                     epsilon_z_F[idx] = (Q_z_F[4][idx] -
                         double(1)/double(2)*(Q_z_F[1][idx]*Q_z_F[1][idx] + Q_z_F[2][idx]*Q_z_F[2][idx] +
-                            Q_z_F[3][idx]*Q_z_F[3][idx])/Q_z_F[0][idx])/Q_z_F[0][idx];
+                        Q_z_F[3][idx]*Q_z_F[3][idx])/Q_z_F[0][idx])/Q_z_F[0][idx];
                 }
             }
         }
@@ -4812,4 +4812,3 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
         }
     }
 }
-

@@ -643,9 +643,9 @@ computeLocalConvectiveFluxInXDirectionFromPrimitiveVariablesHLLC1D(
     
     s_x_star = (V_x_R[num_species + 1][idx] - V_x_L[num_species + 1][idx] +
         rho_x_L[idx]*V_x_L[num_species][idx]*(s_x_L - V_x_L[num_species][idx]) -
-            rho_x_R[idx]*V_x_R[num_species][idx]*(s_x_R - V_x_R[num_species][idx]))/
-                (rho_x_L[idx]*(s_x_L - V_x_L[num_species][idx]) -
-                     rho_x_R[idx]*(s_x_R - V_x_R[num_species][idx]));
+        rho_x_R[idx]*V_x_R[num_species][idx]*(s_x_R - V_x_R[num_species][idx]))/
+        (rho_x_L[idx]*(s_x_L - V_x_L[num_species][idx]) -
+        rho_x_R[idx]*(s_x_R - V_x_R[num_species][idx]));
     
     double Q_x_LR[num_eqn];
     double Q_x_star_LR[num_eqn];
@@ -670,7 +670,7 @@ computeLocalConvectiveFluxInXDirectionFromPrimitiveVariablesHLLC1D(
         Q_x_star_LR[num_species] = Chi_x_star_LR*rho_x_L[idx]*s_x_star;
         Q_x_star_LR[num_species + 1] = Chi_x_star_LR*(Q_x_LR[num_species + 1] +
             (s_x_star - V_x_L[num_species][idx])*(rho_x_L[idx]*s_x_star + V_x_L[num_species + 1][idx]/
-                (s_x_L - V_x_L[num_species][idx])));
+            (s_x_L - V_x_L[num_species][idx])));
         
         for (int si = 0; si < num_species; si++)
         {
@@ -703,7 +703,7 @@ computeLocalConvectiveFluxInXDirectionFromPrimitiveVariablesHLLC1D(
         Q_x_star_LR[num_species] = Chi_x_star_LR*rho_x_R[idx]*s_x_star;
         Q_x_star_LR[num_species + 1] = Chi_x_star_LR*(Q_x_LR[num_species + 1] +
             (s_x_star - V_x_R[num_species][idx])*(rho_x_R[idx]*s_x_star + V_x_R[num_species + 1][idx]/
-                (s_x_R - V_x_R[num_species][idx])));
+            (s_x_R - V_x_R[num_species][idx])));
         
         for (int si = 0; si < num_species; si++)
         {
@@ -755,9 +755,9 @@ computeLocalConvectiveFluxInXDirectionFromPrimitiveVariablesHLLC2D(
     
     s_x_star = (V_x_R[num_species + 2][idx] - V_x_L[num_species + 2][idx] +
         rho_x_L[idx]*V_x_L[num_species][idx]*(s_x_L - V_x_L[num_species][idx]) -
-            rho_x_R[idx]*V_x_R[num_species][idx]*(s_x_R - V_x_R[num_species][idx]))/
-                (rho_x_L[idx]*(s_x_L - V_x_L[num_species][idx]) -
-                     rho_x_R[idx]*(s_x_R - V_x_R[num_species][idx]));
+        rho_x_R[idx]*V_x_R[num_species][idx]*(s_x_R - V_x_R[num_species][idx]))/
+        (rho_x_L[idx]*(s_x_L - V_x_L[num_species][idx]) -
+        rho_x_R[idx]*(s_x_R - V_x_R[num_species][idx]));
     
     double Q_x_LR[num_eqn];
     double Q_x_star_LR[num_eqn];
@@ -775,7 +775,7 @@ computeLocalConvectiveFluxInXDirectionFromPrimitiveVariablesHLLC2D(
         Q_x_LR[num_species + 1] = rho_x_L[idx]*V_x_L[num_species + 1][idx];
         Q_x_LR[num_species + 2] = rho_x_L[idx]*(epsilon_x_L[idx] +
             double(1)/double(2)*(V_x_L[num_species][idx]*V_x_L[num_species][idx] +
-                V_x_L[num_species + 1][idx]*V_x_L[num_species + 1][idx]));
+            V_x_L[num_species + 1][idx]*V_x_L[num_species + 1][idx]));
         
         for (int si = 0; si < num_species; si++)
         {
@@ -785,7 +785,7 @@ computeLocalConvectiveFluxInXDirectionFromPrimitiveVariablesHLLC2D(
         Q_x_star_LR[num_species + 1] = Chi_x_star_LR*Q_x_LR[num_species + 1];
         Q_x_star_LR[num_species + 2] = Chi_x_star_LR*(Q_x_LR[num_species + 2] +
             (s_x_star - V_x_L[num_species][idx])*(rho_x_L[idx]*s_x_star + V_x_L[num_species + 2][idx]/
-                (s_x_L - V_x_L[num_species][idx])));
+            (s_x_L - V_x_L[num_species][idx])));
         
         for (int si = 0; si < num_species; si++)
         {
@@ -812,7 +812,7 @@ computeLocalConvectiveFluxInXDirectionFromPrimitiveVariablesHLLC2D(
         Q_x_LR[num_species + 1] = rho_x_R[idx]*V_x_R[num_species + 1][idx];
         Q_x_LR[num_species + 2] = rho_x_R[idx]*(epsilon_x_R[idx] +
             double(1)/double(2)*(V_x_R[num_species][idx]*V_x_R[num_species][idx] +
-                V_x_R[num_species + 1][idx]*V_x_R[num_species + 1][idx]));
+            V_x_R[num_species + 1][idx]*V_x_R[num_species + 1][idx]));
         
         for (int si = 0; si < num_species; si++)
         {
@@ -822,7 +822,7 @@ computeLocalConvectiveFluxInXDirectionFromPrimitiveVariablesHLLC2D(
         Q_x_star_LR[num_species + 1] = Chi_x_star_LR*Q_x_LR[num_species + 1];
         Q_x_star_LR[num_species + 2] = Chi_x_star_LR*(Q_x_LR[num_species + 2] +
             (s_x_star - V_x_R[num_species][idx])*(rho_x_R[idx]*s_x_star + V_x_R[num_species + 2][idx]/
-                (s_x_R - V_x_R[num_species][idx])));
+            (s_x_R - V_x_R[num_species][idx])));
         
         for (int si = 0; si < num_species; si++)
         {
@@ -875,9 +875,9 @@ computeLocalConvectiveFluxInXDirectionFromPrimitiveVariablesHLLC3D(
     
     s_x_star = (V_x_R[num_species + 3][idx] - V_x_L[num_species + 3][idx] +
         rho_x_L[idx]*V_x_L[num_species][idx]*(s_x_L - V_x_L[num_species][idx]) -
-            rho_x_R[idx]*V_x_R[num_species][idx]*(s_x_R - V_x_R[num_species][idx]))/
-                (rho_x_L[idx]*(s_x_L - V_x_L[num_species][idx]) -
-                     rho_x_R[idx]*(s_x_R - V_x_R[num_species][idx]));
+        rho_x_R[idx]*V_x_R[num_species][idx]*(s_x_R - V_x_R[num_species][idx]))/
+        (rho_x_L[idx]*(s_x_L - V_x_L[num_species][idx]) -
+        rho_x_R[idx]*(s_x_R - V_x_R[num_species][idx]));
     
     double Q_x_LR[num_eqn];
     double Q_x_star_LR[num_eqn];
@@ -896,8 +896,8 @@ computeLocalConvectiveFluxInXDirectionFromPrimitiveVariablesHLLC3D(
         Q_x_LR[num_species + 2] = rho_x_L[idx]*V_x_L[num_species + 2][idx];
         Q_x_LR[num_species + 3] = rho_x_L[idx]*(epsilon_x_L[idx] +
             double(1)/double(2)*(V_x_L[num_species][idx]*V_x_L[num_species][idx] +
-                V_x_L[num_species + 1][idx]*V_x_L[num_species + 1][idx] +
-                    V_x_L[num_species + 2][idx]*V_x_L[num_species + 2][idx]));
+            V_x_L[num_species + 1][idx]*V_x_L[num_species + 1][idx] +
+            V_x_L[num_species + 2][idx]*V_x_L[num_species + 2][idx]));
         
         for (int si = 0; si < num_species; si++)
         {
@@ -908,7 +908,7 @@ computeLocalConvectiveFluxInXDirectionFromPrimitiveVariablesHLLC3D(
         Q_x_star_LR[num_species + 2] = Chi_x_star_LR*Q_x_LR[num_species + 2];
         Q_x_star_LR[num_species + 3] = Chi_x_star_LR*(Q_x_LR[num_species + 3] +
             (s_x_star - V_x_L[num_species][idx])*(rho_x_L[idx]*s_x_star + V_x_L[num_species + 3][idx]/
-                (s_x_L - V_x_L[num_species][idx])));
+            (s_x_L - V_x_L[num_species][idx])));
         
         for (int si = 0; si < num_species; si++)
         {
@@ -937,8 +937,8 @@ computeLocalConvectiveFluxInXDirectionFromPrimitiveVariablesHLLC3D(
         Q_x_LR[num_species + 2] = rho_x_R[idx]*V_x_R[num_species + 2][idx];
         Q_x_LR[num_species + 3] = rho_x_R[idx]*(epsilon_x_R[idx] +
             double(1)/double(2)*(V_x_R[num_species][idx]*V_x_R[num_species][idx] +
-                V_x_R[num_species + 1][idx]*V_x_R[num_species + 1][idx] +
-                    V_x_R[num_species + 2][idx]*V_x_R[num_species + 2][idx]));
+            V_x_R[num_species + 1][idx]*V_x_R[num_species + 1][idx] +
+            V_x_R[num_species + 2][idx]*V_x_R[num_species + 2][idx]));
         
         for (int si = 0; si < num_species; si++)
         {
@@ -949,7 +949,7 @@ computeLocalConvectiveFluxInXDirectionFromPrimitiveVariablesHLLC3D(
         Q_x_star_LR[num_species + 2] = Chi_x_star_LR*Q_x_LR[num_species + 2];
         Q_x_star_LR[num_species + 3] = Chi_x_star_LR*(Q_x_LR[num_species + 3] +
             (s_x_star - V_x_R[num_species][idx])*(rho_x_R[idx]*s_x_star + V_x_R[num_species + 3][idx]/
-                (s_x_R - V_x_R[num_species][idx])));
+            (s_x_R - V_x_R[num_species][idx])));
         
         for (int si = 0; si < num_species; si++)
         {
@@ -1003,9 +1003,9 @@ computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC2D(
     
     s_y_star = (V_y_T[num_species + 2][idx] - V_y_B[num_species + 2][idx] +
         rho_y_B[idx]*V_y_B[num_species + 1][idx]*(s_y_B - V_y_B[num_species + 1][idx]) -
-            rho_y_T[idx]*V_y_T[num_species + 1][idx]*(s_y_T - V_y_T[num_species + 1][idx]))/
-                (rho_y_B[idx]*(s_y_B - V_y_B[num_species + 1][idx]) -
-                     rho_y_T[idx]*(s_y_T - V_y_T[num_species + 1][idx]));
+        rho_y_T[idx]*V_y_T[num_species + 1][idx]*(s_y_T - V_y_T[num_species + 1][idx]))/
+        (rho_y_B[idx]*(s_y_B - V_y_B[num_species + 1][idx]) -
+        rho_y_T[idx]*(s_y_T - V_y_T[num_species + 1][idx]));
     
     double Q_y_BT[num_eqn];
     double Q_y_star_BT[num_eqn];
@@ -1023,7 +1023,7 @@ computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC2D(
         Q_y_BT[num_species + 1] = rho_y_B[idx]*V_y_B[num_species + 1][idx];
         Q_y_BT[num_species + 2] = rho_y_B[idx]*(epsilon_y_B[idx] +
             double(1)/double(2)*(V_y_B[num_species][idx]*V_y_B[num_species][idx] +
-                V_y_B[num_species + 1][idx]*V_y_B[num_species + 1][idx]));
+            V_y_B[num_species + 1][idx]*V_y_B[num_species + 1][idx]));
         
         for (int si = 0; si < num_species; si++)
         {
@@ -1033,7 +1033,7 @@ computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC2D(
         Q_y_star_BT[num_species + 1] = Chi_y_star_BT*rho_y_B[idx]*s_y_star;
         Q_y_star_BT[num_species + 2] = Chi_y_star_BT*(Q_y_BT[num_species + 2] +
             (s_y_star - V_y_B[num_species + 1][idx])*(rho_y_B[idx]*s_y_star + V_y_B[num_species + 2][idx]/
-                (s_y_B - V_y_B[num_species + 1][idx])));
+            (s_y_B - V_y_B[num_species + 1][idx])));
         
         for (int si = 0; si < num_species; si++)
         {
@@ -1060,7 +1060,7 @@ computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC2D(
         Q_y_BT[num_species + 1] = rho_y_T[idx]*V_y_T[num_species + 1][idx];
         Q_y_BT[num_species + 2] = rho_y_T[idx]*(epsilon_y_T[idx] +
             double(1)/double(2)*(V_y_T[num_species][idx]*V_y_T[num_species][idx] +
-                V_y_T[num_species + 1][idx]*V_y_T[num_species + 1][idx]));
+            V_y_T[num_species + 1][idx]*V_y_T[num_species + 1][idx]));
         
         for (int si = 0; si < num_species; si++)
         {
@@ -1070,7 +1070,7 @@ computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC2D(
         Q_y_star_BT[num_species + 1] = Chi_y_star_BT*rho_y_T[idx]*s_y_star;
         Q_y_star_BT[num_species + 2] = Chi_y_star_BT*(Q_y_BT[num_species + 2] +
             (s_y_star - V_y_T[num_species + 1][idx])*(rho_y_T[idx]*s_y_star + V_y_T[num_species + 2][idx]/
-                (s_y_T - V_y_T[num_species + 1][idx])));
+            (s_y_T - V_y_T[num_species + 1][idx])));
         
         for (int si = 0; si < num_species; si++)
         {
@@ -1123,9 +1123,9 @@ computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC3D(
     
     s_y_star = (V_y_T[num_species + 3][idx] - V_y_B[num_species + 3][idx] +
         rho_y_B[idx]*V_y_B[num_species + 1][idx]*(s_y_B - V_y_B[num_species + 1][idx]) -
-            rho_y_T[idx]*V_y_T[num_species + 1][idx]*(s_y_T - V_y_T[num_species + 1][idx]))/
-                (rho_y_B[idx]*(s_y_B - V_y_B[num_species + 1][idx]) -
-                     rho_y_T[idx]*(s_y_T - V_y_T[num_species + 1][idx]));
+        rho_y_T[idx]*V_y_T[num_species + 1][idx]*(s_y_T - V_y_T[num_species + 1][idx]))/
+        (rho_y_B[idx]*(s_y_B - V_y_B[num_species + 1][idx]) -
+        rho_y_T[idx]*(s_y_T - V_y_T[num_species + 1][idx]));
     
     double Q_y_BT[num_eqn];
     double Q_y_star_BT[num_eqn];
@@ -1144,8 +1144,8 @@ computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC3D(
         Q_y_BT[num_species + 2] = rho_y_B[idx]*V_y_B[num_species + 2][idx];
         Q_y_BT[num_species + 3] = rho_y_B[idx]*(epsilon_y_B[idx] +
             double(1)/double(2)*(V_y_B[num_species][idx]*V_y_B[num_species][idx] +
-                V_y_B[num_species + 1][idx]*V_y_B[num_species + 1][idx] +
-                    V_y_B[num_species + 2][idx]*V_y_B[num_species + 2][idx]));
+            V_y_B[num_species + 1][idx]*V_y_B[num_species + 1][idx] +
+            V_y_B[num_species + 2][idx]*V_y_B[num_species + 2][idx]));
         
         for (int si = 0; si < num_species; si++)
         {
@@ -1156,7 +1156,7 @@ computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC3D(
         Q_y_star_BT[num_species + 2] = Chi_y_star_BT*Q_y_BT[num_species + 2];
         Q_y_star_BT[num_species + 3] = Chi_y_star_BT*(Q_y_BT[num_species + 3] +
             (s_y_star - V_y_B[num_species + 1][idx])*(rho_y_B[idx]*s_y_star + V_y_B[num_species + 3][idx]/
-                (s_y_B - V_y_B[num_species + 1][idx])));
+            (s_y_B - V_y_B[num_species + 1][idx])));
         
         for (int si = 0; si < num_species; si++)
         {
@@ -1185,8 +1185,8 @@ computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC3D(
         Q_y_BT[num_species + 2] = rho_y_T[idx]*V_y_T[num_species + 2][idx];
         Q_y_BT[num_species + 3] = rho_y_T[idx]*(epsilon_y_T[idx] +
             double(1)/double(2)*(V_y_T[num_species][idx]*V_y_T[num_species][idx] +
-                V_y_T[num_species + 1][idx]*V_y_T[num_species + 1][idx] +
-                    V_y_T[num_species + 2][idx]*V_y_T[num_species + 2][idx]));
+            V_y_T[num_species + 1][idx]*V_y_T[num_species + 1][idx] +
+            V_y_T[num_species + 2][idx]*V_y_T[num_species + 2][idx]));
         
         for (int si = 0; si < num_species; si++)
         {
@@ -1197,7 +1197,7 @@ computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC3D(
         Q_y_star_BT[num_species + 2] = Chi_y_star_BT*Q_y_BT[num_species + 2];
         Q_y_star_BT[num_species + 3] = Chi_y_star_BT*(Q_y_BT[num_species + 3] +
             (s_y_star - V_y_T[num_species + 1][idx])*(rho_y_T[idx]*s_y_star + V_y_T[num_species + 3][idx]/
-                (s_y_T - V_y_T[num_species + 1][idx])));
+            (s_y_T - V_y_T[num_species + 1][idx])));
         
         for (int si = 0; si < num_species; si++)
         {
@@ -1251,9 +1251,9 @@ computeLocalConvectiveFluxInZDirectionFromPrimitiveVariablesHLLC3D(
     
     s_z_star = (V_z_F[num_species + 3][idx] - V_z_B[num_species + 3][idx] +
         rho_z_B[idx]*V_z_B[num_species + 2][idx]*(s_z_B - V_z_B[num_species + 2][idx]) -
-            rho_z_F[idx]*V_z_F[num_species + 2][idx]*(s_z_F - V_z_F[num_species + 2][idx]))/
-                (rho_z_B[idx]*(s_z_B - V_z_B[num_species + 2][idx]) -
-                     rho_z_F[idx]*(s_z_F - V_z_F[num_species + 2][idx]));
+        rho_z_F[idx]*V_z_F[num_species + 2][idx]*(s_z_F - V_z_F[num_species + 2][idx]))/
+        (rho_z_B[idx]*(s_z_B - V_z_B[num_species + 2][idx]) -
+        rho_z_F[idx]*(s_z_F - V_z_F[num_species + 2][idx]));
     
     double Q_z_BF[num_eqn];
     double Q_z_star_BF[num_eqn];
@@ -1272,8 +1272,8 @@ computeLocalConvectiveFluxInZDirectionFromPrimitiveVariablesHLLC3D(
         Q_z_BF[num_species + 2] = rho_z_B[idx]*V_z_B[num_species + 2][idx];
         Q_z_BF[num_species + 3] = rho_z_B[idx]*(epsilon_z_B[idx] +
             double(1)/double(2)*(V_z_B[num_species][idx]*V_z_B[num_species][idx] +
-                V_z_B[num_species + 1][idx]*V_z_B[num_species + 1][idx] +
-                    V_z_B[num_species + 2][idx]*V_z_B[num_species + 2][idx]));
+            V_z_B[num_species + 1][idx]*V_z_B[num_species + 1][idx] +
+            V_z_B[num_species + 2][idx]*V_z_B[num_species + 2][idx]));
         
         for (int si = 0; si < num_species; si++)
         {
@@ -1284,7 +1284,7 @@ computeLocalConvectiveFluxInZDirectionFromPrimitiveVariablesHLLC3D(
         Q_z_star_BF[num_species + 2] = Chi_z_star_BF*rho_z_B[idx]*s_z_star;
         Q_z_star_BF[num_species + 3] = Chi_z_star_BF*(Q_z_BF[num_species + 3] +
             (s_z_star - V_z_B[num_species + 2][idx])*(rho_z_B[idx]*s_z_star + V_z_B[num_species + 3][idx]/
-                (s_z_B - V_z_B[num_species + 2][idx])));
+            (s_z_B - V_z_B[num_species + 2][idx])));
         
         for (int si = 0; si < num_species; si++)
         {
@@ -1313,8 +1313,8 @@ computeLocalConvectiveFluxInZDirectionFromPrimitiveVariablesHLLC3D(
         Q_z_BF[num_species + 2] = rho_z_F[idx]*V_z_F[num_species + 2][idx];
         Q_z_BF[num_species + 3] = rho_z_F[idx]*(epsilon_z_F[idx] +
             double(1)/double(2)*(V_z_F[num_species][idx]*V_z_F[num_species][idx] +
-                V_z_F[num_species + 1][idx]*V_z_F[num_species + 1][idx] +
-                    V_z_F[num_species + 2][idx]*V_z_F[num_species + 2][idx]));
+            V_z_F[num_species + 1][idx]*V_z_F[num_species + 1][idx] +
+            V_z_F[num_species + 2][idx]*V_z_F[num_species + 2][idx]));
         
         for (int si = 0; si < num_species; si++)
         {
@@ -1325,7 +1325,7 @@ computeLocalConvectiveFluxInZDirectionFromPrimitiveVariablesHLLC3D(
         Q_z_star_BF[num_species + 2] = Chi_z_star_BF*rho_z_F[idx]*s_z_star;
         Q_z_star_BF[num_species + 3] = Chi_z_star_BF*(Q_z_BF[num_species + 3] +
             (s_z_star - V_z_F[num_species + 2][idx])*(rho_z_F[idx]*s_z_star + V_z_F[num_species + 3][idx]/
-                (s_z_F - V_z_F[num_species + 2][idx])));
+            (s_z_F - V_z_F[num_species + 2][idx])));
         
         for (int si = 0; si < num_species; si++)
         {
@@ -1617,7 +1617,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
             
             epsilon_x_L[idx] = (Q_x_L[d_num_species + 1][idx] -
                 double(1)/double(2)*Q_x_L[d_num_species][idx]*Q_x_L[d_num_species][idx]/rho_x_L[idx])/
-                    rho_x_L[idx];
+                rho_x_L[idx];
         }
         
 #ifdef HAMERS_ENABLE_SIMD
@@ -1630,7 +1630,7 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
             
             epsilon_x_R[idx] = (Q_x_R[d_num_species + 1][idx] -
                 double(1)/double(2)*Q_x_R[d_num_species][idx]*Q_x_R[d_num_species][idx]/rho_x_R[idx])/
-                    rho_x_R[idx];
+                rho_x_R[idx];
         }
         
         /*
@@ -1946,8 +1946,8 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
                 
                 epsilon_x_L[idx] = (Q_x_L[d_num_species + 2][idx] -
                     double(1)/double(2)*(Q_x_L[d_num_species][idx]*Q_x_L[d_num_species][idx] +
-                        Q_x_L[d_num_species + 1][idx]*Q_x_L[d_num_species + 1][idx])/
-                            rho_x_L[idx])/rho_x_L[idx];
+                    Q_x_L[d_num_species + 1][idx]*Q_x_L[d_num_species + 1][idx])/
+                    rho_x_L[idx])/rho_x_L[idx];
             }
         }
         
@@ -1964,8 +1964,8 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
                 
                 epsilon_x_R[idx] = (Q_x_R[d_num_species + 2][idx] -
                     double(1)/double(2)*(Q_x_R[d_num_species][idx]*Q_x_R[d_num_species][idx] +
-                        Q_x_R[d_num_species + 1][idx]*Q_x_R[d_num_species + 1][idx])/
-                            rho_x_R[idx])/rho_x_R[idx];
+                    Q_x_R[d_num_species + 1][idx]*Q_x_R[d_num_species + 1][idx])/
+                    rho_x_R[idx])/rho_x_R[idx];
             }
         }
         
@@ -2346,9 +2346,9 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
                     
                     epsilon_x_L[idx] = (Q_x_L[d_num_species + 3][idx] -
                         double(1)/double(2)*(Q_x_L[d_num_species][idx]*Q_x_L[d_num_species][idx] +
-                            Q_x_L[d_num_species + 1][idx]*Q_x_L[d_num_species + 1][idx] +
-                                Q_x_L[d_num_species + 2][idx]*Q_x_L[d_num_species + 2][idx])/
-                                    rho_x_L[idx])/rho_x_L[idx];
+                        Q_x_L[d_num_species + 1][idx]*Q_x_L[d_num_species + 1][idx] +
+                        Q_x_L[d_num_species + 2][idx]*Q_x_L[d_num_species + 2][idx])/
+                        rho_x_L[idx])/rho_x_L[idx];
                 }
             }
         }
@@ -2370,9 +2370,9 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
                     
                     epsilon_x_R[idx] = (Q_x_R[d_num_species + 3][idx] -
                         double(1)/double(2)*(Q_x_R[d_num_species][idx]*Q_x_R[d_num_species][idx] +
-                            Q_x_R[d_num_species + 1][idx]*Q_x_R[d_num_species + 1][idx] +
-                                Q_x_R[d_num_species + 2][idx]*Q_x_R[d_num_species + 2][idx])/
-                                    rho_x_R[idx])/rho_x_R[idx];
+                        Q_x_R[d_num_species + 1][idx]*Q_x_R[d_num_species + 1][idx] +
+                        Q_x_R[d_num_species + 2][idx]*Q_x_R[d_num_species + 2][idx])/
+                        rho_x_R[idx])/rho_x_R[idx];
                 }
             }
         }
@@ -2966,8 +2966,8 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
                 
                 epsilon_y_B[idx] = (Q_y_B[d_num_species + 2][idx] -
                     double(1)/double(2)*(Q_y_B[d_num_species][idx]*Q_y_B[d_num_species][idx] +
-                        Q_y_B[d_num_species + 1][idx]*Q_y_B[d_num_species + 1][idx])/
-                            rho_y_B[idx])/rho_y_B[idx];
+                    Q_y_B[d_num_species + 1][idx]*Q_y_B[d_num_species + 1][idx])/
+                    rho_y_B[idx])/rho_y_B[idx];
             }
         }
         
@@ -2984,8 +2984,8 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
                 
                 epsilon_y_T[idx] = (Q_y_T[d_num_species + 2][idx] -
                     double(1)/double(2)*(Q_y_T[d_num_species][idx]*Q_y_T[d_num_species][idx] +
-                        Q_y_T[d_num_species + 1][idx]*Q_y_T[d_num_species + 1][idx])/
-                            rho_y_T[idx])/rho_y_T[idx];
+                    Q_y_T[d_num_species + 1][idx]*Q_y_T[d_num_species + 1][idx])/
+                    rho_y_T[idx])/rho_y_T[idx];
             }
         }
         
@@ -3366,9 +3366,9 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
                     
                     epsilon_y_B[idx] = (Q_y_B[d_num_species + 3][idx] -
                         double(1)/double(2)*(Q_y_B[d_num_species][idx]*Q_y_B[d_num_species][idx] +
-                            Q_y_B[d_num_species + 1][idx]*Q_y_B[d_num_species + 1][idx] +
-                                Q_y_B[d_num_species + 2][idx]*Q_y_B[d_num_species + 2][idx])/
-                                    rho_y_B[idx])/rho_y_B[idx];
+                        Q_y_B[d_num_species + 1][idx]*Q_y_B[d_num_species + 1][idx] +
+                        Q_y_B[d_num_species + 2][idx]*Q_y_B[d_num_species + 2][idx])/
+                        rho_y_B[idx])/rho_y_B[idx];
                 }
             }
         }
@@ -3390,9 +3390,9 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
                     
                     epsilon_y_T[idx] = (Q_y_T[d_num_species + 3][idx] -
                         double(1)/double(2)*(Q_y_T[d_num_species][idx]*Q_y_T[d_num_species][idx] +
-                            Q_y_T[d_num_species + 1][idx]*Q_y_T[d_num_species + 1][idx] +
-                                Q_y_T[d_num_species + 2][idx]*Q_y_T[d_num_species + 2][idx])/
-                                    rho_y_T[idx])/rho_y_T[idx];
+                        Q_y_T[d_num_species + 1][idx]*Q_y_T[d_num_species + 1][idx] +
+                        Q_y_T[d_num_species + 2][idx]*Q_y_T[d_num_species + 2][idx])/
+                        rho_y_T[idx])/rho_y_T[idx];
                 }
             }
         }
@@ -4024,9 +4024,9 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
                     
                     epsilon_z_B[idx] = (Q_z_B[d_num_species + 3][idx] -
                         double(1)/double(2)*(Q_z_B[d_num_species][idx]*Q_z_B[d_num_species][idx] +
-                            Q_z_B[d_num_species + 1][idx]*Q_z_B[d_num_species + 1][idx] +
-                                Q_z_B[d_num_species + 2][idx]*Q_z_B[d_num_species + 2][idx])/
-                                    rho_z_B[idx])/rho_z_B[idx];
+                        Q_z_B[d_num_species + 1][idx]*Q_z_B[d_num_species + 1][idx] +
+                        Q_z_B[d_num_species + 2][idx]*Q_z_B[d_num_species + 2][idx])/
+                        rho_z_B[idx])/rho_z_B[idx];
                 }
             }
         }
@@ -4048,9 +4048,9 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
                     
                     epsilon_z_F[idx] = (Q_z_F[d_num_species + 3][idx] -
                         double(1)/double(2)*(Q_z_F[d_num_species][idx]*Q_z_F[d_num_species][idx] +
-                            Q_z_F[d_num_species + 1][idx]*Q_z_F[d_num_species + 1][idx] +
-                                Q_z_F[d_num_species + 2][idx]*Q_z_F[d_num_species + 2][idx])/
-                                    rho_z_F[idx])/rho_z_F[idx];
+                        Q_z_F[d_num_species + 1][idx]*Q_z_F[d_num_species + 1][idx] +
+                        Q_z_F[d_num_species + 2][idx]*Q_z_F[d_num_species + 2][idx])/
+                        rho_z_F[idx])/rho_z_F[idx];
                 }
             }
         }
