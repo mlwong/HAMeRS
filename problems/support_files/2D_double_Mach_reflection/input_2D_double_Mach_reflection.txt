@@ -217,3 +217,9 @@ TimeRefinementIntegrator
                                   // by which tagged cells are buffered)
 }
 
+TimerManager
+{
+    print_threshold = 0.01
+    timer_list      = "apps::main::*"
+}
+

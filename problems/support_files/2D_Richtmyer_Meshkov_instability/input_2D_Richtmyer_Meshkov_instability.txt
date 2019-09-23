@@ -188,3 +188,9 @@ TimeRefinementIntegrator
     max_integrator_steps = 10000 // Max number of simulation timesteps
 }
 
+TimerManager
+{
+    print_threshold = 0.01
+    timer_list      = "apps::main::*"
+}
+

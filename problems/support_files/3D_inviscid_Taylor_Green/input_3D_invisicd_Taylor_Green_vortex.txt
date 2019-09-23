@@ -1,0 +1,141 @@
+Application = "Euler"
+
+Euler
+{
+    // Name of project
+    project_name = "3D Taylor-Green vortex"
+    
+    // Number of species
+    num_species = 1
+    
+    // Flow model to use
+    flow_model = "SINGLE_SPECIES"
+    
+    Flow_model
+    {
+        // Equation of state to use
+        equation_of_state = "IDEAL_GAS"
+        
+        Equation_of_state_mixing_rules
+        {
+            species_gamma = 1.666666666666667
+            species_R = 1.0
+        }
+    }
+    
+    // Convective flux reconstructor to use
+    convective_flux_reconstructor = "WCNS6_LD_HLLC_HLL"
+    
+    Convective_flux_reconstructor{}
+    
+    Boundary_data{}
+}
+
+Main
+{
+    // Dimension of problem
+    dim = 3
+    
+    // Base name of log file
+    base_name = "3D_inviscid_Taylor_Green_vortex"
+    
+    // Whether all nodes log to individual files,
+    // if false only node 0 will log 
+    log_all_nodes = TRUE
+    
+    // Visualization dump parameters
+    // Setting to dump viz output: CONSTANT_TIME_INTERVAL, CONSTANT_TIMESTEP_INTERVAL
+    viz_dump_setting = "CONSTANT_TIME_INTERVAL"
+    // Frequency at which to dump viz output (0 to turn off)
+    viz_dump_interval = 0.2
+    // Name of directory in which to place viz output
+    viz_dump_dirname = "viz_3D_inviscid_Taylor_Green_vortex"
+    // Number of processors which write to each viz file
+    visit_number_procs_per_file = 1
+    
+    // Restart dump parameters
+    // Frequency at which to dump restart output
+    // (-1 to be as same as viz_dump_interval, 0 to turn off)
+    restart_interval = -1
+}
+
+CartesianGeometry
+{
+    // Lower and upper indices of computational domain
+    domain_boxes = [(0, 0, 0), (31, 31, 31)]
+    x_lo         = 0.0, 0.0, 0.0                                           // Lower end of computational domain
+    x_up         = 6.283185307179586, 6.283185307179586, 6.283185307179586 // Upper end of computational domain
+    
+    // Periodic dimension. A non-zero value indicates that the direction is periodic
+    periodic_dimension = 1, 1, 1
+}
+
+ExtendedTagAndInitialize{}
+
+PatchHierarchy
+{
+    // Maximum number of levels in hierarchy
+    max_levels = 1
+    
+    ratio_to_coarser
+    {}
+    
+    largest_patch_size
+    {
+        level_0 =  1000, 1000, 1000
+    }
+    
+    smallest_patch_size
+    {
+       level_0 =  4, 4, 4
+    }
+}
+
+GriddingAlgorithm{}
+
+RungeKuttaLevelIntegrator
+{
+    cfl                      = 0.6e0 // Max cfl factor used in problem
+    cfl_init                 = 0.6e0 // Initial cfl factor
+    lag_dt_computation       = FALSE
+    use_ghosts_to_compute_dt = TRUE
+
+   // Weights of Runge-Kutta scheme
+   RungeKuttaWeights
+   {
+      number_steps   = 5
+
+      alpha_0        = 1.0
+      alpha_1        = 0.444370493651235, 0.555629506348765
+      alpha_2        = 0.620101851488403, 0.0, 0.379898148511597
+      alpha_3        = 0.178079954393132, 0.0, 0.0, 0.821920045606868
+      alpha_4        = 0.0, 0.0, 0.517231671970585, 0.096059710526147, 0.386708617503269
+
+      beta_0         = 0.391752226571890
+      beta_1         = 0.0, 0.368410593050371
+      beta_2         = 0.0, 0.0, 0.251891774271694
+      beta_3         = 0.0, 0.0, 0.0, 0.544974750228521
+      beta_4         = 0.0, 0.0, 0.0, 0.063692468666290, 0.226007483236906
+
+      gamma_0        = 0.146811876084787
+      gamma_1        = 0.0, 0.248482909444976
+      gamma_2        = 0.0, 0.0, 0.104258830331981
+      gamma_3        = 0.0, 0.0, 0.0, 0.210746432235061
+      gamma_4        = 0.0, 0.0, 0.0, 0.063692468666290, 0.226007483236906
+   }
+}
+
+TimeRefinementIntegrator
+{
+    start_time           = 0.0e0   // Initial simulation time
+    end_time             = 5.0e0   // Final simulation time
+    grow_dt              = 1.0e0   // Growth factor for timesteps
+    max_integrator_steps = 100000  // Max number of simulation timesteps
+}
+
+TimerManager
+{
+    print_threshold = 0.01
+    timer_list      = "apps::main::*"
+}
+

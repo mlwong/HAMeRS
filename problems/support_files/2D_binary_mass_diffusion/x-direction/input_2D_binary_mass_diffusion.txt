@@ -68,6 +68,8 @@ NavierStokes
     
     Convective_flux_reconstructor{}
     
+    use_conservative_form_diffusive_flux = TRUE
+    
     // Diffusive flux reconstructor to use
     diffusive_flux_reconstructor = "SIXTH_ORDER"
     
@@ -148,5 +150,11 @@ TimeRefinementIntegrator
    end_time             = 0.01 // Final simulation time
    grow_dt              = 1.0  // Growth factor for timesteps
    max_integrator_steps = 1000 // Max number of simulation timesteps
+}
+
+TimerManager
+{
+    print_threshold = 0.01
+    timer_list      = "apps::main::*"
 }
 
