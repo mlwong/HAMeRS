@@ -146,6 +146,13 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             std::vector<double*>& species_thermo_properties,
             const int& species_index) const;
         
+        /*
+         * Get the molecular weight of a species.
+         */
+        double
+        getSpeciesMolecularWeight(
+            const int& species_index) const;
+        
     private:
         /*
          * Get the number of thermodynamic properties of the mixture.

@@ -715,6 +715,22 @@ EquationOfStateMixingRulesIdealGas::getSpeciesThermodynamicProperties(
 
 
 /*
+ * Get the molecular weight of a species.
+ */
+double
+EquationOfStateMixingRulesIdealGas::getSpeciesMolecularWeight(
+    const int& species_index) const
+{
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(species_index >= 0);
+    TBOX_ASSERT(species_index < d_num_species);
+#endif
+    
+    return double(8.3144598)/d_species_R[species_index];
+}
+
+
+/*
  * Get the number of thermodynamic properties of the mixture.
  */
 int

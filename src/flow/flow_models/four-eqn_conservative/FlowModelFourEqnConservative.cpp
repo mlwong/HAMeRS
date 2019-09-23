@@ -22,6 +22,7 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
             flow_model_db),
         d_num_subghosts_density(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_mass_fraction(-hier::IntVector::getOne(d_dim)),
+        d_num_subghosts_mole_fraction(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_velocity(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_internal_energy(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_pressure(-hier::IntVector::getOne(d_dim)),
@@ -40,6 +41,7 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
         d_num_subghosts_diffusivities(-hier::IntVector::getOne(d_dim)),
         d_subghost_box_density(hier::Box::getEmptyBox(dim)),
         d_subghost_box_mass_fraction(hier::Box::getEmptyBox(dim)),
+        d_subghost_box_mole_fraction(hier::Box::getEmptyBox(dim)),
         d_subghost_box_velocity(hier::Box::getEmptyBox(dim)),
         d_subghost_box_internal_energy(hier::Box::getEmptyBox(dim)),
         d_subghost_box_pressure(hier::Box::getEmptyBox(dim)),
@@ -58,6 +60,7 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
         d_subghost_box_diffusivities(hier::Box::getEmptyBox(dim)),
         d_subghostcell_dims_density(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_mass_fraction(hier::IntVector::getZero(d_dim)),
+        d_subghostcell_dims_mole_fraction(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_velocity(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_internal_energy(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_pressure(hier::IntVector::getZero(d_dim)),
@@ -383,7 +386,11 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
         d_grid_geometry,
         d_num_species,
         flow_model_db,
-        d_equation_of_mass_diffusivity_mixing_rules));
+        d_equation_of_state_mixing_rules,
+        d_equation_of_mass_diffusivity_mixing_rules,
+        d_equation_of_shear_viscosity_mixing_rules,
+        d_equation_of_bulk_viscosity_mixing_rules,
+        d_equation_of_thermal_conductivity_mixing_rules));
     
     /*
      * Initialize the Riemann solvers.
@@ -758,6 +765,14 @@ FlowModelFourEqnConservative::registerDerivedCellVariable(
             "MASS_FRACTION");
     }
     
+    if (num_subghosts_of_data.find("MOLE_FRACTION") != num_subghosts_of_data.end())
+    {
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("MOLE_FRACTION")->second,
+            "MOLE_FRACTION",
+            "MOLE_FRACTION");
+    }
+    
     if (num_subghosts_of_data.find("VELOCITY") != num_subghosts_of_data.end())
     {
         setNumberOfSubGhosts(
@@ -1048,6 +1063,7 @@ FlowModelFourEqnConservative::unregisterPatch()
     d_num_ghosts                      = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_density           = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_mass_fraction     = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_mole_fraction     = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_velocity          = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_internal_energy   = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_pressure          = -hier::IntVector::getOne(d_dim);
@@ -1069,6 +1085,7 @@ FlowModelFourEqnConservative::unregisterPatch()
     d_ghost_box                      = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_density           = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_mass_fraction     = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_mole_fraction     = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_velocity          = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_internal_energy   = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_pressure          = hier::Box::getEmptyBox(d_dim);
@@ -1090,6 +1107,7 @@ FlowModelFourEqnConservative::unregisterPatch()
     d_ghostcell_dims                      = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_density           = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_mass_fraction     = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_mole_fraction     = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_velocity          = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_internal_energy   = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_pressure          = hier::IntVector::getZero(d_dim);
@@ -1109,6 +1127,7 @@ FlowModelFourEqnConservative::unregisterPatch()
     
     d_data_density.reset();
     d_data_mass_fraction.reset();
+    d_data_mole_fraction.reset();
     d_data_velocity.reset();
     d_data_internal_energy.reset();
     d_data_pressure.reset();
@@ -1172,6 +1191,16 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData(
         if (!d_data_mass_fraction)
         {
             computeGlobalCellDataMassFractionWithDensity(
+                computing_option);
+        }
+    }
+    
+    // Compute the mole fraction cell data.
+    if (d_num_subghosts_mole_fraction > -hier::IntVector::getOne(d_dim))
+    {
+        if (!d_data_mole_fraction)
+        {
+            computeGlobalCellDataMoleFractionWithMassFraction(
                 computing_option);
         }
     }
@@ -1386,6 +1415,17 @@ FlowModelFourEqnConservative::getGlobalCellData(const std::string& variable_key)
                 << std::endl);
         }
         cell_data = d_data_mass_fraction;
+    }
+    else if (variable_key == "MOLE_FRACTION")
+    {
+        if (!d_data_mole_fraction)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
+                << "Cell data of 'MOLE_FRACTION' is not registered/computed yet."
+                << std::endl);
+        }
+        cell_data = d_data_mole_fraction;
     }
     else if (variable_key == "VELOCITY")
     {
@@ -10129,6 +10169,34 @@ FlowModelFourEqnConservative::setNumberOfSubGhosts(
         
         setNumberOfSubGhosts(num_subghosts, "DENSITY", parent_variable_name);
     }
+    else if (variable_name == "MOLE_FRACTION")
+    {
+        if (d_num_subghosts_mole_fraction > -hier::IntVector::getOne(d_dim))
+        {
+            if (num_subghosts > d_num_subghosts_mole_fraction)
+            {
+                /*
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelFourEqnConservative::setNumberOfSubGhosts()\n"
+                    << "Number of ghosts of '"
+                    << parent_variable_name
+                    << "' exceeds"
+                    << " number of ghosts of '"
+                    << variable_name
+                    << "'."
+                    << std::endl);
+                */
+                
+                d_num_subghosts_mole_fraction = num_subghosts;
+            }
+        }
+        else
+        {
+            d_num_subghosts_mole_fraction = num_subghosts;
+        }
+        
+        setNumberOfSubGhosts(num_subghosts, "MASS_FRACTION", parent_variable_name);
+    }
     else if (variable_name == "VELOCITY")
     {
         if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
@@ -10595,6 +10663,13 @@ FlowModelFourEqnConservative::setGhostBoxesAndDimensionsDerivedCellVariables()
         d_subghostcell_dims_mass_fraction = d_subghost_box_mass_fraction.numberCells();
     }
     
+    if (d_num_subghosts_mole_fraction > -hier::IntVector::getOne(d_dim))
+    {
+        d_subghost_box_mole_fraction = d_interior_box;
+        d_subghost_box_mole_fraction.grow(d_num_subghosts_mole_fraction);
+        d_subghostcell_dims_mole_fraction = d_subghost_box_mole_fraction.numberCells();
+    }
+    
     if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
     {
         d_subghost_box_velocity = d_interior_box;
@@ -11010,6 +11085,281 @@ FlowModelFourEqnConservative::computeGlobalCellDataMassFractionWithDensity(
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::computeGlobalCellDataMassFractionWithDensity()\n"
             << "Cell data of 'MASS_FRACTION' is not yet registered."
+            << std::endl);
+    }
+}
+
+
+/*
+ * Compute the global cell data of mole fraction with mass fraction in the registered patch.
+ */
+void
+FlowModelFourEqnConservative::computeGlobalCellDataMoleFractionWithMassFraction(
+    const COMPUTING_OPTION::TYPE& computing_option)
+{
+    if (d_num_subghosts_mole_fraction > -hier::IntVector::getOne(d_dim))
+    {
+        // Create the cell data of mole fraction.
+        d_data_mole_fraction.reset(
+            new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_mole_fraction));
+        
+        if (!d_data_mass_fraction)
+        {
+            computeGlobalCellDataMassFractionWithDensity();
+        }
+        
+        // Get the pointers to the cell data of mole fraction and mass fraction.
+        std::vector<double*> X;
+        X.reserve(d_num_species);
+        for (int si = 0; si < d_num_species; si++)
+        {
+            X.push_back(d_data_mole_fraction->getPointer(si));
+        }
+        std::vector<double*> Y;
+        Y.reserve(d_num_species);
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Y.push_back(d_data_mass_fraction->getPointer(si));
+        }
+        
+        // Compute the molecular weight of the mixture.
+        
+        boost::shared_ptr<pdat::CellData<double> > data_molecular_weight_mixture(
+            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_mole_fraction));
+        
+        data_molecular_weight_mixture->fillAll(double(0));
+        
+        double* M = data_molecular_weight_mixture->getPointer(0);
+        
+        if (d_dim == tbox::Dimension(1))
+        {
+            // Compute the mixture molecular weight field.
+            for (int si = 0; si < d_num_species; si++)
+            {
+                for (int i = -d_num_subghosts_mole_fraction[0];
+                     i < d_interior_dims[0] + d_num_subghosts_mole_fraction[0];
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_mole_fraction = i + d_num_subghosts_mole_fraction[0];
+                    const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
+                    
+                    const double M_i = d_equation_of_state_mixing_rules->
+                        getSpeciesMolecularWeight(si);
+                    
+                    M[idx_mole_fraction] += Y[si][idx_mass_fraction]/M_i;
+                }
+            }
+            
+            for (int i = -d_num_subghosts_mole_fraction[0];
+                 i < d_interior_dims[0] + d_num_subghosts_mole_fraction[0];
+                 i++)
+            {
+                // Compute the linear index.
+                const int idx_mole_fraction = i + d_num_subghosts_mole_fraction[0];
+                
+                M[idx_mole_fraction] = double(1)/M[idx_mole_fraction];
+            }
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            // Compute the mixture molecular weight field.
+            for (int si = 0; si < d_num_species; si++)
+            {
+                for (int j = -d_num_subghosts_mole_fraction[1];
+                     j < d_interior_dims[1] + d_num_subghosts_mole_fraction[1];
+                     j++)
+                {
+                    for (int i = -d_num_subghosts_mole_fraction[0];
+                         i < d_interior_dims[0] + d_num_subghosts_mole_fraction[0];
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_mole_fraction = (i + d_num_subghosts_mole_fraction[0]) +
+                            (j + d_num_subghosts_mole_fraction[1])*d_subghostcell_dims_mole_fraction[0];
+                        
+                        const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
+                            (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
+                        
+                        const double M_i = d_equation_of_state_mixing_rules->
+                            getSpeciesMolecularWeight(si);
+                        
+                        M[idx_mole_fraction] += Y[si][idx_mass_fraction]/M_i;
+                    }
+                }
+            }
+            
+            for (int j = -d_num_subghosts_mole_fraction[1];
+                 j < d_interior_dims[1] + d_num_subghosts_mole_fraction[1];
+                 j++)
+            {
+                for (int i = -d_num_subghosts_mole_fraction[0];
+                     i < d_interior_dims[0] + d_num_subghosts_mole_fraction[0];
+                     i++)
+                {
+                    // Compute the linear index.
+                    const int idx_mole_fraction = (i + d_num_subghosts_mole_fraction[0]) +
+                        (j + d_num_subghosts_mole_fraction[1])*d_subghostcell_dims_mole_fraction[0];
+                    
+                    M[idx_mole_fraction] = double(1)/M[idx_mole_fraction];
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            // Compute the mixture molecular weight field.
+            for (int si = 0; si < d_num_species; si++)
+            {
+                for (int k = -d_num_subghosts_mole_fraction[2];
+                     k < d_interior_dims[2] + d_num_subghosts_mole_fraction[2];
+                     k++)
+                {
+                    for (int j = -d_num_subghosts_mole_fraction[1];
+                         j < d_interior_dims[1] + d_num_subghosts_mole_fraction[1];
+                         j++)
+                    {
+                        for (int i = -d_num_subghosts_mole_fraction[0];
+                             i < d_interior_dims[0] + d_num_subghosts_mole_fraction[0];
+                             i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_mole_fraction = (i + d_num_subghosts_mole_fraction[0]) +
+                                (j + d_num_subghosts_mole_fraction[1])*d_subghostcell_dims_mole_fraction[0] +
+                                (k + d_num_subghosts_mole_fraction[2])*d_subghostcell_dims_mole_fraction[0]*
+                                    d_subghostcell_dims_mole_fraction[1];
+                            
+                            const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
+                                (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
+                                (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*
+                                    d_subghostcell_dims_mass_fraction[1];
+                            
+                            const double M_i = d_equation_of_state_mixing_rules->
+                                getSpeciesMolecularWeight(si);
+                            
+                            M[idx_mole_fraction] += Y[si][idx_mass_fraction]/M_i;
+                        }
+                    }
+                }
+            }
+            
+            for (int k = -d_num_subghosts_mole_fraction[2];
+                 k < d_interior_dims[2] + d_num_subghosts_mole_fraction[2];
+                 k++)
+            {
+                for (int j = -d_num_subghosts_mole_fraction[1];
+                     j < d_interior_dims[1] + d_num_subghosts_mole_fraction[1];
+                     j++)
+                {
+                    for (int i = -d_num_subghosts_mole_fraction[0];
+                         i < d_interior_dims[0] + d_num_subghosts_mole_fraction[0];
+                         i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_mole_fraction = (i + d_num_subghosts_mole_fraction[0]) +
+                            (j + d_num_subghosts_mole_fraction[1])*d_subghostcell_dims_mole_fraction[0] +
+                            (k + d_num_subghosts_mole_fraction[2])*d_subghostcell_dims_mole_fraction[0]*
+                                d_subghostcell_dims_mole_fraction[1];
+                        
+                        M[idx_mole_fraction] = double(1)/M[idx_mole_fraction];
+                    }
+                }
+            }
+        }
+        
+        // Compute the mole fraction of each species.
+        
+        if (d_dim == tbox::Dimension(1))
+        {
+            // Compute the mole fraction field.
+            for (int si = 0; si < d_num_species; si++)
+            {
+                for (int i = -d_num_subghosts_mole_fraction[0];
+                     i < d_interior_dims[0] + d_num_subghosts_mole_fraction[0];
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_mole_fraction = i + d_num_subghosts_mole_fraction[0];
+                    const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
+                    
+                    const double M_i = d_equation_of_state_mixing_rules->
+                        getSpeciesMolecularWeight(si);
+                    
+                    X[si][idx_mole_fraction] = Y[si][idx_mass_fraction]*M[idx_mole_fraction]/M_i;
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            // Compute the mole fraction field.
+            for (int si = 0; si < d_num_species; si++)
+            {
+                for (int j = -d_num_subghosts_mole_fraction[1];
+                     j < d_interior_dims[1] + d_num_subghosts_mole_fraction[1];
+                     j++)
+                {
+                    for (int i = -d_num_subghosts_mole_fraction[0];
+                         i < d_interior_dims[0] + d_num_subghosts_mole_fraction[0];
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_mole_fraction = (i + d_num_subghosts_mole_fraction[0]) +
+                            (j + d_num_subghosts_mole_fraction[1])*d_subghostcell_dims_mole_fraction[0];
+                        
+                        const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
+                            (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
+                        
+                        const double M_i = d_equation_of_state_mixing_rules->
+                            getSpeciesMolecularWeight(si);
+                        
+                        X[si][idx_mole_fraction] = Y[si][idx_mass_fraction]*M[idx_mole_fraction]/M_i;
+                    }
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            // Compute the mole fraction field.
+            for (int si = 0; si < d_num_species; si++)
+            {
+                for (int k = -d_num_subghosts_mole_fraction[2];
+                     k < d_interior_dims[2] + d_num_subghosts_mole_fraction[2];
+                     k++)
+                {
+                    for (int j = -d_num_subghosts_mole_fraction[1];
+                         j < d_interior_dims[1] + d_num_subghosts_mole_fraction[1];
+                         j++)
+                    {
+                        for (int i = -d_num_subghosts_mole_fraction[0];
+                             i < d_interior_dims[0] + d_num_subghosts_mole_fraction[0];
+                             i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_mole_fraction = (i + d_num_subghosts_mole_fraction[0]) +
+                                (j + d_num_subghosts_mole_fraction[1])*d_subghostcell_dims_mole_fraction[0] +
+                                (k + d_num_subghosts_mole_fraction[2])*d_subghostcell_dims_mole_fraction[0]*
+                                    d_subghostcell_dims_mole_fraction[1];
+                            
+                            const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
+                                (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
+                                (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*
+                                    d_subghostcell_dims_mass_fraction[1];
+                            
+                            const double M_i = d_equation_of_state_mixing_rules->
+                                getSpeciesMolecularWeight(si);
+                            
+                            X[si][idx_mole_fraction] = Y[si][idx_mass_fraction]*M[idx_mole_fraction]/M_i;
+                        }
+                    }
+                }
+            }
+            
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelFourEqnConservative::computeGlobalCellDataMoleFractionWithMassFraction()\n"
+            << "Cell data of 'MOLE_FRACTION' is not yet registered."
             << std::endl);
     }
 }
