@@ -7359,157 +7359,6 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
 
 
 /*
- * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
- */
-void
-EquationOfStateIdealGas::computePressureDerivativeWithDensity(
-    double* const Psi,
-    const double* const rho,
-    const double* const p,
-    const hier::IntVector& num_ghosts_partial_pressure_partial_density,
-    const hier::IntVector& num_ghosts_density,
-    const hier::IntVector& num_ghosts_pressure,
-    const hier::IntVector& ghostcell_dims_partial_pressure_partial_density,
-    const hier::IntVector& ghostcell_dims_density,
-    const hier::IntVector& ghostcell_dims_pressure,
-    const hier::IntVector& domain_lo,
-    const hier::IntVector& domain_dims) const
-{
-    if (d_dim == tbox::Dimension(1))
-    {
-        /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
-         */
-        
-        const int domain_lo_0 = domain_lo[0];
-        const int domain_dim_0 = domain_dims[0];
-        
-        const int num_ghosts_0_partial_pressure_partial_density = num_ghosts_partial_pressure_partial_density[0];
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
-        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
-        {
-            // Compute the linear indices.
-            const int idx_partial_pressure_partial_density = i + num_ghosts_0_partial_pressure_partial_density;
-            const int idx_density = i + num_ghosts_0_density;
-            const int idx_pressure = i + num_ghosts_0_pressure;
-            
-            Psi[idx_partial_pressure_partial_density] = p[idx_pressure]/rho[idx_density];
-        }
-    }
-    else if (d_dim == tbox::Dimension(2))
-    {
-        /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
-         */
-        
-        const int domain_lo_0 = domain_lo[0];
-        const int domain_lo_1 = domain_lo[1];
-        const int domain_dim_0 = domain_dims[0];
-        const int domain_dim_1 = domain_dims[1];
-        
-        const int num_ghosts_0_partial_pressure_partial_density = num_ghosts_partial_pressure_partial_density[0];
-        const int num_ghosts_1_partial_pressure_partial_density = num_ghosts_partial_pressure_partial_density[1];
-        const int ghostcell_dim_0_partial_pressure_partial_density = ghostcell_dims_partial_pressure_partial_density[0];
-        
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
-        const int ghostcell_dim_0_density = ghostcell_dims_density[0];
-        
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
-        const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
-        
-        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
-        {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
-            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
-            {
-                // Compute the linear indices.
-                const int idx_partial_pressure_partial_density = (i + num_ghosts_0_partial_pressure_partial_density) +
-                    (j + num_ghosts_1_partial_pressure_partial_density)*ghostcell_dim_0_partial_pressure_partial_density;
-                
-                const int idx_density = (i + num_ghosts_0_density) +
-                    (j + num_ghosts_1_density)*ghostcell_dim_0_density;
-                
-                const int idx_pressure = (i + num_ghosts_0_pressure) +
-                    (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
-                
-                Psi[idx_partial_pressure_partial_density] = p[idx_pressure]/rho[idx_density];
-            }
-        }
-    }
-    else if (d_dim == tbox::Dimension(3))
-    {
-        /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
-         */
-        
-        const int domain_lo_0 = domain_lo[0];
-        const int domain_lo_1 = domain_lo[1];
-        const int domain_lo_2 = domain_lo[2];
-        const int domain_dim_0 = domain_dims[0];
-        const int domain_dim_1 = domain_dims[1];
-        const int domain_dim_2 = domain_dims[2];
-        
-        const int num_ghosts_0_partial_pressure_partial_density = num_ghosts_partial_pressure_partial_density[0];
-        const int num_ghosts_1_partial_pressure_partial_density = num_ghosts_partial_pressure_partial_density[1];
-        const int num_ghosts_2_partial_pressure_partial_density = num_ghosts_partial_pressure_partial_density[2];
-        const int ghostcell_dim_0_partial_pressure_partial_density = ghostcell_dims_partial_pressure_partial_density[0];
-        const int ghostcell_dim_1_partial_pressure_partial_density = ghostcell_dims_partial_pressure_partial_density[1];
-        
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
-        const int num_ghosts_2_density = num_ghosts_density[2];
-        const int ghostcell_dim_0_density = ghostcell_dims_density[0];
-        const int ghostcell_dim_1_density = ghostcell_dims_density[1];
-        
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
-        const int num_ghosts_2_pressure = num_ghosts_pressure[2];
-        const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
-        const int ghostcell_dim_1_pressure = ghostcell_dims_pressure[1];
-        
-        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
-        {
-            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
-            {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
-                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
-                {
-                    // Compute the linear indices.
-                    const int idx_partial_pressure_partial_density = (i + num_ghosts_0_partial_pressure_partial_density) +
-                        (j + num_ghosts_1_partial_pressure_partial_density)*ghostcell_dim_0_partial_pressure_partial_density +
-                        (k + num_ghosts_2_partial_pressure_partial_density)*ghostcell_dim_0_partial_pressure_partial_density*
-                            ghostcell_dim_1_partial_pressure_partial_density;
-                    
-                    const int idx_density = (i + num_ghosts_0_density) +
-                        (j + num_ghosts_1_density)*ghostcell_dim_0_density +
-                        (k + num_ghosts_2_density)*ghostcell_dim_0_density*
-                            ghostcell_dim_1_density;
-                    
-                    const int idx_pressure = (i + num_ghosts_0_pressure) +
-                        (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
-                        (k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
-                            ghostcell_dim_1_pressure;
-                    
-                    Psi[idx_partial_pressure_partial_density] = p[idx_pressure]/rho[idx_density];
-                }
-            }
-        }
-    }
-}
-
-
-/*
  * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
  * constant density divided by density).
  */
@@ -7772,6 +7621,157 @@ EquationOfStateIdealGas::computeGruneisenParameter(
                             ghostcell_dim_1_thermo_properties;
                     
                     Gamma[idx_gruneisen_parameter] = gamma[idx_thermo_properties] - double(1);
+                }
+            }
+        }
+    }
+}
+
+
+/*
+ * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
+ */
+void
+EquationOfStateIdealGas::computePressureDerivativeWithDensity(
+    double* const Psi,
+    const double* const rho,
+    const double* const p,
+    const hier::IntVector& num_ghosts_partial_pressure_partial_density,
+    const hier::IntVector& num_ghosts_density,
+    const hier::IntVector& num_ghosts_pressure,
+    const hier::IntVector& ghostcell_dims_partial_pressure_partial_density,
+    const hier::IntVector& ghostcell_dims_density,
+    const hier::IntVector& ghostcell_dims_pressure,
+    const hier::IntVector& domain_lo,
+    const hier::IntVector& domain_dims) const
+{
+    if (d_dim == tbox::Dimension(1))
+    {
+        /*
+         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_dim_0 = domain_dims[0];
+        
+        const int num_ghosts_0_partial_pressure_partial_density = num_ghosts_partial_pressure_partial_density[0];
+        const int num_ghosts_0_density = num_ghosts_density[0];
+        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+        
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+        {
+            // Compute the linear indices.
+            const int idx_partial_pressure_partial_density = i + num_ghosts_0_partial_pressure_partial_density;
+            const int idx_density = i + num_ghosts_0_density;
+            const int idx_pressure = i + num_ghosts_0_pressure;
+            
+            Psi[idx_partial_pressure_partial_density] = p[idx_pressure]/rho[idx_density];
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        /*
+         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        
+        const int num_ghosts_0_partial_pressure_partial_density = num_ghosts_partial_pressure_partial_density[0];
+        const int num_ghosts_1_partial_pressure_partial_density = num_ghosts_partial_pressure_partial_density[1];
+        const int ghostcell_dim_0_partial_pressure_partial_density = ghostcell_dims_partial_pressure_partial_density[0];
+        
+        const int num_ghosts_0_density = num_ghosts_density[0];
+        const int num_ghosts_1_density = num_ghosts_density[1];
+        const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+        
+        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+        const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
+        
+        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx_partial_pressure_partial_density = (i + num_ghosts_0_partial_pressure_partial_density) +
+                    (j + num_ghosts_1_partial_pressure_partial_density)*ghostcell_dim_0_partial_pressure_partial_density;
+                
+                const int idx_density = (i + num_ghosts_0_density) +
+                    (j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                
+                const int idx_pressure = (i + num_ghosts_0_pressure) +
+                    (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                
+                Psi[idx_partial_pressure_partial_density] = p[idx_pressure]/rho[idx_density];
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        /*
+         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_lo_2 = domain_lo[2];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        const int domain_dim_2 = domain_dims[2];
+        
+        const int num_ghosts_0_partial_pressure_partial_density = num_ghosts_partial_pressure_partial_density[0];
+        const int num_ghosts_1_partial_pressure_partial_density = num_ghosts_partial_pressure_partial_density[1];
+        const int num_ghosts_2_partial_pressure_partial_density = num_ghosts_partial_pressure_partial_density[2];
+        const int ghostcell_dim_0_partial_pressure_partial_density = ghostcell_dims_partial_pressure_partial_density[0];
+        const int ghostcell_dim_1_partial_pressure_partial_density = ghostcell_dims_partial_pressure_partial_density[1];
+        
+        const int num_ghosts_0_density = num_ghosts_density[0];
+        const int num_ghosts_1_density = num_ghosts_density[1];
+        const int num_ghosts_2_density = num_ghosts_density[2];
+        const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+        const int ghostcell_dim_1_density = ghostcell_dims_density[1];
+        
+        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+        const int num_ghosts_2_pressure = num_ghosts_pressure[2];
+        const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
+        const int ghostcell_dim_1_pressure = ghostcell_dims_pressure[1];
+        
+        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_partial_pressure_partial_density = (i + num_ghosts_0_partial_pressure_partial_density) +
+                        (j + num_ghosts_1_partial_pressure_partial_density)*ghostcell_dim_0_partial_pressure_partial_density +
+                        (k + num_ghosts_2_partial_pressure_partial_density)*ghostcell_dim_0_partial_pressure_partial_density*
+                            ghostcell_dim_1_partial_pressure_partial_density;
+                    
+                    const int idx_density = (i + num_ghosts_0_density) +
+                        (j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                        (k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                            ghostcell_dim_1_density;
+                    
+                    const int idx_pressure = (i + num_ghosts_0_pressure) +
+                        (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
+                        (k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                            ghostcell_dim_1_pressure;
+                    
+                    Psi[idx_partial_pressure_partial_density] = p[idx_pressure]/rho[idx_density];
                 }
             }
         }

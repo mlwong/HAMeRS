@@ -3194,8 +3194,11 @@ EquationOfStateMixingRulesIdealGas::computePressureDerivativeWithPartialDensitie
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     
+    TBOX_ASSERT(data_partial_pressure_partial_partial_densities);
     TBOX_ASSERT(data_density);
     TBOX_ASSERT(data_pressure);
+    
+    TBOX_ASSERT(data_partial_pressure_partial_partial_densities->getDepth() == d_num_species);
 #endif
     
     NULL_USE(data_mass_fractions);
@@ -3308,8 +3311,11 @@ EquationOfStateMixingRulesIdealGas::computePressureDerivativeWithPartialDensitie
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     
+    TBOX_ASSERT(data_partial_pressure_partial_partial_densities);
     TBOX_ASSERT(data_density);
     TBOX_ASSERT(data_pressure);
+    
+    TBOX_ASSERT(data_partial_pressure_partial_partial_densities->getDepth() == d_num_species);
 #endif
     
     NULL_USE(data_mass_fractions);
@@ -3435,6 +3441,7 @@ EquationOfStateMixingRulesIdealGas::getPressureDerivativeWithVolumeFractions(
                 (static_cast<int>(volume_fractions.size()) == d_num_species - 1));
 #endif
     
+    NULL_USE(density);
     NULL_USE(mass_fractions);
     
     // Get the mixture thermodynamic properties.
@@ -3457,18 +3464,15 @@ EquationOfStateMixingRulesIdealGas::getPressureDerivativeWithVolumeFractions(
     
     const double& gamma = mixture_thermo_properties[0];
     
-    const double& rho = *density;
     const double& p   = *pressure;
     
-    const double epsilon = p/((gamma - double(1))*rho);
-    const double temp_1 = (gamma - double(1))*(gamma - double(1))*rho*epsilon;
-    const double temp_2 = double(1)/(d_species_gamma[d_num_species - 1] - double(1));
+    const double tmp = double(1)/(d_species_gamma[d_num_species - 1] - double(1));
     
     std::vector<double> M;
     M.reserve(d_num_species - 1);
     for (int si = 0; si < d_num_species - 1; si++)
     {
-        double M_i = temp_1*(temp_2 - double(1)/(d_species_gamma[si] - double(1)));
+        double M_i = (tmp - double(1)/(d_species_gamma[si] - double(1)))*(gamma - double(1))*p;
         M.push_back(M_i);
     }
     
@@ -3830,7 +3834,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureDensity(
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
                 (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
-
+    
     TBOX_ASSERT(data_mixture_density);
     TBOX_ASSERT(data_pressure);
     TBOX_ASSERT(data_temperature);
@@ -4062,7 +4066,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicProperties(
     {
         case MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC:
         {
-            getMixtureThermodynamicPropertiesWithMassFraction(
+            getMixtureThermodynamicPropertiesWithMassFractions(
                 mixture_thermo_properties,
                 species_fraction);
             
@@ -4070,7 +4074,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicProperties(
         }
         case MIXING_CLOSURE_MODEL::ISOBARIC:
         {
-            getMixtureThermodynamicPropertiesWithVolumeFraction(
+            getMixtureThermodynamicPropertiesWithVolumeFractions(
                 mixture_thermo_properties,
                 species_fraction);
             
@@ -4104,7 +4108,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicProperties(
     {
         case MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC:
         {
-            computeMixtureThermodynamicPropertiesWithMassFraction(
+            computeMixtureThermodynamicPropertiesWithMassFractions(
                 data_mixture_thermo_properties,
                 data_species_fraction,
                 domain);
@@ -4113,7 +4117,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicProperties(
         }
         case MIXING_CLOSURE_MODEL::ISOBARIC:
         {
-            computeMixtureThermodynamicPropertiesWithVolumeFraction(
+            computeMixtureThermodynamicPropertiesWithVolumeFractions(
                 data_mixture_thermo_properties,
                 data_species_fraction,
                 domain);
@@ -4149,7 +4153,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicProperties(
     {
         case MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC:
         {
-            computeMixtureThermodynamicPropertiesWithMassFraction(
+            computeMixtureThermodynamicPropertiesWithMassFractions(
                 data_mixture_thermo_properties,
                 data_species_fraction,
                 side_normal,
@@ -4159,7 +4163,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicProperties(
         }
         case MIXING_CLOSURE_MODEL::ISOBARIC:
         {
-            computeMixtureThermodynamicPropertiesWithVolumeFraction(
+            computeMixtureThermodynamicPropertiesWithVolumeFractions(
                 data_mixture_thermo_properties,
                 data_species_fraction,
                 side_normal,
@@ -4186,7 +4190,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicProperties(
  * Compute the thermodynamic properties of the mixture with mass fractions.
  */
 void
-EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithMassFraction(
+EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithMassFractions(
     std::vector<double*>& mixture_thermo_properties,
     const std::vector<const double*>& mass_fractions) const
 {
@@ -4248,7 +4252,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithMassFra
  * Compute the thermodynamic properties of the mixture with mass fractions.
  */
 void
-EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMassFraction(
+EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMassFractions(
     boost::shared_ptr<pdat::CellData<double> >& data_mixture_thermo_properties,
     const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
     const hier::Box& domain) const
@@ -4346,7 +4350,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMas
             Y.push_back(data_mass_fractions->getPointer(si));
         }
         
-        computeMixtureThermodynamicPropertiesWithMassFraction(
+        computeMixtureThermodynamicPropertiesWithMassFractions(
             gamma,
             R,
             c_p,
@@ -4386,7 +4390,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMas
         
         double* const Y_last = data_mass_fractions_last->getPointer(0);
         
-        computeMixtureThermodynamicPropertiesWithMassFraction(
+        computeMixtureThermodynamicPropertiesWithMassFractions(
             gamma,
             R,
             c_p,
@@ -4415,7 +4419,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMas
  * Compute the thermodynamic properties of the mixture with mass fractions.
  */
 void
-EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMassFraction(
+EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMassFractions(
     boost::shared_ptr<pdat::SideData<double> >& data_mixture_thermo_properties,
     const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
     int side_normal,
@@ -4525,7 +4529,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMas
             Y.push_back(data_mass_fractions->getPointer(side_normal, si));
         }
         
-        computeMixtureThermodynamicPropertiesWithMassFraction(
+        computeMixtureThermodynamicPropertiesWithMassFractions(
             gamma,
             R,
             c_p,
@@ -4569,7 +4573,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMas
         
         double* const Y_last = data_mass_fractions_last->getPointer(side_normal, 0);
         
-        computeMixtureThermodynamicPropertiesWithMassFraction(
+        computeMixtureThermodynamicPropertiesWithMassFractions(
             gamma,
             R,
             c_p,
@@ -4598,7 +4602,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMas
  * Compute the thermodynamic properties of the mixture with volume fractions.
  */
 void
-EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeFraction(
+EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeFractions(
     std::vector<double*>& mixture_thermo_properties,
     const std::vector<const double*>& volume_fractions) const
 {
@@ -4649,7 +4653,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeF
  * Compute the thermodynamic properties of the mixture with volume fractions.
  */
 void
-EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVolumeFraction(
+EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVolumeFractions(
     boost::shared_ptr<pdat::CellData<double> >& data_mixture_thermo_properties,
     const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
     const hier::Box& domain) const
@@ -4742,7 +4746,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
             Z.push_back(data_volume_fractions->getPointer(si));
         }
         
-        getMixtureThermodynamicPropertiesWithVolumeFraction(
+        getMixtureThermodynamicPropertiesWithVolumeFractions(
             gamma,
             Z,
             num_ghosts_mixture_thermo_properties,
@@ -4779,7 +4783,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
         
         double* const Z_last = data_volume_fractions_last->getPointer(0);
         
-        getMixtureThermodynamicPropertiesWithVolumeFraction(
+        getMixtureThermodynamicPropertiesWithVolumeFractions(
             gamma,
             Z_last,
             Z,
@@ -4805,7 +4809,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
  * Compute the thermodynamic properties of the mixture with volume fractions.
  */
 void
-EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVolumeFraction(
+EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVolumeFractions(
     boost::shared_ptr<pdat::SideData<double> >& data_mixture_thermo_properties,
     const boost::shared_ptr<pdat::SideData<double> >& data_volume_fractions,
     int side_normal,
@@ -4910,7 +4914,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
             Z.push_back(data_volume_fractions->getPointer(side_normal, si));
         }
         
-        getMixtureThermodynamicPropertiesWithVolumeFraction(
+        getMixtureThermodynamicPropertiesWithVolumeFractions(
             gamma,
             Z,
             num_ghosts_mixture_thermo_properties,
@@ -4951,7 +4955,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
         
         double* const Z_last = data_volume_fractions_last->getPointer(side_normal, 0);
         
-        getMixtureThermodynamicPropertiesWithVolumeFraction(
+        getMixtureThermodynamicPropertiesWithVolumeFractions(
             gamma,
             Z_last,
             Z,
@@ -6303,7 +6307,7 @@ EquationOfStateMixingRulesIdealGas::computePressureDerivativeWithVolumeFractions
  * Compute the thermodynamic properties of the mixture with mass fractions.
  */
 void
-EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMassFraction(
+EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMassFractions(
     double* const gamma,
     double* const R,
     double* const c_p,
@@ -6507,7 +6511,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMas
  * Compute the thermodynamic properties of the mixture with mass fractions.
  */
 void
-EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMassFraction(
+EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMassFractions(
     double* const gamma,
     double* const R,
     double* const c_p,
@@ -6739,7 +6743,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMas
  * Compute the thermodynamic properties of the mixture with volume fractions.
  */
 void
-EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeFraction(
+EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeFractions(
     double* const gamma,
     const std::vector<const double*> Z,
     const hier::IntVector& num_ghosts_mixture_thermo_properties,
@@ -6934,7 +6938,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeF
  * Compute the thermodynamic properties of the mixture with volume fractions.
  */
 void
-EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeFraction(
+EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeFractions(
     double* const gamma,
     double* const Z_last,
     const std::vector<const double*> Z,

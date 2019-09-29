@@ -912,23 +912,6 @@ class EquationOfStateIdealGas: public EquationOfState
             const hier::IntVector& domain_dims) const;
         
         /*
-         * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
-         */
-        void
-        computePressureDerivativeWithDensity(
-            double* const Psi,
-            const double* const rho,
-            const double* const p,
-            const hier::IntVector& num_ghosts_partial_pressure_partial_density,
-            const hier::IntVector& num_ghosts_density,
-            const hier::IntVector& num_ghosts_pressure,
-            const hier::IntVector& ghostcell_dims_partial_pressure_partial_density,
-            const hier::IntVector& ghostcell_dims_density,
-            const hier::IntVector& ghostcell_dims_pressure,
-            const hier::IntVector& domain_lo,
-            const hier::IntVector& domain_dims) const;
-        
-        /*
          * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
          * constant density divided by density).
          */
@@ -953,6 +936,23 @@ class EquationOfStateIdealGas: public EquationOfState
             const hier::IntVector& num_ghosts_thermo_properties,
             const hier::IntVector& ghostcell_dims_gruneisen_parameter,
             const hier::IntVector& ghostcell_dims_thermo_properties,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims) const;
+        
+        /*
+         * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
+         */
+        void
+        computePressureDerivativeWithDensity(
+            double* const Psi,
+            const double* const rho,
+            const double* const p,
+            const hier::IntVector& num_ghosts_partial_pressure_partial_density,
+            const hier::IntVector& num_ghosts_density,
+            const hier::IntVector& num_ghosts_pressure,
+            const hier::IntVector& ghostcell_dims_partial_pressure_partial_density,
+            const hier::IntVector& ghostcell_dims_density,
+            const hier::IntVector& ghostcell_dims_pressure,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims) const;
         
