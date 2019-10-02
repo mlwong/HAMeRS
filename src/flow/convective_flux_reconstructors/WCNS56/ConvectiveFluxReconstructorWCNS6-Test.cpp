@@ -17,7 +17,7 @@ boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_compute_
 /*
  * Interger based power function.
  */
-static inline __attribute__((always_inline)) double ipow(double base, int exp)
+static inline __attribute__((always_inline)) double ipow(double base, const int& exp)
 {
     double result = base;
     for (int i = 1; i < exp; i++)
@@ -35,7 +35,7 @@ static inline __attribute__((always_inline)) double ipow(double base, int exp)
 static inline __attribute__((always_inline)) void computeLocalSigma(
     double* sigma,
     double** U_array,
-    int idx_side)
+    const int& idx_side)
 {
     /*
      * Compute the sigma.
@@ -61,7 +61,7 @@ static inline __attribute__((always_inline)) void computeLocalBeta(
     double* beta_2,
     double* beta_3,
     double** U_array,
-    int idx_side)
+    const int& idx_side)
 {
     *beta_0 = double(1)/double(3)*(U_array[0][idx_side]*(double(4)*U_array[0][idx_side] -
          double(19)*U_array[1][idx_side] + double(11)*U_array[2][idx_side]) +
@@ -104,7 +104,7 @@ static inline __attribute__((always_inline)) void computeLocalBetaTilde(
     double* beta_tilde_2,
     double* beta_tilde_3,
     double** U_array,
-    int idx_side)
+    const int& idx_side)
 {
     *beta_tilde_0 = double(1)/double(3)*(U_array[5][idx_side]*(double(4)*U_array[5][idx_side] -
          double(19)*U_array[4][idx_side] + double(11)*U_array[3][idx_side]) +
@@ -144,11 +144,11 @@ static inline __attribute__((always_inline)) void computeLocalBetaTilde(
 static inline __attribute__((always_inline)) void performLocalWENOInterpolationMinus(
    double* U_minus,
    double** U_array,
-   int idx_side,
-   int p,
-   int q,
-   double C,
-   double alpha_tau)
+   const int& idx_side,
+   const int& p,
+   const int& q,
+   const double& C,
+   const double& alpha_tau)
 {
     /*
      * Compute sigma.
@@ -240,11 +240,11 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationM
 static inline __attribute__((always_inline)) void performLocalWENOInterpolationPlus(
    double* U_plus,
    double** U_array,
-   int idx_side,
-   int p,
-   int q,
-   double C,
-   double alpha_tau)
+   const int& idx_side,
+   const int& p,
+   const int& q,
+   const double& C,
+   const double& alpha_tau)
 {
     /*
      * Compute sigma.
