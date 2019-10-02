@@ -13,14 +13,14 @@ computeLocalConvectiveFluxInXDirectionFromConservativeVariablesHLLC1D(
     double* p_x_R,
     double* c_x_L,
     double* c_x_R,
-    double u_x_L,
-    double u_x_R,
-    double s_x_minus,
-    double s_x_plus,
-    double s_x_star,
-    double Chi_x_star_LR,
-    const int idx_flux,
-    const int idx)
+    double& u_x_L,
+    double& u_x_R,
+    double& s_x_minus,
+    double& s_x_plus,
+    double& s_x_star,
+    double& Chi_x_star_LR,
+    const int& idx_flux,
+    const int& idx)
 {
     u_x_L = Q_x_L[1][idx]/Q_x_L[0][idx];
     u_x_R = Q_x_R[1][idx]/Q_x_R[0][idx];
@@ -93,14 +93,14 @@ computeLocalConvectiveFluxInXDirectionFromConservativeVariablesHLLC2D(
     double* p_x_R,
     double* c_x_L,
     double* c_x_R,
-    double u_x_L,
-    double u_x_R,
-    double s_x_minus,
-    double s_x_plus,
-    double s_x_star,
-    double Chi_x_star_LR,
-    const int idx_flux,
-    const int idx)
+    double& u_x_L,
+    double& u_x_R,
+    double& s_x_minus,
+    double& s_x_plus,
+    double& s_x_star,
+    double& Chi_x_star_LR,
+    const int& idx_flux,
+    const int& idx)
 {
     u_x_L = Q_x_L[1][idx]/Q_x_L[0][idx];
     u_x_R = Q_x_R[1][idx]/Q_x_R[0][idx];
@@ -177,14 +177,14 @@ computeLocalConvectiveFluxInXDirectionFromConservativeVariablesHLLC3D(
     double* p_x_R,
     double* c_x_L,
     double* c_x_R,
-    double u_x_L,
-    double u_x_R,
-    double s_x_minus,
-    double s_x_plus,
-    double s_x_star,
-    double Chi_x_star_LR,
-    const int idx_flux,
-    const int idx)
+    double& u_x_L,
+    double& u_x_R,
+    double& s_x_minus,
+    double& s_x_plus,
+    double& s_x_star,
+    double& Chi_x_star_LR,
+    const int& idx_flux,
+    const int& idx)
 {
     u_x_L = Q_x_L[1][idx]/Q_x_L[0][idx];
     u_x_R = Q_x_R[1][idx]/Q_x_R[0][idx];
@@ -265,14 +265,14 @@ computeLocalConvectiveFluxInYDirectionFromConservativeVariablesHLLC2D(
     double* p_y_T,
     double* c_y_B,
     double* c_y_T,
-    double v_y_B,
-    double v_y_T,
-    double s_y_minus,
-    double s_y_plus,
-    double s_y_star,
-    double Chi_y_star_BT,
-    const int idx_flux,
-    const int idx)
+    double& v_y_B,
+    double& v_y_T,
+    double& s_y_minus,
+    double& s_y_plus,
+    double& s_y_star,
+    double& Chi_y_star_BT,
+    const int& idx_flux,
+    const int& idx)
 {
     v_y_B = Q_y_B[2][idx]/Q_y_B[0][idx];
     v_y_T = Q_y_T[2][idx]/Q_y_T[0][idx];
@@ -349,14 +349,14 @@ computeLocalConvectiveFluxInYDirectionFromConservativeVariablesHLLC3D(
     double* p_y_T,
     double* c_y_B,
     double* c_y_T,
-    double v_y_B,
-    double v_y_T,
-    double s_y_minus,
-    double s_y_plus,
-    double s_y_star,
-    double Chi_y_star_BT,
-    const int idx_flux,
-    const int idx)
+    double& v_y_B,
+    double& v_y_T,
+    double& s_y_minus,
+    double& s_y_plus,
+    double& s_y_star,
+    double& Chi_y_star_BT,
+    const int& idx_flux,
+    const int& idx)
 {
     v_y_B = Q_y_B[2][idx]/Q_y_B[0][idx];
     v_y_T = Q_y_T[2][idx]/Q_y_T[0][idx];
@@ -437,14 +437,14 @@ computeLocalConvectiveFluxInZDirectionFromConservativeVariablesHLLC3D(
     double* p_z_F,
     double* c_z_B,
     double* c_z_F,
-    double w_z_B,
-    double w_z_F,
-    double s_z_minus,
-    double s_z_plus,
-    double s_z_star,
-    double Chi_z_star_BF,
-    const int idx_flux,
-    const int idx)
+    double& w_z_B,
+    double& w_z_F,
+    double& s_z_minus,
+    double& s_z_plus,
+    double& s_z_star,
+    double& Chi_z_star_BF,
+    const int& idx_flux,
+    const int& idx)
 {
     w_z_B = Q_z_B[3][idx]/Q_z_B[0][idx];
     w_z_F = Q_z_F[3][idx]/Q_z_F[0][idx];
@@ -525,12 +525,12 @@ computeLocalConvectiveFluxInXDirectionFromPrimitiveVariablesHLLC1D(
     double* c_x_R,
     double* epsilon_x_L,
     double* epsilon_x_R,
-    double s_x_minus,
-    double s_x_plus,
-    double s_x_star,
-    double Chi_x_star_LR,
-    const int idx_flux,
-    const int idx)
+    double& s_x_minus,
+    double& s_x_plus,
+    double& s_x_star,
+    double& Chi_x_star_LR,
+    const int& idx_flux,
+    const int& idx)
 {
     const double u_x_average = double(1)/double(2)*(V_x_L[1][idx] + V_x_R[1][idx]);
     const double c_x_average = double(1)/double(2)*(c_x_L[idx] + c_x_R[idx]);
@@ -609,12 +609,12 @@ computeLocalConvectiveFluxInXDirectionFromPrimitiveVariablesHLLC2D(
     double* c_x_R,
     double* epsilon_x_L,
     double* epsilon_x_R,
-    double s_x_minus,
-    double s_x_plus,
-    double s_x_star,
-    double Chi_x_star_LR,
-    const int idx_flux,
-    const int idx)
+    double& s_x_minus,
+    double& s_x_plus,
+    double& s_x_star,
+    double& Chi_x_star_LR,
+    const int& idx_flux,
+    const int& idx)
 {
     const double u_x_average = double(1)/double(2)*(V_x_L[1][idx] + V_x_R[1][idx]);
     const double c_x_average = double(1)/double(2)*(c_x_L[idx] + c_x_R[idx]);
@@ -701,12 +701,12 @@ computeLocalConvectiveFluxInXDirectionFromPrimitiveVariablesHLLC3D(
     double* c_x_R,
     double* epsilon_x_L,
     double* epsilon_x_R,
-    double s_x_minus,
-    double s_x_plus,
-    double s_x_star,
-    double Chi_x_star_LR,
-    const int idx_flux,
-    const int idx)
+    double& s_x_minus,
+    double& s_x_plus,
+    double& s_x_star,
+    double& Chi_x_star_LR,
+    const int& idx_flux,
+    const int& idx)
 {
     const double u_x_average = double(1)/double(2)*(V_x_L[1][idx] + V_x_R[1][idx]);
     const double c_x_average = double(1)/double(2)*(c_x_L[idx] + c_x_R[idx]);
@@ -799,12 +799,12 @@ computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC2D(
     double* c_y_T,
     double* epsilon_y_B,
     double* epsilon_y_T,
-    double s_y_minus,
-    double s_y_plus,
-    double s_y_star,
-    double Chi_y_star_BT,
-    const int idx_flux,
-    const int idx)
+    double& s_y_minus,
+    double& s_y_plus,
+    double& s_y_star,
+    double& Chi_y_star_BT,
+    const int& idx_flux,
+    const int& idx)
 {
     const double v_y_average = double(1)/double(2)*(V_y_B[2][idx] + V_y_T[2][idx]);
     const double c_y_average = double(1)/double(2)*(c_y_B[idx] + c_y_T[idx]);
@@ -891,12 +891,12 @@ computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC3D(
     double* c_y_T,
     double* epsilon_y_B,
     double* epsilon_y_T,
-    double s_y_minus,
-    double s_y_plus,
-    double s_y_star,
-    double Chi_y_star_BT,
-    const int idx_flux,
-    const int idx)
+    double& s_y_minus,
+    double& s_y_plus,
+    double& s_y_star,
+    double& Chi_y_star_BT,
+    const int& idx_flux,
+    const int& idx)
 {
     const double v_y_average = double(1)/double(2)*(V_y_B[2][idx] + V_y_T[2][idx]);
     const double c_y_average = double(1)/double(2)*(c_y_B[idx] + c_y_T[idx]);
@@ -989,12 +989,12 @@ computeLocalConvectiveFluxInZDirectionFromPrimitiveVariablesHLLC3D(
     double* c_z_F,
     double* epsilon_z_B,
     double* epsilon_z_F,
-    double s_z_minus,
-    double s_z_plus,
-    double s_z_star,
-    double Chi_z_star_BF,
-    const int idx_flux,
-    const int idx)
+    double& s_z_minus,
+    double& s_z_plus,
+    double& s_z_star,
+    double& Chi_z_star_BF,
+    const int& idx_flux,
+    const int& idx)
 {
     const double w_z_average = double(1)/double(2)*(V_z_B[3][idx] + V_z_F[3][idx]);
     const double c_z_average = double(1)/double(2)*(c_z_B[idx] + c_z_F[idx]);
