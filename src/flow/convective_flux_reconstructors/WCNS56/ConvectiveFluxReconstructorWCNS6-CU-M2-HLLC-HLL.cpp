@@ -24,29 +24,29 @@ static inline __attribute__((always_inline)) double ipow(double base, const int&
  * Compute local beta's.
  */
 static inline __attribute__((always_inline)) void computeLocalBeta(
-    double* beta_0,
-    double* beta_1,
-    double* beta_2,
-    double* beta_3,
+    double& beta_0,
+    double& beta_1,
+    double& beta_2,
+    double& beta_3,
     double** U_array,
     const int& idx_side)
 {
-    *beta_0 = double(1)/double(3)*(U_array[0][idx_side]*(double(4)*U_array[0][idx_side] -
+    beta_0 = double(1)/double(3)*(U_array[0][idx_side]*(double(4)*U_array[0][idx_side] -
          double(19)*U_array[1][idx_side] + double(11)*U_array[2][idx_side]) +
          U_array[1][idx_side]*(double(25)*U_array[1][idx_side] - double(31)*U_array[2][idx_side]) +
          double(10)*U_array[2][idx_side]*U_array[2][idx_side]);
     
-    *beta_1 = double(1)/double(3)*(U_array[1][idx_side]*(double(4)*U_array[1][idx_side] -
+    beta_1 = double(1)/double(3)*(U_array[1][idx_side]*(double(4)*U_array[1][idx_side] -
          double(13)*U_array[2][idx_side] + double(5)*U_array[3][idx_side]) +
          double(13)*U_array[2][idx_side]*(U_array[2][idx_side] - U_array[3][idx_side]) +
          double(4)*U_array[3][idx_side]*U_array[3][idx_side]);
     
-    *beta_2 = double(1)/double(3)*(U_array[2][idx_side]*(double(10)*U_array[2][idx_side] -
+    beta_2 = double(1)/double(3)*(U_array[2][idx_side]*(double(10)*U_array[2][idx_side] -
          double(31)*U_array[3][idx_side] + double(11)*U_array[4][idx_side]) +
          U_array[3][idx_side]*(double(25)*U_array[3][idx_side] - double(19)*U_array[4][idx_side]) +
          double(4)*U_array[4][idx_side]*U_array[4][idx_side]);
     
-    *beta_3 = double(1)/double(232243200)*(U_array[0][idx_side]*(double(525910327)*U_array[0][idx_side] -
+    beta_3 = double(1)/double(232243200)*(U_array[0][idx_side]*(double(525910327)*U_array[0][idx_side] -
          double(4562164630)*U_array[1][idx_side] + double(7799501420)*U_array[2][idx_side] -
          double(6610694540)*U_array[3][idx_side] + double(2794296070)*U_array[4][idx_side] -
          double(472758974)*U_array[5][idx_side]) + double(5)*U_array[1][idx_side]*
@@ -67,29 +67,29 @@ static inline __attribute__((always_inline)) void computeLocalBeta(
  * Compute local beta_tilde's.
  */
 static inline __attribute__((always_inline)) void computeLocalBetaTilde(
-    double* beta_tilde_0,
-    double* beta_tilde_1,
-    double* beta_tilde_2,
-    double* beta_tilde_3,
+    double& beta_tilde_0,
+    double& beta_tilde_1,
+    double& beta_tilde_2,
+    double& beta_tilde_3,
     double** U_array,
     const int& idx_side)
 {
-    *beta_tilde_0 = double(1)/double(3)*(U_array[5][idx_side]*(double(4)*U_array[5][idx_side] -
+    beta_tilde_0 = double(1)/double(3)*(U_array[5][idx_side]*(double(4)*U_array[5][idx_side] -
          double(19)*U_array[4][idx_side] + double(11)*U_array[3][idx_side]) +
          U_array[4][idx_side]*(double(25)*U_array[4][idx_side] - double(31)*U_array[3][idx_side]) +
          double(10)*U_array[3][idx_side]*U_array[3][idx_side]);
     
-    *beta_tilde_1 = double(1)/double(3)*(U_array[4][idx_side]*(double(4)*U_array[4][idx_side] -
+    beta_tilde_1 = double(1)/double(3)*(U_array[4][idx_side]*(double(4)*U_array[4][idx_side] -
          double(13)*U_array[3][idx_side] + double(5)*U_array[2][idx_side]) +
          double(13)*U_array[3][idx_side]*(U_array[3][idx_side] - U_array[2][idx_side]) +
          double(4)*U_array[2][idx_side]*U_array[2][idx_side]);
     
-    *beta_tilde_2 = double(1)/double(3)*(U_array[3][idx_side]*(double(10)*U_array[3][idx_side] -
+    beta_tilde_2 = double(1)/double(3)*(U_array[3][idx_side]*(double(10)*U_array[3][idx_side] -
          double(31)*U_array[2][idx_side] + double(11)*U_array[1][idx_side]) +
          U_array[2][idx_side]*(double(25)*U_array[2][idx_side] - double(19)*U_array[1][idx_side]) +
          double(4)*U_array[1][idx_side]*U_array[1][idx_side]);
     
-    *beta_tilde_3 = double(1)/double(232243200)*(U_array[5][idx_side]*(double(525910327)*U_array[5][idx_side] -
+    beta_tilde_3 = double(1)/double(232243200)*(U_array[5][idx_side]*(double(525910327)*U_array[5][idx_side] -
          double(4562164630)*U_array[4][idx_side] + double(7799501420)*U_array[3][idx_side] -
          double(6610694540)*U_array[2][idx_side] + double(2794296070)*U_array[1][idx_side] -
          double(472758974)*U_array[0][idx_side]) + double(5)*U_array[4][idx_side]*
@@ -110,14 +110,14 @@ static inline __attribute__((always_inline)) void computeLocalBetaTilde(
  * Perform local WENO interpolation of U_minus.
  */
 static inline __attribute__((always_inline)) void performLocalWENOInterpolationMinus(
-   double* U_minus,
-   double** U_array,
-   const int& idx_side,
-   const int& q,
-   const double& C,
-   const double& Chi,
-   const double& epsilon,
-   const double& dx)
+    double* U_minus,
+    double** U_array,
+    const int& idx_side,
+    const int& q,
+    const double& C,
+    const double& Chi,
+    const double& epsilon,
+    const double& dx)
 {
     /*
      * Compute beta's.
@@ -125,7 +125,7 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationM
     
     double beta_0, beta_1, beta_2, beta_3;
     
-    computeLocalBeta(&beta_0, &beta_1, &beta_2, &beta_3, U_array, idx_side);
+    computeLocalBeta(beta_0, beta_1, beta_2, beta_3, U_array, idx_side);
     
     /*
      * Compute the weights omega.
@@ -171,14 +171,14 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationM
  * Perform local WENO interpolation of U_plus.
  */
 static inline __attribute__((always_inline)) void performLocalWENOInterpolationPlus(
-   double* U_plus,
-   double** U_array,
-   const int& idx_side,
-   const int& q,
-   const double& C,
-   const double& Chi,
-   const double& epsilon,
-   const double& dx)
+    double* U_plus,
+    double** U_array,
+    const int& idx_side,
+    const int& q,
+    const double& C,
+    const double& Chi,
+    const double& epsilon,
+    const double& dx)
 {
     /*
      * Compute beta_tilde's.
@@ -186,7 +186,7 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationP
     
     double beta_tilde_0, beta_tilde_1, beta_tilde_2, beta_tilde_3;
     
-    computeLocalBetaTilde(&beta_tilde_0, &beta_tilde_1, &beta_tilde_2, &beta_tilde_3, U_array, idx_side);
+    computeLocalBetaTilde(beta_tilde_0, beta_tilde_1, beta_tilde_2, beta_tilde_3, U_array, idx_side);
     
     /*
      * Compute the weights omega_tilde.
