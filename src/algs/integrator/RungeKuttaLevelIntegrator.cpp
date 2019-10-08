@@ -1187,6 +1187,7 @@ RungeKuttaLevelIntegrator::getLevelDt(
         const tbox::SAMRAI_MPI& mpi(level->getBoxLevel()->getMPI());
         
         double dt = tbox::MathUtilities<double>::getMax();
+        std::vector<double> spectral_radiuses(d_patch_strategy->getNumberOfSpectralRadiuses(), 0.0);
         
         if (!d_use_ghosts_for_dt)
         {
@@ -1202,14 +1203,19 @@ RungeKuttaLevelIntegrator::getLevelDt(
                 
                 patch->allocatePatchData(d_temp_var_scratch_data, dt_time);
                 
-                double patch_dt;
-                patch_dt = d_patch_strategy->
-                    computeStableDtOnPatch(
+                std::vector<double> patch_spectral_radiuses_and_dt =
+                    d_patch_strategy->computeSpectralRadiusesAndStableDtOnPatch(
                         *patch,
                         initial_time,
                         dt_time);
                 
-                dt = tbox::MathUtilities<double>::Min(dt, patch_dt);
+                for (int si = 0; si < static_cast<int>(spectral_radiuses.size()); si++)
+                {
+                    spectral_radiuses[si] = tbox::MathUtilities<double>::Max(
+                        spectral_radiuses[si], patch_spectral_radiuses_and_dt[si]);
+                }
+                
+                dt = tbox::MathUtilities<double>::Min(dt, patch_spectral_radiuses_and_dt.back());
                 //tbox::plog.precision(12);
                 //tbox::plog << "Level " << level->getLevelNumber()
                 //           << " Patch " << *p
@@ -1220,7 +1226,20 @@ RungeKuttaLevelIntegrator::getLevelDt(
                 
                 patch->deallocatePatchData(d_temp_var_scratch_data);
             }
-         
+            
+            double spectral_radius_sum = 0.0;
+            for (int si = 0; si < static_cast<int>(spectral_radiuses.size()); si++)
+            {
+                if (mpi.getSize() > 1)
+                {
+                    mpi.AllReduce(&spectral_radiuses[si], 1, MPI_MAX);
+                }
+                
+                spectral_radius_sum += spectral_radiuses[si];
+            } 
+            
+            dt = tbox::MathUtilities<double>::Min(dt, 1.0/spectral_radius_sum);
+            
             d_patch_strategy->clearDataContext();
         }
         else
@@ -1243,14 +1262,19 @@ RungeKuttaLevelIntegrator::getLevelDt(
                 
                 patch->allocatePatchData(d_temp_var_scratch_data, dt_time);
                 
-                double patch_dt;
-                patch_dt = d_patch_strategy->
-                    computeStableDtOnPatch(
+                std::vector<double> patch_spectral_radiuses_and_dt =
+                    d_patch_strategy->computeSpectralRadiusesAndStableDtOnPatch(
                         *patch,
                         initial_time,
                         dt_time);
                 
-                dt = tbox::MathUtilities<double>::Min(dt, patch_dt);
+                for (int si = 0; si < static_cast<int>(spectral_radiuses.size()); si++)
+                {
+                    spectral_radiuses[si] = tbox::MathUtilities<double>::Max(
+                        spectral_radiuses[si], patch_spectral_radiuses_and_dt[si]);
+                }
+                
+                dt = tbox::MathUtilities<double>::Min(dt, patch_spectral_radiuses_and_dt.back());
                 //tbox::plog.precision(12);
                 //tbox::plog << "Level " << level->getLevelNumber()
                 //           << " Patch " << *ip
@@ -1261,6 +1285,19 @@ RungeKuttaLevelIntegrator::getLevelDt(
                 
                 patch->deallocatePatchData(d_temp_var_scratch_data);
             }
+            
+            double spectral_radius_sum = 0.0;
+            for (int si = 0; si < static_cast<int>(spectral_radiuses.size()); si++)
+            {
+                if (mpi.getSize() > 1)
+                {
+                    mpi.AllReduce(&spectral_radiuses[si], 1, MPI_MAX);
+                }
+                
+                spectral_radius_sum += spectral_radiuses[si];
+            } 
+            
+            dt = tbox::MathUtilities<double>::Min(dt, 1.0/spectral_radius_sum);
             
             d_patch_strategy->clearDataContext();
             
@@ -1751,6 +1788,8 @@ RungeKuttaLevelIntegrator::advanceLevel(
     {
         if (d_use_cfl)
         {
+            std::vector<double> spectral_radiuses(d_patch_strategy->getNumberOfSpectralRadiuses(), 0.0);
+    
             if (d_lag_dt_computation)
             {
                 if (d_use_ghosts_for_dt)
@@ -1796,16 +1835,37 @@ RungeKuttaLevelIntegrator::advanceLevel(
                 
                 // "false" argument indicates "initial_time" is false.
                 t_patch_num_kernel->start();
-                double patch_dt = d_patch_strategy->computeStableDtOnPatch(
-                    *patch,
-                    false,
-                    new_time);
-                t_patch_num_kernel->stop();
                 
-                dt_next = tbox::MathUtilities<double>::Min(dt_next, patch_dt);
+                std::vector<double> patch_spectral_radiuses_and_dt =
+                    d_patch_strategy->computeSpectralRadiusesAndStableDtOnPatch(
+                        *patch,
+                        false,
+                        new_time);
+                
+                for (int si = 0; si < static_cast<int>(spectral_radiuses.size()); si++)
+                {
+                    spectral_radiuses[si] = tbox::MathUtilities<double>::Max(
+                        spectral_radiuses[si], patch_spectral_radiuses_and_dt[si]);
+                }
+                
+                dt_next = tbox::MathUtilities<double>::Min(dt_next, patch_spectral_radiuses_and_dt.back());
                 
                 patch->deallocatePatchData(d_temp_var_scratch_data);
             }
+            
+            double spectral_radius_sum = 0.0;
+            for (int si = 0; si < static_cast<int>(spectral_radiuses.size()); si++)
+            {
+                if (mpi.getSize() > 1)
+                {
+                    mpi.AllReduce(&spectral_radiuses[si], 1, MPI_MAX);
+                }
+                
+                spectral_radius_sum += spectral_radiuses[si];
+            } 
+            
+            dt_next = tbox::MathUtilities<double>::Min(dt_next, 1.0/spectral_radius_sum);
+            
             d_patch_strategy->clearDataContext();
         }
         else

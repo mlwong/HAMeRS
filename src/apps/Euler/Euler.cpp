@@ -502,15 +502,15 @@ Euler::initializeDataOnPatch(
 }
 
 
-double
-Euler::computeStableDtOnPatch(
+std::vector<double>
+Euler::computeSpectralRadiusesAndStableDtOnPatch(
     hier::Patch& patch,
     const bool initial_time,
     const double dt_time)
 {
     t_compute_dt->start();
     
-    double stable_dt;
+    std::vector<double> spectral_radiuses_and_dt;
     
     const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
         BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
@@ -526,10 +526,10 @@ Euler::computeStableDtOnPatch(
     const hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
     
-    double stable_spectral_radius = 0.0;
-    
     if (d_dim == tbox::Dimension(1))
     {
+        spectral_radiuses_and_dt.resize(2, 0.0);
+        
         /*
          * Get the dimension and grid spacing.
          */
@@ -571,7 +571,7 @@ Euler::computeStableDtOnPatch(
         double* max_lambda_x = max_wave_speed_x->getPointer(0);
         
 #ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd reduction(max:stable_spectral_radius)
+        #pragma omp simd reduction(max: spectral_radiuses_and_dt[0], spectral_radiuses_and_dt[1])
 #endif
         for (int i = -num_ghosts_0;
              i < interior_dim_0 + num_ghosts_0;
@@ -580,8 +580,11 @@ Euler::computeStableDtOnPatch(
             // Compute the linear index.
             const int idx = i + num_ghosts_0;
             
-            const double spectral_radius = max_lambda_x[idx]/dx_0;
-            stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius);
+            const double spectral_radius_x = max_lambda_x[idx]/dx_0;
+            
+            spectral_radiuses_and_dt[0] = fmax(spectral_radiuses_and_dt[0], spectral_radius_x);
+             
+            spectral_radiuses_and_dt[1] = fmax(spectral_radiuses_and_dt[1], spectral_radius_x);
         }
         
         /*
@@ -590,9 +593,12 @@ Euler::computeStableDtOnPatch(
         
         d_flow_model->unregisterPatch();
         
+        spectral_radiuses_and_dt[1] = 1.0/spectral_radiuses_and_dt[1];
     }
     else if (d_dim == tbox::Dimension(2))
     {
+        spectral_radiuses_and_dt.resize(3, 0.0);
+        
         /*
          * Get the dimensions and grid spacings.
          */
@@ -653,7 +659,7 @@ Euler::computeStableDtOnPatch(
              j++)
         {
 #ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(max:stable_spectral_radius)
+            #pragma omp simd reduction(max: spectral_radiuses_and_dt[0], spectral_radiuses_and_dt[1], spectral_radiuses_and_dt[2])
 #endif
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + num_ghosts_0;
@@ -663,10 +669,13 @@ Euler::computeStableDtOnPatch(
                 const int idx = (i + num_ghosts_0) +
                     (j + num_ghosts_1)*ghostcell_dim_0;
                 
-                const double spectral_radius = max_lambda_x[idx]/dx_0 +
-                    max_lambda_y[idx]/dx_1;
+                const double spectral_radius_x = max_lambda_x[idx]/dx_0;
+                const double spectral_radius_y = max_lambda_y[idx]/dx_1;
                 
-                stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius);
+                spectral_radiuses_and_dt[0] = fmax(spectral_radiuses_and_dt[0], spectral_radius_x);
+                spectral_radiuses_and_dt[1] = fmax(spectral_radiuses_and_dt[1], spectral_radius_y);
+                
+                spectral_radiuses_and_dt[2] = fmax(spectral_radiuses_and_dt[2], spectral_radius_x + spectral_radius_y);
             }
         }
         
@@ -676,9 +685,12 @@ Euler::computeStableDtOnPatch(
         
         d_flow_model->unregisterPatch();
         
+        spectral_radiuses_and_dt[2]= 1.0/spectral_radiuses_and_dt[2];
     }
     else if (d_dim == tbox::Dimension(3))
     {
+        spectral_radiuses_and_dt.resize(4, 0.0);
+        
         /*
          * Get the dimensions and grid spacings.
          */
@@ -755,7 +767,7 @@ Euler::computeStableDtOnPatch(
                  j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd reduction(max:stable_spectral_radius)
+                #pragma omp simd reduction(max: spectral_radiuses_and_dt[0], spectral_radiuses_and_dt[1], spectral_radiuses_and_dt[2], spectral_radiuses_and_dt[3])
 #endif
                 for (int i = -num_ghosts_0;
                      i < interior_dim_0 + num_ghosts_0;
@@ -767,11 +779,16 @@ Euler::computeStableDtOnPatch(
                         (k + num_ghosts_2)*ghostcell_dim_0*
                             ghostcell_dim_1;
                     
-                    const double spectral_radius = max_lambda_x[idx]/dx_0 +
-                        max_lambda_y[idx]/dx_1 +
-                        max_lambda_z[idx]/dx_2;
+                    const double spectral_radius_x = max_lambda_x[idx]/dx_0;
+                    const double spectral_radius_y = max_lambda_y[idx]/dx_1;
+                    const double spectral_radius_z = max_lambda_z[idx]/dx_2;
                     
-                    stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius);
+                    spectral_radiuses_and_dt[0] = fmax(spectral_radiuses_and_dt[0], spectral_radius_x);
+                    spectral_radiuses_and_dt[1] = fmax(spectral_radiuses_and_dt[1], spectral_radius_y);
+                    spectral_radiuses_and_dt[2] = fmax(spectral_radiuses_and_dt[2], spectral_radius_z);
+                
+                    spectral_radiuses_and_dt[3] = fmax(spectral_radiuses_and_dt[3],
+                        spectral_radius_x + spectral_radius_y + spectral_radius_z);
                 }
             }
         }
@@ -781,13 +798,13 @@ Euler::computeStableDtOnPatch(
          */
         
         d_flow_model->unregisterPatch();
+        
+        spectral_radiuses_and_dt[3] = 1.0/spectral_radiuses_and_dt[3];
     }
-    
-    stable_dt = 1.0/stable_spectral_radius;
     
     t_compute_dt->stop();
     
-    return stable_dt;
+    return spectral_radiuses_and_dt;
 }
 
 
