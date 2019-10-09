@@ -834,7 +834,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         
         d_flow_model->unregisterPatch();
         
-        spectral_radiuses_and_dt[2]= 1.0/spectral_radiuses_and_dt[2];
+        spectral_radiuses_and_dt[2] = 1.0/spectral_radiuses_and_dt[2];
     }
     else if (d_dim == tbox::Dimension(3))
     {
