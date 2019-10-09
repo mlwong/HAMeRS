@@ -5335,6 +5335,18 @@ FlowModelSingleSpecies::computeSideDataOfPrimitiveVariablesFromCharacteristicVar
 
 
 /*
+ * Check whether the given cell conservative variables are within the bounds.
+ */
+void
+FlowModelSingleSpecies::checkCellDataOfConservativeVariablesBounded(
+    boost::shared_ptr<pdat::CellData<int> >& bounded_flag,
+    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables)
+{
+    // NEED IMPLEMENTATION!
+}
+
+
+/*
  * Check whether the given side conservative variables are within the bounds.
  */
 void
@@ -5739,6 +5751,18 @@ FlowModelSingleSpecies::checkSideDataOfConservativeVariablesBounded(
             }
         }
     }
+}
+
+
+/*
+ * Check whether the given cell primitive variables are within the bounds.
+ */
+void
+FlowModelSingleSpecies::checkCellDataOfPrimitiveVariablesBounded(
+    boost::shared_ptr<pdat::CellData<int> >& bounded_flag,
+    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables)
+{
+    // NEED IMPLEMENTATION!
 }
 
 

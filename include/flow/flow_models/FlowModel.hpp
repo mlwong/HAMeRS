@@ -382,12 +382,28 @@ class FlowModel:
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
         
         /*
+         * Check whether the given cell conservative variables are within the bounds.
+         */
+        virtual void
+        checkCellDataOfConservativeVariablesBounded(
+            boost::shared_ptr<pdat::CellData<int> >& bounded_flag,
+            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables) = 0;
+        
+        /*
          * Check whether the given side conservative variables are within the bounds.
          */
         virtual void
         checkSideDataOfConservativeVariablesBounded(
             boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables) = 0;
+        
+        /*
+         * Check whether the given cell primitive variables are within the bounds.
+         */
+        virtual void
+        checkCellDataOfPrimitiveVariablesBounded(
+            boost::shared_ptr<pdat::CellData<int> >& bounded_flag,
+            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables) = 0;
         
         /*
          * Check whether the given side primitive variables are within the bounds.

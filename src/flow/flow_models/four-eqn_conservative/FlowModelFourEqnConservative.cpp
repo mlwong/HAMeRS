@@ -3815,6 +3815,18 @@ FlowModelFourEqnConservative::computeSideDataOfPrimitiveVariablesFromCharacteris
 
 
 /*
+ * Check whether the given cell conservative variables are within the bounds.
+ */
+void
+FlowModelFourEqnConservative::checkCellDataOfConservativeVariablesBounded(
+    boost::shared_ptr<pdat::CellData<int> >& bounded_flag,
+    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables)
+{
+    // NEED IMPLEMENTATION!
+}
+
+
+/*
  * Check whether the given side conservative variables are within the bounds.
  */
 void
@@ -4567,6 +4579,18 @@ FlowModelFourEqnConservative::checkSideDataOfConservativeVariablesBounded(
             }
         }
     }
+}
+
+
+/*
+ * Check whether the given cell primitive variables are within the bounds.
+ */
+void
+FlowModelFourEqnConservative::checkCellDataOfPrimitiveVariablesBounded(
+    boost::shared_ptr<pdat::CellData<int> >& bounded_flag,
+    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables)
+{
+    // NEED IMPLEMENTATION!
 }
 
 

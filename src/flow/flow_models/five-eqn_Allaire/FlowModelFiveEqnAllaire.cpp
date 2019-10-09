@@ -4090,6 +4090,18 @@ FlowModelFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCharacteristicVa
 
 
 /*
+ * Check whether the given cell conservative variables are within the bounds.
+ */
+void
+FlowModelFiveEqnAllaire::checkCellDataOfConservativeVariablesBounded(
+    boost::shared_ptr<pdat::CellData<int> >& bounded_flag,
+    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables)
+{
+    // NEED IMPLEMENTATION!
+}
+
+
+/*
  * Check whether the given side conservative variables are within the bounds.
  */
 void
@@ -4179,10 +4191,10 @@ FlowModelFiveEqnAllaire::checkSideDataOfConservativeVariablesBounded(
     bounded_flag->fillAll(1);
     
     // Create the side data for last volume fraction.
-    boost::shared_ptr<pdat::SideData<double> > data_last_volume_fractions(
+    boost::shared_ptr<pdat::SideData<double> > data_last_volume_fraction(
         new pdat::SideData<double>(d_interior_box, 1, num_ghosts_conservative_var));
     
-    data_last_volume_fractions->fillAll(double(1));
+    data_last_volume_fraction->fillAll(double(1));
     
     // Create the side data of density.
     boost::shared_ptr<pdat::SideData<double> > data_density(
@@ -4220,7 +4232,7 @@ FlowModelFiveEqnAllaire::checkSideDataOfConservativeVariablesBounded(
             Q[ei] = conservative_variables[ei]->getPointer(0);
         }
         
-        Z_last = data_last_volume_fractions->getPointer(0);
+        Z_last = data_last_volume_fraction->getPointer(0);
         
         rho = data_density->getPointer(0);
         
@@ -4365,7 +4377,7 @@ FlowModelFiveEqnAllaire::checkSideDataOfConservativeVariablesBounded(
             Q[ei] = conservative_variables[ei]->getPointer(0);
         }
         
-        Z_last = data_last_volume_fractions->getPointer(0);
+        Z_last = data_last_volume_fraction->getPointer(0);
         
         rho = data_density->getPointer(0);
         
@@ -4521,7 +4533,7 @@ FlowModelFiveEqnAllaire::checkSideDataOfConservativeVariablesBounded(
             Q[ei] = conservative_variables[ei]->getPointer(1);
         }
         
-        Z_last = data_last_volume_fractions->getPointer(1);
+        Z_last = data_last_volume_fraction->getPointer(1);
         
         rho = data_density->getPointer(1);
         
@@ -4689,7 +4701,7 @@ FlowModelFiveEqnAllaire::checkSideDataOfConservativeVariablesBounded(
             Q[ei] = conservative_variables[ei]->getPointer(0);
         }
         
-        Z_last = data_last_volume_fractions->getPointer(0);
+        Z_last = data_last_volume_fraction->getPointer(0);
         
         rho = data_density->getPointer(0);
         
@@ -4870,7 +4882,7 @@ FlowModelFiveEqnAllaire::checkSideDataOfConservativeVariablesBounded(
             Q[ei] = conservative_variables[ei]->getPointer(1);
         }
         
-        Z_last = data_last_volume_fractions->getPointer(1);
+        Z_last = data_last_volume_fraction->getPointer(1);
         
         rho = data_density->getPointer(1);
         
@@ -5051,7 +5063,7 @@ FlowModelFiveEqnAllaire::checkSideDataOfConservativeVariablesBounded(
             Q[ei] = conservative_variables[ei]->getPointer(2);
         }
         
-        Z_last = data_last_volume_fractions->getPointer(2);
+        Z_last = data_last_volume_fraction->getPointer(2);
         
         rho = data_density->getPointer(2);
         
@@ -5225,6 +5237,18 @@ FlowModelFiveEqnAllaire::checkSideDataOfConservativeVariablesBounded(
 
 
 /*
+ * Check whether the given cell primitive variables are within the bounds.
+ */
+void
+FlowModelFiveEqnAllaire::checkCellDataOfPrimitiveVariablesBounded(
+    boost::shared_ptr<pdat::CellData<int> >& bounded_flag,
+    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables)
+{
+    // NEED IMPLEMENTATION!
+}
+
+
+/*
  * Check whether the given side primitive variables are within the bounds.
  */
 void
@@ -5313,17 +5337,36 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
     
     bounded_flag->fillAll(1);
     
-    // Create the side data for last volume fraction.
-    boost::shared_ptr<pdat::SideData<double> > data_last_volume_fractions(
-        new pdat::SideData<double>(d_interior_box, 1, num_ghosts_primitive_var));
+    // Create the side data for volume fractions.
+    boost::shared_ptr<pdat::SideData<double> > data_volume_fractions(
+        new pdat::SideData<double>(d_interior_box, d_num_species, num_ghosts_primitive_var));
     
-    data_last_volume_fractions->fillAll(double(1));
+    data_volume_fractions->fill(double(1), d_num_species - 1);
     
     // Create the side data of density.
     boost::shared_ptr<pdat::SideData<double> > data_density(
         new pdat::SideData<double>(d_interior_box, 1, num_ghosts_primitive_var));
     
     data_density->fillAll(double(0));
+    
+    // Create the side data of pressure.
+    boost::shared_ptr<pdat::SideData<double> > data_pressure(
+        new pdat::SideData<double>(d_interior_box, 1, num_ghosts_primitive_var));
+    
+    // Create the side data of mass fractions.
+    boost::shared_ptr<pdat::SideData<double> > data_mass_fractions(
+        new pdat::SideData<double>(d_interior_box, d_num_species, num_ghosts_primitive_var));
+    
+    // Create the side data of partial derivatives.
+    boost::shared_ptr<pdat::SideData<double> > data_gruneisen_parameter(
+        new pdat::SideData<double>(d_interior_box, 1, num_ghosts_primitive_var));
+    
+    boost::shared_ptr<pdat::SideData<double> > data_partial_pressure_partial_partial_densities(
+        new pdat::SideData<double>(d_interior_box, d_num_species, num_ghosts_primitive_var));
+    
+    // Create the side data of square of sound speed.
+    boost::shared_ptr<pdat::SideData<double> > data_sound_speed_sq(
+        new pdat::SideData<double>(d_interior_box, 1, num_ghosts_primitive_var));
     
     /*
      * Declare containers to store pointers to different data.
@@ -5334,9 +5377,21 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
     std::vector<double*> V;
     V.resize(d_num_eqn);
     
-    double* Z_last = nullptr;
+    std::vector<double*> Z;
+    Z.resize(d_num_eqn);
     
     double* rho = nullptr;
+    double* p = nullptr;
+    
+    std::vector<double*> Y;
+    Y.resize(d_num_eqn);
+    
+    double* Gamma;
+    
+    std::vector<double*> Psi;
+    Psi.resize(d_num_species);
+    
+    double* c_sq;
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -5355,11 +5410,29 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
         
-        Z_last = data_last_volume_fractions->getPointer(0);
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Z[si] = data_volume_fractions->getPointer(0, si);
+        }
         
         rho = data_density->getPointer(0);
+        p = data_pressure->getPointer(0);
         
-        // Compute last volume fraction and check if volume fractions are bounded.
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Y[si] = data_mass_fractions->getPointer(0, si);
+        }
+        
+        Gamma = data_gruneisen_parameter->getPointer(0);
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Psi[si] = data_partial_pressure_partial_partial_densities->getPointer(0, si);
+        }
+        
+        c_sq = data_sound_speed_sq->getPointer(0);
+        
+        // Get the volume fractions, compute last volume fraction and check if volume fractions are bounded.
         for (int si = 0; si < d_num_species - 1; si++)
         {
 #ifdef HAMERS_ENABLE_SIMD
@@ -5372,10 +5445,11 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                 // Compute the linear index.
                 const int idx_face = i + num_ghosts_0_primitive_var;
                 
-                Z_last[idx_face] -= V[d_num_species + d_dim.getValue() + 1 + si][idx_face];
+                Z[si][idx_face] = V[d_num_species + d_dim.getValue() + 1 + si][idx_face];
+                Z[d_num_species - 1][idx_face] -= Z[si][idx_face];
                 
-                if (V[d_num_species + d_dim.getValue() + 1 + si][idx_face] > d_Z_bound_lo &&
-                    V[d_num_species + d_dim.getValue() + 1 + si][idx_face] < d_Z_bound_up)
+                if (Z[si][idx_face] > d_Z_bound_lo &&
+                    Z[si][idx_face] < d_Z_bound_up)
                 {
                     are_bounded[idx_face] &= 1;
                 }
@@ -5397,7 +5471,8 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
             // Compute the linear index.
             const int idx_face = i + num_ghosts_0_primitive_var;
             
-            if (Z_last[idx_face] > d_Z_bound_lo && Z_last[idx_face] < d_Z_bound_up)
+            if (Z[d_num_species - 1][idx_face] > d_Z_bound_lo &&
+                Z[d_num_species - 1][idx_face] < d_Z_bound_up)
             {
                 are_bounded[idx_face] &= 1;
             }
@@ -5437,9 +5512,10 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                 // Compute the linear index.
                 const int idx_face = i + num_ghosts_0_primitive_var;
                 
-                const double Y = V[si][idx_face]/rho[idx_face];
+                Y[si][idx_face] = V[si][idx_face]/rho[idx_face];
                 
-                if (Y > d_Y_bound_lo && Y < d_Y_bound_up)
+                if (Y[si][idx_face] > d_Y_bound_lo &&
+                    Y[si][idx_face] < d_Y_bound_up)
                 {
                     are_bounded[idx_face] &= 1;
                 }
@@ -5450,7 +5526,31 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
             }
         }
         
-        // Check if density and pressure are bounded.
+        // Check if partial densities are bounded.
+        for (int si = 0; si < d_num_species; si++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = -num_ghosts_0_primitive_var;
+                 i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                 i++)
+            {
+                // Compute the linear index.
+                const int idx_face = i + num_ghosts_0_primitive_var;
+                
+                if (V[si][idx_face] > double(0))
+                {
+                    are_bounded[idx_face] &= 1;
+                }
+                else
+                {
+                    are_bounded[idx_face] &= 0;
+                }
+            }
+        }
+        
+        // Get the pressure.
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
 #endif
@@ -5461,16 +5561,67 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
             // Compute the linear index.
             const int idx_face = i + num_ghosts_0_primitive_var;
             
-            if (rho[idx_face] > double(0))
-            {
-                are_bounded[idx_face] &= 1;
-            }
-            else
-            {
-                are_bounded[idx_face] &= 0;
-            }
+            p[idx_face] = V[d_num_species + d_dim.getValue()][idx_face];
+        }
+        
+        // Check if sound speed is real.
+        
+        d_equation_of_state_mixing_rules->computeGruneisenParameter(
+            data_gruneisen_parameter,
+            data_density,
+            data_pressure,
+            data_mass_fractions,
+            data_volume_fractions,
+            0);
+        
+        d_equation_of_state_mixing_rules->computePressureDerivativeWithPartialDensities(
+            data_partial_pressure_partial_partial_densities,
+            data_density,
+            data_pressure,
+            data_mass_fractions,
+            data_volume_fractions,
+            0);
+        
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = -num_ghosts_0_primitive_var;
+             i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+             i++)
+        {
+            // Compute the linear index.
+            const int idx_face = i + num_ghosts_0_primitive_var;
             
-            if (V[d_num_species + d_dim.getValue()][idx_face] > double(0))
+            c_sq[idx_face] = Gamma[idx_face]*p[idx_face]/rho[idx_face];
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = -num_ghosts_0_primitive_var;
+                 i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                 i++)
+            {
+                // Compute the linear index.
+                const int idx_face = i + num_ghosts_0_primitive_var;
+                
+                c_sq[idx_face] += Y[si][idx_face]*Psi[si][idx_face];
+            }
+        }
+        
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = -num_ghosts_0_primitive_var;
+             i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+             i++)
+        {
+            // Compute the linear index.
+            const int idx_face = i + num_ghosts_0_primitive_var;
+            
+            if (c_sq[idx_face] > double(0))
             {
                 are_bounded[idx_face] &= 1;
             }
@@ -5500,11 +5651,29 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
         
-        Z_last = data_last_volume_fractions->getPointer(0);
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Z[si] = data_volume_fractions->getPointer(0, si);
+        }
         
         rho = data_density->getPointer(0);
+        p = data_pressure->getPointer(0);
         
-        // Compute last volume fraction and check if volume fractions are bounded.
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Y[si] = data_mass_fractions->getPointer(0, si);
+        }
+        
+        Gamma = data_gruneisen_parameter->getPointer(0);
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Psi[si] = data_partial_pressure_partial_partial_densities->getPointer(0, si);
+        }
+        
+        c_sq = data_sound_speed_sq->getPointer(0);
+        
+        // Get the volume fractions, compute last volume fraction and check if volume fractions are bounded.
         for (int si = 0; si < d_num_species - 1; si++)
         {
             for (int j = 0; j < interior_dim_1; j++)
@@ -5520,10 +5689,11 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                     const int idx_face = (i + num_ghosts_0_primitive_var) +
                         (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1);
                     
-                    Z_last[idx_face] -= V[d_num_species + d_dim.getValue() + 1 + si][idx_face];
+                    Z[si][idx_face] = V[d_num_species + d_dim.getValue() + 1 + si][idx_face];
+                    Z[d_num_species - 1][idx_face] -= Z[si][idx_face];
                     
-                    if (V[d_num_species + d_dim.getValue() + 1 + si][idx_face] > d_Z_bound_lo &&
-                        V[d_num_species + d_dim.getValue() + 1 + si][idx_face] < d_Z_bound_up)
+                    if (Z[si][idx_face] > d_Z_bound_lo &&
+                        Z[si][idx_face] < d_Z_bound_up)
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -5549,7 +5719,8 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                 const int idx_face = (i + num_ghosts_0_primitive_var) +
                     (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1);
                 
-                if (Z_last[idx_face] > d_Z_bound_lo && Z_last[idx_face] < d_Z_bound_up)
+                if (Z[d_num_species - 1][idx_face] > d_Z_bound_lo &&
+                    Z[d_num_species - 1][idx_face] < d_Z_bound_up)
                 {
                     are_bounded[idx_face] &= 1;
                 }
@@ -5597,9 +5768,10 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                     const int idx_face = (i + num_ghosts_0_primitive_var) +
                         (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1);
                     
-                    const double Y = V[si][idx_face]/rho[idx_face];
+                    Y[si][idx_face] = V[si][idx_face]/rho[idx_face];
                     
-                    if (Y > d_Y_bound_lo && Y < d_Y_bound_up)
+                    if (Y[si][idx_face] > d_Y_bound_lo &&
+                        Y[si][idx_face] < d_Y_bound_up)
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -5611,7 +5783,35 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
             }
         }
         
-        // Check if density and pressure are bounded.
+        // Check if partial densities are bounded.
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -num_ghosts_0_primitive_var;
+                     i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                     i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1);
+                    
+                    if (V[si][idx_face] > double(0))
+                    {
+                        are_bounded[idx_face] &= 1;
+                    }
+                    else
+                    {
+                        are_bounded[idx_face] &= 0;
+                    }
+                }
+            }
+        }
+        
+        // Get the pressure.
         for (int j = 0; j < interior_dim_1; j++)
         {
 #ifdef HAMERS_ENABLE_SIMD
@@ -5625,16 +5825,79 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                 const int idx_face = (i + num_ghosts_0_primitive_var) +
                     (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1);
                 
-                if (rho[idx_face] > double(0))
-                {
-                    are_bounded[idx_face] &= 1;
-                }
-                else
-                {
-                    are_bounded[idx_face] &= 0;
-                }
+                p[idx_face] = V[d_num_species + d_dim.getValue()][idx_face];
+            }
+        }
+        
+        // Check if sound speed is real.
+        
+        d_equation_of_state_mixing_rules->computeGruneisenParameter(
+            data_gruneisen_parameter,
+            data_density,
+            data_pressure,
+            data_mass_fractions,
+            data_volume_fractions,
+            0);
+        
+        d_equation_of_state_mixing_rules->computePressureDerivativeWithPartialDensities(
+            data_partial_pressure_partial_partial_densities,
+            data_density,
+            data_pressure,
+            data_mass_fractions,
+            data_volume_fractions,
+            0);
+        
+        for (int j = 0; j < interior_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = -num_ghosts_0_primitive_var;
+                 i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                 i++)
+            {
+                // Compute the linear index.
+                const int idx_face = (i + num_ghosts_0_primitive_var) +
+                    (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1);
                 
-                if (V[d_num_species + d_dim.getValue()][idx_face] > double(0))
+                c_sq[idx_face] = Gamma[idx_face]*p[idx_face]/rho[idx_face];
+            }
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -num_ghosts_0_primitive_var;
+                     i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                     i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1);
+                        
+                        c_sq[idx_face] += Y[si][idx_face]*Psi[si][idx_face];
+                }
+            }
+        }
+        
+        for (int j = 0; j < interior_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = -num_ghosts_0_primitive_var;
+                 i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                 i++)
+            {
+                // Compute the linear index.
+                const int idx_face = (i + num_ghosts_0_primitive_var) +
+                    (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1);
+                
+                if (c_sq[idx_face] > double(0))
                 {
                     are_bounded[idx_face] &= 1;
                 }
@@ -5656,11 +5919,29 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
             V[ei] = primitive_variables[ei]->getPointer(1);
         }
         
-        Z_last = data_last_volume_fractions->getPointer(1);
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Z[si] = data_volume_fractions->getPointer(1, si);
+        }
         
         rho = data_density->getPointer(1);
+        p = data_pressure->getPointer(1);
         
-        // Compute last volume fraction and check if volume fractions are bounded.
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Y[si] = data_mass_fractions->getPointer(1, si);
+        }
+        
+        Gamma = data_gruneisen_parameter->getPointer(1);
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Psi[si] = data_partial_pressure_partial_partial_densities->getPointer(1, si);
+        }
+        
+        c_sq = data_sound_speed_sq->getPointer(1);
+        
+        // Get the volume fractions, compute last volume fraction and check if volume fractions are bounded.
         for (int si = 0; si < d_num_species - 1; si++)
         {
             for (int j = -num_ghosts_1_primitive_var;
@@ -5676,10 +5957,11 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                     const int idx_face = (i + num_ghosts_0_primitive_var) +
                         (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var;
                     
-                    Z_last[idx_face] -= V[d_num_species + d_dim.getValue() + 1 + si][idx_face];
+                    Z[si][idx_face] = V[d_num_species + d_dim.getValue() + 1 + si][idx_face];
+                    Z[d_num_species - 1][idx_face] -= Z[si][idx_face];
                     
-                    if (V[d_num_species + d_dim.getValue() + 1 + si][idx_face] > d_Z_bound_lo &&
-                        V[d_num_species + d_dim.getValue() + 1 + si][idx_face] < d_Z_bound_up)
+                    if (Z[si][idx_face] > d_Z_bound_lo &&
+                        Z[si][idx_face] < d_Z_bound_up)
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -5705,7 +5987,8 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                 const int idx_face = (i + num_ghosts_0_primitive_var) +
                     (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var;
                 
-                if (Z_last[idx_face] > d_Z_bound_lo && Z_last[idx_face] < d_Z_bound_up)
+                if (Z[d_num_species - 1][idx_face] > d_Z_bound_lo &&
+                    Z[d_num_species - 1][idx_face] < d_Z_bound_up)
                 {
                     are_bounded[idx_face] &= 1;
                 }
@@ -5753,9 +6036,10 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                     const int idx_face = (i + num_ghosts_0_primitive_var) +
                         (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var;
                     
-                    const double Y = V[si][idx_face]/rho[idx_face];
+                    Y[si][idx_face] = V[si][idx_face]/rho[idx_face];
                     
-                    if (Y > d_Y_bound_lo && Y < d_Y_bound_up)
+                    if (Y[si][idx_face] > d_Y_bound_lo &&
+                        Y[si][idx_face] < d_Y_bound_up)
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -5767,7 +6051,35 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
             }
         }
         
-        // Check if density and pressure are bounded.
+        // Check if partial densities are bounded.
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int j = -num_ghosts_1_primitive_var;
+                 j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
+                 j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var;
+                    
+                    if (V[si][idx_face] > double(0))
+                    {
+                        are_bounded[idx_face] &= 1;
+                    }
+                    else
+                    {
+                        are_bounded[idx_face] &= 0;
+                    }
+                }
+            }
+        }
+        
+        // Get the pressure.
         for (int j = -num_ghosts_1_primitive_var;
              j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
              j++)
@@ -5781,16 +6093,79 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                 const int idx_face = (i + num_ghosts_0_primitive_var) +
                     (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var;
                 
-                if (rho[idx_face] > double(0))
-                {
-                    are_bounded[idx_face] &= 1;
-                }
-                else
-                {
-                    are_bounded[idx_face] &= 0;
-                }
+                p[idx_face] = V[d_num_species + d_dim.getValue()][idx_face];
+            }
+        }
+        
+        // Check if sound speed is real.
+        
+        d_equation_of_state_mixing_rules->computeGruneisenParameter(
+            data_gruneisen_parameter,
+            data_density,
+            data_pressure,
+            data_mass_fractions,
+            data_volume_fractions,
+            1);
+        
+        d_equation_of_state_mixing_rules->computePressureDerivativeWithPartialDensities(
+            data_partial_pressure_partial_partial_densities,
+            data_density,
+            data_pressure,
+            data_mass_fractions,
+            data_volume_fractions,
+            1);
+        
+        for (int j = -num_ghosts_1_primitive_var;
+             j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
+             j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
+            {
+                // Compute the linear index.
+                const int idx_face = (i + num_ghosts_0_primitive_var) +
+                    (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var;
                 
-                if (V[d_num_species + d_dim.getValue()][idx_face] > double(0))
+                c_sq[idx_face] = Gamma[idx_face]*p[idx_face]/rho[idx_face];
+            }
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int j = -num_ghosts_1_primitive_var;
+                 j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
+                 j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var;
+                    
+                    c_sq[idx_face] = Gamma[idx_face]*p[idx_face]/rho[idx_face];
+                }
+            }
+        }
+        
+        for (int j = -num_ghosts_1_primitive_var;
+             j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
+             j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
+            {
+                // Compute the linear index.
+                const int idx_face = (i + num_ghosts_0_primitive_var) +
+                    (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var;
+                
+                if (c_sq[idx_face] > double(0))
                 {
                     are_bounded[idx_face] &= 1;
                 }
@@ -5824,11 +6199,29 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
         
-        Z_last = data_last_volume_fractions->getPointer(0);
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Z[si] = data_volume_fractions->getPointer(0, si);
+        }
         
         rho = data_density->getPointer(0);
+        p = data_pressure->getPointer(0);
         
-        // Compute last volume fraction and check if volume fractions are bounded.
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Y[si] = data_mass_fractions->getPointer(0, si);
+        }
+        
+        Gamma = data_gruneisen_parameter->getPointer(0);
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Psi[si] = data_partial_pressure_partial_partial_densities->getPointer(0, si);
+        }
+        
+        c_sq = data_sound_speed_sq->getPointer(0);
+        
+        // Get the volume fractions, compute last volume fraction and check if volume fractions are bounded.
         for (int si = 0; si < d_num_species - 1; si++)
         {
             for (int k = 0; k < interior_dim_2; k++)
@@ -5848,10 +6241,11 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                             (k + num_ghosts_2_primitive_var)*(ghostcell_dim_0_primitive_var + 1)*
                                 ghostcell_dim_1_primitive_var;
                         
-                        Z_last[idx_face] -= V[d_num_species + d_dim.getValue() + 1 + si][idx_face];
+                        Z[si][idx_face] = V[d_num_species + d_dim.getValue() + 1 + si][idx_face];
+                        Z[d_num_species - 1][idx_face] -= Z[si][idx_face];
                         
-                        if (V[d_num_species + d_dim.getValue() + 1 + si][idx_face] > d_Z_bound_lo &&
-                            V[d_num_species + d_dim.getValue() + 1 + si][idx_face] < d_Z_bound_up)
+                        if (Z[si][idx_face] > d_Z_bound_lo &&
+                            Z[si][idx_face] < d_Z_bound_up)
                         {
                             are_bounded[idx_face] &= 1;
                         }
@@ -5882,7 +6276,8 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                         (k + num_ghosts_2_primitive_var)*(ghostcell_dim_0_primitive_var + 1)*
                             ghostcell_dim_1_primitive_var;
                     
-                    if (Z_last[idx_face] > d_Z_bound_lo && Z_last[idx_face] < d_Z_bound_up)
+                    if (Z[d_num_species - 1][idx_face] > d_Z_bound_lo &&
+                        Z[d_num_species - 1][idx_face] < d_Z_bound_up)
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -5890,7 +6285,7 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                     {
                         are_bounded[idx_face] &= 0;
                     }
-                }
+                }   
             }
         }
         
@@ -5940,9 +6335,10 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                             (k + num_ghosts_2_primitive_var)*(ghostcell_dim_0_primitive_var + 1)*
                                 ghostcell_dim_1_primitive_var;
                         
-                        const double Y = V[si][idx_face]/rho[idx_face];
+                        Y[si][idx_face] = V[si][idx_face]/rho[idx_face];
                         
-                        if (Y > d_Y_bound_lo && Y < d_Y_bound_up)
+                        if (Y[si][idx_face] > d_Y_bound_lo &&
+                            Y[si][idx_face] < d_Y_bound_up)
                         {
                             are_bounded[idx_face] &= 1;
                         }
@@ -5955,7 +6351,40 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
             }
         }
         
-        // Check if density and pressure are bounded.
+        // Check if partial densities are bounded.
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = -num_ghosts_0_primitive_var;
+                         i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                         i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_face = (i + num_ghosts_0_primitive_var) +
+                            (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1) +
+                            (k + num_ghosts_2_primitive_var)*(ghostcell_dim_0_primitive_var + 1)*
+                                ghostcell_dim_1_primitive_var;
+                        
+                        if (V[si][idx_face] > double(0))
+                        {
+                            are_bounded[idx_face] &= 1;
+                        }
+                        else
+                        {
+                            are_bounded[idx_face] &= 0;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Get the pressure.
         for (int k = 0; k < interior_dim_2; k++)
         {
             for (int j = 0; j < interior_dim_1; j++)
@@ -5973,16 +6402,94 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                         (k + num_ghosts_2_primitive_var)*(ghostcell_dim_0_primitive_var + 1)*
                             ghostcell_dim_1_primitive_var;
                     
-                    if (rho[idx_face] > double(0))
-                    {
-                        are_bounded[idx_face] &= 1;
-                    }
-                    else
-                    {
-                        are_bounded[idx_face] &= 0;
-                    }
+                    p[idx_face] = V[d_num_species + d_dim.getValue()][idx_face];
+                }
+            }
+        }
+        
+        // Check if sound speed is real.
+        
+        d_equation_of_state_mixing_rules->computeGruneisenParameter(
+            data_gruneisen_parameter,
+            data_density,
+            data_pressure,
+            data_mass_fractions,
+            data_volume_fractions,
+            0);
+        
+        d_equation_of_state_mixing_rules->computePressureDerivativeWithPartialDensities(
+            data_partial_pressure_partial_partial_densities,
+            data_density,
+            data_pressure,
+            data_mass_fractions,
+            data_volume_fractions,
+            0);
+        
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -num_ghosts_0_primitive_var;
+                     i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                     i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1) +
+                        (k + num_ghosts_2_primitive_var)*(ghostcell_dim_0_primitive_var + 1)*
+                            ghostcell_dim_1_primitive_var;
                     
-                    if (V[d_num_species + d_dim.getValue()][idx_face] > double(0))
+                    c_sq[idx_face] = Gamma[idx_face]*p[idx_face]/rho[idx_face];
+                }
+            }
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = -num_ghosts_0_primitive_var;
+                         i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                         i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_face = (i + num_ghosts_0_primitive_var) +
+                            (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1) +
+                            (k + num_ghosts_2_primitive_var)*(ghostcell_dim_0_primitive_var + 1)*
+                                ghostcell_dim_1_primitive_var;
+                        
+                        c_sq[idx_face] += Y[si][idx_face]*Psi[si][idx_face];
+                    }
+                }
+            }
+        }
+        
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -num_ghosts_0_primitive_var;
+                     i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                     i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1) +
+                        (k + num_ghosts_2_primitive_var)*(ghostcell_dim_0_primitive_var + 1)*
+                            ghostcell_dim_1_primitive_var;
+                    
+                    if (c_sq[idx_face] > double(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -5993,6 +6500,7 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                 }
             }
         }
+        
         
         /*
          * Check if primitive variables in the y-direction are bounded.
@@ -6005,11 +6513,29 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
             V[ei] = primitive_variables[ei]->getPointer(1);
         }
         
-        Z_last = data_last_volume_fractions->getPointer(1);
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Z[si] = data_volume_fractions->getPointer(1, si);
+        }
         
         rho = data_density->getPointer(1);
+        p = data_pressure->getPointer(1);
         
-        // Compute last volume fraction and check if volume fractions are bounded.
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Y[si] = data_mass_fractions->getPointer(1, si);
+        }
+        
+        Gamma = data_gruneisen_parameter->getPointer(1);
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Psi[si] = data_partial_pressure_partial_partial_densities->getPointer(1, si);
+        }
+        
+        c_sq = data_sound_speed_sq->getPointer(1);
+        
+        // Get the volume fractions, compute last volume fraction and check if volume fractions are bounded.
         for (int si = 0; si < d_num_species - 1; si++)
         {
             for (int k = 0; k < interior_dim_2; k++)
@@ -6029,10 +6555,11 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                             (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
                                 (ghostcell_dim_1_primitive_var + 1);
                         
-                        Z_last[idx_face] -= V[d_num_species + d_dim.getValue() + 1 + si][idx_face];
+                        Z[si][idx_face] = V[d_num_species + d_dim.getValue() + 1 + si][idx_face];
+                        Z[d_num_species - 1][idx_face] -= Z[si][idx_face];
                         
-                        if (V[d_num_species + d_dim.getValue() + 1 + si][idx_face] > d_Z_bound_lo &&
-                            V[d_num_species + d_dim.getValue() + 1 + si][idx_face] < d_Z_bound_up)
+                        if (Z[si][idx_face] > d_Z_bound_lo &&
+                            Z[si][idx_face] < d_Z_bound_up)
                         {
                             are_bounded[idx_face] &= 1;
                         }
@@ -6063,7 +6590,8 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                         (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
                             (ghostcell_dim_1_primitive_var + 1);
                     
-                    if (Z_last[idx_face] > d_Z_bound_lo && Z_last[idx_face] < d_Z_bound_up)
+                    if (Z[d_num_species - 1][idx_face] > d_Z_bound_lo &&
+                        Z[d_num_species - 1][idx_face] < d_Z_bound_up)
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -6121,9 +6649,10 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                             (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
                                 (ghostcell_dim_1_primitive_var + 1);
                         
-                        const double Y = V[si][idx_face]/rho[idx_face];
+                        Y[si][idx_face] = V[si][idx_face]/rho[idx_face];
                         
-                        if (Y > d_Y_bound_lo && Y < d_Y_bound_up)
+                        if (Y[si][idx_face] > d_Y_bound_lo &&
+                            Y[si][idx_face] < d_Y_bound_up)
                         {
                             are_bounded[idx_face] &= 1;
                         }
@@ -6136,7 +6665,40 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
             }
         }
         
-        // Check if density and pressure are bounded.
+        // Check if partial densities are bounded.
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = -num_ghosts_1_primitive_var;
+                     j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_face = (i + num_ghosts_0_primitive_var) +
+                            (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                            (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                                (ghostcell_dim_1_primitive_var + 1);
+                        
+                        if (V[si][idx_face] > double(0))
+                        {
+                            are_bounded[idx_face] &= 1;
+                        }
+                        else
+                        {
+                            are_bounded[idx_face] &= 0;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Get the pressure.
         for (int k = 0; k < interior_dim_2; k++)
         {
             for (int j = -num_ghosts_1_primitive_var;
@@ -6154,16 +6716,94 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                         (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
                             (ghostcell_dim_1_primitive_var + 1);
                     
-                    if (rho[idx_face] > double(0))
-                    {
-                        are_bounded[idx_face] &= 1;
-                    }
-                    else
-                    {
-                        are_bounded[idx_face] &= 0;
-                    }
+                    p[idx_face] = V[d_num_species + d_dim.getValue()][idx_face];
+                }
+            }
+        }
+        
+        // Check if sound speed is real.
+        
+        d_equation_of_state_mixing_rules->computeGruneisenParameter(
+            data_gruneisen_parameter,
+            data_density,
+            data_pressure,
+            data_mass_fractions,
+            data_volume_fractions,
+            1);
+        
+        d_equation_of_state_mixing_rules->computePressureDerivativeWithPartialDensities(
+            data_partial_pressure_partial_partial_densities,
+            data_density,
+            data_pressure,
+            data_mass_fractions,
+            data_volume_fractions,
+            1);
+        
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = -num_ghosts_1_primitive_var;
+                 j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
+                 j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                        (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                            (ghostcell_dim_1_primitive_var + 1);
                     
-                    if (V[d_num_species + d_dim.getValue()][idx_face] > double(0))
+                    c_sq[idx_face] = Gamma[idx_face]*p[idx_face]/rho[idx_face];
+                }
+            }
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = -num_ghosts_1_primitive_var;
+                     j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_face = (i + num_ghosts_0_primitive_var) +
+                            (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                            (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                                (ghostcell_dim_1_primitive_var + 1);
+                        
+                        c_sq[idx_face] = Gamma[idx_face]*p[idx_face]/rho[idx_face];
+                    }
+                }
+            }
+        }
+        
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = -num_ghosts_1_primitive_var;
+                 j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
+                 j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                        (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                            (ghostcell_dim_1_primitive_var + 1);
+                    
+                    if (c_sq[idx_face] > double(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -6186,11 +6826,29 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
             V[ei] = primitive_variables[ei]->getPointer(2);
         }
         
-        Z_last = data_last_volume_fractions->getPointer(2);
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Z[si] = data_volume_fractions->getPointer(2, si);
+        }
         
         rho = data_density->getPointer(2);
+        p = data_pressure->getPointer(2);
         
-        // Compute last volume fraction and check if volume fractions are bounded.
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Y[si] = data_mass_fractions->getPointer(2, si);
+        }
+        
+        Gamma = data_gruneisen_parameter->getPointer(2);
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Psi[si] = data_partial_pressure_partial_partial_densities->getPointer(2, si);
+        }
+        
+        c_sq = data_sound_speed_sq->getPointer(2);
+        
+        // Get the volume fractions, compute last volume fraction and check if volume fractions are bounded.
         for (int si = 0; si < d_num_species - 1; si++)
         {
             for (int k = -num_ghosts_2_primitive_var;
@@ -6210,10 +6868,11 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                             (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
                                 ghostcell_dim_1_primitive_var;
                         
-                        Z_last[idx_face] -= V[d_num_species + d_dim.getValue() + 1 + si][idx_face];
+                        Z[si][idx_face] = V[d_num_species + d_dim.getValue() + 1 + si][idx_face];
+                        Z[d_num_species - 1][idx_face] -= Z[si][idx_face];
                         
-                        if (V[d_num_species + d_dim.getValue() + 1 + si][idx_face] > d_Z_bound_lo &&
-                            V[d_num_species + d_dim.getValue() + 1 + si][idx_face] < d_Z_bound_up)
+                        if (Z[si][idx_face] > d_Z_bound_lo &&
+                            Z[si][idx_face] < d_Z_bound_up)
                         {
                             are_bounded[idx_face] &= 1;
                         }
@@ -6244,7 +6903,8 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                         (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
                             ghostcell_dim_1_primitive_var;
                     
-                    if (Z_last[idx_face] > d_Z_bound_lo && Z_last[idx_face] < d_Z_bound_up)
+                    if (Z[d_num_species - 1][idx_face] > d_Z_bound_lo &&
+                        Z[d_num_species - 1][idx_face] < d_Z_bound_up)
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -6302,9 +6962,10 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                             (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
                                 ghostcell_dim_1_primitive_var;
                         
-                        const double Y = V[si][idx_face]/rho[idx_face];
+                        Y[si][idx_face] = V[si][idx_face]/rho[idx_face];
                         
-                        if (Y > d_Y_bound_lo && Y < d_Y_bound_up)
+                        if (Y[si][idx_face] > d_Y_bound_lo &&
+                            Y[si][idx_face] < d_Y_bound_up)
                         {
                             are_bounded[idx_face] &= 1;
                         }
@@ -6317,7 +6978,40 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
             }
         }
         
-        // Check if density and pressure are bounded.
+        // Check if partial densities are bounded.
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int k = -num_ghosts_2_primitive_var;
+                 k < interior_dim_2 + 1 + num_ghosts_2_primitive_var;
+                 k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_face = (i + num_ghosts_0_primitive_var) +
+                            (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                            (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                                ghostcell_dim_1_primitive_var;
+                        
+                        if (V[si][idx_face] > double(0))
+                        {
+                            are_bounded[idx_face] &= 1;
+                        }
+                        else
+                        {
+                            are_bounded[idx_face] &= 0;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Get the pressure.
         for (int k = -num_ghosts_2_primitive_var;
              k < interior_dim_2 + 1 + num_ghosts_2_primitive_var;
              k++)
@@ -6335,16 +7029,94 @@ FlowModelFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
                         (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
                             ghostcell_dim_1_primitive_var;
                     
-                    if (rho[idx_face] > double(0))
-                    {
-                        are_bounded[idx_face] &= 1;
-                    }
-                    else
-                    {
-                        are_bounded[idx_face] &= 0;
-                    }
+                    p[idx_face] = V[d_num_species + d_dim.getValue()][idx_face];
+                }
+            }
+        }
+        
+        // Check if sound speed is real.
+        
+        d_equation_of_state_mixing_rules->computeGruneisenParameter(
+            data_gruneisen_parameter,
+            data_density,
+            data_pressure,
+            data_mass_fractions,
+            data_volume_fractions,
+            2);
+        
+        d_equation_of_state_mixing_rules->computePressureDerivativeWithPartialDensities(
+            data_partial_pressure_partial_partial_densities,
+            data_density,
+            data_pressure,
+            data_mass_fractions,
+            data_volume_fractions,
+            2);
+        
+        for (int k = -num_ghosts_2_primitive_var;
+             k < interior_dim_2 + 1 + num_ghosts_2_primitive_var;
+             k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                        (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                            ghostcell_dim_1_primitive_var;
                     
-                    if (V[d_num_species + d_dim.getValue()][idx_face] > double(0))
+                    c_sq[idx_face] = Gamma[idx_face]*p[idx_face]/rho[idx_face];
+                }
+            }
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int k = -num_ghosts_2_primitive_var;
+                 k < interior_dim_2 + 1 + num_ghosts_2_primitive_var;
+                 k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_face = (i + num_ghosts_0_primitive_var) +
+                            (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                            (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                                ghostcell_dim_1_primitive_var;
+                        
+                        c_sq[idx_face] = Gamma[idx_face]*p[idx_face]/rho[idx_face];
+                    }
+                }
+            }
+        }
+        
+        for (int k = -num_ghosts_2_primitive_var;
+             k < interior_dim_2 + 1 + num_ghosts_2_primitive_var;
+             k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                        (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                            ghostcell_dim_1_primitive_var;
+                    
+                    if (c_sq[idx_face] > double(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
