@@ -269,10 +269,29 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
+         * Output mean enstrophy inside mixing layer with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputEnstrophyMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
          * Output scalar dissipation rate of first species integrated to a file.
          */
         void
         outputScalarDissipationRateIntegrated(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean scalar dissipation rate of first species inside mixing layer with assumed homogeneity
+         * in yz-plane to a file.
+         */
+        void
+        outputScalarDissipationMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
