@@ -3412,6 +3412,37 @@ NavierStokes::getFromInput(
         }
     }
     
+    /*
+     * Get the flow model.
+     */
+    if (input_db->keyExists("flow_model"))
+    {
+        d_flow_model_str = input_db->getString("flow_model");
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "Key data 'flow_model' not found in input database."
+            << " Compressible flow model is unknown."
+            << std::endl);            
+    }
+    
+    /*
+     * Get the database of the flow model.
+     */
+    if (input_db->keyExists("Flow_model"))
+    {
+        d_flow_model_db = input_db->getDatabase("Flow_model");
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "Key data 'Flow_model' not found in input database."
+            << std::endl);
+    }
+    
     if (!is_from_restart)
     {
         if (input_db->keyExists("project_name"))
@@ -3442,37 +3473,6 @@ NavierStokes::getFromInput(
                 << ": "
                 << "Key data 'num_species' not found in input database."
                 << " Number of species is unknown."
-                << std::endl);
-        }
-        
-        /*
-         * Get the flow model.
-         */
-        if (input_db->keyExists("flow_model"))
-        {
-            d_flow_model_str = input_db->getString("flow_model");
-        }
-        else
-        {
-            TBOX_ERROR(d_object_name
-                << ": "
-                << "Key data 'flow_model' not found in input database."
-                << " Compressible flow model is unknown."
-                << std::endl);            
-        }
-        
-        /*
-         * Get the database of the flow model.
-         */
-        if (input_db->keyExists("Flow_model"))
-        {
-            d_flow_model_db = input_db->getDatabase("Flow_model");
-        }
-        else
-        {
-            TBOX_ERROR(d_object_name
-                << ": "
-                << "Key data 'Flow_model' not found in input database."
                 << std::endl);
         }
         
