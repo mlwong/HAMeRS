@@ -74,7 +74,8 @@ class FlowModelStatisticsUtilities
         outputStatisticalQuantities(
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context) = 0;
+            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const double output_time) = 0;
         
     protected:
         /*

@@ -49,9 +49,17 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
         outputStatisticalQuantities(
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const double output_time);
         
     private:
+        void
+        outputAveragedDensityWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const double output_time);
+        
         /*
          * Compute averaged value with only x direction as inhomogeneous direction.
          */

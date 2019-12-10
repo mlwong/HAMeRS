@@ -91,7 +91,8 @@ void
 FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const boost::shared_ptr<hier::VariableContext>& data_context,
+    const double output_time)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -105,6 +106,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         
         if (statistical_quantity_key == "DENSITY")
         {
+            outputAveragedDensityWithInhomogeneousXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context,
+                output_time);
         }
         else if (statistical_quantity_key == "MASS_FRACTION")
         {
@@ -158,6 +164,32 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 << std::endl);
         }
     }
+}
+
+
+/*
+ * Output averaged density with inhomogeneous x-direction to a file.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::outputAveragedDensityWithInhomogeneousXDirection(
+    const std::string& stat_dump_filename,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context,
+    const double output_time)
+{
+    std::vector<double> rho_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::ofstream f_output;
+    f_output.open("rho_mean", std::ios::out | std::ios::binary);
+    
+    f_output.write((char*)&output_time, sizeof(double));
+    f_output.write((char*)&rho_mean[0], sizeof(double)*rho_mean.size());
+    
+    f_output.close();
 }
 
 
