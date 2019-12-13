@@ -53,8 +53,31 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const double output_time);
         
     private:
+        /*
+         * Output averaged density with inhomogeneous x-direction to a file.
+         */
         void
         outputAveragedDensityWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const double output_time);
+        
+        /*
+         * Output averaged mass fraction (first species) with inhomogeneous x-direction to a file.
+         */
+        void
+        outputAveragedMassFractionWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const double output_time);
+        
+        /*
+         * Output averaged mole fraction (first species) with inhomogeneous x-direction to a file.
+         */
+        void
+        outputAveragedMoleFractionWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,

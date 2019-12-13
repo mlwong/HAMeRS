@@ -107,52 +107,110 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         if (statistical_quantity_key == "DENSITY")
         {
             outputAveragedDensityWithInhomogeneousXDirection(
-                stat_dump_filename,
+                "rho_mean.dat",
                 patch_hierarchy,
                 data_context,
                 output_time);
         }
         else if (statistical_quantity_key == "MASS_FRACTION")
         {
+            outputAveragedMassFractionWithInhomogeneousXDirection(
+                "Y_mean.dat",
+                patch_hierarchy,
+                data_context,
+                output_time);
         }
         else if (statistical_quantity_key == "MOLE_FRACTION")
         {
+            outputAveragedMoleFractionWithInhomogeneousXDirection(
+                "X_mean.dat",
+                patch_hierarchy,
+                data_context,
+                output_time);
         }
         else if (statistical_quantity_key == "DENSITY_VARIANCE")
         {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Not implemented!"
+                << std::endl);
         }
         else if (statistical_quantity_key == "TKE")
         {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Not implemented!"
+                << std::endl);
         }
         else if (statistical_quantity_key == "rR11")
         {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Not implemented!"
+                << std::endl);
         }
         else if (statistical_quantity_key == "rR22")
         {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Not implemented!"
+                << std::endl);
         }
         else if (statistical_quantity_key == "rR33")
         {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Not implemented!"
+                << std::endl);
         }
         else if (statistical_quantity_key == "rR12")
         {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Not implemented!"
+                << std::endl);
         }
         else if (statistical_quantity_key == "rR13")
         {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Not implemented!"
+                << std::endl);
         }
         else if (statistical_quantity_key == "rR23")
         {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Not implemented!"
+                << std::endl);
         }
         else if (statistical_quantity_key == "ra1")
         {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Not implemented!"
+                << std::endl);
         }
         else if (statistical_quantity_key == "ra2")
         {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Not implemented!"
+                << std::endl);
         }
         else if (statistical_quantity_key == "ra3")
         {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Not implemented!"
+                << std::endl);
         }
         else if (statistical_quantity_key == "b")
         {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Not implemented!"
+                << std::endl);
         }
         else
         {
@@ -183,13 +241,80 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputAveragedDensityWithInhomo
         patch_hierarchy,
         data_context);
     
-    std::ofstream f_output;
-    f_output.open("rho_mean", std::ios::out | std::ios::binary);
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
-    f_output.write((char*)&output_time, sizeof(double));
-    f_output.write((char*)&rho_mean[0], sizeof(double)*rho_mean.size());
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_output;
+        f_output.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        
+        f_output.write((char*)&output_time, sizeof(double));
+        f_output.write((char*)&rho_mean[0], sizeof(double)*rho_mean.size());
+        
+        f_output.close();
+    }
+}
+
+
+/*
+ * Output averaged mass fraction (first species) with inhomogeneous x-direction to a file.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::outputAveragedMassFractionWithInhomogeneousXDirection(
+    const std::string& stat_dump_filename,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context,
+    const double output_time)
+{
+    std::vector<double> Y_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        "MASS_FRACTION",
+        0,
+        patch_hierarchy,
+        data_context);
     
-    f_output.close();
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_output;
+        f_output.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        
+        f_output.write((char*)&output_time, sizeof(double));
+        f_output.write((char*)&Y_mean[0], sizeof(double)*Y_mean.size());
+        
+        f_output.close();
+    }
+}
+
+
+/*
+ * Output averaged mole fraction (first species) with inhomogeneous x-direction to a file.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::outputAveragedMoleFractionWithInhomogeneousXDirection(
+    const std::string& stat_dump_filename,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context,
+    const double output_time)
+{
+    std::vector<double> X_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        "MOLE_FRACTION",
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_output;
+        f_output.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        
+        f_output.write((char*)&output_time, sizeof(double));
+        f_output.write((char*)&X_mean[0], sizeof(double)*X_mean.size());
+        
+        f_output.close();
+    }
 }
 
 
