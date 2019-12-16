@@ -1,1 +1,1 @@
-NavierStokesInitialConditionsDefault.cpp
+/home/wongml/Codes/HAMeRS_Jon/problems/Navier-Stokes/initial_conditions/RichtmyerMeshkovInstability2D.cpp
