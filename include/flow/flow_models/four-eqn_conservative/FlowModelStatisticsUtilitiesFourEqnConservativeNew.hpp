@@ -293,6 +293,16 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
+         * Compute averaged derivative of value with only x direction as inhomogeneous direction.
+         */
+        std::vector<double> getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+            const std::string quantity_name,
+            const int component_idx,
+            const int derivative_direction,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
          * Compute averaged value with only x direction as inhomogeneous direction.
          */
         std::vector<double> getAveragedQuantityWithInhomogeneousXDirection(
@@ -318,6 +328,18 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::vector<std::string>& quantity_names,
             const std::vector<int>& component_indices,
             const std::vector<bool>& use_reciprocal,
+            const std::vector<std::vector<double> >& averaged_quantities,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute correlation with only x direction as inhomogeneous direction.
+         */
+        std::vector<double> getQuantityCorrelationWithInhomogeneousXDirection(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const std::vector<bool>& use_reciprocal,
+            const std::vector<int>& derivative_directions,
             const std::vector<std::vector<double> >& averaged_quantities,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
