@@ -1579,6 +1579,127 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDensitySpecificVolumeCova
 }
 
 
+/**
+ ** Function to compute budgets.
+ **/        
+
+/*
+ * Output turbulent mass flux in x-direction with inhomogeneous x-direction to a file.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetTurbMassFluxXWithInhomogeneousXDirection(
+    const std::string& stat_dump_filename,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+    const int finest_level_dim_0 = getRefinedDomainNumberOfPointsX(patch_hierarchy);
+    
+    const double dx = getRefinedDomainGridSpacingX(patch_hierarchy);
+    
+    /*
+     * Compute rho_a1.
+     */
+    
+    std::vector<double> rho_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> u_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    std::vector<std::vector<double> > averaged_quantities;
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(rho_mean);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(u_mean);
+    
+    std::vector<double> rho_p_u_p = getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        averaged_quantities,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    averaged_quantities.clear();
+    
+    /*
+     * Compute term II.
+     */
+    
+    // Compute u_tilde.
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    
+    std::vector<double> rho_u_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<double> u_tilde(rho_u_mean);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        u_tilde[i] /= rho_mean[i];
+    }
+    
+    std::vector<double> rho_u_tilde_a1(u_tilde);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        rho_u_tilde_a1[i] *= rho_p_u_p[i];
+    }
+    
+    std::vector<double> d_rho_u_tilde_a1_dx = computeDerivativeOfVector1D(
+        rho_u_tilde_a1,
+        dx);
+    
+    /*
+     * Output budget.
+     */
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_output;
+        f_output.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        
+        f_output.write((char*)&output_time, sizeof(double));
+        f_output.write((char*)&rho_p_u_p[0], sizeof(double)*rho_p_u_p.size());
+        f_output.write((char*)&d_rho_u_tilde_a1_dx[0], sizeof(double)*d_rho_u_tilde_a1_dx.size());
+        
+        f_output.close();
+    }
+}
+
+
+/**
+ ** Helper functions.
+ **/        
+
+
 /*
  * Get number of points in the x-direction of the refined domain.
  */

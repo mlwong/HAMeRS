@@ -266,6 +266,24 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const double output_time) const;
         
         
+        /**
+         ** Function to compute budgets.
+         **/        
+        
+        /*
+         * Output turbulent mass flux in x-direction with inhomogeneous x-direction to a file.
+         */
+        void
+        outputBudgetTurbMassFluxXWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        
+        /**
+         ** Helper functions.
+         **/        
         
         /*
          * Get number of points in the x-direction of the refined domain.
