@@ -61,7 +61,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time);
+            const double output_time) const;
         
         /*
          * Output averaged mass fraction (first species) with inhomogeneous x-direction to a file.
@@ -71,7 +71,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time);
+            const double output_time) const;
         
         /*
          * Output averaged mole fraction (first species) with inhomogeneous x-direction to a file.
@@ -81,7 +81,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time);
+            const double output_time) const;
          
         /*
          * Output averaged specific volume with inhomogeneous x-direction to a file.
@@ -91,7 +91,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time);
+            const double output_time) const;
          
         /*
          * Output turbulent mass flux in x-direction with inhomogeneous x-direction to a file.
@@ -101,7 +101,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time);
+            const double output_time) const;
         
         /*
          * Output turbulent mass flux in y-direction with inhomogeneous x-direction to a file.
@@ -111,7 +111,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time);
+            const double output_time) const;
         
         /*
          * Output turbulent mass flux in z-direction with inhomogeneous x-direction to a file.
@@ -121,7 +121,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time);
+            const double output_time) const;
         
         /*
          * Output Reynolds normal stress in x-direction with inhomogeneous x-direction to a file.
@@ -131,7 +131,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time);
+            const double output_time) const;
         
         /*
          * Output Reynolds normal stress in y-direction with inhomogeneous x-direction to a file.
@@ -141,7 +141,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time);
+            const double output_time) const;
         
         /*
          * Output Reynolds normal stress in z-direction with inhomogeneous x-direction to a file.
@@ -151,7 +151,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time);
+            const double output_time) const;
         
         /*
          * Output Reynolds shear stress in xy-direction with inhomogeneous x-direction to a file.
@@ -161,7 +161,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time);
+            const double output_time) const;
         
         /*
          * Output Reynolds shear stress in xz-direction with inhomogeneous x-direction to a file.
@@ -171,7 +171,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time);
+            const double output_time) const;
         
         /*
          * Output Reynolds shear stress in yz-direction with inhomogeneous x-direction to a file.
@@ -181,7 +181,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time);
+            const double output_time) const;
         
         /*
          * Output variance of velocity component in x-direction with inhomogeneous x-direction to a file.
@@ -191,7 +191,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time);
+            const double output_time) const;
         
         /*
          * Output variance of velocity component in y-direction with inhomogeneous x-direction to a file.
@@ -201,7 +201,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time);
+            const double output_time) const;
         
         /*
          * Output variance of velocity component in z-direction with inhomogeneous x-direction to a file.
@@ -211,7 +211,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time);
+            const double output_time) const;
         
         /*
          * Output correlation of density and velocity component square in x-direction with inhomogeneous x-direction to a file.
@@ -221,7 +221,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time);
+            const double output_time) const;
         
         /*
          * Output correlation of density and velocity component square in y-direction with inhomogeneous x-direction to a file.
@@ -231,7 +231,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time);
+            const double output_time) const;
         
         /*
          * Output correlation of density and velocity component square in z-direction with inhomogeneous x-direction to a file.
@@ -241,7 +241,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time);
+            const double output_time) const;
         
         
         
@@ -253,7 +253,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time);
+            const double output_time) const;
         
         /*
          * Output density specific volume covariance with inhomogeneous x-direction to a file.
@@ -263,7 +263,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time);
+            const double output_time) const;
         
         
         
@@ -275,13 +275,29 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /*
+         * Get grid spacing in the x-direction of the refined domain.
+         */
+        const double
+        getRefinedDomainGridSpacingX(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy) const;
+        
+        /*
+         * Compute the one-dimensional derivative given a vector.
+         */
+        std::vector<double> computeDerivativeOfVector1D(
+            const std::vector<double> quantity_vector,
+            const double dx) const;
+        
+        
+        
+        /*
          * Compute averaged value with only x direction as inhomogeneous direction.
          */
         std::vector<double> getAveragedQuantityWithInhomogeneousXDirection(
             const std::string quantity_name,
             const int component_idx,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const boost::shared_ptr<hier::VariableContext>& data_context) const;
         
         /*
          * Compute averaged reciprocal of value with only x direction as inhomogeneous direction.
@@ -290,7 +306,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::string quantity_name,
             const int component_idx,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const boost::shared_ptr<hier::VariableContext>& data_context) const;
         
         /*
          * Compute averaged derivative of value with only x direction as inhomogeneous direction.
@@ -300,7 +316,17 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const int component_idx,
             const int derivative_direction,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const boost::shared_ptr<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute averaged derivative of reciprocal of value with only x direction as inhomogeneous direction.
+         */
+        std::vector<double> getAveragedDerivativeOfReciprocalOfQuantityWithInhomogeneousXDirection(
+            const std::string quantity_name,
+            const int component_idx,
+            const int derivative_direction,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context) const;
         
         /*
          * Compute averaged value with only x direction as inhomogeneous direction.
@@ -309,7 +335,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::vector<std::string>& quantity_names,
             const std::vector<int>& component_indices,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const boost::shared_ptr<hier::VariableContext>& data_context) const;
         
         /*
          * Compute correlation with only x direction as inhomogeneous direction.
@@ -319,7 +345,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::vector<int>& component_indices,
             const std::vector<std::vector<double> >& averaged_quantities,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const boost::shared_ptr<hier::VariableContext>& data_context) const;
         
         /*
          * Compute correlation with only x direction as inhomogeneous direction.
@@ -330,7 +356,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::vector<bool>& use_reciprocal,
             const std::vector<std::vector<double> >& averaged_quantities,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const boost::shared_ptr<hier::VariableContext>& data_context) const;
         
         /*
          * Compute correlation with only x direction as inhomogeneous direction.
@@ -342,7 +368,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const std::vector<int>& derivative_directions,
             const std::vector<std::vector<double> >& averaged_quantities,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const boost::shared_ptr<hier::VariableContext>& data_context) const;
         
         /*
          * boost::shared_ptr to EquationOfStateMixingRules.
