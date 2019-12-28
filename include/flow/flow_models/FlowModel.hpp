@@ -418,6 +418,22 @@ class FlowModel:
          */
         virtual void
         convertConservativeVariablesToPrimitiveVariables(
+            std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables) = 0;
+        
+        /*
+         * Convert primitive variables to conservative variables.
+         */
+        virtual void
+        convertPrimitiveVariablesToConservativeVariables(
+            std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables) = 0;
+        
+        /*
+         * Convert conservative variables to primitive variables.
+         */
+        virtual void
+        convertConservativeVariablesToPrimitiveVariables(
             const std::vector<const double*>& conservative_variables,
             const std::vector<double*>& primitive_variables) = 0;
         

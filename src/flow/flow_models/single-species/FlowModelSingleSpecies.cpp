@@ -6179,6 +6179,2293 @@ FlowModelSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
  */
 void
 FlowModelSingleSpecies::convertConservativeVariablesToPrimitiveVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables)
+{
+    /*
+     * Get the numbers of ghost cells of the variables.
+     */
+    
+    const hier::IntVector num_ghosts_primitive_var = primitive_variables[0]->
+        getGhostCellWidth();
+    
+    const hier::IntVector num_ghosts_conservative_var = conservative_variables[0]->
+        getGhostCellWidth();
+    
+    /*
+     * Get the ghost cell dimensions of of the variables.
+     */
+    
+    const hier::IntVector ghostcell_dims_primitive_var = primitive_variables[0]->
+        getGhostBox().numberCells();
+    
+    const hier::IntVector ghostcell_dims_conservative_var = conservative_variables[0]->
+        getGhostBox().numberCells();
+    
+    /*
+     * Get the size of variables.
+     */
+    
+    int num_eqn_primitive_var = 0;
+    int num_eqn_conservative_var = 0;
+    
+    /*
+     * Check the size of variables.
+     */
+    
+    for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
+    {
+        num_eqn_primitive_var += primitive_variables[vi]->getDepth();
+    }
+    
+    for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
+    {
+        num_eqn_conservative_var += conservative_variables[vi]->getDepth();
+    }
+    
+    if (num_eqn_primitive_var != d_num_eqn)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::"
+            << "convertConservativeVariablesToPrimitiveVariables()\n"
+            << "The number of primitive variables are incorrect."
+            << std::endl);
+    }
+    
+    if (num_eqn_conservative_var != d_num_eqn)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::"
+            << "convertConservativeVariablesToPrimitiveVariables()\n"
+            << "The number of conservative variables are incorrect."
+            << std::endl);
+    }
+    
+    /*
+     * Check potential failures.
+     */
+    
+    for (int ei = 0; ei < num_eqn_primitive_var; ei++)
+    {
+        const hier::IntVector interior_dims_primitive_var =
+            primitive_variables[ei]->getBox().numberCells();
+        
+        if (interior_dims_primitive_var != d_interior_dims)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::"
+                << "convertConservativeVariablesToPrimitiveVariables()\n"
+                << "The interior dimension of the primitive variables does not match that of patch."
+                << std::endl);
+        }
+    }
+    
+    for (int ei = 0; ei < num_eqn_conservative_var; ei++)
+    {
+        const hier::IntVector interior_dims_conservative_var =
+            conservative_variables[ei]->getBox().numberCells();
+        
+        if (interior_dims_conservative_var != d_interior_dims)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::"
+                << "convertConservativeVariablesToPrimitiveVariables()\n"
+                << "The interior dimension of the conservative variables does not match that of patch."
+                << std::endl);
+        }
+    }
+    
+    for (int ei = 1; ei < num_eqn_primitive_var; ei++)
+    {
+        if (num_ghosts_primitive_var != primitive_variables[ei]->getGhostCellWidth())
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::"
+                << "convertConservativeVariablesToPrimitiveVariables()\n"
+                << "The primitive variables don't have same ghost cell width."
+                << std::endl);
+        }
+    }
+    
+    for (int ei = 1; ei < num_eqn_conservative_var; ei++)
+    {
+        if (num_ghosts_conservative_var != conservative_variables[ei]->getGhostCellWidth())
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::"
+                << "convertConservativeVariablesToPrimitiveVariables()\n"
+                << "The conservative variables don't have same ghost cell width."
+                << std::endl);
+        }
+    }
+    
+    if (num_ghosts_primitive_var > num_ghosts_conservative_var)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::"
+            << "convertConservativeVariablesToPrimitiveVariables()\n"
+            << "The ghost cell width of primitive variables is larger than that of conservative variables."
+            << std::endl);
+    }
+    
+    /*
+     * Declare the pointers to the primitive variables and conservative variables.
+     */
+    
+    std::vector<double*> V;
+    V.resize(num_eqn_primitive_var);
+    
+    std::vector<double*> Q;
+    Q.resize(num_eqn_conservative_var);
+    
+    int count_eqn = 0;
+    
+    /*
+     * Convert conservative variables to primitive variables.
+     */
+    
+    // Create the temporary side data.
+    boost::shared_ptr<pdat::SideData<double> > data_density(
+        new pdat::SideData<double>(d_interior_box, 1, num_ghosts_conservative_var));
+    
+    boost::shared_ptr<pdat::SideData<double> > data_internal_energy(
+        new pdat::SideData<double>(d_interior_box, 1, num_ghosts_conservative_var));
+    
+    boost::shared_ptr<pdat::SideData<double> > data_pressure(
+        new pdat::SideData<double>(d_interior_box, 1, num_ghosts_conservative_var));
+    
+    double* rho     = nullptr;
+    double* epsilon = nullptr;
+    double* p       = nullptr;
+    
+    // Get the thermodynamic properties of the species.
+    std::vector<const double*> thermo_properties_ptr;
+    thermo_properties_ptr.reserve(static_cast<int> (d_thermo_properties.size()));
+    for (int ti = 0; ti < static_cast<int> (d_thermo_properties.size()); ti++)
+    {
+        thermo_properties_ptr.push_back(&d_thermo_properties[ti]);
+    }
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        const int interior_dim_0 = d_interior_dims[0];
+        
+        const int num_ghosts_0_primitive_var    = num_ghosts_primitive_var[0];
+        const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[0];
+        
+        /*
+         * Convert conservative variables to primitive variables in the x-direction.
+         */
+        
+        count_eqn = 0;
+        for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
+        {
+            int depth = primitive_variables[vi]->getDepth();
+            
+            for (int di = 0; di < depth; di++)
+            {
+                V[count_eqn] = primitive_variables[vi]->getPointer(0, di);
+                count_eqn++;
+            }
+        }
+        
+        count_eqn = 0;
+        for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
+        {
+            int depth = conservative_variables[vi]->getDepth();
+            
+            for (int di = 0; di < depth; di++)
+            {
+                Q[count_eqn] = conservative_variables[vi]->getPointer(0, di);
+                count_eqn++;
+            }
+        }
+        
+        rho     = data_density->getPointer(0, 0);
+        epsilon = data_internal_energy->getPointer(0, 0);
+        p       = data_pressure->getPointer(0, 0);
+        
+        // Get the density.
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = -num_ghosts_0_conservative_var;
+                i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
+                i++)
+        {
+            // Compute the linear index.
+            const int idx_conservative_var = i + num_ghosts_0_conservative_var;
+            
+            rho[idx_conservative_var] = Q[0][idx_conservative_var];
+        }
+        
+        // Compute the internal energy.
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = -num_ghosts_0_conservative_var;
+                i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
+                i++)
+        {
+            // Compute the linear index.
+            const int idx_conservative_var = i + num_ghosts_0_conservative_var;
+            
+            epsilon[idx_conservative_var] = (Q[1 + d_dim.getValue()][idx_conservative_var] -
+                double(1)/double(2)*(Q[1][idx_conservative_var]*Q[1][idx_conservative_var])/
+                rho[idx_conservative_var])/rho[idx_conservative_var];
+        }
+        
+        // Compute the pressure.
+        d_equation_of_state_mixing_rules->getEquationOfState()->computePressure(
+            data_pressure,
+            data_density,
+            data_internal_energy,
+            thermo_properties_ptr,
+            0);
+        
+        // Set the density.
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = -num_ghosts_0_primitive_var;
+                i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                i++)
+        {
+            // Compute the linear indices.
+            const int idx_primitive_var    = i + num_ghosts_0_primitive_var;
+            const int idx_conservative_var = i + num_ghosts_0_conservative_var;
+            
+            V[0][idx_primitive_var] = Q[0][idx_conservative_var];
+        }
+        
+        // Set the velocity.
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = -num_ghosts_0_primitive_var;
+                i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                i++)
+        {
+            // Compute the linear indices.
+            const int idx_primitive_var    = i + num_ghosts_0_primitive_var;
+            const int idx_conservative_var = i + num_ghosts_0_conservative_var;
+            
+            V[1][idx_primitive_var] = Q[1][idx_conservative_var]/rho[idx_conservative_var];
+        }
+        
+        // Set the pressure.
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = -num_ghosts_0_primitive_var;
+                i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                i++)
+        {
+            // Compute the linear indices.
+            const int idx_primitive_var    = i + num_ghosts_0_primitive_var;
+            const int idx_conservative_var = i + num_ghosts_0_conservative_var;
+            
+            V[1 + d_dim.getValue()][idx_primitive_var] = p[idx_conservative_var];
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        const int interior_dim_0 = d_interior_dims[0];
+        const int interior_dim_1 = d_interior_dims[1];
+        
+        const int num_ghosts_0_primitive_var = num_ghosts_primitive_var[0];
+        const int num_ghosts_1_primitive_var = num_ghosts_primitive_var[1];
+        const int ghostcell_dim_0_primitive_var = ghostcell_dims_primitive_var[0];
+        
+        const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[0];
+        const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[1];
+        const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[0];
+        
+        /*
+         * Convert conservative variables to primitive variables in the x-direction.
+         */
+        
+        count_eqn = 0;
+        for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
+        {
+            int depth = primitive_variables[vi]->getDepth();
+            
+            for (int di = 0; di < depth; di++)
+            {
+                V[count_eqn] = primitive_variables[vi]->getPointer(0, di);
+                count_eqn++;
+            }
+        }
+        
+        count_eqn = 0;
+        for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
+        {
+            int depth = conservative_variables[vi]->getDepth();
+            
+            for (int di = 0; di < depth; di++)
+            {
+                Q[count_eqn] = conservative_variables[vi]->getPointer(0, di);
+                count_eqn++;
+            }
+        }
+        
+        rho     = data_density->getPointer(0, 0);
+        epsilon = data_internal_energy->getPointer(0, 0);
+        p       = data_pressure->getPointer(0, 0);
+        
+        // Get the density.
+        for (int j = 0; j < interior_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = -num_ghosts_0_conservative_var;
+                    i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
+                    i++)
+            {
+                // Compute the linear index.
+                const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                    (j + num_ghosts_1_conservative_var)*(ghostcell_dim_0_conservative_var + 1);
+                
+                rho[idx_conservative_var] = Q[0][idx_conservative_var];
+            }
+        }
+        
+        // Compute the internal energy.
+        for (int j = 0; j < interior_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = -num_ghosts_0_conservative_var;
+                    i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
+                    i++)
+            {
+                // Compute the linear index.
+                const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                    (j + num_ghosts_1_conservative_var)*(ghostcell_dim_0_conservative_var + 1);
+                
+                epsilon[idx_conservative_var] = (Q[1 + d_dim.getValue()][idx_conservative_var] -
+                    double(1)/double(2)*(Q[1][idx_conservative_var]*Q[1][idx_conservative_var] +
+                    Q[2][idx_conservative_var]*Q[2][idx_conservative_var])/
+                    rho[idx_conservative_var])/rho[idx_conservative_var];
+            }
+        }
+        
+        // Compute the pressure.
+        d_equation_of_state_mixing_rules->getEquationOfState()->computePressure(
+            data_pressure,
+            data_density,
+            data_internal_energy,
+            thermo_properties_ptr,
+            0);
+        
+        // Set the density.
+        for (int j = 0; j < interior_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = -num_ghosts_0_primitive_var;
+                    i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                    i++)
+            {
+                // Compute the linear indices.
+                const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                    (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1);
+                
+                const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                    (j + num_ghosts_1_conservative_var)*(ghostcell_dim_0_conservative_var + 1);
+                
+                V[0][idx_primitive_var] = Q[0][idx_conservative_var];
+            }
+        }
+        
+        // Set the velocity.
+        for (int j = 0; j < interior_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = -num_ghosts_0_primitive_var;
+                    i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                    i++)
+            {
+                // Compute the linear indices.
+                const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                    (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1);
+                
+                const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                    (j + num_ghosts_1_conservative_var)*(ghostcell_dim_0_conservative_var + 1);
+                
+                V[1][idx_primitive_var] = Q[1][idx_conservative_var]/rho[idx_conservative_var];
+                V[2][idx_primitive_var] = Q[2][idx_conservative_var]/rho[idx_conservative_var];
+            }
+        }
+        
+        // Set the pressure.
+        for (int j = 0; j < interior_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = -num_ghosts_0_primitive_var;
+                    i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                    i++)
+            {
+                // Compute the linear indices.
+                const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                    (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1);
+                
+                const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                    (j + num_ghosts_1_conservative_var)*(ghostcell_dim_0_conservative_var + 1);
+                
+                V[1 + d_dim.getValue()][idx_primitive_var] = p[idx_conservative_var];
+            }
+        }
+        
+        /*
+         * Convert conservative variables to primitive variables in the y-direction.
+         */
+        
+        count_eqn = 0;
+        for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
+        {
+            int depth = primitive_variables[vi]->getDepth();
+            
+            for (int di = 0; di < depth; di++)
+            {
+                V[count_eqn] = primitive_variables[vi]->getPointer(1, di);
+                count_eqn++;
+            }
+        }
+        
+        count_eqn = 0;
+        for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
+        {
+            int depth = conservative_variables[vi]->getDepth();
+            
+            for (int di = 0; di < depth; di++)
+            {
+                Q[count_eqn] = conservative_variables[vi]->getPointer(1, di);
+                count_eqn++;
+            }
+        }
+        
+        rho     = data_density->getPointer(1, 0);
+        epsilon = data_internal_energy->getPointer(1, 0);
+        p       = data_pressure->getPointer(1, 0);
+        
+        // Get the density.
+        for (int j = -num_ghosts_1_conservative_var;
+                j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
+                j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
+            {
+                // Compute the linear index.
+                const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                    (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
+                
+                rho[idx_conservative_var] = Q[0][idx_conservative_var];
+            }
+        }
+        
+        // Compute the internal energy.
+        for (int j = -num_ghosts_1_conservative_var;
+                j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
+                j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
+            {
+                // Compute the linear index.
+                const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                    (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
+                
+                epsilon[idx_conservative_var] = (Q[1 + d_dim.getValue()][idx_conservative_var] -
+                    double(1)/double(2)*(Q[1][idx_conservative_var]*Q[1][idx_conservative_var] +
+                    Q[2][idx_conservative_var]*Q[2][idx_conservative_var])/
+                    rho[idx_conservative_var])/rho[idx_conservative_var];
+            }
+        }
+        
+        // Compute the pressure.
+        d_equation_of_state_mixing_rules->getEquationOfState()->computePressure(
+            data_pressure,
+            data_density,
+            data_internal_energy,
+            thermo_properties_ptr,
+            1);
+        
+        // Set the density.
+        for (int j = -num_ghosts_1_primitive_var;
+            j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
+            j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                    (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var;
+                
+                const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                    (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
+                
+                V[0][idx_primitive_var] = Q[0][idx_conservative_var];
+            }
+        }
+        
+        // Set the velocity.
+        for (int j = -num_ghosts_1_primitive_var;
+            j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
+            j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                    (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var;
+                
+                const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                    (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
+                
+                V[1][idx_primitive_var] = Q[1][idx_conservative_var]/rho[idx_conservative_var];
+                V[2][idx_primitive_var] = Q[2][idx_conservative_var]/rho[idx_conservative_var];
+            }
+        }
+        
+        // Set the pressure.
+        for (int j = -num_ghosts_1_primitive_var;
+            j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
+            j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                    (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var;
+                
+                const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                    (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
+                
+                V[1 + d_dim.getValue()][idx_primitive_var] = p[idx_conservative_var];
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const int interior_dim_0 = d_interior_dims[0];
+        const int interior_dim_1 = d_interior_dims[1];
+        const int interior_dim_2 = d_interior_dims[2];
+        
+        const int num_ghosts_0_primitive_var = num_ghosts_primitive_var[0];
+        const int num_ghosts_1_primitive_var = num_ghosts_primitive_var[1];
+        const int num_ghosts_2_primitive_var = num_ghosts_primitive_var[2];
+        const int ghostcell_dim_0_primitive_var = ghostcell_dims_primitive_var[0];
+        const int ghostcell_dim_1_primitive_var = ghostcell_dims_primitive_var[1];
+        
+        const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[0];
+        const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[1];
+        const int num_ghosts_2_conservative_var = num_ghosts_conservative_var[2];
+        const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[0];
+        const int ghostcell_dim_1_conservative_var = ghostcell_dims_conservative_var[1];
+        
+        /*
+         * Convert conservative variables to primitive variables in the x-direction.
+         */
+        
+        count_eqn = 0;
+        for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
+        {
+            int depth = primitive_variables[vi]->getDepth();
+            
+            for (int di = 0; di < depth; di++)
+            {
+                V[count_eqn] = primitive_variables[vi]->getPointer(0, di);
+                count_eqn++;
+            }
+        }
+        
+        count_eqn = 0;
+        for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
+        {
+            int depth = conservative_variables[vi]->getDepth();
+            
+            for (int di = 0; di < depth; di++)
+            {
+                Q[count_eqn] = conservative_variables[vi]->getPointer(0, di);
+                count_eqn++;
+            }
+        }
+        
+        rho     = data_density->getPointer(0, 0);
+        epsilon = data_internal_energy->getPointer(0, 0);
+        p       = data_pressure->getPointer(0, 0);
+        
+        // Get the density.
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -num_ghosts_0_conservative_var;
+                        i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
+                        i++)
+                {
+                    // Compute the linear index.
+                    const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*(ghostcell_dim_0_conservative_var + 1) +
+                        (k + num_ghosts_2_conservative_var)*(ghostcell_dim_0_conservative_var + 1)*
+                            ghostcell_dim_1_conservative_var;
+                    
+                    rho[idx_conservative_var] = Q[0][idx_conservative_var];
+                }
+            }
+        }
+        
+        // Compute the internal energy.
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -num_ghosts_0_conservative_var;
+                        i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
+                        i++)
+                {
+                    // Compute the linear index.
+                    const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*(ghostcell_dim_0_conservative_var + 1) +
+                        (k + num_ghosts_2_conservative_var)*(ghostcell_dim_0_conservative_var + 1)*
+                            ghostcell_dim_1_conservative_var;
+                    
+                    epsilon[idx_conservative_var] = (Q[1 + d_dim.getValue()][idx_conservative_var] -
+                        double(1)/double(2)*(Q[1][idx_conservative_var]*Q[1][idx_conservative_var] +
+                        Q[2][idx_conservative_var]*Q[2][idx_conservative_var] +
+                        Q[3][idx_conservative_var]*Q[3][idx_conservative_var])/
+                        rho[idx_conservative_var])/rho[idx_conservative_var];
+                }
+            }
+        }
+        
+        // Compute the pressure.
+        d_equation_of_state_mixing_rules->getEquationOfState()->computePressure(
+            data_pressure,
+            data_density,
+            data_internal_energy,
+            thermo_properties_ptr,
+            0);
+        
+        // Set the density.
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -num_ghosts_0_primitive_var;
+                        i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                        i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1) +
+                        (k + num_ghosts_2_primitive_var)*(ghostcell_dim_0_primitive_var + 1)*
+                            ghostcell_dim_1_primitive_var;
+                    
+                    const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*(ghostcell_dim_0_conservative_var + 1) +
+                        (k + num_ghosts_2_conservative_var)*(ghostcell_dim_0_conservative_var + 1)*
+                            ghostcell_dim_1_conservative_var;
+                    
+                    V[0][idx_primitive_var] = Q[0][idx_conservative_var];
+                }
+            }
+        }
+        
+        // Set the velocity.
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -num_ghosts_0_primitive_var;
+                        i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                        i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1) +
+                        (k + num_ghosts_2_primitive_var)*(ghostcell_dim_0_primitive_var + 1)*
+                            ghostcell_dim_1_primitive_var;
+                    
+                    const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*(ghostcell_dim_0_conservative_var + 1) +
+                        (k + num_ghosts_2_conservative_var)*(ghostcell_dim_0_conservative_var + 1)*
+                            ghostcell_dim_1_conservative_var;
+                    
+                    V[1][idx_primitive_var] = Q[1][idx_conservative_var]/rho[idx_conservative_var];
+                    V[2][idx_primitive_var] = Q[2][idx_conservative_var]/rho[idx_conservative_var];
+                    V[3][idx_primitive_var] = Q[3][idx_conservative_var]/rho[idx_conservative_var];
+                }
+            }
+        }
+        
+        // Set the pressure.
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -num_ghosts_0_primitive_var;
+                        i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                        i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1) +
+                        (k + num_ghosts_2_primitive_var)*(ghostcell_dim_0_primitive_var + 1)*
+                            ghostcell_dim_1_primitive_var;
+                    
+                    const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*(ghostcell_dim_0_conservative_var + 1) +
+                        (k + num_ghosts_2_conservative_var)*(ghostcell_dim_0_conservative_var + 1)*
+                            ghostcell_dim_1_conservative_var;
+                    
+                    V[1 + d_dim.getValue()][idx_primitive_var] = p[idx_conservative_var];
+                }
+            }
+        }
+        
+        /*
+         * Convert conservative variables to primitive variables in the y-direction.
+         */
+        
+        count_eqn = 0;
+        for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
+        {
+            int depth = primitive_variables[vi]->getDepth();
+            
+            for (int di = 0; di < depth; di++)
+            {
+                V[count_eqn] = primitive_variables[vi]->getPointer(1, di);
+                count_eqn++;
+            }
+        }
+        
+        count_eqn = 0;
+        for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
+        {
+            int depth = conservative_variables[vi]->getDepth();
+            
+            for (int di = 0; di < depth; di++)
+            {
+                Q[count_eqn] = conservative_variables[vi]->getPointer(1, di);
+                count_eqn++;
+            }
+        }
+        
+        rho     = data_density->getPointer(1, 0);
+        epsilon = data_internal_energy->getPointer(1, 0);
+        p       = data_pressure->getPointer(1, 0);
+        
+        // Get the density.
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = -num_ghosts_1_conservative_var;
+                    j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
+                    j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                        (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                            (ghostcell_dim_1_conservative_var + 1);
+                    
+                    rho[idx_conservative_var] = Q[0][idx_conservative_var];
+                }
+            }
+        }
+        
+        // Compute the internal energy.
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = -num_ghosts_1_conservative_var;
+                    j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
+                    j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                        (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                            (ghostcell_dim_1_conservative_var + 1);
+                    
+                    epsilon[idx_conservative_var] = (Q[1 + d_dim.getValue()][idx_conservative_var] -
+                        double(1)/double(2)*(Q[1][idx_conservative_var]*Q[1][idx_conservative_var] +
+                        Q[2][idx_conservative_var]*Q[2][idx_conservative_var] +
+                        Q[3][idx_conservative_var]*Q[3][idx_conservative_var])/
+                        rho[idx_conservative_var])/rho[idx_conservative_var];
+                }
+            }
+        }
+        
+        // Compute the pressure.
+        d_equation_of_state_mixing_rules->getEquationOfState()->computePressure(
+            data_pressure,
+            data_density,
+            data_internal_energy,
+            thermo_properties_ptr,
+            1);
+        
+        // Set the density.
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = -num_ghosts_1_primitive_var;
+                    j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
+                    j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                        (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                            (ghostcell_dim_1_primitive_var + 1);
+                    
+                    const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                        (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                            (ghostcell_dim_1_conservative_var + 1);
+                    
+                    V[0][idx_primitive_var] = Q[0][idx_conservative_var];
+                }
+            }
+        }
+        
+        // Set the velocity.
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = -num_ghosts_1_primitive_var;
+                    j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
+                    j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                        (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                            (ghostcell_dim_1_primitive_var + 1);
+                    
+                    const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                        (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                            (ghostcell_dim_1_conservative_var + 1);
+                    
+                    V[1][idx_primitive_var] = Q[1][idx_conservative_var]/rho[idx_conservative_var];
+                    V[2][idx_primitive_var] = Q[2][idx_conservative_var]/rho[idx_conservative_var];
+                    V[3][idx_primitive_var] = Q[3][idx_conservative_var]/rho[idx_conservative_var];
+                }
+            }
+        }
+        
+        // Set the pressure.
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = -num_ghosts_1_primitive_var;
+                    j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
+                    j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                        (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                            (ghostcell_dim_1_primitive_var + 1);
+                    
+                    const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                        (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                            (ghostcell_dim_1_conservative_var + 1);
+                    
+                    V[1 + d_dim.getValue()][idx_primitive_var] = p[idx_conservative_var];
+                }
+            }
+        }
+        
+        /*
+         * Convert conservative variables to primitive variables in the z-direction.
+         */
+        
+        count_eqn = 0;
+        for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
+        {
+            int depth = primitive_variables[vi]->getDepth();
+            
+            for (int di = 0; di < depth; di++)
+            {
+                V[count_eqn] = primitive_variables[vi]->getPointer(2, di);
+                count_eqn++;
+            }
+        }
+        
+        count_eqn = 0;
+        for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
+        {
+            int depth = conservative_variables[vi]->getDepth();
+            
+            for (int di = 0; di < depth; di++)
+            {
+                Q[count_eqn] = conservative_variables[vi]->getPointer(2, di);
+                count_eqn++;
+            }
+        }
+        
+        rho     = data_density->getPointer(2, 0);
+        epsilon = data_internal_energy->getPointer(2, 0);
+        p       = data_pressure->getPointer(2, 0);
+        
+        // Get the density.
+        for (int k = -num_ghosts_2_conservative_var;
+                k < interior_dim_2 + 1 + num_ghosts_2_conservative_var;
+                k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                        (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                            ghostcell_dim_1_conservative_var;
+                    
+                    rho[idx_conservative_var] = Q[0][idx_conservative_var];
+                }
+            }
+        }
+        
+        // Compute the internal energy.
+        for (int k = -num_ghosts_2_conservative_var;
+                k < interior_dim_2 + 1 + num_ghosts_2_conservative_var;
+                k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                        (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                            ghostcell_dim_1_conservative_var;
+                    
+                    epsilon[idx_conservative_var] = (Q[1 + d_dim.getValue()][idx_conservative_var] -
+                        double(1)/double(2)*(Q[1][idx_conservative_var]*Q[1][idx_conservative_var] +
+                        Q[2][idx_conservative_var]*Q[2][idx_conservative_var] +
+                        Q[3][idx_conservative_var]*Q[3][idx_conservative_var])/
+                        rho[idx_conservative_var])/rho[idx_conservative_var];
+                }
+            }
+        }
+        
+        // Compute the pressure.
+        d_equation_of_state_mixing_rules->getEquationOfState()->computePressure(
+            data_pressure,
+            data_density,
+            data_internal_energy,
+            thermo_properties_ptr,
+            2);
+        
+        // Set the density.
+        for (int k = -num_ghosts_2_primitive_var;
+                k < interior_dim_2 + 1 + num_ghosts_2_primitive_var;
+                k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                        (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                            ghostcell_dim_1_primitive_var;
+                    
+                    const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                        (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                            ghostcell_dim_1_conservative_var;
+                    
+                    V[0][idx_primitive_var] = Q[0][idx_conservative_var];
+                }
+            }
+        }
+        
+        // Set the velocity.
+        for (int k = -num_ghosts_2_primitive_var;
+                k < interior_dim_2 + 1 + num_ghosts_2_primitive_var;
+                k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                        (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                            ghostcell_dim_1_primitive_var;
+                    
+                    const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                        (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                            ghostcell_dim_1_conservative_var;
+                    
+                    V[1][idx_primitive_var] = Q[1][idx_conservative_var]/rho[idx_conservative_var];
+                    V[2][idx_primitive_var] = Q[2][idx_conservative_var]/rho[idx_conservative_var];
+                    V[3][idx_primitive_var] = Q[3][idx_conservative_var]/rho[idx_conservative_var];
+                }
+            }
+        }
+        
+        // Set the pressure.
+        for (int k = -num_ghosts_2_primitive_var;
+                k < interior_dim_2 + 1 + num_ghosts_2_primitive_var;
+                k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                        (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                            ghostcell_dim_1_primitive_var;
+                    
+                    const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                        (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                            ghostcell_dim_1_conservative_var;
+                    
+                    V[1 + d_dim.getValue()][idx_primitive_var] = p[idx_conservative_var];
+                }
+            }
+        }
+    }
+}
+
+
+/*
+ * Convert primitive variables to conservative variables.
+ */
+void
+FlowModelSingleSpecies::convertPrimitiveVariablesToConservativeVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables)
+{
+    /*
+     * Get the numbers of ghost cells of the variables.
+     */
+    
+    const hier::IntVector num_ghosts_conservative_var = conservative_variables[0]->
+        getGhostCellWidth();
+    
+    const hier::IntVector num_ghosts_primitive_var = primitive_variables[0]->
+        getGhostCellWidth();
+    
+    /*
+     * Get the ghost cell dimensions of of the variables.
+     */
+    
+    const hier::IntVector ghostcell_dims_conservative_var = conservative_variables[0]->
+        getGhostBox().numberCells();
+    
+    const hier::IntVector ghostcell_dims_primitive_var = primitive_variables[0]->
+        getGhostBox().numberCells();
+    
+    /*
+     * Get the size of variables.
+     */
+    
+    int num_eqn_conservative_var = 0;
+    int num_eqn_primitive_var = 0;
+    
+    /*
+     * Check the size of variables.
+     */
+    
+    for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
+    {
+        num_eqn_conservative_var += conservative_variables[vi]->getDepth();
+    }
+    
+    for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
+    {
+        num_eqn_primitive_var += primitive_variables[vi]->getDepth();
+    }
+    
+    if (num_eqn_conservative_var != d_num_eqn)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::"
+            << "convertPrimitiveVariablesToConservativeVariables()\n"
+            << "The number of conservative variables are incorrect."
+            << std::endl);
+    }
+    
+    if (num_eqn_primitive_var != d_num_eqn)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::"
+            << "convertPrimitiveVariablesToConservativeVariables()\n"
+            << "The number of primitive variables are incorrect."
+            << std::endl);
+    }
+    
+    /*
+     * Check potential failures.
+     */
+    
+    for (int ei = 0; ei < num_eqn_conservative_var; ei++)
+    {
+        const hier::IntVector interior_dims_conservative_var =
+            conservative_variables[ei]->getBox().numberCells();
+        
+        if (interior_dims_conservative_var != d_interior_dims)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::"
+                << "convertPrimitiveVariablesToConservativeVariables()\n"
+                << "The interior dimension of the conservative variables does not match that of patch."
+                << std::endl);
+        }
+    }
+    
+    for (int ei = 0; ei < num_eqn_primitive_var; ei++)
+    {
+        const hier::IntVector interior_dims_primitive_var =
+            primitive_variables[ei]->getBox().numberCells();
+        
+        if (interior_dims_primitive_var != d_interior_dims)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::"
+                << "convertPrimitiveVariablesToConservativeVariables()\n"
+                << "The interior dimension of the primitive variables does not match that of patch."
+                << std::endl);
+        }
+    }
+    
+    for (int ei = 1; ei < num_eqn_conservative_var; ei++)
+    {
+        if (num_ghosts_conservative_var != conservative_variables[ei]->getGhostCellWidth())
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::"
+                << "convertPrimitiveVariablesToConservativeVariables()\n"
+                << "The conservative variables don't have same ghost cell width."
+                << std::endl);
+        }
+    }
+    
+    for (int ei = 1; ei < num_eqn_primitive_var; ei++)
+    {
+        if (num_ghosts_primitive_var != primitive_variables[ei]->getGhostCellWidth())
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::"
+                << "convertPrimitiveVariablesToConservativeVariables()\n"
+                << "The primitive variables don't have same ghost cell width."
+                << std::endl);
+        }
+    }
+    
+    if (num_ghosts_conservative_var > num_ghosts_primitive_var)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::"
+            << "convertPrimitiveVariablesToConservativeVariables()\n"
+            << "The ghost cell width of conservative variables is larger than that of primitive variables."
+            << std::endl);
+    }
+    
+    /*
+     * Declare the pointers to the conservative variables and primitive variables.
+     */
+    
+    std::vector<double*> Q;
+    Q.resize(num_eqn_conservative_var);
+    
+    std::vector<double*> V;
+    V.resize(num_eqn_primitive_var);
+    
+    int count_eqn = 0;
+    
+    /*
+     * Convert primitive variables to conservative variables.
+     */
+    
+    // Create the temporary side data.
+    boost::shared_ptr<pdat::SideData<double> > data_density(
+        new pdat::SideData<double>(d_interior_box, 1, num_ghosts_primitive_var));
+    
+    boost::shared_ptr<pdat::SideData<double> > data_pressure(
+        new pdat::SideData<double>(d_interior_box, 1, num_ghosts_primitive_var));
+    
+    boost::shared_ptr<pdat::SideData<double> > data_internal_energy(
+        new pdat::SideData<double>(d_interior_box, 1, num_ghosts_primitive_var));
+    
+    double* rho     = nullptr;
+    double* p       = nullptr;
+    double* epsilon = nullptr;
+    
+    // Get the thermodynamic properties of the species.
+    std::vector<const double*> thermo_properties_ptr;
+    thermo_properties_ptr.reserve(static_cast<int> (d_thermo_properties.size()));
+    for (int ti = 0; ti < static_cast<int> (d_thermo_properties.size()); ti++)
+    {
+        thermo_properties_ptr.push_back(&d_thermo_properties[ti]);
+    }
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        const int interior_dim_0 = d_interior_dims[0];
+        
+        const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[0];
+        const int num_ghosts_0_primitive_var    = num_ghosts_primitive_var[0];
+        
+        /*
+         * Convert primitive variables to conservative variables in the x-direction.
+         */
+        
+        count_eqn = 0;
+        for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
+        {
+            int depth = conservative_variables[vi]->getDepth();
+            
+            for (int di = 0; di < depth; di++)
+            {
+                Q[count_eqn] = conservative_variables[vi]->getPointer(0, di);
+                count_eqn++;
+            }
+        }
+        
+        count_eqn = 0;
+        for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
+        {
+            int depth = primitive_variables[vi]->getDepth();
+            
+            for (int di = 0; di < depth; di++)
+            {
+                V[count_eqn] = primitive_variables[vi]->getPointer(0, di);
+                count_eqn++;
+            }
+        }
+        
+        rho     = data_density->getPointer(0, 0);
+        epsilon = data_internal_energy->getPointer(0, 0);
+        p       = data_pressure->getPointer(0, 0);
+        
+        // Get the density.
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = -num_ghosts_0_primitive_var;
+                i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                i++)
+        {
+            // Compute the linear index.
+            const int idx_primitive_var = i + num_ghosts_0_primitive_var;
+            
+            rho[idx_primitive_var] = V[0][idx_primitive_var];
+        }
+        
+        // Get the pressure.
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = -num_ghosts_0_primitive_var;
+                i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                i++)
+        {
+            // Compute the linear index.
+            const int idx_primitive_var = i + num_ghosts_0_primitive_var;
+            
+            p[idx_primitive_var] = V[1 + d_dim.getValue()][idx_primitive_var];
+        }
+        
+        // Compute the specific internal energy.
+        d_equation_of_state_mixing_rules->getEquationOfState()->computeInternalEnergy(
+            data_internal_energy,
+            data_density,
+            data_pressure,
+            thermo_properties_ptr,
+            0);
+        
+        // Set the density.
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = -num_ghosts_0_conservative_var;
+                i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
+                i++)
+        {
+            // Compute the linear indices.
+            const int idx_conservative_var = i + num_ghosts_0_conservative_var;
+            const int idx_primitive_var    = i + num_ghosts_0_primitive_var;
+            
+            Q[0][idx_conservative_var] = V[0][idx_primitive_var];
+        }
+        
+        // Set the momentum.
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = -num_ghosts_0_conservative_var;
+                i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
+                i++)
+        {
+            // Compute the linear indices.
+            const int idx_conservative_var = i + num_ghosts_0_conservative_var;
+            const int idx_primitive_var    = i + num_ghosts_0_primitive_var;
+            
+            Q[1][idx_conservative_var] = rho[idx_primitive_var]*V[1][idx_primitive_var];
+        }
+        
+        // Set the total energy.
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = -num_ghosts_0_conservative_var;
+                i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
+                i++)
+        {
+            // Compute the linear indices.
+            const int idx_conservative_var = i + num_ghosts_0_conservative_var;
+            const int idx_primitive_var    = i + num_ghosts_0_primitive_var;
+            
+            Q[d_num_species][idx_conservative_var] = epsilon[idx_primitive_var] +
+                double(1)/double(2)*rho[idx_primitive_var]*(
+                V[1][idx_primitive_var]*V[1][idx_primitive_var]);
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        const int interior_dim_0 = d_interior_dims[0];
+        const int interior_dim_1 = d_interior_dims[1];
+        
+        const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[0];
+        const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[1];
+        const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[0];
+        
+        const int num_ghosts_0_primitive_var = num_ghosts_primitive_var[0];
+        const int num_ghosts_1_primitive_var = num_ghosts_primitive_var[1];
+        const int ghostcell_dim_0_primitive_var = ghostcell_dims_primitive_var[0];
+        
+        /*
+         * Convert primitive variables to conservative variables in the x-direction.
+         */
+        
+        count_eqn = 0;
+        for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
+        {
+            int depth = conservative_variables[vi]->getDepth();
+            
+            for (int di = 0; di < depth; di++)
+            {
+                Q[count_eqn] = conservative_variables[vi]->getPointer(0, di);
+                count_eqn++;
+            }
+        }
+        
+        count_eqn = 0;
+        for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
+        {
+            int depth = primitive_variables[vi]->getDepth();
+            
+            for (int di = 0; di < depth; di++)
+            {
+                V[count_eqn] = primitive_variables[vi]->getPointer(0, di);
+                count_eqn++;
+            }
+        }
+        
+        rho     = data_density->getPointer(0, 0);
+        epsilon = data_internal_energy->getPointer(0, 0);
+        p       = data_pressure->getPointer(0, 0);
+        
+        // Get the density.
+        for (int j = 0; j < interior_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = -num_ghosts_0_primitive_var;
+                    i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                    i++)
+            {
+                // Compute the linear index.
+                const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                    (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1);
+                
+                rho[idx_primitive_var] = V[0][idx_primitive_var];
+            }
+        }
+        
+        // Get the pressure.
+        for (int j = 0; j < interior_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = -num_ghosts_0_primitive_var;
+                    i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                    i++)
+            {
+                // Compute the linear index.
+                const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                    (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1);
+                
+                p[idx_primitive_var] = V[1 + d_dim.getValue()][idx_primitive_var];
+            }
+        }
+        
+        // Compute the specific internal energy.
+        d_equation_of_state_mixing_rules->getEquationOfState()->computeInternalEnergy(
+            data_internal_energy,
+            data_density,
+            data_pressure,
+            thermo_properties_ptr,
+            0);
+        
+        // Set the density.
+        for (int j = 0; j < interior_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = -num_ghosts_0_conservative_var;
+                    i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
+                    i++)
+            {
+                // Compute the linear indices.
+                const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                    (j + num_ghosts_1_conservative_var)*(ghostcell_dim_0_conservative_var + 1);
+                
+                const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                    (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1);
+                
+                Q[0][idx_conservative_var] = V[0][idx_primitive_var];
+            }
+        }
+        
+        // Set the momentum.
+        for (int j = 0; j < interior_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = -num_ghosts_0_conservative_var;
+                    i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
+                    i++)
+            {
+                // Compute the linear indices.
+                const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                    (j + num_ghosts_1_conservative_var)*(ghostcell_dim_0_conservative_var + 1);
+                
+                const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                    (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1);
+                
+                Q[1][idx_conservative_var] = rho[idx_primitive_var]*V[1][idx_primitive_var];
+                Q[2][idx_conservative_var] = rho[idx_primitive_var]*V[2][idx_primitive_var];
+            }
+        }
+        
+        // Set the total energy.
+        for (int j = 0; j < interior_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = -num_ghosts_0_conservative_var;
+                    i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
+                    i++)
+            {
+                // Compute the linear indices.
+                const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                    (j + num_ghosts_1_conservative_var)*(ghostcell_dim_0_conservative_var + 1);
+                
+                const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                    (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1);
+                
+                Q[d_num_species][idx_conservative_var] = epsilon[idx_primitive_var] +
+                    double(1)/double(2)*rho[idx_primitive_var]*(
+                    V[1][idx_primitive_var]*V[1][idx_primitive_var] + 
+                    V[2][idx_primitive_var]*V[2][idx_primitive_var]);
+            }
+        }
+        
+        /*
+         * Convert primitive variables to conservative variables in the y-direction.
+         */
+        
+        count_eqn = 0;
+        for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
+        {
+            int depth = conservative_variables[vi]->getDepth();
+            
+            for (int di = 0; di < depth; di++)
+            {
+                Q[count_eqn] = conservative_variables[vi]->getPointer(1, di);
+                count_eqn++;
+            }
+        }
+        
+        count_eqn = 0;
+        for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
+        {
+            int depth = primitive_variables[vi]->getDepth();
+            
+            for (int di = 0; di < depth; di++)
+            {
+                V[count_eqn] = primitive_variables[vi]->getPointer(1, di);
+                count_eqn++;
+            }
+        }
+        
+        rho     = data_density->getPointer(1, 0);
+        epsilon = data_internal_energy->getPointer(1, 0);
+        p       = data_pressure->getPointer(1, 0);
+        
+        // Get the density.
+        for (int j = -num_ghosts_1_primitive_var;
+                j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
+                j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
+            {
+                // Compute the linear index.
+                const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                    (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var;
+                
+                rho[idx_primitive_var] = V[0][idx_primitive_var];
+            }
+        }
+        
+        // Get the pressure.
+        for (int j = -num_ghosts_1_primitive_var;
+                j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
+                j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
+            {
+                // Compute the linear index.
+                const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                    (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var;
+                
+                p[idx_primitive_var] = V[1 + d_dim.getValue()][idx_primitive_var];
+            }
+        }
+        
+        // Compute the specific internal energy.
+        d_equation_of_state_mixing_rules->getEquationOfState()->computeInternalEnergy(
+            data_internal_energy,
+            data_density,
+            data_pressure,
+            thermo_properties_ptr,
+            1);
+        
+        // Set the density.
+        for (int j = -num_ghosts_1_primitive_var;
+            j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
+            j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                    (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
+                
+                const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                    (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var;
+                
+                Q[0][idx_conservative_var] = V[0][idx_primitive_var];
+            }
+        }
+        
+        // Set the momentum.
+        for (int j = -num_ghosts_1_primitive_var;
+            j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
+            j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                    (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
+                
+                const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                    (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var;
+                
+                Q[1][idx_conservative_var] = rho[idx_primitive_var]*V[1][idx_primitive_var];
+                Q[2][idx_conservative_var] = rho[idx_primitive_var]*V[2][idx_primitive_var];
+            }
+        }
+        
+        // Set the total energy.
+        for (int j = -num_ghosts_1_primitive_var;
+            j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
+            j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                    (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
+                
+                const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                    (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var;
+                
+                Q[d_num_species][idx_conservative_var] = epsilon[idx_primitive_var] +
+                    double(1)/double(2)*rho[idx_primitive_var]*(
+                    V[1][idx_primitive_var]*V[1][idx_primitive_var] + 
+                    V[2][idx_primitive_var]*V[2][idx_primitive_var]);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const int interior_dim_0 = d_interior_dims[0];
+        const int interior_dim_1 = d_interior_dims[1];
+        const int interior_dim_2 = d_interior_dims[2];
+        
+        const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[0];
+        const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[1];
+        const int num_ghosts_2_conservative_var = num_ghosts_conservative_var[2];
+        const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[0];
+        const int ghostcell_dim_1_conservative_var = ghostcell_dims_conservative_var[1];
+        
+        const int num_ghosts_0_primitive_var = num_ghosts_primitive_var[0];
+        const int num_ghosts_1_primitive_var = num_ghosts_primitive_var[1];
+        const int num_ghosts_2_primitive_var = num_ghosts_primitive_var[2];
+        const int ghostcell_dim_0_primitive_var = ghostcell_dims_primitive_var[0];
+        const int ghostcell_dim_1_primitive_var = ghostcell_dims_primitive_var[1];
+        
+        /*
+         * Convert primitive variables to conservative variables in the x-direction.
+         */
+        
+        count_eqn = 0;
+        for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
+        {
+            int depth = conservative_variables[vi]->getDepth();
+            
+            for (int di = 0; di < depth; di++)
+            {
+                Q[count_eqn] = conservative_variables[vi]->getPointer(0, di);
+                count_eqn++;
+            }
+        }
+        
+        count_eqn = 0;
+        for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
+        {
+            int depth = primitive_variables[vi]->getDepth();
+            
+            for (int di = 0; di < depth; di++)
+            {
+                V[count_eqn] = primitive_variables[vi]->getPointer(0, di);
+                count_eqn++;
+            }
+        }
+        
+        rho     = data_density->getPointer(0, 0);
+        epsilon = data_internal_energy->getPointer(0, 0);
+        p       = data_pressure->getPointer(0, 0);
+        
+        // Get the density.
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -num_ghosts_0_primitive_var;
+                        i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                        i++)
+                {
+                    // Compute the linear index.
+                    const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1) +
+                        (k + num_ghosts_2_primitive_var)*(ghostcell_dim_0_primitive_var + 1)*
+                            ghostcell_dim_1_primitive_var;
+                    
+                    rho[idx_primitive_var] = V[0][idx_primitive_var];
+                }
+            }
+        }
+        
+        // Get the pressure.
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -num_ghosts_0_primitive_var;
+                        i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                        i++)
+                {
+                    // Compute the linear index.
+                    const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1) +
+                        (k + num_ghosts_2_primitive_var)*(ghostcell_dim_0_primitive_var + 1)*
+                            ghostcell_dim_1_primitive_var;
+                    
+                    p[idx_primitive_var] = V[1 + d_dim.getValue()][idx_primitive_var];
+                }
+            }
+        }
+        
+        // Compute the specific internal energy.
+        d_equation_of_state_mixing_rules->getEquationOfState()->computeInternalEnergy(
+            data_internal_energy,
+            data_density,
+            data_pressure,
+            thermo_properties_ptr,
+            0);
+        
+        // Set the density.
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -num_ghosts_0_conservative_var;
+                        i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
+                        i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*(ghostcell_dim_0_conservative_var + 1) +
+                        (k + num_ghosts_2_conservative_var)*(ghostcell_dim_0_conservative_var + 1)*
+                            ghostcell_dim_1_conservative_var;
+                    
+                    const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1) +
+                        (k + num_ghosts_2_primitive_var)*(ghostcell_dim_0_primitive_var + 1)*
+                            ghostcell_dim_1_primitive_var;
+                    
+                    Q[0][idx_conservative_var] = V[0][idx_primitive_var];
+                }
+            }
+        }
+        
+        // Set the momentum.
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -num_ghosts_0_conservative_var;
+                        i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
+                        i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*(ghostcell_dim_0_conservative_var + 1) +
+                        (k + num_ghosts_2_conservative_var)*(ghostcell_dim_0_conservative_var + 1)*
+                            ghostcell_dim_1_conservative_var;
+                    
+                    const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1) +
+                        (k + num_ghosts_2_primitive_var)*(ghostcell_dim_0_primitive_var + 1)*
+                            ghostcell_dim_1_primitive_var;
+                    
+                    Q[1][idx_conservative_var] = rho[idx_primitive_var]*V[1][idx_primitive_var];
+                    Q[2][idx_conservative_var] = rho[idx_primitive_var]*V[2][idx_primitive_var];
+                    Q[3][idx_conservative_var] = rho[idx_primitive_var]*V[3][idx_primitive_var];
+                }
+            }
+        }
+        
+        // Set the total energy.
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -num_ghosts_0_conservative_var;
+                        i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
+                        i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*(ghostcell_dim_0_conservative_var + 1) +
+                        (k + num_ghosts_2_conservative_var)*(ghostcell_dim_0_conservative_var + 1)*
+                            ghostcell_dim_1_conservative_var;
+                    
+                    const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1) +
+                        (k + num_ghosts_2_primitive_var)*(ghostcell_dim_0_primitive_var + 1)*
+                            ghostcell_dim_1_primitive_var;
+                    
+                    Q[d_num_species][idx_conservative_var] = epsilon[idx_primitive_var] +
+                        double(1)/double(2)*rho[idx_primitive_var]*(
+                        V[1][idx_primitive_var]*V[1][idx_primitive_var] + 
+                        V[2][idx_primitive_var]*V[2][idx_primitive_var] +
+                        V[3][idx_primitive_var]*V[3][idx_primitive_var]);
+                }
+            }
+        }
+        
+        /*
+         * Convert primitive variables to conservative variables in the y-direction.
+         */
+        
+        count_eqn = 0;
+        for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
+        {
+            int depth = conservative_variables[vi]->getDepth();
+            
+            for (int di = 0; di < depth; di++)
+            {
+                Q[count_eqn] = conservative_variables[vi]->getPointer(1, di);
+                count_eqn++;
+            }
+        }
+        
+        count_eqn = 0;
+        for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
+        {
+            int depth = primitive_variables[vi]->getDepth();
+            
+            for (int di = 0; di < depth; di++)
+            {
+                V[count_eqn] = primitive_variables[vi]->getPointer(1, di);
+                count_eqn++;
+            }
+        }
+        
+        rho     = data_density->getPointer(1, 0);
+        epsilon = data_internal_energy->getPointer(1, 0);
+        p       = data_pressure->getPointer(1, 0);
+        
+        // Get the density.
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = -num_ghosts_1_primitive_var;
+                    j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
+                    j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                        (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                            (ghostcell_dim_1_primitive_var + 1);
+                    
+                    rho[idx_primitive_var] = V[0][idx_primitive_var];
+                }
+            }
+        }
+        
+        // Get the pressure.
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = -num_ghosts_1_primitive_var;
+                    j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
+                    j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                        (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                            (ghostcell_dim_1_primitive_var + 1);
+                    
+                    p[idx_primitive_var] = V[1 + d_dim.getValue()][idx_primitive_var];
+                }
+            }
+        }
+        
+        // Compute the specific internal energy.
+        d_equation_of_state_mixing_rules->getEquationOfState()->computeInternalEnergy(
+            data_internal_energy,
+            data_density,
+            data_pressure,
+            thermo_properties_ptr,
+            1);
+        
+        // Set the density.
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = -num_ghosts_1_conservative_var;
+                    j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
+                    j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                        (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                            (ghostcell_dim_1_conservative_var + 1);
+                    
+                    const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                        (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                            (ghostcell_dim_1_primitive_var + 1);
+                    
+                    Q[0][idx_conservative_var] = V[0][idx_primitive_var];
+                }
+            }
+        }
+        
+        // Set the momentum.
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = -num_ghosts_1_conservative_var;
+                    j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
+                    j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                        (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                            (ghostcell_dim_1_conservative_var + 1);
+                    
+                    const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                        (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                            (ghostcell_dim_1_primitive_var + 1);
+                    
+                    Q[1][idx_conservative_var] = rho[idx_primitive_var]*V[1][idx_primitive_var];
+                    Q[2][idx_conservative_var] = rho[idx_primitive_var]*V[2][idx_primitive_var];
+                    Q[3][idx_conservative_var] = rho[idx_primitive_var]*V[3][idx_primitive_var];
+                }
+            }
+        }
+        
+        // Set the total energy.
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = -num_ghosts_1_conservative_var;
+                    j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
+                    j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                        (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                            (ghostcell_dim_1_conservative_var + 1);
+                    
+                    const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                        (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                            (ghostcell_dim_1_primitive_var + 1);
+                    
+                    Q[d_num_species][idx_conservative_var] = epsilon[idx_primitive_var] +
+                        double(1)/double(2)*rho[idx_primitive_var]*(
+                        V[1][idx_primitive_var]*V[1][idx_primitive_var] + 
+                        V[2][idx_primitive_var]*V[2][idx_primitive_var] +
+                        V[3][idx_primitive_var]*V[3][idx_primitive_var]);
+                }
+            }
+        }
+        
+        /*
+         * Convert primitive variables to conservative variables in the z-direction.
+         */
+        
+        count_eqn = 0;
+        for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
+        {
+            int depth = conservative_variables[vi]->getDepth();
+            
+            for (int di = 0; di < depth; di++)
+            {
+                Q[count_eqn] = conservative_variables[vi]->getPointer(2, di);
+                count_eqn++;
+            }
+        }
+        
+        count_eqn = 0;
+        for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
+        {
+            int depth = primitive_variables[vi]->getDepth();
+            
+            for (int di = 0; di < depth; di++)
+            {
+                V[count_eqn] = primitive_variables[vi]->getPointer(2, di);
+                count_eqn++;
+            }
+        }
+        
+        rho     = data_density->getPointer(2, 0);
+        epsilon = data_internal_energy->getPointer(2, 0);
+        p       = data_pressure->getPointer(2, 0);
+        
+        // Get the density.
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int k = -num_ghosts_2_primitive_var;
+                 k < interior_dim_2 + 1 + num_ghosts_2_primitive_var;
+                 k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                            (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                            (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                                ghostcell_dim_1_primitive_var;
+                        
+                        rho[idx_primitive_var] = V[0][idx_primitive_var];
+                    }
+                }
+            }
+        }
+        
+        // Get the pressure.
+        for (int k = -num_ghosts_2_primitive_var;
+                k < interior_dim_2 + 1 + num_ghosts_2_primitive_var;
+                k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                        (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                            ghostcell_dim_1_primitive_var;
+                    
+                    p[idx_primitive_var] = V[1 + d_dim.getValue()][idx_primitive_var];
+                }
+            }
+        }
+        
+        // Compute the specific internal energy.
+        d_equation_of_state_mixing_rules->getEquationOfState()->computeInternalEnergy(
+            data_internal_energy,
+            data_density,
+            data_pressure,
+            thermo_properties_ptr,
+            2);
+        
+        // Set the density.
+        for (int k = -num_ghosts_2_conservative_var;
+                k < interior_dim_2 + 1 + num_ghosts_2_conservative_var;
+                k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                        (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                            ghostcell_dim_1_conservative_var;
+                    
+                    const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                        (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                            ghostcell_dim_1_primitive_var;
+                    
+                    Q[0][idx_conservative_var] = V[0][idx_primitive_var];
+                }
+            }
+        }
+        
+        // Set the momentum.
+        for (int k = -num_ghosts_2_conservative_var;
+                k < interior_dim_2 + 1 + num_ghosts_2_conservative_var;
+                k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                        (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                            ghostcell_dim_1_conservative_var;
+                    
+                    const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                        (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                            ghostcell_dim_1_primitive_var;
+                    
+                    Q[1][idx_conservative_var] = rho[idx_primitive_var]*V[1][idx_primitive_var];
+                    Q[2][idx_conservative_var] = rho[idx_primitive_var]*V[2][idx_primitive_var];
+                    Q[3][idx_conservative_var] = rho[idx_primitive_var]*V[3][idx_primitive_var];
+                }
+            }
+        }
+        
+        // Set the total energy.
+        for (int k = -num_ghosts_2_conservative_var;
+                k < interior_dim_2 + 1 + num_ghosts_2_conservative_var;
+                k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                        (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                            ghostcell_dim_1_conservative_var;
+                    
+                    const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                        (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                            ghostcell_dim_1_primitive_var;
+                    
+                    Q[d_num_species][idx_conservative_var] = epsilon[idx_primitive_var] +
+                        double(1)/double(2)*rho[idx_primitive_var]*(
+                        V[1][idx_primitive_var]*V[1][idx_primitive_var] + 
+                        V[2][idx_primitive_var]*V[2][idx_primitive_var] +
+                        V[3][idx_primitive_var]*V[3][idx_primitive_var]);
+                }
+            }
+        }
+    }
+}
+
+
+/*
+ * Convert conservative variables to primitive variables.
+ */
+void
+FlowModelSingleSpecies::convertConservativeVariablesToPrimitiveVariables(
     const std::vector<const double*>& conservative_variables,
     const std::vector<double*>& primitive_variables)
 {
@@ -6201,6 +8488,7 @@ FlowModelSingleSpecies::convertConservativeVariablesToPrimitiveVariables(
         thermo_properties_ptr.push_back(&d_thermo_properties[ti]);
     }
     
+    // Compute the specific internal energy.
     double epsilon = double(0);
     if (d_dim == tbox::Dimension(1))
     {
@@ -6251,7 +8539,7 @@ FlowModelSingleSpecies::convertPrimitiveVariablesToConservativeVariables(
         thermo_properties_ptr.push_back(&d_thermo_properties[ti]);
     }
     
-    // Compute the specific internal energy.
+    // Compute the total energy.
     const double epsilon = d_equation_of_state_mixing_rules->getEquationOfState()->
         getInternalEnergy(
             V[0],
