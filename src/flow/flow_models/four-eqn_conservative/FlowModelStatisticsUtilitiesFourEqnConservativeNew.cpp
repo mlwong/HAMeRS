@@ -235,6 +235,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 data_context,
                 output_time);
         }
+        else if (statistical_quantity_key == "ra1_budget")
+        {
+            outputBudgetTurbMassFluxXWithInhomogeneousXDirection(
+                "ra1_budget.dat",
+                patch_hierarchy,
+                data_context,
+                output_time);
+        }
         else
         {
             TBOX_ERROR(d_object_name
@@ -1597,6 +1605,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetTurbMassFluxXWithIn
     
     const double dx = getRefinedDomainGridSpacingX(patch_hierarchy);
     
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    std::vector<std::vector<double> > averaged_quantities;
+    std::vector<bool> use_reciprocal;
+    std::vector<int> derivative_directions;
+    
     /*
      * Compute rho_a1.
      */
@@ -1612,10 +1626,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetTurbMassFluxXWithIn
         0,
         patch_hierarchy,
         data_context);
-    
-    std::vector<std::string> quantity_names;
-    std::vector<int> component_indices;
-    std::vector<std::vector<double> > averaged_quantities;
     
     quantity_names.push_back("DENSITY");
     component_indices.push_back(0);
@@ -1676,6 +1686,138 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetTurbMassFluxXWithIn
         dx);
     
     /*
+     * Compute term VI(3).
+     */
+    
+    std::vector<double> du_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
+        0,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> dv_dy_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
+        1,
+        1,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> dw_dz_mean;
+    if (d_dim == tbox::Dimension(3))
+    {
+        dw_dz_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+            "VELOCITY",
+            2,
+            2,
+            patch_hierarchy,
+            data_context);
+    }
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    use_reciprocal.push_back(false);
+    derivative_directions.push_back(-1);
+    averaged_quantities.push_back(u_mean);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    use_reciprocal.push_back(false);
+    derivative_directions.push_back(0);
+    averaged_quantities.push_back(du_dx_mean);
+    
+    std::vector<double> epsilon_a1_1 = getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_reciprocal,
+        derivative_directions,
+        averaged_quantities,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_reciprocal.clear();
+    derivative_directions.clear();
+    averaged_quantities.clear();
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    use_reciprocal.push_back(false);
+    derivative_directions.push_back(-1);
+    averaged_quantities.push_back(u_mean);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(1);
+    use_reciprocal.push_back(false);
+    derivative_directions.push_back(1);
+    averaged_quantities.push_back(dv_dy_mean);
+    
+    std::vector<double> epsilon_a1_2 = getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_reciprocal,
+        derivative_directions,
+        averaged_quantities,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_reciprocal.clear();
+    derivative_directions.clear();
+    averaged_quantities.clear();
+    
+    std::vector<double> epsilon_a1_3;
+    if (d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(0);
+        use_reciprocal.push_back(false);
+        derivative_directions.push_back(-1);
+        averaged_quantities.push_back(u_mean);
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(2);
+        use_reciprocal.push_back(false);
+        derivative_directions.push_back(2);
+        averaged_quantities.push_back(dw_dz_mean);
+        
+        epsilon_a1_3 = getQuantityCorrelationWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_reciprocal,
+            derivative_directions,
+            averaged_quantities,
+            patch_hierarchy,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_reciprocal.clear();
+        derivative_directions.clear();
+        averaged_quantities.clear();
+    }
+    
+    std::vector<double> rho_epsilon_a1(finest_level_dim_0, double(0));
+    
+    if (d_dim == tbox::Dimension(2))
+    {
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            rho_epsilon_a1[i] = -rho_mean[i]*(epsilon_a1_1[i] + epsilon_a1_2[i]);
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            rho_epsilon_a1[i] = -rho_mean[i]*(epsilon_a1_1[i] + epsilon_a1_2[i] + epsilon_a1_3[i]);
+        }
+    }
+    
+    
+    /*
      * Output budget.
      */
     
@@ -1688,7 +1830,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetTurbMassFluxXWithIn
         
         f_output.write((char*)&output_time, sizeof(double));
         f_output.write((char*)&rho_p_u_p[0], sizeof(double)*rho_p_u_p.size());
+        // Term II.
         f_output.write((char*)&d_rho_u_tilde_a1_dx[0], sizeof(double)*d_rho_u_tilde_a1_dx.size());
+        // Term VI(3).
+        f_output.write((char*)&rho_epsilon_a1[0], sizeof(double)*rho_epsilon_a1.size());
         
         f_output.close();
     }
@@ -1756,7 +1901,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::getRefinedDomainGridSpacingX(
     
     const double* dx = d_grid_geometry->getDx();
     
-    return dx[0]*ratioFinestLevelToCoarestLevel[0];
+    return dx[0]/ratioFinestLevelToCoarestLevel[0];
 }
 
 
@@ -6789,15 +6934,30 @@ FlowModelStatisticsUtilitiesFourEqnConservative::getQuantityCorrelationWithInhom
                 
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    if (derivative_directions[qi] >= 0)
+                    std::unordered_map<std::string, hier::IntVector>::const_iterator quantity_it = num_subghosts_of_data.find(quantity_names[qi]);
+                    
+                    if (quantity_it == num_subghosts_of_data.end())
                     {
-                        num_subghosts_of_data.insert(
-                            std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts));
+                        if (derivative_directions[qi] >= 0)
+                        {
+                            num_subghosts_of_data.insert(
+                                std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts));
+                        }
+                        else
+                        {
+                            num_subghosts_of_data.insert(
+                                std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
+                        }
                     }
                     else
                     {
-                        num_subghosts_of_data.insert(
-                            std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
+                        if (derivative_directions[qi] >= 0 && quantity_it->second < num_ghosts)
+                        {
+                            num_subghosts_of_data.erase(quantity_it);
+                            
+                            num_subghosts_of_data.insert(
+                                std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts));
+                        }
                     }
                 }
                 
@@ -7205,15 +7365,30 @@ FlowModelStatisticsUtilitiesFourEqnConservative::getQuantityCorrelationWithInhom
                 
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    if (derivative_directions[qi] >= 0)
+                    std::unordered_map<std::string, hier::IntVector>::const_iterator quantity_it = num_subghosts_of_data.find(quantity_names[qi]);
+                    
+                    if (quantity_it == num_subghosts_of_data.end())
                     {
-                        num_subghosts_of_data.insert(
-                            std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts));
+                        if (derivative_directions[qi] >= 0)
+                        {
+                            num_subghosts_of_data.insert(
+                                std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts));
+                        }
+                        else
+                        {
+                            num_subghosts_of_data.insert(
+                                std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
+                        }
                     }
                     else
                     {
-                        num_subghosts_of_data.insert(
-                            std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
+                        if (derivative_directions[qi] >= 0 && quantity_it->second < num_ghosts)
+                        {
+                            num_subghosts_of_data.erase(quantity_it);
+                            
+                            num_subghosts_of_data.insert(
+                                std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts));
+                        }
                     }
                 }
                 
