@@ -56,18 +56,6 @@ DifferenceSecondOrder::computeDifferenceWithVariableLocalMean(
     TBOX_ASSERT(depth < cell_data->getDepth());
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = cell_data->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
-    
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(difference->getBox().numberCells() == interior_dims);
-#endif
-
-    // Get the number of ghost cells of the cell data and difference data.
-    const hier::IntVector num_ghosts_cell_data = cell_data->getGhostCellWidth();
-    const hier::IntVector num_ghosts_difference = difference->getGhostCellWidth();
-    
     // Get the dimensions of box that covers interior of patch plus ghost cells.
     const hier::Box ghost_box_cell_data = cell_data->getGhostBox();
     const hier::IntVector ghostcell_dims_cell_data = ghost_box_cell_data.numberCells();
@@ -77,14 +65,28 @@ DifferenceSecondOrder::computeDifferenceWithVariableLocalMean(
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_cell_data(d_dim);
+    hier::IntVector offset_difference(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells of the cell data and difference data.
+        const hier::IntVector num_ghosts_cell_data = cell_data->getGhostCellWidth();
+        const hier::IntVector num_ghosts_difference = difference->getGhostCellWidth();
+        
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        // Get the dimensions of box that covers the interior of patch.
+        const hier::Box interior_box = cell_data->getBox();
+        const hier::IntVector interior_dims = interior_box.numberCells();
+        
+        TBOX_ASSERT(difference->getBox().numberCells() == interior_dims);
+        
         /*
          * Check potential failures.
          */
@@ -108,6 +110,9 @@ DifferenceSecondOrder::computeDifferenceWithVariableLocalMean(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_cell_data = num_ghosts_cell_data;
+        offset_difference = num_ghosts_difference;
     }
     else
     {
@@ -119,8 +124,11 @@ DifferenceSecondOrder::computeDifferenceWithVariableLocalMean(
         TBOX_ASSERT(ghost_box_difference.contains(domain));
 #endif        
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_cell_data = domain.lower() - ghost_box_cell_data.lower();
+        offset_difference = domain.lower() - ghost_box_difference.lower();
     }
     
     // Determine whether local mean is requred to be completed.
@@ -128,14 +136,12 @@ DifferenceSecondOrder::computeDifferenceWithVariableLocalMean(
     if (variable_local_mean)
     {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        TBOX_ASSERT(variable_local_mean->getBox().numberCells() == interior_dims);
-#endif
-        
-        compute_variable_local_mean = true;
+        TBOX_ASSERT(variable_local_mean->getBox().numberCells() == 
+                    difference->getBox().numberCells());
         
         const hier::IntVector num_ghosts_local_means = variable_local_mean->getGhostCellWidth();
+        const hier::IntVector num_ghosts_difference = difference->getGhostCellWidth();
         
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         if (num_ghosts_local_means != num_ghosts_difference)
         {
             TBOX_ERROR(d_object_name
@@ -143,8 +149,10 @@ DifferenceSecondOrder::computeDifferenceWithVariableLocalMean(
                 << "The number of ghost cells of variable local means doesn't match that of difference."
                 << std::endl);
         }
-    }
 #endif
+        
+        compute_variable_local_mean = true;
+    }
     
     // Get the pointer to the current depth component of the given cell data.
     double* f = cell_data->getPointer(depth);
@@ -161,14 +169,14 @@ DifferenceSecondOrder::computeDifferenceWithVariableLocalMean(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_cell_data = num_ghosts_cell_data[0];
-        const int num_ghosts_0_difference = num_ghosts_difference[0];
+        const int offset_0_cell_data = offset_cell_data[0];
+        const int offset_0_difference = offset_difference[0];
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
@@ -176,11 +184,11 @@ DifferenceSecondOrder::computeDifferenceWithVariableLocalMean(
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
             // Compute the linear indices.
-            const int idx = i + num_ghosts_0_difference;
+            const int idx = i + offset_0_difference;
             
-            const int idx_cell_data     = i + num_ghosts_0_cell_data;
-            const int idx_cell_data_x_L = i - 1 + num_ghosts_0_cell_data;
-            const int idx_cell_data_x_R = i + 1 + num_ghosts_0_cell_data;
+            const int idx_cell_data     = i + offset_0_cell_data;
+            const int idx_cell_data_x_L = i - 1 + offset_0_cell_data;
+            const int idx_cell_data_x_R = i + 1 + offset_0_cell_data;
             
             w[idx] = fabs(f[idx_cell_data_x_R] + double(-2)*f[idx_cell_data] + f[idx_cell_data_x_L]);
         }
@@ -193,11 +201,11 @@ DifferenceSecondOrder::computeDifferenceWithVariableLocalMean(
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx = i + num_ghosts_0_difference;
+                const int idx = i + offset_0_difference;
                 
-                const int idx_cell_data     = i + num_ghosts_0_cell_data;
-                const int idx_cell_data_x_L = i - 1 + num_ghosts_0_cell_data;
-                const int idx_cell_data_x_R = i + 1 + num_ghosts_0_cell_data;
+                const int idx_cell_data     = i + offset_0_cell_data;
+                const int idx_cell_data_x_L = i - 1 + offset_0_cell_data;
+                const int idx_cell_data_x_R = i + 1 + offset_0_cell_data;
                 
                 f_mean[idx] = f[idx_cell_data_x_R] + double(2)*f[idx_cell_data] + f[idx_cell_data_x_L];
             }
@@ -206,7 +214,7 @@ DifferenceSecondOrder::computeDifferenceWithVariableLocalMean(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -214,12 +222,12 @@ DifferenceSecondOrder::computeDifferenceWithVariableLocalMean(
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_cell_data = num_ghosts_cell_data[0];
-        const int num_ghosts_1_cell_data = num_ghosts_cell_data[1];
+        const int offset_0_cell_data = offset_cell_data[0];
+        const int offset_1_cell_data = offset_cell_data[1];
         const int ghostcell_dim_0_cell_data = ghostcell_dims_cell_data[0];
         
-        const int num_ghosts_0_difference = num_ghosts_difference[0];
-        const int num_ghosts_1_difference = num_ghosts_difference[1];
+        const int offset_0_difference = offset_difference[0];
+        const int offset_1_difference = offset_difference[1];
         const int ghostcell_dim_0_difference = ghostcell_dims_difference[0];
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -230,23 +238,23 @@ DifferenceSecondOrder::computeDifferenceWithVariableLocalMean(
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {        
                 // Compute the linear indices.
-                const int idx = (i + num_ghosts_0_difference) +
-                    (j + num_ghosts_1_difference)*ghostcell_dim_0_difference;
+                const int idx = (i + offset_0_difference) +
+                    (j + offset_1_difference)*ghostcell_dim_0_difference;
                 
-                const int idx_cell_data = (i + num_ghosts_0_cell_data) +
-                    (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                const int idx_cell_data = (i + offset_0_cell_data) +
+                    (j + offset_1_cell_data)*ghostcell_dim_0_cell_data;
                 
-                const int idx_cell_data_x_L = (i - 1 + num_ghosts_0_cell_data) +
-                    (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                const int idx_cell_data_x_L = (i - 1 + offset_0_cell_data) +
+                    (j + offset_1_cell_data)*ghostcell_dim_0_cell_data;
                 
-                const int idx_cell_data_x_R = (i + 1 + num_ghosts_0_cell_data) +
-                    (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                const int idx_cell_data_x_R = (i + 1 + offset_0_cell_data) +
+                    (j + offset_1_cell_data)*ghostcell_dim_0_cell_data;
                 
-                const int idx_cell_data_y_B = (i + num_ghosts_0_cell_data) +
-                    (j - 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                const int idx_cell_data_y_B = (i + offset_0_cell_data) +
+                    (j - 1 + offset_1_cell_data)*ghostcell_dim_0_cell_data;
                 
-                const int idx_cell_data_y_T = (i + num_ghosts_0_cell_data) +
-                    (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                const int idx_cell_data_y_T = (i + offset_0_cell_data) +
+                    (j + 1 + offset_1_cell_data)*ghostcell_dim_0_cell_data;
                 
                 double w_x = f[idx_cell_data_x_R] + double(-2)*f[idx_cell_data] + f[idx_cell_data_x_L];
                 double w_y = f[idx_cell_data_y_T] + double(-2)*f[idx_cell_data] + f[idx_cell_data_y_B];
@@ -265,23 +273,23 @@ DifferenceSecondOrder::computeDifferenceWithVariableLocalMean(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx = (i + num_ghosts_0_difference) +
-                        (j + num_ghosts_1_difference)*ghostcell_dim_0_difference;
+                    const int idx = (i + offset_0_difference) +
+                        (j + offset_1_difference)*ghostcell_dim_0_difference;
                     
-                    const int idx_cell_data = (i + num_ghosts_0_cell_data) +
-                        (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                    const int idx_cell_data = (i + offset_0_cell_data) +
+                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data;
                     
-                    const int idx_cell_data_x_L = (i - 1 + num_ghosts_0_cell_data) +
-                        (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                    const int idx_cell_data_x_L = (i - 1 + offset_0_cell_data) +
+                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data;
                     
-                    const int idx_cell_data_x_R = (i + 1 + num_ghosts_0_cell_data) +
-                        (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                    const int idx_cell_data_x_R = (i + 1 + offset_0_cell_data) +
+                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data;
                     
-                    const int idx_cell_data_y_B = (i + num_ghosts_0_cell_data) +
-                        (j - 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                    const int idx_cell_data_y_B = (i + offset_0_cell_data) +
+                        (j - 1 + offset_1_cell_data)*ghostcell_dim_0_cell_data;
                     
-                    const int idx_cell_data_y_T = (i + num_ghosts_0_cell_data) +
-                        (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                    const int idx_cell_data_y_T = (i + offset_0_cell_data) +
+                        (j + 1 + offset_1_cell_data)*ghostcell_dim_0_cell_data;
                     
                     double f_mean_x = f[idx_cell_data_x_R] + double(2)*f[idx_cell_data] + f[idx_cell_data_x_L];
                     double f_mean_y = f[idx_cell_data_y_T] + double(2)*f[idx_cell_data] + f[idx_cell_data_y_B];
@@ -294,7 +302,7 @@ DifferenceSecondOrder::computeDifferenceWithVariableLocalMean(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -304,15 +312,15 @@ DifferenceSecondOrder::computeDifferenceWithVariableLocalMean(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_cell_data = num_ghosts_cell_data[0];
-        const int num_ghosts_1_cell_data = num_ghosts_cell_data[1];
-        const int num_ghosts_2_cell_data = num_ghosts_cell_data[2];
+        const int offset_0_cell_data = offset_cell_data[0];
+        const int offset_1_cell_data = offset_cell_data[1];
+        const int offset_2_cell_data = offset_cell_data[2];
         const int ghostcell_dim_0_cell_data = ghostcell_dims_cell_data[0];
         const int ghostcell_dim_1_cell_data = ghostcell_dims_cell_data[1];
         
-        const int num_ghosts_0_difference = num_ghosts_difference[0];
-        const int num_ghosts_1_difference = num_ghosts_difference[1];
-        const int num_ghosts_2_difference = num_ghosts_difference[2];
+        const int offset_0_difference = offset_difference[0];
+        const int offset_1_difference = offset_difference[1];
+        const int offset_2_difference = offset_difference[2];
         const int ghostcell_dim_0_difference = ghostcell_dims_difference[0];
         const int ghostcell_dim_1_difference = ghostcell_dims_difference[1];
         
@@ -326,44 +334,44 @@ DifferenceSecondOrder::computeDifferenceWithVariableLocalMean(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx = (i + num_ghosts_0_difference) +
-                        (j + num_ghosts_1_difference)*ghostcell_dim_0_difference +
-                        (k + num_ghosts_2_difference)*ghostcell_dim_0_difference*
+                    const int idx = (i + offset_0_difference) +
+                        (j + offset_1_difference)*ghostcell_dim_0_difference +
+                        (k + offset_2_difference)*ghostcell_dim_0_difference*
                             ghostcell_dim_1_difference;
                     
-                    const int idx_cell_data = (i + num_ghosts_0_cell_data) +
-                        (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                        (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                    const int idx_cell_data = (i + offset_0_cell_data) +
+                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                        (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
                             ghostcell_dim_1_cell_data;
                     
-                    const int idx_cell_data_x_L = (i - 1 + num_ghosts_0_cell_data) +
-                        (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                        (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                    const int idx_cell_data_x_L = (i - 1 + offset_0_cell_data) +
+                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                        (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
                             ghostcell_dim_1_cell_data;
                     
-                    const int idx_cell_data_x_R = (i + 1 + num_ghosts_0_cell_data) +
-                        (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                        (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                    const int idx_cell_data_x_R = (i + 1 + offset_0_cell_data) +
+                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                        (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
                             ghostcell_dim_1_cell_data;
                     
-                    const int idx_cell_data_y_B = (i + num_ghosts_0_cell_data) +
-                        (j - 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                        (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                    const int idx_cell_data_y_B = (i + offset_0_cell_data) +
+                        (j - 1 + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                        (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
                             ghostcell_dim_1_cell_data;
                     
-                    const int idx_cell_data_y_T = (i + num_ghosts_0_cell_data) +
-                        (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                        (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                    const int idx_cell_data_y_T = (i + offset_0_cell_data) +
+                        (j + 1 + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                        (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
                             ghostcell_dim_1_cell_data;
                     
-                    const int idx_cell_data_z_B = (i + num_ghosts_0_cell_data) +
-                        (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                        (k - 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                    const int idx_cell_data_z_B = (i + offset_0_cell_data) +
+                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                        (k - 1 + offset_2_cell_data)*ghostcell_dim_0_cell_data*
                             ghostcell_dim_1_cell_data;
                     
-                    const int idx_cell_data_z_F = (i + num_ghosts_0_cell_data) +
-                        (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                        (k + 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                    const int idx_cell_data_z_F = (i + offset_0_cell_data) +
+                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                        (k + 1 + offset_2_cell_data)*ghostcell_dim_0_cell_data*
                             ghostcell_dim_1_cell_data;
                     
                     double w_x = f[idx_cell_data_x_R] + double(-2)*f[idx_cell_data] + f[idx_cell_data_x_L];
@@ -387,44 +395,44 @@ DifferenceSecondOrder::computeDifferenceWithVariableLocalMean(
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx = (i + num_ghosts_0_difference) +
-                            (j + num_ghosts_1_difference)*ghostcell_dim_0_difference +
-                            (k + num_ghosts_2_difference)*ghostcell_dim_0_difference*
+                        const int idx = (i + offset_0_difference) +
+                            (j + offset_1_difference)*ghostcell_dim_0_difference +
+                            (k + offset_2_difference)*ghostcell_dim_0_difference*
                                 ghostcell_dim_1_difference;
                         
-                        const int idx_cell_data = (i + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                        const int idx_cell_data = (i + offset_0_cell_data) +
+                            (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                            (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
                                 ghostcell_dim_1_cell_data;
                         
-                        const int idx_cell_data_x_L = (i - 1 + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                        const int idx_cell_data_x_L = (i - 1 + offset_0_cell_data) +
+                            (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                            (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
                                 ghostcell_dim_1_cell_data;
                         
-                        const int idx_cell_data_x_R = (i + 1 + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                        const int idx_cell_data_x_R = (i + 1 + offset_0_cell_data) +
+                            (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                            (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
                                 ghostcell_dim_1_cell_data;
                         
-                        const int idx_cell_data_y_B = (i + num_ghosts_0_cell_data) +
-                            (j - 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                        const int idx_cell_data_y_B = (i + offset_0_cell_data) +
+                            (j - 1 + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                            (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
                                 ghostcell_dim_1_cell_data;
                         
-                        const int idx_cell_data_y_T = (i + num_ghosts_0_cell_data) +
-                            (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                        const int idx_cell_data_y_T = (i + offset_0_cell_data) +
+                            (j + 1 + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                            (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
                                 ghostcell_dim_1_cell_data;
                         
-                        const int idx_cell_data_z_B = (i + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k - 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                        const int idx_cell_data_z_B = (i + offset_0_cell_data) +
+                            (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                            (k - 1 + offset_2_cell_data)*ghostcell_dim_0_cell_data*
                                 ghostcell_dim_1_cell_data;
                         
-                        const int idx_cell_data_z_F = (i + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k + 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                        const int idx_cell_data_z_F = (i + offset_0_cell_data) +
+                            (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                            (k + 1 + offset_2_cell_data)*ghostcell_dim_0_cell_data*
                                 ghostcell_dim_1_cell_data;
                         
                         double f_mean_x = f[idx_cell_data_x_R] + double(2)*f[idx_cell_data] + f[idx_cell_data_x_L];
