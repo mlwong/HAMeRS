@@ -80,9 +80,11 @@ DifferenceSecondOrder::computeDifferenceWithVariableLocalMean(
         const hier::IntVector num_ghosts_cell_data = cell_data->getGhostCellWidth();
         const hier::IntVector num_ghosts_difference = difference->getGhostCellWidth();
         
+        // Get the interior box.
+        const hier::Box interior_box = cell_data->getBox();
+        
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         // Get the dimensions of box that covers the interior of patch.
-        const hier::Box interior_box = cell_data->getBox();
         const hier::IntVector interior_dims = interior_box.numberCells();
         
         TBOX_ASSERT(difference->getBox().numberCells() == interior_dims);
