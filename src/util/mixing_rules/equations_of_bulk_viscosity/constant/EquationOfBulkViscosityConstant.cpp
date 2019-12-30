@@ -98,35 +98,40 @@ EquationOfBulkViscosityConstant::computeBulkViscosity(
     TBOX_ASSERT(data_molecular_properties->getDepth() >= 1);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_bulk_viscosity->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_bulk_viscosity = data_bulk_viscosity->getGhostBox();
+    const hier::IntVector ghostcell_dims_bulk_viscosity = ghost_box_bulk_viscosity.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_molecular_properties->getBox().numberCells() == interior_dims);
-#endif
-    
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
-    
-    const hier::IntVector num_ghosts_bulk_viscosity = data_bulk_viscosity->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_bulk_viscosity =
-        data_bulk_viscosity->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_molecular_properties = data_molecular_properties->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_molecular_properties =
-        data_molecular_properties->getGhostBox().numberCells();
+    const hier::Box ghost_box_molecular_properties = data_molecular_properties->getGhostBox();
+    const hier::IntVector ghostcell_dims_molecular_properties = ghost_box_molecular_properties.numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_bulk_viscosity(d_dim);
+    hier::IntVector offset_molecular_properties(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_bulk_viscosity = data_bulk_viscosity->getGhostCellWidth();
+        const hier::IntVector num_ghosts_molecular_properties = data_molecular_properties->getGhostCellWidth();
+        
+        // Get the interior box.
+        const hier::Box interior_box = data_bulk_viscosity->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        // Get the dimensions of box that covers the interior of patch.
+        const hier::IntVector interior_dims = interior_box.numberCells();
+        
+        TBOX_ASSERT(data_molecular_properties->getBox().numberCells() == interior_dims);
+#endif
+    
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_bulk_viscosity;
@@ -137,6 +142,9 @@ EquationOfBulkViscosityConstant::computeBulkViscosity(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_bulk_viscosity = num_ghosts_bulk_viscosity;
+        offset_molecular_properties = num_ghosts_molecular_properties;
     }
     else
     {
@@ -145,8 +153,11 @@ EquationOfBulkViscosityConstant::computeBulkViscosity(
         TBOX_ASSERT(data_molecular_properties->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_bulk_viscosity = domain.lower() - ghost_box_bulk_viscosity.lower();
+        offset_molecular_properties = domain.lower() - ghost_box_molecular_properties.lower();
     }
     
     /*
@@ -159,14 +170,14 @@ EquationOfBulkViscosityConstant::computeBulkViscosity(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_bulk_viscosity = num_ghosts_bulk_viscosity[0];
-        const int num_ghosts_0_molecular_properties = num_ghosts_molecular_properties[0];
+        const int offset_0_bulk_viscosity = offset_bulk_viscosity[0];
+        const int offset_0_molecular_properties = offset_molecular_properties[0];
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
@@ -174,8 +185,8 @@ EquationOfBulkViscosityConstant::computeBulkViscosity(
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
             // Compute the linear indices.
-            const int idx_bulk_viscosity = i + num_ghosts_0_bulk_viscosity;
-            const int idx_molecular_properties = i + num_ghosts_0_molecular_properties;
+            const int idx_bulk_viscosity = i + offset_0_bulk_viscosity;
+            const int idx_molecular_properties = i + offset_0_molecular_properties;
             
             mu_v[idx_bulk_viscosity] = mu_v_src[idx_molecular_properties];
         }
@@ -183,7 +194,7 @@ EquationOfBulkViscosityConstant::computeBulkViscosity(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -191,12 +202,12 @@ EquationOfBulkViscosityConstant::computeBulkViscosity(
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_bulk_viscosity = num_ghosts_bulk_viscosity[0];
-        const int num_ghosts_1_bulk_viscosity = num_ghosts_bulk_viscosity[1];
+        const int offset_0_bulk_viscosity = offset_bulk_viscosity[0];
+        const int offset_1_bulk_viscosity = offset_bulk_viscosity[1];
         const int ghostcell_dim_0_bulk_viscosity = ghostcell_dims_bulk_viscosity[0];
         
-        const int num_ghosts_0_molecular_properties = num_ghosts_molecular_properties[0];
-        const int num_ghosts_1_molecular_properties = num_ghosts_molecular_properties[1];
+        const int offset_0_molecular_properties = offset_molecular_properties[0];
+        const int offset_1_molecular_properties = offset_molecular_properties[1];
         const int ghostcell_dim_0_molecular_properties = ghostcell_dims_molecular_properties[0];
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -207,11 +218,11 @@ EquationOfBulkViscosityConstant::computeBulkViscosity(
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx_bulk_viscosity = (i + num_ghosts_0_bulk_viscosity) +
-                    (j + num_ghosts_1_bulk_viscosity)*ghostcell_dim_0_bulk_viscosity;
+                const int idx_bulk_viscosity = (i + offset_0_bulk_viscosity) +
+                    (j + offset_1_bulk_viscosity)*ghostcell_dim_0_bulk_viscosity;
                 
-                const int idx_molecular_properties = (i + num_ghosts_0_molecular_properties) +
-                    (j + num_ghosts_1_molecular_properties)*ghostcell_dim_0_molecular_properties;
+                const int idx_molecular_properties = (i + offset_0_molecular_properties) +
+                    (j + offset_1_molecular_properties)*ghostcell_dim_0_molecular_properties;
                 
                 mu_v[idx_bulk_viscosity] = mu_v_src[idx_molecular_properties];
             }
@@ -220,7 +231,7 @@ EquationOfBulkViscosityConstant::computeBulkViscosity(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -230,15 +241,15 @@ EquationOfBulkViscosityConstant::computeBulkViscosity(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_bulk_viscosity = num_ghosts_bulk_viscosity[0];
-        const int num_ghosts_1_bulk_viscosity = num_ghosts_bulk_viscosity[1];
-        const int num_ghosts_2_bulk_viscosity = num_ghosts_bulk_viscosity[2];
+        const int offset_0_bulk_viscosity = offset_bulk_viscosity[0];
+        const int offset_1_bulk_viscosity = offset_bulk_viscosity[1];
+        const int offset_2_bulk_viscosity = offset_bulk_viscosity[2];
         const int ghostcell_dim_0_bulk_viscosity = ghostcell_dims_bulk_viscosity[0];
         const int ghostcell_dim_1_bulk_viscosity = ghostcell_dims_bulk_viscosity[1];
         
-        const int num_ghosts_0_molecular_properties = num_ghosts_molecular_properties[0];
-        const int num_ghosts_1_molecular_properties = num_ghosts_molecular_properties[1];
-        const int num_ghosts_2_molecular_properties = num_ghosts_molecular_properties[2];
+        const int offset_0_molecular_properties = offset_molecular_properties[0];
+        const int offset_1_molecular_properties = offset_molecular_properties[1];
+        const int offset_2_molecular_properties = offset_molecular_properties[2];
         const int ghostcell_dim_0_molecular_properties = ghostcell_dims_molecular_properties[0];
         const int ghostcell_dim_1_molecular_properties = ghostcell_dims_molecular_properties[1];
         
@@ -252,14 +263,14 @@ EquationOfBulkViscosityConstant::computeBulkViscosity(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_bulk_viscosity = (i + num_ghosts_0_bulk_viscosity) +
-                        (j + num_ghosts_1_bulk_viscosity)*ghostcell_dim_0_bulk_viscosity +
-                        (k + num_ghosts_2_bulk_viscosity)*ghostcell_dim_0_bulk_viscosity*
+                    const int idx_bulk_viscosity = (i + offset_0_bulk_viscosity) +
+                        (j + offset_1_bulk_viscosity)*ghostcell_dim_0_bulk_viscosity +
+                        (k + offset_2_bulk_viscosity)*ghostcell_dim_0_bulk_viscosity*
                             ghostcell_dim_1_bulk_viscosity;
                     
-                    const int idx_molecular_properties = (i + num_ghosts_0_molecular_properties) +
-                        (j + num_ghosts_1_molecular_properties)*ghostcell_dim_0_molecular_properties +
-                        (k + num_ghosts_2_molecular_properties)*ghostcell_dim_0_molecular_properties*
+                    const int idx_molecular_properties = (i + offset_0_molecular_properties) +
+                        (j + offset_1_molecular_properties)*ghostcell_dim_0_molecular_properties +
+                        (k + offset_2_molecular_properties)*ghostcell_dim_0_molecular_properties*
                             ghostcell_dim_1_molecular_properties;
                     
                     mu_v[idx_bulk_viscosity] = mu_v_src[idx_molecular_properties];
