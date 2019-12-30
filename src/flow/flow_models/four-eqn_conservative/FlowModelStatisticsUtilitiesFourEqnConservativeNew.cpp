@@ -1646,6 +1646,13 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetTurbMassFluxXWithIn
     component_indices.clear();
     averaged_quantities.clear();
     
+    std::vector<double> a_1(rho_p_u_p);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        a_1[i] /= rho_mean[i];
+    }
+    
     /*
      * Compute term II.
      */
@@ -1686,7 +1693,132 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetTurbMassFluxXWithIn
         dx);
     
     /*
-     * Compute term VI(3).
+     * Compute term III(1).
+     */
+    
+    std::vector<double> rho_inv_mean = getAveragedReciprocalOfQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_reciprocal.push_back(false);
+    averaged_quantities.push_back(rho_mean);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_reciprocal.push_back(true);
+    averaged_quantities.push_back(rho_inv_mean);
+    
+    std::vector<double> b = getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_reciprocal,
+        averaged_quantities,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_reciprocal.clear();
+    averaged_quantities.clear();
+    
+    std::vector<double> dp_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "PRESSURE",
+        0,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> b_dp_dx(dp_dx_mean);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        b_dp_dx[i] *= b[i];
+    }
+    
+    /*
+     * Compute term III(2).
+     */
+    
+    // ...
+    
+    /*
+     * Compute term III(3).
+     */
+    
+    std::vector<double> drho_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    // Compute R_11.
+    
+    std::vector<double> zeros(finest_level_dim_0, double(0));
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(zeros);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(u_tilde);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(u_tilde);
+    
+    std::vector<double> R_11 = getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        averaged_quantities,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    averaged_quantities.clear();
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        R_11[i] /= rho_mean[i];
+    }
+    
+    std::vector<double> m_R_11_drho_dx(drho_dx_mean);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        m_R_11_drho_dx[i] *= (-R_11[i]);
+    }
+    
+    /*
+     * Compute term IV(1).
+     */
+    
+    std::vector<double> a_1_sq(a_1);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        a_1_sq[i] *= a_1[i];
+    }
+    
+    std::vector<double> da_1_sq_dx = computeDerivativeOfVector1D(
+        a_1_sq,
+        dx);
+    
+    std::vector<double> rho_da_1_sq_dx(da_1_sq_dx);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        rho_da_1_sq_dx[i] *= rho_mean[i];
+    }
+    
+    /*
+     * Compute term IV(2).
      */
     
     std::vector<double> du_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
@@ -1695,6 +1827,104 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetTurbMassFluxXWithIn
         0,
         patch_hierarchy,
         data_context);
+    
+    std::vector<double> m_rho_a_1_du_dx(du_dx_mean);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        m_rho_a_1_du_dx[i] *= (-rho_mean[i]*a_1[i]);
+    }
+    
+    /*
+     * Compute term V.
+     */
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(rho_mean);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(u_mean);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(u_mean);
+    
+    std::vector<double> rho_p_u_p_sq_over_rho = getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        averaged_quantities,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    averaged_quantities.clear();
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        rho_p_u_p_sq_over_rho[i] /= rho_mean[i];
+    }
+    
+    std::vector<double> drho_p_u_p_sq_over_rho_dx = computeDerivativeOfVector1D(
+        rho_p_u_p_sq_over_rho,
+        dx);
+    
+    std::vector<double> m_rho_drho_p_u_p_sq_over_rho_dx(drho_p_u_p_sq_over_rho_dx);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        m_rho_drho_p_u_p_sq_over_rho_dx[i] *= (-rho_mean[i]);
+    }
+    
+    /*
+     * Compute term VI(1).
+     */
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_reciprocal.push_back(true);
+    derivative_directions.push_back(-1);
+    averaged_quantities.push_back(rho_inv_mean);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_reciprocal.push_back(false);
+    derivative_directions.push_back(0);
+    averaged_quantities.push_back(dp_dx_mean);
+    
+    std::vector<double> rho_rho_inv_p_dp_dx_p = getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_reciprocal,
+        derivative_directions,
+        averaged_quantities,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_reciprocal.clear();
+    derivative_directions.clear();
+    averaged_quantities.clear();
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        rho_rho_inv_p_dp_dx_p[i] *= rho_mean[i];
+    }
+    
+    /*
+     * Compute term VI(3).
+     */
+    
+    // Repeated.
+    // std::vector<double> du_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+    //     "VELOCITY",
+    //     0,
+    //     0,
+    //     patch_hierarchy,
+    //     data_context);
     
     std::vector<double> dv_dy_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
         "VELOCITY",
@@ -1832,6 +2062,22 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetTurbMassFluxXWithIn
         f_output.write((char*)&rho_p_u_p[0], sizeof(double)*rho_p_u_p.size());
         // Term II.
         f_output.write((char*)&d_rho_u_tilde_a1_dx[0], sizeof(double)*d_rho_u_tilde_a1_dx.size());
+        
+        // Term III(1).
+        f_output.write((char*)&b_dp_dx[0], sizeof(double)*b_dp_dx.size());
+        // Term III(3).
+        f_output.write((char*)&m_R_11_drho_dx[0], sizeof(double)*m_R_11_drho_dx.size());
+        
+        // Term IV(1).
+        f_output.write((char*)&rho_da_1_sq_dx[0], sizeof(double)*rho_da_1_sq_dx.size());
+        // Term IV(2).
+        f_output.write((char*)&m_rho_a_1_du_dx[0], sizeof(double)*m_rho_a_1_du_dx.size());
+        
+        // Term V.
+        f_output.write((char*)&m_rho_drho_p_u_p_sq_over_rho_dx[0], sizeof(double)*m_rho_drho_p_u_p_sq_over_rho_dx.size());
+        
+        // Term VI(1).
+        f_output.write((char*)&rho_rho_inv_p_dp_dx_p[0], sizeof(double)*rho_rho_inv_p_dp_dx_p.size());
         // Term VI(3).
         f_output.write((char*)&rho_epsilon_a1[0], sizeof(double)*rho_epsilon_a1.size());
         
