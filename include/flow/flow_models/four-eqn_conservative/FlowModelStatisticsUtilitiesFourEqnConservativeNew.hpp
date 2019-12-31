@@ -268,7 +268,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
         
         /**
          ** Function to compute budgets.
-         **/        
+         **/
         
         /*
          * Output turbulent mass flux in x-direction with inhomogeneous x-direction to a file.
@@ -347,7 +347,38 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::VariableContext>& data_context) const;
         
         /*
-         * Compute averaged value with only x direction as inhomogeneous direction.
+         * Compute averaged derivative of shear stress component with only x direction as inhomogeneous direction.
+         * Component index:
+         * 0: tau_11
+         * 1: tau_12
+         * 2: tau_13
+         * 3: tau_22
+         * 4: tau_23
+         * 5: tau_33
+         */
+        std::vector<double> getAveragedShearStressComponentWithInhomogeneousXDirection(
+            const int component_idx,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute averaged derivative of shear stress component with only x direction as inhomogeneous direction.
+         * Component index:
+         * 0: tau_11
+         * 1: tau_12
+         * 2: tau_13
+         * 3: tau_22
+         * 4: tau_23
+         * 5: tau_33
+         */
+        std::vector<double> getAveragedDerivativeOfShearStressComponentWithInhomogeneousXDirection(
+            const int component_idx,
+            const int derivative_direction,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute averaged value (on product of variables) with only x direction as inhomogeneous direction.
          */
         std::vector<double> getAveragedQuantityWithInhomogeneousXDirection(
             const std::vector<std::string>& quantity_names,
