@@ -413,17 +413,19 @@ EquationOfBulkViscosityMixingRulesConstant::computeBulkViscosity(
         
         ghostcell_dims_min = domain_dims;
         
-        data_bulk_viscosity_species = boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+        data_bulk_viscosity_species =
+            boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
         data_den = boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
         data_num = boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
         
         if (data_mass_fractions->getDepth() == d_num_species - 1)
         {
-            data_mass_fractions_last = boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+            data_mass_fractions_last =
+                boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
         }
     }
     
-    // Declare data containers for and species molecular properties
+    // Declare data containers for and species molecular properties.
     std::vector<double> species_molecular_properties;
     std::vector<double*> species_molecular_properties_ptr;
     std::vector<const double*> species_molecular_properties_const_ptr;
