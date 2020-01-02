@@ -331,8 +331,8 @@ EquationOfBulkViscosityMixingRulesConstant::computeBulkViscosity(
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
-     * Also, get the offsets of all data and dimensions of the ghost cell box for denominator
-     * and numerator and allocate memory.
+     * Also, get the offsets of all data and dimensions of the ghost cell box for denominator,
+     * numerator and last mass fraction and allocate memory.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -352,21 +352,19 @@ EquationOfBulkViscosityMixingRulesConstant::computeBulkViscosity(
         const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
         const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
         
-        // Get the interior box.
+        // Get the interior box and the dimensions of box that covers the interior of patch.
         const hier::Box interior_box = data_bulk_viscosity->getBox();
-        
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        // Get the dimensions of box that covers the interior of patch.
         const hier::IntVector interior_dims = interior_box.numberCells();
         
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
         TBOX_ASSERT(data_temperature->getBox().numberCells() == interior_dims);
         TBOX_ASSERT(data_mass_fractions->getBox().numberCells() == interior_dims);
 #endif
         
         /*
-         * Get the minimum number of ghost cells and the dimensions of the ghost cell box for denominator
-         * and numerator.
+         * Get the minimum number of ghost cells and the dimensions of the ghost cell box for denominator,
+         * numerator and last mass fraction.
          */
         
         hier::IntVector num_ghosts_min(d_dim);
@@ -1177,8 +1175,8 @@ EquationOfBulkViscosityMixingRulesConstant::computeBulkViscosity(
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
-     * Also, get the offsets of all data and dimensions of the ghost cell box for bulk viscosity
-     * and temperature of a species and allocate memory.
+     * Also, get the offsets of all data and dimensions of the ghost cell box for bulk viscosity,
+     * temperature of a species and last volume fraction and allocate memory.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -1198,21 +1196,19 @@ EquationOfBulkViscosityMixingRulesConstant::computeBulkViscosity(
         const hier::IntVector num_ghosts_species_temperatures = data_species_temperatures->getGhostCellWidth();
         const hier::IntVector num_ghosts_volume_fractions = data_volume_fractions->getGhostCellWidth();
         
-        // Get the interior box.
+        // Get the interior box and the dimensions of box that covers the interior of patch.
         const hier::Box interior_box = data_bulk_viscosity->getBox();
-        
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        // Get the dimensions of box that covers the interior of patch.
         const hier::IntVector interior_dims = interior_box.numberCells();
         
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
         TBOX_ASSERT(data_species_temperatures->getBox().numberCells() == interior_dims);
         TBOX_ASSERT(data_volume_fractions->getBox().numberCells() == interior_dims);
 #endif
         
         /*
-         * Get the minimum number of ghost cells and the dimensions of the ghost cell box for bulk viscosity
-         * and temperature of a species.
+         * Get the minimum number of ghost cells and the dimensions of the ghost cell box for bulk viscosity,
+         * temperature of a species and last volume fraction.
          */
         
         hier::IntVector num_ghosts_min(d_dim);
@@ -1260,12 +1256,15 @@ EquationOfBulkViscosityMixingRulesConstant::computeBulkViscosity(
         
         ghostcell_dims_min = domain_dims;
         
-        data_bulk_viscosity_species = boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
-        data_temperature_species = boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+        data_bulk_viscosity_species =
+            boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+        data_temperature_species =
+            boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
         
         if (data_volume_fractions->getDepth() == d_num_species - 1)
         {
-            data_volume_fractions_last = boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+            data_volume_fractions_last =
+                boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
         }
     }
     
