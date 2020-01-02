@@ -53,7 +53,7 @@ EquationOfBulkViscosityCramer::getBulkViscosity(
     
     double mu_v = A_r + B_r*T +
         (gamma - double(1))*(gamma - double(1))*c_v_v*A_v*exp(B_v/(pow(T, double(1)/double(3))) +
-            C_v/(pow(T, double(2)/double(3))));
+        C_v/(pow(T, double(2)/double(3))));
     
     return mu_v;
 }
@@ -181,8 +181,8 @@ EquationOfBulkViscosityCramer::computeBulkViscosity(
             
             mu_v[idx_bulk_viscosity] = A_r + B_r*T[idx_temperature] + 
                 (gamma - double(1))*(gamma - double(1))*c_v_v*A_v*
-                    exp(B_v/(pow(T[idx_temperature], double(1)/double(3))) +
-                        C_v/(pow(T[idx_temperature], double(2)/double(3))));
+                exp(B_v/(pow(T[idx_temperature], double(1)/double(3))) +
+                C_v/(pow(T[idx_temperature], double(2)/double(3))));
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -220,8 +220,8 @@ EquationOfBulkViscosityCramer::computeBulkViscosity(
                 
                 mu_v[idx_bulk_viscosity] = A_r + B_r*T[idx_temperature] + 
                     (gamma - double(1))*(gamma - double(1))*c_v_v*A_v*
-                        exp(B_v/(pow(T[idx_temperature], double(1)/double(3))) +
-                            C_v/(pow(T[idx_temperature], double(2)/double(3))));
+                    exp(B_v/(pow(T[idx_temperature], double(1)/double(3))) +
+                    C_v/(pow(T[idx_temperature], double(2)/double(3))));
             }
         }
     }
@@ -272,8 +272,8 @@ EquationOfBulkViscosityCramer::computeBulkViscosity(
                     
                     mu_v[idx_bulk_viscosity] = A_r + B_r*T[idx_temperature] + 
                         (gamma - double(1))*(gamma - double(1))*c_v_v*
-                            A_v*exp(B_v/(pow(T[idx_temperature], double(1)/double(3))) +
-                                C_v/(pow(T[idx_temperature], double(2)/double(3))));
+                        A_v*exp(B_v/(pow(T[idx_temperature], double(1)/double(3))) +
+                        C_v/(pow(T[idx_temperature], double(2)/double(3))));
                 }
             }
         }
@@ -417,9 +417,9 @@ EquationOfBulkViscosityCramer::computeBulkViscosity(
             mu_v[idx_bulk_viscosity] = A_r[idx_molecular_properties] +
                 B_r[idx_molecular_properties]*T[idx_temperature] + 
                 (gamma[idx_molecular_properties] - double(1))*(gamma[idx_molecular_properties] - double(1))*
-                    c_v_v[idx_molecular_properties]*A_v[idx_molecular_properties]*
-                        exp(B_v[idx_molecular_properties]/(pow(T[idx_temperature], double(1)/double(3))) +
-                            C_v[idx_molecular_properties]/(pow(T[idx_temperature], double(2)/double(3))));
+                c_v_v[idx_molecular_properties]*A_v[idx_molecular_properties]*
+                exp(B_v[idx_molecular_properties]/(pow(T[idx_temperature], double(1)/double(3))) +
+                C_v[idx_molecular_properties]/(pow(T[idx_temperature], double(2)/double(3))));
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -465,9 +465,9 @@ EquationOfBulkViscosityCramer::computeBulkViscosity(
                 mu_v[idx_bulk_viscosity] = A_r[idx_molecular_properties] +
                     B_r[idx_molecular_properties]*T[idx_temperature] + 
                     (gamma[idx_molecular_properties] - double(1))*(gamma[idx_molecular_properties] - double(1))*
-                        c_v_v[idx_molecular_properties]*A_v[idx_molecular_properties]*
-                            exp(B_v[idx_molecular_properties]/(pow(T[idx_temperature], double(1)/double(3))) +
-                                C_v[idx_molecular_properties]/(pow(T[idx_temperature], double(2)/double(3))));
+                    c_v_v[idx_molecular_properties]*A_v[idx_molecular_properties]*
+                    exp(B_v[idx_molecular_properties]/(pow(T[idx_temperature], double(1)/double(3))) +
+                    C_v[idx_molecular_properties]/(pow(T[idx_temperature], double(2)/double(3))));
             }
         }
     }
@@ -530,9 +530,9 @@ EquationOfBulkViscosityCramer::computeBulkViscosity(
                     mu_v[idx_bulk_viscosity] = A_r[idx_molecular_properties] +
                         B_r[idx_molecular_properties]*T[idx_temperature] + 
                         (gamma[idx_molecular_properties] - double(1))*(gamma[idx_molecular_properties] - double(1))*
-                            c_v_v[idx_molecular_properties]*A_v[idx_molecular_properties]*
-                                exp(B_v[idx_molecular_properties]/(pow(T[idx_temperature], double(1)/double(3))) +
-                                    C_v[idx_molecular_properties]/(pow(T[idx_temperature], double(2)/double(3))));
+                        c_v_v[idx_molecular_properties]*A_v[idx_molecular_properties]*
+                        exp(B_v[idx_molecular_properties]/(pow(T[idx_temperature], double(1)/double(3))) +
+                        C_v[idx_molecular_properties]/(pow(T[idx_temperature], double(2)/double(3))));
                 }
             }
         }

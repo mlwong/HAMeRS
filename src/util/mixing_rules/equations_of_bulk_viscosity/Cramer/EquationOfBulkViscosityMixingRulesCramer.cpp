@@ -692,7 +692,7 @@ EquationOfBulkViscosityMixingRulesCramer::computeBulkViscosity(
         TBOX_ASSERT(data_temperature->getBox().numberCells() == interior_dims);
         TBOX_ASSERT(data_mass_fractions->getBox().numberCells() == interior_dims);
 #endif
-
+        
         /*
          * Get the minimum number of ghost cells and the dimensions of the ghost cell box for denominator,
          * numerator and last mass fraction.
@@ -744,13 +744,15 @@ EquationOfBulkViscosityMixingRulesCramer::computeBulkViscosity(
         
         ghostcell_dims_min = domain_dims;
         
-        data_bulk_viscosity_species = boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+        data_bulk_viscosity_species =
+            boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
         data_den = boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
         data_num = boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
         
         if (data_mass_fractions->getDepth() == d_num_species - 1)
         {
-            data_mass_fractions_last = boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+            data_mass_fractions_last =
+                boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
         }
     }
     
