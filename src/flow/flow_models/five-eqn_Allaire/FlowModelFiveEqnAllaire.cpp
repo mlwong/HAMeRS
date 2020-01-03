@@ -1428,13 +1428,17 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables()
     
     if (d_dim == tbox::Dimension(1))
     {
+        const int interior_dim_0 = d_interior_dims[0];
+        
+        const int num_ghosts_0 = d_num_ghosts[0];
+        
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
 #endif
-        for (int i = 0; i < d_interior_dims[0]; i++)
+        for (int i = 0; i < interior_dim_0; i++)
         {
             // Compute the linear index.
-            int idx = i + d_num_ghosts[0];
+            int idx = i + num_ghosts_0;
             
             Z[d_num_species - 1][idx] = double(1);
         }
@@ -1444,10 +1448,10 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables()
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
 #endif
-            for (int i = 0; i < d_interior_dims[0]; i++)
+            for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear index.
-                int idx = i + d_num_ghosts[0];
+                int idx = i + num_ghosts_0;
                 
                 Z[d_num_species - 1][idx] -= Z[si][idx];
             }
@@ -1455,16 +1459,23 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables()
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        for (int j = 0; j < d_interior_dims[1]; j++)
+        const int interior_dim_0 = d_interior_dims[0];
+        const int interior_dim_1 = d_interior_dims[1];
+        
+        const int num_ghosts_0 = d_num_ghosts[0];
+        const int num_ghosts_1 = d_num_ghosts[1];
+        const int ghostcell_dim_0 = d_ghostcell_dims[0];
+        
+        for (int j = 0; j < interior_dim_1; j++)
         {
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
 #endif
-            for (int i = 0; i < d_interior_dims[0]; i++)
+            for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear index.
-                int idx  = (i + d_num_ghosts[0]) +
-                    (j + d_num_ghosts[1])*d_ghostcell_dims[0];
+                int idx  = (i + num_ghosts_0) +
+                    (j + num_ghosts_1)*ghostcell_dim_0;
                 
                 Z[d_num_species - 1][idx] = double(1);
             }
@@ -1472,16 +1483,16 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables()
         
         for (int si = 0; si < d_num_species - 1; si++)
         {
-            for (int j = 0; j < d_interior_dims[1]; j++)
+            for (int j = 0; j < interior_dim_1; j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
-                for (int i = 0; i < d_interior_dims[0]; i++)
+                for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
-                    int idx  = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
+                    int idx  = (i + num_ghosts_0) +
+                        (j + num_ghosts_1)*ghostcell_dim_0;
                     
                     Z[d_num_species - 1][idx] -= Z[si][idx];
                 }
@@ -1490,19 +1501,29 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables()
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        for (int k = 0; k < d_interior_dims[2]; k++)
+        const int interior_dim_0 = d_interior_dims[0];
+        const int interior_dim_1 = d_interior_dims[1];
+        const int interior_dim_2 = d_interior_dims[2];
+        
+        const int num_ghosts_0 = d_num_ghosts[0];
+        const int num_ghosts_1 = d_num_ghosts[1];
+        const int num_ghosts_2 = d_num_ghosts[2];
+        const int ghostcell_dim_0 = d_ghostcell_dims[0];
+        const int ghostcell_dim_1 = d_ghostcell_dims[1];
+        
+        for (int k = 0; k < interior_dim_2; k++)
         {
-            for (int j = 0; j < d_interior_dims[1]; j++)
+            for (int j = 0; j < interior_dim_1; j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
-                for (int i = 0; i < d_interior_dims[0]; i++)
+                for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
-                    int idx = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
-                        (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
+                    int idx = (i + num_ghosts_0) +
+                        (j + num_ghosts_1)*ghostcell_dim_0 +
+                        (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
                     
                     Z[d_num_species - 1][idx] = double(1);
                 }
@@ -1511,19 +1532,19 @@ FlowModelFiveEqnAllaire::updateCellDataOfConservativeVariables()
         
         for (int si = 0; si < d_num_species - 1; si++)
         {
-            for (int k = 0; k < d_interior_dims[2]; k++)
+            for (int k = 0; k < interior_dim_2; k++)
             {
-                for (int j = 0; j < d_interior_dims[1]; j++)
+                for (int j = 0; j < interior_dim_1; j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
-                    for (int i = 0; i < d_interior_dims[0]; i++)
+                    for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
-                        int idx = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
+                        int idx = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0 +
+                            (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
                         
                         Z[d_num_species - 1][idx] -= Z[si][idx];
                     }
