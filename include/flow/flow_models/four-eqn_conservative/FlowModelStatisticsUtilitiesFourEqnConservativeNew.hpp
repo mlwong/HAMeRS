@@ -420,6 +420,21 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::VariableContext>& data_context) const;
         
         /*
+         * Compute correlation with shear stress with only x direction as inhomogeneous direction.
+         */
+        std::vector<double> getQuantityCorrelationWithDerivativeOfShearStressComponentWithInhomogeneousXDirection(
+            const std::string quantity_name,
+            const int component_idx,
+            const bool use_reciprocal,
+            const int derivative_direction,
+            const std::vector<double>& averaged_quantity,
+            const int shear_stress_component_idx,
+            const int shear_stress_derivative_direction,
+            const std::vector<double>& averaged_shear_stress_component,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context) const;
+        
+        /*
          * boost::shared_ptr to EquationOfStateMixingRules.
          */
         const boost::shared_ptr<EquationOfStateMixingRules>
