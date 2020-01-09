@@ -467,7 +467,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
      * Also, get the offsets of all data and dimensions of the ghost cell box for binary
-     * mass diffusivities and mole fractions and allocate memory.
+     * mass diffusivities, mole fractions and last mass fraction and allocate memory.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -501,7 +501,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
         
         /*
          * Get the minimum number of ghost cells and the dimensions of the ghost cell box for binary
-         * mass diffusivities and mole fractions.
+         * mass diffusivities, mole fractions and last mass fraction.
          */
         
         hier::IntVector num_ghosts_min(d_dim);
@@ -537,7 +537,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
         if (data_mass_fractions->getDepth() == d_num_species - 1)
         {
             data_mass_fractions_last = boost::make_shared<pdat::CellData<double> >(
-                interior_box, 1, num_ghosts_mass_fractions);
+                interior_box, 1, num_ghosts_min);
         }
     }
     else
@@ -576,14 +576,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
         }
     }
     
-    if (domain.empty())
-    {
-        data_sum->fillAll(double(0));
-    }
-    else
-    {
-        data_sum->fillAll(double(0), domain);
-    }
+    data_sum->fillAll(double(0));
     
     /*
      * Get the pointers to the cell data.
