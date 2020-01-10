@@ -485,7 +485,7 @@ EquationOfShearViscosityMixingRulesChapmanEnskog::computeShearViscosity(
         }
     }
     
-    // Declare data containers for and species molecular properties.
+    // Declare data containers for species molecular properties.
     std::vector<double> species_molecular_properties;
     std::vector<double*> species_molecular_properties_ptr;
     std::vector<const double*> species_molecular_properties_const_ptr;
