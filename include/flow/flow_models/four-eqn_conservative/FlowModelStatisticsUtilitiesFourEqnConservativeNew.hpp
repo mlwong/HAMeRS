@@ -347,7 +347,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::VariableContext>& data_context) const;
         
         /*
-         * Compute averaged derivative of shear stress component with only x direction as inhomogeneous direction.
+         * Compute averaged shear stress component with only x direction as inhomogeneous direction.
          * Component index:
          * 0: tau_11
          * 1: tau_12
@@ -420,7 +420,35 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::VariableContext>& data_context) const;
         
         /*
-         * Compute correlation with shear stress with only x direction as inhomogeneous direction.
+         * Compute correlation with shear stress component with only x direction as inhomogeneous direction.
+         * shear_stress_component_idx:
+         * 0: tau_11
+         * 1: tau_12
+         * 2: tau_13
+         * 3: tau_22
+         * 4: tau_23
+         * 5: tau_33
+         */
+        std::vector<double> getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
+            const std::string quantity_name,
+            const int component_idx,
+            const bool use_reciprocal,
+            const int derivative_direction,
+            const std::vector<double>& averaged_quantity,
+            const int shear_stress_component_idx,
+            const std::vector<double>& averaged_shear_stress_component,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute correlation with derivative of shear stress component with only x direction as inhomogeneous direction.
+         * shear_stress_component_idx:
+         * 0: tau_11
+         * 1: tau_12
+         * 2: tau_13
+         * 3: tau_22
+         * 4: tau_23
+         * 5: tau_33
          */
         std::vector<double> getQuantityCorrelationWithDerivativeOfShearStressComponentWithInhomogeneousXDirection(
             const std::string quantity_name,
