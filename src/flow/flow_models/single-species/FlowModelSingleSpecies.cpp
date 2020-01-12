@@ -6245,10 +6245,10 @@ FlowModelSingleSpecies::convertConservativeVariablesToPrimitiveVariables(
      * Check potential failures.
      */
     
-    for (int ei = 0; ei < num_eqn_primitive_var; ei++)
+    for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
     {
         const hier::IntVector interior_dims_primitive_var =
-            primitive_variables[ei]->getBox().numberCells();
+            primitive_variables[vi]->getBox().numberCells();
         
         if (interior_dims_primitive_var != d_interior_dims)
         {
@@ -6260,10 +6260,10 @@ FlowModelSingleSpecies::convertConservativeVariablesToPrimitiveVariables(
         }
     }
     
-    for (int ei = 0; ei < num_eqn_conservative_var; ei++)
+    for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
     {
         const hier::IntVector interior_dims_conservative_var =
-            conservative_variables[ei]->getBox().numberCells();
+            conservative_variables[vi]->getBox().numberCells();
         
         if (interior_dims_conservative_var != d_interior_dims)
         {
@@ -6275,9 +6275,9 @@ FlowModelSingleSpecies::convertConservativeVariablesToPrimitiveVariables(
         }
     }
     
-    for (int ei = 1; ei < num_eqn_primitive_var; ei++)
+    for (int vi = 1; vi < static_cast<int>(primitive_variables.size()); vi++)
     {
-        if (num_ghosts_primitive_var != primitive_variables[ei]->getGhostCellWidth())
+        if (num_ghosts_primitive_var != primitive_variables[vi]->getGhostCellWidth())
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::"
@@ -6287,9 +6287,9 @@ FlowModelSingleSpecies::convertConservativeVariablesToPrimitiveVariables(
         }
     }
     
-    for (int ei = 1; ei < num_eqn_conservative_var; ei++)
+    for (int vi = 1; vi < static_cast<int>(conservative_variables.size()); vi++)
     {
-        if (num_ghosts_conservative_var != conservative_variables[ei]->getGhostCellWidth())
+        if (num_ghosts_conservative_var != conservative_variables[vi]->getGhostCellWidth())
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::"
@@ -7387,10 +7387,10 @@ FlowModelSingleSpecies::convertPrimitiveVariablesToConservativeVariables(
      * Check potential failures.
      */
     
-    for (int ei = 0; ei < num_eqn_conservative_var; ei++)
+    for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
     {
         const hier::IntVector interior_dims_conservative_var =
-            conservative_variables[ei]->getBox().numberCells();
+            conservative_variables[vi]->getBox().numberCells();
         
         if (interior_dims_conservative_var != d_interior_dims)
         {
@@ -7402,10 +7402,10 @@ FlowModelSingleSpecies::convertPrimitiveVariablesToConservativeVariables(
         }
     }
     
-    for (int ei = 0; ei < num_eqn_primitive_var; ei++)
+    for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
     {
         const hier::IntVector interior_dims_primitive_var =
-            primitive_variables[ei]->getBox().numberCells();
+            primitive_variables[vi]->getBox().numberCells();
         
         if (interior_dims_primitive_var != d_interior_dims)
         {
@@ -7417,9 +7417,9 @@ FlowModelSingleSpecies::convertPrimitiveVariablesToConservativeVariables(
         }
     }
     
-    for (int ei = 1; ei < num_eqn_conservative_var; ei++)
+    for (int vi = 1; vi < static_cast<int>(conservative_variables.size()); vi++)
     {
-        if (num_ghosts_conservative_var != conservative_variables[ei]->getGhostCellWidth())
+        if (num_ghosts_conservative_var != conservative_variables[vi]->getGhostCellWidth())
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::"
@@ -7429,9 +7429,9 @@ FlowModelSingleSpecies::convertPrimitiveVariablesToConservativeVariables(
         }
     }
     
-    for (int ei = 1; ei < num_eqn_primitive_var; ei++)
+    for (int vi = 1; vi < static_cast<int>(primitive_variables.size()); vi++)
     {
-        if (num_ghosts_primitive_var != primitive_variables[ei]->getGhostCellWidth())
+        if (num_ghosts_primitive_var != primitive_variables[vi]->getGhostCellWidth())
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::"
@@ -7605,8 +7605,8 @@ FlowModelSingleSpecies::convertPrimitiveVariablesToConservativeVariables(
             const int idx_conservative_var = i + num_ghosts_0_conservative_var;
             const int idx_primitive_var    = i + num_ghosts_0_primitive_var;
             
-            Q[d_num_species][idx_conservative_var] = epsilon[idx_primitive_var] +
-                double(1)/double(2)*rho[idx_primitive_var]*(
+            Q[2][idx_conservative_var] = rho[idx_primitive_var]*
+                (epsilon[idx_primitive_var] + double(1)/double(2)*
                 V[1][idx_primitive_var]*V[1][idx_primitive_var]);
         }
     }
@@ -7759,10 +7759,10 @@ FlowModelSingleSpecies::convertPrimitiveVariablesToConservativeVariables(
                 const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
                     (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1);
                 
-                Q[d_num_species][idx_conservative_var] = epsilon[idx_primitive_var] +
-                    double(1)/double(2)*rho[idx_primitive_var]*(
-                    V[1][idx_primitive_var]*V[1][idx_primitive_var] + 
-                    V[2][idx_primitive_var]*V[2][idx_primitive_var]);
+                Q[3][idx_conservative_var] = rho[idx_primitive_var]*
+                    (epsilon[idx_primitive_var] + double(1)/double(2)*(
+                    V[1][idx_primitive_var]*V[1][idx_primitive_var] +
+                    V[2][idx_primitive_var]*V[2][idx_primitive_var]));
             }
         }
         
@@ -7902,10 +7902,10 @@ FlowModelSingleSpecies::convertPrimitiveVariablesToConservativeVariables(
                 const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
                     (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var;
                 
-                Q[d_num_species][idx_conservative_var] = epsilon[idx_primitive_var] +
-                    double(1)/double(2)*rho[idx_primitive_var]*(
-                    V[1][idx_primitive_var]*V[1][idx_primitive_var] + 
-                    V[2][idx_primitive_var]*V[2][idx_primitive_var]);
+                Q[3][idx_conservative_var] = rho[idx_primitive_var]*
+                    (epsilon[idx_primitive_var] + double(1)/double(2)*(
+                    V[1][idx_primitive_var]*V[1][idx_primitive_var] +
+                    V[2][idx_primitive_var]*V[2][idx_primitive_var]));
             }
         }
     }
@@ -8094,11 +8094,11 @@ FlowModelSingleSpecies::convertPrimitiveVariablesToConservativeVariables(
                         (k + num_ghosts_2_primitive_var)*(ghostcell_dim_0_primitive_var + 1)*
                             ghostcell_dim_1_primitive_var;
                     
-                    Q[d_num_species][idx_conservative_var] = epsilon[idx_primitive_var] +
-                        double(1)/double(2)*rho[idx_primitive_var]*(
+                    Q[4][idx_conservative_var] = rho[idx_primitive_var]*
+                        (epsilon[idx_primitive_var] + double(1)/double(2)*(
                         V[1][idx_primitive_var]*V[1][idx_primitive_var] + 
                         V[2][idx_primitive_var]*V[2][idx_primitive_var] +
-                        V[3][idx_primitive_var]*V[3][idx_primitive_var]);
+                        V[3][idx_primitive_var]*V[3][idx_primitive_var]));
                 }
             }
         }
@@ -8270,11 +8270,11 @@ FlowModelSingleSpecies::convertPrimitiveVariablesToConservativeVariables(
                         (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
                             (ghostcell_dim_1_primitive_var + 1);
                     
-                    Q[d_num_species][idx_conservative_var] = epsilon[idx_primitive_var] +
-                        double(1)/double(2)*rho[idx_primitive_var]*(
+                    Q[4][idx_conservative_var] = rho[idx_primitive_var]*
+                        (epsilon[idx_primitive_var] + double(1)/double(2)*(
                         V[1][idx_primitive_var]*V[1][idx_primitive_var] + 
                         V[2][idx_primitive_var]*V[2][idx_primitive_var] +
-                        V[3][idx_primitive_var]*V[3][idx_primitive_var]);
+                        V[3][idx_primitive_var]*V[3][idx_primitive_var]));
                 }
             }
         }
@@ -8449,11 +8449,11 @@ FlowModelSingleSpecies::convertPrimitiveVariablesToConservativeVariables(
                         (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
                             ghostcell_dim_1_primitive_var;
                     
-                    Q[d_num_species][idx_conservative_var] = epsilon[idx_primitive_var] +
-                        double(1)/double(2)*rho[idx_primitive_var]*(
+                    Q[4][idx_conservative_var] = rho[idx_primitive_var]*
+                        (epsilon[idx_primitive_var] + double(1)/double(2)*(
                         V[1][idx_primitive_var]*V[1][idx_primitive_var] + 
                         V[2][idx_primitive_var]*V[2][idx_primitive_var] +
-                        V[3][idx_primitive_var]*V[3][idx_primitive_var]);
+                        V[3][idx_primitive_var]*V[3][idx_primitive_var]));
                 }
             }
         }
