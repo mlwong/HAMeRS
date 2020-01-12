@@ -688,9 +688,9 @@ EquationOfBulkViscosityMixingRulesCramer::computeBulkViscosity(
         const hier::IntVector interior_dims = interior_box.numberCells();
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-        TBOX_ASSERT(data_temperature->getBox().numberCells() == interior_dims);
-        TBOX_ASSERT(data_mass_fractions->getBox().numberCells() == interior_dims);
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_temperature->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_mass_fractions->getBox().isSpatiallyEqual(interior_box));
 #endif
         
         /*
@@ -1534,9 +1534,9 @@ EquationOfBulkViscosityMixingRulesCramer::computeBulkViscosity(
         const hier::IntVector interior_dims = interior_box.numberCells();
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-        TBOX_ASSERT(data_species_temperatures->getBox().numberCells() == interior_dims);
-        TBOX_ASSERT(data_volume_fractions->getBox().numberCells() == interior_dims);
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_species_temperatures->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_volume_fractions->getBox().isSpatiallyEqual(interior_box));
 #endif
         
         /*

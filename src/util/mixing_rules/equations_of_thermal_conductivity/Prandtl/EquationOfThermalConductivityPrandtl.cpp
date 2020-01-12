@@ -111,15 +111,13 @@ EquationOfThermalConductivityPrandtl::computeThermalConductivity(
         const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
         const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
         
-        // Get the interior box.
+        // Get the interior box and the dimensions of box that covers the interior of patch.
         const hier::Box interior_box = data_thermal_conductivity->getBox();
-        
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        // Get the dimensions of box that covers the interior of patch.
         const hier::IntVector interior_dims = interior_box.numberCells();
         
-        TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-        TBOX_ASSERT(data_temperature->getBox().numberCells() == interior_dims);
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_temperature->getBox().isSpatiallyEqual(interior_box));
 #endif
         
         /*
@@ -370,16 +368,14 @@ EquationOfThermalConductivityPrandtl::computeThermalConductivity(
         const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
         const hier::IntVector num_ghosts_molecular_properties = data_molecular_properties->getGhostCellWidth();
         
-        // Get the interior box.
+        // Get the interior box and the dimensions of box that covers the interior of patch.
         const hier::Box interior_box = data_thermal_conductivity->getBox();
-        
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        // Get the dimensions of box that covers the interior of patch.
         const hier::IntVector interior_dims = interior_box.numberCells();
         
-        TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-        TBOX_ASSERT(data_temperature->getBox().numberCells() == interior_dims);
-        TBOX_ASSERT(data_molecular_properties->getBox().numberCells() == interior_dims);
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_temperature->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_molecular_properties->getBox().isSpatiallyEqual(interior_box));
 #endif
         
         /*

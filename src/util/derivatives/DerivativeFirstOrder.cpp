@@ -90,11 +90,10 @@ DerivativeFirstOrder::computeDerivative(
         const hier::IntVector num_ghosts_data = data->getGhostCellWidth();
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        // Get the dimensions of box that covers the interior of patch.
+        // Get the box that covers the interior of patch.
         const hier::Box interior_box = data->getBox();
-        const hier::IntVector interior_dims = interior_box.numberCells();
         
-        TBOX_ASSERT(derivative->getBox().numberCells() == interior_dims);
+        TBOX_ASSERT(derivative->getBox().isSpatiallyEqual(interior_box));
         
         if (num_ghosts_data - num_ghosts_derivative < d_num_derivative_ghosts)
         {

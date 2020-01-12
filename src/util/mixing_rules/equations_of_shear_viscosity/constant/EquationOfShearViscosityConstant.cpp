@@ -122,14 +122,11 @@ EquationOfShearViscosityConstant::computeShearViscosity(
         const hier::IntVector num_ghosts_shear_viscosity = data_shear_viscosity->getGhostCellWidth();
         const hier::IntVector num_ghosts_molecular_properties = data_molecular_properties->getGhostCellWidth();
         
-        // Get the interior box.
+        // Get the box that covers the interior of patch.
         const hier::Box interior_box = data_shear_viscosity->getBox();
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        // Get the dimensions of box that covers the interior of patch.
-        const hier::IntVector interior_dims = interior_box.numberCells();
-        
-        TBOX_ASSERT(data_molecular_properties->getBox().numberCells() == interior_dims);
+        TBOX_ASSERT(data_molecular_properties->getBox().isSpatiallyEqual(interior_box));
 #endif
         
         hier::IntVector num_ghosts_min(d_dim);
