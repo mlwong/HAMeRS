@@ -2134,7 +2134,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetTurbMassFluxXWithIn
         }
     }
     
-    
     /*
      * Output budget.
      */
@@ -2144,7 +2143,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetTurbMassFluxXWithIn
     if (mpi.getRank() == 0)
     {
         std::ofstream f_output;
-        f_output.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        f_output.open(stat_dump_filename.c_str(), std::ios_base::app | std::ios::out | std::ios::binary);
+        
+        if (!f_output.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output turbulent mass flux budget!"
+                << std::endl);
+        }
         
         f_output.write((char*)&output_time, sizeof(double));
         f_output.write((char*)&rho_p_u_p[0], sizeof(double)*rho_p_u_p.size());
