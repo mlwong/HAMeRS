@@ -358,7 +358,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
         
         /*
          * Compute averaged shear stress component with only x direction as inhomogeneous direction.
-         * Component index:
+         * component_idx:
          * 0: tau_11
          * 1: tau_12
          * 2: tau_13
@@ -373,7 +373,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
         
         /*
          * Compute averaged derivative of shear stress component with only x direction as inhomogeneous direction.
-         * Component index:
+         * component_idx:
          * 0: tau_11
          * 1: tau_12
          * 2: tau_13

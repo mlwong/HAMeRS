@@ -5699,7 +5699,7 @@ getAveragedDerivativeOfReciprocalOfQuantityWithInhomogeneousXDirection(
 
 /*
  * Compute averaged shear stress component with only x direction as inhomogeneous direction.
- * Component index:
+ * component_idx:
  * 0: tau_11
  * 1: tau_12
  * 2: tau_13
@@ -7329,7 +7329,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::getAveragedShearStressComponent
 
 /*
  * Compute averaged derivative of shear stress component with only x direction as inhomogeneous direction.
- * Component index:
+ * component_idx:
  * 0: tau_11
  * 1: tau_12
  * 2: tau_13
@@ -11972,7 +11972,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::getQuantityCorrelationWithInhom
                 
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    std::unordered_map<std::string, hier::IntVector>::const_iterator quantity_it = num_subghosts_of_data.find(quantity_names[qi]);
+                    std::unordered_map<std::string, hier::IntVector>::const_iterator quantity_it =
+                        num_subghosts_of_data.find(quantity_names[qi]);
                     
                     if (quantity_it == num_subghosts_of_data.end())
                     {
@@ -11984,7 +11985,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::getQuantityCorrelationWithInhom
                         else
                         {
                             num_subghosts_of_data.insert(
-                                std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
+                                std::pair<std::string, hier::IntVector>(
+                                    quantity_names[qi], hier::IntVector::getZero(d_dim)));
                         }
                     }
                     else
@@ -12095,206 +12097,119 @@ FlowModelStatisticsUtilitiesFourEqnConservative::getQuantityCorrelationWithInhom
                             }
                             
                             /*
-                             * Compute the linear indices and the data to add.
+                             * Perform operations on quantities.
                              */
                             
-                            for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                            double u_values[num_quantities];
+                            
+                            for (int qi = 0; qi < num_quantities; qi++)
                             {
-                                const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
-                                
-                                double corr = double(0);
-                                if (derivative_directions[0] == -1)
+                                if (derivative_directions[qi] == -1)
                                 {
-                                    const int idx_q0 = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0];
+                                    const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
                                     
-                                    if (use_reciprocal[0])
+                                    if (use_reciprocal[qi])
                                     {
-                                        corr = double(1)/(u_qi[0][idx_q0]) - u_qi_avg_global[0][idx_fine];
+                                        u_values[qi] = double(1)/(u_qi[qi][idx_qi]);
                                     }
                                     else
                                     {
-                                        corr = u_qi[0][idx_q0] - u_qi_avg_global[0][idx_fine];
+                                        u_values[qi] = u_qi[qi][idx_qi];
                                     }
                                 }
-                                else if (derivative_directions[0] == 0)
+                                else if (derivative_directions[qi] == 0)
                                 {
-                                    const int idx_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_u_qi[0]) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0];
+                                    const int idx_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_u_qi[qi]) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
                                     
-                                    const int idx_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_u_qi[0]) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0];
+                                    const int idx_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_u_qi[qi]) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
                                     
-                                    const int idx_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_u_qi[0]) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0];
+                                    const int idx_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_u_qi[qi]) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
                                     
-                                    const int idx_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_u_qi[0]) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0];
+                                    const int idx_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_u_qi[qi]) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
                                     
-                                    const int idx_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_u_qi[0]) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0];
+                                    const int idx_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_u_qi[qi]) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
                                     
-                                    const int idx_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_u_qi[0]) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0];
+                                    const int idx_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_u_qi[qi]) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
                                     
-                                    double dudx = double(0);
-                                    if (use_reciprocal[0])
+                                    if (use_reciprocal[qi])
                                     {
-                                        dudx = (double(1)/double(60)*(double(1)/u_qi[0][idx_RRR] - double(1)/u_qi[0][idx_LLL])
-                                            - double(3)/double(20)*(double(1)/u_qi[0][idx_RR] - double(1)/u_qi[0][idx_LL])
-                                            + double(3)/double(4)*(double(1)/u_qi[0][idx_R] - double(1)/u_qi[0][idx_L]))/dx[0];
+                                        u_values[qi] = (double(1)/double(60)*(double(1)/u_qi[qi][idx_RRR] - double(1)/u_qi[qi][idx_LLL])
+                                            - double(3)/double(20)*(double(1)/u_qi[qi][idx_RR] - double(1)/u_qi[qi][idx_LL])
+                                            + double(3)/double(4)*(double(1)/u_qi[qi][idx_R] - double(1)/u_qi[qi][idx_L]))/dx[0];
                                     }
                                     else
                                     {
-                                        dudx = (double(1)/double(60)*(u_qi[0][idx_RRR] - u_qi[0][idx_LLL])
-                                            - double(3)/double(20)*(u_qi[0][idx_RR] - u_qi[0][idx_LL])
-                                            + double(3)/double(4)*(u_qi[0][idx_R] - u_qi[0][idx_L]))/dx[0];
+                                        u_values[qi] = (double(1)/double(60)*(u_qi[qi][idx_RRR] - u_qi[qi][idx_LLL])
+                                            - double(3)/double(20)*(u_qi[qi][idx_RR] - u_qi[qi][idx_LL])
+                                            + double(3)/double(4)*(u_qi[qi][idx_R] - u_qi[qi][idx_L]))/dx[0];
                                     }
-                                    corr = dudx - u_qi_avg_global[0][idx_fine];
                                 }
-                                else if (derivative_directions[0] == 1)
+                                else if (derivative_directions[qi] == 1)
                                 {
-                                    const int idx_BBB = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
-                                        (relative_idx_lo_1 + (j - 3) + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0];
+                                    const int idx_BBB = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                        (relative_idx_lo_1 + (j - 3) + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
                                     
-                                    const int idx_BB  = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
-                                        (relative_idx_lo_1 + (j - 2) + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0];
+                                    const int idx_BB  = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                        (relative_idx_lo_1 + (j - 2) + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
                                     
-                                    const int idx_B   = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
-                                        (relative_idx_lo_1 + (j - 1) + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0];
+                                    const int idx_B   = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                        (relative_idx_lo_1 + (j - 1) + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
                                     
-                                    const int idx_T   = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
-                                        (relative_idx_lo_1 + (j + 1) + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0];
+                                    const int idx_T   = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                        (relative_idx_lo_1 + (j + 1) + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
                                     
-                                    const int idx_TT  = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
-                                        (relative_idx_lo_1 + (j + 2) + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0];
+                                    const int idx_TT  = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                        (relative_idx_lo_1 + (j + 2) + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
                                     
-                                    const int idx_TTT = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
-                                        (relative_idx_lo_1 + (j + 3) + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0];
+                                    const int idx_TTT = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                        (relative_idx_lo_1 + (j + 3) + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
                                     
-                                    double dudy = double(0);
-                                    if (use_reciprocal[0])
+                                    if (use_reciprocal[qi])
                                     {
-                                        dudy = (double(1)/double(60)*(double(1)/u_qi[0][idx_TTT] - double(1)/u_qi[0][idx_BBB])
-                                            - double(3)/double(20)*(double(1)/u_qi[0][idx_TT] - double(1)/u_qi[0][idx_BB])
-                                            + double(3)/double(4)*(double(1)/u_qi[0][idx_T] - double(1)/u_qi[0][idx_B]))/dx[1];
+                                        u_values[qi] = (double(1)/double(60)*(double(1)/u_qi[qi][idx_TTT] - double(1)/u_qi[qi][idx_BBB])
+                                            - double(3)/double(20)*(double(1)/u_qi[qi][idx_TT] - double(1)/u_qi[qi][idx_BB])
+                                            + double(3)/double(4)*(double(1)/u_qi[qi][idx_T] - double(1)/u_qi[qi][idx_B]))/dx[1];
                                     }
                                     else
                                     {
-                                        dudy = (double(1)/double(60)*(u_qi[0][idx_TTT] - u_qi[0][idx_BBB])
-                                            - double(3)/double(20)*(u_qi[0][idx_TT] - u_qi[0][idx_BB])
-                                            + double(3)/double(4)*(u_qi[0][idx_T] - u_qi[0][idx_B]))/dx[1];
+                                        u_values[qi] = (double(1)/double(60)*(u_qi[qi][idx_TTT] - u_qi[qi][idx_BBB])
+                                            - double(3)/double(20)*(u_qi[qi][idx_TT] - u_qi[qi][idx_BB])
+                                            + double(3)/double(4)*(u_qi[qi][idx_T] - u_qi[qi][idx_B]))/dx[1];
                                     }
-                                    corr = dudy - u_qi_avg_global[0][idx_fine];
                                 }
                                 else
                                 {
                                     TBOX_ERROR(d_object_name
                                         << ": "
                                         << "Cannot take derivative for two-dimensional problem!\n"
-                                        << "derivative_direction = " << derivative_directions[0] << " given!\n"
+                                        << "derivative_direction = " << derivative_directions[qi] << " given!\n"
                                         << std::endl);
                                 }
+                            }
+                            
+                            /*
+                             * Compute the correlation.
+                             */
+                            
+                            for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                            {
+                                const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                 
-                                for (int qi = 1; qi < num_quantities; qi++)
+                                double corr = double(1);
+                                for (int qi = 0; qi < num_quantities; qi++)
                                 {
-                                    if (derivative_directions[qi] == -1)
-                                    {
-                                        const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
-                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
-                                        
-                                        if (use_reciprocal[qi])
-                                        {
-                                            corr *= (double(1)/(u_qi[qi][idx_qi]) - u_qi_avg_global[qi][idx_fine]);
-                                        }
-                                        else
-                                        {
-                                            corr *= (u_qi[qi][idx_qi] - u_qi_avg_global[qi][idx_fine]);
-                                        }
-                                    }
-                                    else if (derivative_directions[qi] == 0)
-                                    {
-                                        const int idx_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_u_qi[qi]) +
-                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
-                                        
-                                        const int idx_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_u_qi[qi]) +
-                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
-                                        
-                                        const int idx_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_u_qi[qi]) +
-                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
-                                        
-                                        const int idx_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_u_qi[qi]) +
-                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
-                                        
-                                        const int idx_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_u_qi[qi]) +
-                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
-                                        
-                                        const int idx_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_u_qi[qi]) +
-                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
-                                        
-                                        double dudx = double(0);
-                                        if (use_reciprocal[qi])
-                                        {
-                                            dudx = (double(1)/double(60)*(double(1)/u_qi[qi][idx_RRR] - double(1)/u_qi[qi][idx_LLL])
-                                                - double(3)/double(20)*(double(1)/u_qi[qi][idx_RR] - double(1)/u_qi[qi][idx_LL])
-                                                + double(3)/double(4)*(double(1)/u_qi[qi][idx_R] - double(1)/u_qi[qi][idx_L]))/dx[0];
-                                        }
-                                        else
-                                        {
-                                            dudx = (double(1)/double(60)*(u_qi[qi][idx_RRR] - u_qi[qi][idx_LLL])
-                                                - double(3)/double(20)*(u_qi[qi][idx_RR] - u_qi[qi][idx_LL])
-                                                + double(3)/double(4)*(u_qi[qi][idx_R] - u_qi[qi][idx_L]))/dx[0];
-                                        }
-                                        corr *= (dudx - u_qi_avg_global[qi][idx_fine]);
-                                    }
-                                    else if (derivative_directions[qi] == 1)
-                                    {
-                                        const int idx_BBB = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
-                                            (relative_idx_lo_1 + (j - 3) + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
-                                        
-                                        const int idx_BB  = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
-                                            (relative_idx_lo_1 + (j - 2) + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
-                                        
-                                        const int idx_B   = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
-                                            (relative_idx_lo_1 + (j - 1) + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
-                                        
-                                        const int idx_T   = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
-                                            (relative_idx_lo_1 + (j + 1) + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
-                                        
-                                        const int idx_TT  = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
-                                            (relative_idx_lo_1 + (j + 2) + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
-                                        
-                                        const int idx_TTT = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
-                                            (relative_idx_lo_1 + (j + 3) + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
-                                        
-                                        double dudy = double(0);
-                                        if (use_reciprocal[qi])
-                                        {
-                                            dudy = (double(1)/double(60)*(double(1)/u_qi[qi][idx_TTT] - double(1)/u_qi[qi][idx_BBB])
-                                                - double(3)/double(20)*(double(1)/u_qi[qi][idx_TT] - double(1)/u_qi[qi][idx_BB])
-                                                + double(3)/double(4)*(double(1)/u_qi[qi][idx_T] - double(1)/u_qi[qi][idx_B]))/dx[1];
-                                        }
-                                        else
-                                        {
-                                            dudy = (double(1)/double(60)*(u_qi[qi][idx_TTT] - u_qi[qi][idx_BBB])
-                                                - double(3)/double(20)*(u_qi[qi][idx_TT] - u_qi[qi][idx_BB])
-                                                + double(3)/double(4)*(u_qi[qi][idx_T] - u_qi[qi][idx_B]))/dx[1];
-                                        }
-                                        corr *= (dudy - u_qi_avg_global[qi][idx_fine]);
-                                    }
-                                    else
-                                    {
-                                        TBOX_ERROR(d_object_name
-                                            << ": "
-                                            << "Cannot take derivative for two-dimensional problem!\n"
-                                            << "derivative_direction = " << derivative_directions[qi] << " given!\n"
-                                            << std::endl);
-                                    }
+                                    corr *= (u_values[qi] - u_qi_avg_global[qi][idx_fine]);
                                 }
                                 
                                 corr_local[idx_fine] += (corr*weight/((double) n_overlapped));
                             }
-                            
                         }
                     }
                 }
@@ -12403,7 +12318,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::getQuantityCorrelationWithInhom
                 
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    std::unordered_map<std::string, hier::IntVector>::const_iterator quantity_it = num_subghosts_of_data.find(quantity_names[qi]);
+                    std::unordered_map<std::string, hier::IntVector>::const_iterator quantity_it =
+                        num_subghosts_of_data.find(quantity_names[qi]);
                     
                     if (quantity_it == num_subghosts_of_data.end())
                     {
@@ -12415,7 +12331,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::getQuantityCorrelationWithInhom
                         else
                         {
                             num_subghosts_of_data.insert(
-                                std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
+                                std::pair<std::string, hier::IntVector>(
+                                    quantity_names[qi], hier::IntVector::getZero(d_dim)));
                         }
                     }
                     else
@@ -12537,347 +12454,186 @@ FlowModelStatisticsUtilitiesFourEqnConservative::getQuantityCorrelationWithInhom
                                 }
                                 
                                 /*
-                                 * Compute the linear index and the data to add.
+                                 * Perform operations on quantities.
                                  */
                                 
-                                for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                                double u_values[num_quantities];
+                                
+                                for (int qi = 0; qi < num_quantities; qi++)
                                 {
-                                    const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
-                                    
-                                    double corr = double(0);
-                                    if (derivative_directions[0] == -1)
+                                    if (derivative_directions[qi] == -1)
                                     {
-                                        const int idx_q0 = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
-                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0] +
-                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
-                                                ghostcell_dim_1_u_qi[0];
+                                        const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                ghostcell_dim_1_u_qi[qi];
                                         
-                                        if (use_reciprocal[0])
+                                        if (use_reciprocal[qi])
                                         {
-                                            corr = double(1)/(u_qi[0][idx_q0]) - u_qi_avg_global[0][idx_fine];
+                                            u_values[qi] = double(1)/(u_qi[qi][idx_qi]);
                                         }
                                         else
                                         {
-                                            corr = u_qi[0][idx_q0] - u_qi_avg_global[0][idx_fine];
+                                            u_values[qi] = u_qi[qi][idx_qi];
                                         }
                                     }
-                                    else if (derivative_directions[0] == 0)
+                                    else if (derivative_directions[qi] == 0)
                                     {
-                                        const int idx_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_u_qi[0]) +
-                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0] +
-                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
-                                                ghostcell_dim_1_u_qi[0];
+                                        const int idx_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                ghostcell_dim_1_u_qi[qi];
                                         
-                                        const int idx_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_u_qi[0]) +
-                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0] +
-                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
-                                                ghostcell_dim_1_u_qi[0];
+                                        const int idx_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                ghostcell_dim_1_u_qi[qi];
                                         
-                                        const int idx_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_u_qi[0]) +
-                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0] +
-                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
-                                                ghostcell_dim_1_u_qi[0];
+                                        const int idx_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                ghostcell_dim_1_u_qi[qi];
                                         
-                                        const int idx_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_u_qi[0]) +
-                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0] +
-                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
-                                                ghostcell_dim_1_u_qi[0];
+                                        const int idx_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                ghostcell_dim_1_u_qi[qi];
                                         
-                                        const int idx_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_u_qi[0]) +
-                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0] +
-                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
-                                                ghostcell_dim_1_u_qi[0];
+                                        const int idx_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                ghostcell_dim_1_u_qi[qi];
                                         
-                                        const int idx_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_u_qi[0]) +
-                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0] +
-                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
-                                                ghostcell_dim_1_u_qi[0];
+                                        const int idx_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                ghostcell_dim_1_u_qi[qi];
                                         
-                                        double dudx = double(0);
-                                        if (use_reciprocal[0])
+                                        if (use_reciprocal[qi])
                                         {
-                                            dudx = (double(1)/double(60)*(double(1)/u_qi[0][idx_RRR] - double(1)/u_qi[0][idx_LLL])
-                                                - double(3)/double(20)*(double(1)/u_qi[0][idx_RR] - double(1)/u_qi[0][idx_LL])
-                                                + double(3)/double(4)*(double(1)/u_qi[0][idx_R] - double(1)/u_qi[0][idx_L]))/dx[0];
+                                            u_values[qi] = (double(1)/double(60)*(double(1)/u_qi[qi][idx_RRR] - double(1)/u_qi[qi][idx_LLL])
+                                                - double(3)/double(20)*(double(1)/u_qi[qi][idx_RR] - double(1)/u_qi[qi][idx_LL])
+                                                + double(3)/double(4)*(double(1)/u_qi[qi][idx_R] - double(1)/u_qi[qi][idx_L]))/dx[0];
                                         }
                                         else
                                         {
-                                            dudx = (double(1)/double(60)*(u_qi[0][idx_RRR] - u_qi[0][idx_LLL])
-                                                - double(3)/double(20)*(u_qi[0][idx_RR] - u_qi[0][idx_LL])
-                                                + double(3)/double(4)*(u_qi[0][idx_R] - u_qi[0][idx_L]))/dx[0];
+                                            u_values[qi] = (double(1)/double(60)*(u_qi[qi][idx_RRR] - u_qi[qi][idx_LLL])
+                                                - double(3)/double(20)*(u_qi[qi][idx_RR] - u_qi[qi][idx_LL])
+                                                + double(3)/double(4)*(u_qi[qi][idx_R] - u_qi[qi][idx_L]))/dx[0];
                                         }
-                                        corr = dudx - u_qi_avg_global[0][idx_fine];
                                     }
-                                    else if (derivative_directions[0] == 1)
+                                    else if (derivative_directions[qi] == 1)
                                     {
-                                        const int idx_BBB = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
-                                            (relative_idx_lo_1 + (j - 3) + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0] +
-                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
-                                                ghostcell_dim_1_u_qi[0];
+                                        const int idx_BBB = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + (j - 3) + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                ghostcell_dim_1_u_qi[qi];
                                         
-                                        const int idx_BB  = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
-                                            (relative_idx_lo_1 + (j - 2) + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0] +
-                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
-                                                ghostcell_dim_1_u_qi[0];
+                                        const int idx_BB  = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + (j - 2) + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                ghostcell_dim_1_u_qi[qi];
                                         
-                                        const int idx_B   = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
-                                            (relative_idx_lo_1 + (j - 1) + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0] +
-                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
-                                                ghostcell_dim_1_u_qi[0];
+                                        const int idx_B   = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + (j - 1) + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                ghostcell_dim_1_u_qi[qi];
                                         
-                                        const int idx_T   = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
-                                            (relative_idx_lo_1 + (j + 1) + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0] +
-                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
-                                                ghostcell_dim_1_u_qi[0];
+                                        const int idx_T   = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + (j + 1) + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                ghostcell_dim_1_u_qi[qi];
                                         
-                                        const int idx_TT  = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
-                                            (relative_idx_lo_1 + (j + 2) + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0] +
-                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
-                                                ghostcell_dim_1_u_qi[0];
+                                        const int idx_TT  = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + (j + 2) + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                ghostcell_dim_1_u_qi[qi];
                                         
-                                        const int idx_TTT = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
-                                            (relative_idx_lo_1 + (j + 3) + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0] +
-                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
-                                                ghostcell_dim_1_u_qi[0];
+                                        const int idx_TTT = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + (j + 3) + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                ghostcell_dim_1_u_qi[qi];
                                         
-                                        double dudy = double(0);
-                                        if (use_reciprocal[0])
+                                        if (use_reciprocal[qi])
                                         {
-                                            dudy = (double(1)/double(60)*(double(1)/u_qi[0][idx_TTT] - double(1)/u_qi[0][idx_BBB])
-                                                - double(3)/double(20)*(double(1)/u_qi[0][idx_TT] - double(1)/u_qi[0][idx_BB])
-                                                + double(3)/double(4)*(double(1)/u_qi[0][idx_T] - double(1)/u_qi[0][idx_B]))/dx[1];
+                                            u_values[qi] = (double(1)/double(60)*(double(1)/u_qi[qi][idx_TTT] - double(1)/u_qi[qi][idx_BBB])
+                                                - double(3)/double(20)*(double(1)/u_qi[qi][idx_TT] - double(1)/u_qi[qi][idx_BB])
+                                                + double(3)/double(4)*(double(1)/u_qi[qi][idx_T] - double(1)/u_qi[qi][idx_B]))/dx[1];
                                         }
                                         else
                                         {
-                                            dudy = (double(1)/double(60)*(u_qi[0][idx_TTT] - u_qi[0][idx_BBB])
-                                                - double(3)/double(20)*(u_qi[0][idx_TT] - u_qi[0][idx_BB])
-                                                + double(3)/double(4)*(u_qi[0][idx_T] - u_qi[0][idx_B]))/dx[1];
+                                            u_values[qi] = (double(1)/double(60)*(u_qi[qi][idx_TTT] - u_qi[qi][idx_BBB])
+                                                - double(3)/double(20)*(u_qi[qi][idx_TT] - u_qi[qi][idx_BB])
+                                                + double(3)/double(4)*(u_qi[qi][idx_T] - u_qi[qi][idx_B]))/dx[1];
                                         }
-                                        corr = dudy - u_qi_avg_global[0][idx_fine];
                                     }
-                                    else if (derivative_directions[0] == 2)
+                                    else if (derivative_directions[qi] == 2)
                                     {
-                                        const int idx_BBB = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
-                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0] +
-                                            (relative_idx_lo_2 + (k - 3) + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
-                                                ghostcell_dim_1_u_qi[0];
+                                        const int idx_BBB = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                            (relative_idx_lo_2 + (k - 3) + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                ghostcell_dim_1_u_qi[qi];
                                         
-                                        const int idx_BB  = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
-                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0] +
-                                            (relative_idx_lo_2 + (k - 2) + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
-                                                ghostcell_dim_1_u_qi[0];
+                                        const int idx_BB  = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                            (relative_idx_lo_2 + (k - 2) + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                ghostcell_dim_1_u_qi[qi];
                                         
-                                        const int idx_B   = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
-                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0] +
-                                            (relative_idx_lo_2 + (k - 1) + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
-                                                ghostcell_dim_1_u_qi[0];
+                                        const int idx_B   = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                            (relative_idx_lo_2 + (k - 1) + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                ghostcell_dim_1_u_qi[qi];
                                         
-                                        const int idx_F   = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
-                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0] +
-                                            (relative_idx_lo_2 + (k + 1) + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
-                                                ghostcell_dim_1_u_qi[0];
+                                        const int idx_F   = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                            (relative_idx_lo_2 + (k + 1) + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                ghostcell_dim_1_u_qi[qi];
                                         
-                                        const int idx_FF  = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
-                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0] +
-                                            (relative_idx_lo_2 + (k + 2) + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
-                                                ghostcell_dim_1_u_qi[0];
+                                        const int idx_FF  = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                            (relative_idx_lo_2 + (k + 2) + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                ghostcell_dim_1_u_qi[qi];
                                         
-                                        const int idx_FFF = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
-                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0] +
-                                            (relative_idx_lo_2 + (k + 3) + num_ghosts_2_u_qi[0])*ghostcell_dim_0_u_qi[0]*
-                                                ghostcell_dim_1_u_qi[0];
+                                        const int idx_FFF = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                            (relative_idx_lo_2 + (k + 3) + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                ghostcell_dim_1_u_qi[qi];
                                         
-                                        double dudz = double(0);
-                                        if (use_reciprocal[0])
+                                        if (use_reciprocal[qi])
                                         {
-                                            dudz = (double(1)/double(60)*(double(1)/u_qi[0][idx_FFF] - double(1)/u_qi[0][idx_BBB])
-                                                - double(3)/double(20)*(double(1)/u_qi[0][idx_FF] - double(1)/u_qi[0][idx_BB])
-                                                + double(3)/double(4)*(double(1)/u_qi[0][idx_F] - double(1)/u_qi[0][idx_B]))/dx[2];
+                                            u_values[qi] = (double(1)/double(60)*(double(1)/u_qi[qi][idx_FFF] - double(1)/u_qi[qi][idx_BBB])
+                                                - double(3)/double(20)*(double(1)/u_qi[qi][idx_FF] - double(1)/u_qi[qi][idx_BB])
+                                                + double(3)/double(4)*(double(1)/u_qi[qi][idx_F] - double(1)/u_qi[qi][idx_B]))/dx[2];
                                         }
                                         else
                                         {
-                                            dudz = (double(1)/double(60)*(u_qi[0][idx_FFF] - u_qi[0][idx_BBB])
-                                                - double(3)/double(20)*(u_qi[0][idx_FF] - u_qi[0][idx_BB])
-                                                + double(3)/double(4)*(u_qi[0][idx_F] - u_qi[0][idx_B]))/dx[2];
+                                            u_values[qi] = (double(1)/double(60)*(u_qi[qi][idx_FFF] - u_qi[qi][idx_BBB])
+                                                - double(3)/double(20)*(u_qi[qi][idx_FF] - u_qi[qi][idx_BB])
+                                                + double(3)/double(4)*(u_qi[qi][idx_F] - u_qi[qi][idx_B]))/dx[2];
                                         }
-                                        corr = dudz - u_qi_avg_global[0][idx_fine];
                                     }
                                     else
                                     {
                                         TBOX_ERROR(d_object_name
                                             << ": "
                                             << "Cannot take derivative for three-dimensional problem!\n"
-                                            << "derivative_direction = " << derivative_directions[0] << " given!\n"
+                                            << "derivative_direction = " << derivative_directions[qi] << " given!\n"
                                             << std::endl);
                                     }
+                                }
+                                
+                                /*
+                                 * Compute the correlation.
+                                 */
+                                
+                                for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                                {
+                                    const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                     
-                                    for (int qi = 1; qi < num_quantities; qi++)
+                                    double corr = double(1);
+                                    for (int qi = 0; qi < num_quantities; qi++)
                                     {
-                                        if (derivative_directions[qi] == -1)
-                                        {
-                                            const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
-                                                (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
-                                                (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
-                                                    ghostcell_dim_1_u_qi[qi];
-                                            
-                                            if (use_reciprocal[qi])
-                                            {
-                                                corr *= (double(1)/(u_qi[qi][idx_qi]) - u_qi_avg_global[qi][idx_fine]);
-                                            }
-                                            else
-                                            {
-                                                corr *= (u_qi[qi][idx_qi] - u_qi_avg_global[qi][idx_fine]);
-                                            }
-                                        }
-                                        else if (derivative_directions[qi] == 0)
-                                        {
-                                            const int idx_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_u_qi[qi]) +
-                                                (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
-                                                (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
-                                                    ghostcell_dim_1_u_qi[qi];
-                                            
-                                            const int idx_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_u_qi[qi]) +
-                                                (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
-                                                (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
-                                                    ghostcell_dim_1_u_qi[qi];
-                                            
-                                            const int idx_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_u_qi[qi]) +
-                                                (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
-                                                (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
-                                                    ghostcell_dim_1_u_qi[qi];
-                                            
-                                            const int idx_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_u_qi[qi]) +
-                                                (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
-                                                (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
-                                                    ghostcell_dim_1_u_qi[qi];
-                                            
-                                            const int idx_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_u_qi[qi]) +
-                                                (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
-                                                (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
-                                                    ghostcell_dim_1_u_qi[qi];
-                                            
-                                            const int idx_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_u_qi[qi]) +
-                                                (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
-                                                (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
-                                                    ghostcell_dim_1_u_qi[qi];
-                                            
-                                            double dudx = double(0);
-                                            if (use_reciprocal[qi])
-                                            {
-                                                dudx = (double(1)/double(60)*(double(1)/u_qi[qi][idx_RRR] - double(1)/u_qi[qi][idx_LLL])
-                                                    - double(3)/double(20)*(double(1)/u_qi[qi][idx_RR] - double(1)/u_qi[qi][idx_LL])
-                                                    + double(3)/double(4)*(double(1)/u_qi[qi][idx_R] - double(1)/u_qi[qi][idx_L]))/dx[0];
-                                            }
-                                            else
-                                            {
-                                                dudx = (double(1)/double(60)*(u_qi[qi][idx_RRR] - u_qi[qi][idx_LLL])
-                                                    - double(3)/double(20)*(u_qi[qi][idx_RR] - u_qi[qi][idx_LL])
-                                                    + double(3)/double(4)*(u_qi[qi][idx_R] - u_qi[qi][idx_L]))/dx[0];
-                                            }
-                                            corr *= (dudx - u_qi_avg_global[qi][idx_fine]);
-                                        }
-                                        else if (derivative_directions[qi] == 1)
-                                        {
-                                            const int idx_BBB = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
-                                                (relative_idx_lo_1 + (j - 3) + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
-                                                (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
-                                                    ghostcell_dim_1_u_qi[qi];
-                                            
-                                            const int idx_BB  = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
-                                                (relative_idx_lo_1 + (j - 2) + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
-                                                (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
-                                                    ghostcell_dim_1_u_qi[qi];
-                                            
-                                            const int idx_B   = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
-                                                (relative_idx_lo_1 + (j - 1) + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
-                                                (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
-                                                    ghostcell_dim_1_u_qi[qi];
-                                            
-                                            const int idx_T   = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
-                                                (relative_idx_lo_1 + (j + 1) + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
-                                                (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
-                                                    ghostcell_dim_1_u_qi[qi];
-                                            
-                                            const int idx_TT  = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
-                                                (relative_idx_lo_1 + (j + 2) + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
-                                                (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
-                                                    ghostcell_dim_1_u_qi[qi];
-                                            
-                                            const int idx_TTT = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
-                                                (relative_idx_lo_1 + (j + 3) + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
-                                                (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
-                                                    ghostcell_dim_1_u_qi[qi];
-                                            
-                                            double dudy = double(0);
-                                            if (use_reciprocal[qi])
-                                            {
-                                                dudy = (double(1)/double(60)*(double(1)/u_qi[qi][idx_TTT] - double(1)/u_qi[qi][idx_BBB])
-                                                    - double(3)/double(20)*(double(1)/u_qi[qi][idx_TT] - double(1)/u_qi[qi][idx_BB])
-                                                    + double(3)/double(4)*(double(1)/u_qi[qi][idx_T] - double(1)/u_qi[qi][idx_B]))/dx[1];
-                                            }
-                                            else
-                                            {
-                                                dudy = (double(1)/double(60)*(u_qi[qi][idx_TTT] - u_qi[qi][idx_BBB])
-                                                    - double(3)/double(20)*(u_qi[qi][idx_TT] - u_qi[qi][idx_BB])
-                                                    + double(3)/double(4)*(u_qi[qi][idx_T] - u_qi[qi][idx_B]))/dx[1];
-                                            }
-                                            corr *= (dudy - u_qi_avg_global[qi][idx_fine]);
-                                        }
-                                        else if (derivative_directions[qi] == 2)
-                                        {
-                                            const int idx_BBB = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
-                                                (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
-                                                (relative_idx_lo_2 + (k - 3) + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
-                                                    ghostcell_dim_1_u_qi[qi];
-                                            
-                                            const int idx_BB  = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
-                                                (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
-                                                (relative_idx_lo_2 + (k - 2) + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
-                                                    ghostcell_dim_1_u_qi[qi];
-                                            
-                                            const int idx_B   = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
-                                                (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
-                                                (relative_idx_lo_2 + (k - 1) + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
-                                                    ghostcell_dim_1_u_qi[qi];
-                                            
-                                            const int idx_F   = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
-                                                (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
-                                                (relative_idx_lo_2 + (k + 1) + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
-                                                    ghostcell_dim_1_u_qi[qi];
-                                            
-                                            const int idx_FF  = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
-                                                (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
-                                                (relative_idx_lo_2 + (k + 2) + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
-                                                    ghostcell_dim_1_u_qi[qi];
-                                            
-                                            const int idx_FFF = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
-                                                (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
-                                                (relative_idx_lo_2 + (k + 3) + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
-                                                    ghostcell_dim_1_u_qi[qi];
-                                            
-                                            double dudz = double(0);
-                                            if (use_reciprocal[qi])
-                                            {
-                                                dudz = (double(1)/double(60)*(double(1)/u_qi[qi][idx_FFF] - double(1)/u_qi[qi][idx_BBB])
-                                                    - double(3)/double(20)*(double(1)/u_qi[qi][idx_FF] - double(1)/u_qi[qi][idx_BB])
-                                                    + double(3)/double(4)*(double(1)/u_qi[qi][idx_F] - double(1)/u_qi[qi][idx_B]))/dx[2];
-                                            }
-                                            else
-                                            {
-                                                dudz = (double(1)/double(60)*(u_qi[qi][idx_FFF] - u_qi[qi][idx_BBB])
-                                                    - double(3)/double(20)*(u_qi[qi][idx_FF] - u_qi[qi][idx_BB])
-                                                    + double(3)/double(4)*(u_qi[qi][idx_F] - u_qi[qi][idx_B]))/dx[2];
-                                            }
-                                            corr *= (dudz - u_qi_avg_global[qi][idx_fine]);
-                                        }
-                                        else
-                                        {
-                                            TBOX_ERROR(d_object_name
-                                                << ": "
-                                                << "Cannot take derivative for three-dimensional problem!\n"
-                                                << "derivative_direction = " << derivative_directions[qi] << " given!\n"
-                                                << std::endl);
-                                        }
+                                        corr *= (u_values[qi] - u_qi_avg_global[qi][idx_fine]);
                                     }
                                     
                                     corr_local[idx_fine] += (corr*weight/((double) n_overlapped));
