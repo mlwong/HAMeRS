@@ -1580,6 +1580,13 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDensitySpecificVolumeCova
         patch_hierarchy,
         data_context);
     
+    std::vector<double> b(rho_p_v_p);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        b[i] = -b[i];
+    }
+    
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     if (mpi.getRank() == 0)
@@ -1588,7 +1595,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDensitySpecificVolumeCova
         f_output.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
         
         f_output.write((char*)&output_time, sizeof(double));
-        f_output.write((char*)&rho_p_v_p[0], sizeof(double)*rho_p_v_p.size());
+        f_output.write((char*)&b[0], sizeof(double)*b.size());
         
         f_output.close();
     }
@@ -1727,6 +1734,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetTurbMassFluxXWithIn
         averaged_quantities,
         patch_hierarchy,
         data_context);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        b[i] = -b[i];
+    }
     
     quantity_names.clear();
     component_indices.clear();
@@ -2261,6 +2273,11 @@ outputBudgetDensitySpecificVolumeCovarianceWithInhomogeneousXDirection(
         averaged_quantities,
         patch_hierarchy,
         data_context);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        b[i] = -b[i];
+    }
     
     quantity_names.clear();
     component_indices.clear();
