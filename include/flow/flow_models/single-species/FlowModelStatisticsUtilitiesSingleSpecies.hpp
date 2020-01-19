@@ -34,7 +34,8 @@ class FlowModelStatisticsUtilitiesSingleSpecies: public FlowModelStatisticsUtili
         outputStatisticalQuantities(
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const double output_time);
         
 };
 
