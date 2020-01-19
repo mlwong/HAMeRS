@@ -1545,6 +1545,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDensitySpecificVolumeCova
     const boost::shared_ptr<hier::VariableContext>& data_context,
     const double output_time) const
 {
+    const int finest_level_dim_0 = getRefinedDomainNumberOfPointsX(patch_hierarchy);
+    
     std::vector<double> rho_mean = getAveragedQuantityWithInhomogeneousXDirection(
         "DENSITY",
         0,
@@ -1705,6 +1707,21 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetTurbMassFluxXWithIn
     
     std::vector<double> d_rho_u_tilde_a1_dx = computeDerivativeOfVector1D(
         rho_u_tilde_a1,
+        dx);
+    
+    /*
+     * Compute term II in moving frame of mixing layer.
+     */
+    
+    std::vector<double> rho_a1_a1(a_1);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        rho_a1_a1[i] *= rho_p_u_p[i];
+    }
+    
+    std::vector<double> d_rho_a1_a1_dx = computeDerivativeOfVector1D(
+        rho_a1_a1,
         dx);
     
     /*
@@ -2200,6 +2217,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetTurbMassFluxXWithIn
         // Term VI(3).
         f_output.write((char*)&rho_epsilon_a1[0], sizeof(double)*rho_epsilon_a1.size());
         
+        // Term II in moving frame of mixing layer.
+        f_output.write((char*)&d_rho_a1_a1_dx[0], sizeof(double)*d_rho_a1_a1_dx.size());
+        
         f_output.close();
     }
 }
@@ -2335,7 +2355,7 @@ outputBudgetDensitySpecificVolumeCovarianceWithInhomogeneousXDirection(
         dx);
     
     /*
-     * Compute term III.
+     * Compute term II in moving frame of mixing layer.
      */
     
     // Compute a1.
@@ -2365,6 +2385,21 @@ outputBudgetDensitySpecificVolumeCovarianceWithInhomogeneousXDirection(
     {
         a_1[i] /= rho_mean[i];
     }
+    
+    std::vector<double> rho_a1_b(a_1);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        rho_a1_b[i] *= rho_b[i];
+    }
+    
+    std::vector<double> d_rho_a1_b_dx = computeDerivativeOfVector1D(
+        rho_a1_b,
+        dx);
+    
+    /*
+     * Compute term III.
+     */
     
     // Compute drho_dx_mean.
     
@@ -2613,6 +2648,9 @@ outputBudgetDensitySpecificVolumeCovarianceWithInhomogeneousXDirection(
         
         // Term VI.
         f_output.write((char*)&rho_epsilon_b[0], sizeof(double)*rho_epsilon_b.size());
+        
+        // Term II in moving frame of mixing layer.
+        f_output.write((char*)&d_rho_a1_b_dx[0], sizeof(double)*d_rho_a1_b_dx.size());
         
         f_output.close();
     }
