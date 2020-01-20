@@ -14638,7 +14638,7 @@ getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
                         const int idx_pressure = relative_idx_lo_0 + i + num_ghosts_0_pressure;
                         const int idx_temperature = relative_idx_lo_0 + i + num_ghosts_0_temperature;
                         
-                        if (component_idx == 0)
+                        if (shear_stress_component_idx == 0)
                         {
                             std::vector<const double*> Y_ptr;
                             Y_ptr.resize(d_num_species);
@@ -14675,7 +14675,7 @@ getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
                             TBOX_ERROR(d_object_name
                                 << ": "
                                 << "Cannot compute shear stress component for one-dimensional problem!\n"
-                                << "component_idx = " << component_idx << " given!\n"
+                                << "shear_stress_component_idx = " << shear_stress_component_idx << " given!\n"
                                 << std::endl);
                         }
                         
@@ -15044,7 +15044,7 @@ getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
                             const int idx_vel_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
                                 (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
                             
-                            if (component_idx == 0)
+                            if (shear_stress_component_idx == 0)
                             {
                                 std::vector<const double*> Y_ptr;
                                 Y_ptr.resize(d_num_species);
@@ -15073,7 +15073,7 @@ getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
                                 
                                 tau_ij = ((double(4)/double(3)*mu + mu_v)*dudx - (double(2)/double(3)*mu - mu_v)*dvdy);
                             }
-                            else if (component_idx == 1)
+                            else if (shear_stress_component_idx == 1)
                             {
                                 std::vector<const double*> Y_ptr;
                                 Y_ptr.resize(d_num_species);
@@ -15097,7 +15097,7 @@ getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
                                 
                                 tau_ij = mu*(dudy + dvdx);
                             }
-                            else if (component_idx == 3)
+                            else if (shear_stress_component_idx == 3)
                             {
                                 std::vector<const double*> Y_ptr;
                                 Y_ptr.resize(d_num_species);
@@ -15131,7 +15131,7 @@ getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
                                 TBOX_ERROR(d_object_name
                                     << ": "
                                     << "Cannot compute shear stress component for two-dimensional problem!\n"
-                                    << "component_idx = " << component_idx << " given!\n"
+                                    << "shear_stress_component_idx = " << shear_stress_component_idx << " given!\n"
                                     << std::endl);
                             }
                             
@@ -15532,7 +15532,7 @@ getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
                                         ghostcell_dim_1_temperature;
                                 
-                                if (component_idx == 0)
+                                if (shear_stress_component_idx == 0)
                                 {
                                     std::vector<const double*> Y_ptr;
                                     Y_ptr.resize(d_num_species);
@@ -15656,7 +15656,7 @@ getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
                                     tau_ij = (double(4)/double(3)*mu + mu_v)*dudx -
                                         (double(2)/double(3)*mu - mu_v)*(dvdy + dwdz);
                                 }
-                                else if (component_idx == 1)
+                                else if (shear_stress_component_idx == 1)
                                 {
                                     std::vector<const double*> Y_ptr;
                                     Y_ptr.resize(d_num_species);
@@ -15740,7 +15740,7 @@ getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
                                     
                                     tau_ij = mu*(dudy + dvdx);
                                 }
-                                else if (component_idx == 2)
+                                else if (shear_stress_component_idx == 2)
                                 {
                                     std::vector<const double*> Y_ptr;
                                     Y_ptr.resize(d_num_species);
@@ -15824,7 +15824,7 @@ getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
                                     
                                     tau_ij = mu*(dudz + dwdx);
                                 }
-                                else if (component_idx == 3)
+                                else if (shear_stress_component_idx == 3)
                                 {
                                     std::vector<const double*> Y_ptr;
                                     Y_ptr.resize(d_num_species);
@@ -15948,7 +15948,7 @@ getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
                                     tau_ij = (double(4)/double(3)*mu + mu_v)*dvdy -
                                         (double(2)/double(3)*mu - mu_v)*(dudx + dwdz);
                                 }
-                                else if (component_idx == 4)
+                                else if (shear_stress_component_idx == 4)
                                 {
                                     std::vector<const double*> Y_ptr;
                                     Y_ptr.resize(d_num_species);
@@ -16032,7 +16032,7 @@ getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
                                     
                                     tau_ij = mu*(dvdz + dwdy);
                                 }
-                                else if (component_idx == 5)
+                                else if (shear_stress_component_idx == 5)
                                 {
                                     std::vector<const double*> Y_ptr;
                                     Y_ptr.resize(d_num_species);
@@ -16161,7 +16161,7 @@ getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
                                     TBOX_ERROR(d_object_name
                                         << ": "
                                         << "Cannot compute shear stress component for two-dimensional problem!\n"
-                                        << "component_idx = " << component_idx << " given!\n"
+                                        << "shear_stress_component_idx = " << shear_stress_component_idx << " given!\n"
                                         << std::endl);
                                 }
                                 
