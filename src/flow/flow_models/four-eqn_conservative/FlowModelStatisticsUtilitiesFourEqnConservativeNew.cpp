@@ -251,6 +251,30 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 data_context,
                 output_time);
         }
+        else if (statistical_quantity_key == "rR11_budget")
+        {
+            outputBudgetReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
+                "rR11_budget.dat",
+                patch_hierarchy,
+                data_context,
+                output_time);
+        }
+        else if (statistical_quantity_key == "rR22_budget")
+        {
+            outputBudgetReynoldsNormalStressInYDirectionWithInhomogeneousXDirection(
+                "rR22_budget.dat",
+                patch_hierarchy,
+                data_context,
+                output_time);
+        }
+        else if (statistical_quantity_key == "rR33_budget")
+        {
+            outputBudgetReynoldsNormalStressInZDirectionWithInhomogeneousXDirection(
+                "rR33_budget.dat",
+                patch_hierarchy,
+                data_context,
+                output_time);
+        }
         else
         {
             TBOX_ERROR(d_object_name
@@ -289,6 +313,145 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputAveragedDensityWithInhomo
         
         f_output.write((char*)&output_time, sizeof(double));
         f_output.write((char*)&rho_mean[0], sizeof(double)*rho_mean.size());
+        
+        f_output.close();
+    }
+}
+
+
+/*
+ * Output averaged pressure with inhomogeneous x-direction to a file.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::outputAveragedPressureWithInhomogeneousXDirection(
+    const std::string& stat_dump_filename,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+    std::vector<double> p_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        "PRESSURE",
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_output;
+        f_output.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        
+        f_output.write((char*)&output_time, sizeof(double));
+        f_output.write((char*)&p_mean[0], sizeof(double)*p_mean.size());
+        
+        f_output.close();
+    }
+}
+
+
+/*
+ * Output averaged temperature with inhomogeneous x-direction to a file.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::outputAveragedTemperatureWithInhomogeneousXDirection(
+    const std::string& stat_dump_filename,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+    std::vector<double> T_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        "TEMPERATURE",
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_output;
+        f_output.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        
+        f_output.write((char*)&output_time, sizeof(double));
+        f_output.write((char*)&T_mean[0], sizeof(double)*T_mean.size());
+        
+        f_output.close();
+    }
+}
+
+
+/*
+ * Output averaged velocity component in x-direction with inhomogeneous x-direction to a file.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::outputAveragedVelocityXWithInhomogeneousXDirection(
+    const std::string& stat_dump_filename,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+    std::vector<double> u_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_output;
+        f_output.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        
+        f_output.write((char*)&output_time, sizeof(double));
+        f_output.write((char*)&u_mean[0], sizeof(double)*u_mean.size());
+        
+        f_output.close();
+    }
+}
+
+
+/*
+ * Output Favre-averaged velocity component in x-direction with inhomogeneous x-direction to a file.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::outputFavreAveragedVelocityXWithInhomogeneousXDirection(
+    const std::string& stat_dump_filename,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+    const int finest_level_dim_0 = getRefinedDomainNumberOfPointsX(patch_hierarchy);
+    
+    std::vector<double> rho_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> rho_u_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        "MOMENTUM",
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> u_tilde(rho_u_mean);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        u_tilde[i] /= rho_mean[i];
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_output;
+        f_output.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        
+        f_output.write((char*)&output_time, sizeof(double));
+        f_output.write((char*)&u_tilde[0], sizeof(double)*u_tilde.size());
         
         f_output.close();
     }
@@ -627,6 +790,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputReynoldsNormalStressInXDi
         patch_hierarchy,
         data_context);
     
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        R_11[i] /= rho_mean[i];
+    }
+    
     // Output R_11.
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
@@ -714,6 +882,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputReynoldsNormalStressInYDi
         patch_hierarchy,
         data_context);
     
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        R_22[i] /= rho_mean[i];
+    }
+    
     // Output R_22.
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
@@ -800,6 +973,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputReynoldsNormalStressInZDi
         averaged_quantities,
         patch_hierarchy,
         data_context);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        R_33[i] /= rho_mean[i];
+    }
     
     // Output R_33.
     
@@ -912,6 +1090,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputReynoldsShearStressInXYDi
         patch_hierarchy,
         data_context);
     
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        R_12[i] /= rho_mean[i];
+    }
+    
     // Output R_12.
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
@@ -1023,6 +1206,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputReynoldsShearStressInXZDi
         patch_hierarchy,
         data_context);
     
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        R_13[i] /= rho_mean[i];
+    }
+    
     // Output R_13.
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
@@ -1133,6 +1321,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputReynoldsShearStressInYZDi
         averaged_quantities,
         patch_hierarchy,
         data_context);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        R_23[i] /= rho_mean[i];
+    }
     
     // Output R_23.
     
@@ -1966,7 +2159,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetTurbMassFluxXWithIn
      * Compute term VI(2).
      */
     
-    std::vector<double> rho_inv_p_dtau_11_dx_p = 
+    std::vector<double> rho_inv_p_dtau_11_dx_p =
         getQuantityCorrelationWithDerivativeOfShearStressComponentWithInhomogeneousXDirection(
             "DENSITY",
             0,
@@ -1985,7 +2178,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetTurbMassFluxXWithIn
         patch_hierarchy,
         data_context);
     
-    std::vector<double> rho_inv_p_dtau_12_dy_p = 
+    std::vector<double> rho_inv_p_dtau_12_dy_p =
         getQuantityCorrelationWithDerivativeOfShearStressComponentWithInhomogeneousXDirection(
             "DENSITY",
             0,
@@ -2007,7 +2200,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetTurbMassFluxXWithIn
             patch_hierarchy,
             data_context);
         
-        rho_inv_p_dtau_13_dz_p = 
+        rho_inv_p_dtau_13_dz_p =
             getQuantityCorrelationWithDerivativeOfShearStressComponentWithInhomogeneousXDirection(
                 "DENSITY",
                 0,
@@ -2651,6 +2844,1424 @@ outputBudgetDensitySpecificVolumeCovarianceWithInhomogeneousXDirection(
         
         // Term II in moving frame of mixing layer.
         f_output.write((char*)&d_rho_a1_b_dx[0], sizeof(double)*d_rho_a1_b_dx.size());
+        
+        f_output.close();
+    }
+}
+
+
+/*
+ * Output budget of Reynolds normal stress in x-direction with inhomogeneous x-direction to a file.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::
+outputBudgetReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
+    const std::string& stat_dump_filename,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+    const int finest_level_dim_0 = getRefinedDomainNumberOfPointsX(patch_hierarchy);
+    
+    const double dx = getRefinedDomainGridSpacingX(patch_hierarchy);
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    std::vector<std::vector<double> > averaged_quantities;
+    std::vector<bool> use_reciprocal;
+    std::vector<int> derivative_directions;
+    
+    std::vector<double> zeros(finest_level_dim_0, double(0));
+    
+    /*
+     * Compute rho_mean.
+     */
+    
+    std::vector<double> rho_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    /*
+     * Compute u_mean.
+     */
+    
+    std::vector<double> u_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    /*
+     * Compute p_mean.
+     */
+    
+    std::vector<double> p_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        "PRESSURE",
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    /*
+     * Compute u_tilde.
+     */
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    
+    std::vector<double> rho_u_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<double> u_tilde(rho_u_mean);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        u_tilde[i] /= rho_mean[i];
+    }
+    
+    /*
+     * Compute a1.
+     */
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(rho_mean);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(u_mean);
+    
+    std::vector<double> rho_p_u_p = getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        averaged_quantities,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    averaged_quantities.clear();
+    
+    std::vector<double> a1(rho_p_u_p);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        a1[i] /= rho_mean[i];
+    }
+    
+    /*
+     * Compute R11.
+     */
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(zeros);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(u_tilde);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(u_tilde);
+    
+    std::vector<double> rho_R11 = getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        averaged_quantities,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    averaged_quantities.clear();
+    
+    std::vector<double> R11(rho_R11);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        R11[i] /= rho_mean[i];
+    }
+    
+    /*
+     * Compute term II.
+     */
+    
+    std::vector<double> rho_u_tilde_R11(rho_R11);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        rho_u_tilde_R11[i] *= u_tilde[i];
+    }
+    
+    std::vector<double> d_rho_u_tilde_R11_dx = computeDerivativeOfVector1D(
+        rho_u_tilde_R11,
+        dx);
+    
+    /*
+     * Compute term II in moving frame of mixing layer.
+     */
+    
+    std::vector<double> rho_a1_R11(rho_R11);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        rho_a1_R11[i] *= a1[i];
+    }
+    
+    std::vector<double> d_rho_a1_R11_dx = computeDerivativeOfVector1D(
+        rho_a1_R11,
+        dx);
+    
+    /*
+     * Compute term III(1).
+     */
+    
+    std::vector<double> dp_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "PRESSURE",
+        0,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> two_a1_dp_dx(dp_dx_mean);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        two_a1_dp_dx[i] *= (double(2)*a1[i]);
+    }
+    
+    /*
+     * Compute term III(2).
+     */
+    
+    std::vector<double> dtau_11_dx_mean = getAveragedDerivativeOfShearStressComponentWithInhomogeneousXDirection(
+        0,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> m_2a1_dtau_11_dx(dtau_11_dx_mean);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        m_2a1_dtau_11_dx[i] *= (-double(2)*a1[i]);
+    }
+    
+    /*
+     * Compute term III(3).
+     */
+    
+    std::vector<double> drho_u_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "MOMENTUM",
+        0,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> drho_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> du_tilde_dx(finest_level_dim_0, double(0));
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        du_tilde_dx[i] = drho_u_dx_mean[i]/rho_mean[i] - rho_u_mean[i]/(rho_mean[i]*rho_mean[i])*drho_dx_mean[i];
+    }
+    
+    std::vector<double> m_2rho_R11_du_tilde_dx(du_tilde_dx);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        m_2rho_R11_du_tilde_dx[i] *= (-double(2)*rho_R11[i]);
+    }
+    
+    /*
+     * Compute term IV(1).
+     */
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(zeros);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(u_tilde);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(u_tilde);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(u_tilde);
+    
+    std::vector<double> rho_u_pp_u_pp_u_pp = getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        averaged_quantities,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    averaged_quantities.clear();
+    
+    std::vector<double> m_drho_u_pp_u_pp_u_pp_dx = computeDerivativeOfVector1D(
+        rho_u_pp_u_pp_u_pp,
+        dx);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        m_drho_u_pp_u_pp_u_pp_dx[i] = -m_drho_u_pp_u_pp_u_pp_dx[i];
+    }
+    
+    /*
+     * Compute term IV(2).
+     */
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(u_mean);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(p_mean);
+    
+    std::vector<double> u_p_p_p = getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        averaged_quantities,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    averaged_quantities.clear();
+    
+    std::vector<double> m_2du_p_p_p_dx = computeDerivativeOfVector1D(
+        u_p_p_p,
+        dx);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        m_2du_p_p_p_dx[i] *= (-double(2));
+    }
+    
+    /*
+     * Compute term IV(3).
+     */
+    
+    std::vector<double> tau11_mean = getAveragedShearStressComponentWithInhomogeneousXDirection(
+    0,
+    patch_hierarchy,
+    data_context);
+    
+    std::vector<double> u_p_tau11_p =
+    getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
+            "VELOCITY",
+            0,
+            false,
+            -1,
+            u_mean,
+            0,
+            tau11_mean,
+            patch_hierarchy,
+            data_context);
+    
+    std::vector<double> two_du_p_tau11_p_dx = computeDerivativeOfVector1D(
+        u_p_tau11_p,
+        dx);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        two_du_p_tau11_p_dx[i] *= double(2);
+    }
+    
+    /*
+     * Compute term V.
+     */
+    
+    std::vector<double> du_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
+        0,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_reciprocal.push_back(false);
+    derivative_directions.push_back(-1);
+    averaged_quantities.push_back(p_mean);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    use_reciprocal.push_back(false);
+    derivative_directions.push_back(0);
+    averaged_quantities.push_back(du_dx_mean);
+    
+    std::vector<double> two_p_p_du_dx_p = getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_reciprocal,
+        derivative_directions,
+        averaged_quantities,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_reciprocal.clear();
+    derivative_directions.clear();
+    averaged_quantities.clear();
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        two_p_p_du_dx_p[i] *= double(2);
+    }
+    
+    /*
+     * Compute term VI.
+     */
+    
+    std::vector<double> tau_11_p_du_dx_p =
+        getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
+            "VELOCITY",
+            0,
+            false,
+            0,
+            du_dx_mean,
+            0,
+            tau11_mean,
+            patch_hierarchy,
+            data_context) ;
+    
+    std::vector<double> du_dy_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
+        0,
+        1,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> tau12_mean = getAveragedShearStressComponentWithInhomogeneousXDirection(
+    1,
+    patch_hierarchy,
+    data_context);
+    
+    std::vector<double> tau_12_p_du_dy_p =
+        getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
+            "VELOCITY",
+            0,
+            false,
+            1,
+            du_dy_mean,
+            1,
+            tau12_mean,
+            patch_hierarchy,
+            data_context);
+    
+    std::vector<double> tau_13_p_du_dz_p;
+    if (d_dim == tbox::Dimension(3))
+    {
+        std::vector<double> du_dz_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+            "VELOCITY",
+            0,
+            2,
+            patch_hierarchy,
+            data_context);
+        
+        std::vector<double> tau13_mean = getAveragedShearStressComponentWithInhomogeneousXDirection(
+        2,
+        patch_hierarchy,
+        data_context);
+        
+        tau_13_p_du_dz_p =
+            getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
+                "VELOCITY",
+                0,
+                false,
+                2,
+                du_dz_mean,
+                2,
+                tau13_mean,
+                patch_hierarchy,
+                data_context);
+    }
+    
+    std::vector<double> m_2tau_1i_p_du_p_dxi(finest_level_dim_0, double(0));
+    
+    if (d_dim == tbox::Dimension(2))
+    {
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            m_2tau_1i_p_du_p_dxi[i] = -double(2)*(tau_11_p_du_dx_p[i] + tau_12_p_du_dy_p[i]);
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            m_2tau_1i_p_du_p_dxi[i] = -double(2)*(tau_11_p_du_dx_p[i] + tau_12_p_du_dy_p[i] + tau_13_p_du_dz_p[i]);
+        }
+    }
+    
+    /*
+     * Output budget.
+     */
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_output;
+        f_output.open(stat_dump_filename.c_str(), std::ios_base::app | std::ios::out | std::ios::binary);
+        
+        if (!f_output.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output R11 budget!"
+                << std::endl);
+        }
+        
+        f_output.write((char*)&output_time, sizeof(double));
+        f_output.write((char*)&rho_R11[0], sizeof(double)*rho_R11.size());
+        // Term II.
+        f_output.write((char*)&d_rho_u_tilde_R11_dx[0], sizeof(double)*d_rho_u_tilde_R11_dx.size());
+        
+        // Term III(1).
+        f_output.write((char*)&two_a1_dp_dx[0], sizeof(double)*two_a1_dp_dx.size());
+        // Term III(2).
+        f_output.write((char*)&m_2a1_dtau_11_dx[0], sizeof(double)*m_2a1_dtau_11_dx.size());
+        // Term III(3).
+        f_output.write((char*)&m_2rho_R11_du_tilde_dx[0], sizeof(double)*m_2rho_R11_du_tilde_dx.size());
+        
+        // Term IV(1).
+        f_output.write((char*)&m_drho_u_pp_u_pp_u_pp_dx[0], sizeof(double)*m_drho_u_pp_u_pp_u_pp_dx.size());
+        // Term IV(2).
+        f_output.write((char*)&m_2du_p_p_p_dx[0], sizeof(double)*m_2du_p_p_p_dx.size());
+        // Term IV(3).
+        f_output.write((char*)&two_du_p_tau11_p_dx[0], sizeof(double)*two_du_p_tau11_p_dx.size());
+        
+        // Term V.
+        f_output.write((char*)&two_p_p_du_dx_p[0], sizeof(double)*two_p_p_du_dx_p.size());
+        
+        // Term VI.
+        f_output.write((char*)&m_2tau_1i_p_du_p_dxi[0], sizeof(double)*m_2tau_1i_p_du_p_dxi.size());
+        
+        // Term II in moving frame of mixing layer.
+        f_output.write((char*)&d_rho_a1_R11_dx[0], sizeof(double)*d_rho_a1_R11_dx.size());
+        
+        f_output.close();
+    }
+}
+
+
+/*
+ * Output budget of Reynolds normal stress in y-direction with inhomogeneous x-direction to a file.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::
+outputBudgetReynoldsNormalStressInYDirectionWithInhomogeneousXDirection(
+    const std::string& stat_dump_filename,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+    const int finest_level_dim_0 = getRefinedDomainNumberOfPointsX(patch_hierarchy);
+    
+    const double dx = getRefinedDomainGridSpacingX(patch_hierarchy);
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    std::vector<std::vector<double> > averaged_quantities;
+    std::vector<bool> use_reciprocal;
+    std::vector<int> derivative_directions;
+    
+    std::vector<double> zeros(finest_level_dim_0, double(0));
+    
+    /*
+     * Compute rho_mean.
+     */
+    
+    std::vector<double> rho_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    /*
+     * Compute u_mean.
+     */
+    
+    std::vector<double> u_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    /*
+     * Compute v_mean.
+     */
+    
+    std::vector<double> v_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
+        1,
+        patch_hierarchy,
+        data_context);
+    
+    /*
+     * Compute p_mean.
+     */
+    
+    std::vector<double> p_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        "PRESSURE",
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    /*
+     * Compute u_tilde.
+     */
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    
+    std::vector<double> rho_u_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<double> u_tilde(rho_u_mean);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        u_tilde[i] /= rho_mean[i];
+    }
+    
+    /*
+     * Compute v_tilde.
+     */
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(1);
+    
+    std::vector<double> rho_v_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<double> v_tilde(rho_v_mean);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        v_tilde[i] /= rho_mean[i];
+    }
+    
+    /*
+     * Compute a1.
+     */
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(rho_mean);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(u_mean);
+    
+    std::vector<double> rho_p_u_p = getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        averaged_quantities,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    averaged_quantities.clear();
+    
+    std::vector<double> a1(rho_p_u_p);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        a1[i] /= rho_mean[i];
+    }
+    
+    /*
+     * Compute R22.
+     */
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(zeros);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(1);
+    averaged_quantities.push_back(v_tilde);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(1);
+    averaged_quantities.push_back(v_tilde);
+    
+    std::vector<double> rho_R22 = getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        averaged_quantities,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    averaged_quantities.clear();
+    
+    std::vector<double> R22(rho_R22);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        R22[i] /= rho_mean[i];
+    }
+    
+    /*
+     * Compute term II.
+     */
+    
+    std::vector<double> rho_u_tilde_R22(rho_R22);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        rho_u_tilde_R22[i] *= u_tilde[i];
+    }
+    
+    std::vector<double> d_rho_u_tilde_R22_dx = computeDerivativeOfVector1D(
+        rho_u_tilde_R22,
+        dx);
+    
+    /*
+     * Compute term II in moving frame of mixing layer.
+     */
+    
+    std::vector<double> rho_a1_R22(rho_R22);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        rho_a1_R22[i] *= a1[i];
+    }
+    
+    std::vector<double> d_rho_a1_R22_dx = computeDerivativeOfVector1D(
+        rho_a1_R22,
+        dx);
+    
+    /*
+     * Compute term IV(1).
+     */
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(zeros);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(1);
+    averaged_quantities.push_back(v_tilde);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(1);
+    averaged_quantities.push_back(v_tilde);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(u_tilde);
+    
+    std::vector<double> rho_v_pp_v_pp_u_pp = getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        averaged_quantities,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    averaged_quantities.clear();
+    
+    std::vector<double> m_drho_v_pp_v_pp_u_pp_dx = computeDerivativeOfVector1D(
+        rho_v_pp_v_pp_u_pp,
+        dx);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        m_drho_v_pp_v_pp_u_pp_dx[i] = -m_drho_v_pp_v_pp_u_pp_dx[i];
+    }
+    
+    /*
+     * Compute term IV(2).
+     */
+    
+    std::vector<double> tau21_mean = getAveragedShearStressComponentWithInhomogeneousXDirection(
+    1,
+    patch_hierarchy,
+    data_context);
+    
+    std::vector<double> v_p_tau21_p =
+    getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
+            "VELOCITY",
+            1,
+            false,
+            -1,
+            v_mean,
+            1,
+            tau21_mean,
+            patch_hierarchy,
+            data_context);
+    
+    std::vector<double> two_dv_p_tau21_p_dx = computeDerivativeOfVector1D(
+        v_p_tau21_p,
+        dx);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        two_dv_p_tau21_p_dx[i] *= double(2);
+    }
+    
+    /*
+     * Compute term V.
+     */
+    
+    std::vector<double> dv_dy_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
+        1,
+        1,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_reciprocal.push_back(false);
+    derivative_directions.push_back(-1);
+    averaged_quantities.push_back(p_mean);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(1);
+    use_reciprocal.push_back(false);
+    derivative_directions.push_back(1);
+    averaged_quantities.push_back(dv_dy_mean);
+    
+    std::vector<double> two_p_p_dv_dy_p = getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_reciprocal,
+        derivative_directions,
+        averaged_quantities,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_reciprocal.clear();
+    derivative_directions.clear();
+    averaged_quantities.clear();
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        two_p_p_dv_dy_p[i] *= double(2);
+    }
+    
+    /*
+     * Compute term VI.
+     */
+    
+    std::vector<double> dv_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
+        1,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> tau_21_p_dv_dx_p =
+        getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
+            "VELOCITY",
+            1,
+            false,
+            0,
+            dv_dx_mean,
+            1,
+            tau21_mean,
+            patch_hierarchy,
+            data_context) ;
+    
+    std::vector<double> tau22_mean = getAveragedShearStressComponentWithInhomogeneousXDirection(
+    3,
+    patch_hierarchy,
+    data_context);
+    
+    std::vector<double> tau_22_p_dv_dy_p =
+        getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
+            "VELOCITY",
+            1,
+            false,
+            1,
+            dv_dy_mean,
+            3,
+            tau22_mean,
+            patch_hierarchy,
+            data_context);
+    
+    std::vector<double> tau_23_p_dv_dz_p;
+    if (d_dim == tbox::Dimension(3))
+    {
+        std::vector<double> dv_dz_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+            "VELOCITY",
+            1,
+            2,
+            patch_hierarchy,
+            data_context);
+        
+        std::vector<double> tau23_mean = getAveragedShearStressComponentWithInhomogeneousXDirection(
+        4,
+        patch_hierarchy,
+        data_context);
+        
+        tau_23_p_dv_dz_p =
+            getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
+                "VELOCITY",
+                1,
+                false,
+                2,
+                dv_dz_mean,
+                4,
+                tau23_mean,
+                patch_hierarchy,
+                data_context);
+    }
+    
+    std::vector<double> m_2tau_2i_p_dv_p_dxi(finest_level_dim_0, double(0));
+    
+    if (d_dim == tbox::Dimension(2))
+    {
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            m_2tau_2i_p_dv_p_dxi[i] = -double(2)*(tau_21_p_dv_dx_p[i] + tau_22_p_dv_dy_p[i]);
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            m_2tau_2i_p_dv_p_dxi[i] = -double(2)*(tau_21_p_dv_dx_p[i] + tau_22_p_dv_dy_p[i] + tau_23_p_dv_dz_p[i]);
+        }
+    }
+    
+    /*
+     * Output budget.
+     */
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_output;
+        f_output.open(stat_dump_filename.c_str(), std::ios_base::app | std::ios::out | std::ios::binary);
+        
+        if (!f_output.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output R22 budget!"
+                << std::endl);
+        }
+        
+        f_output.write((char*)&output_time, sizeof(double));
+        f_output.write((char*)&rho_R22[0], sizeof(double)*rho_R22.size());
+        // Term II.
+        f_output.write((char*)&d_rho_u_tilde_R22_dx[0], sizeof(double)*d_rho_u_tilde_R22_dx.size());
+        
+        // Term IV(1).
+        f_output.write((char*)&m_drho_v_pp_v_pp_u_pp_dx[0], sizeof(double)*m_drho_v_pp_v_pp_u_pp_dx.size());
+        // Term IV(2).
+        f_output.write((char*)&two_dv_p_tau21_p_dx[0], sizeof(double)*two_dv_p_tau21_p_dx.size());
+        
+        // Term V.
+        f_output.write((char*)&two_p_p_dv_dy_p[0], sizeof(double)*two_p_p_dv_dy_p.size());
+        
+        // Term VI.
+        f_output.write((char*)&m_2tau_2i_p_dv_p_dxi[0], sizeof(double)*m_2tau_2i_p_dv_p_dxi.size());
+        
+        // Term II in moving frame of mixing layer.
+        f_output.write((char*)&d_rho_a1_R22_dx[0], sizeof(double)*d_rho_a1_R22_dx.size());
+        
+        f_output.close();
+    }
+}
+
+
+/*
+ * Output budget of Reynolds normal stress in z-direction with inhomogeneous x-direction to a file.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::
+outputBudgetReynoldsNormalStressInZDirectionWithInhomogeneousXDirection(
+    const std::string& stat_dump_filename,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+    const int finest_level_dim_0 = getRefinedDomainNumberOfPointsX(patch_hierarchy);
+    
+    const double dx = getRefinedDomainGridSpacingX(patch_hierarchy);
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    std::vector<std::vector<double> > averaged_quantities;
+    std::vector<bool> use_reciprocal;
+    std::vector<int> derivative_directions;
+    
+    std::vector<double> zeros(finest_level_dim_0, double(0));
+    
+    /*
+     * Compute rho_mean.
+     */
+    
+    std::vector<double> rho_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    /*
+     * Compute u_mean.
+     */
+    
+    std::vector<double> u_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    /*
+     * Compute w_mean.
+     */
+    
+    std::vector<double> w_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
+        2,
+        patch_hierarchy,
+        data_context);
+    
+    /*
+     * Compute p_mean.
+     */
+    
+    std::vector<double> p_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        "PRESSURE",
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    /*
+     * Compute u_tilde.
+     */
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    
+    std::vector<double> rho_u_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<double> u_tilde(rho_u_mean);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        u_tilde[i] /= rho_mean[i];
+    }
+    
+    /*
+     * Compute w_tilde.
+     */
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(2);
+    
+    std::vector<double> rho_w_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<double> w_tilde(rho_w_mean);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        w_tilde[i] /= rho_mean[i];
+    }
+    
+    /*
+     * Compute a1.
+     */
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(rho_mean);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(u_mean);
+    
+    std::vector<double> rho_p_u_p = getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        averaged_quantities,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    averaged_quantities.clear();
+    
+    std::vector<double> a1(rho_p_u_p);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        a1[i] /= rho_mean[i];
+    }
+    
+    /*
+     * Compute R33.
+     */
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(zeros);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(2);
+    averaged_quantities.push_back(w_tilde);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(2);
+    averaged_quantities.push_back(w_tilde);
+    
+    std::vector<double> rho_R33 = getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        averaged_quantities,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    averaged_quantities.clear();
+    
+    std::vector<double> R33(rho_R33);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        R33[i] /= rho_mean[i];
+    }
+    
+    /*
+     * Compute term II.
+     */
+    
+    std::vector<double> rho_u_tilde_R33(rho_R33);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        rho_u_tilde_R33[i] *= u_tilde[i];
+    }
+    
+    std::vector<double> d_rho_u_tilde_R33_dx = computeDerivativeOfVector1D(
+        rho_u_tilde_R33,
+        dx);
+    
+    /*
+     * Compute term II in moving frame of mixing layer.
+     */
+    
+    std::vector<double> rho_a1_R33(rho_R33);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        rho_a1_R33[i] *= a1[i];
+    }
+    
+    std::vector<double> d_rho_a1_R33_dx = computeDerivativeOfVector1D(
+        rho_a1_R33,
+        dx);
+    
+    /*
+     * Compute term IV(1).
+     */
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(zeros);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(2);
+    averaged_quantities.push_back(w_tilde);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(2);
+    averaged_quantities.push_back(w_tilde);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(u_tilde);
+    
+    std::vector<double> rho_w_pp_w_pp_u_pp = getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        averaged_quantities,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    averaged_quantities.clear();
+    
+    std::vector<double> m_drho_w_pp_w_pp_u_pp_dx = computeDerivativeOfVector1D(
+        rho_w_pp_w_pp_u_pp,
+        dx);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        m_drho_w_pp_w_pp_u_pp_dx[i] = -m_drho_w_pp_w_pp_u_pp_dx[i];
+    }
+    
+    /*
+     * Compute term IV(2).
+     */
+    
+    std::vector<double> tau31_mean = getAveragedShearStressComponentWithInhomogeneousXDirection(
+    2,
+    patch_hierarchy,
+    data_context);
+    
+    std::vector<double> w_p_tau31_p =
+    getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
+            "VELOCITY",
+            2,
+            false,
+            -1,
+            w_mean,
+            2,
+            tau31_mean,
+            patch_hierarchy,
+            data_context);
+    
+    std::vector<double> two_dw_p_tau31_p_dx = computeDerivativeOfVector1D(
+        w_p_tau31_p,
+        dx);
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        two_dw_p_tau31_p_dx[i] *= double(2);
+    }
+    
+    /*
+     * Compute term V.
+     */
+    
+    std::vector<double> dw_dz_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
+        2,
+        2,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_reciprocal.push_back(false);
+    derivative_directions.push_back(-1);
+    averaged_quantities.push_back(p_mean);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(2);
+    use_reciprocal.push_back(false);
+    derivative_directions.push_back(2);
+    averaged_quantities.push_back(dw_dz_mean);
+    
+    std::vector<double> two_p_p_dw_dz_p = getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_reciprocal,
+        derivative_directions,
+        averaged_quantities,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_reciprocal.clear();
+    derivative_directions.clear();
+    averaged_quantities.clear();
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        two_p_p_dw_dz_p[i] *= double(2);
+    }
+    
+    /*
+     * Compute term VI.
+     */
+    
+    std::vector<double> dw_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
+        2,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> tau_31_p_dw_dx_p =
+        getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
+            "VELOCITY",
+            2,
+            false,
+            0,
+            dw_dx_mean,
+            2,
+            tau31_mean,
+            patch_hierarchy,
+            data_context) ;
+    
+    std::vector<double> dw_dy_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
+        2,
+        1,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> tau32_mean = getAveragedShearStressComponentWithInhomogeneousXDirection(
+    4,
+    patch_hierarchy,
+    data_context);
+    
+    std::vector<double> tau_32_p_dw_dy_p =
+        getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
+            "VELOCITY",
+            2,
+            false,
+            1,
+            dw_dy_mean,
+            4,
+            tau32_mean,
+            patch_hierarchy,
+            data_context);
+    
+    std::vector<double> tau33_mean = getAveragedShearStressComponentWithInhomogeneousXDirection(
+    5,
+    patch_hierarchy,
+    data_context);
+    
+    std::vector<double> tau_33_p_dw_dz_p =
+        getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
+            "VELOCITY",
+            2,
+            false,
+            2,
+            dw_dz_mean,
+            4,
+            tau33_mean,
+            patch_hierarchy,
+            data_context);
+    
+    std::vector<double> m_2tau_3i_p_dw_p_dxi(finest_level_dim_0, double(0));
+    
+    if (d_dim == tbox::Dimension(2))
+    {
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            m_2tau_3i_p_dw_p_dxi[i] = -double(2)*(tau_31_p_dw_dx_p[i] + tau_32_p_dw_dy_p[i]);
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            m_2tau_3i_p_dw_p_dxi[i] = -double(2)*(tau_31_p_dw_dx_p[i] + tau_32_p_dw_dy_p[i] + tau_33_p_dw_dz_p[i]);
+        }
+    }
+    
+    /*
+     * Output budget.
+     */
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_output;
+        f_output.open(stat_dump_filename.c_str(), std::ios_base::app | std::ios::out | std::ios::binary);
+        
+        if (!f_output.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output R33 budget!"
+                << std::endl);
+        }
+        
+        f_output.write((char*)&output_time, sizeof(double));
+        f_output.write((char*)&rho_R33[0], sizeof(double)*rho_R33.size());
+        // Term II.
+        f_output.write((char*)&d_rho_u_tilde_R33_dx[0], sizeof(double)*d_rho_u_tilde_R33_dx.size());
+        
+        // Term IV(1).
+        f_output.write((char*)&m_drho_w_pp_w_pp_u_pp_dx[0], sizeof(double)*m_drho_w_pp_w_pp_u_pp_dx.size());
+        // Term IV(2).
+        f_output.write((char*)&two_dw_p_tau31_p_dx[0], sizeof(double)*two_dw_p_tau31_p_dx.size());
+        
+        // Term V.
+        f_output.write((char*)&two_p_p_dw_dz_p[0], sizeof(double)*two_p_p_dw_dz_p.size());
+        
+        // Term VI.
+        f_output.write((char*)&m_2tau_3i_p_dw_p_dxi[0], sizeof(double)*m_2tau_3i_p_dw_p_dxi.size());
+        
+        // Term II in moving frame of mixing layer.
+        f_output.write((char*)&d_rho_a1_R33_dx[0], sizeof(double)*d_rho_a1_R33_dx.size());
         
         f_output.close();
     }

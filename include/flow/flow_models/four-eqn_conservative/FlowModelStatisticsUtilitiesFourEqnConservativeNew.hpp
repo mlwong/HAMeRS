@@ -64,6 +64,46 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const double output_time) const;
         
         /*
+         * Output averaged pressure with inhomogeneous x-direction to a file.
+         */
+        void
+        outputAveragedPressureWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output averaged temperature with inhomogeneous x-direction to a file.
+         */
+        void
+        outputAveragedTemperatureWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output averaged velocity component in x-direction with inhomogeneous x-direction to a file.
+         */
+        void
+        outputAveragedVelocityXWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output Favre-averaged velocity component in x-direction with inhomogeneous x-direction to a file.
+         */
+        void
+        outputFavreAveragedVelocityXWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
          * Output averaged mass fraction (first species) with inhomogeneous x-direction to a file.
          */
         void
@@ -82,7 +122,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
             const double output_time) const;
-         
+        
         /*
          * Output averaged specific volume with inhomogeneous x-direction to a file.
          */
@@ -92,7 +132,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
             const double output_time) const;
-         
+        
         /*
          * Output turbulent mass flux in x-direction with inhomogeneous x-direction to a file.
          */
@@ -285,6 +325,36 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
          */
         void
         outputBudgetDensitySpecificVolumeCovarianceWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output budget of Reynolds normal stress in x-direction with inhomogeneous x-direction to a file.
+         */
+        void
+        outputBudgetReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output budget of Reynolds normal stress in y-direction with inhomogeneous x-direction to a file.
+         */
+        void
+        outputBudgetReynoldsNormalStressInYDirectionWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output budget of Reynolds normal stress in z-direction with inhomogeneous x-direction to a file.
+         */
+        void
+        outputBudgetReynoldsNormalStressInZDirectionWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
