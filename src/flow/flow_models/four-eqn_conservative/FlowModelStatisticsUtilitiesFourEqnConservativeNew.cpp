@@ -68,6 +68,38 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 data_context,
                 output_time);
         }
+        else if (statistical_quantity_key == "PRESSURE")
+        {
+            outputAveragedPressureWithInhomogeneousXDirection(
+                "p_mean.dat",
+                patch_hierarchy,
+                data_context,
+                output_time);
+        }
+        else if (statistical_quantity_key == "TEMPERATURE")
+        {
+            outputAveragedTemperatureWithInhomogeneousXDirection(
+                "T_mean.dat",
+                patch_hierarchy,
+                data_context,
+                output_time);
+        }
+        else if (statistical_quantity_key == "VELOCITY_X")
+        {
+            outputAveragedVelocityXWithInhomogeneousXDirection(
+                "u_mean.dat",
+                patch_hierarchy,
+                data_context,
+                output_time);
+        }
+        else if (statistical_quantity_key == "F_VELOCITY_X")
+        {
+            outputFavreAveragedVelocityXWithInhomogeneousXDirection(
+                "u_tilde.dat",
+                patch_hierarchy,
+                data_context,
+                output_time);
+        }
         else if (statistical_quantity_key == "MASS_FRACTION")
         {
             outputAveragedMassFractionWithInhomogeneousXDirection(
