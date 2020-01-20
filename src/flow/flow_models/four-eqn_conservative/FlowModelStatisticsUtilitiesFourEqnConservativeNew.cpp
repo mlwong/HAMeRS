@@ -139,50 +139,50 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 << "Not implemented!"
                 << std::endl);
         }
-        else if (statistical_quantity_key == "rR11")
+        else if (statistical_quantity_key == "R11")
         {
             outputReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
-                "rR11.dat",
+                "R11.dat",
                 patch_hierarchy,
                 data_context,
                 output_time);
         }
-        else if (statistical_quantity_key == "rR22")
+        else if (statistical_quantity_key == "R22")
         {
             outputReynoldsNormalStressInYDirectionWithInhomogeneousXDirection(
-                "rR22.dat",
+                "R22.dat",
                 patch_hierarchy,
                 data_context,
                 output_time);
         }
-        else if (statistical_quantity_key == "rR33")
+        else if (statistical_quantity_key == "R33")
         {
             outputReynoldsNormalStressInZDirectionWithInhomogeneousXDirection(
-                "rR33.dat",
+                "R33.dat",
                 patch_hierarchy,
                 data_context,
                 output_time);
         }
-        else if (statistical_quantity_key == "rR12")
+        else if (statistical_quantity_key == "R12")
         {
             outputReynoldsShearStressInXYDirectionWithInhomogeneousXDirection(
-                "rR12.dat",
+                "R12.dat",
                 patch_hierarchy,
                 data_context,
                 output_time);
         }
-        else if (statistical_quantity_key == "rR13")
+        else if (statistical_quantity_key == "R13")
         {
             outputReynoldsShearStressInXZDirectionWithInhomogeneousXDirection(
-                "rR13.dat",
+                "R13.dat",
                 patch_hierarchy,
                 data_context,
                 output_time);
         }
-        else if (statistical_quantity_key == "rR23")
+        else if (statistical_quantity_key == "R23")
         {
             outputReynoldsShearStressInYZDirectionWithInhomogeneousXDirection(
-                "rR23.dat",
+                "R23.dat",
                 patch_hierarchy,
                 data_context,
                 output_time);
