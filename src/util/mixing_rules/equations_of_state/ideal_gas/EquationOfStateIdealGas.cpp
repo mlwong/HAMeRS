@@ -63,40 +63,43 @@ EquationOfStateIdealGas::computePressure(
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 1);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_pressure->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_pressure = data_pressure->getGhostBox();
+    const hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_internal_energy->getBox().numberCells() == interior_dims);
-#endif
+    const hier::Box ghost_box_density = data_density->getGhostBox();
+    const hier::IntVector ghostcell_dims_density = ghost_box_density.numberCells();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
-    
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_pressure =
-        data_pressure->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_density =
-        data_density->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_internal_energy =
-        data_internal_energy->getGhostBox().numberCells();
+    const hier::Box ghost_box_internal_energy = data_internal_energy->getGhostBox();
+    const hier::IntVector ghostcell_dims_internal_energy = ghost_box_internal_energy.numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_pressure(d_dim);
+    hier::IntVector offset_density(d_dim);
+    hier::IntVector offset_internal_energy(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_pressure->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_internal_energy->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_pressure;
@@ -108,6 +111,10 @@ EquationOfStateIdealGas::computePressure(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_pressure = num_ghosts_pressure;
+        offset_density = num_ghosts_density;
+        offset_internal_energy = num_ghosts_internal_energy;
     }
     else
     {
@@ -117,8 +124,12 @@ EquationOfStateIdealGas::computePressure(
         TBOX_ASSERT(data_internal_energy->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_pressure = domain.lower() - ghost_box_pressure.lower();
+        offset_density = domain.lower() - ghost_box_density.lower();
+        offset_internal_energy = domain.lower() - ghost_box_internal_energy.lower();
     }
     
     /*
@@ -136,9 +147,9 @@ EquationOfStateIdealGas::computePressure(
         rho,
         epsilon,
         gamma,
-        num_ghosts_pressure,
-        num_ghosts_density,
-        num_ghosts_internal_energy,
+        offset_pressure,
+        offset_density,
+        offset_internal_energy,
         ghostcell_dims_pressure,
         ghostcell_dims_density,
         ghostcell_dims_internal_energy,
@@ -167,37 +178,43 @@ EquationOfStateIdealGas::computePressure(
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 1);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_pressure->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_pressure = data_pressure->getGhostBox();
+    hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_internal_energy->getBox().numberCells() == interior_dims);
-#endif
+    const hier::Box ghost_box_density = data_density->getGhostBox();
+    hier::IntVector ghostcell_dims_density = ghost_box_density.numberCells();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
-    
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_internal_energy = data_internal_energy->getGhostBox().numberCells();
+    const hier::Box ghost_box_internal_energy = data_internal_energy->getGhostBox();
+    hier::IntVector ghostcell_dims_internal_energy = ghost_box_internal_energy.numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_pressure(d_dim);
+    hier::IntVector offset_density(d_dim);
+    hier::IntVector offset_internal_energy(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_pressure->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_internal_energy->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_pressure;
@@ -209,6 +226,10 @@ EquationOfStateIdealGas::computePressure(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_pressure = num_ghosts_pressure;
+        offset_density = num_ghosts_density;
+        offset_internal_energy = num_ghosts_internal_energy;
     }
     else
     {
@@ -218,8 +239,12 @@ EquationOfStateIdealGas::computePressure(
         TBOX_ASSERT(data_internal_energy->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_pressure = domain.lower() - ghost_box_pressure.lower();
+        offset_density = domain.lower() - ghost_box_density.lower();
+        offset_internal_energy = domain.lower() - ghost_box_internal_energy.lower();
     }
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -250,9 +275,9 @@ EquationOfStateIdealGas::computePressure(
         rho,
         epsilon,
         gamma,
-        num_ghosts_pressure,
-        num_ghosts_density,
-        num_ghosts_internal_energy,
+        offset_pressure,
+        offset_density,
+        offset_internal_energy,
         ghostcell_dims_pressure,
         ghostcell_dims_density,
         ghostcell_dims_internal_energy,
@@ -281,45 +306,49 @@ EquationOfStateIdealGas::computePressure(
     TBOX_ASSERT(data_thermo_properties->getDepth() >= 1);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_pressure->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_pressure = data_pressure->getGhostBox();
+    const hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_internal_energy->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_thermo_properties->getBox().numberCells() == interior_dims);
-#endif
+    const hier::Box ghost_box_density = data_density->getGhostBox();
+    const hier::IntVector ghostcell_dims_density = ghost_box_density.numberCells();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
+    const hier::Box ghost_box_internal_energy = data_internal_energy->getGhostBox();
+    const hier::IntVector ghostcell_dims_internal_energy = ghost_box_internal_energy.numberCells();
     
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_pressure =
-        data_pressure->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_density =
-        data_density->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_internal_energy =
-        data_internal_energy->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_thermo_properties =
-        data_thermo_properties->getGhostBox().numberCells();
+    const hier::Box ghost_box_thermo_properties = data_thermo_properties->getGhostBox();
+    const hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_pressure(d_dim);
+    hier::IntVector offset_density(d_dim);
+    hier::IntVector offset_internal_energy(d_dim);
+    hier::IntVector offset_thermo_properties(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
+        const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_pressure->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_internal_energy->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_thermo_properties->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_pressure;
@@ -332,6 +361,11 @@ EquationOfStateIdealGas::computePressure(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_pressure = num_ghosts_pressure;
+        offset_density = num_ghosts_density;
+        offset_internal_energy = num_ghosts_internal_energy;
+        offset_thermo_properties = num_ghosts_thermo_properties;
     }
     else
     {
@@ -342,8 +376,13 @@ EquationOfStateIdealGas::computePressure(
         TBOX_ASSERT(data_thermo_properties->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_pressure = domain.lower() - ghost_box_pressure.lower();
+        offset_density = domain.lower() - ghost_box_density.lower();
+        offset_internal_energy = domain.lower() - ghost_box_internal_energy.lower();
+        offset_thermo_properties = domain.lower() - ghost_box_thermo_properties.lower();
     }
     
     /*
@@ -360,10 +399,10 @@ EquationOfStateIdealGas::computePressure(
         rho,
         epsilon,
         gamma,
-        num_ghosts_pressure,
-        num_ghosts_density,
-        num_ghosts_internal_energy,
-        num_ghosts_thermo_properties,
+        offset_pressure,
+        offset_density,
+        offset_internal_energy,
+        offset_thermo_properties,
         ghostcell_dims_pressure,
         ghostcell_dims_density,
         ghostcell_dims_internal_energy,
@@ -394,41 +433,49 @@ EquationOfStateIdealGas::computePressure(
     TBOX_ASSERT(data_thermo_properties->getDepth() >= 1);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_pressure->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_pressure = data_pressure->getGhostBox();
+    hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_internal_energy->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_thermo_properties->getBox().numberCells() == interior_dims);
-#endif
+    const hier::Box ghost_box_density = data_density->getGhostBox();
+    hier::IntVector ghostcell_dims_density = ghost_box_density.numberCells();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
+    const hier::Box ghost_box_internal_energy = data_internal_energy->getGhostBox();
+    hier::IntVector ghostcell_dims_internal_energy = ghost_box_internal_energy.numberCells();
     
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_internal_energy = data_internal_energy->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_thermo_properties = data_thermo_properties->getGhostBox().numberCells();
+    const hier::Box ghost_box_thermo_properties = data_thermo_properties->getGhostBox();
+    hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_pressure(d_dim);
+    hier::IntVector offset_density(d_dim);
+    hier::IntVector offset_internal_energy(d_dim);
+    hier::IntVector offset_thermo_properties(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
+        const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_pressure->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_internal_energy->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_thermo_properties->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_pressure;
@@ -441,6 +488,11 @@ EquationOfStateIdealGas::computePressure(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_pressure = num_ghosts_pressure;
+        offset_density = num_ghosts_density;
+        offset_internal_energy = num_ghosts_internal_energy;
+        offset_thermo_properties = num_ghosts_thermo_properties;
     }
     else
     {
@@ -451,8 +503,13 @@ EquationOfStateIdealGas::computePressure(
         TBOX_ASSERT(data_thermo_properties->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_pressure = domain.lower() - ghost_box_pressure.lower();
+        offset_density = domain.lower() - ghost_box_density.lower();
+        offset_internal_energy = domain.lower() - ghost_box_internal_energy.lower();
+        offset_thermo_properties = domain.lower() - ghost_box_thermo_properties.lower();
     }
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -484,10 +541,10 @@ EquationOfStateIdealGas::computePressure(
         rho,
         epsilon,
         gamma,
-        num_ghosts_pressure,
-        num_ghosts_density,
-        num_ghosts_internal_energy,
-        num_ghosts_thermo_properties,
+        offset_pressure,
+        offset_density,
+        offset_internal_energy,
+        offset_thermo_properties,
         ghostcell_dims_pressure,
         ghostcell_dims_density,
         ghostcell_dims_internal_energy,
@@ -4908,9 +4965,9 @@ EquationOfStateIdealGas::computePressure(
     const double* const rho,
     const double* const epsilon,
     const double& gamma,
-    const hier::IntVector& num_ghosts_pressure,
-    const hier::IntVector& num_ghosts_density,
-    const hier::IntVector& num_ghosts_internal_energy,
+    const hier::IntVector& offset_pressure,
+    const hier::IntVector& offset_density,
+    const hier::IntVector& offset_internal_energy,
     const hier::IntVector& ghostcell_dims_pressure,
     const hier::IntVector& ghostcell_dims_density,
     const hier::IntVector& ghostcell_dims_internal_energy,
@@ -4920,15 +4977,15 @@ EquationOfStateIdealGas::computePressure(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_0_internal_energy = num_ghosts_internal_energy[0];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_0_density = offset_density[0];
+        const int offset_0_internal_energy = offset_internal_energy[0];
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
@@ -4936,9 +4993,9 @@ EquationOfStateIdealGas::computePressure(
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
             // Compute the linear indices.
-            const int idx_pressure = i + num_ghosts_0_pressure;
-            const int idx_density = i + num_ghosts_0_density;
-            const int idx_internal_energy = i + num_ghosts_0_internal_energy;
+            const int idx_pressure = i + offset_0_pressure;
+            const int idx_density = i + offset_0_density;
+            const int idx_internal_energy = i + offset_0_internal_energy;
             
             p[idx_pressure] = (gamma - double(1))*rho[idx_density]*epsilon[idx_internal_energy];
         }
@@ -4946,7 +5003,7 @@ EquationOfStateIdealGas::computePressure(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -4954,16 +5011,16 @@ EquationOfStateIdealGas::computePressure(
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         
-        const int num_ghosts_0_internal_energy = num_ghosts_internal_energy[0];
-        const int num_ghosts_1_internal_energy = num_ghosts_internal_energy[1];
+        const int offset_0_internal_energy = offset_internal_energy[0];
+        const int offset_1_internal_energy = offset_internal_energy[1];
         const int ghostcell_dim_0_internal_energy = ghostcell_dims_internal_energy[0];
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -4974,14 +5031,14 @@ EquationOfStateIdealGas::computePressure(
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx_pressure = (i + num_ghosts_0_pressure) +
-                    (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                const int idx_pressure = (i + offset_0_pressure) +
+                    (j + offset_1_pressure)*ghostcell_dim_0_pressure;
                 
-                const int idx_density = (i + num_ghosts_0_density) +
-                    (j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                const int idx_density = (i + offset_0_density) +
+                    (j + offset_1_density)*ghostcell_dim_0_density;
                 
-                const int idx_internal_energy = (i + num_ghosts_0_internal_energy) +
-                    (j + num_ghosts_1_internal_energy)*ghostcell_dim_0_internal_energy;
+                const int idx_internal_energy = (i + offset_0_internal_energy) +
+                    (j + offset_1_internal_energy)*ghostcell_dim_0_internal_energy;
                 
                 p[idx_pressure] = (gamma - double(1))*rho[idx_density]*epsilon[idx_internal_energy];
             }
@@ -4990,7 +5047,7 @@ EquationOfStateIdealGas::computePressure(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -5000,21 +5057,21 @@ EquationOfStateIdealGas::computePressure(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
-        const int num_ghosts_2_pressure = num_ghosts_pressure[2];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
+        const int offset_2_pressure = offset_pressure[2];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         const int ghostcell_dim_1_pressure = ghostcell_dims_pressure[1];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
-        const int num_ghosts_2_density = num_ghosts_density[2];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
+        const int offset_2_density = offset_density[2];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         const int ghostcell_dim_1_density = ghostcell_dims_density[1];
         
-        const int num_ghosts_0_internal_energy = num_ghosts_internal_energy[0];
-        const int num_ghosts_1_internal_energy = num_ghosts_internal_energy[1];
-        const int num_ghosts_2_internal_energy = num_ghosts_internal_energy[2];
+        const int offset_0_internal_energy = offset_internal_energy[0];
+        const int offset_1_internal_energy = offset_internal_energy[1];
+        const int offset_2_internal_energy = offset_internal_energy[2];
         const int ghostcell_dim_0_internal_energy = ghostcell_dims_internal_energy[0];
         const int ghostcell_dim_1_internal_energy = ghostcell_dims_internal_energy[1];
         
@@ -5028,19 +5085,19 @@ EquationOfStateIdealGas::computePressure(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_pressure = (i + num_ghosts_0_pressure) +
-                        (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
-                        (k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                    const int idx_pressure = (i + offset_0_pressure) +
+                        (j + offset_1_pressure)*ghostcell_dim_0_pressure +
+                        (k + offset_2_pressure)*ghostcell_dim_0_pressure*
                             ghostcell_dim_1_pressure;
                     
-                    const int idx_density = (i + num_ghosts_0_density) +
-                        (j + num_ghosts_1_density)*ghostcell_dim_0_density +
-                        (k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                    const int idx_density = (i + offset_0_density) +
+                        (j + offset_1_density)*ghostcell_dim_0_density +
+                        (k + offset_2_density)*ghostcell_dim_0_density*
                             ghostcell_dim_1_density;
                     
-                    const int idx_internal_energy = (i + num_ghosts_0_internal_energy) +
-                        (j + num_ghosts_1_internal_energy)*ghostcell_dim_0_internal_energy +
-                        (k + num_ghosts_2_internal_energy)*ghostcell_dim_0_internal_energy*
+                    const int idx_internal_energy = (i + offset_0_internal_energy) +
+                        (j + offset_1_internal_energy)*ghostcell_dim_0_internal_energy +
+                        (k + offset_2_internal_energy)*ghostcell_dim_0_internal_energy*
                             ghostcell_dim_1_internal_energy;
                     
                     p[idx_pressure] = (gamma - double(1))*rho[idx_density]*epsilon[idx_internal_energy];
@@ -5060,10 +5117,10 @@ EquationOfStateIdealGas::computePressure(
     const double* const rho,
     const double* const epsilon,
     const double* const gamma,
-    const hier::IntVector& num_ghosts_pressure,
-    const hier::IntVector& num_ghosts_density,
-    const hier::IntVector& num_ghosts_internal_energy,
-    const hier::IntVector& num_ghosts_thermo_properties,
+    const hier::IntVector& offset_pressure,
+    const hier::IntVector& offset_density,
+    const hier::IntVector& offset_internal_energy,
+    const hier::IntVector& offset_thermo_properties,
     const hier::IntVector& ghostcell_dims_pressure,
     const hier::IntVector& ghostcell_dims_density,
     const hier::IntVector& ghostcell_dims_internal_energy,
@@ -5074,16 +5131,16 @@ EquationOfStateIdealGas::computePressure(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_0_internal_energy = num_ghosts_internal_energy[0];
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_0_density = offset_density[0];
+        const int offset_0_internal_energy = offset_internal_energy[0];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
@@ -5091,10 +5148,10 @@ EquationOfStateIdealGas::computePressure(
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
             // Compute the linear indices.
-            const int idx_pressure = i + num_ghosts_0_pressure;
-            const int idx_density = i + num_ghosts_0_density;
-            const int idx_internal_energy = i + num_ghosts_0_internal_energy;
-            const int idx_thermo_properties = i + num_ghosts_0_thermo_properties;
+            const int idx_pressure = i + offset_0_pressure;
+            const int idx_density = i + offset_0_density;
+            const int idx_internal_energy = i + offset_0_internal_energy;
+            const int idx_thermo_properties = i + offset_0_thermo_properties;
             
             p[idx_pressure] = (gamma[idx_thermo_properties] - double(1))*rho[idx_density]*
                 epsilon[idx_internal_energy];
@@ -5103,7 +5160,7 @@ EquationOfStateIdealGas::computePressure(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -5111,20 +5168,20 @@ EquationOfStateIdealGas::computePressure(
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         
-        const int num_ghosts_0_internal_energy = num_ghosts_internal_energy[0];
-        const int num_ghosts_1_internal_energy = num_ghosts_internal_energy[1];
+        const int offset_0_internal_energy = offset_internal_energy[0];
+        const int offset_1_internal_energy = offset_internal_energy[1];
         const int ghostcell_dim_0_internal_energy = ghostcell_dims_internal_energy[0];
         
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
-        const int num_ghosts_1_thermo_properties = num_ghosts_thermo_properties[1];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
+        const int offset_1_thermo_properties = offset_thermo_properties[1];
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -5135,17 +5192,17 @@ EquationOfStateIdealGas::computePressure(
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx_pressure = (i + num_ghosts_0_pressure) +
-                    (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                const int idx_pressure = (i + offset_0_pressure) +
+                    (j + offset_1_pressure)*ghostcell_dim_0_pressure;
                 
-                const int idx_density = (i + num_ghosts_0_density) +
-                    (j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                const int idx_density = (i + offset_0_density) +
+                    (j + offset_1_density)*ghostcell_dim_0_density;
                 
-                const int idx_internal_energy = (i + num_ghosts_0_internal_energy) +
-                    (j + num_ghosts_1_internal_energy)*ghostcell_dim_0_internal_energy;
+                const int idx_internal_energy = (i + offset_0_internal_energy) +
+                    (j + offset_1_internal_energy)*ghostcell_dim_0_internal_energy;
                 
-                const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
-                    (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
+                const int idx_thermo_properties = (i + offset_0_thermo_properties) +
+                    (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
                 
                 p[idx_pressure] = (gamma[idx_thermo_properties] - double(1))*rho[idx_density]*
                     epsilon[idx_internal_energy];
@@ -5155,7 +5212,7 @@ EquationOfStateIdealGas::computePressure(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -5165,27 +5222,27 @@ EquationOfStateIdealGas::computePressure(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
-        const int num_ghosts_2_pressure = num_ghosts_pressure[2];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
+        const int offset_2_pressure = offset_pressure[2];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         const int ghostcell_dim_1_pressure = ghostcell_dims_pressure[1];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
-        const int num_ghosts_2_density = num_ghosts_density[2];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
+        const int offset_2_density = offset_density[2];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         const int ghostcell_dim_1_density = ghostcell_dims_density[1];
         
-        const int num_ghosts_0_internal_energy = num_ghosts_internal_energy[0];
-        const int num_ghosts_1_internal_energy = num_ghosts_internal_energy[1];
-        const int num_ghosts_2_internal_energy = num_ghosts_internal_energy[2];
+        const int offset_0_internal_energy = offset_internal_energy[0];
+        const int offset_1_internal_energy = offset_internal_energy[1];
+        const int offset_2_internal_energy = offset_internal_energy[2];
         const int ghostcell_dim_0_internal_energy = ghostcell_dims_internal_energy[0];
         const int ghostcell_dim_1_internal_energy = ghostcell_dims_internal_energy[1];
         
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
-        const int num_ghosts_1_thermo_properties = num_ghosts_thermo_properties[1];
-        const int num_ghosts_2_thermo_properties = num_ghosts_thermo_properties[2];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
+        const int offset_1_thermo_properties = offset_thermo_properties[1];
+        const int offset_2_thermo_properties = offset_thermo_properties[2];
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         const int ghostcell_dim_1_thermo_properties = ghostcell_dims_thermo_properties[1];
         
@@ -5199,24 +5256,24 @@ EquationOfStateIdealGas::computePressure(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_pressure = (i + num_ghosts_0_pressure) +
-                        (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
-                        (k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                    const int idx_pressure = (i + offset_0_pressure) +
+                        (j + offset_1_pressure)*ghostcell_dim_0_pressure +
+                        (k + offset_2_pressure)*ghostcell_dim_0_pressure*
                             ghostcell_dim_1_pressure;
                     
-                    const int idx_density = (i + num_ghosts_0_density) +
-                        (j + num_ghosts_1_density)*ghostcell_dim_0_density +
-                        (k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                    const int idx_density = (i + offset_0_density) +
+                        (j + offset_1_density)*ghostcell_dim_0_density +
+                        (k + offset_2_density)*ghostcell_dim_0_density*
                             ghostcell_dim_1_density;
                     
-                    const int idx_internal_energy = (i + num_ghosts_0_internal_energy) +
-                        (j + num_ghosts_1_internal_energy)*ghostcell_dim_0_internal_energy +
-                        (k + num_ghosts_2_internal_energy)*ghostcell_dim_0_internal_energy*
+                    const int idx_internal_energy = (i + offset_0_internal_energy) +
+                        (j + offset_1_internal_energy)*ghostcell_dim_0_internal_energy +
+                        (k + offset_2_internal_energy)*ghostcell_dim_0_internal_energy*
                             ghostcell_dim_1_internal_energy;
                     
-                    const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
-                        (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties +
-                        (k + num_ghosts_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
+                    const int idx_thermo_properties = (i + offset_0_thermo_properties) +
+                        (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties +
+                        (k + offset_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
                             ghostcell_dim_1_thermo_properties;
                     
                     p[idx_pressure] = (gamma[idx_thermo_properties] - double(1))*rho[idx_density]*
@@ -5237,9 +5294,9 @@ EquationOfStateIdealGas::computeSoundSpeed(
     const double* const rho,
     const double* const p,
     const double& gamma,
-    const hier::IntVector& num_ghosts_sound_speed,
-    const hier::IntVector& num_ghosts_density,
-    const hier::IntVector& num_ghosts_pressure,
+    const hier::IntVector& offset_sound_speed,
+    const hier::IntVector& offset_density,
+    const hier::IntVector& offset_pressure,
     const hier::IntVector& ghostcell_dims_sound_speed,
     const hier::IntVector& ghostcell_dims_density,
     const hier::IntVector& ghostcell_dims_pressure,
@@ -5249,15 +5306,15 @@ EquationOfStateIdealGas::computeSoundSpeed(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_sound_speed = num_ghosts_sound_speed[0];
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+        const int offset_0_sound_speed = offset_sound_speed[0];
+        const int offset_0_density = offset_density[0];
+        const int offset_0_pressure = offset_pressure[0];
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
@@ -5265,9 +5322,9 @@ EquationOfStateIdealGas::computeSoundSpeed(
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
             // Compute the linear indices.
-            const int idx_sound_speed = i + num_ghosts_0_sound_speed;
-            const int idx_density = i + num_ghosts_0_density;
-            const int idx_pressure = i + num_ghosts_0_pressure;
+            const int idx_sound_speed = i + offset_0_sound_speed;
+            const int idx_density = i + offset_0_density;
+            const int idx_pressure = i + offset_0_pressure;
             
             c[idx_sound_speed] = sqrt(gamma*p[idx_pressure]/rho[idx_density]);
         }
@@ -5275,7 +5332,7 @@ EquationOfStateIdealGas::computeSoundSpeed(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -5283,16 +5340,16 @@ EquationOfStateIdealGas::computeSoundSpeed(
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_sound_speed = num_ghosts_sound_speed[0];
-        const int num_ghosts_1_sound_speed = num_ghosts_sound_speed[1];
+        const int offset_0_sound_speed = offset_sound_speed[0];
+        const int offset_1_sound_speed = offset_sound_speed[1];
         const int ghostcell_dim_0_sound_speed = ghostcell_dims_sound_speed[0];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -5303,14 +5360,14 @@ EquationOfStateIdealGas::computeSoundSpeed(
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx_sound_speed = (i + num_ghosts_0_sound_speed) +
-                    (j + num_ghosts_1_sound_speed)*ghostcell_dim_0_sound_speed;
+                const int idx_sound_speed = (i + offset_0_sound_speed) +
+                    (j + offset_1_sound_speed)*ghostcell_dim_0_sound_speed;
                 
-                const int idx_density = (i + num_ghosts_0_density) +
-                    (j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                const int idx_density = (i + offset_0_density) +
+                    (j + offset_1_density)*ghostcell_dim_0_density;
                 
-                const int idx_pressure = (i + num_ghosts_0_pressure) +
-                    (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                const int idx_pressure = (i + offset_0_pressure) +
+                    (j + offset_1_pressure)*ghostcell_dim_0_pressure;
                 
                 c[idx_sound_speed] = sqrt(gamma*p[idx_pressure]/rho[idx_density]);
             }
@@ -5319,7 +5376,7 @@ EquationOfStateIdealGas::computeSoundSpeed(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -5329,21 +5386,21 @@ EquationOfStateIdealGas::computeSoundSpeed(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_sound_speed = num_ghosts_sound_speed[0];
-        const int num_ghosts_1_sound_speed = num_ghosts_sound_speed[1];
-        const int num_ghosts_2_sound_speed = num_ghosts_sound_speed[2];
+        const int offset_0_sound_speed = offset_sound_speed[0];
+        const int offset_1_sound_speed = offset_sound_speed[1];
+        const int offset_2_sound_speed = offset_sound_speed[2];
         const int ghostcell_dim_0_sound_speed = ghostcell_dims_sound_speed[0];
         const int ghostcell_dim_1_sound_speed = ghostcell_dims_sound_speed[1];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
-        const int num_ghosts_2_density = num_ghosts_density[2];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
+        const int offset_2_density = offset_density[2];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         const int ghostcell_dim_1_density = ghostcell_dims_density[1];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
-        const int num_ghosts_2_pressure = num_ghosts_pressure[2];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
+        const int offset_2_pressure = offset_pressure[2];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         const int ghostcell_dim_1_pressure = ghostcell_dims_pressure[1];
         
@@ -5357,19 +5414,19 @@ EquationOfStateIdealGas::computeSoundSpeed(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_sound_speed = (i + num_ghosts_0_sound_speed) +
-                        (j + num_ghosts_1_sound_speed)*ghostcell_dim_0_sound_speed +
-                        (k + num_ghosts_2_sound_speed)*ghostcell_dim_0_sound_speed*
+                    const int idx_sound_speed = (i + offset_0_sound_speed) +
+                        (j + offset_1_sound_speed)*ghostcell_dim_0_sound_speed +
+                        (k + offset_2_sound_speed)*ghostcell_dim_0_sound_speed*
                             ghostcell_dim_1_sound_speed;
                     
-                    const int idx_density = (i + num_ghosts_0_density) +
-                        (j + num_ghosts_1_density)*ghostcell_dim_0_density +
-                        (k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                    const int idx_density = (i + offset_0_density) +
+                        (j + offset_1_density)*ghostcell_dim_0_density +
+                        (k + offset_2_density)*ghostcell_dim_0_density*
                             ghostcell_dim_1_density;
                     
-                    const int idx_pressure = (i + num_ghosts_0_pressure) +
-                        (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
-                        (k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                    const int idx_pressure = (i + offset_0_pressure) +
+                        (j + offset_1_pressure)*ghostcell_dim_0_pressure +
+                        (k + offset_2_pressure)*ghostcell_dim_0_pressure*
                             ghostcell_dim_1_pressure;
                     
                     c[idx_sound_speed] = sqrt(gamma*p[idx_pressure]/rho[idx_density]);
@@ -5389,10 +5446,10 @@ EquationOfStateIdealGas::computeSoundSpeed(
     const double* const rho,
     const double* const p,
     const double* const gamma,
-    const hier::IntVector& num_ghosts_sound_speed,
-    const hier::IntVector& num_ghosts_density,
-    const hier::IntVector& num_ghosts_pressure,
-    const hier::IntVector& num_ghosts_thermo_properties,
+    const hier::IntVector& offset_sound_speed,
+    const hier::IntVector& offset_density,
+    const hier::IntVector& offset_pressure,
+    const hier::IntVector& offset_thermo_properties,
     const hier::IntVector& ghostcell_dims_sound_speed,
     const hier::IntVector& ghostcell_dims_density,
     const hier::IntVector& ghostcell_dims_pressure,
@@ -5403,16 +5460,16 @@ EquationOfStateIdealGas::computeSoundSpeed(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_sound_speed = num_ghosts_sound_speed[0];
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
+        const int offset_0_sound_speed = offset_sound_speed[0];
+        const int offset_0_density = offset_density[0];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
@@ -5420,10 +5477,10 @@ EquationOfStateIdealGas::computeSoundSpeed(
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
             // Compute the linear indices.
-            const int idx_sound_speed = i + num_ghosts_0_sound_speed;
-            const int idx_density = i + num_ghosts_0_density;
-            const int idx_pressure = i + num_ghosts_0_pressure;
-            const int idx_thermo_properties = i + num_ghosts_0_thermo_properties;
+            const int idx_sound_speed = i + offset_0_sound_speed;
+            const int idx_density = i + offset_0_density;
+            const int idx_pressure = i + offset_0_pressure;
+            const int idx_thermo_properties = i + offset_0_thermo_properties;
             
             c[idx_sound_speed] = sqrt(gamma[idx_thermo_properties]*p[idx_pressure]/
                 rho[idx_density]);
@@ -5432,7 +5489,7 @@ EquationOfStateIdealGas::computeSoundSpeed(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -5440,20 +5497,20 @@ EquationOfStateIdealGas::computeSoundSpeed(
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_sound_speed = num_ghosts_sound_speed[0];
-        const int num_ghosts_1_sound_speed = num_ghosts_sound_speed[1];
+        const int offset_0_sound_speed = offset_sound_speed[0];
+        const int offset_1_sound_speed = offset_sound_speed[1];
         const int ghostcell_dim_0_sound_speed = ghostcell_dims_sound_speed[0];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
-        const int num_ghosts_1_thermo_properties = num_ghosts_thermo_properties[1];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
+        const int offset_1_thermo_properties = offset_thermo_properties[1];
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -5464,17 +5521,17 @@ EquationOfStateIdealGas::computeSoundSpeed(
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx_sound_speed = (i + num_ghosts_0_sound_speed) +
-                    (j + num_ghosts_1_sound_speed)*ghostcell_dim_0_sound_speed;
+                const int idx_sound_speed = (i + offset_0_sound_speed) +
+                    (j + offset_1_sound_speed)*ghostcell_dim_0_sound_speed;
                 
-                const int idx_density = (i + num_ghosts_0_density) +
-                    (j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                const int idx_density = (i + offset_0_density) +
+                    (j + offset_1_density)*ghostcell_dim_0_density;
                 
-                const int idx_pressure = (i + num_ghosts_0_pressure) +
-                    (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                const int idx_pressure = (i + offset_0_pressure) +
+                    (j + offset_1_pressure)*ghostcell_dim_0_pressure;
                 
-                const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
-                    (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
+                const int idx_thermo_properties = (i + offset_0_thermo_properties) +
+                    (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
                 
                 c[idx_sound_speed] = sqrt(gamma[idx_thermo_properties]*p[idx_pressure]/
                     rho[idx_density]);
@@ -5484,7 +5541,7 @@ EquationOfStateIdealGas::computeSoundSpeed(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -5494,27 +5551,27 @@ EquationOfStateIdealGas::computeSoundSpeed(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_sound_speed = num_ghosts_sound_speed[0];
-        const int num_ghosts_1_sound_speed = num_ghosts_sound_speed[1];
-        const int num_ghosts_2_sound_speed = num_ghosts_sound_speed[2];
+        const int offset_0_sound_speed = offset_sound_speed[0];
+        const int offset_1_sound_speed = offset_sound_speed[1];
+        const int offset_2_sound_speed = offset_sound_speed[2];
         const int ghostcell_dim_0_sound_speed = ghostcell_dims_sound_speed[0];
         const int ghostcell_dim_1_sound_speed = ghostcell_dims_sound_speed[1];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
-        const int num_ghosts_2_density = num_ghosts_density[2];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
+        const int offset_2_density = offset_density[2];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         const int ghostcell_dim_1_density = ghostcell_dims_density[1];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
-        const int num_ghosts_2_pressure = num_ghosts_pressure[2];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
+        const int offset_2_pressure = offset_pressure[2];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         const int ghostcell_dim_1_pressure = ghostcell_dims_pressure[1];
         
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
-        const int num_ghosts_1_thermo_properties = num_ghosts_thermo_properties[1];
-        const int num_ghosts_2_thermo_properties = num_ghosts_thermo_properties[2];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
+        const int offset_1_thermo_properties = offset_thermo_properties[1];
+        const int offset_2_thermo_properties = offset_thermo_properties[2];
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         const int ghostcell_dim_1_thermo_properties = ghostcell_dims_thermo_properties[1];
         
@@ -5528,24 +5585,24 @@ EquationOfStateIdealGas::computeSoundSpeed(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_sound_speed = (i + num_ghosts_0_sound_speed) +
-                        (j + num_ghosts_1_sound_speed)*ghostcell_dim_0_sound_speed +
-                        (k + num_ghosts_2_sound_speed)*ghostcell_dim_0_sound_speed*
+                    const int idx_sound_speed = (i + offset_0_sound_speed) +
+                        (j + offset_1_sound_speed)*ghostcell_dim_0_sound_speed +
+                        (k + offset_2_sound_speed)*ghostcell_dim_0_sound_speed*
                             ghostcell_dim_1_sound_speed;
                     
-                    const int idx_density = (i + num_ghosts_0_density) +
-                        (j + num_ghosts_1_density)*ghostcell_dim_0_density +
-                        (k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                    const int idx_density = (i + offset_0_density) +
+                        (j + offset_1_density)*ghostcell_dim_0_density +
+                        (k + offset_2_density)*ghostcell_dim_0_density*
                             ghostcell_dim_1_density;
                     
-                    const int idx_pressure = (i + num_ghosts_0_pressure) +
-                        (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
-                        (k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                    const int idx_pressure = (i + offset_0_pressure) +
+                        (j + offset_1_pressure)*ghostcell_dim_0_pressure +
+                        (k + offset_2_pressure)*ghostcell_dim_0_pressure*
                             ghostcell_dim_1_pressure;
                     
-                    const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
-                        (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties +
-                        (k + num_ghosts_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
+                    const int idx_thermo_properties = (i + offset_0_thermo_properties) +
+                        (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties +
+                        (k + offset_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
                             ghostcell_dim_1_thermo_properties;
                     
                     c[idx_sound_speed] = sqrt(gamma[idx_thermo_properties]*p[idx_pressure]/
@@ -5566,9 +5623,9 @@ EquationOfStateIdealGas::computeInternalEnergy(
     const double* const rho,
     const double* const p,
     const double& gamma,
-    const hier::IntVector& num_ghosts_internal_energy,
-    const hier::IntVector& num_ghosts_density,
-    const hier::IntVector& num_ghosts_pressure,
+    const hier::IntVector& offset_internal_energy,
+    const hier::IntVector& offset_density,
+    const hier::IntVector& offset_pressure,
     const hier::IntVector& ghostcell_dims_internal_energy,
     const hier::IntVector& ghostcell_dims_density,
     const hier::IntVector& ghostcell_dims_pressure,
@@ -5578,15 +5635,15 @@ EquationOfStateIdealGas::computeInternalEnergy(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_internal_energy = num_ghosts_internal_energy[0];
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+        const int offset_0_internal_energy = offset_internal_energy[0];
+        const int offset_0_density = offset_density[0];
+        const int offset_0_pressure = offset_pressure[0];
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
@@ -5594,9 +5651,9 @@ EquationOfStateIdealGas::computeInternalEnergy(
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
             // Compute the linear indices.
-            const int idx_internal_energy = i + num_ghosts_0_internal_energy;
-            const int idx_density = i + num_ghosts_0_density;
-            const int idx_pressure = i + num_ghosts_0_pressure;
+            const int idx_internal_energy = i + offset_0_internal_energy;
+            const int idx_density = i + offset_0_density;
+            const int idx_pressure = i + offset_0_pressure;
             
             epsilon[idx_internal_energy] = p[idx_pressure]/((gamma - double(1))*rho[idx_density]);
         }
@@ -5604,7 +5661,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -5612,16 +5669,16 @@ EquationOfStateIdealGas::computeInternalEnergy(
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_internal_energy = num_ghosts_internal_energy[0];
-        const int num_ghosts_1_internal_energy = num_ghosts_internal_energy[1];
+        const int offset_0_internal_energy = offset_internal_energy[0];
+        const int offset_1_internal_energy = offset_internal_energy[1];
         const int ghostcell_dim_0_internal_energy = ghostcell_dims_internal_energy[0];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -5632,14 +5689,14 @@ EquationOfStateIdealGas::computeInternalEnergy(
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx_internal_energy = (i + num_ghosts_0_internal_energy) +
-                    (j + num_ghosts_1_internal_energy)*ghostcell_dim_0_internal_energy;
+                const int idx_internal_energy = (i + offset_0_internal_energy) +
+                    (j + offset_1_internal_energy)*ghostcell_dim_0_internal_energy;
                 
-                const int idx_density = (i + num_ghosts_0_density) +
-                    (j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                const int idx_density = (i + offset_0_density) +
+                    (j + offset_1_density)*ghostcell_dim_0_density;
                 
-                const int idx_pressure = (i + num_ghosts_0_pressure) +
-                    (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                const int idx_pressure = (i + offset_0_pressure) +
+                    (j + offset_1_pressure)*ghostcell_dim_0_pressure;
                 
                 epsilon[idx_internal_energy] = p[idx_pressure]/((gamma - double(1))*rho[idx_density]);
             }
@@ -5648,7 +5705,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -5658,21 +5715,21 @@ EquationOfStateIdealGas::computeInternalEnergy(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_internal_energy = num_ghosts_internal_energy[0];
-        const int num_ghosts_1_internal_energy = num_ghosts_internal_energy[1];
-        const int num_ghosts_2_internal_energy = num_ghosts_internal_energy[2];
+        const int offset_0_internal_energy = offset_internal_energy[0];
+        const int offset_1_internal_energy = offset_internal_energy[1];
+        const int offset_2_internal_energy = offset_internal_energy[2];
         const int ghostcell_dim_0_internal_energy = ghostcell_dims_internal_energy[0];
         const int ghostcell_dim_1_internal_energy = ghostcell_dims_internal_energy[1];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
-        const int num_ghosts_2_density = num_ghosts_density[2];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
+        const int offset_2_density = offset_density[2];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         const int ghostcell_dim_1_density = ghostcell_dims_density[1];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
-        const int num_ghosts_2_pressure = num_ghosts_pressure[2];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
+        const int offset_2_pressure = offset_pressure[2];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         const int ghostcell_dim_1_pressure = ghostcell_dims_pressure[1];
         
@@ -5686,19 +5743,19 @@ EquationOfStateIdealGas::computeInternalEnergy(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_internal_energy = (i + num_ghosts_0_internal_energy) +
-                        (j + num_ghosts_1_internal_energy)*ghostcell_dim_0_internal_energy +
-                        (k + num_ghosts_2_internal_energy)*ghostcell_dim_0_internal_energy*
+                    const int idx_internal_energy = (i + offset_0_internal_energy) +
+                        (j + offset_1_internal_energy)*ghostcell_dim_0_internal_energy +
+                        (k + offset_2_internal_energy)*ghostcell_dim_0_internal_energy*
                             ghostcell_dim_1_internal_energy;
                     
-                    const int idx_density = (i + num_ghosts_0_density) +
-                        (j + num_ghosts_1_density)*ghostcell_dim_0_density +
-                        (k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                    const int idx_density = (i + offset_0_density) +
+                        (j + offset_1_density)*ghostcell_dim_0_density +
+                        (k + offset_2_density)*ghostcell_dim_0_density*
                             ghostcell_dim_1_density;
                     
-                    const int idx_pressure = (i + num_ghosts_0_pressure) +
-                        (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
-                        (k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                    const int idx_pressure = (i + offset_0_pressure) +
+                        (j + offset_1_pressure)*ghostcell_dim_0_pressure +
+                        (k + offset_2_pressure)*ghostcell_dim_0_pressure*
                             ghostcell_dim_1_pressure;
                     
                     epsilon[idx_internal_energy] = p[idx_pressure]/((gamma - double(1))*rho[idx_density]);
@@ -5718,10 +5775,10 @@ EquationOfStateIdealGas::computeInternalEnergy(
     const double* const rho,
     const double* const p,
     const double* const gamma,
-    const hier::IntVector& num_ghosts_internal_energy,
-    const hier::IntVector& num_ghosts_density,
-    const hier::IntVector& num_ghosts_pressure,
-    const hier::IntVector& num_ghosts_thermo_properties,
+    const hier::IntVector& offset_internal_energy,
+    const hier::IntVector& offset_density,
+    const hier::IntVector& offset_pressure,
+    const hier::IntVector& offset_thermo_properties,
     const hier::IntVector& ghostcell_dims_internal_energy,
     const hier::IntVector& ghostcell_dims_density,
     const hier::IntVector& ghostcell_dims_pressure,
@@ -5732,16 +5789,16 @@ EquationOfStateIdealGas::computeInternalEnergy(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_internal_energy = num_ghosts_internal_energy[0];
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
+        const int offset_0_internal_energy = offset_internal_energy[0];
+        const int offset_0_density = offset_density[0];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
@@ -5749,10 +5806,10 @@ EquationOfStateIdealGas::computeInternalEnergy(
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
             // Compute the linear indices.
-            const int idx_internal_energy = i + num_ghosts_0_internal_energy;
-            const int idx_density = i + num_ghosts_0_density;
-            const int idx_pressure = i + num_ghosts_0_pressure;
-            const int idx_thermo_properties = i + num_ghosts_0_thermo_properties;
+            const int idx_internal_energy = i + offset_0_internal_energy;
+            const int idx_density = i + offset_0_density;
+            const int idx_pressure = i + offset_0_pressure;
+            const int idx_thermo_properties = i + offset_0_thermo_properties;
             
             epsilon[idx_internal_energy] = p[idx_pressure]/((gamma[idx_thermo_properties] - double(1))*
                 rho[idx_density]);
@@ -5761,7 +5818,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -5769,20 +5826,20 @@ EquationOfStateIdealGas::computeInternalEnergy(
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_internal_energy = num_ghosts_internal_energy[0];
-        const int num_ghosts_1_internal_energy = num_ghosts_internal_energy[1];
+        const int offset_0_internal_energy = offset_internal_energy[0];
+        const int offset_1_internal_energy = offset_internal_energy[1];
         const int ghostcell_dim_0_internal_energy = ghostcell_dims_internal_energy[0];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
-        const int num_ghosts_1_thermo_properties = num_ghosts_thermo_properties[1];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
+        const int offset_1_thermo_properties = offset_thermo_properties[1];
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -5793,17 +5850,17 @@ EquationOfStateIdealGas::computeInternalEnergy(
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx_internal_energy = (i + num_ghosts_0_internal_energy) +
-                    (j + num_ghosts_1_internal_energy)*ghostcell_dim_0_internal_energy;
+                const int idx_internal_energy = (i + offset_0_internal_energy) +
+                    (j + offset_1_internal_energy)*ghostcell_dim_0_internal_energy;
                 
-                const int idx_density = (i + num_ghosts_0_density) +
-                    (j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                const int idx_density = (i + offset_0_density) +
+                    (j + offset_1_density)*ghostcell_dim_0_density;
                 
-                const int idx_pressure = (i + num_ghosts_0_pressure) +
-                    (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                const int idx_pressure = (i + offset_0_pressure) +
+                    (j + offset_1_pressure)*ghostcell_dim_0_pressure;
                 
-                const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
-                    (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
+                const int idx_thermo_properties = (i + offset_0_thermo_properties) +
+                    (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
                 
                 epsilon[idx_internal_energy] = p[idx_pressure]/((gamma[idx_thermo_properties] - double(1))*
                     rho[idx_density]);
@@ -5813,7 +5870,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -5823,27 +5880,27 @@ EquationOfStateIdealGas::computeInternalEnergy(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_internal_energy = num_ghosts_internal_energy[0];
-        const int num_ghosts_1_internal_energy = num_ghosts_internal_energy[1];
-        const int num_ghosts_2_internal_energy = num_ghosts_internal_energy[2];
+        const int offset_0_internal_energy = offset_internal_energy[0];
+        const int offset_1_internal_energy = offset_internal_energy[1];
+        const int offset_2_internal_energy = offset_internal_energy[2];
         const int ghostcell_dim_0_internal_energy = ghostcell_dims_internal_energy[0];
         const int ghostcell_dim_1_internal_energy = ghostcell_dims_internal_energy[1];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
-        const int num_ghosts_2_density = num_ghosts_density[2];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
+        const int offset_2_density = offset_density[2];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         const int ghostcell_dim_1_density = ghostcell_dims_density[1];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
-        const int num_ghosts_2_pressure = num_ghosts_pressure[2];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
+        const int offset_2_pressure = offset_pressure[2];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         const int ghostcell_dim_1_pressure = ghostcell_dims_pressure[1];
         
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
-        const int num_ghosts_1_thermo_properties = num_ghosts_thermo_properties[1];
-        const int num_ghosts_2_thermo_properties = num_ghosts_thermo_properties[2];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
+        const int offset_1_thermo_properties = offset_thermo_properties[1];
+        const int offset_2_thermo_properties = offset_thermo_properties[2];
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         const int ghostcell_dim_1_thermo_properties = ghostcell_dims_thermo_properties[1];
         
@@ -5857,24 +5914,24 @@ EquationOfStateIdealGas::computeInternalEnergy(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_internal_energy = (i + num_ghosts_0_internal_energy) +
-                        (j + num_ghosts_1_internal_energy)*ghostcell_dim_0_internal_energy +
-                        (k + num_ghosts_2_internal_energy)*ghostcell_dim_0_internal_energy*
+                    const int idx_internal_energy = (i + offset_0_internal_energy) +
+                        (j + offset_1_internal_energy)*ghostcell_dim_0_internal_energy +
+                        (k + offset_2_internal_energy)*ghostcell_dim_0_internal_energy*
                             ghostcell_dim_1_internal_energy;
                     
-                    const int idx_density = (i + num_ghosts_0_density) +
-                        (j + num_ghosts_1_density)*ghostcell_dim_0_density +
-                        (k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                    const int idx_density = (i + offset_0_density) +
+                        (j + offset_1_density)*ghostcell_dim_0_density +
+                        (k + offset_2_density)*ghostcell_dim_0_density*
                             ghostcell_dim_1_density;
                     
-                    const int idx_pressure = (i + num_ghosts_0_pressure) +
-                        (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
-                        (k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                    const int idx_pressure = (i + offset_0_pressure) +
+                        (j + offset_1_pressure)*ghostcell_dim_0_pressure +
+                        (k + offset_2_pressure)*ghostcell_dim_0_pressure*
                             ghostcell_dim_1_pressure;
                     
-                    const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
-                        (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties +
-                        (k + num_ghosts_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
+                    const int idx_thermo_properties = (i + offset_0_thermo_properties) +
+                        (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties +
+                        (k + offset_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
                             ghostcell_dim_1_thermo_properties;
                     
                     epsilon[idx_internal_energy] = p[idx_pressure]/((gamma[idx_thermo_properties] - double(1))*
@@ -5895,9 +5952,9 @@ EquationOfStateIdealGas::computeEnthalpy(
     const double* const rho,
     const double* const p,
     const double& gamma,
-    const hier::IntVector& num_ghosts_enthalpy,
-    const hier::IntVector& num_ghosts_density,
-    const hier::IntVector& num_ghosts_pressure,
+    const hier::IntVector& offset_enthalpy,
+    const hier::IntVector& offset_density,
+    const hier::IntVector& offset_pressure,
     const hier::IntVector& ghostcell_dims_enthalpy,
     const hier::IntVector& ghostcell_dims_density,
     const hier::IntVector& ghostcell_dims_pressure,
@@ -5907,15 +5964,15 @@ EquationOfStateIdealGas::computeEnthalpy(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_enthalpy = num_ghosts_enthalpy[0];
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+        const int offset_0_enthalpy = offset_enthalpy[0];
+        const int offset_0_density = offset_density[0];
+        const int offset_0_pressure = offset_pressure[0];
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
@@ -5923,9 +5980,9 @@ EquationOfStateIdealGas::computeEnthalpy(
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
             // Compute the linear indices.
-            const int idx_enthalpy = i + num_ghosts_0_enthalpy;
-            const int idx_density = i + num_ghosts_0_density;
-            const int idx_pressure = i + num_ghosts_0_pressure;
+            const int idx_enthalpy = i + offset_0_enthalpy;
+            const int idx_density = i + offset_0_density;
+            const int idx_pressure = i + offset_0_pressure;
             
             h[idx_enthalpy] = gamma*p[idx_pressure]/((gamma - double(1))*rho[idx_density]);
         }
@@ -5933,7 +5990,7 @@ EquationOfStateIdealGas::computeEnthalpy(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -5941,16 +5998,16 @@ EquationOfStateIdealGas::computeEnthalpy(
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_enthalpy = num_ghosts_enthalpy[0];
-        const int num_ghosts_1_enthalpy = num_ghosts_enthalpy[1];
+        const int offset_0_enthalpy = offset_enthalpy[0];
+        const int offset_1_enthalpy = offset_enthalpy[1];
         const int ghostcell_dim_0_enthalpy = ghostcell_dims_enthalpy[0];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -5961,14 +6018,14 @@ EquationOfStateIdealGas::computeEnthalpy(
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx_enthalpy = (i + num_ghosts_0_enthalpy) +
-                    (j + num_ghosts_1_enthalpy)*ghostcell_dim_0_enthalpy;
+                const int idx_enthalpy = (i + offset_0_enthalpy) +
+                    (j + offset_1_enthalpy)*ghostcell_dim_0_enthalpy;
                 
-                const int idx_density = (i + num_ghosts_0_density) +
-                    (j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                const int idx_density = (i + offset_0_density) +
+                    (j + offset_1_density)*ghostcell_dim_0_density;
                 
-                const int idx_pressure = (i + num_ghosts_0_pressure) +
-                    (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                const int idx_pressure = (i + offset_0_pressure) +
+                    (j + offset_1_pressure)*ghostcell_dim_0_pressure;
                 
                 h[idx_enthalpy] = gamma*p[idx_pressure]/((gamma - double(1))*rho[idx_density]);
             }
@@ -5977,7 +6034,7 @@ EquationOfStateIdealGas::computeEnthalpy(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -5987,21 +6044,21 @@ EquationOfStateIdealGas::computeEnthalpy(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_enthalpy = num_ghosts_enthalpy[0];
-        const int num_ghosts_1_enthalpy = num_ghosts_enthalpy[1];
-        const int num_ghosts_2_enthalpy = num_ghosts_enthalpy[2];
+        const int offset_0_enthalpy = offset_enthalpy[0];
+        const int offset_1_enthalpy = offset_enthalpy[1];
+        const int offset_2_enthalpy = offset_enthalpy[2];
         const int ghostcell_dim_0_enthalpy = ghostcell_dims_enthalpy[0];
         const int ghostcell_dim_1_enthalpy = ghostcell_dims_enthalpy[1];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
-        const int num_ghosts_2_density = num_ghosts_density[2];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
+        const int offset_2_density = offset_density[2];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         const int ghostcell_dim_1_density = ghostcell_dims_density[1];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
-        const int num_ghosts_2_pressure = num_ghosts_pressure[2];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
+        const int offset_2_pressure = offset_pressure[2];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         const int ghostcell_dim_1_pressure = ghostcell_dims_pressure[1];
         
@@ -6015,19 +6072,19 @@ EquationOfStateIdealGas::computeEnthalpy(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_enthalpy = (i + num_ghosts_0_enthalpy) +
-                        (j + num_ghosts_1_enthalpy)*ghostcell_dim_0_enthalpy +
-                        (k + num_ghosts_2_enthalpy)*ghostcell_dim_0_enthalpy*
+                    const int idx_enthalpy = (i + offset_0_enthalpy) +
+                        (j + offset_1_enthalpy)*ghostcell_dim_0_enthalpy +
+                        (k + offset_2_enthalpy)*ghostcell_dim_0_enthalpy*
                             ghostcell_dim_1_enthalpy;
                     
-                    const int idx_density = (i + num_ghosts_0_density) +
-                        (j + num_ghosts_1_density)*ghostcell_dim_0_density +
-                        (k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                    const int idx_density = (i + offset_0_density) +
+                        (j + offset_1_density)*ghostcell_dim_0_density +
+                        (k + offset_2_density)*ghostcell_dim_0_density*
                             ghostcell_dim_1_density;
                     
-                    const int idx_pressure = (i + num_ghosts_0_pressure) +
-                        (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
-                        (k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                    const int idx_pressure = (i + offset_0_pressure) +
+                        (j + offset_1_pressure)*ghostcell_dim_0_pressure +
+                        (k + offset_2_pressure)*ghostcell_dim_0_pressure*
                             ghostcell_dim_1_pressure;
                     
                     h[idx_enthalpy] = gamma*p[idx_pressure]/((gamma - double(1))*rho[idx_density]);
@@ -6047,10 +6104,10 @@ EquationOfStateIdealGas::computeEnthalpy(
     const double* const rho,
     const double* const p,
     const double* const gamma,
-    const hier::IntVector& num_ghosts_enthalpy,
-    const hier::IntVector& num_ghosts_density,
-    const hier::IntVector& num_ghosts_pressure,
-    const hier::IntVector& num_ghosts_thermo_properties,
+    const hier::IntVector& offset_enthalpy,
+    const hier::IntVector& offset_density,
+    const hier::IntVector& offset_pressure,
+    const hier::IntVector& offset_thermo_properties,
     const hier::IntVector& ghostcell_dims_enthalpy,
     const hier::IntVector& ghostcell_dims_density,
     const hier::IntVector& ghostcell_dims_pressure,
@@ -6061,16 +6118,16 @@ EquationOfStateIdealGas::computeEnthalpy(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_enthalpy = num_ghosts_enthalpy[0];
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
+        const int offset_0_enthalpy = offset_enthalpy[0];
+        const int offset_0_density = offset_density[0];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
@@ -6078,10 +6135,10 @@ EquationOfStateIdealGas::computeEnthalpy(
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
             // Compute the linear indices.
-            const int idx_enthalpy = i + num_ghosts_0_enthalpy;
-            const int idx_density = i + num_ghosts_0_density;
-            const int idx_pressure = i + num_ghosts_0_pressure;
-            const int idx_thermo_properties = i + num_ghosts_0_thermo_properties;
+            const int idx_enthalpy = i + offset_0_enthalpy;
+            const int idx_density = i + offset_0_density;
+            const int idx_pressure = i + offset_0_pressure;
+            const int idx_thermo_properties = i + offset_0_thermo_properties;
             
             h[idx_enthalpy] = gamma[idx_thermo_properties]*p[idx_pressure]/
                 ((gamma[idx_thermo_properties] - double(1))*rho[idx_density]);
@@ -6090,7 +6147,7 @@ EquationOfStateIdealGas::computeEnthalpy(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -6098,20 +6155,20 @@ EquationOfStateIdealGas::computeEnthalpy(
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_enthalpy = num_ghosts_enthalpy[0];
-        const int num_ghosts_1_enthalpy = num_ghosts_enthalpy[1];
+        const int offset_0_enthalpy = offset_enthalpy[0];
+        const int offset_1_enthalpy = offset_enthalpy[1];
         const int ghostcell_dim_0_enthalpy = ghostcell_dims_enthalpy[0];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
-        const int num_ghosts_1_thermo_properties = num_ghosts_thermo_properties[1];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
+        const int offset_1_thermo_properties = offset_thermo_properties[1];
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -6122,17 +6179,17 @@ EquationOfStateIdealGas::computeEnthalpy(
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx_enthalpy = (i + num_ghosts_0_enthalpy) +
-                    (j + num_ghosts_1_enthalpy)*ghostcell_dim_0_enthalpy;
+                const int idx_enthalpy = (i + offset_0_enthalpy) +
+                    (j + offset_1_enthalpy)*ghostcell_dim_0_enthalpy;
                 
-                const int idx_density = (i + num_ghosts_0_density) +
-                    (j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                const int idx_density = (i + offset_0_density) +
+                    (j + offset_1_density)*ghostcell_dim_0_density;
                 
-                const int idx_pressure = (i + num_ghosts_0_pressure) +
-                    (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                const int idx_pressure = (i + offset_0_pressure) +
+                    (j + offset_1_pressure)*ghostcell_dim_0_pressure;
                 
-                const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
-                    (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
+                const int idx_thermo_properties = (i + offset_0_thermo_properties) +
+                    (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
                 
                 h[idx_enthalpy] = gamma[idx_thermo_properties]*p[idx_pressure]/
                     ((gamma[idx_thermo_properties] - double(1))*rho[idx_density]);
@@ -6142,7 +6199,7 @@ EquationOfStateIdealGas::computeEnthalpy(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -6152,27 +6209,27 @@ EquationOfStateIdealGas::computeEnthalpy(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_enthalpy = num_ghosts_enthalpy[0];
-        const int num_ghosts_1_enthalpy = num_ghosts_enthalpy[1];
-        const int num_ghosts_2_enthalpy = num_ghosts_enthalpy[2];
+        const int offset_0_enthalpy = offset_enthalpy[0];
+        const int offset_1_enthalpy = offset_enthalpy[1];
+        const int offset_2_enthalpy = offset_enthalpy[2];
         const int ghostcell_dim_0_enthalpy = ghostcell_dims_enthalpy[0];
         const int ghostcell_dim_1_enthalpy = ghostcell_dims_enthalpy[1];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
-        const int num_ghosts_2_density = num_ghosts_density[2];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
+        const int offset_2_density = offset_density[2];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         const int ghostcell_dim_1_density = ghostcell_dims_density[1];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
-        const int num_ghosts_2_pressure = num_ghosts_pressure[2];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
+        const int offset_2_pressure = offset_pressure[2];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         const int ghostcell_dim_1_pressure = ghostcell_dims_pressure[1];
         
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
-        const int num_ghosts_1_thermo_properties = num_ghosts_thermo_properties[1];
-        const int num_ghosts_2_thermo_properties = num_ghosts_thermo_properties[2];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
+        const int offset_1_thermo_properties = offset_thermo_properties[1];
+        const int offset_2_thermo_properties = offset_thermo_properties[2];
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         const int ghostcell_dim_1_thermo_properties = ghostcell_dims_thermo_properties[1];
         
@@ -6186,24 +6243,24 @@ EquationOfStateIdealGas::computeEnthalpy(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_enthalpy = (i + num_ghosts_0_enthalpy) +
-                        (j + num_ghosts_1_enthalpy)*ghostcell_dim_0_enthalpy +
-                        (k + num_ghosts_2_enthalpy)*ghostcell_dim_0_enthalpy*
+                    const int idx_enthalpy = (i + offset_0_enthalpy) +
+                        (j + offset_1_enthalpy)*ghostcell_dim_0_enthalpy +
+                        (k + offset_2_enthalpy)*ghostcell_dim_0_enthalpy*
                             ghostcell_dim_1_enthalpy;
                     
-                    const int idx_density = (i + num_ghosts_0_density) +
-                        (j + num_ghosts_1_density)*ghostcell_dim_0_density +
-                        (k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                    const int idx_density = (i + offset_0_density) +
+                        (j + offset_1_density)*ghostcell_dim_0_density +
+                        (k + offset_2_density)*ghostcell_dim_0_density*
                             ghostcell_dim_1_density;
                     
-                    const int idx_pressure = (i + num_ghosts_0_pressure) +
-                        (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
-                        (k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                    const int idx_pressure = (i + offset_0_pressure) +
+                        (j + offset_1_pressure)*ghostcell_dim_0_pressure +
+                        (k + offset_2_pressure)*ghostcell_dim_0_pressure*
                             ghostcell_dim_1_pressure;
                     
-                    const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
-                        (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties +
-                        (k + num_ghosts_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
+                    const int idx_thermo_properties = (i + offset_0_thermo_properties) +
+                        (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties +
+                        (k + offset_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
                             ghostcell_dim_1_thermo_properties;
                     
                     h[idx_enthalpy] = gamma[idx_thermo_properties]*p[idx_pressure]/
@@ -6225,9 +6282,9 @@ EquationOfStateIdealGas::computeTemperature(
     const double* const p,
     const double& gamma,
     const double& c_v,
-    const hier::IntVector& num_ghosts_temperature,
-    const hier::IntVector& num_ghosts_density,
-    const hier::IntVector& num_ghosts_pressure,
+    const hier::IntVector& offset_temperature,
+    const hier::IntVector& offset_density,
+    const hier::IntVector& offset_pressure,
     const hier::IntVector& ghostcell_dims_temperature,
     const hier::IntVector& ghostcell_dims_density,
     const hier::IntVector& ghostcell_dims_pressure,
@@ -6237,15 +6294,15 @@ EquationOfStateIdealGas::computeTemperature(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_temperature = num_ghosts_temperature[0];
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+        const int offset_0_temperature = offset_temperature[0];
+        const int offset_0_density = offset_density[0];
+        const int offset_0_pressure = offset_pressure[0];
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
@@ -6253,9 +6310,9 @@ EquationOfStateIdealGas::computeTemperature(
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
             // Compute the linear indices.
-            const int idx_temperature = i + num_ghosts_0_temperature;
-            const int idx_density = i + num_ghosts_0_density;
-            const int idx_pressure = i + num_ghosts_0_pressure;
+            const int idx_temperature = i + offset_0_temperature;
+            const int idx_density = i + offset_0_density;
+            const int idx_pressure = i + offset_0_pressure;
             
             T[idx_temperature] = p[idx_pressure]/((gamma - double(1))*c_v*rho[idx_density]);
         }
@@ -6263,7 +6320,7 @@ EquationOfStateIdealGas::computeTemperature(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -6271,16 +6328,16 @@ EquationOfStateIdealGas::computeTemperature(
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_temperature = num_ghosts_temperature[0];
-        const int num_ghosts_1_temperature = num_ghosts_temperature[1];
+        const int offset_0_temperature = offset_temperature[0];
+        const int offset_1_temperature = offset_temperature[1];
         const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -6291,14 +6348,14 @@ EquationOfStateIdealGas::computeTemperature(
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx_temperature = (i + num_ghosts_0_temperature) +
-                    (j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature;
+                const int idx_temperature = (i + offset_0_temperature) +
+                    (j + offset_1_temperature)*ghostcell_dim_0_temperature;
                 
-                const int idx_density = (i + num_ghosts_0_density) +
-                    (j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                const int idx_density = (i + offset_0_density) +
+                    (j + offset_1_density)*ghostcell_dim_0_density;
                 
-                const int idx_pressure = (i + num_ghosts_0_pressure) +
-                    (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                const int idx_pressure = (i + offset_0_pressure) +
+                    (j + offset_1_pressure)*ghostcell_dim_0_pressure;
                 
                 T[idx_temperature] = p[idx_pressure]/((gamma - double(1))*c_v*rho[idx_density]);
             }
@@ -6307,7 +6364,7 @@ EquationOfStateIdealGas::computeTemperature(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -6317,21 +6374,21 @@ EquationOfStateIdealGas::computeTemperature(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_temperature = num_ghosts_temperature[0];
-        const int num_ghosts_1_temperature = num_ghosts_temperature[1];
-        const int num_ghosts_2_temperature = num_ghosts_temperature[2];
+        const int offset_0_temperature = offset_temperature[0];
+        const int offset_1_temperature = offset_temperature[1];
+        const int offset_2_temperature = offset_temperature[2];
         const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
         const int ghostcell_dim_1_temperature = ghostcell_dims_temperature[1];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
-        const int num_ghosts_2_density = num_ghosts_density[2];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
+        const int offset_2_density = offset_density[2];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         const int ghostcell_dim_1_density = ghostcell_dims_density[1];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
-        const int num_ghosts_2_pressure = num_ghosts_pressure[2];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
+        const int offset_2_pressure = offset_pressure[2];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         const int ghostcell_dim_1_pressure = ghostcell_dims_pressure[1];
         
@@ -6345,19 +6402,19 @@ EquationOfStateIdealGas::computeTemperature(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_temperature = (i + num_ghosts_0_temperature) +
-                        (j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
-                        (k + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                    const int idx_temperature = (i + offset_0_temperature) +
+                        (j + offset_1_temperature)*ghostcell_dim_0_temperature +
+                        (k + offset_2_temperature)*ghostcell_dim_0_temperature*
                             ghostcell_dim_1_temperature;
                     
-                    const int idx_density = (i + num_ghosts_0_density) +
-                        (j + num_ghosts_1_density)*ghostcell_dim_0_density +
-                        (k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                    const int idx_density = (i + offset_0_density) +
+                        (j + offset_1_density)*ghostcell_dim_0_density +
+                        (k + offset_2_density)*ghostcell_dim_0_density*
                             ghostcell_dim_1_density;
                     
-                    const int idx_pressure = (i + num_ghosts_0_pressure) +
-                        (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
-                        (k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                    const int idx_pressure = (i + offset_0_pressure) +
+                        (j + offset_1_pressure)*ghostcell_dim_0_pressure +
+                        (k + offset_2_pressure)*ghostcell_dim_0_pressure*
                             ghostcell_dim_1_pressure;
                     
                     T[idx_temperature] = p[idx_pressure]/((gamma - double(1))*c_v*rho[idx_density]);
@@ -6378,10 +6435,10 @@ EquationOfStateIdealGas::computeTemperature(
     const double* const p,
     const double* const gamma,
     const double* const c_v,
-    const hier::IntVector& num_ghosts_temperature,
-    const hier::IntVector& num_ghosts_density,
-    const hier::IntVector& num_ghosts_pressure,
-    const hier::IntVector& num_ghosts_thermo_properties,
+    const hier::IntVector& offset_temperature,
+    const hier::IntVector& offset_density,
+    const hier::IntVector& offset_pressure,
+    const hier::IntVector& offset_thermo_properties,
     const hier::IntVector& ghostcell_dims_temperature,
     const hier::IntVector& ghostcell_dims_density,
     const hier::IntVector& ghostcell_dims_pressure,
@@ -6392,16 +6449,16 @@ EquationOfStateIdealGas::computeTemperature(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_temperature = num_ghosts_temperature[0];
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
+        const int offset_0_temperature = offset_temperature[0];
+        const int offset_0_density = offset_density[0];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
@@ -6409,10 +6466,10 @@ EquationOfStateIdealGas::computeTemperature(
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
             // Compute the linear indices.
-            const int idx_temperature = i + num_ghosts_0_temperature;
-            const int idx_density = i + num_ghosts_0_density;
-            const int idx_pressure = i + num_ghosts_0_pressure;
-            const int idx_thermo_properties = i + num_ghosts_0_thermo_properties;
+            const int idx_temperature = i + offset_0_temperature;
+            const int idx_density = i + offset_0_density;
+            const int idx_pressure = i + offset_0_pressure;
+            const int idx_thermo_properties = i + offset_0_thermo_properties;
             
             T[idx_temperature] = p[idx_pressure]/((gamma[idx_thermo_properties] - double(1))*
                 c_v[idx_thermo_properties]*rho[idx_density]);
@@ -6421,7 +6478,7 @@ EquationOfStateIdealGas::computeTemperature(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -6429,20 +6486,20 @@ EquationOfStateIdealGas::computeTemperature(
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_temperature = num_ghosts_temperature[0];
-        const int num_ghosts_1_temperature = num_ghosts_temperature[1];
+        const int offset_0_temperature = offset_temperature[0];
+        const int offset_1_temperature = offset_temperature[1];
         const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
-        const int num_ghosts_1_thermo_properties = num_ghosts_thermo_properties[1];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
+        const int offset_1_thermo_properties = offset_thermo_properties[1];
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -6453,17 +6510,17 @@ EquationOfStateIdealGas::computeTemperature(
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx_temperature = (i + num_ghosts_0_temperature) +
-                    (j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature;
+                const int idx_temperature = (i + offset_0_temperature) +
+                    (j + offset_1_temperature)*ghostcell_dim_0_temperature;
                 
-                const int idx_density = (i + num_ghosts_0_density) +
-                    (j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                const int idx_density = (i + offset_0_density) +
+                    (j + offset_1_density)*ghostcell_dim_0_density;
                 
-                const int idx_pressure = (i + num_ghosts_0_pressure) +
-                    (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                const int idx_pressure = (i + offset_0_pressure) +
+                    (j + offset_1_pressure)*ghostcell_dim_0_pressure;
                 
-                const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
-                    (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
+                const int idx_thermo_properties = (i + offset_0_thermo_properties) +
+                    (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
                 
                 T[idx_temperature] = p[idx_pressure]/((gamma[idx_thermo_properties] - double(1))*
                     c_v[idx_thermo_properties]*rho[idx_density]);
@@ -6473,7 +6530,7 @@ EquationOfStateIdealGas::computeTemperature(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -6483,27 +6540,27 @@ EquationOfStateIdealGas::computeTemperature(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_temperature = num_ghosts_temperature[0];
-        const int num_ghosts_1_temperature = num_ghosts_temperature[1];
-        const int num_ghosts_2_temperature = num_ghosts_temperature[2];
+        const int offset_0_temperature = offset_temperature[0];
+        const int offset_1_temperature = offset_temperature[1];
+        const int offset_2_temperature = offset_temperature[2];
         const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
         const int ghostcell_dim_1_temperature = ghostcell_dims_temperature[1];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
-        const int num_ghosts_2_density = num_ghosts_density[2];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
+        const int offset_2_density = offset_density[2];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         const int ghostcell_dim_1_density = ghostcell_dims_density[1];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
-        const int num_ghosts_2_pressure = num_ghosts_pressure[2];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
+        const int offset_2_pressure = offset_pressure[2];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         const int ghostcell_dim_1_pressure = ghostcell_dims_pressure[1];
         
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
-        const int num_ghosts_1_thermo_properties = num_ghosts_thermo_properties[1];
-        const int num_ghosts_2_thermo_properties = num_ghosts_thermo_properties[2];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
+        const int offset_1_thermo_properties = offset_thermo_properties[1];
+        const int offset_2_thermo_properties = offset_thermo_properties[2];
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         const int ghostcell_dim_1_thermo_properties = ghostcell_dims_thermo_properties[1];
         
@@ -6517,24 +6574,24 @@ EquationOfStateIdealGas::computeTemperature(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_temperature = (i + num_ghosts_0_temperature) +
-                        (j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
-                        (k + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                    const int idx_temperature = (i + offset_0_temperature) +
+                        (j + offset_1_temperature)*ghostcell_dim_0_temperature +
+                        (k + offset_2_temperature)*ghostcell_dim_0_temperature*
                             ghostcell_dim_1_temperature;
                     
-                    const int idx_density = (i + num_ghosts_0_density) +
-                        (j + num_ghosts_1_density)*ghostcell_dim_0_density +
-                        (k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                    const int idx_density = (i + offset_0_density) +
+                        (j + offset_1_density)*ghostcell_dim_0_density +
+                        (k + offset_2_density)*ghostcell_dim_0_density*
                             ghostcell_dim_1_density;
                     
-                    const int idx_pressure = (i + num_ghosts_0_pressure) +
-                        (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
-                        (k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                    const int idx_pressure = (i + offset_0_pressure) +
+                        (j + offset_1_pressure)*ghostcell_dim_0_pressure +
+                        (k + offset_2_pressure)*ghostcell_dim_0_pressure*
                             ghostcell_dim_1_pressure;
                     
-                    const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
-                        (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties +
-                        (k + num_ghosts_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
+                    const int idx_thermo_properties = (i + offset_0_thermo_properties) +
+                        (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties +
+                        (k + offset_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
                             ghostcell_dim_1_thermo_properties;
                     
                     T[idx_temperature] = p[idx_pressure]/((gamma[idx_thermo_properties] - double(1))*
@@ -6554,8 +6611,8 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     double* const epsilon,
     const double* const T,
     const double& c_v,
-    const hier::IntVector& num_ghosts_internal_energy,
-    const hier::IntVector& num_ghosts_temperature,
+    const hier::IntVector& offset_internal_energy,
+    const hier::IntVector& offset_temperature,
     const hier::IntVector& ghostcell_dims_internal_energy,
     const hier::IntVector& ghostcell_dims_temperature,
     const hier::IntVector& domain_lo,
@@ -6564,14 +6621,14 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_internal_energy = num_ghosts_internal_energy[0];
-        const int num_ghosts_0_temperature = num_ghosts_temperature[0];
+        const int offset_0_internal_energy = offset_internal_energy[0];
+        const int offset_0_temperature = offset_temperature[0];
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
@@ -6579,8 +6636,8 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
             // Compute the linear indices.
-            const int idx_internal_energy = i + num_ghosts_0_internal_energy;
-            const int idx_temperature = i + num_ghosts_0_temperature;
+            const int idx_internal_energy = i + offset_0_internal_energy;
+            const int idx_temperature = i + offset_0_temperature;
             
             epsilon[idx_internal_energy] = c_v*T[idx_temperature];
         }
@@ -6588,7 +6645,7 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -6596,12 +6653,12 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_internal_energy = num_ghosts_internal_energy[0];
-        const int num_ghosts_1_internal_energy = num_ghosts_internal_energy[1];
+        const int offset_0_internal_energy = offset_internal_energy[0];
+        const int offset_1_internal_energy = offset_internal_energy[1];
         const int ghostcell_dim_0_internal_energy = ghostcell_dims_internal_energy[0];
         
-        const int num_ghosts_0_temperature = num_ghosts_temperature[0];
-        const int num_ghosts_1_temperature = num_ghosts_temperature[1];
+        const int offset_0_temperature = offset_temperature[0];
+        const int offset_1_temperature = offset_temperature[1];
         const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -6612,11 +6669,11 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx_internal_energy = (i + num_ghosts_0_internal_energy) +
-                    (j + num_ghosts_1_internal_energy)*ghostcell_dim_0_internal_energy;
+                const int idx_internal_energy = (i + offset_0_internal_energy) +
+                    (j + offset_1_internal_energy)*ghostcell_dim_0_internal_energy;
                 
-                const int idx_temperature = (i + num_ghosts_0_temperature) +
-                    (j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature;
+                const int idx_temperature = (i + offset_0_temperature) +
+                    (j + offset_1_temperature)*ghostcell_dim_0_temperature;
                 
                 epsilon[idx_internal_energy] = c_v*T[idx_temperature];
             }
@@ -6625,7 +6682,7 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -6635,15 +6692,15 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_internal_energy = num_ghosts_internal_energy[0];
-        const int num_ghosts_1_internal_energy = num_ghosts_internal_energy[1];
-        const int num_ghosts_2_internal_energy = num_ghosts_internal_energy[2];
+        const int offset_0_internal_energy = offset_internal_energy[0];
+        const int offset_1_internal_energy = offset_internal_energy[1];
+        const int offset_2_internal_energy = offset_internal_energy[2];
         const int ghostcell_dim_0_internal_energy = ghostcell_dims_internal_energy[0];
         const int ghostcell_dim_1_internal_energy = ghostcell_dims_internal_energy[1];
         
-        const int num_ghosts_0_temperature = num_ghosts_temperature[0];
-        const int num_ghosts_1_temperature = num_ghosts_temperature[1];
-        const int num_ghosts_2_temperature = num_ghosts_temperature[2];
+        const int offset_0_temperature = offset_temperature[0];
+        const int offset_1_temperature = offset_temperature[1];
+        const int offset_2_temperature = offset_temperature[2];
         const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
         const int ghostcell_dim_1_temperature = ghostcell_dims_temperature[1];
         
@@ -6657,14 +6714,14 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_internal_energy = (i + num_ghosts_0_internal_energy) +
-                        (j + num_ghosts_1_internal_energy)*ghostcell_dim_0_internal_energy +
-                        (k + num_ghosts_2_internal_energy)*ghostcell_dim_0_internal_energy*
+                    const int idx_internal_energy = (i + offset_0_internal_energy) +
+                        (j + offset_1_internal_energy)*ghostcell_dim_0_internal_energy +
+                        (k + offset_2_internal_energy)*ghostcell_dim_0_internal_energy*
                             ghostcell_dim_1_internal_energy;
                     
-                    const int idx_temperature = (i + num_ghosts_0_temperature) +
-                        (j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
-                        (k + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                    const int idx_temperature = (i + offset_0_temperature) +
+                        (j + offset_1_temperature)*ghostcell_dim_0_temperature +
+                        (k + offset_2_temperature)*ghostcell_dim_0_temperature*
                             ghostcell_dim_1_temperature;
                     
                     epsilon[idx_internal_energy] = c_v*T[idx_temperature];
@@ -6683,9 +6740,9 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     double* const epsilon,
     const double* const T,
     const double* const c_v,
-    const hier::IntVector& num_ghosts_internal_energy,
-    const hier::IntVector& num_ghosts_temperature,
-    const hier::IntVector& num_ghosts_thermo_properties,
+    const hier::IntVector& offset_internal_energy,
+    const hier::IntVector& offset_temperature,
+    const hier::IntVector& offset_thermo_properties,
     const hier::IntVector& ghostcell_dims_internal_energy,
     const hier::IntVector& ghostcell_dims_temperature,
     const hier::IntVector& ghostcell_dims_thermo_properties,
@@ -6695,15 +6752,15 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_internal_energy = num_ghosts_internal_energy[0];
-        const int num_ghosts_0_temperature = num_ghosts_temperature[0];
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
+        const int offset_0_internal_energy = offset_internal_energy[0];
+        const int offset_0_temperature = offset_temperature[0];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
@@ -6711,9 +6768,9 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
             // Compute the linear indices.
-            const int idx_internal_energy = i + num_ghosts_0_internal_energy;
-            const int idx_temperature = i + num_ghosts_0_temperature;
-            const int idx_thermo_properties = i + num_ghosts_0_thermo_properties;
+            const int idx_internal_energy = i + offset_0_internal_energy;
+            const int idx_temperature = i + offset_0_temperature;
+            const int idx_thermo_properties = i + offset_0_thermo_properties;
             
             epsilon[idx_internal_energy] = c_v[idx_thermo_properties]*T[idx_temperature];
         }
@@ -6721,7 +6778,7 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -6729,16 +6786,16 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_internal_energy = num_ghosts_internal_energy[0];
-        const int num_ghosts_1_internal_energy = num_ghosts_internal_energy[1];
+        const int offset_0_internal_energy = offset_internal_energy[0];
+        const int offset_1_internal_energy = offset_internal_energy[1];
         const int ghostcell_dim_0_internal_energy = ghostcell_dims_internal_energy[0];
         
-        const int num_ghosts_0_temperature = num_ghosts_temperature[0];
-        const int num_ghosts_1_temperature = num_ghosts_temperature[1];
+        const int offset_0_temperature = offset_temperature[0];
+        const int offset_1_temperature = offset_temperature[1];
         const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
         
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
-        const int num_ghosts_1_thermo_properties = num_ghosts_thermo_properties[1];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
+        const int offset_1_thermo_properties = offset_thermo_properties[1];
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -6749,14 +6806,14 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx_internal_energy = (i + num_ghosts_0_internal_energy) +
-                    (j + num_ghosts_1_internal_energy)*ghostcell_dim_0_internal_energy;
+                const int idx_internal_energy = (i + offset_0_internal_energy) +
+                    (j + offset_1_internal_energy)*ghostcell_dim_0_internal_energy;
                 
-                const int idx_temperature = (i + num_ghosts_0_temperature) +
-                    (j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature;
+                const int idx_temperature = (i + offset_0_temperature) +
+                    (j + offset_1_temperature)*ghostcell_dim_0_temperature;
                 
-                const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
-                    (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
+                const int idx_thermo_properties = (i + offset_0_thermo_properties) +
+                    (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
                 
                 epsilon[idx_internal_energy] = c_v[idx_thermo_properties]*T[idx_temperature];
             }
@@ -6765,7 +6822,7 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -6775,21 +6832,21 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_internal_energy = num_ghosts_internal_energy[0];
-        const int num_ghosts_1_internal_energy = num_ghosts_internal_energy[1];
-        const int num_ghosts_2_internal_energy = num_ghosts_internal_energy[2];
+        const int offset_0_internal_energy = offset_internal_energy[0];
+        const int offset_1_internal_energy = offset_internal_energy[1];
+        const int offset_2_internal_energy = offset_internal_energy[2];
         const int ghostcell_dim_0_internal_energy = ghostcell_dims_internal_energy[0];
         const int ghostcell_dim_1_internal_energy = ghostcell_dims_internal_energy[1];
         
-        const int num_ghosts_0_temperature = num_ghosts_temperature[0];
-        const int num_ghosts_1_temperature = num_ghosts_temperature[1];
-        const int num_ghosts_2_temperature = num_ghosts_temperature[2];
+        const int offset_0_temperature = offset_temperature[0];
+        const int offset_1_temperature = offset_temperature[1];
+        const int offset_2_temperature = offset_temperature[2];
         const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
         const int ghostcell_dim_1_temperature = ghostcell_dims_temperature[1];
         
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
-        const int num_ghosts_1_thermo_properties = num_ghosts_thermo_properties[1];
-        const int num_ghosts_2_thermo_properties = num_ghosts_thermo_properties[2];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
+        const int offset_1_thermo_properties = offset_thermo_properties[1];
+        const int offset_2_thermo_properties = offset_thermo_properties[2];
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         const int ghostcell_dim_1_thermo_properties = ghostcell_dims_thermo_properties[1];
         
@@ -6803,19 +6860,19 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_internal_energy = (i + num_ghosts_0_internal_energy) +
-                        (j + num_ghosts_1_internal_energy)*ghostcell_dim_0_internal_energy +
-                        (k + num_ghosts_2_internal_energy)*ghostcell_dim_0_internal_energy*
+                    const int idx_internal_energy = (i + offset_0_internal_energy) +
+                        (j + offset_1_internal_energy)*ghostcell_dim_0_internal_energy +
+                        (k + offset_2_internal_energy)*ghostcell_dim_0_internal_energy*
                             ghostcell_dim_1_internal_energy;
                     
-                    const int idx_temperature = (i + num_ghosts_0_temperature) +
-                        (j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
-                        (k + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                    const int idx_temperature = (i + offset_0_temperature) +
+                        (j + offset_1_temperature)*ghostcell_dim_0_temperature +
+                        (k + offset_2_temperature)*ghostcell_dim_0_temperature*
                             ghostcell_dim_1_temperature;
                     
-                    const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
-                        (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties +
-                        (k + num_ghosts_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
+                    const int idx_thermo_properties = (i + offset_0_thermo_properties) +
+                        (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties +
+                        (k + offset_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
                             ghostcell_dim_1_thermo_properties;
                     
                     epsilon[idx_internal_energy] = c_v[idx_thermo_properties]*T[idx_temperature];
@@ -6833,7 +6890,7 @@ void
 EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
     double* const c_v,
     const double& c_v_src,
-    const hier::IntVector& num_ghosts_isochoric_specific_heat_capacity,
+    const hier::IntVector& offset_isochoric_specific_heat_capacity,
     const hier::IntVector& ghostcell_dims_isochoric_specific_heat_capacity,
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims) const
@@ -6841,14 +6898,14 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_isochoric_specific_heat_capacity =
-            num_ghosts_isochoric_specific_heat_capacity[0];
+        const int offset_0_isochoric_specific_heat_capacity =
+            offset_isochoric_specific_heat_capacity[0];
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
@@ -6857,7 +6914,7 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
         {
             // Compute the linear indices.
             const int idx_isochoric_specific_heat_capacity =
-                i + num_ghosts_0_isochoric_specific_heat_capacity;
+                i + offset_0_isochoric_specific_heat_capacity;
             
             c_v[idx_isochoric_specific_heat_capacity] = c_v_src;
         }
@@ -6865,7 +6922,7 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -6873,10 +6930,10 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_isochoric_specific_heat_capacity =
-            num_ghosts_isochoric_specific_heat_capacity[0];
-        const int num_ghosts_1_isochoric_specific_heat_capacity =
-            num_ghosts_isochoric_specific_heat_capacity[1];
+        const int offset_0_isochoric_specific_heat_capacity =
+            offset_isochoric_specific_heat_capacity[0];
+        const int offset_1_isochoric_specific_heat_capacity =
+            offset_isochoric_specific_heat_capacity[1];
         const int ghostcell_dim_0_isochoric_specific_heat_capacity =
             ghostcell_dims_isochoric_specific_heat_capacity[0];
         
@@ -6889,8 +6946,8 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
             {
                 // Compute the linear indices.
                 const int idx_isochoric_specific_heat_capacity =
-                    (i + num_ghosts_0_isochoric_specific_heat_capacity) +
-                    (j + num_ghosts_1_isochoric_specific_heat_capacity)*
+                    (i + offset_0_isochoric_specific_heat_capacity) +
+                    (j + offset_1_isochoric_specific_heat_capacity)*
                         ghostcell_dim_0_isochoric_specific_heat_capacity;
                 
                 c_v[idx_isochoric_specific_heat_capacity] = c_v_src;
@@ -6900,7 +6957,7 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -6910,12 +6967,12 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_isochoric_specific_heat_capacity =
-            num_ghosts_isochoric_specific_heat_capacity[0];
-        const int num_ghosts_1_isochoric_specific_heat_capacity =
-            num_ghosts_isochoric_specific_heat_capacity[1];
-        const int num_ghosts_2_isochoric_specific_heat_capacity =
-            num_ghosts_isochoric_specific_heat_capacity[2];
+        const int offset_0_isochoric_specific_heat_capacity =
+            offset_isochoric_specific_heat_capacity[0];
+        const int offset_1_isochoric_specific_heat_capacity =
+            offset_isochoric_specific_heat_capacity[1];
+        const int offset_2_isochoric_specific_heat_capacity =
+            offset_isochoric_specific_heat_capacity[2];
         const int ghostcell_dim_0_isochoric_specific_heat_capacity =
             ghostcell_dims_isochoric_specific_heat_capacity[0];
         const int ghostcell_dim_1_isochoric_specific_heat_capacity =
@@ -6932,10 +6989,10 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
                 {
                     // Compute the linear indices.
                     const int idx_isochoric_specific_heat_capacity =
-                        (i + num_ghosts_0_isochoric_specific_heat_capacity) +
-                        (j + num_ghosts_1_isochoric_specific_heat_capacity)*
+                        (i + offset_0_isochoric_specific_heat_capacity) +
+                        (j + offset_1_isochoric_specific_heat_capacity)*
                             ghostcell_dim_0_isochoric_specific_heat_capacity +
-                        (k + num_ghosts_2_isochoric_specific_heat_capacity)*
+                        (k + offset_2_isochoric_specific_heat_capacity)*
                             ghostcell_dim_0_isochoric_specific_heat_capacity*
                             ghostcell_dim_1_isochoric_specific_heat_capacity;
                     
@@ -6954,8 +7011,8 @@ void
 EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
     double* const c_v,
     const double* const c_v_src,
-    const hier::IntVector& num_ghosts_isochoric_specific_heat_capacity,
-    const hier::IntVector& num_ghosts_thermo_properties,
+    const hier::IntVector& offset_isochoric_specific_heat_capacity,
+    const hier::IntVector& offset_thermo_properties,
     const hier::IntVector& ghostcell_dims_isochoric_specific_heat_capacity,
     const hier::IntVector& ghostcell_dims_thermo_properties,
     const hier::IntVector& domain_lo,
@@ -6964,16 +7021,16 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_isochoric_specific_heat_capacity =
-            num_ghosts_isochoric_specific_heat_capacity[0];
+        const int offset_0_isochoric_specific_heat_capacity =
+            offset_isochoric_specific_heat_capacity[0];
         
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
@@ -6982,9 +7039,9 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
         {
             // Compute the linear indices.
             const int idx_isochoric_specific_heat_capacity =
-                i + num_ghosts_0_isochoric_specific_heat_capacity;
+                i + offset_0_isochoric_specific_heat_capacity;
             
-            const int idx_thermo_properties = i + num_ghosts_0_thermo_properties;
+            const int idx_thermo_properties = i + offset_0_thermo_properties;
             
             c_v[idx_isochoric_specific_heat_capacity] = c_v_src[idx_thermo_properties];
         }
@@ -6992,7 +7049,7 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -7000,15 +7057,15 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_isochoric_specific_heat_capacity =
-            num_ghosts_isochoric_specific_heat_capacity[0];
-        const int num_ghosts_1_isochoric_specific_heat_capacity =
-            num_ghosts_isochoric_specific_heat_capacity[1];
+        const int offset_0_isochoric_specific_heat_capacity =
+            offset_isochoric_specific_heat_capacity[0];
+        const int offset_1_isochoric_specific_heat_capacity =
+            offset_isochoric_specific_heat_capacity[1];
         const int ghostcell_dim_0_isochoric_specific_heat_capacity =
             ghostcell_dims_isochoric_specific_heat_capacity[0];
         
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
-        const int num_ghosts_1_thermo_properties = num_ghosts_thermo_properties[1];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
+        const int offset_1_thermo_properties = offset_thermo_properties[1];
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -7020,12 +7077,12 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
             {
                 // Compute the linear indices.
                 const int idx_isochoric_specific_heat_capacity =
-                    (i + num_ghosts_0_isochoric_specific_heat_capacity) +
-                    (j + num_ghosts_1_isochoric_specific_heat_capacity)*
+                    (i + offset_0_isochoric_specific_heat_capacity) +
+                    (j + offset_1_isochoric_specific_heat_capacity)*
                         ghostcell_dim_0_isochoric_specific_heat_capacity;
                 
-                const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
-                    (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
+                const int idx_thermo_properties = (i + offset_0_thermo_properties) +
+                    (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
                 
                 c_v[idx_isochoric_specific_heat_capacity] = c_v_src[idx_thermo_properties];
             }
@@ -7034,7 +7091,7 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -7044,20 +7101,20 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_isochoric_specific_heat_capacity =
-            num_ghosts_isochoric_specific_heat_capacity[0];
-        const int num_ghosts_1_isochoric_specific_heat_capacity =
-            num_ghosts_isochoric_specific_heat_capacity[1];
-        const int num_ghosts_2_isochoric_specific_heat_capacity =
-            num_ghosts_isochoric_specific_heat_capacity[2];
+        const int offset_0_isochoric_specific_heat_capacity =
+            offset_isochoric_specific_heat_capacity[0];
+        const int offset_1_isochoric_specific_heat_capacity =
+            offset_isochoric_specific_heat_capacity[1];
+        const int offset_2_isochoric_specific_heat_capacity =
+            offset_isochoric_specific_heat_capacity[2];
         const int ghostcell_dim_0_isochoric_specific_heat_capacity =
             ghostcell_dims_isochoric_specific_heat_capacity[0];
         const int ghostcell_dim_1_isochoric_specific_heat_capacity =
             ghostcell_dims_isochoric_specific_heat_capacity[1];
         
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
-        const int num_ghosts_1_thermo_properties = num_ghosts_thermo_properties[1];
-        const int num_ghosts_2_thermo_properties = num_ghosts_thermo_properties[2];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
+        const int offset_1_thermo_properties = offset_thermo_properties[1];
+        const int offset_2_thermo_properties = offset_thermo_properties[2];
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         const int ghostcell_dim_1_thermo_properties = ghostcell_dims_thermo_properties[1];
         
@@ -7072,16 +7129,16 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
                 {
                     // Compute the linear indices.
                     const int idx_isochoric_specific_heat_capacity =
-                        (i + num_ghosts_0_isochoric_specific_heat_capacity) +
-                        (j + num_ghosts_1_isochoric_specific_heat_capacity)*
+                        (i + offset_0_isochoric_specific_heat_capacity) +
+                        (j + offset_1_isochoric_specific_heat_capacity)*
                             ghostcell_dim_0_isochoric_specific_heat_capacity +
-                        (k + num_ghosts_2_isochoric_specific_heat_capacity)*
+                        (k + offset_2_isochoric_specific_heat_capacity)*
                             ghostcell_dim_0_isochoric_specific_heat_capacity*
                             ghostcell_dim_1_isochoric_specific_heat_capacity;
                     
-                    const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
-                        (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties +
-                        (k + num_ghosts_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
+                    const int idx_thermo_properties = (i + offset_0_thermo_properties) +
+                        (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties +
+                        (k + offset_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
                             ghostcell_dim_1_thermo_properties;
                     
                     c_v[idx_isochoric_specific_heat_capacity] = c_v_src[idx_thermo_properties];
@@ -7099,7 +7156,7 @@ void
 EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
     double* const c_p,
     const double& c_p_src,
-    const hier::IntVector& num_ghosts_isobaric_specific_heat_capacity,
+    const hier::IntVector& offset_isobaric_specific_heat_capacity,
     const hier::IntVector& ghostcell_dims_isobaric_specific_heat_capacity,
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims) const
@@ -7107,14 +7164,14 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_isobaric_specific_heat_capacity =
-            num_ghosts_isobaric_specific_heat_capacity[0];
+        const int offset_0_isobaric_specific_heat_capacity =
+            offset_isobaric_specific_heat_capacity[0];
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
@@ -7123,7 +7180,7 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
         {
             // Compute the linear indices.
             const int idx_isobaric_specific_heat_capacity =
-                i + num_ghosts_0_isobaric_specific_heat_capacity;
+                i + offset_0_isobaric_specific_heat_capacity;
             
             c_p[idx_isobaric_specific_heat_capacity] = c_p_src;
         }
@@ -7131,7 +7188,7 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -7139,10 +7196,10 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_isobaric_specific_heat_capacity =
-            num_ghosts_isobaric_specific_heat_capacity[0];
-        const int num_ghosts_1_isobaric_specific_heat_capacity =
-            num_ghosts_isobaric_specific_heat_capacity[1];
+        const int offset_0_isobaric_specific_heat_capacity =
+            offset_isobaric_specific_heat_capacity[0];
+        const int offset_1_isobaric_specific_heat_capacity =
+            offset_isobaric_specific_heat_capacity[1];
         const int ghostcell_dim_0_isobaric_specific_heat_capacity =
             ghostcell_dims_isobaric_specific_heat_capacity[0];
         
@@ -7155,8 +7212,8 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
             {
                 // Compute the linear indices.
                 const int idx_isobaric_specific_heat_capacity =
-                    (i + num_ghosts_0_isobaric_specific_heat_capacity) +
-                    (j + num_ghosts_1_isobaric_specific_heat_capacity)*
+                    (i + offset_0_isobaric_specific_heat_capacity) +
+                    (j + offset_1_isobaric_specific_heat_capacity)*
                         ghostcell_dim_0_isobaric_specific_heat_capacity;
                 
                 c_p[idx_isobaric_specific_heat_capacity] = c_p_src;
@@ -7166,7 +7223,7 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -7176,12 +7233,12 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_isobaric_specific_heat_capacity =
-            num_ghosts_isobaric_specific_heat_capacity[0];
-        const int num_ghosts_1_isobaric_specific_heat_capacity =
-            num_ghosts_isobaric_specific_heat_capacity[1];
-        const int num_ghosts_2_isobaric_specific_heat_capacity =
-            num_ghosts_isobaric_specific_heat_capacity[2];
+        const int offset_0_isobaric_specific_heat_capacity =
+            offset_isobaric_specific_heat_capacity[0];
+        const int offset_1_isobaric_specific_heat_capacity =
+            offset_isobaric_specific_heat_capacity[1];
+        const int offset_2_isobaric_specific_heat_capacity =
+            offset_isobaric_specific_heat_capacity[2];
         const int ghostcell_dim_0_isobaric_specific_heat_capacity =
             ghostcell_dims_isobaric_specific_heat_capacity[0];
         const int ghostcell_dim_1_isobaric_specific_heat_capacity =
@@ -7198,10 +7255,10 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
                 {
                     // Compute the linear indices.
                     const int idx_isobaric_specific_heat_capacity =
-                        (i + num_ghosts_0_isobaric_specific_heat_capacity) +
-                        (j + num_ghosts_1_isobaric_specific_heat_capacity)*
+                        (i + offset_0_isobaric_specific_heat_capacity) +
+                        (j + offset_1_isobaric_specific_heat_capacity)*
                             ghostcell_dim_0_isobaric_specific_heat_capacity +
-                        (k + num_ghosts_2_isobaric_specific_heat_capacity)*
+                        (k + offset_2_isobaric_specific_heat_capacity)*
                             ghostcell_dim_0_isobaric_specific_heat_capacity*
                             ghostcell_dim_1_isobaric_specific_heat_capacity;
                     
@@ -7220,8 +7277,8 @@ void
 EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
     double* const c_p,
     const double* const c_p_src,
-    const hier::IntVector& num_ghosts_isobaric_specific_heat_capacity,
-    const hier::IntVector& num_ghosts_thermo_properties,
+    const hier::IntVector& offset_isobaric_specific_heat_capacity,
+    const hier::IntVector& offset_thermo_properties,
     const hier::IntVector& ghostcell_dims_isobaric_specific_heat_capacity,
     const hier::IntVector& ghostcell_dims_thermo_properties,
     const hier::IntVector& domain_lo,
@@ -7230,16 +7287,16 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_isobaric_specific_heat_capacity =
-            num_ghosts_isobaric_specific_heat_capacity[0];
+        const int offset_0_isobaric_specific_heat_capacity =
+            offset_isobaric_specific_heat_capacity[0];
         
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
@@ -7248,9 +7305,9 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
         {
             // Compute the linear indices.
             const int idx_isobaric_specific_heat_capacity =
-                i + num_ghosts_0_isobaric_specific_heat_capacity;
+                i + offset_0_isobaric_specific_heat_capacity;
             
-            const int idx_thermo_properties = i + num_ghosts_0_thermo_properties;
+            const int idx_thermo_properties = i + offset_0_thermo_properties;
             
             c_p[idx_isobaric_specific_heat_capacity] = c_p_src[idx_thermo_properties];
         }
@@ -7258,7 +7315,7 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -7266,15 +7323,15 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_isobaric_specific_heat_capacity =
-            num_ghosts_isobaric_specific_heat_capacity[0];
-        const int num_ghosts_1_isobaric_specific_heat_capacity =
-            num_ghosts_isobaric_specific_heat_capacity[1];
+        const int offset_0_isobaric_specific_heat_capacity =
+            offset_isobaric_specific_heat_capacity[0];
+        const int offset_1_isobaric_specific_heat_capacity =
+            offset_isobaric_specific_heat_capacity[1];
         const int ghostcell_dim_0_isobaric_specific_heat_capacity =
             ghostcell_dims_isobaric_specific_heat_capacity[0];
         
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
-        const int num_ghosts_1_thermo_properties = num_ghosts_thermo_properties[1];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
+        const int offset_1_thermo_properties = offset_thermo_properties[1];
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -7286,12 +7343,12 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
             {
                 // Compute the linear indices.
                 const int idx_isobaric_specific_heat_capacity =
-                    (i + num_ghosts_0_isobaric_specific_heat_capacity) +
-                    (j + num_ghosts_1_isobaric_specific_heat_capacity)*
+                    (i + offset_0_isobaric_specific_heat_capacity) +
+                    (j + offset_1_isobaric_specific_heat_capacity)*
                         ghostcell_dim_0_isobaric_specific_heat_capacity;
                 
-                const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
-                    (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
+                const int idx_thermo_properties = (i + offset_0_thermo_properties) +
+                    (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
                 
                 c_p[idx_isobaric_specific_heat_capacity] = c_p_src[idx_thermo_properties];
             }
@@ -7300,7 +7357,7 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -7310,20 +7367,20 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_isobaric_specific_heat_capacity =
-            num_ghosts_isobaric_specific_heat_capacity[0];
-        const int num_ghosts_1_isobaric_specific_heat_capacity =
-            num_ghosts_isobaric_specific_heat_capacity[1];
-        const int num_ghosts_2_isobaric_specific_heat_capacity =
-            num_ghosts_isobaric_specific_heat_capacity[2];
+        const int offset_0_isobaric_specific_heat_capacity =
+            offset_isobaric_specific_heat_capacity[0];
+        const int offset_1_isobaric_specific_heat_capacity =
+            offset_isobaric_specific_heat_capacity[1];
+        const int offset_2_isobaric_specific_heat_capacity =
+            offset_isobaric_specific_heat_capacity[2];
         const int ghostcell_dim_0_isobaric_specific_heat_capacity =
             ghostcell_dims_isobaric_specific_heat_capacity[0];
         const int ghostcell_dim_1_isobaric_specific_heat_capacity =
             ghostcell_dims_isobaric_specific_heat_capacity[1];
         
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
-        const int num_ghosts_1_thermo_properties = num_ghosts_thermo_properties[1];
-        const int num_ghosts_2_thermo_properties = num_ghosts_thermo_properties[2];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
+        const int offset_1_thermo_properties = offset_thermo_properties[1];
+        const int offset_2_thermo_properties = offset_thermo_properties[2];
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         const int ghostcell_dim_1_thermo_properties = ghostcell_dims_thermo_properties[1];
         
@@ -7338,16 +7395,16 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
                 {
                     // Compute the linear indices.
                     const int idx_isobaric_specific_heat_capacity =
-                        (i + num_ghosts_0_isobaric_specific_heat_capacity) +
-                        (j + num_ghosts_1_isobaric_specific_heat_capacity)*
+                        (i + offset_0_isobaric_specific_heat_capacity) +
+                        (j + offset_1_isobaric_specific_heat_capacity)*
                             ghostcell_dim_0_isobaric_specific_heat_capacity +
-                        (k + num_ghosts_2_isobaric_specific_heat_capacity)*
+                        (k + offset_2_isobaric_specific_heat_capacity)*
                             ghostcell_dim_0_isobaric_specific_heat_capacity*
                             ghostcell_dim_1_isobaric_specific_heat_capacity;
                     
-                    const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
-                        (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties +
-                        (k + num_ghosts_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
+                    const int idx_thermo_properties = (i + offset_0_thermo_properties) +
+                        (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties +
+                        (k + offset_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
                             ghostcell_dim_1_thermo_properties;
                     
                     c_p[idx_isobaric_specific_heat_capacity] = c_p_src[idx_thermo_properties];
@@ -7366,7 +7423,7 @@ void
 EquationOfStateIdealGas::computeGruneisenParameter(
     double* const Gamma,
     const double& gamma,
-    const hier::IntVector& num_ghosts_gruneisen_parameter,
+    const hier::IntVector& offset_gruneisen_parameter,
     const hier::IntVector& ghostcell_dims_gruneisen_parameter,
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims) const
@@ -7376,14 +7433,14 @@ EquationOfStateIdealGas::computeGruneisenParameter(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_gruneisen_parameter =
-            num_ghosts_gruneisen_parameter[0];
+        const int offset_0_gruneisen_parameter =
+            offset_gruneisen_parameter[0];
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
@@ -7392,7 +7449,7 @@ EquationOfStateIdealGas::computeGruneisenParameter(
         {
             // Compute the linear indices.
             const int idx_gruneisen_parameter =
-                i + num_ghosts_0_gruneisen_parameter;
+                i + offset_0_gruneisen_parameter;
             
             Gamma[idx_gruneisen_parameter] = Gamma_src;
         }
@@ -7400,7 +7457,7 @@ EquationOfStateIdealGas::computeGruneisenParameter(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -7408,10 +7465,10 @@ EquationOfStateIdealGas::computeGruneisenParameter(
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_gruneisen_parameter =
-            num_ghosts_gruneisen_parameter[0];
-        const int num_ghosts_1_gruneisen_parameter =
-            num_ghosts_gruneisen_parameter[1];
+        const int offset_0_gruneisen_parameter =
+            offset_gruneisen_parameter[0];
+        const int offset_1_gruneisen_parameter =
+            offset_gruneisen_parameter[1];
         const int ghostcell_dim_0_gruneisen_parameter =
             ghostcell_dims_gruneisen_parameter[0];
         
@@ -7424,8 +7481,8 @@ EquationOfStateIdealGas::computeGruneisenParameter(
             {
                 // Compute the linear indices.
                 const int idx_gruneisen_parameter =
-                    (i + num_ghosts_0_gruneisen_parameter) +
-                    (j + num_ghosts_1_gruneisen_parameter)*
+                    (i + offset_0_gruneisen_parameter) +
+                    (j + offset_1_gruneisen_parameter)*
                         ghostcell_dim_0_gruneisen_parameter;
                 
                 Gamma[idx_gruneisen_parameter] = Gamma_src;
@@ -7435,7 +7492,7 @@ EquationOfStateIdealGas::computeGruneisenParameter(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -7445,12 +7502,12 @@ EquationOfStateIdealGas::computeGruneisenParameter(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_gruneisen_parameter =
-            num_ghosts_gruneisen_parameter[0];
-        const int num_ghosts_1_gruneisen_parameter =
-            num_ghosts_gruneisen_parameter[1];
-        const int num_ghosts_2_gruneisen_parameter =
-            num_ghosts_gruneisen_parameter[2];
+        const int offset_0_gruneisen_parameter =
+            offset_gruneisen_parameter[0];
+        const int offset_1_gruneisen_parameter =
+            offset_gruneisen_parameter[1];
+        const int offset_2_gruneisen_parameter =
+            offset_gruneisen_parameter[2];
         const int ghostcell_dim_0_gruneisen_parameter =
             ghostcell_dims_gruneisen_parameter[0];
         const int ghostcell_dim_1_gruneisen_parameter =
@@ -7467,10 +7524,10 @@ EquationOfStateIdealGas::computeGruneisenParameter(
                 {
                     // Compute the linear indices.
                     const int idx_gruneisen_parameter =
-                        (i + num_ghosts_0_gruneisen_parameter) +
-                        (j + num_ghosts_1_gruneisen_parameter)*
+                        (i + offset_0_gruneisen_parameter) +
+                        (j + offset_1_gruneisen_parameter)*
                             ghostcell_dim_0_gruneisen_parameter +
-                        (k + num_ghosts_2_gruneisen_parameter)*
+                        (k + offset_2_gruneisen_parameter)*
                             ghostcell_dim_0_gruneisen_parameter*
                             ghostcell_dim_1_gruneisen_parameter;
                     
@@ -7490,8 +7547,8 @@ void
 EquationOfStateIdealGas::computeGruneisenParameter(
     double* const Gamma,
     const double* const gamma,
-    const hier::IntVector& num_ghosts_gruneisen_parameter,
-    const hier::IntVector& num_ghosts_thermo_properties,
+    const hier::IntVector& offset_gruneisen_parameter,
+    const hier::IntVector& offset_thermo_properties,
     const hier::IntVector& ghostcell_dims_gruneisen_parameter,
     const hier::IntVector& ghostcell_dims_thermo_properties,
     const hier::IntVector& domain_lo,
@@ -7500,16 +7557,16 @@ EquationOfStateIdealGas::computeGruneisenParameter(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_gruneisen_parameter =
-            num_ghosts_gruneisen_parameter[0];
+        const int offset_0_gruneisen_parameter =
+            offset_gruneisen_parameter[0];
         
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
@@ -7518,9 +7575,9 @@ EquationOfStateIdealGas::computeGruneisenParameter(
         {
             // Compute the linear indices.
             const int idx_gruneisen_parameter =
-                i + num_ghosts_0_gruneisen_parameter;
+                i + offset_0_gruneisen_parameter;
             
-            const int idx_thermo_properties = i + num_ghosts_0_thermo_properties;
+            const int idx_thermo_properties = i + offset_0_thermo_properties;
             
             Gamma[idx_gruneisen_parameter] = gamma[idx_thermo_properties] - double(1);
         }
@@ -7528,7 +7585,7 @@ EquationOfStateIdealGas::computeGruneisenParameter(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -7536,15 +7593,15 @@ EquationOfStateIdealGas::computeGruneisenParameter(
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_gruneisen_parameter =
-            num_ghosts_gruneisen_parameter[0];
-        const int num_ghosts_1_gruneisen_parameter =
-            num_ghosts_gruneisen_parameter[1];
+        const int offset_0_gruneisen_parameter =
+            offset_gruneisen_parameter[0];
+        const int offset_1_gruneisen_parameter =
+            offset_gruneisen_parameter[1];
         const int ghostcell_dim_0_gruneisen_parameter =
             ghostcell_dims_gruneisen_parameter[0];
         
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
-        const int num_ghosts_1_thermo_properties = num_ghosts_thermo_properties[1];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
+        const int offset_1_thermo_properties = offset_thermo_properties[1];
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -7556,12 +7613,12 @@ EquationOfStateIdealGas::computeGruneisenParameter(
             {
                 // Compute the linear indices.
                 const int idx_gruneisen_parameter =
-                    (i + num_ghosts_0_gruneisen_parameter) +
-                    (j + num_ghosts_1_gruneisen_parameter)*
+                    (i + offset_0_gruneisen_parameter) +
+                    (j + offset_1_gruneisen_parameter)*
                         ghostcell_dim_0_gruneisen_parameter;
                 
-                const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
-                    (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
+                const int idx_thermo_properties = (i + offset_0_thermo_properties) +
+                    (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
                 
                 Gamma[idx_gruneisen_parameter] = gamma[idx_thermo_properties] - double(1);
             }
@@ -7570,7 +7627,7 @@ EquationOfStateIdealGas::computeGruneisenParameter(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -7580,20 +7637,20 @@ EquationOfStateIdealGas::computeGruneisenParameter(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_gruneisen_parameter =
-            num_ghosts_gruneisen_parameter[0];
-        const int num_ghosts_1_gruneisen_parameter =
-            num_ghosts_gruneisen_parameter[1];
-        const int num_ghosts_2_gruneisen_parameter =
-            num_ghosts_gruneisen_parameter[2];
+        const int offset_0_gruneisen_parameter =
+            offset_gruneisen_parameter[0];
+        const int offset_1_gruneisen_parameter =
+            offset_gruneisen_parameter[1];
+        const int offset_2_gruneisen_parameter =
+            offset_gruneisen_parameter[2];
         const int ghostcell_dim_0_gruneisen_parameter =
             ghostcell_dims_gruneisen_parameter[0];
         const int ghostcell_dim_1_gruneisen_parameter =
             ghostcell_dims_gruneisen_parameter[1];
         
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
-        const int num_ghosts_1_thermo_properties = num_ghosts_thermo_properties[1];
-        const int num_ghosts_2_thermo_properties = num_ghosts_thermo_properties[2];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
+        const int offset_1_thermo_properties = offset_thermo_properties[1];
+        const int offset_2_thermo_properties = offset_thermo_properties[2];
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         const int ghostcell_dim_1_thermo_properties = ghostcell_dims_thermo_properties[1];
         
@@ -7608,16 +7665,16 @@ EquationOfStateIdealGas::computeGruneisenParameter(
                 {
                     // Compute the linear indices.
                     const int idx_gruneisen_parameter =
-                        (i + num_ghosts_0_gruneisen_parameter) +
-                        (j + num_ghosts_1_gruneisen_parameter)*
+                        (i + offset_0_gruneisen_parameter) +
+                        (j + offset_1_gruneisen_parameter)*
                             ghostcell_dim_0_gruneisen_parameter +
-                        (k + num_ghosts_2_gruneisen_parameter)*
+                        (k + offset_2_gruneisen_parameter)*
                             ghostcell_dim_0_gruneisen_parameter*
                             ghostcell_dim_1_gruneisen_parameter;
                     
-                    const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
-                        (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties +
-                        (k + num_ghosts_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
+                    const int idx_thermo_properties = (i + offset_0_thermo_properties) +
+                        (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties +
+                        (k + offset_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
                             ghostcell_dim_1_thermo_properties;
                     
                     Gamma[idx_gruneisen_parameter] = gamma[idx_thermo_properties] - double(1);
@@ -7636,9 +7693,9 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
     double* const Psi,
     const double* const rho,
     const double* const p,
-    const hier::IntVector& num_ghosts_partial_pressure_partial_density,
-    const hier::IntVector& num_ghosts_density,
-    const hier::IntVector& num_ghosts_pressure,
+    const hier::IntVector& offset_partial_pressure_partial_density,
+    const hier::IntVector& offset_density,
+    const hier::IntVector& offset_pressure,
     const hier::IntVector& ghostcell_dims_partial_pressure_partial_density,
     const hier::IntVector& ghostcell_dims_density,
     const hier::IntVector& ghostcell_dims_pressure,
@@ -7648,15 +7705,15 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_partial_pressure_partial_density = num_ghosts_partial_pressure_partial_density[0];
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+        const int offset_0_partial_pressure_partial_density = offset_partial_pressure_partial_density[0];
+        const int offset_0_density = offset_density[0];
+        const int offset_0_pressure = offset_pressure[0];
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
@@ -7664,9 +7721,9 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
             // Compute the linear indices.
-            const int idx_partial_pressure_partial_density = i + num_ghosts_0_partial_pressure_partial_density;
-            const int idx_density = i + num_ghosts_0_density;
-            const int idx_pressure = i + num_ghosts_0_pressure;
+            const int idx_partial_pressure_partial_density = i + offset_0_partial_pressure_partial_density;
+            const int idx_density = i + offset_0_density;
+            const int idx_pressure = i + offset_0_pressure;
             
             Psi[idx_partial_pressure_partial_density] = p[idx_pressure]/rho[idx_density];
         }
@@ -7674,7 +7731,7 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -7682,16 +7739,16 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_partial_pressure_partial_density = num_ghosts_partial_pressure_partial_density[0];
-        const int num_ghosts_1_partial_pressure_partial_density = num_ghosts_partial_pressure_partial_density[1];
+        const int offset_0_partial_pressure_partial_density = offset_partial_pressure_partial_density[0];
+        const int offset_1_partial_pressure_partial_density = offset_partial_pressure_partial_density[1];
         const int ghostcell_dim_0_partial_pressure_partial_density = ghostcell_dims_partial_pressure_partial_density[0];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -7702,14 +7759,14 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx_partial_pressure_partial_density = (i + num_ghosts_0_partial_pressure_partial_density) +
-                    (j + num_ghosts_1_partial_pressure_partial_density)*ghostcell_dim_0_partial_pressure_partial_density;
+                const int idx_partial_pressure_partial_density = (i + offset_0_partial_pressure_partial_density) +
+                    (j + offset_1_partial_pressure_partial_density)*ghostcell_dim_0_partial_pressure_partial_density;
                 
-                const int idx_density = (i + num_ghosts_0_density) +
-                    (j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                const int idx_density = (i + offset_0_density) +
+                    (j + offset_1_density)*ghostcell_dim_0_density;
                 
-                const int idx_pressure = (i + num_ghosts_0_pressure) +
-                    (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                const int idx_pressure = (i + offset_0_pressure) +
+                    (j + offset_1_pressure)*ghostcell_dim_0_pressure;
                 
                 Psi[idx_partial_pressure_partial_density] = p[idx_pressure]/rho[idx_density];
             }
@@ -7718,7 +7775,7 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -7728,21 +7785,21 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_partial_pressure_partial_density = num_ghosts_partial_pressure_partial_density[0];
-        const int num_ghosts_1_partial_pressure_partial_density = num_ghosts_partial_pressure_partial_density[1];
-        const int num_ghosts_2_partial_pressure_partial_density = num_ghosts_partial_pressure_partial_density[2];
+        const int offset_0_partial_pressure_partial_density = offset_partial_pressure_partial_density[0];
+        const int offset_1_partial_pressure_partial_density = offset_partial_pressure_partial_density[1];
+        const int offset_2_partial_pressure_partial_density = offset_partial_pressure_partial_density[2];
         const int ghostcell_dim_0_partial_pressure_partial_density = ghostcell_dims_partial_pressure_partial_density[0];
         const int ghostcell_dim_1_partial_pressure_partial_density = ghostcell_dims_partial_pressure_partial_density[1];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
-        const int num_ghosts_2_density = num_ghosts_density[2];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
+        const int offset_2_density = offset_density[2];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         const int ghostcell_dim_1_density = ghostcell_dims_density[1];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
-        const int num_ghosts_2_pressure = num_ghosts_pressure[2];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
+        const int offset_2_pressure = offset_pressure[2];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         const int ghostcell_dim_1_pressure = ghostcell_dims_pressure[1];
         
@@ -7756,19 +7813,19 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_partial_pressure_partial_density = (i + num_ghosts_0_partial_pressure_partial_density) +
-                        (j + num_ghosts_1_partial_pressure_partial_density)*ghostcell_dim_0_partial_pressure_partial_density +
-                        (k + num_ghosts_2_partial_pressure_partial_density)*ghostcell_dim_0_partial_pressure_partial_density*
+                    const int idx_partial_pressure_partial_density = (i + offset_0_partial_pressure_partial_density) +
+                        (j + offset_1_partial_pressure_partial_density)*ghostcell_dim_0_partial_pressure_partial_density +
+                        (k + offset_2_partial_pressure_partial_density)*ghostcell_dim_0_partial_pressure_partial_density*
                             ghostcell_dim_1_partial_pressure_partial_density;
                     
-                    const int idx_density = (i + num_ghosts_0_density) +
-                        (j + num_ghosts_1_density)*ghostcell_dim_0_density +
-                        (k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                    const int idx_density = (i + offset_0_density) +
+                        (j + offset_1_density)*ghostcell_dim_0_density +
+                        (k + offset_2_density)*ghostcell_dim_0_density*
                             ghostcell_dim_1_density;
                     
-                    const int idx_pressure = (i + num_ghosts_0_pressure) +
-                        (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
-                        (k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                    const int idx_pressure = (i + offset_0_pressure) +
+                        (j + offset_1_pressure)*ghostcell_dim_0_pressure +
+                        (k + offset_2_pressure)*ghostcell_dim_0_pressure*
                             ghostcell_dim_1_pressure;
                     
                     Psi[idx_partial_pressure_partial_density] = p[idx_pressure]/rho[idx_density];
@@ -7788,9 +7845,9 @@ EquationOfStateIdealGas::computeDensity(
     const double* const p,
     const double* const T,
     const double& R,
-    const hier::IntVector& num_ghosts_density,
-    const hier::IntVector& num_ghosts_pressure,
-    const hier::IntVector& num_ghosts_temperature,
+    const hier::IntVector& offset_density,
+    const hier::IntVector& offset_pressure,
+    const hier::IntVector& offset_temperature,
     const hier::IntVector& ghostcell_dims_density,
     const hier::IntVector& ghostcell_dims_pressure,
     const hier::IntVector& ghostcell_dims_temperature,
@@ -7800,15 +7857,15 @@ EquationOfStateIdealGas::computeDensity(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_0_temperature = num_ghosts_temperature[0];
+        const int offset_0_density = offset_density[0];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_0_temperature = offset_temperature[0];
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
@@ -7816,9 +7873,9 @@ EquationOfStateIdealGas::computeDensity(
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
             // Compute the linear indices.
-            const int idx_density = i + num_ghosts_0_density;
-            const int idx_pressure = i + num_ghosts_0_pressure;
-            const int idx_temperature = i + num_ghosts_0_temperature;
+            const int idx_density = i + offset_0_density;
+            const int idx_pressure = i + offset_0_pressure;
+            const int idx_temperature = i + offset_0_temperature;
             
             rho[idx_density] = p[idx_pressure]/(R*T[idx_temperature]);
         }
@@ -7826,7 +7883,7 @@ EquationOfStateIdealGas::computeDensity(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -7834,16 +7891,16 @@ EquationOfStateIdealGas::computeDensity(
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         
-        const int num_ghosts_0_temperature = num_ghosts_temperature[0];
-        const int num_ghosts_1_temperature = num_ghosts_temperature[1];
+        const int offset_0_temperature = offset_temperature[0];
+        const int offset_1_temperature = offset_temperature[1];
         const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -7854,14 +7911,14 @@ EquationOfStateIdealGas::computeDensity(
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx_density = (i + num_ghosts_0_density) +
-                    (j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                const int idx_density = (i + offset_0_density) +
+                    (j + offset_1_density)*ghostcell_dim_0_density;
                 
-                const int idx_pressure = (i + num_ghosts_0_pressure) +
-                    (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                const int idx_pressure = (i + offset_0_pressure) +
+                    (j + offset_1_pressure)*ghostcell_dim_0_pressure;
                 
-                const int idx_temperature = (i + num_ghosts_0_temperature) +
-                    (j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature;
+                const int idx_temperature = (i + offset_0_temperature) +
+                    (j + offset_1_temperature)*ghostcell_dim_0_temperature;
                 
                 rho[idx_density] = p[idx_pressure]/(R*T[idx_temperature]);
             }
@@ -7870,7 +7927,7 @@ EquationOfStateIdealGas::computeDensity(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -7880,21 +7937,21 @@ EquationOfStateIdealGas::computeDensity(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
-        const int num_ghosts_2_density = num_ghosts_density[2];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
+        const int offset_2_density = offset_density[2];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         const int ghostcell_dim_1_density = ghostcell_dims_density[1];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
-        const int num_ghosts_2_pressure = num_ghosts_pressure[2];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
+        const int offset_2_pressure = offset_pressure[2];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         const int ghostcell_dim_1_pressure = ghostcell_dims_pressure[1];
         
-        const int num_ghosts_0_temperature = num_ghosts_temperature[0];
-        const int num_ghosts_1_temperature = num_ghosts_temperature[1];
-        const int num_ghosts_2_temperature = num_ghosts_temperature[2];
+        const int offset_0_temperature = offset_temperature[0];
+        const int offset_1_temperature = offset_temperature[1];
+        const int offset_2_temperature = offset_temperature[2];
         const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
         const int ghostcell_dim_1_temperature = ghostcell_dims_temperature[1];
         
@@ -7908,19 +7965,19 @@ EquationOfStateIdealGas::computeDensity(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_density = (i + num_ghosts_0_density) +
-                        (j + num_ghosts_1_density)*ghostcell_dim_0_density +
-                        (k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                    const int idx_density = (i + offset_0_density) +
+                        (j + offset_1_density)*ghostcell_dim_0_density +
+                        (k + offset_2_density)*ghostcell_dim_0_density*
                             ghostcell_dim_1_density;
                     
-                    const int idx_pressure = (i + num_ghosts_0_pressure) +
-                        (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
-                        (k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                    const int idx_pressure = (i + offset_0_pressure) +
+                        (j + offset_1_pressure)*ghostcell_dim_0_pressure +
+                        (k + offset_2_pressure)*ghostcell_dim_0_pressure*
                             ghostcell_dim_1_pressure;
                     
-                    const int idx_temperature = (i + num_ghosts_0_temperature) +
-                        (j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
-                        (k + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                    const int idx_temperature = (i + offset_0_temperature) +
+                        (j + offset_1_temperature)*ghostcell_dim_0_temperature +
+                        (k + offset_2_temperature)*ghostcell_dim_0_temperature*
                             ghostcell_dim_1_temperature;
                     
                     rho[idx_density] = p[idx_pressure]/(R*T[idx_temperature]);
@@ -7940,10 +7997,10 @@ EquationOfStateIdealGas::computeDensity(
     const double* const p,
     const double* const T,
     const double* const R,
-    const hier::IntVector& num_ghosts_density,
-    const hier::IntVector& num_ghosts_pressure,
-    const hier::IntVector& num_ghosts_temperature,
-    const hier::IntVector& num_ghosts_thermo_properties,
+    const hier::IntVector& offset_density,
+    const hier::IntVector& offset_pressure,
+    const hier::IntVector& offset_temperature,
+    const hier::IntVector& offset_thermo_properties,
     const hier::IntVector& ghostcell_dims_density,
     const hier::IntVector& ghostcell_dims_pressure,
     const hier::IntVector& ghostcell_dims_temperature,
@@ -7954,16 +8011,16 @@ EquationOfStateIdealGas::computeDensity(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_0_temperature = num_ghosts_temperature[0];
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
+        const int offset_0_density = offset_density[0];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_0_temperature = offset_temperature[0];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
@@ -7971,10 +8028,10 @@ EquationOfStateIdealGas::computeDensity(
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
             // Compute the linear indices.
-            const int idx_density = i + num_ghosts_0_density;
-            const int idx_pressure = i + num_ghosts_0_pressure;
-            const int idx_temperature = i + num_ghosts_0_temperature;
-            const int idx_thermo_properties = i + num_ghosts_0_thermo_properties;
+            const int idx_density = i + offset_0_density;
+            const int idx_pressure = i + offset_0_pressure;
+            const int idx_temperature = i + offset_0_temperature;
+            const int idx_thermo_properties = i + offset_0_thermo_properties;
             
             rho[idx_density] = p[idx_pressure]/(R[idx_thermo_properties]*T[idx_temperature]);
         }
@@ -7982,7 +8039,7 @@ EquationOfStateIdealGas::computeDensity(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -7990,20 +8047,20 @@ EquationOfStateIdealGas::computeDensity(
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         
-        const int num_ghosts_0_temperature = num_ghosts_temperature[0];
-        const int num_ghosts_1_temperature = num_ghosts_temperature[1];
+        const int offset_0_temperature = offset_temperature[0];
+        const int offset_1_temperature = offset_temperature[1];
         const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
         
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
-        const int num_ghosts_1_thermo_properties = num_ghosts_thermo_properties[1];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
+        const int offset_1_thermo_properties = offset_thermo_properties[1];
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         
         for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -8014,17 +8071,17 @@ EquationOfStateIdealGas::computeDensity(
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx_density = (i + num_ghosts_0_density) +
-                    (j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                const int idx_density = (i + offset_0_density) +
+                    (j + offset_1_density)*ghostcell_dim_0_density;
                 
-                const int idx_pressure = (i + num_ghosts_0_pressure) +
-                    (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                const int idx_pressure = (i + offset_0_pressure) +
+                    (j + offset_1_pressure)*ghostcell_dim_0_pressure;
                 
-                const int idx_temperature = (i + num_ghosts_0_temperature) +
-                    (j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature;
+                const int idx_temperature = (i + offset_0_temperature) +
+                    (j + offset_1_temperature)*ghostcell_dim_0_temperature;
                 
-                const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
-                    (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
+                const int idx_thermo_properties = (i + offset_0_thermo_properties) +
+                    (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
                 
                 rho[idx_density] = p[idx_pressure]/(R[idx_thermo_properties]*T[idx_temperature]);
             }
@@ -8033,7 +8090,7 @@ EquationOfStateIdealGas::computeDensity(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -8043,27 +8100,27 @@ EquationOfStateIdealGas::computeDensity(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
-        const int num_ghosts_2_density = num_ghosts_density[2];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
+        const int offset_2_density = offset_density[2];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         const int ghostcell_dim_1_density = ghostcell_dims_density[1];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
-        const int num_ghosts_2_pressure = num_ghosts_pressure[2];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
+        const int offset_2_pressure = offset_pressure[2];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         const int ghostcell_dim_1_pressure = ghostcell_dims_pressure[1];
         
-        const int num_ghosts_0_temperature = num_ghosts_temperature[0];
-        const int num_ghosts_1_temperature = num_ghosts_temperature[1];
-        const int num_ghosts_2_temperature = num_ghosts_temperature[2];
+        const int offset_0_temperature = offset_temperature[0];
+        const int offset_1_temperature = offset_temperature[1];
+        const int offset_2_temperature = offset_temperature[2];
         const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
         const int ghostcell_dim_1_temperature = ghostcell_dims_temperature[1];
         
-        const int num_ghosts_0_thermo_properties = num_ghosts_thermo_properties[0];
-        const int num_ghosts_1_thermo_properties = num_ghosts_thermo_properties[1];
-        const int num_ghosts_2_thermo_properties = num_ghosts_thermo_properties[2];
+        const int offset_0_thermo_properties = offset_thermo_properties[0];
+        const int offset_1_thermo_properties = offset_thermo_properties[1];
+        const int offset_2_thermo_properties = offset_thermo_properties[2];
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         const int ghostcell_dim_1_thermo_properties = ghostcell_dims_thermo_properties[1];
         
@@ -8077,24 +8134,24 @@ EquationOfStateIdealGas::computeDensity(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_density = (i + num_ghosts_0_density) +
-                        (j + num_ghosts_1_density)*ghostcell_dim_0_density +
-                        (k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                    const int idx_density = (i + offset_0_density) +
+                        (j + offset_1_density)*ghostcell_dim_0_density +
+                        (k + offset_2_density)*ghostcell_dim_0_density*
                             ghostcell_dim_1_density;
                     
-                    const int idx_pressure = (i + num_ghosts_0_pressure) +
-                        (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
-                        (k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                    const int idx_pressure = (i + offset_0_pressure) +
+                        (j + offset_1_pressure)*ghostcell_dim_0_pressure +
+                        (k + offset_2_pressure)*ghostcell_dim_0_pressure*
                             ghostcell_dim_1_pressure;
                     
-                    const int idx_temperature = (i + num_ghosts_0_temperature) +
-                        (j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
-                        (k + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                    const int idx_temperature = (i + offset_0_temperature) +
+                        (j + offset_1_temperature)*ghostcell_dim_0_temperature +
+                        (k + offset_2_temperature)*ghostcell_dim_0_temperature*
                             ghostcell_dim_1_temperature;
                     
-                    const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
-                        (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties +
-                        (k + num_ghosts_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
+                    const int idx_thermo_properties = (i + offset_0_thermo_properties) +
+                        (j + offset_1_thermo_properties)*ghostcell_dim_0_thermo_properties +
+                        (k + offset_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
                             ghostcell_dim_1_thermo_properties;
                     
                     rho[idx_density] = p[idx_pressure]/(R[idx_thermo_properties]*T[idx_temperature]);
