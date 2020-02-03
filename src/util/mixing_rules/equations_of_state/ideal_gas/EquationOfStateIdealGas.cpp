@@ -595,40 +595,43 @@ EquationOfStateIdealGas::computeSoundSpeed(
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 1);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_sound_speed->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_sound_speed = data_sound_speed->getGhostBox();
+    const hier::IntVector ghostcell_dims_sound_speed = ghost_box_sound_speed.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-#endif
+    const hier::Box ghost_box_density = data_density->getGhostBox();
+    const hier::IntVector ghostcell_dims_density = ghost_box_density.numberCells();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
-    
-    const hier::IntVector num_ghosts_sound_speed = data_sound_speed->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_sound_speed =
-        data_sound_speed->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_density =
-        data_density->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_pressure =
-        data_pressure->getGhostBox().numberCells();
+    const hier::Box ghost_box_pressure = data_pressure->getGhostBox();
+    const hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_sound_speed(d_dim);
+    hier::IntVector offset_density(d_dim);
+    hier::IntVector offset_pressure(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_sound_speed = data_sound_speed->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_sound_speed->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_sound_speed;
@@ -640,6 +643,10 @@ EquationOfStateIdealGas::computeSoundSpeed(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_sound_speed = num_ghosts_sound_speed;
+        offset_density = num_ghosts_density;
+        offset_pressure = num_ghosts_pressure;
     }
     else
     {
@@ -649,8 +656,12 @@ EquationOfStateIdealGas::computeSoundSpeed(
         TBOX_ASSERT(data_pressure->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_sound_speed = domain.lower() - ghost_box_sound_speed.lower();
+        offset_density = domain.lower() - ghost_box_density.lower();
+        offset_pressure = domain.lower() - ghost_box_pressure.lower();
     }
     
     /*
@@ -668,9 +679,9 @@ EquationOfStateIdealGas::computeSoundSpeed(
         rho,
         p,
         gamma,
-        num_ghosts_sound_speed,
-        num_ghosts_density,
-        num_ghosts_pressure,
+        offset_sound_speed,
+        offset_density,
+        offset_pressure,
         ghostcell_dims_sound_speed,
         ghostcell_dims_density,
         ghostcell_dims_pressure,
@@ -699,37 +710,43 @@ EquationOfStateIdealGas::computeSoundSpeed(
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 1);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_sound_speed->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_sound_speed = data_sound_speed->getGhostBox();
+    hier::IntVector ghostcell_dims_sound_speed = ghost_box_sound_speed.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-#endif
+    const hier::Box ghost_box_density = data_density->getGhostBox();
+    hier::IntVector ghostcell_dims_density = ghost_box_density.numberCells();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
-    
-    const hier::IntVector num_ghosts_sound_speed = data_sound_speed->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_sound_speed = data_sound_speed->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
+    const hier::Box ghost_box_pressure = data_pressure->getGhostBox();
+    hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_sound_speed(d_dim);
+    hier::IntVector offset_density(d_dim);
+    hier::IntVector offset_pressure(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_sound_speed = data_sound_speed->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_sound_speed->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_sound_speed;
@@ -741,6 +758,10 @@ EquationOfStateIdealGas::computeSoundSpeed(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_sound_speed = num_ghosts_sound_speed;
+        offset_density = num_ghosts_density;
+        offset_pressure = num_ghosts_pressure;
     }
     else
     {
@@ -750,8 +771,12 @@ EquationOfStateIdealGas::computeSoundSpeed(
         TBOX_ASSERT(data_pressure->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_sound_speed = domain.lower() - ghost_box_sound_speed.lower();
+        offset_density = domain.lower() - ghost_box_density.lower();
+        offset_pressure = domain.lower() - ghost_box_pressure.lower();
     }
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -782,9 +807,9 @@ EquationOfStateIdealGas::computeSoundSpeed(
         rho,
         p,
         gamma,
-        num_ghosts_sound_speed,
-        num_ghosts_density,
-        num_ghosts_pressure,
+        offset_sound_speed,
+        offset_density,
+        offset_pressure,
         ghostcell_dims_sound_speed,
         ghostcell_dims_density,
         ghostcell_dims_pressure,
@@ -813,45 +838,49 @@ EquationOfStateIdealGas::computeSoundSpeed(
     TBOX_ASSERT(data_thermo_properties->getDepth() >= 1);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_sound_speed->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_sound_speed = data_sound_speed->getGhostBox();
+    const hier::IntVector ghostcell_dims_sound_speed = ghost_box_sound_speed.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_thermo_properties->getBox().numberCells() == interior_dims);
-#endif
+    const hier::Box ghost_box_density = data_density->getGhostBox();
+    const hier::IntVector ghostcell_dims_density = ghost_box_density.numberCells();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
+    const hier::Box ghost_box_pressure = data_pressure->getGhostBox();
+    const hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
-    const hier::IntVector num_ghosts_sound_speed = data_sound_speed->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_sound_speed =
-        data_sound_speed->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_density =
-        data_density->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_pressure =
-        data_pressure->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_thermo_properties =
-        data_thermo_properties->getGhostBox().numberCells();
+    const hier::Box ghost_box_thermo_properties = data_thermo_properties->getGhostBox();
+    const hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_sound_speed(d_dim);
+    hier::IntVector offset_density(d_dim);
+    hier::IntVector offset_pressure(d_dim);
+    hier::IntVector offset_thermo_properties(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_sound_speed = data_sound_speed->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_sound_speed->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_thermo_properties->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_sound_speed;
@@ -864,6 +893,11 @@ EquationOfStateIdealGas::computeSoundSpeed(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_sound_speed = num_ghosts_sound_speed;
+        offset_density = num_ghosts_density;
+        offset_pressure = num_ghosts_pressure;
+        offset_thermo_properties = num_ghosts_thermo_properties;
     }
     else
     {
@@ -874,8 +908,13 @@ EquationOfStateIdealGas::computeSoundSpeed(
         TBOX_ASSERT(data_thermo_properties->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_sound_speed = domain.lower() - ghost_box_sound_speed.lower();
+        offset_density = domain.lower() - ghost_box_density.lower();
+        offset_pressure = domain.lower() - ghost_box_pressure.lower();
+        offset_thermo_properties = domain.lower() - ghost_box_thermo_properties.lower();
     }
     
     /*
@@ -892,10 +931,10 @@ EquationOfStateIdealGas::computeSoundSpeed(
         rho,
         p,
         gamma,
-        num_ghosts_sound_speed,
-        num_ghosts_density,
-        num_ghosts_pressure,
-        num_ghosts_thermo_properties,
+        offset_sound_speed,
+        offset_density,
+        offset_pressure,
+        offset_thermo_properties,
         ghostcell_dims_sound_speed,
         ghostcell_dims_density,
         ghostcell_dims_pressure,
@@ -926,41 +965,49 @@ EquationOfStateIdealGas::computeSoundSpeed(
     TBOX_ASSERT(data_thermo_properties->getDepth() >= 1);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_sound_speed->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_sound_speed = data_sound_speed->getGhostBox();
+    hier::IntVector ghostcell_dims_sound_speed = ghost_box_sound_speed.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_thermo_properties->getBox().numberCells() == interior_dims);
-#endif
+    const hier::Box ghost_box_density = data_density->getGhostBox();
+    hier::IntVector ghostcell_dims_density = ghost_box_density.numberCells();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
+    const hier::Box ghost_box_pressure = data_pressure->getGhostBox();
+    hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
-    const hier::IntVector num_ghosts_sound_speed = data_sound_speed->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_sound_speed = data_sound_speed->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_thermo_properties = data_thermo_properties->getGhostBox().numberCells();
+    const hier::Box ghost_box_thermo_properties = data_thermo_properties->getGhostBox();
+    hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_sound_speed(d_dim);
+    hier::IntVector offset_density(d_dim);
+    hier::IntVector offset_pressure(d_dim);
+    hier::IntVector offset_thermo_properties(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_sound_speed = data_sound_speed->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_sound_speed->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_thermo_properties->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_sound_speed;
@@ -973,6 +1020,11 @@ EquationOfStateIdealGas::computeSoundSpeed(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_sound_speed = num_ghosts_sound_speed;
+        offset_density = num_ghosts_density;
+        offset_pressure = num_ghosts_pressure;
+        offset_thermo_properties = num_ghosts_thermo_properties;
     }
     else
     {
@@ -983,8 +1035,13 @@ EquationOfStateIdealGas::computeSoundSpeed(
         TBOX_ASSERT(data_thermo_properties->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_sound_speed = domain.lower() - ghost_box_sound_speed.lower();
+        offset_density = domain.lower() - ghost_box_density.lower();
+        offset_pressure = domain.lower() - ghost_box_pressure.lower();
+        offset_thermo_properties = domain.lower() - ghost_box_thermo_properties.lower();
     }
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -1016,10 +1073,10 @@ EquationOfStateIdealGas::computeSoundSpeed(
         rho,
         p,
         gamma,
-        num_ghosts_sound_speed,
-        num_ghosts_density,
-        num_ghosts_pressure,
-        num_ghosts_thermo_properties,
+        offset_sound_speed,
+        offset_density,
+        offset_pressure,
+        offset_thermo_properties,
         ghostcell_dims_sound_speed,
         ghostcell_dims_density,
         ghostcell_dims_pressure,
@@ -1070,40 +1127,43 @@ EquationOfStateIdealGas::computeInternalEnergy(
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 1);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_internal_energy->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_internal_energy = data_internal_energy->getGhostBox();
+    const hier::IntVector ghostcell_dims_internal_energy = ghost_box_internal_energy.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-#endif
+    const hier::Box ghost_box_density = data_density->getGhostBox();
+    const hier::IntVector ghostcell_dims_density = ghost_box_density.numberCells();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
-    
-    const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_internal_energy =
-        data_internal_energy->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_density =
-        data_density->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_pressure =
-        data_pressure->getGhostBox().numberCells();
+    const hier::Box ghost_box_pressure = data_pressure->getGhostBox();
+    const hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_internal_energy(d_dim);
+    hier::IntVector offset_density(d_dim);
+    hier::IntVector offset_pressure(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_internal_energy->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_internal_energy;
@@ -1115,6 +1175,10 @@ EquationOfStateIdealGas::computeInternalEnergy(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_internal_energy = num_ghosts_internal_energy;
+        offset_density = num_ghosts_density;
+        offset_pressure = num_ghosts_pressure;
     }
     else
     {
@@ -1124,8 +1188,12 @@ EquationOfStateIdealGas::computeInternalEnergy(
         TBOX_ASSERT(data_pressure->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_internal_energy = domain.lower() - ghost_box_internal_energy.lower();
+        offset_density = domain.lower() - ghost_box_density.lower();
+        offset_pressure = domain.lower() - ghost_box_pressure.lower();
     }
     
     /*
@@ -1143,9 +1211,9 @@ EquationOfStateIdealGas::computeInternalEnergy(
         rho,
         p,
         gamma,
-        num_ghosts_internal_energy,
-        num_ghosts_density,
-        num_ghosts_pressure,
+        offset_internal_energy,
+        offset_density,
+        offset_pressure,
         ghostcell_dims_internal_energy,
         ghostcell_dims_density,
         ghostcell_dims_pressure,
@@ -1174,37 +1242,43 @@ EquationOfStateIdealGas::computeInternalEnergy(
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 1);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_internal_energy->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_internal_energy = data_internal_energy->getGhostBox();
+    hier::IntVector ghostcell_dims_internal_energy = ghost_box_internal_energy.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-#endif
+    const hier::Box ghost_box_density = data_density->getGhostBox();
+    hier::IntVector ghostcell_dims_density = ghost_box_density.numberCells();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
-    
-    const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_internal_energy = data_internal_energy->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
+    const hier::Box ghost_box_pressure = data_pressure->getGhostBox();
+    hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_internal_energy(d_dim);
+    hier::IntVector offset_density(d_dim);
+    hier::IntVector offset_pressure(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_internal_energy->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_internal_energy;
@@ -1216,6 +1290,10 @@ EquationOfStateIdealGas::computeInternalEnergy(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_internal_energy = num_ghosts_internal_energy;
+        offset_density = num_ghosts_density;
+        offset_pressure = num_ghosts_pressure;
     }
     else
     {
@@ -1225,8 +1303,12 @@ EquationOfStateIdealGas::computeInternalEnergy(
         TBOX_ASSERT(data_pressure->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_internal_energy = domain.lower() - ghost_box_internal_energy.lower();
+        offset_density = domain.lower() - ghost_box_density.lower();
+        offset_pressure = domain.lower() - ghost_box_pressure.lower();
     }
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -1257,9 +1339,9 @@ EquationOfStateIdealGas::computeInternalEnergy(
         rho,
         p,
         gamma,
-        num_ghosts_internal_energy,
-        num_ghosts_density,
-        num_ghosts_pressure,
+        offset_internal_energy,
+        offset_density,
+        offset_pressure,
         ghostcell_dims_internal_energy,
         ghostcell_dims_density,
         ghostcell_dims_pressure,
@@ -1288,45 +1370,49 @@ EquationOfStateIdealGas::computeInternalEnergy(
     TBOX_ASSERT(data_thermo_properties->getDepth() >= 1);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_internal_energy->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_internal_energy = data_internal_energy->getGhostBox();
+    const hier::IntVector ghostcell_dims_internal_energy = ghost_box_internal_energy.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_thermo_properties->getBox().numberCells() == interior_dims);
-#endif
+    const hier::Box ghost_box_density = data_density->getGhostBox();
+    const hier::IntVector ghostcell_dims_density = ghost_box_density.numberCells();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
+    const hier::Box ghost_box_pressure = data_pressure->getGhostBox();
+    const hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
-    const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_internal_energy =
-        data_internal_energy->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_density =
-        data_density->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_pressure =
-        data_pressure->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_thermo_properties =
-        data_thermo_properties->getGhostBox().numberCells();
+    const hier::Box ghost_box_thermo_properties = data_thermo_properties->getGhostBox();
+    const hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_internal_energy(d_dim);
+    hier::IntVector offset_density(d_dim);
+    hier::IntVector offset_pressure(d_dim);
+    hier::IntVector offset_thermo_properties(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_internal_energy->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_thermo_properties->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_internal_energy;
@@ -1339,6 +1425,11 @@ EquationOfStateIdealGas::computeInternalEnergy(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_internal_energy = num_ghosts_internal_energy;
+        offset_density = num_ghosts_density;
+        offset_pressure = num_ghosts_pressure;
+        offset_thermo_properties = num_ghosts_thermo_properties;
     }
     else
     {
@@ -1349,8 +1440,13 @@ EquationOfStateIdealGas::computeInternalEnergy(
         TBOX_ASSERT(data_thermo_properties->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_internal_energy = domain.lower() - ghost_box_internal_energy.lower();
+        offset_density = domain.lower() - ghost_box_density.lower();
+        offset_pressure = domain.lower() - ghost_box_pressure.lower();
+        offset_thermo_properties = domain.lower() - ghost_box_thermo_properties.lower();
     }
     
     /*
@@ -1367,10 +1463,10 @@ EquationOfStateIdealGas::computeInternalEnergy(
         rho,
         p,
         gamma,
-        num_ghosts_internal_energy,
-        num_ghosts_density,
-        num_ghosts_pressure,
-        num_ghosts_thermo_properties,
+        offset_internal_energy,
+        offset_density,
+        offset_pressure,
+        offset_thermo_properties,
         ghostcell_dims_internal_energy,
         ghostcell_dims_density,
         ghostcell_dims_pressure,
@@ -1401,41 +1497,49 @@ EquationOfStateIdealGas::computeInternalEnergy(
     TBOX_ASSERT(data_thermo_properties->getDepth() >= 1);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_internal_energy->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_internal_energy = data_internal_energy->getGhostBox();
+    hier::IntVector ghostcell_dims_internal_energy = ghost_box_internal_energy.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_thermo_properties->getBox().numberCells() == interior_dims);
-#endif
+    const hier::Box ghost_box_density = data_density->getGhostBox();
+    hier::IntVector ghostcell_dims_density = ghost_box_density.numberCells();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
+    const hier::Box ghost_box_pressure = data_pressure->getGhostBox();
+    hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
-    const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_internal_energy = data_internal_energy->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_thermo_properties = data_thermo_properties->getGhostBox().numberCells();
+    const hier::Box ghost_box_thermo_properties = data_thermo_properties->getGhostBox();
+    hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_internal_energy(d_dim);
+    hier::IntVector offset_density(d_dim);
+    hier::IntVector offset_pressure(d_dim);
+    hier::IntVector offset_thermo_properties(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_internal_energy->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_thermo_properties->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_internal_energy;
@@ -1448,6 +1552,11 @@ EquationOfStateIdealGas::computeInternalEnergy(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_internal_energy = num_ghosts_internal_energy;
+        offset_density = num_ghosts_density;
+        offset_pressure = num_ghosts_pressure;
+        offset_thermo_properties = num_ghosts_thermo_properties;
     }
     else
     {
@@ -1458,8 +1567,13 @@ EquationOfStateIdealGas::computeInternalEnergy(
         TBOX_ASSERT(data_thermo_properties->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_internal_energy = domain.lower() - ghost_box_internal_energy.lower();
+        offset_density = domain.lower() - ghost_box_density.lower();
+        offset_pressure = domain.lower() - ghost_box_pressure.lower();
+        offset_thermo_properties = domain.lower() - ghost_box_thermo_properties.lower();
     }
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -1491,10 +1605,10 @@ EquationOfStateIdealGas::computeInternalEnergy(
         rho,
         p,
         gamma,
-        num_ghosts_internal_energy,
-        num_ghosts_density,
-        num_ghosts_pressure,
-        num_ghosts_thermo_properties,
+        offset_internal_energy,
+        offset_density,
+        offset_pressure,
+        offset_thermo_properties,
         ghostcell_dims_internal_energy,
         ghostcell_dims_density,
         ghostcell_dims_pressure,
@@ -1545,40 +1659,43 @@ EquationOfStateIdealGas::computeEnthalpy(
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 1);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_enthalpy->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_enthalpy = data_enthalpy->getGhostBox();
+    const hier::IntVector ghostcell_dims_enthalpy = ghost_box_enthalpy.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-#endif
+    const hier::Box ghost_box_density = data_density->getGhostBox();
+    const hier::IntVector ghostcell_dims_density = ghost_box_density.numberCells();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
-    
-    const hier::IntVector num_ghosts_enthalpy = data_enthalpy->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_enthalpy =
-        data_enthalpy->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_density =
-        data_density->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_pressure =
-        data_pressure->getGhostBox().numberCells();
+    const hier::Box ghost_box_pressure = data_pressure->getGhostBox();
+    const hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_enthalpy(d_dim);
+    hier::IntVector offset_density(d_dim);
+    hier::IntVector offset_pressure(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_enthalpy = data_enthalpy->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_enthalpy->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_enthalpy;
@@ -1590,6 +1707,10 @@ EquationOfStateIdealGas::computeEnthalpy(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_enthalpy = num_ghosts_enthalpy;
+        offset_density = num_ghosts_density;
+        offset_pressure = num_ghosts_pressure;
     }
     else
     {
@@ -1599,8 +1720,12 @@ EquationOfStateIdealGas::computeEnthalpy(
         TBOX_ASSERT(data_pressure->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_enthalpy = domain.lower() - ghost_box_enthalpy.lower();
+        offset_density = domain.lower() - ghost_box_density.lower();
+        offset_pressure = domain.lower() - ghost_box_pressure.lower();
     }
     
     /*
@@ -1618,9 +1743,9 @@ EquationOfStateIdealGas::computeEnthalpy(
         rho,
         p,
         gamma,
-        num_ghosts_enthalpy,
-        num_ghosts_density,
-        num_ghosts_pressure,
+        offset_enthalpy,
+        offset_density,
+        offset_pressure,
         ghostcell_dims_enthalpy,
         ghostcell_dims_density,
         ghostcell_dims_pressure,
@@ -1649,37 +1774,43 @@ EquationOfStateIdealGas::computeEnthalpy(
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 1);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_enthalpy->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_enthalpy = data_enthalpy->getGhostBox();
+    hier::IntVector ghostcell_dims_enthalpy = ghost_box_enthalpy.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-#endif
+    const hier::Box ghost_box_density = data_density->getGhostBox();
+    hier::IntVector ghostcell_dims_density = ghost_box_density.numberCells();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
-    
-    const hier::IntVector num_ghosts_enthalpy = data_enthalpy->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_enthalpy = data_enthalpy->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
+    const hier::Box ghost_box_pressure = data_pressure->getGhostBox();
+    hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_enthalpy(d_dim);
+    hier::IntVector offset_density(d_dim);
+    hier::IntVector offset_pressure(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_enthalpy = data_enthalpy->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_enthalpy->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_enthalpy;
@@ -1691,6 +1822,10 @@ EquationOfStateIdealGas::computeEnthalpy(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_enthalpy = num_ghosts_enthalpy;
+        offset_density = num_ghosts_density;
+        offset_pressure = num_ghosts_pressure;
     }
     else
     {
@@ -1700,8 +1835,12 @@ EquationOfStateIdealGas::computeEnthalpy(
         TBOX_ASSERT(data_pressure->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_enthalpy = domain.lower() - ghost_box_enthalpy.lower();
+        offset_density = domain.lower() - ghost_box_density.lower();
+        offset_pressure = domain.lower() - ghost_box_pressure.lower();
     }
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -1732,9 +1871,9 @@ EquationOfStateIdealGas::computeEnthalpy(
         rho,
         p,
         gamma,
-        num_ghosts_enthalpy,
-        num_ghosts_density,
-        num_ghosts_pressure,
+        offset_enthalpy,
+        offset_density,
+        offset_pressure,
         ghostcell_dims_enthalpy,
         ghostcell_dims_density,
         ghostcell_dims_pressure,
@@ -1763,45 +1902,49 @@ EquationOfStateIdealGas::computeEnthalpy(
     TBOX_ASSERT(data_thermo_properties->getDepth() >= 1);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_enthalpy->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_enthalpy = data_enthalpy->getGhostBox();
+    const hier::IntVector ghostcell_dims_enthalpy = ghost_box_enthalpy.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_thermo_properties->getBox().numberCells() == interior_dims);
-#endif
+    const hier::Box ghost_box_density = data_density->getGhostBox();
+    const hier::IntVector ghostcell_dims_density = ghost_box_density.numberCells();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
+    const hier::Box ghost_box_pressure = data_pressure->getGhostBox();
+    const hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
-    const hier::IntVector num_ghosts_enthalpy = data_enthalpy->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_enthalpy =
-        data_enthalpy->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_density =
-        data_density->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_pressure =
-        data_pressure->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_thermo_properties =
-        data_thermo_properties->getGhostBox().numberCells();
+    const hier::Box ghost_box_thermo_properties = data_thermo_properties->getGhostBox();
+    const hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_enthalpy(d_dim);
+    hier::IntVector offset_density(d_dim);
+    hier::IntVector offset_pressure(d_dim);
+    hier::IntVector offset_thermo_properties(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_enthalpy = data_enthalpy->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_enthalpy->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_thermo_properties->getBox().isSpatiallyEqual(interior_box));
+#endif
+    
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_enthalpy;
@@ -1814,6 +1957,11 @@ EquationOfStateIdealGas::computeEnthalpy(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_enthalpy = num_ghosts_enthalpy;
+        offset_density = num_ghosts_density;
+        offset_pressure = num_ghosts_pressure;
+        offset_thermo_properties = num_ghosts_thermo_properties;
     }
     else
     {
@@ -1824,8 +1972,13 @@ EquationOfStateIdealGas::computeEnthalpy(
         TBOX_ASSERT(data_thermo_properties->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_enthalpy = domain.lower() - ghost_box_enthalpy.lower();
+        offset_density = domain.lower() - ghost_box_density.lower();
+        offset_pressure = domain.lower() - ghost_box_pressure.lower();
+        offset_thermo_properties = domain.lower() - ghost_box_thermo_properties.lower();
     }
     
     /*
@@ -1842,10 +1995,10 @@ EquationOfStateIdealGas::computeEnthalpy(
         rho,
         p,
         gamma,
-        num_ghosts_enthalpy,
-        num_ghosts_density,
-        num_ghosts_pressure,
-        num_ghosts_thermo_properties,
+        offset_enthalpy,
+        offset_density,
+        offset_pressure,
+        offset_thermo_properties,
         ghostcell_dims_enthalpy,
         ghostcell_dims_density,
         ghostcell_dims_pressure,
@@ -1876,41 +2029,49 @@ EquationOfStateIdealGas::computeEnthalpy(
     TBOX_ASSERT(data_thermo_properties->getDepth() >= 1);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_enthalpy->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_enthalpy = data_enthalpy->getGhostBox();
+    hier::IntVector ghostcell_dims_enthalpy = ghost_box_enthalpy.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_thermo_properties->getBox().numberCells() == interior_dims);
-#endif
+    const hier::Box ghost_box_density = data_density->getGhostBox();
+    hier::IntVector ghostcell_dims_density = ghost_box_density.numberCells();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
+    const hier::Box ghost_box_pressure = data_pressure->getGhostBox();
+    hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
-    const hier::IntVector num_ghosts_enthalpy = data_enthalpy->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_enthalpy = data_enthalpy->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_thermo_properties = data_thermo_properties->getGhostBox().numberCells();
+    const hier::Box ghost_box_thermo_properties = data_thermo_properties->getGhostBox();
+    hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_enthalpy(d_dim);
+    hier::IntVector offset_density(d_dim);
+    hier::IntVector offset_pressure(d_dim);
+    hier::IntVector offset_thermo_properties(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_enthalpy = data_enthalpy->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_enthalpy->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_thermo_properties->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_enthalpy;
@@ -1923,6 +2084,11 @@ EquationOfStateIdealGas::computeEnthalpy(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_enthalpy = num_ghosts_enthalpy;
+        offset_density = num_ghosts_density;
+        offset_pressure = num_ghosts_pressure;
+        offset_thermo_properties = num_ghosts_thermo_properties;
     }
     else
     {
@@ -1933,8 +2099,13 @@ EquationOfStateIdealGas::computeEnthalpy(
         TBOX_ASSERT(data_thermo_properties->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_enthalpy = domain.lower() - ghost_box_enthalpy.lower();
+        offset_density = domain.lower() - ghost_box_density.lower();
+        offset_pressure = domain.lower() - ghost_box_pressure.lower();
+        offset_thermo_properties = domain.lower() - ghost_box_thermo_properties.lower();
     }
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -1966,10 +2137,10 @@ EquationOfStateIdealGas::computeEnthalpy(
         rho,
         p,
         gamma,
-        num_ghosts_enthalpy,
-        num_ghosts_density,
-        num_ghosts_pressure,
-        num_ghosts_thermo_properties,
+        offset_enthalpy,
+        offset_density,
+        offset_pressure,
+        offset_thermo_properties,
         ghostcell_dims_enthalpy,
         ghostcell_dims_density,
         ghostcell_dims_pressure,
@@ -2021,40 +2192,43 @@ EquationOfStateIdealGas::computeTemperature(
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) == 4);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_temperature->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_temperature = data_temperature->getGhostBox();
+    const hier::IntVector ghostcell_dims_temperature = ghost_box_temperature.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-#endif
+    const hier::Box ghost_box_density = data_density->getGhostBox();
+    const hier::IntVector ghostcell_dims_density = ghost_box_density.numberCells();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
-    
-    const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_temperature =
-        data_temperature->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_density =
-        data_density->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_pressure =
-        data_pressure->getGhostBox().numberCells();
+    const hier::Box ghost_box_pressure = data_pressure->getGhostBox();
+    const hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_temperature(d_dim);
+    hier::IntVector offset_density(d_dim);
+    hier::IntVector offset_pressure(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_temperature->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_temperature;
@@ -2066,6 +2240,10 @@ EquationOfStateIdealGas::computeTemperature(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_temperature = num_ghosts_temperature;
+        offset_density = num_ghosts_density;
+        offset_pressure = num_ghosts_pressure;
     }
     else
     {
@@ -2075,8 +2253,12 @@ EquationOfStateIdealGas::computeTemperature(
         TBOX_ASSERT(data_pressure->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_temperature = domain.lower() - ghost_box_temperature.lower();
+        offset_density = domain.lower() - ghost_box_density.lower();
+        offset_pressure = domain.lower() - ghost_box_pressure.lower();
     }
     
     /*
@@ -2096,9 +2278,9 @@ EquationOfStateIdealGas::computeTemperature(
         p,
         gamma,
         c_v,
-        num_ghosts_temperature,
-        num_ghosts_density,
-        num_ghosts_pressure,
+        offset_temperature,
+        offset_density,
+        offset_pressure,
         ghostcell_dims_temperature,
         ghostcell_dims_density,
         ghostcell_dims_pressure,
@@ -2127,37 +2309,43 @@ EquationOfStateIdealGas::computeTemperature(
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) == 4);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_temperature->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_temperature = data_temperature->getGhostBox();
+    hier::IntVector ghostcell_dims_temperature = ghost_box_temperature.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-#endif
+    const hier::Box ghost_box_density = data_density->getGhostBox();
+    hier::IntVector ghostcell_dims_density = ghost_box_density.numberCells();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
-    
-    const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_temperature = data_temperature->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
+    const hier::Box ghost_box_pressure = data_pressure->getGhostBox();
+    hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_temperature(d_dim);
+    hier::IntVector offset_density(d_dim);
+    hier::IntVector offset_pressure(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_temperature->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_temperature;
@@ -2169,6 +2357,10 @@ EquationOfStateIdealGas::computeTemperature(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_temperature = num_ghosts_temperature;
+        offset_density = num_ghosts_density;
+        offset_pressure = num_ghosts_pressure;
     }
     else
     {
@@ -2178,8 +2370,12 @@ EquationOfStateIdealGas::computeTemperature(
         TBOX_ASSERT(data_pressure->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_temperature = domain.lower() - ghost_box_temperature.lower();
+        offset_density = domain.lower() - ghost_box_density.lower();
+        offset_pressure = domain.lower() - ghost_box_pressure.lower();
     }
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2212,9 +2408,9 @@ EquationOfStateIdealGas::computeTemperature(
         p,
         gamma,
         c_v,
-        num_ghosts_temperature,
-        num_ghosts_density,
-        num_ghosts_pressure,
+        offset_temperature,
+        offset_density,
+        offset_pressure,
         ghostcell_dims_temperature,
         ghostcell_dims_density,
         ghostcell_dims_pressure,
@@ -2243,45 +2439,49 @@ EquationOfStateIdealGas::computeTemperature(
     TBOX_ASSERT(data_thermo_properties->getDepth() == 4);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_temperature->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_temperature = data_temperature->getGhostBox();
+    const hier::IntVector ghostcell_dims_temperature = ghost_box_temperature.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_thermo_properties->getBox().numberCells() == interior_dims);
-#endif
+    const hier::Box ghost_box_density = data_density->getGhostBox();
+    const hier::IntVector ghostcell_dims_density = ghost_box_density.numberCells();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
+    const hier::Box ghost_box_pressure = data_pressure->getGhostBox();
+    const hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
-    const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_temperature =
-        data_temperature->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_density =
-        data_density->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_pressure =
-        data_pressure->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_thermo_properties =
-        data_thermo_properties->getGhostBox().numberCells();
+    const hier::Box ghost_box_thermo_properties = data_thermo_properties->getGhostBox();
+    const hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_temperature(d_dim);
+    hier::IntVector offset_density(d_dim);
+    hier::IntVector offset_pressure(d_dim);
+    hier::IntVector offset_thermo_properties(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_temperature->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_thermo_properties->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_temperature;
@@ -2294,6 +2494,11 @@ EquationOfStateIdealGas::computeTemperature(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_temperature = num_ghosts_temperature;
+        offset_density = num_ghosts_density;
+        offset_pressure = num_ghosts_pressure;
+        offset_thermo_properties = num_ghosts_thermo_properties;
     }
     else
     {
@@ -2304,8 +2509,13 @@ EquationOfStateIdealGas::computeTemperature(
         TBOX_ASSERT(data_thermo_properties->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_temperature = domain.lower() - ghost_box_temperature.lower();
+        offset_density = domain.lower() - ghost_box_density.lower();
+        offset_pressure = domain.lower() - ghost_box_pressure.lower();
+        offset_thermo_properties = domain.lower() - ghost_box_thermo_properties.lower();
     }
     
     /*
@@ -2324,10 +2534,10 @@ EquationOfStateIdealGas::computeTemperature(
         p,
         gamma,
         c_v,
-        num_ghosts_temperature,
-        num_ghosts_density,
-        num_ghosts_pressure,
-        num_ghosts_thermo_properties,
+        offset_temperature,
+        offset_density,
+        offset_pressure,
+        offset_thermo_properties,
         ghostcell_dims_temperature,
         ghostcell_dims_density,
         ghostcell_dims_pressure,
@@ -2358,41 +2568,49 @@ EquationOfStateIdealGas::computeTemperature(
     TBOX_ASSERT(data_thermo_properties->getDepth() == 4);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_temperature->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_temperature = data_temperature->getGhostBox();
+    hier::IntVector ghostcell_dims_temperature = ghost_box_temperature.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_thermo_properties->getBox().numberCells() == interior_dims);
-#endif
+    const hier::Box ghost_box_density = data_density->getGhostBox();
+    hier::IntVector ghostcell_dims_density = ghost_box_density.numberCells();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
+    const hier::Box ghost_box_pressure = data_pressure->getGhostBox();
+    hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
-    const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_temperature = data_temperature->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_thermo_properties = data_thermo_properties->getGhostBox().numberCells();
+    const hier::Box ghost_box_thermo_properties = data_thermo_properties->getGhostBox();
+    hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_temperature(d_dim);
+    hier::IntVector offset_density(d_dim);
+    hier::IntVector offset_pressure(d_dim);
+    hier::IntVector offset_thermo_properties(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_temperature->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_thermo_properties->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_temperature;
@@ -2405,6 +2623,11 @@ EquationOfStateIdealGas::computeTemperature(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_temperature = num_ghosts_temperature;
+        offset_density = num_ghosts_density;
+        offset_pressure = num_ghosts_pressure;
+        offset_thermo_properties = num_ghosts_thermo_properties;
     }
     else
     {
@@ -2415,8 +2638,13 @@ EquationOfStateIdealGas::computeTemperature(
         TBOX_ASSERT(data_thermo_properties->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_temperature = domain.lower() - ghost_box_temperature.lower();
+        offset_density = domain.lower() - ghost_box_density.lower();
+        offset_pressure = domain.lower() - ghost_box_pressure.lower();
+        offset_thermo_properties = domain.lower() - ghost_box_thermo_properties.lower();
     }
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2450,10 +2678,10 @@ EquationOfStateIdealGas::computeTemperature(
         p,
         gamma,
         c_v,
-        num_ghosts_temperature,
-        num_ghosts_density,
-        num_ghosts_pressure,
-        num_ghosts_thermo_properties,
+        offset_temperature,
+        offset_density,
+        offset_pressure,
+        offset_thermo_properties,
         ghostcell_dims_temperature,
         ghostcell_dims_density,
         ghostcell_dims_pressure,
@@ -2506,35 +2734,37 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) == 4);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_internal_energy->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_internal_energy = data_internal_energy->getGhostBox();
+    const hier::IntVector ghostcell_dims_internal_energy = ghost_box_internal_energy.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_temperature->getBox().numberCells() == interior_dims);
-#endif
-    
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
-    
-    const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_internal_energy =
-        data_internal_energy->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_temperature =
-        data_temperature->getGhostBox().numberCells();
+    const hier::Box ghost_box_temperature = data_temperature->getGhostBox();
+    const hier::IntVector ghostcell_dims_temperature = ghost_box_temperature.numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_internal_energy(d_dim);
+    hier::IntVector offset_temperature(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
+        const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_internal_energy->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_temperature->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_internal_energy;
@@ -2545,6 +2775,9 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_internal_energy = num_ghosts_internal_energy;
+        offset_temperature = num_ghosts_temperature;
     }
     else
     {
@@ -2553,8 +2786,11 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
         TBOX_ASSERT(data_temperature->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_internal_energy = domain.lower() - ghost_box_internal_energy.lower();
+        offset_temperature = domain.lower() - ghost_box_temperature.lower();
     }
     
     /*
@@ -2570,8 +2806,8 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
         epsilon,
         T,
         c_v,
-        num_ghosts_internal_energy,
-        num_ghosts_temperature,
+        offset_internal_energy,
+        offset_temperature,
         ghostcell_dims_internal_energy,
         ghostcell_dims_temperature,
         domain_lo,
@@ -2600,33 +2836,37 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) == 4);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_internal_energy->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_internal_energy = data_internal_energy->getGhostBox();
+    hier::IntVector ghostcell_dims_internal_energy = ghost_box_internal_energy.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_temperature->getBox().numberCells() == interior_dims);
-#endif
-    
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
-    
-    const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_internal_energy = data_internal_energy->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_temperature = data_temperature->getGhostBox().numberCells();
+    const hier::Box ghost_box_temperature = data_temperature->getGhostBox();
+    hier::IntVector ghostcell_dims_temperature = ghost_box_temperature.numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_internal_energy(d_dim);
+    hier::IntVector offset_temperature(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
+        const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_internal_energy->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_temperature->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_internal_energy;
@@ -2637,6 +2877,9 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_internal_energy = num_ghosts_internal_energy;
+        offset_temperature = num_ghosts_temperature;
     }
     else
     {
@@ -2645,8 +2888,11 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
         TBOX_ASSERT(data_temperature->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_internal_energy = domain.lower() - ghost_box_internal_energy.lower();
+        offset_temperature = domain.lower() - ghost_box_temperature.lower();
     }
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2673,8 +2919,8 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
         epsilon,
         T,
         c_v,
-        num_ghosts_internal_energy,
-        num_ghosts_temperature,
+        offset_internal_energy,
+        offset_temperature,
         ghostcell_dims_internal_energy,
         ghostcell_dims_temperature,
         domain_lo,
@@ -2703,40 +2949,43 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     TBOX_ASSERT(data_thermo_properties->getDepth() == 4);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_internal_energy->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_internal_energy = data_internal_energy->getGhostBox();
+    const hier::IntVector ghostcell_dims_internal_energy = ghost_box_internal_energy.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_temperature->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_thermo_properties->getBox().numberCells() == interior_dims);
-#endif
+    const hier::Box ghost_box_temperature = data_temperature->getGhostBox();
+    const hier::IntVector ghostcell_dims_temperature = ghost_box_temperature.numberCells();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
-    
-    const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_internal_energy =
-        data_internal_energy->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_temperature =
-        data_temperature->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_thermo_properties =
-        data_thermo_properties->getGhostBox().numberCells();
+    const hier::Box ghost_box_thermo_properties = data_thermo_properties->getGhostBox();
+    const hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_internal_energy(d_dim);
+    hier::IntVector offset_temperature(d_dim);
+    hier::IntVector offset_thermo_properties(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
+        const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+        const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_internal_energy->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_temperature->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_thermo_properties->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_internal_energy;
@@ -2748,6 +2997,10 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_internal_energy = num_ghosts_internal_energy;
+        offset_temperature = num_ghosts_temperature;
+        offset_thermo_properties = num_ghosts_thermo_properties;
     }
     else
     {
@@ -2757,8 +3010,12 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
         TBOX_ASSERT(data_thermo_properties->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_internal_energy = domain.lower() - ghost_box_internal_energy.lower();
+        offset_temperature = domain.lower() - ghost_box_temperature.lower();
+        offset_thermo_properties = domain.lower() - ghost_box_thermo_properties.lower();
     }
     
     /*
@@ -2773,9 +3030,9 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
         epsilon,
         T,
         c_v,
-        num_ghosts_internal_energy,
-        num_ghosts_temperature,
-        num_ghosts_thermo_properties,
+        offset_internal_energy,
+        offset_temperature,
+        offset_thermo_properties,
         ghostcell_dims_internal_energy,
         ghostcell_dims_temperature,
         ghostcell_dims_thermo_properties,
@@ -2806,37 +3063,43 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     TBOX_ASSERT(data_thermo_properties->getDepth() == 4);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_internal_energy->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_internal_energy = data_internal_energy->getGhostBox();
+    hier::IntVector ghostcell_dims_internal_energy = ghost_box_internal_energy.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_temperature->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_thermo_properties->getBox().numberCells() == interior_dims);
-#endif
+    const hier::Box ghost_box_temperature = data_temperature->getGhostBox();
+    hier::IntVector ghostcell_dims_temperature = ghost_box_temperature.numberCells();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
-    
-    const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_internal_energy = data_internal_energy->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_temperature = data_temperature->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_thermo_properties = data_thermo_properties->getGhostBox().numberCells();
+    const hier::Box ghost_box_thermo_properties = data_thermo_properties->getGhostBox();
+    hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_internal_energy(d_dim);
+    hier::IntVector offset_temperature(d_dim);
+    hier::IntVector offset_thermo_properties(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
+        const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+        const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_internal_energy->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_temperature->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_thermo_properties->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_internal_energy;
@@ -2848,6 +3111,10 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_internal_energy = num_ghosts_internal_energy;
+        offset_temperature = num_ghosts_temperature;
+        offset_thermo_properties = num_ghosts_thermo_properties;
     }
     else
     {
@@ -2857,8 +3124,12 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
         TBOX_ASSERT(data_thermo_properties->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_internal_energy = domain.lower() - ghost_box_internal_energy.lower();
+        offset_temperature = domain.lower() - ghost_box_temperature.lower();
+        offset_thermo_properties = domain.lower() - ghost_box_thermo_properties.lower();
     }
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2886,9 +3157,9 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
         epsilon,
         T,
         c_v,
-        num_ghosts_internal_energy,
-        num_ghosts_temperature,
-        num_ghosts_thermo_properties,
+        offset_internal_energy,
+        offset_temperature,
+        offset_thermo_properties,
         ghostcell_dims_internal_energy,
         ghostcell_dims_temperature,
         ghostcell_dims_thermo_properties,
