@@ -3295,7 +3295,6 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
     // Get the dimensions of the ghost cell box.
     const hier::Box ghost_box_isochoric_specific_heat_capacity =
         data_isochoric_specific_heat_capacity->getGhostBox();
-    
     hier::IntVector ghostcell_dims_isochoric_specific_heat_capacity =
         ghost_box_isochoric_specific_heat_capacity.numberCells();
     
@@ -3710,7 +3709,6 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
     // Get the dimensions of the ghost cell box.
     const hier::Box ghost_box_isobaric_specific_heat_capacity =
         data_isobaric_specific_heat_capacity->getGhostBox();
-    
     hier::IntVector ghostcell_dims_isobaric_specific_heat_capacity =
         ghost_box_isobaric_specific_heat_capacity.numberCells();
     
