@@ -1573,7 +1573,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
     const hier::IntVector ghostcell_dims_min = ghost_box.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -1724,7 +1724,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
     hier::IntVector ghostcell_dims_min = ghost_box.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -1946,7 +1946,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
     const hier::IntVector ghostcell_dims_min = ghost_box.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -2086,7 +2086,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
     hier::IntVector ghostcell_dims_min = ghost_box.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -2394,7 +2394,7 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
         data_volume_fractions->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -2556,7 +2556,7 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
         data_volume_fractions->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);

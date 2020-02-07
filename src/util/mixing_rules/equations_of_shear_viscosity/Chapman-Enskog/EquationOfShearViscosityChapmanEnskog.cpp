@@ -91,7 +91,7 @@ EquationOfShearViscosityChapmanEnskog::computeShearViscosity(
     const hier::IntVector ghostcell_dims_temperature = ghost_box_temperature.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -103,7 +103,7 @@ EquationOfShearViscosityChapmanEnskog::computeShearViscosity(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_shear_viscosity = data_shear_viscosity->getGhostCellWidth();
         const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
         
@@ -315,7 +315,7 @@ EquationOfShearViscosityChapmanEnskog::computeShearViscosity(
     const hier::IntVector ghostcell_dims_molecular_properties = ghost_box_molecular_properties.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -328,7 +328,7 @@ EquationOfShearViscosityChapmanEnskog::computeShearViscosity(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_shear_viscosity = data_shear_viscosity->getGhostCellWidth();
         const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
         const hier::IntVector num_ghosts_molecular_properties = data_molecular_properties->getGhostCellWidth();

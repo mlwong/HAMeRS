@@ -1596,7 +1596,7 @@ EquationOfStateMixingRulesIdealGas::computeIsochoricSpecificHeatCapacity(
         data_mass_fractions->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -1766,7 +1766,7 @@ EquationOfStateMixingRulesIdealGas::computeIsochoricSpecificHeatCapacity(
         data_mass_fractions->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -2005,7 +2005,7 @@ EquationOfStateMixingRulesIdealGas::computeIsobaricSpecificHeatCapacity(
         data_mass_fractions->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -2175,7 +2175,7 @@ EquationOfStateMixingRulesIdealGas::computeIsobaricSpecificHeatCapacity(
         data_mass_fractions->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -2881,7 +2881,7 @@ EquationOfStateMixingRulesIdealGas::computePressureDerivativeWithPartialDensitie
     const hier::IntVector ghostcell_dims_min = ghost_box.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -3037,7 +3037,7 @@ EquationOfStateMixingRulesIdealGas::computePressureDerivativeWithPartialDensitie
     hier::IntVector ghostcell_dims_min = ghost_box.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -3229,7 +3229,7 @@ EquationOfStateMixingRulesIdealGas::computePressureDerivativeWithPartialDensitie
     const hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -3346,7 +3346,7 @@ EquationOfStateMixingRulesIdealGas::computePressureDerivativeWithPartialDensitie
     hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -3549,7 +3549,7 @@ EquationOfStateMixingRulesIdealGas::computePressureDerivativeWithVolumeFractions
     const hier::IntVector ghostcell_dims_min = ghost_box.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -3689,7 +3689,7 @@ EquationOfStateMixingRulesIdealGas::computePressureDerivativeWithVolumeFractions
     hier::IntVector ghostcell_dims_min = ghost_box.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -4283,7 +4283,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMas
         data_mass_fractions->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -4451,7 +4451,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMas
         data_mass_fractions->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -4684,7 +4684,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
         data_volume_fractions->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -4841,7 +4841,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
         data_volume_fractions->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);

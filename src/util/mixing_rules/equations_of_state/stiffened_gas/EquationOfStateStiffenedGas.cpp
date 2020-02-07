@@ -90,7 +90,7 @@ EquationOfStateStiffenedGas::computePressure(
         data_internal_energy->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -193,7 +193,7 @@ EquationOfStateStiffenedGas::computePressure(
     hier::IntVector ghostcell_dims_internal_energy = data_internal_energy->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -317,7 +317,7 @@ EquationOfStateStiffenedGas::computePressure(
         data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -428,7 +428,7 @@ EquationOfStateStiffenedGas::computePressure(
     hier::IntVector ghostcell_dims_thermo_properties = data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -574,7 +574,7 @@ EquationOfStateStiffenedGas::computeSoundSpeed(
         data_pressure->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -677,7 +677,7 @@ EquationOfStateStiffenedGas::computeSoundSpeed(
     hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -801,7 +801,7 @@ EquationOfStateStiffenedGas::computeSoundSpeed(
         data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -912,7 +912,7 @@ EquationOfStateStiffenedGas::computeSoundSpeed(
     hier::IntVector ghostcell_dims_thermo_properties = data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -1058,7 +1058,7 @@ EquationOfStateStiffenedGas::computeInternalEnergy(
         data_pressure->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -1161,7 +1161,7 @@ EquationOfStateStiffenedGas::computeInternalEnergy(
     hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -1285,7 +1285,7 @@ EquationOfStateStiffenedGas::computeInternalEnergy(
         data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -1396,7 +1396,7 @@ EquationOfStateStiffenedGas::computeInternalEnergy(
     hier::IntVector ghostcell_dims_thermo_properties = data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -1542,7 +1542,7 @@ EquationOfStateStiffenedGas::computeEnthalpy(
         data_pressure->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -1645,7 +1645,7 @@ EquationOfStateStiffenedGas::computeEnthalpy(
     hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -1769,7 +1769,7 @@ EquationOfStateStiffenedGas::computeEnthalpy(
         data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -1880,7 +1880,7 @@ EquationOfStateStiffenedGas::computeEnthalpy(
     hier::IntVector ghostcell_dims_thermo_properties = data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -2027,7 +2027,7 @@ EquationOfStateStiffenedGas::computeTemperature(
         data_pressure->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -2132,7 +2132,7 @@ EquationOfStateStiffenedGas::computeTemperature(
     hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -2258,7 +2258,7 @@ EquationOfStateStiffenedGas::computeTemperature(
         data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -2371,7 +2371,7 @@ EquationOfStateStiffenedGas::computeTemperature(
     hier::IntVector ghostcell_dims_thermo_properties = data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -2519,7 +2519,7 @@ EquationOfStateStiffenedGas::computeInternalEnergyFromTemperature(
         data_temperature->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -2622,7 +2622,7 @@ EquationOfStateStiffenedGas::computeInternalEnergyFromTemperature(
     hier::IntVector ghostcell_dims_temperature = data_temperature->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -2746,7 +2746,7 @@ EquationOfStateStiffenedGas::computeInternalEnergyFromTemperature(
         data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -2857,7 +2857,7 @@ EquationOfStateStiffenedGas::computeInternalEnergyFromTemperature(
     hier::IntVector ghostcell_dims_thermo_properties = data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -2989,7 +2989,7 @@ EquationOfStateStiffenedGas::computeIsochoricSpecificHeatCapacity(
         data_isochoric_specific_heat_capacity->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -3066,7 +3066,7 @@ EquationOfStateStiffenedGas::computeIsochoricSpecificHeatCapacity(
         data_isochoric_specific_heat_capacity->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -3160,7 +3160,7 @@ EquationOfStateStiffenedGas::computeIsochoricSpecificHeatCapacity(
         data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -3252,7 +3252,7 @@ EquationOfStateStiffenedGas::computeIsochoricSpecificHeatCapacity(
     hier::IntVector ghostcell_dims_thermo_properties = data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -3366,7 +3366,7 @@ EquationOfStateStiffenedGas::computeIsobaricSpecificHeatCapacity(
         data_isobaric_specific_heat_capacity->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -3443,7 +3443,7 @@ EquationOfStateStiffenedGas::computeIsobaricSpecificHeatCapacity(
         data_isobaric_specific_heat_capacity->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -3537,7 +3537,7 @@ EquationOfStateStiffenedGas::computeIsobaricSpecificHeatCapacity(
         data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -3629,7 +3629,7 @@ EquationOfStateStiffenedGas::computeIsobaricSpecificHeatCapacity(
     hier::IntVector ghostcell_dims_thermo_properties = data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -3747,7 +3747,7 @@ EquationOfStateStiffenedGas::computeGruneisenParameter(
         data_gruneisen_parameter->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -3825,7 +3825,7 @@ EquationOfStateStiffenedGas::computeGruneisenParameter(
         data_gruneisen_parameter->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -3920,7 +3920,7 @@ EquationOfStateStiffenedGas::computeGruneisenParameter(
         data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -4013,7 +4013,7 @@ EquationOfStateStiffenedGas::computeGruneisenParameter(
     hier::IntVector ghostcell_dims_thermo_properties = data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -4142,7 +4142,7 @@ EquationOfStateStiffenedGas::computePressureDerivativeWithDensity(
         data_pressure->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -4247,7 +4247,7 @@ EquationOfStateStiffenedGas::computePressureDerivativeWithDensity(
     hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -4372,7 +4372,7 @@ EquationOfStateStiffenedGas::computePressureDerivativeWithDensity(
         data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -4485,7 +4485,7 @@ EquationOfStateStiffenedGas::computePressureDerivativeWithDensity(
     hier::IntVector ghostcell_dims_thermo_properties = data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -4632,7 +4632,7 @@ EquationOfStateStiffenedGas::computeDensity(
         data_temperature->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -4737,7 +4737,7 @@ EquationOfStateStiffenedGas::computeDensity(
     hier::IntVector ghostcell_dims_temperature = data_temperature->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -4863,7 +4863,7 @@ EquationOfStateStiffenedGas::computeDensity(
         data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -4976,7 +4976,7 @@ EquationOfStateStiffenedGas::computeDensity(
     hier::IntVector ghostcell_dims_thermo_properties = data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);

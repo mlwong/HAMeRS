@@ -64,7 +64,7 @@ DifferenceFirstOrder::computeDifferenceWithVariableLocalMean(
     const hier::IntVector ghostcell_dims_difference = ghost_box_difference.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     

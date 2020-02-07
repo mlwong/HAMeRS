@@ -12783,7 +12783,7 @@ FlowModelFourEqnConservative::computeCellDataOfMassFractionsWithDensity(
             new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_mass_fractions));
         
         /*
-         * Get the local lower indices and number of cells in each direction of the domain.
+         * Get the local lower index and number of cells in each direction of the domain.
          */
         
         hier::IntVector domain_lo(d_dim);
@@ -12995,7 +12995,7 @@ FlowModelFourEqnConservative::computeCellDataOfMoleFractionsWithMassFractions(
             new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_mole_fractions));
         
         /*
-         * Get the local lower indices and number of cells in each direction of the domain.
+         * Get the local lower index and number of cells in each direction of the domain.
          */
         
         hier::IntVector domain_lo(d_dim);
@@ -13206,7 +13206,7 @@ FlowModelFourEqnConservative::computeCellDataOfVelocityWithDensity(
             new pdat::CellData<double>(d_interior_box, d_dim.getValue(), d_num_subghosts_velocity));
         
         /*
-         * Get the local lower indices and number of cells in each direction of the domain.
+         * Get the local lower index and number of cells in each direction of the domain.
          */
         
         hier::IntVector domain_lo(d_dim);
@@ -13425,7 +13425,7 @@ FlowModelFourEqnConservative::computeCellDataOfInternalEnergyWithDensityAndVeloc
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_internal_energy));
         
         /*
-         * Get the local lower indices and number of cells in each direction of the domain.
+         * Get the local lower index and number of cells in each direction of the domain.
          */
         
         hier::IntVector domain_lo(d_dim);
@@ -13709,7 +13709,7 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_sound_speed));
         
         /*
-         * Get the local lower indices and number of cells in each direction of the domain.
+         * Get the local lower index and number of cells in each direction of the domain.
          */
         
         hier::IntVector domain_lo(d_dim);
@@ -14114,7 +14114,7 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                 new pdat::CellData<double>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_x));
             
             /*
-             * Get the local lower indices and number of cells in each direction of the domain.
+             * Get the local lower index and number of cells in each direction of the domain.
              */
             
             hier::IntVector domain_lo(d_dim);
@@ -14442,7 +14442,7 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                 new pdat::CellData<double>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_y));
             
             /*
-             * Get the local lower indices and number of cells in each direction of the domain.
+             * Get the local lower index and number of cells in each direction of the domain.
              */
             
             hier::IntVector domain_lo(d_dim);
@@ -14726,7 +14726,7 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                 new pdat::CellData<double>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_z));
             
             /*
-             * Get the local lower indices and number of cells in each direction of the domain.
+             * Get the local lower index and number of cells in each direction of the domain.
              */
             
             hier::IntVector domain_lo(d_dim);
@@ -14939,7 +14939,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
                 new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_wave_speed_x));
             
             /*
-             * Get the local lower indices and number of cells in each direction of the domain.
+             * Get the local lower index and number of cells in each direction of the domain.
              */
             
             hier::IntVector domain_lo(d_dim);
@@ -15128,7 +15128,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
                 new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_wave_speed_y));
             
             /*
-             * Get the local lower indices and number of cells in each direction of the domain.
+             * Get the local lower index and number of cells in each direction of the domain.
              */
             
             hier::IntVector domain_lo(d_dim);
@@ -15298,7 +15298,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
                 new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_wave_speed_z));
             
             /*
-             * Get the local lower indices and number of cells in each direction of the domain.
+             * Get the local lower index and number of cells in each direction of the domain.
              */
             
             hier::IntVector domain_lo(d_dim);
@@ -15445,7 +15445,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxDiffusivityWithDensityMassFrac
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
         
         /*
-         * Get the local lower indices and number of cells in each direction of the domain.
+         * Get the local lower index and number of cells in each direction of the domain.
          */
         
         hier::IntVector domain_lo(d_dim);

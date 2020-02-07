@@ -11465,7 +11465,7 @@ FlowModelSingleSpecies::computeCellDataOfVelocity(
             new pdat::CellData<double>(d_interior_box, d_dim.getValue(), d_num_subghosts_velocity));
         
         /*
-         * Get the local lower indices and number of cells in each direction of the domain.
+         * Get the local lower index and number of cells in each direction of the domain.
          */
         
         hier::IntVector domain_lo(d_dim);
@@ -11661,7 +11661,7 @@ FlowModelSingleSpecies::computeCellDataOfInternalEnergyWithVelocity(
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_internal_energy));
         
         /*
-         * Get the local lower indices and number of cells in each direction of the domain.
+         * Get the local lower index and number of cells in each direction of the domain.
          */
         
         hier::IntVector domain_lo(d_dim);
@@ -12028,7 +12028,7 @@ FlowModelSingleSpecies::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 new pdat::CellData<double>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_x));
             
             /*
-             * Get the local lower indices and number of cells in each direction of the domain.
+             * Get the local lower index and number of cells in each direction of the domain.
              */
             
             hier::IntVector domain_lo(d_dim);
@@ -12277,7 +12277,7 @@ FlowModelSingleSpecies::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 new pdat::CellData<double>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_y));
             
             /*
-             * Get the local lower indices and number of cells in each direction of the domain.
+             * Get the local lower index and number of cells in each direction of the domain.
              */
             
             hier::IntVector domain_lo(d_dim);
@@ -12496,7 +12496,7 @@ FlowModelSingleSpecies::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 new pdat::CellData<double>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_z));
             
             /*
-             * Get the local lower indices and number of cells in each direction of the domain.
+             * Get the local lower index and number of cells in each direction of the domain.
              */
             
             hier::IntVector domain_lo(d_dim);
@@ -12665,7 +12665,7 @@ FlowModelSingleSpecies::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                 new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_wave_speed_x));
             
             /*
-             * Get the local lower indices and number of cells in each direction of the domain.
+             * Get the local lower index and number of cells in each direction of the domain.
              */
             
             hier::IntVector domain_lo(d_dim);
@@ -12853,7 +12853,7 @@ FlowModelSingleSpecies::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                 new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_wave_speed_y));
             
             /*
-             * Get the local lower indices and number of cells in each direction of the domain.
+             * Get the local lower index and number of cells in each direction of the domain.
              */
             
             hier::IntVector domain_lo(d_dim);
@@ -13021,7 +13021,7 @@ FlowModelSingleSpecies::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                 new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_wave_speed_z));
             
             /*
-             * Get the local lower indices and number of cells in each direction of the domain.
+             * Get the local lower index and number of cells in each direction of the domain.
              */
             
             hier::IntVector domain_lo(d_dim);
@@ -13164,7 +13164,7 @@ FlowModelSingleSpecies::computeCellDataOfMaxDiffusivityWithPressureAndTemperatur
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
         
         /*
-         * Get the local lower indices and number of cells in each direction of the domain.
+         * Get the local lower index and number of cells in each direction of the domain.
          */
         
         hier::IntVector domain_lo(d_dim);

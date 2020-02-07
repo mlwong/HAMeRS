@@ -74,7 +74,7 @@ EquationOfStateIdealGas::computePressure(
     const hier::IntVector ghostcell_dims_internal_energy = ghost_box_internal_energy.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -87,7 +87,7 @@ EquationOfStateIdealGas::computePressure(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
         const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
         const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
@@ -189,7 +189,7 @@ EquationOfStateIdealGas::computePressure(
     hier::IntVector ghostcell_dims_internal_energy = ghost_box_internal_energy.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -202,7 +202,7 @@ EquationOfStateIdealGas::computePressure(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
         const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
         const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
@@ -320,7 +320,7 @@ EquationOfStateIdealGas::computePressure(
     const hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -334,7 +334,7 @@ EquationOfStateIdealGas::computePressure(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
         const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
         const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
@@ -447,7 +447,7 @@ EquationOfStateIdealGas::computePressure(
     hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -461,7 +461,7 @@ EquationOfStateIdealGas::computePressure(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
         const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
         const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
@@ -606,7 +606,7 @@ EquationOfStateIdealGas::computeSoundSpeed(
     const hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -619,7 +619,7 @@ EquationOfStateIdealGas::computeSoundSpeed(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_sound_speed = data_sound_speed->getGhostCellWidth();
         const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
         const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
@@ -721,7 +721,7 @@ EquationOfStateIdealGas::computeSoundSpeed(
     hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -734,7 +734,7 @@ EquationOfStateIdealGas::computeSoundSpeed(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_sound_speed = data_sound_speed->getGhostCellWidth();
         const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
         const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
@@ -852,7 +852,7 @@ EquationOfStateIdealGas::computeSoundSpeed(
     const hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -866,7 +866,7 @@ EquationOfStateIdealGas::computeSoundSpeed(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_sound_speed = data_sound_speed->getGhostCellWidth();
         const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
         const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
@@ -979,7 +979,7 @@ EquationOfStateIdealGas::computeSoundSpeed(
     hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -993,7 +993,7 @@ EquationOfStateIdealGas::computeSoundSpeed(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_sound_speed = data_sound_speed->getGhostCellWidth();
         const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
         const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
@@ -1138,7 +1138,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
     const hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -1151,7 +1151,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
         const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
         const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
@@ -1253,7 +1253,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
     hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -1266,7 +1266,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
         const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
         const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
@@ -1384,7 +1384,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
     const hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -1398,7 +1398,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
         const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
         const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
@@ -1511,7 +1511,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
     hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -1525,7 +1525,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
         const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
         const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
@@ -1670,7 +1670,7 @@ EquationOfStateIdealGas::computeEnthalpy(
     const hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -1683,7 +1683,7 @@ EquationOfStateIdealGas::computeEnthalpy(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_enthalpy = data_enthalpy->getGhostCellWidth();
         const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
         const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
@@ -1785,7 +1785,7 @@ EquationOfStateIdealGas::computeEnthalpy(
     hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -1798,7 +1798,7 @@ EquationOfStateIdealGas::computeEnthalpy(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_enthalpy = data_enthalpy->getGhostCellWidth();
         const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
         const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
@@ -1916,7 +1916,7 @@ EquationOfStateIdealGas::computeEnthalpy(
     const hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -1930,7 +1930,7 @@ EquationOfStateIdealGas::computeEnthalpy(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_enthalpy = data_enthalpy->getGhostCellWidth();
         const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
         const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
@@ -2043,7 +2043,7 @@ EquationOfStateIdealGas::computeEnthalpy(
     hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -2057,7 +2057,7 @@ EquationOfStateIdealGas::computeEnthalpy(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_enthalpy = data_enthalpy->getGhostCellWidth();
         const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
         const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
@@ -2203,7 +2203,7 @@ EquationOfStateIdealGas::computeTemperature(
     const hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -2216,7 +2216,7 @@ EquationOfStateIdealGas::computeTemperature(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
         const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
         const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
@@ -2320,7 +2320,7 @@ EquationOfStateIdealGas::computeTemperature(
     hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -2333,7 +2333,7 @@ EquationOfStateIdealGas::computeTemperature(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
         const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
         const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
@@ -2453,7 +2453,7 @@ EquationOfStateIdealGas::computeTemperature(
     const hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -2467,7 +2467,7 @@ EquationOfStateIdealGas::computeTemperature(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
         const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
         const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
@@ -2582,7 +2582,7 @@ EquationOfStateIdealGas::computeTemperature(
     hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -2596,7 +2596,7 @@ EquationOfStateIdealGas::computeTemperature(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
         const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
         const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
@@ -2742,7 +2742,7 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     const hier::IntVector ghostcell_dims_temperature = ghost_box_temperature.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -2754,7 +2754,7 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
         const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
         
@@ -2844,7 +2844,7 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     hier::IntVector ghostcell_dims_temperature = ghost_box_temperature.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -2856,7 +2856,7 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
         const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
         
@@ -2960,7 +2960,7 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     const hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -2973,7 +2973,7 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
         const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
         const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
@@ -3074,7 +3074,7 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -3087,7 +3087,7 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
         const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
         const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
@@ -3208,33 +3208,38 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) == 4);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_isochoric_specific_heat_capacity->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
-    
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell box.
-     */
-    
-    const hier::IntVector num_ghosts_isochoric_specific_heat_capacity =
-        data_isochoric_specific_heat_capacity->getGhostCellWidth();
+    // Get the dimensions of the ghost cell box.
+    const hier::Box ghost_box_isochoric_specific_heat_capacity =
+        data_isochoric_specific_heat_capacity->getGhostBox();
     const hier::IntVector ghostcell_dims_isochoric_specific_heat_capacity =
-        data_isochoric_specific_heat_capacity->getGhostBox().numberCells();
+        ghost_box_isochoric_specific_heat_capacity.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
+     * Also, get the offset.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_isochoric_specific_heat_capacity(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_isochoric_specific_heat_capacity =
+            data_isochoric_specific_heat_capacity->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_isochoric_specific_heat_capacity->getBox();
+        
         hier::Box ghost_box = interior_box;
         ghost_box.grow(num_ghosts_isochoric_specific_heat_capacity);
         
         domain_lo = -num_ghosts_isochoric_specific_heat_capacity;
         domain_dims = ghost_box.numberCells();
+        
+        offset_isochoric_specific_heat_capacity = num_ghosts_isochoric_specific_heat_capacity;
     }
     else
     {
@@ -3242,8 +3247,10 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
         TBOX_ASSERT(data_isochoric_specific_heat_capacity->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_isochoric_specific_heat_capacity = domain.lower() - ghost_box_isochoric_specific_heat_capacity.lower();
     }
     
     /*
@@ -3257,7 +3264,7 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
     computeIsochoricSpecificHeatCapacity(
         c_v,
         c_v_src,
-        num_ghosts_isochoric_specific_heat_capacity,
+        offset_isochoric_specific_heat_capacity,
         ghostcell_dims_isochoric_specific_heat_capacity,
         domain_lo,
         domain_dims);
@@ -3285,33 +3292,39 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) == 4);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_isochoric_specific_heat_capacity->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell box.
+    const hier::Box ghost_box_isochoric_specific_heat_capacity =
+        data_isochoric_specific_heat_capacity->getGhostBox();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell box.
-     */
-    
-    const hier::IntVector num_ghosts_isochoric_specific_heat_capacity =
-        data_isochoric_specific_heat_capacity->getGhostCellWidth();
     hier::IntVector ghostcell_dims_isochoric_specific_heat_capacity =
-        data_isochoric_specific_heat_capacity->getGhostBox().numberCells();
+        ghost_box_isochoric_specific_heat_capacity.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
+     * Also, get the offset.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_isochoric_specific_heat_capacity(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_isochoric_specific_heat_capacity =
+            data_isochoric_specific_heat_capacity->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_isochoric_specific_heat_capacity->getBox();
+        
         hier::Box ghost_box = interior_box;
         ghost_box.grow(num_ghosts_isochoric_specific_heat_capacity);
         
         domain_lo = -num_ghosts_isochoric_specific_heat_capacity;
         domain_dims = ghost_box.numberCells();
+        
+        offset_isochoric_specific_heat_capacity = num_ghosts_isochoric_specific_heat_capacity;
     }
     else
     {
@@ -3319,8 +3332,10 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
         TBOX_ASSERT(data_isochoric_specific_heat_capacity->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_isochoric_specific_heat_capacity = domain.lower() - ghost_box_isochoric_specific_heat_capacity.lower();
     }
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -3343,7 +3358,7 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
     computeIsochoricSpecificHeatCapacity(
         c_v,
         c_v_src,
-        num_ghosts_isochoric_specific_heat_capacity,
+        offset_isochoric_specific_heat_capacity,
         ghostcell_dims_isochoric_specific_heat_capacity,
         domain_lo,
         domain_dims);
@@ -3371,36 +3386,42 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
     TBOX_ASSERT(data_thermo_properties->getDepth() == 4);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_isochoric_specific_heat_capacity->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
-    
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_thermo_properties->getBox().numberCells() == interior_dims);
-#endif
-    
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
-    
-    const hier::IntVector num_ghosts_isochoric_specific_heat_capacity =
-        data_isochoric_specific_heat_capacity->getGhostCellWidth();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_isochoric_specific_heat_capacity =
+        data_isochoric_specific_heat_capacity->getGhostBox();
     const hier::IntVector ghostcell_dims_isochoric_specific_heat_capacity =
-        data_isochoric_specific_heat_capacity->getGhostBox().numberCells();
+        ghost_box_isochoric_specific_heat_capacity.numberCells();
     
-    const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
+    const hier::Box ghost_box_thermo_properties =
+        data_thermo_properties->getGhostBox();
     const hier::IntVector ghostcell_dims_thermo_properties =
-        data_thermo_properties->getGhostBox().numberCells();
+        ghost_box_thermo_properties.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_isochoric_specific_heat_capacity(d_dim);
+    hier::IntVector offset_thermo_properties(d_dim);
+    
     if (domain.empty())
     {
+        // Get the numbers of ghost cells.
+        const hier::IntVector num_ghosts_isochoric_specific_heat_capacity =
+            data_isochoric_specific_heat_capacity->getGhostCellWidth();
+        const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_isochoric_specific_heat_capacity->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_thermo_properties->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_isochoric_specific_heat_capacity;
@@ -3411,6 +3432,9 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_isochoric_specific_heat_capacity = num_ghosts_isochoric_specific_heat_capacity;
+        offset_thermo_properties = num_ghosts_thermo_properties;
     }
     else
     {
@@ -3419,8 +3443,11 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
         TBOX_ASSERT(data_thermo_properties->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_isochoric_specific_heat_capacity = domain.lower() - ghost_box_isochoric_specific_heat_capacity.lower();
+        offset_thermo_properties = domain.lower() - ghost_box_thermo_properties.lower();
     }
     
     /*
@@ -3433,8 +3460,8 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
     computeIsochoricSpecificHeatCapacity(
         c_v,
         c_v_src,
-        num_ghosts_isochoric_specific_heat_capacity,
-        num_ghosts_thermo_properties,
+        offset_isochoric_specific_heat_capacity,
+        offset_thermo_properties,
         ghostcell_dims_isochoric_specific_heat_capacity,
         ghostcell_dims_thermo_properties,
         domain_lo,
@@ -3464,35 +3491,40 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
     TBOX_ASSERT(data_thermo_properties->getDepth() == 4);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_isochoric_specific_heat_capacity->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
-    
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_thermo_properties->getBox().numberCells() == interior_dims);
-#endif
-    
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
-    
-    const hier::IntVector num_ghosts_isochoric_specific_heat_capacity =
-        data_isochoric_specific_heat_capacity->getGhostCellWidth();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_isochoric_specific_heat_capacity =
+        data_isochoric_specific_heat_capacity->getGhostBox();
     hier::IntVector ghostcell_dims_isochoric_specific_heat_capacity =
-        data_isochoric_specific_heat_capacity->getGhostBox().numberCells();
+        ghost_box_isochoric_specific_heat_capacity.numberCells();
     
-    const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_thermo_properties = data_thermo_properties->getGhostBox().numberCells();
+    const hier::Box ghost_box_thermo_properties = data_thermo_properties->getGhostBox();
+    hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_isochoric_specific_heat_capacity(d_dim);
+    hier::IntVector offset_thermo_properties(d_dim);
+    
     if (domain.empty())
     {
+        // Get the numbers of ghost cells.
+        const hier::IntVector num_ghosts_isochoric_specific_heat_capacity =
+            data_isochoric_specific_heat_capacity->getGhostCellWidth();
+        const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_isochoric_specific_heat_capacity->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_thermo_properties->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_isochoric_specific_heat_capacity;
@@ -3503,6 +3535,9 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_isochoric_specific_heat_capacity = num_ghosts_isochoric_specific_heat_capacity;
+        offset_thermo_properties = num_ghosts_thermo_properties;
     }
     else
     {
@@ -3511,8 +3546,11 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
         TBOX_ASSERT(data_thermo_properties->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_isochoric_specific_heat_capacity = domain.lower() - ghost_box_isochoric_specific_heat_capacity.lower();
+        offset_thermo_properties = domain.lower() - ghost_box_thermo_properties.lower();
     }
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -3536,8 +3574,8 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
     computeIsochoricSpecificHeatCapacity(
         c_v,
         c_v_src,
-        num_ghosts_isochoric_specific_heat_capacity,
-        num_ghosts_thermo_properties,
+        offset_isochoric_specific_heat_capacity,
+        offset_thermo_properties,
         ghostcell_dims_isochoric_specific_heat_capacity,
         ghostcell_dims_thermo_properties,
         domain_lo,
@@ -3585,33 +3623,38 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 3);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_isobaric_specific_heat_capacity->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
-    
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell box.
-     */
-    
-    const hier::IntVector num_ghosts_isobaric_specific_heat_capacity =
-        data_isobaric_specific_heat_capacity->getGhostCellWidth();
+    // Get the dimensions of the ghost cell box.
+    const hier::Box ghost_box_isobaric_specific_heat_capacity =
+        data_isobaric_specific_heat_capacity->getGhostBox();
     const hier::IntVector ghostcell_dims_isobaric_specific_heat_capacity =
-        data_isobaric_specific_heat_capacity->getGhostBox().numberCells();
+        ghost_box_isobaric_specific_heat_capacity.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
+     * Also, get the offset.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_isobaric_specific_heat_capacity(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_isobaric_specific_heat_capacity =
+            data_isobaric_specific_heat_capacity->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_isobaric_specific_heat_capacity->getBox();
+        
         hier::Box ghost_box = interior_box;
         ghost_box.grow(num_ghosts_isobaric_specific_heat_capacity);
         
         domain_lo = -num_ghosts_isobaric_specific_heat_capacity;
         domain_dims = ghost_box.numberCells();
+        
+        offset_isobaric_specific_heat_capacity = num_ghosts_isobaric_specific_heat_capacity;
     }
     else
     {
@@ -3619,8 +3662,10 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
         TBOX_ASSERT(data_isobaric_specific_heat_capacity->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_isobaric_specific_heat_capacity = domain.lower() - ghost_box_isobaric_specific_heat_capacity.lower();
     }
     
     /*
@@ -3634,7 +3679,7 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
     computeIsobaricSpecificHeatCapacity(
         c_p,
         c_p_src,
-        num_ghosts_isobaric_specific_heat_capacity,
+        offset_isobaric_specific_heat_capacity,
         ghostcell_dims_isobaric_specific_heat_capacity,
         domain_lo,
         domain_dims);
@@ -3662,33 +3707,39 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 3);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_isobaric_specific_heat_capacity->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell box.
+    const hier::Box ghost_box_isobaric_specific_heat_capacity =
+        data_isobaric_specific_heat_capacity->getGhostBox();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell box.
-     */
-    
-    const hier::IntVector num_ghosts_isobaric_specific_heat_capacity =
-        data_isobaric_specific_heat_capacity->getGhostCellWidth();
     hier::IntVector ghostcell_dims_isobaric_specific_heat_capacity =
-        data_isobaric_specific_heat_capacity->getGhostBox().numberCells();
+        ghost_box_isobaric_specific_heat_capacity.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
+     * Also, get the offset.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_isobaric_specific_heat_capacity(d_dim);
+    
     if (domain.empty())
     {
+        // Get the number of ghost cells.
+        const hier::IntVector num_ghosts_isobaric_specific_heat_capacity =
+            data_isobaric_specific_heat_capacity->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_isobaric_specific_heat_capacity->getBox();
+        
         hier::Box ghost_box = interior_box;
         ghost_box.grow(num_ghosts_isobaric_specific_heat_capacity);
         
         domain_lo = -num_ghosts_isobaric_specific_heat_capacity;
         domain_dims = ghost_box.numberCells();
+        
+        offset_isobaric_specific_heat_capacity = num_ghosts_isobaric_specific_heat_capacity;
     }
     else
     {
@@ -3696,8 +3747,10 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
         TBOX_ASSERT(data_isobaric_specific_heat_capacity->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_isobaric_specific_heat_capacity = domain.lower() - ghost_box_isobaric_specific_heat_capacity.lower();
     }
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -3720,7 +3773,7 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
     computeIsobaricSpecificHeatCapacity(
         c_p,
         c_p_src,
-        num_ghosts_isobaric_specific_heat_capacity,
+        offset_isobaric_specific_heat_capacity,
         ghostcell_dims_isobaric_specific_heat_capacity,
         domain_lo,
         domain_dims);
@@ -3748,36 +3801,42 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
     TBOX_ASSERT(data_thermo_properties->getDepth() >= 3);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_isobaric_specific_heat_capacity->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
-    
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_thermo_properties->getBox().numberCells() == interior_dims);
-#endif
-    
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
-    
-    const hier::IntVector num_ghosts_isobaric_specific_heat_capacity =
-        data_isobaric_specific_heat_capacity->getGhostCellWidth();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_isobaric_specific_heat_capacity =
+        data_isobaric_specific_heat_capacity->getGhostBox();
     const hier::IntVector ghostcell_dims_isobaric_specific_heat_capacity =
-        data_isobaric_specific_heat_capacity->getGhostBox().numberCells();
+        ghost_box_isobaric_specific_heat_capacity.numberCells();
     
-    const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
+    const hier::Box ghost_box_thermo_properties =
+        data_thermo_properties->getGhostBox();
     const hier::IntVector ghostcell_dims_thermo_properties =
-        data_thermo_properties->getGhostBox().numberCells();
+        ghost_box_thermo_properties.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_isobaric_specific_heat_capacity(d_dim);
+    hier::IntVector offset_thermo_properties(d_dim);
+    
     if (domain.empty())
     {
+        // Get the numbers of ghost cells.
+        const hier::IntVector num_ghosts_isobaric_specific_heat_capacity =
+            data_isobaric_specific_heat_capacity->getGhostCellWidth();
+        const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_isobaric_specific_heat_capacity->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_thermo_properties->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_isobaric_specific_heat_capacity;
@@ -3788,6 +3847,9 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_isobaric_specific_heat_capacity = num_ghosts_isobaric_specific_heat_capacity;
+        offset_thermo_properties = num_ghosts_thermo_properties;
     }
     else
     {
@@ -3796,8 +3858,11 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
         TBOX_ASSERT(data_thermo_properties->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_isobaric_specific_heat_capacity = domain.lower() - ghost_box_isobaric_specific_heat_capacity.lower();
+        offset_thermo_properties = domain.lower() - ghost_box_thermo_properties.lower();
     }
     
     /*
@@ -3810,8 +3875,8 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
     computeIsobaricSpecificHeatCapacity(
         c_p,
         c_p_src,
-        num_ghosts_isobaric_specific_heat_capacity,
-        num_ghosts_thermo_properties,
+        offset_isobaric_specific_heat_capacity,
+        offset_thermo_properties,
         ghostcell_dims_isobaric_specific_heat_capacity,
         ghostcell_dims_thermo_properties,
         domain_lo,
@@ -3841,35 +3906,40 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
     TBOX_ASSERT(data_thermo_properties->getDepth() >= 3);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_isobaric_specific_heat_capacity->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
-    
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_thermo_properties->getBox().numberCells() == interior_dims);
-#endif
-    
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
-    
-    const hier::IntVector num_ghosts_isobaric_specific_heat_capacity =
-        data_isobaric_specific_heat_capacity->getGhostCellWidth();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_isobaric_specific_heat_capacity =
+        data_isobaric_specific_heat_capacity->getGhostBox();
     hier::IntVector ghostcell_dims_isobaric_specific_heat_capacity =
-        data_isobaric_specific_heat_capacity->getGhostBox().numberCells();
+        ghost_box_isobaric_specific_heat_capacity.numberCells();
     
-    const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_thermo_properties = data_thermo_properties->getGhostBox().numberCells();
+    const hier::Box ghost_box_thermo_properties = data_thermo_properties->getGhostBox();
+    hier::IntVector ghostcell_dims_thermo_properties = ghost_box_thermo_properties.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_isobaric_specific_heat_capacity(d_dim);
+    hier::IntVector offset_thermo_properties(d_dim);
+    
     if (domain.empty())
     {
+        // Get the numbers of ghost cells.
+        const hier::IntVector num_ghosts_isobaric_specific_heat_capacity =
+            data_isobaric_specific_heat_capacity->getGhostCellWidth();
+        const hier::IntVector num_ghosts_thermo_properties = data_thermo_properties->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_isobaric_specific_heat_capacity->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_thermo_properties->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_isobaric_specific_heat_capacity;
@@ -3880,6 +3950,9 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_isobaric_specific_heat_capacity = num_ghosts_isobaric_specific_heat_capacity;
+        offset_thermo_properties = num_ghosts_thermo_properties;
     }
     else
     {
@@ -3888,8 +3961,11 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
         TBOX_ASSERT(data_thermo_properties->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_isobaric_specific_heat_capacity = domain.lower() - ghost_box_isobaric_specific_heat_capacity.lower();
+        offset_thermo_properties = domain.lower() - ghost_box_thermo_properties.lower();
     }
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -3913,8 +3989,8 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
     computeIsobaricSpecificHeatCapacity(
         c_p,
         c_p_src,
-        num_ghosts_isobaric_specific_heat_capacity,
-        num_ghosts_thermo_properties,
+        offset_isobaric_specific_heat_capacity,
+        offset_thermo_properties,
         ghostcell_dims_isobaric_specific_heat_capacity,
         ghostcell_dims_thermo_properties,
         domain_lo,
@@ -3980,7 +4056,7 @@ EquationOfStateIdealGas::computeGruneisenParameter(
         data_gruneisen_parameter->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -4058,7 +4134,7 @@ EquationOfStateIdealGas::computeGruneisenParameter(
         data_gruneisen_parameter->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -4153,7 +4229,7 @@ EquationOfStateIdealGas::computeGruneisenParameter(
         data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -4246,7 +4322,7 @@ EquationOfStateIdealGas::computeGruneisenParameter(
     hier::IntVector ghostcell_dims_thermo_properties = data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -4370,7 +4446,7 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
         data_pressure->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -4470,7 +4546,7 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
     hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -4584,7 +4660,7 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
         data_pressure->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -4684,7 +4760,7 @@ EquationOfStateIdealGas::computePressureDerivativeWithDensity(
     hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -4819,7 +4895,7 @@ EquationOfStateIdealGas::computeDensity(
         data_temperature->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -4920,7 +4996,7 @@ EquationOfStateIdealGas::computeDensity(
     hier::IntVector ghostcell_dims_temperature = data_temperature->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -5042,7 +5118,7 @@ EquationOfStateIdealGas::computeDensity(
         data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -5151,7 +5227,7 @@ EquationOfStateIdealGas::computeDensity(
     hier::IntVector ghostcell_dims_thermo_properties = data_thermo_properties->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);

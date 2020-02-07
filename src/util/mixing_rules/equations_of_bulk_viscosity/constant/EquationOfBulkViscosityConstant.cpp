@@ -106,7 +106,7 @@ EquationOfBulkViscosityConstant::computeBulkViscosity(
     const hier::IntVector ghostcell_dims_molecular_properties = ghost_box_molecular_properties.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     
@@ -118,7 +118,7 @@ EquationOfBulkViscosityConstant::computeBulkViscosity(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_bulk_viscosity = data_bulk_viscosity->getGhostCellWidth();
         const hier::IntVector num_ghosts_molecular_properties = data_molecular_properties->getGhostCellWidth();
         

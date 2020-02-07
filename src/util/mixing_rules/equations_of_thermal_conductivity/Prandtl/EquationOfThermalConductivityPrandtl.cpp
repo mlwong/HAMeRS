@@ -91,7 +91,7 @@ EquationOfThermalConductivityPrandtl::computeThermalConductivity(
     boost::shared_ptr<pdat::CellData<double> > data_shear_viscosity;
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets of all data and dimensions of the ghost cell box for shear viscosity
      * and allocate memory.
      */
@@ -106,7 +106,7 @@ EquationOfThermalConductivityPrandtl::computeThermalConductivity(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_thermal_conductivity = data_thermal_conductivity->getGhostCellWidth();
         const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
         const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
@@ -346,7 +346,7 @@ EquationOfThermalConductivityPrandtl::computeThermalConductivity(
     boost::shared_ptr<pdat::CellData<double> > data_molecular_properties_shear_viscosity;
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets of all data and dimensions of the ghost cell box for shear viscosity
      * and molecular properties and allocate memory.
      */
@@ -362,7 +362,7 @@ EquationOfThermalConductivityPrandtl::computeThermalConductivity(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_thermal_conductivity = data_thermal_conductivity->getGhostCellWidth();
         const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
         const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();

@@ -73,7 +73,7 @@ DerivativeFirstOrder::computeDerivative(
     const hier::IntVector ghostcell_dims_derivative = ghost_box_derivative.numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets.
      */
     

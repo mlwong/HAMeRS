@@ -330,7 +330,7 @@ EquationOfBulkViscosityMixingRulesConstant::computeBulkViscosity(
     boost::shared_ptr<pdat::CellData<double> > data_mass_fractions_last;
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets of all data and dimensions of the ghost cell box for denominator,
      * numerator and last mass fraction and allocate memory.
      */
@@ -1176,7 +1176,7 @@ EquationOfBulkViscosityMixingRulesConstant::computeBulkViscosity(
     boost::shared_ptr<pdat::CellData<double> > data_volume_fractions_last;
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets of all data and dimensions of the ghost cell box for bulk viscosity,
      * temperature of a species and last volume fraction and allocate memory.
      */

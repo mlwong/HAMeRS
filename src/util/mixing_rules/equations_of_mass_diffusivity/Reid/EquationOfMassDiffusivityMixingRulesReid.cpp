@@ -465,7 +465,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
     boost::shared_ptr<pdat::CellData<double> > data_mass_fractions_last;
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      * Also, get the offsets of all data and dimensions of the ghost cell box for binary
      * mass diffusivities, mole fractions and last mass fraction and allocate memory.
      */
@@ -483,7 +483,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
     
     if (domain.empty())
     {
-        // Get the number of ghost cells.
+        // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_mass_diffusivities = data_mass_diffusivities->getGhostCellWidth();
         const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
         const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
