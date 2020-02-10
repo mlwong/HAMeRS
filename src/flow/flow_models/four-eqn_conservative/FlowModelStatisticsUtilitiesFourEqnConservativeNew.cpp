@@ -3071,9 +3071,8 @@ outputBudgetReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
     for (int i = 0; i < finest_level_dim_0; i++)
     {
         const double dR_11_tilde_dx = -(rho_R11[i]/(rho_mean[i]*rho_mean[i]))*drho_dx_mean[i] + 
-            double(1)/rho_mean[i]*(drho_u_u_dx_mean[i] - double(2)*rho_u_mean[i]*du_dx_mean[i] -
-                double(2)*u_mean[i]*drho_u_dx_mean[i] + u_mean[i]*u_mean[i]*drho_dx_mean[i] +
-                double(2)*rho_mean[i]*u_mean[i]*du_dx_mean[i]);
+            double(1)/rho_mean[i]*(drho_u_u_dx_mean[i] - double(2)*u_tilde[i]*drho_u_dx_mean[i] + 
+            u_tilde[i]*u_tilde[i]*drho_dx_mean[i]);
         
         d_rho_u_tilde_R11_dx[i] = rho_u_mean[i]*dR_11_tilde_dx + R11[i]*drho_u_dx_mean[i];
     }
