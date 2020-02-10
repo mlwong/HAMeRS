@@ -3029,16 +3029,67 @@ outputBudgetReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
      * Compute term II.
      */
     
-    std::vector<double> rho_u_tilde_R11(rho_R11);
+    std::vector<double> drho_u_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "MOMENTUM",
+        0,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> drho_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> du_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
+        0,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.push_back("MOMENTUM");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    
+    std::vector<double> drho_u_u_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<double> d_rho_u_tilde_R11_dx(finest_level_dim_0, double(0));
     
     for (int i = 0; i < finest_level_dim_0; i++)
     {
-        rho_u_tilde_R11[i] *= u_tilde[i];
+        const double dR_11_tilde_dx = -(rho_R11[i]/(rho_mean[i]*rho_mean[i]))*drho_dx_mean[i] + 
+            double(1)/rho_mean[i]*(drho_u_u_dx_mean[i] - double(2)*rho_u_mean[i]*du_dx_mean[i] -
+                double(2)*u_mean[i]*drho_u_dx_mean[i] + u_mean[i]*u_mean[i]*drho_dx_mean[i] +
+                double(2)*rho_mean[i]*u_mean[i]*du_dx_mean[i]);
+        
+        d_rho_u_tilde_R11_dx[i] = rho_u_mean[i]*dR_11_tilde_dx + R11[i]*drho_u_dx_mean[i];
     }
     
-    std::vector<double> d_rho_u_tilde_R11_dx = computeDerivativeOfVector1D(
-        rho_u_tilde_R11,
-        dx);
+    // Old implementation.
+    // 
+    // std::vector<double> rho_u_tilde_R11(rho_R11);
+    // 
+    // for (int i = 0; i < finest_level_dim_0; i++)
+    // {
+    //     rho_u_tilde_R11[i] *= u_tilde[i];
+    // }
+    // 
+    // std::vector<double> d_rho_u_tilde_R11_dx = computeDerivativeOfVector1D(
+    //     rho_u_tilde_R11,
+    //     dx);
     
     /*
      * Compute term II in moving frame of mixing layer.
@@ -3093,20 +3144,6 @@ outputBudgetReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
     /*
      * Compute term III(3).
      */
-    
-    std::vector<double> drho_u_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
-        "MOMENTUM",
-        0,
-        0,
-        patch_hierarchy,
-        data_context);
-    
-    std::vector<double> drho_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
-        "DENSITY",
-        0,
-        0,
-        patch_hierarchy,
-        data_context);
     
     std::vector<double> du_tilde_dx(finest_level_dim_0, double(0));
     
@@ -3227,13 +3264,6 @@ outputBudgetReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
     /*
      * Compute term V.
      */
-    
-    std::vector<double> du_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
-        "VELOCITY",
-        0,
-        0,
-        patch_hierarchy,
-        data_context);
     
     quantity_names.push_back("PRESSURE");
     component_indices.push_back(0);
