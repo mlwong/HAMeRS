@@ -1896,10 +1896,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetTurbMassFluxXWithIn
     }
     
     /*
-     * Compute term II.
+     * Compute u_tilde.
      */
-    
-    // Compute u_tilde.
     
     quantity_names.push_back("DENSITY");
     component_indices.push_back(0);
@@ -1923,16 +1921,54 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetTurbMassFluxXWithIn
         u_tilde[i] /= rho_mean[i];
     }
     
-    std::vector<double> rho_u_tilde_a1(u_tilde);
+    /*
+     * Compute term II.
+     */
+    
+    std::vector<double> drho_u_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "MOMENTUM",
+        0,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> drho_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> du_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
+        0,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> da1_dx(finest_level_dim_0, double(0));
+    std::vector<double> d_rho_u_tilde_a1_dx(finest_level_dim_0, double(0));
     
     for (int i = 0; i < finest_level_dim_0; i++)
     {
-        rho_u_tilde_a1[i] *= rho_p_u_p[i];
+        da1_dx[i] = -rho_p_u_p[i]/(rho_mean[i]*rho_mean[i])*drho_dx_mean[i] +
+            double(1)/rho_mean[i]*(drho_u_dx_mean[i] - u_mean[i]*drho_dx_mean[i]) - du_dx_mean[i];
+        
+        d_rho_u_tilde_a1_dx[i] = rho_u_mean[i]*da1_dx[i] + a_1[i]*drho_u_dx_mean[i];
     }
     
-    std::vector<double> d_rho_u_tilde_a1_dx = computeDerivativeOfVector1D(
-        rho_u_tilde_a1,
-        dx);
+    // Old implementation.
+    // 
+    // std::vector<double> rho_u_tilde_a1(u_tilde);
+    // 
+    // for (int i = 0; i < finest_level_dim_0; i++)
+    // {
+    //     rho_u_tilde_a1[i] *= rho_p_u_p[i];
+    // }
+    // 
+    // std::vector<double> d_rho_u_tilde_a1_dx = computeDerivativeOfVector1D(
+    //     rho_u_tilde_a1,
+    //     dx);
     
     /*
      * Compute term II in moving frame of mixing layer.
@@ -2022,13 +2058,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetTurbMassFluxXWithIn
      * Compute term III(3).
      */
     
-    std::vector<double> drho_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
-        "DENSITY",
-        0,
-        0,
-        patch_hierarchy,
-        data_context);
-    
     // Compute R_11.
     
     std::vector<double> zeros(finest_level_dim_0, double(0));
@@ -2072,34 +2101,36 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetTurbMassFluxXWithIn
      * Compute term IV(1).
      */
     
-    std::vector<double> a_1_sq(a_1);
+    std::vector<double> rho_da_1_sq_dx(finest_level_dim_0, double(0));
     
     for (int i = 0; i < finest_level_dim_0; i++)
     {
-        a_1_sq[i] *= a_1[i];
+        rho_da_1_sq_dx[i] = double(2)*rho_mean[i]*a_1[i]*da1_dx[i];
     }
     
-    std::vector<double> da_1_sq_dx = computeDerivativeOfVector1D(
-        a_1_sq,
-        dx);
-    
-    std::vector<double> rho_da_1_sq_dx(da_1_sq_dx);
-    
-    for (int i = 0; i < finest_level_dim_0; i++)
-    {
-        rho_da_1_sq_dx[i] *= rho_mean[i];
-    }
+    // Old implementation.
+    // 
+    // std::vector<double> a_1_sq(a_1);
+    // 
+    // for (int i = 0; i < finest_level_dim_0; i++)
+    // {
+    //     a_1_sq[i] *= a_1[i];
+    // }
+    // 
+    // std::vector<double> da_1_sq_dx = computeDerivativeOfVector1D(
+    //     a_1_sq,
+    //     dx);
+    // 
+    // std::vector<double> rho_da_1_sq_dx(da_1_sq_dx);
+    // 
+    // for (int i = 0; i < finest_level_dim_0; i++)
+    // {
+    //     rho_da_1_sq_dx[i] *= rho_mean[i];
+    // }
     
     /*
      * Compute term IV(2).
      */
-    
-    std::vector<double> du_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
-        "VELOCITY",
-        0,
-        0,
-        patch_hierarchy,
-        data_context);
     
     std::vector<double> m_rho_a_1_du_dx(du_dx_mean);
     
@@ -2112,6 +2143,21 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetTurbMassFluxXWithIn
      * Compute term V.
      */
     
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    
+    std::vector<double> u_u_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+
     quantity_names.push_back("DENSITY");
     component_indices.push_back(0);
     averaged_quantities.push_back(rho_mean);
@@ -2124,7 +2170,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetTurbMassFluxXWithIn
     component_indices.push_back(0);
     averaged_quantities.push_back(u_mean);
     
-    std::vector<double> rho_p_u_p_sq_over_rho = getQuantityCorrelationWithInhomogeneousXDirection(
+    std::vector<double> rho_p_u_p_u_p = getQuantityCorrelationWithInhomogeneousXDirection(
         quantity_names,
         component_indices,
         averaged_quantities,
@@ -2135,21 +2181,92 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetTurbMassFluxXWithIn
     component_indices.clear();
     averaged_quantities.clear();
     
+    quantity_names.push_back("MOMENTUM");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    
+    std::vector<double> drho_u_u_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    
+    std::vector<double> du_u_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<double> m_rho_drho_p_u_p_sq_over_rho_dx(finest_level_dim_0, double(0));
+    
     for (int i = 0; i < finest_level_dim_0; i++)
     {
-        rho_p_u_p_sq_over_rho[i] /= rho_mean[i];
+        m_rho_drho_p_u_p_sq_over_rho_dx[i] = -rho_mean[i]*(
+            -rho_p_u_p_u_p[i]/(rho_mean[i]*rho_mean[i])*drho_dx_mean[i] +
+            double(1)/rho_mean[i]*(
+                drho_u_u_dx_mean[i] - double(2)*rho_u_mean[i]*du_dx_mean[i] - double(2)*u_mean[i]*drho_u_dx_mean[i] +
+                double(2)*u_mean[i]*u_mean[i]*drho_dx_mean[i] + double(4)*rho_mean[i]*u_mean[i]*du_dx_mean[i] -
+                rho_mean[i]*du_u_dx_mean[i] - u_u_mean[i]*drho_dx_mean[i]
+            )
+        );
     }
     
-    std::vector<double> drho_p_u_p_sq_over_rho_dx = computeDerivativeOfVector1D(
-        rho_p_u_p_sq_over_rho,
-        dx);
-    
-    std::vector<double> m_rho_drho_p_u_p_sq_over_rho_dx(drho_p_u_p_sq_over_rho_dx);
-    
-    for (int i = 0; i < finest_level_dim_0; i++)
-    {
-        m_rho_drho_p_u_p_sq_over_rho_dx[i] *= (-rho_mean[i]);
-    }
+    // Old implementation.
+    // 
+    // quantity_names.push_back("DENSITY");
+    // component_indices.push_back(0);
+    // averaged_quantities.push_back(rho_mean);
+    // 
+    // quantity_names.push_back("VELOCITY");
+    // component_indices.push_back(0);
+    // averaged_quantities.push_back(u_mean);
+    // 
+    // quantity_names.push_back("VELOCITY");
+    // component_indices.push_back(0);
+    // averaged_quantities.push_back(u_mean);
+    // 
+    // std::vector<double> rho_p_u_p_sq_over_rho = getQuantityCorrelationWithInhomogeneousXDirection(
+    //     quantity_names,
+    //     component_indices,
+    //     averaged_quantities,
+    //     patch_hierarchy,
+    //     data_context);
+    // 
+    // quantity_names.clear();
+    // component_indices.clear();
+    // averaged_quantities.clear();
+    // 
+    // for (int i = 0; i < finest_level_dim_0; i++)
+    // {
+    //     rho_p_u_p_sq_over_rho[i] /= rho_mean[i];
+    // }
+    // 
+    // std::vector<double> drho_p_u_p_sq_over_rho_dx = computeDerivativeOfVector1D(
+    //     rho_p_u_p_sq_over_rho,
+    //     dx);
+    // 
+    // std::vector<double> m_rho_drho_p_u_p_sq_over_rho_dx(drho_p_u_p_sq_over_rho_dx);
+    // 
+    // for (int i = 0; i < finest_level_dim_0; i++)
+    // {
+    //     m_rho_drho_p_u_p_sq_over_rho_dx[i] *= (-rho_mean[i]);
+    // }
     
     /*
      * Compute term VI(1).
@@ -2541,10 +2658,8 @@ outputBudgetDensitySpecificVolumeCovarianceWithInhomogeneousXDirection(
     }
     
     /*
-     * Compute term II.
+     * Compute u_tilde.
      */
-    
-    // Compute u_tilde.
     
     quantity_names.push_back("DENSITY");
     component_indices.push_back(0);
@@ -2568,16 +2683,53 @@ outputBudgetDensitySpecificVolumeCovarianceWithInhomogeneousXDirection(
         u_tilde[i] /= rho_mean[i];
     }
     
-    std::vector<double> rho_u_tilde_b(u_tilde);
+    /*
+     * Compute term II.
+     */
+    
+   std::vector<double> drho_u_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "MOMENTUM",
+        0,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> drho_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> drho_inv_dx_mean = getAveragedDerivativeOfReciprocalOfQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> db_dx(finest_level_dim_0, double(0));
+    std::vector<double> d_rho_u_tilde_b_dx(finest_level_dim_0, double(0));
     
     for (int i = 0; i < finest_level_dim_0; i++)
     {
-        rho_u_tilde_b[i] *= rho_b[i];
+        db_dx[i] = rho_inv_mean[i]*drho_dx_mean[i] + rho_mean[i]*drho_inv_dx_mean[i];
+        
+        d_rho_u_tilde_b_dx[i] = rho_u_mean[i]*db_dx[i] + b[i]*drho_u_dx_mean[i];
     }
     
-    std::vector<double> d_rho_u_tilde_b_dx = computeDerivativeOfVector1D(
-        rho_u_tilde_b,
-        dx);
+    // Old implementation.
+    // 
+    // std::vector<double> rho_u_tilde_b(u_tilde);
+    // 
+    // for (int i = 0; i < finest_level_dim_0; i++)
+    // {
+    //     rho_u_tilde_b[i] *= rho_b[i];
+    // }
+    // 
+    // std::vector<double> d_rho_u_tilde_b_dx = computeDerivativeOfVector1D(
+    //     rho_u_tilde_b,
+    //     dx);
     
     /*
      * Compute term II in moving frame of mixing layer.
@@ -2626,15 +2778,6 @@ outputBudgetDensitySpecificVolumeCovarianceWithInhomogeneousXDirection(
      * Compute term III.
      */
     
-    // Compute drho_dx_mean.
-    
-    std::vector<double> drho_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
-        "DENSITY",
-        0,
-        0,
-        patch_hierarchy,
-        data_context);
-    
     std::vector<double> production(drho_dx_mean);
     
     for (int i = 0; i < finest_level_dim_0; i++)
@@ -2646,9 +2789,9 @@ outputBudgetDensitySpecificVolumeCovarianceWithInhomogeneousXDirection(
      * Compute term IV.
      */
     
-    std::vector<double> db_dx = computeDerivativeOfVector1D(
-        b,
-        dx);
+    // std::vector<double> db_dx = computeDerivativeOfVector1D(
+    //     b,
+    //     dx);
     
     std::vector<double> redistribution(db_dx);
     
@@ -3043,13 +3186,6 @@ outputBudgetReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
         patch_hierarchy,
         data_context);
     
-    std::vector<double> du_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
-        "VELOCITY",
-        0,
-        0,
-        patch_hierarchy,
-        data_context);
-    
     quantity_names.push_back("MOMENTUM");
     component_indices.push_back(0);
     
@@ -3162,73 +3298,151 @@ outputBudgetReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
      * Compute term IV(1).
      */
     
-    quantity_names.push_back("DENSITY");
+    quantity_names.push_back("MOMENTUM");
     component_indices.push_back(0);
-    averaged_quantities.push_back(zeros);
     
     quantity_names.push_back("VELOCITY");
     component_indices.push_back(0);
-    averaged_quantities.push_back(u_tilde);
     
     quantity_names.push_back("VELOCITY");
     component_indices.push_back(0);
-    averaged_quantities.push_back(u_tilde);
     
-    quantity_names.push_back("VELOCITY");
-    component_indices.push_back(0);
-    averaged_quantities.push_back(u_tilde);
-    
-    std::vector<double> rho_u_pp_u_pp_u_pp = getQuantityCorrelationWithInhomogeneousXDirection(
+    std::vector<double> drho_u_u_u_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
         quantity_names,
         component_indices,
-        averaged_quantities,
+        0,
         patch_hierarchy,
         data_context);
     
     quantity_names.clear();
     component_indices.clear();
-    averaged_quantities.clear();
     
-    std::vector<double> m_drho_u_pp_u_pp_u_pp_dx = computeDerivativeOfVector1D(
-        rho_u_pp_u_pp_u_pp,
-        dx);
+    quantity_names.push_back("MOMENTUM");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    
+    std::vector<double> rho_u_u_mean = getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<double> m_drho_u_pp_u_pp_u_pp_dx(finest_level_dim_0, double(0));
     
     for (int i = 0; i < finest_level_dim_0; i++)
     {
-        m_drho_u_pp_u_pp_u_pp_dx[i] = -m_drho_u_pp_u_pp_u_pp_dx[i];
+        m_drho_u_pp_u_pp_u_pp_dx[i] = -(drho_u_u_u_dx_mean[i] - double(2)*rho_u_u_mean[i]*du_tilde_dx[i] -
+            double(2)*u_tilde[i]*drho_u_u_dx_mean[i] + u_tilde[i]*u_tilde[i]*drho_u_dx_mean[i] +
+            double(2)*rho_u_mean[i]*u_tilde[i]*du_tilde_dx[i] - d_rho_u_tilde_R11_dx[i]
+            );
     }
+    
+    // Old implementation.
+    // 
+    // quantity_names.push_back("DENSITY");
+    // component_indices.push_back(0);
+    // averaged_quantities.push_back(zeros);
+    // 
+    // quantity_names.push_back("VELOCITY");
+    // component_indices.push_back(0);
+    // averaged_quantities.push_back(u_tilde);
+    // 
+    // quantity_names.push_back("VELOCITY");
+    // component_indices.push_back(0);
+    // averaged_quantities.push_back(u_tilde);
+    // 
+    // quantity_names.push_back("VELOCITY");
+    // component_indices.push_back(0);
+    // averaged_quantities.push_back(u_tilde);
+    // 
+    // std::vector<double> rho_u_pp_u_pp_u_pp = getQuantityCorrelationWithInhomogeneousXDirection(
+    //     quantity_names,
+    //     component_indices,
+    //     averaged_quantities,
+    //     patch_hierarchy,
+    //     data_context);
+    // 
+    // quantity_names.clear();
+    // component_indices.clear();
+    // averaged_quantities.clear();
+    // 
+    // std::vector<double> m_drho_u_pp_u_pp_u_pp_dx = computeDerivativeOfVector1D(
+    //     rho_u_pp_u_pp_u_pp,
+    //     dx);
+    // 
+    // for (int i = 0; i < finest_level_dim_0; i++)
+    // {
+    //     m_drho_u_pp_u_pp_u_pp_dx[i] = -m_drho_u_pp_u_pp_u_pp_dx[i];
+    // }
     
     /*
      * Compute term IV(2).
      */
     
-    quantity_names.push_back("VELOCITY");
-    component_indices.push_back(0);
-    averaged_quantities.push_back(u_mean);
+    std::vector<double> du_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
+        0,
+        0,
+        patch_hierarchy,
+        data_context);
     
     quantity_names.push_back("PRESSURE");
     component_indices.push_back(0);
-    averaged_quantities.push_back(p_mean);
     
-    std::vector<double> u_p_p_p = getQuantityCorrelationWithInhomogeneousXDirection(
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    
+    std::vector<double> du_pressure_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
         quantity_names,
         component_indices,
-        averaged_quantities,
+        0,
         patch_hierarchy,
         data_context);
     
     quantity_names.clear();
     component_indices.clear();
-    averaged_quantities.clear();
     
-    std::vector<double> m_2du_p_p_p_dx = computeDerivativeOfVector1D(
-        u_p_p_p,
-        dx);
+    std::vector<double> m_2du_p_p_p_dx(finest_level_dim_0, double(0));
     
     for (int i = 0; i < finest_level_dim_0; i++)
     {
-        m_2du_p_p_p_dx[i] *= (-double(2));
+        m_2du_p_p_p_dx[i] = -double(2)*(du_pressure_dx_mean[i] - u_mean[i]*dp_dx_mean[i] - p_mean[i]*du_dx_mean[i]);
     }
+    
+    // Old implementation.
+    // 
+    // quantity_names.push_back("VELOCITY");
+    // component_indices.push_back(0);
+    // averaged_quantities.push_back(u_mean);
+    // 
+    // quantity_names.push_back("PRESSURE");
+    // component_indices.push_back(0);
+    // averaged_quantities.push_back(p_mean);
+    // 
+    // std::vector<double> u_p_p_p = getQuantityCorrelationWithInhomogeneousXDirection(
+    //     quantity_names,
+    //     component_indices,
+    //     averaged_quantities,
+    //     patch_hierarchy,
+    //     data_context);
+    // 
+    // quantity_names.clear();
+    // component_indices.clear();
+    // averaged_quantities.clear();
+    // 
+    // std::vector<double> m_2du_p_p_p_dx = computeDerivativeOfVector1D(
+    //     u_p_p_p,
+    //     dx);
+    // 
+    // for (int i = 0; i < finest_level_dim_0; i++)
+    // {
+    //     m_2du_p_p_p_dx[i] *= (-double(2));
+    // }
     
     /*
      * Compute term IV(3).
@@ -3616,16 +3830,66 @@ outputBudgetReynoldsNormalStressInYDirectionWithInhomogeneousXDirection(
      * Compute term II.
      */
     
-    std::vector<double> rho_u_tilde_R22(rho_R22);
+    std::vector<double> drho_u_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "MOMENTUM",
+        0,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> drho_v_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "MOMENTUM",
+        1,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> drho_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.push_back("MOMENTUM");
+    component_indices.push_back(1);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(1);
+    
+    std::vector<double> drho_v_v_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<double> d_rho_u_tilde_R22_dx(finest_level_dim_0, double(0));
     
     for (int i = 0; i < finest_level_dim_0; i++)
     {
-        rho_u_tilde_R22[i] *= u_tilde[i];
+        const double dR_22_tilde_dx = -(rho_R22[i]/(rho_mean[i]*rho_mean[i]))*drho_dx_mean[i] + 
+            double(1)/rho_mean[i]*(drho_v_v_dx_mean[i] - double(2)*v_tilde[i]*drho_v_dx_mean[i] + 
+            v_tilde[i]*v_tilde[i]*drho_dx_mean[i]);
+        
+        d_rho_u_tilde_R22_dx[i] = rho_u_mean[i]*dR_22_tilde_dx + R22[i]*drho_u_dx_mean[i];
     }
     
-    std::vector<double> d_rho_u_tilde_R22_dx = computeDerivativeOfVector1D(
-        rho_u_tilde_R22,
-        dx);
+    // Old implementation.
+    // 
+    // std::vector<double> rho_u_tilde_R22(rho_R22);
+    // 
+    // for (int i = 0; i < finest_level_dim_0; i++)
+    // {
+    //     rho_u_tilde_R22[i] *= u_tilde[i];
+    // }
+    // 
+    // std::vector<double> d_rho_u_tilde_R22_dx = computeDerivativeOfVector1D(
+    //     rho_u_tilde_R22,
+    //     dx);
     
     /*
      * Compute term II in moving frame of mixing layer.
@@ -3646,41 +3910,110 @@ outputBudgetReynoldsNormalStressInYDirectionWithInhomogeneousXDirection(
      * Compute term IV(1).
      */
     
-    quantity_names.push_back("DENSITY");
+    std::vector<double> dv_tilde_dx(finest_level_dim_0, double(0));
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        dv_tilde_dx[i] = drho_v_dx_mean[i]/rho_mean[i] - rho_v_mean[i]/(rho_mean[i]*rho_mean[i])*drho_dx_mean[i];
+    }
+    
+    quantity_names.push_back("MOMENTUM");
     component_indices.push_back(0);
-    averaged_quantities.push_back(zeros);
     
     quantity_names.push_back("VELOCITY");
     component_indices.push_back(1);
-    averaged_quantities.push_back(v_tilde);
     
-    quantity_names.push_back("VELOCITY");
-    component_indices.push_back(1);
-    averaged_quantities.push_back(v_tilde);
-    
-    quantity_names.push_back("VELOCITY");
-    component_indices.push_back(0);
-    averaged_quantities.push_back(u_tilde);
-    
-    std::vector<double> rho_v_pp_v_pp_u_pp = getQuantityCorrelationWithInhomogeneousXDirection(
+    std::vector<double> rho_u_v_mean = getAveragedQuantityWithInhomogeneousXDirection(
         quantity_names,
         component_indices,
-        averaged_quantities,
         patch_hierarchy,
         data_context);
     
     quantity_names.clear();
     component_indices.clear();
-    averaged_quantities.clear();
     
-    std::vector<double> m_drho_v_pp_v_pp_u_pp_dx = computeDerivativeOfVector1D(
-        rho_v_pp_v_pp_u_pp,
-        dx);
+    quantity_names.push_back("MOMENTUM");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(1);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(1);
+    
+    std::vector<double> drho_u_v_v_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    quantity_names.push_back("MOMENTUM");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(1);
+    
+    std::vector<double> drho_u_v_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<double> m_drho_v_pp_v_pp_u_pp_dx(finest_level_dim_0, double(0));
     
     for (int i = 0; i < finest_level_dim_0; i++)
     {
-        m_drho_v_pp_v_pp_u_pp_dx[i] = -m_drho_v_pp_v_pp_u_pp_dx[i];
+        m_drho_v_pp_v_pp_u_pp_dx[i] = -(drho_u_v_v_dx_mean[i] - double(2)*rho_u_v_mean[i]*dv_tilde_dx[i] -
+            double(2)*v_tilde[i]*drho_u_v_dx_mean[i] + v_tilde[i]*v_tilde[i]*drho_u_dx_mean[i] +
+            double(2)*rho_u_mean[i]*v_tilde[i]*dv_tilde_dx[i] - d_rho_u_tilde_R22_dx[i]
+            );
     }
+    
+    // Old implementation.
+    // 
+    // quantity_names.push_back("DENSITY");
+    // component_indices.push_back(0);
+    // averaged_quantities.push_back(zeros);
+    // 
+    // quantity_names.push_back("VELOCITY");
+    // component_indices.push_back(1);
+    // averaged_quantities.push_back(v_tilde);
+    // 
+    // quantity_names.push_back("VELOCITY");
+    // component_indices.push_back(1);
+    // averaged_quantities.push_back(v_tilde);
+    // 
+    // quantity_names.push_back("VELOCITY");
+    // component_indices.push_back(0);
+    // averaged_quantities.push_back(u_tilde);
+    // 
+    // std::vector<double> rho_v_pp_v_pp_u_pp = getQuantityCorrelationWithInhomogeneousXDirection(
+    //     quantity_names,
+    //     component_indices,
+    //     averaged_quantities,
+    //     patch_hierarchy,
+    //     data_context);
+    // 
+    // quantity_names.clear();
+    // component_indices.clear();
+    // averaged_quantities.clear();
+    // 
+    // std::vector<double> m_drho_v_pp_v_pp_u_pp_dx = computeDerivativeOfVector1D(
+    //     rho_v_pp_v_pp_u_pp,
+    //     dx);
+    // 
+    // for (int i = 0; i < finest_level_dim_0; i++)
+    // {
+    //     m_drho_v_pp_v_pp_u_pp_dx[i] = -m_drho_v_pp_v_pp_u_pp_dx[i];
+    // }
     
     /*
      * Compute term IV(2).
@@ -4066,16 +4399,66 @@ outputBudgetReynoldsNormalStressInZDirectionWithInhomogeneousXDirection(
      * Compute term II.
      */
     
-    std::vector<double> rho_u_tilde_R33(rho_R33);
+    std::vector<double> drho_u_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "MOMENTUM",
+        0,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> drho_w_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "MOMENTUM",
+        2,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<double> drho_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.push_back("MOMENTUM");
+    component_indices.push_back(2);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(2);
+    
+    std::vector<double> drho_w_w_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<double> d_rho_u_tilde_R33_dx(finest_level_dim_0, double(0));
     
     for (int i = 0; i < finest_level_dim_0; i++)
     {
-        rho_u_tilde_R33[i] *= u_tilde[i];
+        const double dR_33_tilde_dx = -(rho_R33[i]/(rho_mean[i]*rho_mean[i]))*drho_dx_mean[i] + 
+            double(1)/rho_mean[i]*(drho_w_w_dx_mean[i] - double(2)*w_tilde[i]*drho_w_dx_mean[i] + 
+            w_tilde[i]*w_tilde[i]*drho_dx_mean[i]);
+        
+        d_rho_u_tilde_R33_dx[i] = rho_u_mean[i]*dR_33_tilde_dx + R33[i]*drho_u_dx_mean[i];
     }
     
-    std::vector<double> d_rho_u_tilde_R33_dx = computeDerivativeOfVector1D(
-        rho_u_tilde_R33,
-        dx);
+    // Old implementation.
+    // 
+    // std::vector<double> rho_u_tilde_R33(rho_R33);
+    // 
+    // for (int i = 0; i < finest_level_dim_0; i++)
+    // {
+    //     rho_u_tilde_R33[i] *= u_tilde[i];
+    // }
+    // 
+    // std::vector<double> d_rho_u_tilde_R33_dx = computeDerivativeOfVector1D(
+    //     rho_u_tilde_R33,
+    //     dx);
     
     /*
      * Compute term II in moving frame of mixing layer.
@@ -4096,41 +4479,110 @@ outputBudgetReynoldsNormalStressInZDirectionWithInhomogeneousXDirection(
      * Compute term IV(1).
      */
     
-    quantity_names.push_back("DENSITY");
+    std::vector<double> dw_tilde_dx(finest_level_dim_0, double(0));
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        dw_tilde_dx[i] = drho_w_dx_mean[i]/rho_mean[i] - rho_w_mean[i]/(rho_mean[i]*rho_mean[i])*drho_dx_mean[i];
+    }
+    
+    quantity_names.push_back("MOMENTUM");
     component_indices.push_back(0);
-    averaged_quantities.push_back(zeros);
     
     quantity_names.push_back("VELOCITY");
     component_indices.push_back(2);
-    averaged_quantities.push_back(w_tilde);
     
-    quantity_names.push_back("VELOCITY");
-    component_indices.push_back(2);
-    averaged_quantities.push_back(w_tilde);
-    
-    quantity_names.push_back("VELOCITY");
-    component_indices.push_back(0);
-    averaged_quantities.push_back(u_tilde);
-    
-    std::vector<double> rho_w_pp_w_pp_u_pp = getQuantityCorrelationWithInhomogeneousXDirection(
+    std::vector<double> rho_u_w_mean = getAveragedQuantityWithInhomogeneousXDirection(
         quantity_names,
         component_indices,
-        averaged_quantities,
         patch_hierarchy,
         data_context);
     
     quantity_names.clear();
     component_indices.clear();
-    averaged_quantities.clear();
     
-    std::vector<double> m_drho_w_pp_w_pp_u_pp_dx = computeDerivativeOfVector1D(
-        rho_w_pp_w_pp_u_pp,
-        dx);
+    quantity_names.push_back("MOMENTUM");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(2);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(2);
+    
+    std::vector<double> drho_u_w_w_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    quantity_names.push_back("MOMENTUM");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(2);
+    
+    std::vector<double> drho_u_w_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<double> m_drho_w_pp_w_pp_u_pp_dx(finest_level_dim_0, double(0));
     
     for (int i = 0; i < finest_level_dim_0; i++)
     {
-        m_drho_w_pp_w_pp_u_pp_dx[i] = -m_drho_w_pp_w_pp_u_pp_dx[i];
+        m_drho_w_pp_w_pp_u_pp_dx[i] = -(drho_u_w_w_dx_mean[i] - double(2)*rho_u_w_mean[i]*dw_tilde_dx[i] -
+            double(2)*w_tilde[i]*drho_u_w_dx_mean[i] + w_tilde[i]*w_tilde[i]*drho_u_dx_mean[i] +
+            double(2)*rho_u_mean[i]*w_tilde[i]*dw_tilde_dx[i] - d_rho_u_tilde_R33_dx[i]
+            );
     }
+    
+    // Old implementation.
+    // 
+    // quantity_names.push_back("DENSITY");
+    // component_indices.push_back(0);
+    // averaged_quantities.push_back(zeros);
+    // 
+    // quantity_names.push_back("VELOCITY");
+    // component_indices.push_back(2);
+    // averaged_quantities.push_back(w_tilde);
+    // 
+    // quantity_names.push_back("VELOCITY");
+    // component_indices.push_back(2);
+    // averaged_quantities.push_back(w_tilde);
+    // 
+    // quantity_names.push_back("VELOCITY");
+    // component_indices.push_back(0);
+    // averaged_quantities.push_back(u_tilde);
+    // 
+    // std::vector<double> rho_w_pp_w_pp_u_pp = getQuantityCorrelationWithInhomogeneousXDirection(
+    //     quantity_names,
+    //     component_indices,
+    //     averaged_quantities,
+    //     patch_hierarchy,
+    //     data_context);
+    // 
+    // quantity_names.clear();
+    // component_indices.clear();
+    // averaged_quantities.clear();
+    // 
+    // std::vector<double> m_drho_w_pp_w_pp_u_pp_dx = computeDerivativeOfVector1D(
+    //     rho_w_pp_w_pp_u_pp,
+    //     dx);
+    // 
+    // for (int i = 0; i < finest_level_dim_0; i++)
+    // {
+    //     m_drho_w_pp_w_pp_u_pp_dx[i] = -m_drho_w_pp_w_pp_u_pp_dx[i];
+    // }
     
     /*
      * Compute term IV(2).
