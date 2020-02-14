@@ -2887,8 +2887,8 @@ outputBudgetDensitySpecificVolumeCovarianceWithInhomogeneousXDirection(
             double(1)/rho_mean[i]*(
                 -rho_mean[i]*du_rho_inv_dx_mean[i] - u_rho_inv_mean[i]*drho_dx_mean[i] -
                 rho_u_mean[i]*drho_inv_dx_mean[i] - rho_inv_mean[i]*drho_u_dx_mean[i] +
-                rho_mean[i]*rho_inv_mean[i]*du_dx_mean[i] + rho_inv_mean[i]*u_mean[i]*drho_dx_mean[i] +
-                rho_mean[i]*u_mean[i]*drho_inv_dx_mean[i]
+                double(2)*rho_mean[i]*rho_inv_mean[i]*du_dx_mean[i] + double(2)*rho_inv_mean[i]*u_mean[i]*drho_dx_mean[i] +
+                double(2)*rho_mean[i]*u_mean[i]*drho_inv_dx_mean[i]
             )
         );
     }
