@@ -1944,7 +1944,7 @@ EquationOfStateIdealGas::computeEnthalpy(
         TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
         TBOX_ASSERT(data_thermo_properties->getBox().isSpatiallyEqual(interior_box));
 #endif
-    
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_enthalpy;
