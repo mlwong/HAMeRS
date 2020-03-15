@@ -2,11 +2,12 @@
     "configurations": [
       {
         "name": "farmshare",
-        "includePath": ["${workspaceFolder}/include/**",
-                        "${workspaceFolder}/src/**",
-                        "/home/wongml/Codes/SAMRAI/include/**"],
+        "includePath": ["${SAMRAI_ROOT}/include/**",
+                        "${workspaceFolder}/include/**",
+                        "${workspaceFolder}/src/**"
+                        ],
         "defines": [],
-        "compilerPath": "/farmshare/software/free/openmpi/3.0.0/gcc/6.2/bin/mpicxx",
+        "compilerPath": "${MPI_ROOT}/bin/mpicxx",
         "cStandard": "c11",
         "cppStandard": "c++11",
         "intelliSenseMode": "clang-x64"
