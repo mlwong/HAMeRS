@@ -2703,7 +2703,7 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDensities(
-    std::vector<double*> Psi,
+    std::vector<double*>& Psi,
     const double* const rho,
     const double* const p,
     const double* const gamma,
@@ -2921,7 +2921,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
  */
 void
 EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFractions(
-    std::vector<double*> M,
+    std::vector<double*>& M,
     const double* const p,
     const double* const gamma,
     const hier::IntVector& num_ghosts_partial_pressure_partial_volume_fractions,
@@ -3124,7 +3124,7 @@ void
 EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVolumeFractions(
     double* const gamma,
     double* const p_inf,
-    const std::vector<const double*> Z,
+    const std::vector<const double*>& Z,
     const hier::IntVector& num_ghosts_mixture_thermo_properties,
     const hier::IntVector& num_ghosts_volume_fractions,
     const hier::IntVector& ghostcell_dims_mixture_thermo_properties,
@@ -3336,7 +3336,7 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
     double* const gamma,
     double* const p_inf,
     double* const Z_last,
-    const std::vector<const double*> Z,
+    const std::vector<const double*>& Z,
     const hier::IntVector& num_ghosts_mixture_thermo_properties,
     const hier::IntVector& num_ghosts_volume_fractions,
     const hier::IntVector& ghostcell_dims_mixture_thermo_properties,
