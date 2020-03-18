@@ -4871,8 +4871,8 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMas
             
             offset_mass_fractions_last = data_mass_fractions->getGhostCellWidth();
             
-            data_mass_fractions_last =
-                boost::make_shared<pdat::CellData<double> >(interior_box, 1, data_mass_fractions->getGhostCellWidth());
+            data_mass_fractions_last = boost::make_shared<pdat::CellData<double> >(
+                interior_box, 1, data_mass_fractions->getGhostCellWidth());
             
             data_mass_fractions_last->fillAll(double(1));
         }
@@ -4880,8 +4880,8 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMas
         {
             offset_mass_fractions_last = hier::IntVector::getZero(d_dim);
             
-            data_mass_fractions_last =
-                boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+            data_mass_fractions_last = boost::make_shared<pdat::CellData<double> >(
+                domain, 1, hier::IntVector::getZero(d_dim));
             
             data_mass_fractions_last->fillAll(double(1), domain);
         }
@@ -5080,9 +5080,8 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMas
             
             offset_mass_fractions_last = data_mass_fractions->getGhostCellWidth();
             
-            boost::shared_ptr<pdat::SideData<double> > data_mass_fractions_last =
-                boost::make_shared<pdat::SideData<double> >(
-                    interior_box, 1, data_mass_fractions->getGhostCellWidth(), direction);
+            data_mass_fractions_last = boost::make_shared<pdat::SideData<double> >(
+                interior_box, 1, data_mass_fractions->getGhostCellWidth(), direction);
             
             data_mass_fractions_last->fillAll(double(1));
         }
@@ -5090,8 +5089,8 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMas
         {
             offset_mass_fractions_last = hier::IntVector::getZero(d_dim);
             
-            data_mass_fractions_last =
-                boost::make_shared<pdat::SideData<double> >(domain, 1, hier::IntVector::getZero(d_dim), direction);
+            data_mass_fractions_last = boost::make_shared<pdat::SideData<double> >(
+                domain, 1, hier::IntVector::getZero(d_dim), direction);
             
             data_mass_fractions_last->fillAll(double(1), domain);
         }
@@ -5258,6 +5257,9 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
         TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
 #endif
         
+        domain_lo = hier::IntVector::getZero(d_dim);
+        domain_dims = domain.numberCells();
+        
         offset_mixture_thermo_properties = domain.lower() - ghost_box_mixture_thermo_properties.lower();
         offset_volume_fractions = domain.lower() - ghost_box_volume_fractions.lower();
     }
@@ -5294,7 +5296,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
             Z.push_back(data_volume_fractions->getPointer(si));
         }
         
-        getMixtureThermodynamicPropertiesWithVolumeFractions(
+        computeMixtureThermodynamicPropertiesWithVolumeFractions(
             gamma,
             Z,
             offset_mixture_thermo_properties,
@@ -5316,8 +5318,8 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
             
             offset_volume_fractions_last = data_volume_fractions->getGhostCellWidth();
             
-            data_volume_fractions_last =
-                boost::make_shared<pdat::CellData<double> >(interior_box, 1, data_volume_fractions->getGhostCellWidth());
+            data_volume_fractions_last = boost::make_shared<pdat::CellData<double> >(
+                interior_box, 1, data_volume_fractions->getGhostCellWidth());
             
             data_volume_fractions_last->fillAll(double(1));
         }
@@ -5325,8 +5327,8 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
         {
             offset_volume_fractions_last = hier::IntVector::getZero(d_dim);
             
-            data_volume_fractions_last =
-                boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+            data_volume_fractions_last = boost::make_shared<pdat::CellData<double> >(
+                domain, 1, hier::IntVector::getZero(d_dim));
             
             data_volume_fractions_last->fillAll(double(1), domain);
         }
@@ -5348,7 +5350,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
         const hier::Box ghost_box_volume_fractions_last = data_volume_fractions_last->getGhostBox();
         const hier::IntVector ghostcell_dims_volume_fractions_last = ghost_box_volume_fractions_last.numberCells();
         
-        getMixtureThermodynamicPropertiesWithVolumeFractions(
+        computeMixtureThermodynamicPropertiesWithVolumeFractions(
             gamma,
             Z_last,
             Z,
@@ -5489,7 +5491,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
             Z.push_back(data_volume_fractions->getPointer(side_normal, si));
         }
         
-        getMixtureThermodynamicPropertiesWithVolumeFractions(
+        computeMixtureThermodynamicPropertiesWithVolumeFractions(
             gamma,
             Z,
             offset_mixture_thermo_properties,
@@ -5514,9 +5516,8 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
             
             offset_volume_fractions_last = data_volume_fractions->getGhostCellWidth();
             
-            boost::shared_ptr<pdat::SideData<double> > data_volume_fractions_last =
-                boost::make_shared<pdat::SideData<double> >(
-                    interior_box, 1, data_volume_fractions->getGhostCellWidth(), direction);
+            data_volume_fractions_last = boost::make_shared<pdat::SideData<double> >(
+                interior_box, 1, data_volume_fractions->getGhostCellWidth(), direction);
             
             data_volume_fractions_last->fillAll(double(1));
         }
@@ -5524,8 +5525,8 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
         {
             offset_volume_fractions_last = hier::IntVector::getZero(d_dim);
             
-            data_volume_fractions_last =
-                boost::make_shared<pdat::SideData<double> >(domain, 1, hier::IntVector::getZero(d_dim), direction);
+            data_volume_fractions_last = boost::make_shared<pdat::SideData<double> >(
+                domain, 1, hier::IntVector::getZero(d_dim), direction);
             
             data_volume_fractions_last->fillAll(double(1), domain);
         }
@@ -5548,7 +5549,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
         hier::IntVector ghostcell_dims_volume_fractions_last = ghost_box_volume_fractions_last.numberCells();
         ghostcell_dims_volume_fractions_last[side_normal]++;
         
-        getMixtureThermodynamicPropertiesWithVolumeFractions(
+        computeMixtureThermodynamicPropertiesWithVolumeFractions(
             gamma,
             Z_last,
             Z,
@@ -7404,7 +7405,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMas
  * Compute the thermodynamic properties of the mixture with volume fractions.
  */
 void
-EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeFractions(
+EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVolumeFractions(
     double* const gamma,
     const std::vector<const double*>& Z,
     const hier::IntVector& offset_mixture_thermo_properties,
@@ -7599,7 +7600,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeF
  * Compute the thermodynamic properties of the mixture with volume fractions.
  */
 void
-EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeFractions(
+EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVolumeFractions(
     double* const gamma,
     double* const Z_last,
     const std::vector<const double*>& Z,

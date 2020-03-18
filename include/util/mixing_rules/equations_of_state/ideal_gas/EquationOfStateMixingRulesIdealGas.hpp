@@ -802,7 +802,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          * Compute the thermodynamic properties of the mixture with volume fractions.
          */
         void
-        getMixtureThermodynamicPropertiesWithVolumeFractions(
+        computeMixtureThermodynamicPropertiesWithVolumeFractions(
             double* const gamma,
             const std::vector<const double*>& Z,
             const hier::IntVector& offset_mixture_thermo_properties,
@@ -816,7 +816,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          * Compute the thermodynamic properties of the mixture with volume fractions.
          */
         void
-        getMixtureThermodynamicPropertiesWithVolumeFractions(
+        computeMixtureThermodynamicPropertiesWithVolumeFractions(
             double* const gamma,
             double* const Z_last,
             const std::vector<const double*>& Z,

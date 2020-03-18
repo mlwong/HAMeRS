@@ -597,10 +597,10 @@ class EquationOfStateMixingRulesStiffenedGas: public EquationOfStateMixingRules
             const double* const p,
             const double* const gamma,
             const double* const p_inf,
-            const hier::IntVector& num_ghosts_partial_pressure_partial_partial_densities,
-            const hier::IntVector& num_ghosts_density,
-            const hier::IntVector& num_ghosts_pressure,
-            const hier::IntVector& num_ghosts_mixture_thermo_properties,
+            const hier::IntVector& offset_partial_pressure_partial_partial_densities,
+            const hier::IntVector& offset_density,
+            const hier::IntVector& offset_pressure,
+            const hier::IntVector& offset_mixture_thermo_properties,
             const hier::IntVector& ghostcell_dims_partial_pressure_partial_partial_densities,
             const hier::IntVector& ghostcell_dims_density,
             const hier::IntVector& ghostcell_dims_pressure,
@@ -617,9 +617,9 @@ class EquationOfStateMixingRulesStiffenedGas: public EquationOfStateMixingRules
             std::vector<double*>& M,
             const double* const p,
             const double* const gamma,
-            const hier::IntVector& num_ghosts_partial_pressure_partial_volume_fractions,
-            const hier::IntVector& num_ghosts_pressure,
-            const hier::IntVector& num_ghosts_mixture_thermo_properties,
+            const hier::IntVector& offset_partial_pressure_partial_volume_fractions,
+            const hier::IntVector& offset_pressure,
+            const hier::IntVector& offset_mixture_thermo_properties,
             const hier::IntVector& ghostcell_dims_partial_pressure_partial_volume_fractions,
             const hier::IntVector& ghostcell_dims_pressure,
             const hier::IntVector& ghostcell_dims_mixture_thermo_properties,
@@ -630,12 +630,12 @@ class EquationOfStateMixingRulesStiffenedGas: public EquationOfStateMixingRules
          * Compute the thermodynamic properties of the mixture with volume fractions.
          */
         void
-        getMixtureThermodynamicPropertiesWithVolumeFractions(
+        computeMixtureThermodynamicPropertiesWithVolumeFractions(
             double* const gamma,
             double* const p_inf,
             const std::vector<const double*>& Z,
-            const hier::IntVector& num_ghosts_mixture_thermo_properties,
-            const hier::IntVector& num_ghosts_volume_fractions,
+            const hier::IntVector& offset_mixture_thermo_properties,
+            const hier::IntVector& offset_volume_fractions,
             const hier::IntVector& ghostcell_dims_mixture_thermo_properties,
             const hier::IntVector& ghostcell_dims_volume_fractions,
             const hier::IntVector& domain_lo,
@@ -645,14 +645,16 @@ class EquationOfStateMixingRulesStiffenedGas: public EquationOfStateMixingRules
          * Compute the thermodynamic properties of the mixture with volume fractions.
          */
         void
-        getMixtureThermodynamicPropertiesWithVolumeFractions(
+        computeMixtureThermodynamicPropertiesWithVolumeFractions(
             double* const gamma,
             double* const p_inf,
             double* const Z_last,
             const std::vector<const double*>& Z,
-            const hier::IntVector& num_ghosts_mixture_thermo_properties,
-            const hier::IntVector& num_ghosts_volume_fractions,
+            const hier::IntVector& offset_mixture_thermo_properties,
+            const hier::IntVector& offset_volume_fractions_last,
+            const hier::IntVector& offset_volume_fractions,
             const hier::IntVector& ghostcell_dims_mixture_thermo_properties,
+            const hier::IntVector& ghostcell_dims_volume_fractions_last,
             const hier::IntVector& ghostcell_dims_volume_fractions,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims) const;

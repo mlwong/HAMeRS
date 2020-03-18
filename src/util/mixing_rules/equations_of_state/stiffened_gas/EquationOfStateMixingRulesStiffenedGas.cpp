@@ -2373,35 +2373,37 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
     TBOX_ASSERT(data_mixture_thermo_properties->getDepth() == 2);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_mixture_thermo_properties->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_mixture_thermo_properties = data_mixture_thermo_properties->getGhostBox();
+    const hier::IntVector ghostcell_dims_mixture_thermo_properties = ghost_box_mixture_thermo_properties.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(data_volume_fractions->getBox().numberCells() == interior_dims);
-#endif
-    
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
-    
-    const hier::IntVector num_ghosts_mixture_thermo_properties = data_mixture_thermo_properties->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_mixture_thermo_properties =
-        data_mixture_thermo_properties->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_volume_fractions = data_volume_fractions->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_volume_fractions =
-        data_volume_fractions->getGhostBox().numberCells();
+    const hier::Box ghost_box_volume_fractions = data_volume_fractions->getGhostBox();
+    const hier::IntVector ghostcell_dims_volume_fractions = ghost_box_volume_fractions.numberCells();
     
     /*
      * Get the local lower index and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_mixture_thermo_properties(d_dim);
+    hier::IntVector offset_volume_fractions(d_dim);
+    
     if (domain.empty())
     {
+        // Get the numbers of ghost cells.
+        const hier::IntVector num_ghosts_mixture_thermo_properties = data_mixture_thermo_properties->getGhostCellWidth();
+        const hier::IntVector num_ghosts_volume_fractions = data_volume_fractions->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_mixture_thermo_properties->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+        TBOX_ASSERT(data_volume_fractions->getBox().isSpatiallyEqual(interior_box));
+#endif
+    
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_mixture_thermo_properties;
@@ -2412,6 +2414,9 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_mixture_thermo_properties = num_ghosts_mixture_thermo_properties;
+        offset_volume_fractions = num_ghosts_volume_fractions;
     }
     else
     {
@@ -2420,8 +2425,11 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
         TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_mixture_thermo_properties = domain.lower() - ghost_box_mixture_thermo_properties.lower();
+        offset_volume_fractions = domain.lower() - ghost_box_volume_fractions.lower();
     }
     
     /*
@@ -2459,12 +2467,12 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
             Z.push_back(data_volume_fractions->getPointer(si));
         }
         
-        getMixtureThermodynamicPropertiesWithVolumeFractions(
+        computeMixtureThermodynamicPropertiesWithVolumeFractions(
             gamma,
             p_inf,
             Z,
-            num_ghosts_mixture_thermo_properties,
-            num_ghosts_volume_fractions,
+            offset_mixture_thermo_properties,
+            offset_volume_fractions,
             ghostcell_dims_mixture_thermo_properties,
             ghostcell_dims_volume_fractions,
             domain_lo,
@@ -2472,20 +2480,34 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
     }
     else if (data_volume_fractions->getDepth() == d_num_species - 1)
     {
-        boost::shared_ptr<pdat::CellData<double> > data_volume_fractions_last(
-            new pdat::CellData<double>(interior_box, 1, num_ghosts_volume_fractions));
+        boost::shared_ptr<pdat::CellData<double> > data_volume_fractions_last;
+        
+        hier::IntVector offset_volume_fractions_last(d_dim);
         
         if (domain.empty())
         {
+            const hier::Box interior_box = data_volume_fractions->getBox();
+            
+            offset_volume_fractions_last = data_volume_fractions->getGhostCellWidth();
+            
+            data_volume_fractions_last = boost::make_shared<pdat::CellData<double> >(
+                interior_box, 1, data_volume_fractions->getGhostCellWidth());
+            
             data_volume_fractions_last->fillAll(double(1));
         }
         else
         {
+            offset_volume_fractions_last = hier::IntVector::getZero(d_dim);
+            
+            data_volume_fractions_last = boost::make_shared<pdat::CellData<double> >(
+                domain, 1, hier::IntVector::getZero(d_dim));
+            
             data_volume_fractions_last->fillAll(double(1), domain);
         }
         
         /*
-         * Get the pointers to the cell data of volume fractions.
+         * Get the pointers to the cell data of volume fractions and the dimensions of the ghost cell box of
+         * last volume fraction.
          */
         
         std::vector<const double*> Z;
@@ -2497,14 +2519,19 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
         
         double* const Z_last = data_volume_fractions_last->getPointer(0);
         
-        getMixtureThermodynamicPropertiesWithVolumeFractions(
+        const hier::Box ghost_box_volume_fractions_last = data_volume_fractions_last->getGhostBox();
+        const hier::IntVector ghostcell_dims_volume_fractions_last = ghost_box_volume_fractions_last.numberCells();
+        
+        computeMixtureThermodynamicPropertiesWithVolumeFractions(
             gamma,
             p_inf,
             Z_last,
             Z,
-            num_ghosts_mixture_thermo_properties,
-            num_ghosts_volume_fractions,
+            offset_mixture_thermo_properties,
+            offset_volume_fractions_last,
+            offset_volume_fractions,
             ghostcell_dims_mixture_thermo_properties,
+            ghostcell_dims_volume_fractions_last,
             ghostcell_dims_volume_fractions,
             domain_lo,
             domain_dims);
@@ -2535,35 +2562,44 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
     TBOX_ASSERT(data_mixture_thermo_properties->getDepth() == 2);
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_mixture_thermo_properties->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(side_normal < d_dim.getValue());
     
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(data_volume_fractions->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_mixture_thermo_properties->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_volume_fractions->getDirectionVector()[side_normal] > 0);
 #endif
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_mixture_thermo_properties = data_mixture_thermo_properties->getGhostBox();
+    hier::IntVector ghostcell_dims_mixture_thermo_properties = ghost_box_mixture_thermo_properties.numberCells();
     
-    const hier::IntVector num_ghosts_mixture_thermo_properties = data_mixture_thermo_properties->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_mixture_thermo_properties =
-        data_mixture_thermo_properties->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_volume_fractions = data_volume_fractions->getGhostCellWidth();
-    hier::IntVector ghostcell_dims_volume_fractions =
-        data_volume_fractions->getGhostBox().numberCells();
+    const hier::Box ghost_box_volume_fractions = data_volume_fractions->getGhostBox();
+    hier::IntVector ghostcell_dims_volume_fractions = ghost_box_volume_fractions.numberCells();
     
     /*
      * Get the local lower index and number of cells in each direction of the domain.
+     * Also, get the offsets.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_mixture_thermo_properties(d_dim);
+    hier::IntVector offset_volume_fractions(d_dim);
+    
     if (domain.empty())
     {
+        // Get the numbers of ghost cells.
+        const hier::IntVector num_ghosts_mixture_thermo_properties = data_mixture_thermo_properties->getGhostCellWidth();
+        const hier::IntVector num_ghosts_volume_fractions = data_volume_fractions->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_mixture_thermo_properties->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+        TBOX_ASSERT(data_volume_fractions->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_mixture_thermo_properties;
@@ -2574,6 +2610,9 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_mixture_thermo_properties = num_ghosts_mixture_thermo_properties;
+        offset_volume_fractions = num_ghosts_volume_fractions;
     }
     else
     {
@@ -2582,16 +2621,12 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
         TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_mixture_thermo_properties = domain.lower() - ghost_box_mixture_thermo_properties.lower();
+        offset_volume_fractions = domain.lower() - ghost_box_volume_fractions.lower();
     }
-    
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(side_normal < d_dim.getValue());
-    
-    TBOX_ASSERT(data_mixture_thermo_properties->getDirectionVector()[side_normal] > 0);
-    TBOX_ASSERT(data_volume_fractions->getDirectionVector()[side_normal] > 0);
-#endif
     
     ghostcell_dims_mixture_thermo_properties[side_normal]++;
     ghostcell_dims_volume_fractions[side_normal]++;
@@ -2632,12 +2667,12 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
             Z.push_back(data_volume_fractions->getPointer(side_normal, si));
         }
         
-        getMixtureThermodynamicPropertiesWithVolumeFractions(
+        computeMixtureThermodynamicPropertiesWithVolumeFractions(
             gamma,
             p_inf,
             Z,
-            num_ghosts_mixture_thermo_properties,
-            num_ghosts_volume_fractions,
+            offset_mixture_thermo_properties,
+            offset_volume_fractions,
             ghostcell_dims_mixture_thermo_properties,
             ghostcell_dims_volume_fractions,
             domain_lo,
@@ -2648,21 +2683,34 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
         hier::IntVector direction = hier::IntVector::getZero(d_dim);
         direction[side_normal] = 1;
         
-        boost::shared_ptr<pdat::SideData<double> > data_volume_fractions_last(
-            new pdat::SideData<double>(interior_box, 1, num_ghosts_volume_fractions,
-                direction));
+        boost::shared_ptr<pdat::SideData<double> > data_volume_fractions_last;
+        
+        hier::IntVector offset_volume_fractions_last(d_dim);
         
         if (domain.empty())
         {
+            const hier::Box interior_box = data_volume_fractions->getBox();
+            
+            offset_volume_fractions_last = data_volume_fractions->getGhostCellWidth();
+            
+            data_volume_fractions_last = boost::make_shared<pdat::SideData<double> >(
+                interior_box, 1, data_volume_fractions->getGhostCellWidth(), direction);
+        
             data_volume_fractions_last->fillAll(double(1));
         }
         else
         {
+            offset_volume_fractions_last = hier::IntVector::getZero(d_dim);
+            
+            data_volume_fractions_last = boost::make_shared<pdat::SideData<double> >(
+                domain, 1, hier::IntVector::getZero(d_dim), direction);
+            
             data_volume_fractions_last->fillAll(double(1), domain);
         }
         
         /*
-         * Get the pointers to the cell data of volume fractions.
+         * Get the pointers to the cell data of volume fractions and the dimensions of the ghost cell box of
+         * last volume fraction.
          */
         
         std::vector<const double*> Z;
@@ -2674,14 +2722,20 @@ EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWit
         
         double* const Z_last = data_volume_fractions_last->getPointer(side_normal, 0);
         
-        getMixtureThermodynamicPropertiesWithVolumeFractions(
+        const hier::Box ghost_box_volume_fractions_last = data_volume_fractions_last->getGhostBox();
+        hier::IntVector ghostcell_dims_volume_fractions_last = ghost_box_volume_fractions_last.numberCells();
+        ghostcell_dims_volume_fractions_last[side_normal]++;
+        
+        computeMixtureThermodynamicPropertiesWithVolumeFractions(
             gamma,
             p_inf,
             Z_last,
             Z,
-            num_ghosts_mixture_thermo_properties,
-            num_ghosts_volume_fractions,
+            offset_mixture_thermo_properties,
+            offset_volume_fractions_last,
+            offset_volume_fractions,
             ghostcell_dims_mixture_thermo_properties,
+            ghostcell_dims_volume_fractions_last,
             ghostcell_dims_volume_fractions,
             domain_lo,
             domain_dims);
@@ -2708,10 +2762,10 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
     const double* const p,
     const double* const gamma,
     const double* const p_inf,
-    const hier::IntVector& num_ghosts_partial_pressure_partial_partial_densities,
-    const hier::IntVector& num_ghosts_density,
-    const hier::IntVector& num_ghosts_pressure,
-    const hier::IntVector& num_ghosts_mixture_thermo_properties,
+    const hier::IntVector& offset_partial_pressure_partial_partial_densities,
+    const hier::IntVector& offset_density,
+    const hier::IntVector& offset_pressure,
+    const hier::IntVector& offset_mixture_thermo_properties,
     const hier::IntVector& ghostcell_dims_partial_pressure_partial_partial_densities,
     const hier::IntVector& ghostcell_dims_density,
     const hier::IntVector& ghostcell_dims_pressure,
@@ -2722,17 +2776,17 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_partial_pressure_partial_partial_densities =
-            num_ghosts_partial_pressure_partial_partial_densities[0];
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_0_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[0];
+        const int offset_0_partial_pressure_partial_partial_densities =
+            offset_partial_pressure_partial_partial_densities[0];
+        const int offset_0_density = offset_density[0];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_0_mixture_thermo_properties = offset_mixture_thermo_properties[0];
         
         // Compute Psi.
         for (int si = 0; si < d_num_species; si++)
@@ -2746,13 +2800,13 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
             {
                 // Compute the linear indices.
                 const int idx_partial_pressure_partial_partial_densities =
-                    i + num_ghosts_0_partial_pressure_partial_partial_densities;
+                    i + offset_0_partial_pressure_partial_partial_densities;
                 
-                const int idx_density = i + num_ghosts_0_density;
+                const int idx_density = i + offset_0_density;
                 
-                const int idx_pressure = i + num_ghosts_0_pressure;
+                const int idx_pressure = i + offset_0_pressure;
                 
-                const int idx_mixture_thermo_properties = i + num_ghosts_0_mixture_thermo_properties;
+                const int idx_mixture_thermo_properties = i + offset_0_mixture_thermo_properties;
                 
                 Psi_i[idx_partial_pressure_partial_partial_densities] = (p[idx_pressure] +
                     gamma[idx_mixture_thermo_properties]*p_inf[idx_mixture_thermo_properties])/
@@ -2763,7 +2817,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -2771,23 +2825,23 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_partial_pressure_partial_partial_densities =
-            num_ghosts_partial_pressure_partial_partial_densities[0];
-        const int num_ghosts_1_partial_pressure_partial_partial_densities =
-            num_ghosts_partial_pressure_partial_partial_densities[1];
+        const int offset_0_partial_pressure_partial_partial_densities =
+            offset_partial_pressure_partial_partial_densities[0];
+        const int offset_1_partial_pressure_partial_partial_densities =
+            offset_partial_pressure_partial_partial_densities[1];
         const int ghostcell_dim_0_partial_pressure_partial_partial_densities =
             ghostcell_dims_partial_pressure_partial_partial_densities[0];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         
-        const int num_ghosts_0_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[0];
-        const int num_ghosts_1_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[1];
+        const int offset_0_mixture_thermo_properties = offset_mixture_thermo_properties[0];
+        const int offset_1_mixture_thermo_properties = offset_mixture_thermo_properties[1];
         const int ghostcell_dim_0_mixture_thermo_properties = ghostcell_dims_mixture_thermo_properties[0];
         
         // Compute Psi.
@@ -2804,18 +2858,18 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
                 {
                     // Compute the linear indices.
                     const int idx_partial_pressure_partial_partial_densities =
-                        (i + num_ghosts_0_partial_pressure_partial_partial_densities) +
-                        (j + num_ghosts_1_partial_pressure_partial_partial_densities)*
+                        (i + offset_0_partial_pressure_partial_partial_densities) +
+                        (j + offset_1_partial_pressure_partial_partial_densities)*
                             ghostcell_dim_0_partial_pressure_partial_partial_densities;
                     
-                    const int idx_density = (i + num_ghosts_0_density) +
-                        (j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                    const int idx_density = (i + offset_0_density) +
+                        (j + offset_1_density)*ghostcell_dim_0_density;
                     
-                    const int idx_pressure = (i + num_ghosts_0_pressure) +
-                        (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                    const int idx_pressure = (i + offset_0_pressure) +
+                        (j + offset_1_pressure)*ghostcell_dim_0_pressure;
                     
-                    const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
-                        (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties;
+                    const int idx_mixture_thermo_properties = (i + offset_0_mixture_thermo_properties) +
+                        (j + offset_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties;
                     
                     Psi_i[idx_partial_pressure_partial_partial_densities] = (p[idx_pressure] +
                         gamma[idx_mixture_thermo_properties]*p_inf[idx_mixture_thermo_properties])/
@@ -2827,7 +2881,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -2837,32 +2891,32 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_partial_pressure_partial_partial_densities =
-            num_ghosts_partial_pressure_partial_partial_densities[0];
-        const int num_ghosts_1_partial_pressure_partial_partial_densities =
-            num_ghosts_partial_pressure_partial_partial_densities[1];
-        const int num_ghosts_2_partial_pressure_partial_partial_densities =
-            num_ghosts_partial_pressure_partial_partial_densities[2];
+        const int offset_0_partial_pressure_partial_partial_densities =
+            offset_partial_pressure_partial_partial_densities[0];
+        const int offset_1_partial_pressure_partial_partial_densities =
+            offset_partial_pressure_partial_partial_densities[1];
+        const int offset_2_partial_pressure_partial_partial_densities =
+            offset_partial_pressure_partial_partial_densities[2];
         const int ghostcell_dim_0_partial_pressure_partial_partial_densities =
             ghostcell_dims_partial_pressure_partial_partial_densities[0];
         const int ghostcell_dim_1_partial_pressure_partial_partial_densities =
             ghostcell_dims_partial_pressure_partial_partial_densities[1];
         
-        const int num_ghosts_0_density = num_ghosts_density[0];
-        const int num_ghosts_1_density = num_ghosts_density[1];
-        const int num_ghosts_2_density = num_ghosts_density[2];
+        const int offset_0_density = offset_density[0];
+        const int offset_1_density = offset_density[1];
+        const int offset_2_density = offset_density[2];
         const int ghostcell_dim_0_density = ghostcell_dims_density[0];
         const int ghostcell_dim_1_density = ghostcell_dims_density[1];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
-        const int num_ghosts_2_pressure = num_ghosts_pressure[2];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
+        const int offset_2_pressure = offset_pressure[2];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         const int ghostcell_dim_1_pressure = ghostcell_dims_pressure[1];
         
-        const int num_ghosts_0_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[0];
-        const int num_ghosts_1_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[1];
-        const int num_ghosts_2_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[2];
+        const int offset_0_mixture_thermo_properties = offset_mixture_thermo_properties[0];
+        const int offset_1_mixture_thermo_properties = offset_mixture_thermo_properties[1];
+        const int offset_2_mixture_thermo_properties = offset_mixture_thermo_properties[2];
         const int ghostcell_dim_0_mixture_thermo_properties = ghostcell_dims_mixture_thermo_properties[0];
         const int ghostcell_dim_1_mixture_thermo_properties = ghostcell_dims_mixture_thermo_properties[1];
         
@@ -2882,26 +2936,26 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
                     {
                         // Compute the linear indices.
                         const int idx_partial_pressure_partial_partial_densities =
-                            (i + num_ghosts_0_partial_pressure_partial_partial_densities) +
-                            (j + num_ghosts_1_partial_pressure_partial_partial_densities)*
+                            (i + offset_0_partial_pressure_partial_partial_densities) +
+                            (j + offset_1_partial_pressure_partial_partial_densities)*
                                 ghostcell_dim_0_partial_pressure_partial_partial_densities +
-                            (k + num_ghosts_2_partial_pressure_partial_partial_densities)*
+                            (k + offset_2_partial_pressure_partial_partial_densities)*
                                 ghostcell_dim_0_partial_pressure_partial_partial_densities*
                                 ghostcell_dim_1_partial_pressure_partial_partial_densities;
                         
-                        const int idx_density = (i + num_ghosts_0_density) +
-                            (j + num_ghosts_1_density)*ghostcell_dim_0_density +
-                            (k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                        const int idx_density = (i + offset_0_density) +
+                            (j + offset_1_density)*ghostcell_dim_0_density +
+                            (k + offset_2_density)*ghostcell_dim_0_density*
                                 ghostcell_dim_1_density;
                         
-                        const int idx_pressure = (i + num_ghosts_0_pressure) +
-                            (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
-                            (k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                        const int idx_pressure = (i + offset_0_pressure) +
+                            (j + offset_1_pressure)*ghostcell_dim_0_pressure +
+                            (k + offset_2_pressure)*ghostcell_dim_0_pressure*
                                 ghostcell_dim_1_pressure;
                         
-                        const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
-                            (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties +
-                            (k + num_ghosts_2_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties*
+                        const int idx_mixture_thermo_properties = (i + offset_0_mixture_thermo_properties) +
+                            (j + offset_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties +
+                            (k + offset_2_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties*
                                 ghostcell_dim_1_mixture_thermo_properties;
                         
                         Psi_i[idx_partial_pressure_partial_partial_densities] = (p[idx_pressure] +
@@ -2924,9 +2978,9 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
     std::vector<double*>& M,
     const double* const p,
     const double* const gamma,
-    const hier::IntVector& num_ghosts_partial_pressure_partial_volume_fractions,
-    const hier::IntVector& num_ghosts_pressure,
-    const hier::IntVector& num_ghosts_mixture_thermo_properties,
+    const hier::IntVector& offset_partial_pressure_partial_volume_fractions,
+    const hier::IntVector& offset_pressure,
+    const hier::IntVector& offset_mixture_thermo_properties,
     const hier::IntVector& ghostcell_dims_partial_pressure_partial_volume_fractions,
     const hier::IntVector& ghostcell_dims_pressure,
     const hier::IntVector& ghostcell_dims_mixture_thermo_properties,
@@ -2936,16 +2990,16 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_partial_pressure_partial_volume_fractions =
-            num_ghosts_partial_pressure_partial_volume_fractions[0];
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_0_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[0];
+        const int offset_0_partial_pressure_partial_volume_fractions =
+            offset_partial_pressure_partial_volume_fractions[0];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_0_mixture_thermo_properties = offset_mixture_thermo_properties[0];
         
         // Compute M.
         for (int si = 0; si < d_num_species - 1; si++)
@@ -2959,11 +3013,11 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
             {
                 // Compute the linear indices.
                 const int idx_partial_pressure_partial_volume_fractions =
-                    i + num_ghosts_0_partial_pressure_partial_volume_fractions;
+                    i + offset_0_partial_pressure_partial_volume_fractions;
                 
-                const int idx_pressure = i + num_ghosts_0_pressure;
+                const int idx_pressure = i + offset_0_pressure;
                 
-                const int idx_mixture_thermo_properties = i + num_ghosts_0_mixture_thermo_properties;
+                const int idx_mixture_thermo_properties = i + offset_0_mixture_thermo_properties;
                 
                 M_i[idx_partial_pressure_partial_volume_fractions] =
                     (gamma[idx_mixture_thermo_properties] - double(1))*
@@ -2977,7 +3031,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -2985,19 +3039,19 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_partial_pressure_partial_volume_fractions =
-            num_ghosts_partial_pressure_partial_volume_fractions[0];
-        const int num_ghosts_1_partial_pressure_partial_volume_fractions =
-            num_ghosts_partial_pressure_partial_volume_fractions[1];
+        const int offset_0_partial_pressure_partial_volume_fractions =
+            offset_partial_pressure_partial_volume_fractions[0];
+        const int offset_1_partial_pressure_partial_volume_fractions =
+            offset_partial_pressure_partial_volume_fractions[1];
         const int ghostcell_dim_0_partial_pressure_partial_volume_fractions =
             ghostcell_dims_partial_pressure_partial_volume_fractions[0];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         
-        const int num_ghosts_0_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[0];
-        const int num_ghosts_1_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[1];
+        const int offset_0_mixture_thermo_properties = offset_mixture_thermo_properties[0];
+        const int offset_1_mixture_thermo_properties = offset_mixture_thermo_properties[1];
         const int ghostcell_dim_0_mixture_thermo_properties = ghostcell_dims_mixture_thermo_properties[0];
         
         // Compute M.
@@ -3014,15 +3068,15 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
                 {
                     // Compute the linear indices.
                     const int idx_partial_pressure_partial_volume_fractions =
-                        (i + num_ghosts_0_partial_pressure_partial_volume_fractions) +
-                        (j + num_ghosts_1_partial_pressure_partial_volume_fractions)*
+                        (i + offset_0_partial_pressure_partial_volume_fractions) +
+                        (j + offset_1_partial_pressure_partial_volume_fractions)*
                             ghostcell_dim_0_partial_pressure_partial_volume_fractions;
                     
-                    const int idx_pressure = (i + num_ghosts_0_pressure) +
-                        (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                    const int idx_pressure = (i + offset_0_pressure) +
+                        (j + offset_1_pressure)*ghostcell_dim_0_pressure;
                     
-                    const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
-                        (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties;
+                    const int idx_mixture_thermo_properties = (i + offset_0_mixture_thermo_properties) +
+                        (j + offset_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties;
                     
                     M_i[idx_partial_pressure_partial_volume_fractions] =
                         (gamma[idx_mixture_thermo_properties] - double(1))*
@@ -3037,7 +3091,7 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -3047,26 +3101,26 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_partial_pressure_partial_volume_fractions =
-            num_ghosts_partial_pressure_partial_volume_fractions[0];
-        const int num_ghosts_1_partial_pressure_partial_volume_fractions =
-            num_ghosts_partial_pressure_partial_volume_fractions[1];
-        const int num_ghosts_2_partial_pressure_partial_volume_fractions =
-            num_ghosts_partial_pressure_partial_volume_fractions[2];
+        const int offset_0_partial_pressure_partial_volume_fractions =
+            offset_partial_pressure_partial_volume_fractions[0];
+        const int offset_1_partial_pressure_partial_volume_fractions =
+            offset_partial_pressure_partial_volume_fractions[1];
+        const int offset_2_partial_pressure_partial_volume_fractions =
+            offset_partial_pressure_partial_volume_fractions[2];
         const int ghostcell_dim_0_partial_pressure_partial_volume_fractions =
             ghostcell_dims_partial_pressure_partial_volume_fractions[0];
         const int ghostcell_dim_1_partial_pressure_partial_volume_fractions =
             ghostcell_dims_partial_pressure_partial_volume_fractions[1];
         
-        const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-        const int num_ghosts_1_pressure = num_ghosts_pressure[1];
-        const int num_ghosts_2_pressure = num_ghosts_pressure[2];
+        const int offset_0_pressure = offset_pressure[0];
+        const int offset_1_pressure = offset_pressure[1];
+        const int offset_2_pressure = offset_pressure[2];
         const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
         const int ghostcell_dim_1_pressure = ghostcell_dims_pressure[1];
         
-        const int num_ghosts_0_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[0];
-        const int num_ghosts_1_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[1];
-        const int num_ghosts_2_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[2];
+        const int offset_0_mixture_thermo_properties = offset_mixture_thermo_properties[0];
+        const int offset_1_mixture_thermo_properties = offset_mixture_thermo_properties[1];
+        const int offset_2_mixture_thermo_properties = offset_mixture_thermo_properties[2];
         const int ghostcell_dim_0_mixture_thermo_properties = ghostcell_dims_mixture_thermo_properties[0];
         const int ghostcell_dim_1_mixture_thermo_properties = ghostcell_dims_mixture_thermo_properties[1];
         
@@ -3086,21 +3140,21 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
                     {
                         // Compute the linear indices.
                         const int idx_partial_pressure_partial_volume_fractions =
-                            (i + num_ghosts_0_partial_pressure_partial_volume_fractions) +
-                            (j + num_ghosts_1_partial_pressure_partial_volume_fractions)*
+                            (i + offset_0_partial_pressure_partial_volume_fractions) +
+                            (j + offset_1_partial_pressure_partial_volume_fractions)*
                                 ghostcell_dim_0_partial_pressure_partial_volume_fractions +
-                            (k + num_ghosts_2_partial_pressure_partial_volume_fractions)*
+                            (k + offset_2_partial_pressure_partial_volume_fractions)*
                                 ghostcell_dim_0_partial_pressure_partial_volume_fractions*
                                 ghostcell_dim_1_partial_pressure_partial_volume_fractions;
                         
-                        const int idx_pressure = (i + num_ghosts_0_pressure) +
-                            (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
-                            (k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                        const int idx_pressure = (i + offset_0_pressure) +
+                            (j + offset_1_pressure)*ghostcell_dim_0_pressure +
+                            (k + offset_2_pressure)*ghostcell_dim_0_pressure*
                                 ghostcell_dim_1_pressure;
                         
-                        const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
-                            (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties +
-                            (k + num_ghosts_2_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties*
+                        const int idx_mixture_thermo_properties = (i + offset_0_mixture_thermo_properties) +
+                            (j + offset_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties +
+                            (k + offset_2_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties*
                                 ghostcell_dim_1_mixture_thermo_properties;
                         
                         M_i[idx_partial_pressure_partial_volume_fractions] =
@@ -3121,12 +3175,12 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
  * Compute the thermodynamic properties of the mixture with volume fractions.
  */
 void
-EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVolumeFractions(
+EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWithVolumeFractions(
     double* const gamma,
     double* const p_inf,
     const std::vector<const double*>& Z,
-    const hier::IntVector& num_ghosts_mixture_thermo_properties,
-    const hier::IntVector& num_ghosts_volume_fractions,
+    const hier::IntVector& offset_mixture_thermo_properties,
+    const hier::IntVector& offset_volume_fractions,
     const hier::IntVector& ghostcell_dims_mixture_thermo_properties,
     const hier::IntVector& ghostcell_dims_volume_fractions,
     const hier::IntVector& domain_lo,
@@ -3135,14 +3189,14 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[0];
-        const int num_ghosts_0_volume_fractions = num_ghosts_volume_fractions[0];
+        const int offset_0_mixture_thermo_properties = offset_mixture_thermo_properties[0];
+        const int offset_0_volume_fractions = offset_volume_fractions[0];
         
         // Compute temporary variables and store them in the data of gamma of p_inf temporarily.
         for (int si = 0; si < d_num_species; si++)
@@ -3156,8 +3210,8 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx_mixture_thermo_properties = i + num_ghosts_0_mixture_thermo_properties;
-                const int idx_volume_fractions = i + num_ghosts_0_volume_fractions;
+                const int idx_mixture_thermo_properties = i + offset_0_mixture_thermo_properties;
+                const int idx_volume_fractions = i + offset_0_volume_fractions;
                 
                 gamma[idx_mixture_thermo_properties] += Z[si][idx_volume_fractions]*tmp_1;
                 p_inf[idx_mixture_thermo_properties] += Z[si][idx_volume_fractions]*tmp_2;
@@ -3171,7 +3225,7 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
             // Compute the linear index.
-            const int idx_mixture_thermo_properties = i + num_ghosts_0_mixture_thermo_properties;
+            const int idx_mixture_thermo_properties = i + offset_0_mixture_thermo_properties;
             
             gamma[idx_mixture_thermo_properties] = double(1)/gamma[idx_mixture_thermo_properties] + double(1);
             
@@ -3182,7 +3236,7 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -3190,12 +3244,12 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[0];
-        const int num_ghosts_1_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[1];
+        const int offset_0_mixture_thermo_properties = offset_mixture_thermo_properties[0];
+        const int offset_1_mixture_thermo_properties = offset_mixture_thermo_properties[1];
         const int ghostcell_dim_0_mixture_thermo_properties = ghostcell_dims_mixture_thermo_properties[0];
         
-        const int num_ghosts_0_volume_fractions = num_ghosts_volume_fractions[0];
-        const int num_ghosts_1_volume_fractions = num_ghosts_volume_fractions[1];
+        const int offset_0_volume_fractions = offset_volume_fractions[0];
+        const int offset_1_volume_fractions = offset_volume_fractions[1];
         const int ghostcell_dim_0_volume_fractions = ghostcell_dims_volume_fractions[0];
         
         // Compute temporary variables and store them in the data of gamma of p_inf temporarily.
@@ -3212,11 +3266,11 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
-                        (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties;
+                    const int idx_mixture_thermo_properties = (i + offset_0_mixture_thermo_properties) +
+                        (j + offset_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties;
                     
-                    const int idx_volume_fractions = (i + num_ghosts_0_volume_fractions) +
-                        (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                    const int idx_volume_fractions = (i + offset_0_volume_fractions) +
+                        (j + offset_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
                     
                     gamma[idx_mixture_thermo_properties] += Z[si][idx_volume_fractions]*tmp_1;
                     p_inf[idx_mixture_thermo_properties] += Z[si][idx_volume_fractions]*tmp_2;
@@ -3233,8 +3287,8 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear index.
-                const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
-                    (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties;
+                const int idx_mixture_thermo_properties = (i + offset_0_mixture_thermo_properties) +
+                    (j + offset_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties;
                 
                 gamma[idx_mixture_thermo_properties] = double(1)/gamma[idx_mixture_thermo_properties] + double(1);
                 
@@ -3246,7 +3300,7 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -3256,15 +3310,15 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[0];
-        const int num_ghosts_1_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[1];
-        const int num_ghosts_2_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[2];
+        const int offset_0_mixture_thermo_properties = offset_mixture_thermo_properties[0];
+        const int offset_1_mixture_thermo_properties = offset_mixture_thermo_properties[1];
+        const int offset_2_mixture_thermo_properties = offset_mixture_thermo_properties[2];
         const int ghostcell_dim_0_mixture_thermo_properties = ghostcell_dims_mixture_thermo_properties[0];
         const int ghostcell_dim_1_mixture_thermo_properties = ghostcell_dims_mixture_thermo_properties[1];
         
-        const int num_ghosts_0_volume_fractions = num_ghosts_volume_fractions[0];
-        const int num_ghosts_1_volume_fractions = num_ghosts_volume_fractions[1];
-        const int num_ghosts_2_volume_fractions = num_ghosts_volume_fractions[2];
+        const int offset_0_volume_fractions = offset_volume_fractions[0];
+        const int offset_1_volume_fractions = offset_volume_fractions[1];
+        const int offset_2_volume_fractions = offset_volume_fractions[2];
         const int ghostcell_dim_0_volume_fractions = ghostcell_dims_volume_fractions[0];
         const int ghostcell_dim_1_volume_fractions = ghostcell_dims_volume_fractions[1];
         
@@ -3284,14 +3338,14 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
-                            (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties +
-                            (k + num_ghosts_2_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties*
+                        const int idx_mixture_thermo_properties = (i + offset_0_mixture_thermo_properties) +
+                            (j + offset_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties +
+                            (k + offset_2_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties*
                                 ghostcell_dim_1_mixture_thermo_properties;
                         
-                        const int idx_volume_fractions = (i + num_ghosts_0_volume_fractions) +
-                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
-                            (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                        const int idx_volume_fractions = (i + offset_0_volume_fractions) +
+                            (j + offset_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                            (k + offset_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
                                 ghostcell_dim_1_volume_fractions;
                         
                         gamma[idx_mixture_thermo_properties] += Z[si][idx_volume_fractions]*tmp_1;
@@ -3312,9 +3366,9 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
-                    const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
-                        (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties +
-                        (k + num_ghosts_2_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties*
+                    const int idx_mixture_thermo_properties = (i + offset_0_mixture_thermo_properties) +
+                        (j + offset_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties +
+                        (k + offset_2_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties*
                             ghostcell_dim_1_mixture_thermo_properties;
                     
                     gamma[idx_mixture_thermo_properties] = double(1)/gamma[idx_mixture_thermo_properties] + double(1);
@@ -3332,14 +3386,16 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
  * Compute the thermodynamic properties of the mixture with volume fractions.
  */
 void
-EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVolumeFractions(
+EquationOfStateMixingRulesStiffenedGas::computeMixtureThermodynamicPropertiesWithVolumeFractions(
     double* const gamma,
     double* const p_inf,
     double* const Z_last,
     const std::vector<const double*>& Z,
-    const hier::IntVector& num_ghosts_mixture_thermo_properties,
-    const hier::IntVector& num_ghosts_volume_fractions,
+    const hier::IntVector& offset_mixture_thermo_properties,
+    const hier::IntVector& offset_volume_fractions_last,
+    const hier::IntVector& offset_volume_fractions,
     const hier::IntVector& ghostcell_dims_mixture_thermo_properties,
+    const hier::IntVector& ghostcell_dims_volume_fractions_last,
     const hier::IntVector& ghostcell_dims_volume_fractions,
     const hier::IntVector& domain_lo,
     const hier::IntVector& domain_dims) const
@@ -3347,14 +3403,15 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[0];
-        const int num_ghosts_0_volume_fractions = num_ghosts_volume_fractions[0];
+        const int offset_0_mixture_thermo_properties = offset_mixture_thermo_properties[0];
+        const int offset_0_volume_fractions_last = offset_volume_fractions_last[0];
+        const int offset_0_volume_fractions = offset_volume_fractions[0];
         
         // Compute temporary variables and store them in the data of gamma of p_inf temporarily.
         for (int si = 0; si < d_num_species - 1; si++)
@@ -3368,14 +3425,15 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx_mixture_thermo_properties = i + num_ghosts_0_mixture_thermo_properties;
-                const int idx_volume_fractions = i + num_ghosts_0_volume_fractions;
+                const int idx_mixture_thermo_properties = i + offset_0_mixture_thermo_properties;
+                const int idx_volume_fractions_last = i + offset_0_volume_fractions_last;
+                const int idx_volume_fractions = i + offset_0_volume_fractions;
                 
                 gamma[idx_mixture_thermo_properties] += Z[si][idx_volume_fractions]*tmp_1;
                 p_inf[idx_mixture_thermo_properties] += Z[si][idx_volume_fractions]*tmp_2;
                 
                 // Compute the volume fraction of the last species.
-                Z_last[idx_volume_fractions] -= Z[si][idx_volume_fractions];
+                Z_last[idx_volume_fractions_last] -= Z[si][idx_volume_fractions];
             }
         }
         
@@ -3390,11 +3448,11 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
             // Compute the linear indices.
-            const int idx_mixture_thermo_properties = i + num_ghosts_0_mixture_thermo_properties;
-            const int idx_volume_fractions = i + num_ghosts_0_volume_fractions;
+            const int idx_mixture_thermo_properties = i + offset_0_mixture_thermo_properties;
+            const int idx_volume_fractions_last = i + offset_0_volume_fractions_last;
             
-            gamma[idx_mixture_thermo_properties] += Z_last[idx_volume_fractions]*tmp_1;
-            p_inf[idx_mixture_thermo_properties] += Z_last[idx_volume_fractions]*tmp_2;
+            gamma[idx_mixture_thermo_properties] += Z_last[idx_volume_fractions_last]*tmp_1;
+            p_inf[idx_mixture_thermo_properties] += Z_last[idx_volume_fractions_last]*tmp_2;
             
             gamma[idx_mixture_thermo_properties] = double(1)/gamma[idx_mixture_thermo_properties] + double(1);
             
@@ -3405,7 +3463,7 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -3413,12 +3471,16 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[0];
-        const int num_ghosts_1_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[1];
+        const int offset_0_mixture_thermo_properties = offset_mixture_thermo_properties[0];
+        const int offset_1_mixture_thermo_properties = offset_mixture_thermo_properties[1];
         const int ghostcell_dim_0_mixture_thermo_properties = ghostcell_dims_mixture_thermo_properties[0];
         
-        const int num_ghosts_0_volume_fractions = num_ghosts_volume_fractions[0];
-        const int num_ghosts_1_volume_fractions = num_ghosts_volume_fractions[1];
+        const int offset_0_volume_fractions_last = offset_volume_fractions_last[0];
+        const int offset_1_volume_fractions_last = offset_volume_fractions_last[1];
+        const int ghostcell_dim_0_volume_fractions_last = ghostcell_dims_volume_fractions_last[0];
+        
+        const int offset_0_volume_fractions = offset_volume_fractions[0];
+        const int offset_1_volume_fractions = offset_volume_fractions[1];
         const int ghostcell_dim_0_volume_fractions = ghostcell_dims_volume_fractions[0];
         
         // Compute temporary variables and store them in the data of gamma of p_inf temporarily.
@@ -3435,17 +3497,20 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
-                        (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties;
+                    const int idx_mixture_thermo_properties = (i + offset_0_mixture_thermo_properties) +
+                        (j + offset_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties;
                     
-                    const int idx_volume_fractions = (i + num_ghosts_0_volume_fractions) +
-                        (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                    const int idx_volume_fractions_last = (i + offset_0_volume_fractions_last) +
+                        (j + offset_1_volume_fractions_last)*ghostcell_dim_0_volume_fractions_last;
+                    
+                    const int idx_volume_fractions = (i + offset_0_volume_fractions) +
+                        (j + offset_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
                     
                     gamma[idx_mixture_thermo_properties] += Z[si][idx_volume_fractions]*tmp_1;
                     p_inf[idx_mixture_thermo_properties] += Z[si][idx_volume_fractions]*tmp_2;
                     
                     // Compute the volume fraction of the last species.
-                    Z_last[idx_volume_fractions] -= Z[si][idx_volume_fractions];
+                    Z_last[idx_volume_fractions_last] -= Z[si][idx_volume_fractions];
                 }
             }
         }
@@ -3463,14 +3528,14 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
-                    (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties;
+                const int idx_mixture_thermo_properties = (i + offset_0_mixture_thermo_properties) +
+                    (j + offset_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties;
                 
-                const int idx_volume_fractions = (i + num_ghosts_0_volume_fractions) +
-                    (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                const int idx_volume_fractions_last = (i + offset_0_volume_fractions_last) +
+                    (j + offset_1_volume_fractions_last)*ghostcell_dim_0_volume_fractions_last;
                 
-                gamma[idx_mixture_thermo_properties] += Z_last[idx_volume_fractions]*tmp_1;
-                p_inf[idx_mixture_thermo_properties] += Z_last[idx_volume_fractions]*tmp_2;
+                gamma[idx_mixture_thermo_properties] += Z_last[idx_volume_fractions_last]*tmp_1;
+                p_inf[idx_mixture_thermo_properties] += Z_last[idx_volume_fractions_last]*tmp_2;
                 
                 gamma[idx_mixture_thermo_properties] = double(1)/gamma[idx_mixture_thermo_properties] + double(1);
                 
@@ -3482,7 +3547,7 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -3492,15 +3557,21 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[0];
-        const int num_ghosts_1_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[1];
-        const int num_ghosts_2_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[2];
+        const int offset_0_mixture_thermo_properties = offset_mixture_thermo_properties[0];
+        const int offset_1_mixture_thermo_properties = offset_mixture_thermo_properties[1];
+        const int offset_2_mixture_thermo_properties = offset_mixture_thermo_properties[2];
         const int ghostcell_dim_0_mixture_thermo_properties = ghostcell_dims_mixture_thermo_properties[0];
         const int ghostcell_dim_1_mixture_thermo_properties = ghostcell_dims_mixture_thermo_properties[1];
         
-        const int num_ghosts_0_volume_fractions = num_ghosts_volume_fractions[0];
-        const int num_ghosts_1_volume_fractions = num_ghosts_volume_fractions[1];
-        const int num_ghosts_2_volume_fractions = num_ghosts_volume_fractions[2];
+        const int offset_0_volume_fractions_last = offset_volume_fractions_last[0];
+        const int offset_1_volume_fractions_last = offset_volume_fractions_last[1];
+        const int offset_2_volume_fractions_last = offset_volume_fractions_last[2];
+        const int ghostcell_dim_0_volume_fractions_last = ghostcell_dims_volume_fractions_last[0];
+        const int ghostcell_dim_1_volume_fractions_last = ghostcell_dims_volume_fractions_last[1];
+        
+        const int offset_0_volume_fractions = offset_volume_fractions[0];
+        const int offset_1_volume_fractions = offset_volume_fractions[1];
+        const int offset_2_volume_fractions = offset_volume_fractions[2];
         const int ghostcell_dim_0_volume_fractions = ghostcell_dims_volume_fractions[0];
         const int ghostcell_dim_1_volume_fractions = ghostcell_dims_volume_fractions[1];
         
@@ -3520,21 +3591,26 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
-                            (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties +
-                            (k + num_ghosts_2_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties*
+                        const int idx_mixture_thermo_properties = (i + offset_0_mixture_thermo_properties) +
+                            (j + offset_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties +
+                            (k + offset_2_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties*
                                 ghostcell_dim_1_mixture_thermo_properties;
                         
-                        const int idx_volume_fractions = (i + num_ghosts_0_volume_fractions) +
-                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
-                            (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                        const int idx_volume_fractions_last = (i + offset_0_volume_fractions_last) +
+                            (j + offset_1_volume_fractions_last)*ghostcell_dim_0_volume_fractions_last +
+                            (k + offset_2_volume_fractions_last)*ghostcell_dim_0_volume_fractions_last*
+                                ghostcell_dim_1_volume_fractions_last;
+                        
+                        const int idx_volume_fractions = (i + offset_0_volume_fractions) +
+                            (j + offset_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                            (k + offset_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
                                 ghostcell_dim_1_volume_fractions;
                         
                         gamma[idx_mixture_thermo_properties] += Z[si][idx_volume_fractions]*tmp_1;
                         p_inf[idx_mixture_thermo_properties] += Z[si][idx_volume_fractions]*tmp_2;
                         
                         // Compute the volume fraction of the last species.
-                        Z_last[idx_volume_fractions] -= Z[si][idx_volume_fractions];
+                        Z_last[idx_volume_fractions_last] -= Z[si][idx_volume_fractions];
                     }
                 }
             }
@@ -3555,18 +3631,18 @@ EquationOfStateMixingRulesStiffenedGas::getMixtureThermodynamicPropertiesWithVol
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
-                        (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties +
-                        (k + num_ghosts_2_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties*
+                    const int idx_mixture_thermo_properties = (i + offset_0_mixture_thermo_properties) +
+                        (j + offset_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties +
+                        (k + offset_2_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties*
                             ghostcell_dim_1_mixture_thermo_properties;
                     
-                    const int idx_volume_fractions = (i + num_ghosts_0_volume_fractions) +
-                        (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
-                        (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
-                            ghostcell_dim_1_volume_fractions;
+                    const int idx_volume_fractions_last = (i + offset_0_volume_fractions_last) +
+                        (j + offset_1_volume_fractions_last)*ghostcell_dim_0_volume_fractions_last +
+                        (k + offset_2_volume_fractions_last)*ghostcell_dim_0_volume_fractions_last*
+                            ghostcell_dim_1_volume_fractions_last;
                         
-                    gamma[idx_mixture_thermo_properties] += Z_last[idx_volume_fractions]*tmp_1;
-                    p_inf[idx_mixture_thermo_properties] += Z_last[idx_volume_fractions]*tmp_2;
+                    gamma[idx_mixture_thermo_properties] += Z_last[idx_volume_fractions_last]*tmp_1;
+                    p_inf[idx_mixture_thermo_properties] += Z_last[idx_volume_fractions_last]*tmp_2;
                     
                     gamma[idx_mixture_thermo_properties] = double(1)/gamma[idx_mixture_thermo_properties] + double(1);
                     
