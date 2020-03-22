@@ -357,13 +357,13 @@ EquationOfStateMixingRulesStiffenedGas::getPressure(
     const std::vector<const double*>& mass_fractions,
     const std::vector<const double*>& volume_fractions) const
 {
+    NULL_USE(mass_fractions);
+    
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     TBOX_ASSERT((static_cast<int>(volume_fractions.size()) == d_num_species) ||
                 (static_cast<int>(volume_fractions.size()) == d_num_species - 1));
 #endif
-    
-    NULL_USE(mass_fractions);
     
     // Get the mixture thermodynamic properties.
     std::vector<double> mixture_thermo_properties;
@@ -405,6 +405,8 @@ EquationOfStateMixingRulesStiffenedGas::computePressure(
     const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
     const hier::Box& domain) const
 {
+    NULL_USE(data_mass_fractions);
+    
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     
@@ -417,46 +419,58 @@ EquationOfStateMixingRulesStiffenedGas::computePressure(
                 (data_volume_fractions->getDepth() == d_num_species - 1));
 #endif
     
-    NULL_USE(data_mass_fractions);
-    
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_pressure->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
-    
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_internal_energy->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_volume_fractions->getBox().numberCells() == interior_dims);
-#endif
-    
-    /*
-     * Get the numbers of ghost cells.
-     */
-    
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
-    const hier::IntVector num_ghosts_volume_fractions = data_volume_fractions->getGhostCellWidth();
-    
-    /*
-     * Get the minimum number of ghost cells for mixture thermodynamic properties.
-     */
-    
-    hier::IntVector num_ghosts_min(d_dim);
-    
-    num_ghosts_min = num_ghosts_pressure;
-    num_ghosts_min = hier::IntVector::min(num_ghosts_density, num_ghosts_min);
-    num_ghosts_min = hier::IntVector::min(num_ghosts_internal_energy, num_ghosts_min);
-    num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
-    
     /*
      * Get the mixture thermodyanmic properties.
      */
     
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
-    boost::shared_ptr<pdat::CellData<double> > data_mixture_thermo_properties(
-        new pdat::CellData<double>(interior_box, num_thermo_properties, num_ghosts_min));
+    // Declare data container for mixture thermodyanmic properties.
+    boost::shared_ptr<pdat::CellData<double> > data_mixture_thermo_properties;
+    
+    if (domain.empty())
+    {
+        // Get the numbers of ghost cells.
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
+        const hier::IntVector num_ghosts_volume_fractions = data_volume_fractions->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_pressure->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_internal_energy->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_volume_fractions->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
+        /*
+         * Get the minimum number of ghost cells for mixture thermodynamic properties.
+         */
+        
+        hier::IntVector num_ghosts_min(d_dim);
+        
+        num_ghosts_min = num_ghosts_pressure;
+        num_ghosts_min = hier::IntVector::min(num_ghosts_density, num_ghosts_min);
+        num_ghosts_min = hier::IntVector::min(num_ghosts_internal_energy, num_ghosts_min);
+        num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
+        
+        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+            interior_box, num_thermo_properties, num_ghosts_min);
+    }
+    else
+    {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_pressure->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_density->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_internal_energy->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
+#endif
+        
+        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+            domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
+    }
     
     computeMixtureThermodynamicPropertiesWithVolumeFractions(
         data_mixture_thermo_properties,
@@ -485,6 +499,8 @@ EquationOfStateMixingRulesStiffenedGas::computePressure(
     int side_normal,
     const hier::Box& domain) const
 {
+    NULL_USE(data_mass_fractions);
+    
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     
@@ -496,38 +512,6 @@ EquationOfStateMixingRulesStiffenedGas::computePressure(
     TBOX_ASSERT((data_volume_fractions->getDepth() == d_num_species) ||
                 (data_volume_fractions->getDepth() == d_num_species - 1));
 #endif
-    
-    NULL_USE(data_mass_fractions);
-    
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_pressure->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
-    
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_internal_energy->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_volume_fractions->getBox().numberCells() == interior_dims);
-#endif
-    
-    /*
-     * Get the numbers of ghost cells.
-     */
-    
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
-    const hier::IntVector num_ghosts_volume_fractions = data_volume_fractions->getGhostCellWidth();
-    
-    /*
-     * Get the minimum number of ghost cells for mixture thermodynamic properties.
-     */
-    
-    hier::IntVector num_ghosts_min(d_dim);
-    
-    num_ghosts_min = num_ghosts_pressure;
-    num_ghosts_min = hier::IntVector::min(num_ghosts_density, num_ghosts_min);
-    num_ghosts_min = hier::IntVector::min(num_ghosts_internal_energy, num_ghosts_min);
-    num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(side_normal < d_dim.getValue());
@@ -547,9 +531,52 @@ EquationOfStateMixingRulesStiffenedGas::computePressure(
     
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
-    boost::shared_ptr<pdat::SideData<double> > data_mixture_thermo_properties(
-        new pdat::SideData<double>(interior_box, num_thermo_properties, num_ghosts_min,
-            direction));
+    // Declare data container for mixture thermodyanmic properties.
+    boost::shared_ptr<pdat::SideData<double> > data_mixture_thermo_properties;
+    
+    if (domain.empty())
+    {
+        // Get the numbers of ghost cells.
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
+        const hier::IntVector num_ghosts_volume_fractions = data_volume_fractions->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_pressure->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_internal_energy->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_volume_fractions->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
+        /*
+         * Get the minimum number of ghost cells for mixture thermodynamic properties.
+         */
+        
+        hier::IntVector num_ghosts_min(d_dim);
+        
+        num_ghosts_min = num_ghosts_pressure;
+        num_ghosts_min = hier::IntVector::min(num_ghosts_density, num_ghosts_min);
+        num_ghosts_min = hier::IntVector::min(num_ghosts_internal_energy, num_ghosts_min);
+        num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
+        
+        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+            interior_box, num_thermo_properties, num_ghosts_min, direction);
+    }
+    else
+    {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_pressure->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_density->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_internal_energy->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
+#endif
+        
+        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+            domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
+    }
     
     computeMixtureThermodynamicPropertiesWithVolumeFractions(
         data_mixture_thermo_properties,
@@ -635,13 +662,13 @@ EquationOfStateMixingRulesStiffenedGas::getInternalEnergy(
     const std::vector<const double*>& mass_fractions,
     const std::vector<const double*>& volume_fractions) const
 {
+    NULL_USE(mass_fractions);
+    
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     TBOX_ASSERT((static_cast<int>(volume_fractions.size()) == d_num_species) ||
                 (static_cast<int>(volume_fractions.size()) == d_num_species - 1));
 #endif
-    
-    NULL_USE(mass_fractions);
     
     // Get the mixture thermodynamic properties.
     std::vector<double> mixture_thermo_properties;
@@ -683,6 +710,8 @@ EquationOfStateMixingRulesStiffenedGas::computeInternalEnergy(
     const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
     const hier::Box& domain) const
 {
+    NULL_USE(data_mass_fractions);
+    
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     
@@ -695,46 +724,58 @@ EquationOfStateMixingRulesStiffenedGas::computeInternalEnergy(
                 (data_volume_fractions->getDepth() == d_num_species - 1));
 #endif
     
-    NULL_USE(data_mass_fractions);
-    
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_internal_energy->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
-    
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_volume_fractions->getBox().numberCells() == interior_dims);
-#endif
-    
-    /*
-     * Get the numbers of ghost cells.
-     */
-    
-    const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    const hier::IntVector num_ghosts_volume_fractions = data_volume_fractions->getGhostCellWidth();
-    
-    /*
-     * Get the minimum number of ghost cells for mixture thermodynamic properties.
-     */
-    
-    hier::IntVector num_ghosts_min(d_dim);
-    
-    num_ghosts_min = num_ghosts_internal_energy;
-    num_ghosts_min = hier::IntVector::min(num_ghosts_density, num_ghosts_min);
-    num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
-    num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
-    
     /*
      * Get the mixture thermodyanmic properties.
      */
     
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
-    boost::shared_ptr<pdat::CellData<double> > data_mixture_thermo_properties(
-        new pdat::CellData<double>(interior_box, num_thermo_properties, num_ghosts_min));
+    // Declare data container for mixture thermodyanmic properties.
+    boost::shared_ptr<pdat::CellData<double> > data_mixture_thermo_properties;
+    
+    if (domain.empty())
+    {
+        // Get the numbers of ghost cells.
+        const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        const hier::IntVector num_ghosts_volume_fractions = data_volume_fractions->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_internal_energy->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_volume_fractions->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
+        /*
+         * Get the minimum number of ghost cells for mixture thermodynamic properties.
+         */
+        
+        hier::IntVector num_ghosts_min(d_dim);
+        
+        num_ghosts_min = num_ghosts_internal_energy;
+        num_ghosts_min = hier::IntVector::min(num_ghosts_density, num_ghosts_min);
+        num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
+        num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
+        
+        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+            interior_box, num_thermo_properties, num_ghosts_min);
+    }
+    else
+    {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_internal_energy->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_density->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_pressure->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
+#endif
+        
+        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+            domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
+    }
     
     computeMixtureThermodynamicPropertiesWithVolumeFractions(
         data_mixture_thermo_properties,
@@ -763,6 +804,8 @@ EquationOfStateMixingRulesStiffenedGas::computeInternalEnergy(
     int side_normal,
     const hier::Box& domain) const
 {
+    NULL_USE(data_mass_fractions);
+    
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     
@@ -774,38 +817,6 @@ EquationOfStateMixingRulesStiffenedGas::computeInternalEnergy(
     TBOX_ASSERT((data_volume_fractions->getDepth() == d_num_species) ||
                 (data_volume_fractions->getDepth() == d_num_species - 1));
 #endif
-    
-    NULL_USE(data_mass_fractions);
-    
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_internal_energy->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
-    
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_volume_fractions->getBox().numberCells() == interior_dims);
-#endif
-    
-    /*
-     * Get the numbers of ghost cells.
-     */
-    
-    const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    const hier::IntVector num_ghosts_volume_fractions = data_volume_fractions->getGhostCellWidth();
-    
-    /*
-     * Get the minimum number of ghost cells for mixture thermodynamic properties.
-     */
-    
-    hier::IntVector num_ghosts_min(d_dim);
-    
-    num_ghosts_min = num_ghosts_internal_energy;
-    num_ghosts_min = hier::IntVector::min(num_ghosts_density, num_ghosts_min);
-    num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
-    num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(side_normal < d_dim.getValue());
@@ -825,9 +836,52 @@ EquationOfStateMixingRulesStiffenedGas::computeInternalEnergy(
     
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
-    boost::shared_ptr<pdat::SideData<double> > data_mixture_thermo_properties(
-        new pdat::SideData<double>(interior_box, num_thermo_properties, num_ghosts_min,
-            direction));
+    // Declare data container for mixture thermodyanmic properties.
+    boost::shared_ptr<pdat::SideData<double> > data_mixture_thermo_properties;
+    
+    if (domain.empty())
+    {
+        // Get the numbers of ghost cells.
+        const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        const hier::IntVector num_ghosts_volume_fractions = data_volume_fractions->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_internal_energy->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_volume_fractions->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
+        /*
+         * Get the minimum number of ghost cells for mixture thermodynamic properties.
+         */
+        
+        hier::IntVector num_ghosts_min(d_dim);
+        
+        num_ghosts_min = num_ghosts_internal_energy;
+        num_ghosts_min = hier::IntVector::min(num_ghosts_density, num_ghosts_min);
+        num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
+        num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
+        
+        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+            interior_box, num_thermo_properties, num_ghosts_min, direction);
+    }
+    else
+    {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_internal_energy->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_density->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_pressure->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
+#endif
+        
+        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+            domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
+    }
     
     computeMixtureThermodynamicPropertiesWithVolumeFractions(
         data_mixture_thermo_properties,
@@ -1162,13 +1216,13 @@ EquationOfStateMixingRulesStiffenedGas::getGruneisenParameter(
     const std::vector<const double*>& mass_fractions,
     const std::vector<const double*>& volume_fractions) const
 {
+    NULL_USE(mass_fractions);
+    
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     TBOX_ASSERT((static_cast<int>(volume_fractions.size()) == d_num_species) ||
                 (static_cast<int>(volume_fractions.size()) == d_num_species - 1));
 #endif
-    
-    NULL_USE(mass_fractions);
     
     // Get the mixture thermodynamic properties.
     std::vector<double> mixture_thermo_properties;
@@ -1212,6 +1266,8 @@ EquationOfStateMixingRulesStiffenedGas::computeGruneisenParameter(
     const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
     const hier::Box& domain) const
 {
+    NULL_USE(data_mass_fractions);
+    
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     
@@ -1224,46 +1280,58 @@ EquationOfStateMixingRulesStiffenedGas::computeGruneisenParameter(
                 (data_volume_fractions->getDepth() == d_num_species - 1));
 #endif
     
-    NULL_USE(data_mass_fractions);
-    
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_gruneisen_parameter->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
-    
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_volume_fractions->getBox().numberCells() == interior_dims);
-#endif
-    
-    /*
-     * Get the numbers of ghost cells.
-     */
-    
-    const hier::IntVector num_ghosts_gruneisen_parameter = data_gruneisen_parameter->getGhostCellWidth();
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    const hier::IntVector num_ghosts_volume_fractions = data_volume_fractions->getGhostCellWidth();
-    
-    /*
-     * Get the minimum number of ghost cells for mixture thermodynamic properties.
-     */
-    
-    hier::IntVector num_ghosts_min(d_dim);
-    
-    num_ghosts_min = num_ghosts_gruneisen_parameter;
-    num_ghosts_min = hier::IntVector::min(num_ghosts_density, num_ghosts_min);
-    num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
-    num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
-    
     /*
      * Get the mixture thermodyanmic properties.
      */
     
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
-    boost::shared_ptr<pdat::CellData<double> > data_mixture_thermo_properties(
-        new pdat::CellData<double>(interior_box, num_thermo_properties, num_ghosts_min));
+    // Declare data container for mixture thermodyanmic properties.
+    boost::shared_ptr<pdat::CellData<double> > data_mixture_thermo_properties;
+    
+    if (domain.empty())
+    {
+        // Get the numbers of ghost cells.
+        const hier::IntVector num_ghosts_gruneisen_parameter = data_gruneisen_parameter->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        const hier::IntVector num_ghosts_volume_fractions = data_volume_fractions->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_gruneisen_parameter->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_volume_fractions->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
+        /*
+         * Get the minimum number of ghost cells for mixture thermodynamic properties.
+         */
+        
+        hier::IntVector num_ghosts_min(d_dim);
+        
+        num_ghosts_min = num_ghosts_gruneisen_parameter;
+        num_ghosts_min = hier::IntVector::min(num_ghosts_density, num_ghosts_min);
+        num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
+        num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
+        
+        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+            interior_box, num_thermo_properties, num_ghosts_min);
+    }
+    else
+    {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_gruneisen_parameter->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_density->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_pressure->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
+#endif
+        
+        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+            domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
+    }
     
     computeMixtureThermodynamicPropertiesWithVolumeFractions(
         data_mixture_thermo_properties,
@@ -1294,6 +1362,8 @@ EquationOfStateMixingRulesStiffenedGas::computeGruneisenParameter(
     int side_normal,
     const hier::Box& domain) const
 {
+    NULL_USE(data_mass_fractions);
+    
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     
@@ -1305,38 +1375,6 @@ EquationOfStateMixingRulesStiffenedGas::computeGruneisenParameter(
     TBOX_ASSERT((data_volume_fractions->getDepth() == d_num_species) ||
                 (data_volume_fractions->getDepth() == d_num_species - 1));
 #endif
-    
-    NULL_USE(data_mass_fractions);
-    
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_gruneisen_parameter->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
-    
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_volume_fractions->getBox().numberCells() == interior_dims);
-#endif
-    
-    /*
-     * Get the numbers of ghost cells.
-     */
-    
-    const hier::IntVector num_ghosts_gruneisen_parameter = data_gruneisen_parameter->getGhostCellWidth();
-    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    const hier::IntVector num_ghosts_volume_fractions = data_volume_fractions->getGhostCellWidth();
-    
-    /*
-     * Get the minimum number of ghost cells for mixture thermodynamic properties.
-     */
-    
-    hier::IntVector num_ghosts_min(d_dim);
-    
-    num_ghosts_min = num_ghosts_gruneisen_parameter;
-    num_ghosts_min = hier::IntVector::min(num_ghosts_density, num_ghosts_min);
-    num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
-    num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(side_normal < d_dim.getValue());
@@ -1356,9 +1394,51 @@ EquationOfStateMixingRulesStiffenedGas::computeGruneisenParameter(
     
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
-    boost::shared_ptr<pdat::SideData<double> > data_mixture_thermo_properties(
-        new pdat::SideData<double>(interior_box, num_thermo_properties, num_ghosts_min,
-            direction));
+    // Get the box that covers the interior of patch.
+    boost::shared_ptr<pdat::SideData<double> > data_mixture_thermo_properties;
+    
+    if (domain.empty())
+    {
+        // Get the numbers of ghost cells.
+        const hier::IntVector num_ghosts_gruneisen_parameter = data_gruneisen_parameter->getGhostCellWidth();
+        const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        const hier::IntVector num_ghosts_volume_fractions = data_volume_fractions->getGhostCellWidth();
+        
+        // Get the box that covers the interior of patch.
+        const hier::Box interior_box = data_gruneisen_parameter->getBox();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_density->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_volume_fractions->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
+        /*
+         * Get the minimum number of ghost cells for mixture thermodynamic properties.
+         */
+        
+        hier::IntVector num_ghosts_min(d_dim);
+        
+        num_ghosts_min = num_ghosts_gruneisen_parameter;
+        num_ghosts_min = hier::IntVector::min(num_ghosts_density, num_ghosts_min);
+        num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
+        num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
+        
+        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+            interior_box, num_thermo_properties, num_ghosts_min, direction);
+    }
+    else
+    {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_gruneisen_parameter->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_density->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_pressure->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
+#endif
+        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+            domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
+    }
     
     computeMixtureThermodynamicPropertiesWithVolumeFractions(
         data_mixture_thermo_properties,
@@ -1455,13 +1535,13 @@ EquationOfStateMixingRulesStiffenedGas::getPressureDerivativeWithPartialDensitie
     const std::vector<const double*>& mass_fractions,
     const std::vector<const double*>& volume_fractions) const
 {
+    NULL_USE(mass_fractions);
+    
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     TBOX_ASSERT((static_cast<int>(volume_fractions.size()) == d_num_species) ||
                 (static_cast<int>(volume_fractions.size()) == d_num_species - 1));
 #endif
-    
-    NULL_USE(mass_fractions);
     
     // Get the mixture thermodynamic properties.
     std::vector<double> mixture_thermo_properties;
@@ -1512,6 +1592,8 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
     const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
     const hier::Box& domain) const
 {
+    NULL_USE(data_mass_fractions);
+    
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     
@@ -1525,8 +1607,6 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
     TBOX_ASSERT((data_volume_fractions->getDepth() == d_num_species) ||
                 (data_volume_fractions->getDepth() == d_num_species - 1));
 #endif
-    
-    NULL_USE(data_mass_fractions);
     
     // Get the dimensions of box that covers the interior of patch.
     const hier::Box interior_box = data_partial_pressure_partial_partial_densities->getBox();
@@ -1664,6 +1744,8 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
     int side_normal,
     const hier::Box& domain) const
 {
+    NULL_USE(data_mass_fractions);
+    
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     
@@ -1677,8 +1759,6 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithPartialDens
     TBOX_ASSERT((data_volume_fractions->getDepth() == d_num_species) ||
                 (data_volume_fractions->getDepth() == d_num_species - 1));
 #endif
-    
-    NULL_USE(data_mass_fractions);
     
     // Get the dimensions of box that covers the interior of patch.
     const hier::Box interior_box = data_partial_pressure_partial_partial_densities->getBox();
@@ -1831,13 +1911,13 @@ EquationOfStateMixingRulesStiffenedGas::getPressureDerivativeWithVolumeFractions
     const std::vector<const double*>& mass_fractions,
     const std::vector<const double*>& volume_fractions) const
 {
+    NULL_USE(mass_fractions);
+    
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     TBOX_ASSERT((static_cast<int>(volume_fractions.size()) == d_num_species) ||
                 (static_cast<int>(volume_fractions.size()) == d_num_species - 1));
 #endif
-    
-    NULL_USE(mass_fractions);
     
     // Get the mixture thermodynamic properties.
     std::vector<double> mixture_thermo_properties;
@@ -1890,6 +1970,9 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
     const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
     const hier::Box& domain) const
 {
+    NULL_USE(data_density);
+    NULL_USE(data_mass_fractions);
+    
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     
@@ -1902,9 +1985,6 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
     TBOX_ASSERT((data_volume_fractions->getDepth() == d_num_species) ||
                 (data_volume_fractions->getDepth() == d_num_species - 1));
 #endif
-    
-    NULL_USE(data_density);
-    NULL_USE(data_mass_fractions);
     
     // Get the dimensions of box that covers the interior of patch.
     const hier::Box interior_box = data_partial_pressure_partial_volume_fractions->getBox();
@@ -2030,6 +2110,9 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
     int side_normal,
     const hier::Box& domain) const
 {
+    NULL_USE(data_density);
+    NULL_USE(data_mass_fractions);
+    
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     
@@ -2042,9 +2125,6 @@ EquationOfStateMixingRulesStiffenedGas::computePressureDerivativeWithVolumeFract
     TBOX_ASSERT((data_volume_fractions->getDepth() == d_num_species) ||
                 (data_volume_fractions->getDepth() == d_num_species - 1));
 #endif
-    
-    NULL_USE(data_density);
-    NULL_USE(data_mass_fractions);
     
     // Get the dimensions of box that covers the interior of patch.
     const hier::Box interior_box = data_partial_pressure_partial_volume_fractions->getBox();

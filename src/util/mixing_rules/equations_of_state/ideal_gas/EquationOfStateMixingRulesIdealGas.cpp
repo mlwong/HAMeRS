@@ -298,8 +298,8 @@ EquationOfStateMixingRulesIdealGas::computePressure(
         num_ghosts_min = hier::IntVector::min(num_ghosts_internal_energy, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties =
-            boost::make_shared<pdat::CellData<double> >(interior_box, num_thermo_properties, num_ghosts_min);
+        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+            interior_box, num_thermo_properties, num_ghosts_min);
     }
     else
     {
@@ -310,8 +310,8 @@ EquationOfStateMixingRulesIdealGas::computePressure(
         TBOX_ASSERT(data_mass_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties =
-            boost::make_shared<pdat::CellData<double> >(domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
+        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+            domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
     }
     
     computeMixtureThermodynamicProperties(
@@ -371,6 +371,7 @@ EquationOfStateMixingRulesIdealGas::computePressure(
     
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
+    // Declare data container for mixture thermodyanmic properties.
     boost::shared_ptr<pdat::SideData<double> > data_mixture_thermo_properties;
     
     if (domain.empty())
@@ -401,9 +402,8 @@ EquationOfStateMixingRulesIdealGas::computePressure(
         num_ghosts_min = hier::IntVector::min(num_ghosts_internal_energy, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties =
-            boost::make_shared<pdat::SideData<double> >(
-                interior_box, num_thermo_properties, num_ghosts_min, direction);
+        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+            interior_box, num_thermo_properties, num_ghosts_min, direction);
     }
     else
     {
@@ -414,9 +414,8 @@ EquationOfStateMixingRulesIdealGas::computePressure(
         TBOX_ASSERT(data_mass_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties =
-            boost::make_shared<pdat::SideData<double> >(
-                domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
+        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+            domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
     }
     
     computeMixtureThermodynamicProperties(
@@ -544,8 +543,8 @@ EquationOfStateMixingRulesIdealGas::computePressure(
         num_ghosts_min = hier::IntVector::min(num_ghosts_internal_energy, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties =
-            boost::make_shared<pdat::CellData<double> >(interior_box, num_thermo_properties, num_ghosts_min);
+        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+            interior_box, num_thermo_properties, num_ghosts_min);
     }
     else
     {
@@ -556,8 +555,8 @@ EquationOfStateMixingRulesIdealGas::computePressure(
         TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties =
-            boost::make_shared<pdat::CellData<double> >(domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
+        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+            domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
     }
     
     computeMixtureThermodynamicProperties(
@@ -619,6 +618,7 @@ EquationOfStateMixingRulesIdealGas::computePressure(
     
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
+    // Declare data container for mixture thermodyanmic properties.
     boost::shared_ptr<pdat::SideData<double> > data_mixture_thermo_properties;
     
     if (domain.empty())
@@ -649,9 +649,8 @@ EquationOfStateMixingRulesIdealGas::computePressure(
         num_ghosts_min = hier::IntVector::min(num_ghosts_internal_energy, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties =
-            boost::make_shared<pdat::SideData<double> >(
-                interior_box, num_thermo_properties, num_ghosts_min, direction);
+        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+            interior_box, num_thermo_properties, num_ghosts_min, direction);
     }
     else
     {
@@ -662,9 +661,8 @@ EquationOfStateMixingRulesIdealGas::computePressure(
         TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties =
-            boost::make_shared<pdat::SideData<double> >(
-                domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
+        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+            domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
     }
     
     computeMixtureThermodynamicProperties(
@@ -788,8 +786,8 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergy(
         num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties =
-            boost::make_shared<pdat::CellData<double> >(interior_box, num_thermo_properties, num_ghosts_min);
+        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+            interior_box, num_thermo_properties, num_ghosts_min);
     }
     else
     {
@@ -800,8 +798,8 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergy(
         TBOX_ASSERT(data_mass_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties =
-            boost::make_shared<pdat::CellData<double> >(domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
+        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+            domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
     }
     
     computeMixtureThermodynamicProperties(
@@ -861,6 +859,7 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergy(
     
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
+    // Declare data container for mixture thermodyanmic properties.
     boost::shared_ptr<pdat::SideData<double> > data_mixture_thermo_properties;
     
     if (domain.empty())
@@ -891,9 +890,8 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergy(
         num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties =
-            boost::make_shared<pdat::SideData<double> >(
-                interior_box, num_thermo_properties, num_ghosts_min, direction);
+        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+            interior_box, num_thermo_properties, num_ghosts_min, direction);
     }
     else
     {
@@ -904,9 +902,8 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergy(
         TBOX_ASSERT(data_mass_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties =
-            boost::make_shared<pdat::SideData<double> >(
-                domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
+        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+            domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
     }
     
     computeMixtureThermodynamicProperties(
@@ -1034,8 +1031,8 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergy(
         num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties =
-            boost::make_shared<pdat::CellData<double> >(interior_box, num_thermo_properties, num_ghosts_min);
+        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+            interior_box, num_thermo_properties, num_ghosts_min);
     }
     else
     {
@@ -1046,8 +1043,8 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergy(
         TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties =
-            boost::make_shared<pdat::CellData<double> >(domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
+        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+            domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
     }
     
     computeMixtureThermodynamicProperties(
@@ -1109,6 +1106,7 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergy(
     
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
+    // Declare data container for mixture thermodyanmic properties.
     boost::shared_ptr<pdat::SideData<double> > data_mixture_thermo_properties;
     
     if (domain.empty())
@@ -1139,9 +1137,8 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergy(
         num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties =
-            boost::make_shared<pdat::SideData<double> >(
-                interior_box, num_thermo_properties, num_ghosts_min, direction);
+        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+            interior_box, num_thermo_properties, num_ghosts_min, direction);
     }
     else
     {
@@ -1152,9 +1149,8 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergy(
         TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties =
-            boost::make_shared<pdat::SideData<double> >(
-                domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
+        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+            domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
     }
     
     computeMixtureThermodynamicProperties(
@@ -1278,8 +1274,8 @@ EquationOfStateMixingRulesIdealGas::computeTemperature(
         num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties =
-            boost::make_shared<pdat::CellData<double> >(interior_box, num_thermo_properties, num_ghosts_min);
+        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+            interior_box, num_thermo_properties, num_ghosts_min);
     }
     else
     {
@@ -1290,8 +1286,8 @@ EquationOfStateMixingRulesIdealGas::computeTemperature(
         TBOX_ASSERT(data_mass_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties =
-            boost::make_shared<pdat::CellData<double> >(domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
+        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+            domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
     }
     
     computeMixtureThermodynamicProperties(
@@ -1351,6 +1347,7 @@ EquationOfStateMixingRulesIdealGas::computeTemperature(
     
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
+    // Declare data container for mixture thermodyanmic properties.
     boost::shared_ptr<pdat::SideData<double> > data_mixture_thermo_properties;
     
     if (domain.empty())
@@ -1381,9 +1378,8 @@ EquationOfStateMixingRulesIdealGas::computeTemperature(
         num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties =
-            boost::make_shared<pdat::SideData<double> >(
-                interior_box, num_thermo_properties, num_ghosts_min, direction);
+        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+            interior_box, num_thermo_properties, num_ghosts_min, direction);
     }
     else
     {
@@ -1394,9 +1390,8 @@ EquationOfStateMixingRulesIdealGas::computeTemperature(
         TBOX_ASSERT(data_mass_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties =
-            boost::make_shared<pdat::SideData<double> >(
-                domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
+        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+            domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
     }
     
     computeMixtureThermodynamicProperties(
@@ -1522,8 +1517,8 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergyFromTemperature(
         num_ghosts_min = hier::IntVector::min(num_ghosts_temperature, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties =
-            boost::make_shared<pdat::CellData<double> >(interior_box, num_thermo_properties, num_ghosts_min);
+        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+            interior_box, num_thermo_properties, num_ghosts_min);
     }
     else
     {
@@ -1534,8 +1529,8 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergyFromTemperature(
         TBOX_ASSERT(data_mass_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties =
-            boost::make_shared<pdat::CellData<double> >(domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
+        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+            domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
     }
     
     computeMixtureThermodynamicProperties(
@@ -1596,6 +1591,7 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergyFromTemperature(
     
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
+    // Declare data container for mixture thermodyanmic properties.
     boost::shared_ptr<pdat::SideData<double> > data_mixture_thermo_properties;
     
     if (domain.empty())
@@ -1626,9 +1622,8 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergyFromTemperature(
         num_ghosts_min = hier::IntVector::min(num_ghosts_temperature, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties =
-            boost::make_shared<pdat::SideData<double> >(
-                interior_box, num_thermo_properties, num_ghosts_min, direction);
+        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+            interior_box, num_thermo_properties, num_ghosts_min, direction);
     }
     else
     {
@@ -1639,9 +1634,8 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergyFromTemperature(
         TBOX_ASSERT(data_mass_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties =
-            boost::make_shared<pdat::SideData<double> >(
-                domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
+        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+            domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
     }
     
     computeMixtureThermodynamicProperties(
@@ -2785,6 +2779,7 @@ EquationOfStateMixingRulesIdealGas::computeGruneisenParameter(
     
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
+    // Declare data container for mixture thermodyanmic properties.
     boost::shared_ptr<pdat::SideData<double> > data_mixture_thermo_properties;
     
     if (domain.empty())
@@ -3037,6 +3032,7 @@ EquationOfStateMixingRulesIdealGas::computeGruneisenParameter(
     
     const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
     
+    // Declare data container for mixture thermodyanmic properties.
     boost::shared_ptr<pdat::SideData<double> > data_mixture_thermo_properties;
     
     if (domain.empty())
