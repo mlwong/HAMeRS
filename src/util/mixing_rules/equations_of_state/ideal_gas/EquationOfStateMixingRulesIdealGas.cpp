@@ -3187,7 +3187,7 @@ EquationOfStateMixingRulesIdealGas::computePressureDerivativeWithPartialDensitie
     
     /*
      * Get the local lower index and number of cells in each direction of the domain.
-     * Also, get the offsets and allocate memory for the mixture thermodyanmic properties
+     * Also, get the offsets and allocate memory for the mixture thermodyanmic properties.
      * and the specific internal energy.
      */
     
@@ -3376,7 +3376,7 @@ EquationOfStateMixingRulesIdealGas::computePressureDerivativeWithPartialDensitie
     
     /*
      * Get the local lower index and number of cells in each direction of the domain.
-     * Also, get the offsets and allocate memory for the mixture thermodyanmic properties
+     * Also, get the offsets and allocate memory for the mixture thermodyanmic properties.
      * and the specific internal energy.
      */
     
@@ -4110,7 +4110,7 @@ EquationOfStateMixingRulesIdealGas::computePressureDerivativeWithVolumeFractions
     
     /*
      * Get the local lower index and number of cells in each direction of the domain.
-     * Also, get the offsets and allocate memory for the mixture thermodyanmic properties
+     * Also, get the offsets and allocate memory for the mixture thermodyanmic properties.
      */
     
     hier::IntVector domain_lo(d_dim);
