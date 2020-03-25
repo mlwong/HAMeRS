@@ -82,7 +82,7 @@ EquationOfStateMixingRules::computeMixtureMolecularWeight(
         data_mass_fractions->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -186,7 +186,7 @@ EquationOfStateMixingRules::computeMixtureMolecularWeight(
         data_mass_fractions->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -331,7 +331,7 @@ EquationOfStateMixingRules::computeMixtureDensity(
         data_partial_densities->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -435,7 +435,7 @@ EquationOfStateMixingRules::computeMixtureDensity(
         data_partial_densities->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);

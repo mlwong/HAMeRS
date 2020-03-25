@@ -1,14 +1,14 @@
-#ifndef EQUATION_OF_STATE_IDEAL_GAS_HPP
-#define EQUATION_OF_STATE_IDEAL_GAS_HPP
+#ifndef EQUATION_OF_STATE_STIFFENED_GAS_HPP
+#define EQUATION_OF_STATE_STIFFENED_GAS_HPP
 
 #include "util/mixing_rules/equations_of_state/EquationOfState.hpp"
 
 #include <cmath>
 
-class EquationOfStateIdealGas: public EquationOfState
+class EquationOfStateStiffenedGas: public EquationOfState
 {
     public:        
-        EquationOfStateIdealGas(
+        EquationOfStateStiffenedGas(
             const std::string& object_name,
             const tbox::Dimension& dim):
                 EquationOfState(
@@ -16,7 +16,7 @@ class EquationOfStateIdealGas: public EquationOfState
                     dim)
         {}
         
-        ~EquationOfStateIdealGas() {}
+        ~EquationOfStateStiffenedGas() {}
         
         /*
          * Print all characteristics of the equation of state class.
@@ -644,6 +644,7 @@ class EquationOfStateIdealGas: public EquationOfState
             const double* const rho,
             const double* const epsilon,
             const double& gamma,
+            const double& p_inf,
             const hier::IntVector& offset_pressure,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_internal_energy,
@@ -662,6 +663,7 @@ class EquationOfStateIdealGas: public EquationOfState
             const double* const rho,
             const double* const epsilon,
             const double* const gamma,
+            const double* const p_inf,
             const hier::IntVector& offset_pressure,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_internal_energy,
@@ -682,6 +684,7 @@ class EquationOfStateIdealGas: public EquationOfState
             const double* const rho,
             const double* const p,
             const double& gamma,
+            const double& p_inf,
             const hier::IntVector& offset_sound_speed,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_pressure,
@@ -700,6 +703,7 @@ class EquationOfStateIdealGas: public EquationOfState
             const double* const rho,
             const double* const p,
             const double* const gamma,
+            const double* const p_inf,
             const hier::IntVector& offset_sound_speed,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_pressure,
@@ -720,6 +724,7 @@ class EquationOfStateIdealGas: public EquationOfState
             const double* const rho,
             const double* const p,
             const double& gamma,
+            const double& p_inf,
             const hier::IntVector& offset_internal_energy,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_pressure,
@@ -738,6 +743,7 @@ class EquationOfStateIdealGas: public EquationOfState
             const double* const rho,
             const double* const p,
             const double* const gamma,
+            const double* const p_inf,
             const hier::IntVector& offset_internal_energy,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_pressure,
@@ -758,6 +764,7 @@ class EquationOfStateIdealGas: public EquationOfState
             const double* const rho,
             const double* const p,
             const double& gamma,
+            const double& p_inf,
             const hier::IntVector& offset_enthalpy,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_pressure,
@@ -776,6 +783,7 @@ class EquationOfStateIdealGas: public EquationOfState
             const double* const rho,
             const double* const p,
             const double* const gamma,
+            const double* const p_inf,
             const hier::IntVector& offset_enthalpy,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_pressure,
@@ -796,6 +804,7 @@ class EquationOfStateIdealGas: public EquationOfState
             const double* const rho,
             const double* const p,
             const double& gamma,
+            const double& p_inf,
             const double& c_v,
             const hier::IntVector& offset_temperature,
             const hier::IntVector& offset_density,
@@ -815,6 +824,7 @@ class EquationOfStateIdealGas: public EquationOfState
             const double* const rho,
             const double* const p,
             const double* const gamma,
+            const double* const p_inf,
             const double* const c_v,
             const hier::IntVector& offset_temperature,
             const hier::IntVector& offset_density,
@@ -833,11 +843,15 @@ class EquationOfStateIdealGas: public EquationOfState
         void
         computeInternalEnergyFromTemperature(
             double* const epsilon,
+            const double* const rho,
             const double* const T,
+            const double& p_inf,
             const double& c_v,
             const hier::IntVector& offset_internal_energy,
+            const hier::IntVector& offset_density,
             const hier::IntVector& offset_temperature,
             const hier::IntVector& ghostcell_dims_internal_energy,
+            const hier::IntVector& ghostcell_dims_density,
             const hier::IntVector& ghostcell_dims_temperature,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims) const;
@@ -848,12 +862,16 @@ class EquationOfStateIdealGas: public EquationOfState
         void
         computeInternalEnergyFromTemperature(
             double* const epsilon,
+            const double* const rho,
             const double* const T,
+            const double* const p_inf,
             const double* const c_v,
             const hier::IntVector& offset_internal_energy,
+            const hier::IntVector& offset_density,
             const hier::IntVector& offset_temperature,
             const hier::IntVector& offset_thermo_properties,
             const hier::IntVector& ghostcell_dims_internal_energy,
+            const hier::IntVector& ghostcell_dims_density,
             const hier::IntVector& ghostcell_dims_temperature,
             const hier::IntVector& ghostcell_dims_thermo_properties,
             const hier::IntVector& domain_lo,
@@ -947,12 +965,35 @@ class EquationOfStateIdealGas: public EquationOfState
             double* const Psi,
             const double* const rho,
             const double* const p,
+            const double& gamma,
+            const double& p_inf,
             const hier::IntVector& offset_partial_pressure_partial_density,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_pressure,
             const hier::IntVector& ghostcell_dims_partial_pressure_partial_density,
             const hier::IntVector& ghostcell_dims_density,
             const hier::IntVector& ghostcell_dims_pressure,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims) const;
+        
+        /*
+         * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
+         */
+        void
+        computePressureDerivativeWithDensity(
+            double* const Psi,
+            const double* const rho,
+            const double* const p,
+            const double* const gamma,
+            const double* const p_inf,
+            const hier::IntVector& offset_partial_pressure_partial_density,
+            const hier::IntVector& offset_density,
+            const hier::IntVector& offset_pressure,
+            const hier::IntVector& offset_thermo_properties,
+            const hier::IntVector& ghostcell_dims_partial_pressure_partial_density,
+            const hier::IntVector& ghostcell_dims_density,
+            const hier::IntVector& ghostcell_dims_pressure,
+            const hier::IntVector& ghostcell_dims_thermo_properties,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims) const;
         
@@ -964,7 +1005,9 @@ class EquationOfStateIdealGas: public EquationOfState
             double* const rho,
             const double* const p,
             const double* const T,
-            const double& R,
+            const double& gamma,
+            const double& p_inf,
+            const double& c_v,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_pressure,
             const hier::IntVector& offset_temperature,
@@ -982,7 +1025,9 @@ class EquationOfStateIdealGas: public EquationOfState
             double* const rho,
             const double* const p,
             const double* const T,
-            const double* const R,
+            const double* const gamma,
+            const double* const p_inf,
+            const double* const c_v,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_pressure,
             const hier::IntVector& offset_temperature,
@@ -996,4 +1041,4 @@ class EquationOfStateIdealGas: public EquationOfState
         
 };
 
-#endif /* EQUATION_OF_STATE_IDEAL_GAS_HPP */
+#endif /* EQUATION_OF_STATE_STIFFENED_GAS_HPP */
