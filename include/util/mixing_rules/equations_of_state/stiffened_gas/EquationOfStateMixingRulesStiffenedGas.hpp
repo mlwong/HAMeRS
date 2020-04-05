@@ -1,21 +1,21 @@
-#ifndef EQUATION_OF_STATE_MIXING_RULES_IDEAL_GAS_HPP
-#define EQUATION_OF_STATE_MIXING_RULES_IDEAL_GAS_HPP
+#ifndef EQUATION_OF_STATE_MIXING_RULES_STIFFENED_GAS_HPP
+#define EQUATION_OF_STATE_MIXING_RULES_STIFFENED_GAS_HPP
 
 #include "util/mixing_rules/equations_of_state/EquationOfStateMixingRules.hpp"
 
-#include "util/mixing_rules/equations_of_state/ideal_gas/EquationOfStateIdealGas.hpp"
+#include "util/mixing_rules/equations_of_state/stiffened_gas/EquationOfStateStiffenedGas.hpp"
 
-class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
+class EquationOfStateMixingRulesStiffenedGas: public EquationOfStateMixingRules
 {
     public:        
-        EquationOfStateMixingRulesIdealGas(
+        EquationOfStateMixingRulesStiffenedGas(
             const std::string& object_name,
             const tbox::Dimension& dim,
             const int& num_species,
             const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
             const boost::shared_ptr<tbox::Database>& equation_of_state_mixing_rules_db);
         
-        ~EquationOfStateMixingRulesIdealGas() {}
+        ~EquationOfStateMixingRulesStiffenedGas() {}
         
         /*
          * Print all characteristics of the equation of state mixing rules class.
@@ -560,60 +560,6 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
         getNumberOfMixtureThermodynamicProperties() const;
         
         /*
-         * Get the thermodynamic properties of the mixture.
-         */
-        void
-        getMixtureThermodynamicProperties(
-            std::vector<double*>& mixture_thermo_properties,
-            const std::vector<const double*>& species_fraction) const;
-        
-        /*
-         * Get the thermodynamic properties of the mixture.
-         */
-        void
-        computeMixtureThermodynamicProperties(
-            boost::shared_ptr<pdat::CellData<double> >& data_mixture_thermo_properties,
-            const boost::shared_ptr<pdat::CellData<double> >& data_species_fraction,
-            const hier::Box& domain) const;
-        
-        /*
-         * Get the thermodynamic properties of the mixture.
-         */
-        void
-        computeMixtureThermodynamicProperties(
-            boost::shared_ptr<pdat::SideData<double> >& data_mixture_thermo_properties,
-            const boost::shared_ptr<pdat::SideData<double> >& data_species_fraction,
-            int side_normal,
-            const hier::Box& domain) const;
-        
-        /*
-         * Compute the thermodynamic properties of the mixture with mass fractions.
-         */
-        void
-        getMixtureThermodynamicPropertiesWithMassFractions(
-            std::vector<double*>& mixture_thermo_properties,
-            const std::vector<const double*>& mass_fractions) const;
-        
-        /*
-         * Compute the thermodynamic properties of the mixture with mass fractions.
-         */
-        void
-        computeMixtureThermodynamicPropertiesWithMassFractions(
-            boost::shared_ptr<pdat::CellData<double> >& data_mixture_thermo_properties,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
-            const hier::Box& domain) const;
-        
-        /*
-         * Compute the thermodynamic properties of the mixture with mass fractions.
-         */
-        void
-        computeMixtureThermodynamicPropertiesWithMassFractions(
-            boost::shared_ptr<pdat::SideData<double> >& data_mixture_thermo_properties,
-            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
-            int side_normal,
-            const hier::Box& domain) const;
-        
-        /*
          * Compute the thermodynamic properties of the mixture with volume fractions.
          */
         void
@@ -641,91 +587,6 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const hier::Box& domain) const;
         
         /*
-         * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric
-         * equilibrium assumptions.
-         */
-        void
-        computeIsochoricSpecificHeatCapacity(
-            double* const c_v,
-            const std::vector<const double*>& Y,
-            const hier::IntVector& offset_isochoric_specific_heat_capacity,
-            const hier::IntVector& offset_mass_fractions,
-            const hier::IntVector& ghostcell_dims_isochoric_specific_heat_capacity,
-            const hier::IntVector& ghostcell_dims_mass_fractions,
-            const hier::IntVector& domain_lo,
-            const hier::IntVector& domain_dims) const;
-        
-        /*
-         * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric
-         * equilibrium assumptions.
-         */
-        void
-        computeIsochoricSpecificHeatCapacity(
-            double* const c_v,
-            double* const Y_last,
-            const std::vector<const double*>& Y,
-            const hier::IntVector& offset_isochoric_specific_heat_capacity,
-            const hier::IntVector& offset_mass_fractions_last,
-            const hier::IntVector& offset_mass_fractions,
-            const hier::IntVector& ghostcell_dims_isochoric_specific_heat_capacity,
-            const hier::IntVector& ghostcell_dims_mass_fractions_last,
-            const hier::IntVector& ghostcell_dims_mass_fractions,
-            const hier::IntVector& domain_lo,
-            const hier::IntVector& domain_dims) const;
-        
-        /*
-         * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric equilibrium
-         * assumptions.
-         */
-        void
-        computeIsobaricSpecificHeatCapacity(
-            double* const c_p,
-            const std::vector<const double*>& Y,
-            const hier::IntVector& offset_isobaric_specific_heat_capacity,
-            const hier::IntVector& offset_mass_fractions,
-            const hier::IntVector& ghostcell_dims_isobaric_specific_heat_capacity,
-            const hier::IntVector& ghostcell_dims_mass_fractions,
-            const hier::IntVector& domain_lo,
-            const hier::IntVector& domain_dims) const;
-        
-        /*
-         * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric equilibrium
-         * assumptions.
-         */
-        void
-        computeIsobaricSpecificHeatCapacity(
-            double* const c_p,
-            double* const Y_last,
-            const std::vector<const double*>& Y,
-            const hier::IntVector& offset_isobaric_specific_heat_capacity,
-            const hier::IntVector& offset_mass_fractions_last,
-            const hier::IntVector& offset_mass_fractions,
-            const hier::IntVector& ghostcell_dims_isobaric_specific_heat_capacity,
-            const hier::IntVector& ghostcell_dims_mass_fractions_last,
-            const hier::IntVector& ghostcell_dims_mass_fractions,
-            const hier::IntVector& domain_lo,
-            const hier::IntVector& domain_dims) const;
-        
-        /*
-         * Compute the mixture partial derivative of pressure w.r.t. partial densities under constant specific
-         * internal energy with isothermal and isobaric equilibrium assumptions.
-         */
-        void
-        computePressureDerivativeWithPartialDensities(
-            std::vector<double*>& Psi,
-            const double* const epsilon,
-            const double* const gamma,
-            const double* const c_v,
-            const hier::IntVector& offset_partial_pressure_partial_partial_densities,
-            const hier::IntVector& offset_internal_energy,
-            const hier::IntVector& offset_mixture_thermo_properties,
-            const hier::IntVector& ghostcell_dims_partial_pressure_partial_partial_densities,
-            const hier::IntVector& ghostcell_dims_internal_energy,
-            const hier::IntVector& ghostcell_dims_mixture_thermo_properties,
-            const hier::IntVector& domain_lo,
-            const hier::IntVector& domain_dims) const;
-        
-        /*
          * Compute the mixture partial derivative of pressure w.r.t. partial densities under constant specific
          * internal energy and volume fractions with isobaric equilibrium assumption.
          */
@@ -734,12 +595,16 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             std::vector<double*>& Psi,
             const double* const rho,
             const double* const p,
+            const double* const gamma,
+            const double* const p_inf,
             const hier::IntVector& offset_partial_pressure_partial_partial_densities,
             const hier::IntVector& offset_density,
             const hier::IntVector& offset_pressure,
+            const hier::IntVector& offset_mixture_thermo_properties,
             const hier::IntVector& ghostcell_dims_partial_pressure_partial_partial_densities,
             const hier::IntVector& ghostcell_dims_density,
             const hier::IntVector& ghostcell_dims_pressure,
+            const hier::IntVector& ghostcell_dims_mixture_thermo_properties,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims) const;
         
@@ -762,48 +627,12 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const hier::IntVector& domain_dims) const;
         
         /*
-         * Compute the thermodynamic properties of the mixture with mass fractions.
-         */
-        void
-        computeMixtureThermodynamicPropertiesWithMassFractions(
-            double* const gamma,
-            double* const R,
-            double* const c_p,
-            double* const c_v,
-            const std::vector<const double*>& Y,
-            const hier::IntVector& offset_mixture_thermo_properties,
-            const hier::IntVector& offset_mass_fractions,
-            const hier::IntVector& ghostcell_dims_mixture_thermo_properties,
-            const hier::IntVector& ghostcell_dims_mass_fractions,
-            const hier::IntVector& domain_lo,
-            const hier::IntVector& domain_dims) const;
-        
-        /*
-         * Compute the thermodynamic properties of the mixture with mass fractions.
-         */
-        void
-        computeMixtureThermodynamicPropertiesWithMassFractions(
-            double* const gamma,
-            double* const R,
-            double* const c_p,
-            double* const c_v,
-            double* const Y_last,
-            const std::vector<const double*>& Y,
-            const hier::IntVector& offset_mixture_thermo_properties,
-            const hier::IntVector& offset_mass_fractions_last,
-            const hier::IntVector& offset_mass_fractions,
-            const hier::IntVector& ghostcell_dims_mixture_thermo_properties,
-            const hier::IntVector& ghostcell_dims_mass_fractions_last,
-            const hier::IntVector& ghostcell_dims_mass_fractions,
-            const hier::IntVector& domain_lo,
-            const hier::IntVector& domain_dims) const;
-        
-        /*
          * Compute the thermodynamic properties of the mixture with volume fractions.
          */
         void
         computeMixtureThermodynamicPropertiesWithVolumeFractions(
             double* const gamma,
+            double* const p_inf,
             const std::vector<const double*>& Z,
             const hier::IntVector& offset_mixture_thermo_properties,
             const hier::IntVector& offset_volume_fractions,
@@ -818,6 +647,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
         void
         computeMixtureThermodynamicPropertiesWithVolumeFractions(
             double* const gamma,
+            double* const p_inf,
             double* const Z_last,
             const std::vector<const double*>& Z,
             const hier::IntVector& offset_mixture_thermo_properties,
@@ -835,9 +665,9 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
         std::vector<double> d_species_gamma;
         
         /*
-         * Gas constants of different species.
+         * Reference pressure.
          */
-        std::vector<double> d_species_R;
+        std::vector<double> d_species_p_inf;
         
         /*
          * Specific heats of different species.
@@ -852,4 +682,4 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
         
 };
 
-#endif /* EQUATION_OF_STATE_MIXING_RULES_IDEAL_GAS_HPP */
+#endif /* EQUATION_OF_STATE_MIXING_RULES_STIFFENED_GAS_HPP */

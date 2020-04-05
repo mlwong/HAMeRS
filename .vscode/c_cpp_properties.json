@@ -1,0 +1,18 @@
+{
+    "configurations": [
+      {
+        "name": "farmshare",
+        "includePath": ["${SAMRAI_ROOT}/include/**",
+                        "${workspaceFolder}/include/**",
+                        "${workspaceFolder}/src/**"
+                        ],
+        "defines": [],
+        "compilerPath": "${MPI_ROOT}/bin/mpicxx",
+        "cStandard": "c11",
+        "cppStandard": "c++11",
+        "intelliSenseMode": "clang-x64"
+      }
+    ],
+    "version": 4
+  }
+  

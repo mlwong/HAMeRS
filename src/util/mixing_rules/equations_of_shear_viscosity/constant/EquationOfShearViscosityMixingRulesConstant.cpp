@@ -314,59 +314,86 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 (data_mass_fractions->getDepth() == d_num_species - 1));
 #endif
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_shear_viscosity->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_shear_viscosity = data_shear_viscosity->getGhostBox();
+    const hier::IntVector ghostcell_dims_shear_viscosity = ghost_box_shear_viscosity.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_temperature->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_mass_fractions->getBox().numberCells() == interior_dims);
-#endif
+    const hier::Box ghost_box_mass_fractions = data_mass_fractions->getGhostBox();
+    const hier::IntVector ghostcell_dims_mass_fractions = ghost_box_mass_fractions.numberCells();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
+    // Delcare data containers for shear viscosity of a species, denominator and numerator.
+    boost::shared_ptr<pdat::CellData<double> > data_shear_viscosity_species;
+    boost::shared_ptr<pdat::CellData<double> > data_den;
+    boost::shared_ptr<pdat::CellData<double> > data_num;
     
-    const hier::IntVector num_ghosts_shear_viscosity = data_shear_viscosity->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_shear_viscosity =
-        data_shear_viscosity->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
-    
-    const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_mass_fractions =
-        data_mass_fractions->getGhostBox().numberCells();
+    // Declare data container for last mass fraction.
+    boost::shared_ptr<pdat::CellData<double> > data_mass_fractions_last;
     
     /*
-     * Get the minimum number of ghost cells and the dimensions of the ghost cell box for denominator
-     * and numerator.
-     */
-    
-    hier::IntVector num_ghosts_min(d_dim);
-    
-    num_ghosts_min = num_ghosts_shear_viscosity;
-    num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
-    num_ghosts_min = hier::IntVector::min(num_ghosts_temperature, num_ghosts_min);
-    num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fractions, num_ghosts_min);
-    
-    const hier::IntVector ghostcell_dims_min = interior_dims + num_ghosts_min*2;
-    
-    /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
+     * Also, get the offsets of all data and dimensions of the ghost cell box for denominator,
+     * numerator and last mass fraction and allocate memory.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_shear_viscosity(d_dim);
+    hier::IntVector offset_mass_fractions(d_dim);
+    hier::IntVector offset_min(d_dim);
+    
+    hier::IntVector ghostcell_dims_min(d_dim);
+    
     if (domain.empty())
     {
+        // Get the numbers of ghost cells.
+        const hier::IntVector num_ghosts_shear_viscosity = data_shear_viscosity->getGhostCellWidth();
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+        const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
+        
+        // Get the interior box and the dimensions of box that covers the interior of patch.
+        const hier::Box interior_box = data_shear_viscosity->getBox();
+        const hier::IntVector interior_dims = interior_box.numberCells();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_temperature->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_mass_fractions->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
+        /*
+        * Get the minimum number of ghost cells and the dimensions of the ghost cell box for denominator,
+        * numerator and last mass fraction.
+        */
+        
+        hier::IntVector num_ghosts_min(d_dim);
+        
+        num_ghosts_min = num_ghosts_shear_viscosity;
+        num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
+        num_ghosts_min = hier::IntVector::min(num_ghosts_temperature, num_ghosts_min);
+        num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fractions, num_ghosts_min);
+        
         hier::Box ghost_box = interior_box;
         ghost_box.grow(num_ghosts_min);
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_min = num_ghosts_min;
+        offset_shear_viscosity = num_ghosts_shear_viscosity;
+        offset_mass_fractions = num_ghosts_mass_fractions;
+        
+        ghostcell_dims_min = interior_dims + num_ghosts_min*2;
+        
+        data_shear_viscosity_species = boost::make_shared<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
+        data_den = boost::make_shared<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
+        data_num = boost::make_shared<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
+        
+        if (data_mass_fractions->getDepth() == d_num_species - 1)
+        {
+            data_mass_fractions_last = boost::make_shared<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
+        }
     }
     else
     {
@@ -377,24 +404,28 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
         TBOX_ASSERT(data_mass_fractions->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_min = hier::IntVector::getZero(d_dim);
+        offset_shear_viscosity = domain.lower() - ghost_box_shear_viscosity.lower();
+        offset_mass_fractions = domain.lower() - ghost_box_mass_fractions.lower();
+        
+        ghostcell_dims_min = domain_dims;
+        
+        data_shear_viscosity_species =
+            boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+        data_den = boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+        data_num = boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+        
+        if (data_mass_fractions->getDepth() == d_num_species - 1)
+        {
+            data_mass_fractions_last =
+                boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+        }
     }
     
-    /*
-     * Delcare data containers for shear viscosity of a species, denominator, numerator and species
-     * molecular properties.
-     */
-    
-    boost::shared_ptr<pdat::CellData<double> > data_shear_viscosity_species(
-        new pdat::CellData<double>(interior_box, 1, num_ghosts_min));
-    
-    boost::shared_ptr<pdat::CellData<double> > data_den(
-        new pdat::CellData<double>(interior_box, 1, num_ghosts_min));
-    
-    boost::shared_ptr<pdat::CellData<double> > data_num(
-        new pdat::CellData<double>(interior_box, 1, num_ghosts_min));
-    
+    // Declare data containers for species molecular properties.
     std::vector<double> species_molecular_properties;
     std::vector<double*> species_molecular_properties_ptr;
     std::vector<const double*> species_molecular_properties_const_ptr;
@@ -425,16 +456,8 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
      * Fill zeros for denominator and numerator.
      */
     
-    if (domain.empty())
-    {
-        data_den->fillAll(double(0));
-        data_num->fillAll(double(0));
-    }
-    else
-    {
-        data_den->fillAll(double(0), domain);
-        data_num->fillAll(double(0), domain);
-    }
+    data_den->fillAll(double(0));
+    data_num->fillAll(double(0));
     
     if (data_mass_fractions->getDepth() == d_num_species)
     {
@@ -452,15 +475,15 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
         if (d_dim == tbox::Dimension(1))
         {
             /*
-             * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+             * Get the local lower index, numbers of cells in each dimension and offsets.
              */
             
             const int domain_lo_0 = domain_lo[0];
             const int domain_dim_0 = domain_dims[0];
             
-            const int num_ghosts_0_shear_viscosity = num_ghosts_shear_viscosity[0];
-            const int num_ghosts_0_min = num_ghosts_min[0];
-            const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+            const int offset_0_shear_viscosity = offset_shear_viscosity[0];
+            const int offset_0_min = offset_min[0];
+            const int offset_0_mass_fractions = offset_mass_fractions[0];
             
             // Compute the mixture shear viscosity field.
             for (int si = 0; si < d_num_species; si++)
@@ -483,8 +506,8 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_min = i + num_ghosts_0_min;
-                    const int idx_mass_fractions = i + num_ghosts_0_mass_fractions;
+                    const int idx_min = i + offset_0_min;
+                    const int idx_mass_fractions = i + offset_0_mass_fractions;
                     
                     const double weight = Y[si][idx_mass_fractions]*factor;
                     
@@ -499,8 +522,8 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx_shear_viscosity = i + num_ghosts_0_shear_viscosity;
-                const int idx_min = i + num_ghosts_0_min;
+                const int idx_shear_viscosity = i + offset_0_shear_viscosity;
+                const int idx_min = i + offset_0_min;
                 
                 mu[idx_shear_viscosity] = num[idx_min]/den[idx_min];
             }
@@ -508,7 +531,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
         else if (d_dim == tbox::Dimension(2))
         {
             /*
-             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             * Get the local lower indices, numbers of cells in each dimension and offsets.
              */
             
             const int domain_lo_0 = domain_lo[0];
@@ -516,16 +539,16 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             const int domain_dim_0 = domain_dims[0];
             const int domain_dim_1 = domain_dims[1];
             
-            const int num_ghosts_0_shear_viscosity = num_ghosts_shear_viscosity[0];
-            const int num_ghosts_1_shear_viscosity = num_ghosts_shear_viscosity[1];
+            const int offset_0_shear_viscosity = offset_shear_viscosity[0];
+            const int offset_1_shear_viscosity = offset_shear_viscosity[1];
             const int ghostcell_dim_0_shear_viscosity = ghostcell_dims_shear_viscosity[0];
             
-            const int num_ghosts_0_min = num_ghosts_min[0];
-            const int num_ghosts_1_min = num_ghosts_min[1];
+            const int offset_0_min = offset_min[0];
+            const int offset_1_min = offset_min[1];
             const int ghostcell_dim_0_min = ghostcell_dims_min[0];
             
-            const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
-            const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
+            const int offset_0_mass_fractions = offset_mass_fractions[0];
+            const int offset_1_mass_fractions = offset_mass_fractions[1];
             const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
             
             // Compute the mixture shear viscosity field.
@@ -551,11 +574,11 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx_min = (i + num_ghosts_0_min) +
-                            (j + num_ghosts_1_min)*ghostcell_dim_0_min;
+                        const int idx_min = (i + offset_0_min) +
+                            (j + offset_1_min)*ghostcell_dim_0_min;
                         
-                        const int idx_mass_fractions = (i + num_ghosts_0_mass_fractions) +
-                            (j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
+                        const int idx_mass_fractions = (i + offset_0_mass_fractions) +
+                            (j + offset_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                         
                         const double weight = Y[si][idx_mass_fractions]*factor;
                         
@@ -573,11 +596,11 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_shear_viscosity = (i + num_ghosts_0_shear_viscosity) +
-                        (j + num_ghosts_1_shear_viscosity)*ghostcell_dim_0_shear_viscosity;
+                    const int idx_shear_viscosity = (i + offset_0_shear_viscosity) +
+                        (j + offset_1_shear_viscosity)*ghostcell_dim_0_shear_viscosity;
                     
-                    const int idx_min = (i + num_ghosts_0_min) +
-                        (j + num_ghosts_1_min)*ghostcell_dim_0_min;
+                    const int idx_min = (i + offset_0_min) +
+                        (j + offset_1_min)*ghostcell_dim_0_min;
                     
                     mu[idx_shear_viscosity] = num[idx_min]/den[idx_min];
                 }
@@ -586,7 +609,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
         else if (d_dim == tbox::Dimension(3))
         {
             /*
-             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             * Get the local lower indices, numbers of cells in each dimension and offsets.
              */
             
             const int domain_lo_0 = domain_lo[0];
@@ -596,21 +619,21 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             const int domain_dim_1 = domain_dims[1];
             const int domain_dim_2 = domain_dims[2];
             
-            const int num_ghosts_0_shear_viscosity = num_ghosts_shear_viscosity[0];
-            const int num_ghosts_1_shear_viscosity = num_ghosts_shear_viscosity[1];
-            const int num_ghosts_2_shear_viscosity = num_ghosts_shear_viscosity[2];
+            const int offset_0_shear_viscosity = offset_shear_viscosity[0];
+            const int offset_1_shear_viscosity = offset_shear_viscosity[1];
+            const int offset_2_shear_viscosity = offset_shear_viscosity[2];
             const int ghostcell_dim_0_shear_viscosity = ghostcell_dims_shear_viscosity[0];
             const int ghostcell_dim_1_shear_viscosity = ghostcell_dims_shear_viscosity[1];
             
-            const int num_ghosts_0_min = num_ghosts_min[0];
-            const int num_ghosts_1_min = num_ghosts_min[1];
-            const int num_ghosts_2_min = num_ghosts_min[2];
+            const int offset_0_min = offset_min[0];
+            const int offset_1_min = offset_min[1];
+            const int offset_2_min = offset_min[2];
             const int ghostcell_dim_0_min = ghostcell_dims_min[0];
             const int ghostcell_dim_1_min = ghostcell_dims_min[1];
             
-            const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
-            const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
-            const int num_ghosts_2_mass_fractions = num_ghosts_mass_fractions[2];
+            const int offset_0_mass_fractions = offset_mass_fractions[0];
+            const int offset_1_mass_fractions = offset_mass_fractions[1];
+            const int offset_2_mass_fractions = offset_mass_fractions[2];
             const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
             const int ghostcell_dim_1_mass_fractions = ghostcell_dims_mass_fractions[1];
             
@@ -639,14 +662,14 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_min = (i + num_ghosts_0_min) +
-                                (j + num_ghosts_1_min)*ghostcell_dim_0_min +
-                                (k + num_ghosts_2_min)*ghostcell_dim_0_min*
+                            const int idx_min = (i + offset_0_min) +
+                                (j + offset_1_min)*ghostcell_dim_0_min +
+                                (k + offset_2_min)*ghostcell_dim_0_min*
                                     ghostcell_dim_1_min;
                             
-                            const int idx_mass_fractions = (i + num_ghosts_0_mass_fractions) +
-                                (j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
-                                (k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                            const int idx_mass_fractions = (i + offset_0_mass_fractions) +
+                                (j + offset_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                (k + offset_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
                                     ghostcell_dim_1_mass_fractions;
                             
                             const double weight = Y[si][idx_mass_fractions]*factor;
@@ -668,14 +691,14 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx_shear_viscosity = (i + num_ghosts_0_shear_viscosity) +
-                            (j + num_ghosts_1_shear_viscosity)*ghostcell_dim_0_shear_viscosity +
-                            (k + num_ghosts_2_shear_viscosity)*ghostcell_dim_0_shear_viscosity*
+                        const int idx_shear_viscosity = (i + offset_0_shear_viscosity) +
+                            (j + offset_1_shear_viscosity)*ghostcell_dim_0_shear_viscosity +
+                            (k + offset_2_shear_viscosity)*ghostcell_dim_0_shear_viscosity*
                                 ghostcell_dim_1_shear_viscosity;
                         
-                        const int idx_min = (i + num_ghosts_0_min) +
-                            (j + num_ghosts_1_min)*ghostcell_dim_0_min +
-                            (k + num_ghosts_2_min)*ghostcell_dim_0_min*
+                        const int idx_min = (i + offset_0_min) +
+                            (j + offset_1_min)*ghostcell_dim_0_min +
+                            (k + offset_2_min)*ghostcell_dim_0_min*
                                 ghostcell_dim_1_min;
                         
                         mu[idx_shear_viscosity] = num[idx_min]/den[idx_min];
@@ -686,17 +709,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
     }
     else if (data_mass_fractions->getDepth() == d_num_species - 1)
     {
-        boost::shared_ptr<pdat::CellData<double> > data_mass_fractions_last(
-            new pdat::CellData<double>(interior_box, 1, num_ghosts_mass_fractions));
-        
-        if (domain.empty())
-        {
-            data_mass_fractions_last->fillAll(double(1));
-        }
-        else
-        {
-            data_mass_fractions_last->fillAll(double(1), domain);
-        }
+        data_mass_fractions_last->fillAll(double(1));
         
         /*
          * Get the pointers to the cell data of mass fractions.
@@ -714,15 +727,15 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
         if (d_dim == tbox::Dimension(1))
         {
             /*
-             * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+             * Get the local lower index, numbers of cells in each dimension and offsets.
              */
             
             const int domain_lo_0 = domain_lo[0];
             const int domain_dim_0 = domain_dims[0];
             
-            const int num_ghosts_0_shear_viscosity = num_ghosts_shear_viscosity[0];
-            const int num_ghosts_0_min = num_ghosts_min[0];
-            const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+            const int offset_0_shear_viscosity = offset_shear_viscosity[0];
+            const int offset_0_min = offset_min[0];
+            const int offset_0_mass_fractions = offset_mass_fractions[0];
             
             // Compute the mixture shear viscosity field.
             for (int si = 0; si < d_num_species - 1; si++)
@@ -745,8 +758,8 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_min = i + num_ghosts_0_min;
-                    const int idx_mass_fractions = i + num_ghosts_0_mass_fractions;
+                    const int idx_min = i + offset_0_min;
+                    const int idx_mass_fractions = i + offset_0_mass_fractions;
                     
                     const double weight = Y[si][idx_mass_fractions]*factor;
                     
@@ -754,7 +767,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                     den[idx_min] += weight;
                     
                     // Compute the mass fraction of the last species.
-                    Y_last[idx_mass_fractions] -= Y[si][idx_mass_fractions];
+                    Y_last[idx_min] -= Y[si][idx_mass_fractions];
                 }
             }
             
@@ -776,11 +789,10 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx_shear_viscosity = i + num_ghosts_0_shear_viscosity;
-                const int idx_min = i + num_ghosts_0_min;
-                const int idx_mass_fractions = i + num_ghosts_0_mass_fractions;
+                const int idx_shear_viscosity = i + offset_0_shear_viscosity;
+                const int idx_min = i + offset_0_min;
                 
-                const double weight = Y_last[idx_mass_fractions]*factor;
+                const double weight = Y_last[idx_min]*factor;
                 
                 num[idx_min] += mu_i[idx_min]*weight;
                 den[idx_min] += weight;
@@ -791,7 +803,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
         else if (d_dim == tbox::Dimension(2))
         {
             /*
-             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             * Get the local lower indices, numbers of cells in each dimension and offsets.
              */
             
             const int domain_lo_0 = domain_lo[0];
@@ -799,16 +811,16 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             const int domain_dim_0 = domain_dims[0];
             const int domain_dim_1 = domain_dims[1];
             
-            const int num_ghosts_0_shear_viscosity = num_ghosts_shear_viscosity[0];
-            const int num_ghosts_1_shear_viscosity = num_ghosts_shear_viscosity[1];
+            const int offset_0_shear_viscosity = offset_shear_viscosity[0];
+            const int offset_1_shear_viscosity = offset_shear_viscosity[1];
             const int ghostcell_dim_0_shear_viscosity = ghostcell_dims_shear_viscosity[0];
             
-            const int num_ghosts_0_min = num_ghosts_min[0];
-            const int num_ghosts_1_min = num_ghosts_min[1];
+            const int offset_0_min = offset_min[0];
+            const int offset_1_min = offset_min[1];
             const int ghostcell_dim_0_min = ghostcell_dims_min[0];
             
-            const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
-            const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
+            const int offset_0_mass_fractions = offset_mass_fractions[0];
+            const int offset_1_mass_fractions = offset_mass_fractions[1];
             const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
             
             // Compute the mixture shear viscosity field.
@@ -834,11 +846,11 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx_min = (i + num_ghosts_0_min) +
-                            (j + num_ghosts_1_min)*ghostcell_dim_0_min;
+                        const int idx_min = (i + offset_0_min) +
+                            (j + offset_1_min)*ghostcell_dim_0_min;
                         
-                        const int idx_mass_fractions = (i + num_ghosts_0_mass_fractions) +
-                            (j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
+                        const int idx_mass_fractions = (i + offset_0_mass_fractions) +
+                            (j + offset_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                         
                         const double weight = Y[si][idx_mass_fractions]*factor;
                         
@@ -846,7 +858,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                         den[idx_min] += weight;
                         
                         // Compute the mass fraction of the last species.
-                        Y_last[idx_mass_fractions] -= Y[si][idx_mass_fractions];
+                        Y_last[idx_min] -= Y[si][idx_mass_fractions];
                     }
                 }
             }
@@ -871,16 +883,13 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_shear_viscosity = (i + num_ghosts_0_shear_viscosity) +
-                        (j + num_ghosts_1_shear_viscosity)*ghostcell_dim_0_shear_viscosity;
+                    const int idx_shear_viscosity = (i + offset_0_shear_viscosity) +
+                        (j + offset_1_shear_viscosity)*ghostcell_dim_0_shear_viscosity;
                     
-                    const int idx_min = (i + num_ghosts_0_min) +
-                        (j + num_ghosts_1_min)*ghostcell_dim_0_min;
+                    const int idx_min = (i + offset_0_min) +
+                        (j + offset_1_min)*ghostcell_dim_0_min;
                     
-                    const int idx_mass_fractions = (i + num_ghosts_0_mass_fractions) +
-                        (j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
-                    
-                    const double weight = Y_last[idx_mass_fractions]*factor;
+                    const double weight = Y_last[idx_min]*factor;
                     
                     num[idx_min] += mu_i[idx_min]*weight;
                     den[idx_min] += weight;
@@ -892,7 +901,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
         else if (d_dim == tbox::Dimension(3))
         {
             /*
-             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             * Get the local lower indices, numbers of cells in each dimension and offsets.
              */
             
             const int domain_lo_0 = domain_lo[0];
@@ -902,21 +911,21 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             const int domain_dim_1 = domain_dims[1];
             const int domain_dim_2 = domain_dims[2];
             
-            const int num_ghosts_0_shear_viscosity = num_ghosts_shear_viscosity[0];
-            const int num_ghosts_1_shear_viscosity = num_ghosts_shear_viscosity[1];
-            const int num_ghosts_2_shear_viscosity = num_ghosts_shear_viscosity[2];
+            const int offset_0_shear_viscosity = offset_shear_viscosity[0];
+            const int offset_1_shear_viscosity = offset_shear_viscosity[1];
+            const int offset_2_shear_viscosity = offset_shear_viscosity[2];
             const int ghostcell_dim_0_shear_viscosity = ghostcell_dims_shear_viscosity[0];
             const int ghostcell_dim_1_shear_viscosity = ghostcell_dims_shear_viscosity[1];
             
-            const int num_ghosts_0_min = num_ghosts_min[0];
-            const int num_ghosts_1_min = num_ghosts_min[1];
-            const int num_ghosts_2_min = num_ghosts_min[2];
+            const int offset_0_min = offset_min[0];
+            const int offset_1_min = offset_min[1];
+            const int offset_2_min = offset_min[2];
             const int ghostcell_dim_0_min = ghostcell_dims_min[0];
             const int ghostcell_dim_1_min = ghostcell_dims_min[1];
             
-            const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
-            const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
-            const int num_ghosts_2_mass_fractions = num_ghosts_mass_fractions[2];
+            const int offset_0_mass_fractions = offset_mass_fractions[0];
+            const int offset_1_mass_fractions = offset_mass_fractions[1];
+            const int offset_2_mass_fractions = offset_mass_fractions[2];
             const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
             const int ghostcell_dim_1_mass_fractions = ghostcell_dims_mass_fractions[1];
             
@@ -945,14 +954,14 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_min = (i + num_ghosts_0_min) +
-                                (j + num_ghosts_1_min)*ghostcell_dim_0_min +
-                                (k + num_ghosts_2_min)*ghostcell_dim_0_min*
+                            const int idx_min = (i + offset_0_min) +
+                                (j + offset_1_min)*ghostcell_dim_0_min +
+                                (k + offset_2_min)*ghostcell_dim_0_min*
                                     ghostcell_dim_1_min;
                             
-                            const int idx_mass_fractions = (i + num_ghosts_0_mass_fractions) +
-                                (j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
-                                (k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                            const int idx_mass_fractions = (i + offset_0_mass_fractions) +
+                                (j + offset_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                (k + offset_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
                                     ghostcell_dim_1_mass_fractions;
                             
                             const double weight = Y[si][idx_mass_fractions]*factor;
@@ -961,7 +970,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                             den[idx_min] += weight;
                             
                             // Compute the mass fraction of the last species.
-                            Y_last[idx_mass_fractions] -= Y[si][idx_mass_fractions];
+                            Y_last[idx_min] -= Y[si][idx_mass_fractions];
                         }
                     }
                 }
@@ -989,22 +998,17 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx_shear_viscosity = (i + num_ghosts_0_shear_viscosity) +
-                            (j + num_ghosts_1_shear_viscosity)*ghostcell_dim_0_shear_viscosity +
-                            (k + num_ghosts_2_shear_viscosity)*ghostcell_dim_0_shear_viscosity*
+                        const int idx_shear_viscosity = (i + offset_0_shear_viscosity) +
+                            (j + offset_1_shear_viscosity)*ghostcell_dim_0_shear_viscosity +
+                            (k + offset_2_shear_viscosity)*ghostcell_dim_0_shear_viscosity*
                                 ghostcell_dim_1_shear_viscosity;
                         
-                        const int idx_min = (i + num_ghosts_0_min) +
-                            (j + num_ghosts_1_min)*ghostcell_dim_0_min +
-                            (k + num_ghosts_2_min)*ghostcell_dim_0_min*
+                        const int idx_min = (i + offset_0_min) +
+                            (j + offset_1_min)*ghostcell_dim_0_min +
+                            (k + offset_2_min)*ghostcell_dim_0_min*
                                 ghostcell_dim_1_min;
                         
-                        const int idx_mass_fractions = (i + num_ghosts_0_mass_fractions) +
-                            (j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
-                            (k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
-                                ghostcell_dim_1_mass_fractions;
-                        
-                        const double weight = Y_last[idx_mass_fractions]*factor;
+                        const double weight = Y_last[idx_min]*factor;
                         
                         num[idx_min] += mu_i[idx_min]*weight;
                         den[idx_min] += weight;
@@ -1157,59 +1161,84 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
     
     NULL_USE(data_mass_fractions);
     
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_shear_viscosity->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_shear_viscosity = data_shear_viscosity->getGhostBox();
+    const hier::IntVector ghostcell_dims_shear_viscosity = ghost_box_shear_viscosity.numberCells();
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_species_temperatures->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_volume_fractions->getBox().numberCells() == interior_dims);
-#endif
+    const hier::Box ghost_box_volume_fractions = data_volume_fractions->getGhostBox();
+    const hier::IntVector ghostcell_dims_volume_fractions = ghost_box_volume_fractions.numberCells();
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
+    // Delcare data containers for shear viscosity and temperature of a species.
+    boost::shared_ptr<pdat::CellData<double> > data_shear_viscosity_species;
+    boost::shared_ptr<pdat::CellData<double> > data_temperature_species;;
     
-    const hier::IntVector num_ghosts_shear_viscosity = data_shear_viscosity->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_shear_viscosity =
-        data_shear_viscosity->getGhostBox().numberCells();
-    
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    const hier::IntVector num_ghosts_species_temperatures = data_species_temperatures->getGhostCellWidth();
-    
-    const hier::IntVector num_ghosts_volume_fractions = data_volume_fractions->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_volume_fractions =
-        data_volume_fractions->getGhostBox().numberCells();
+    // Declare data container for last volume fraction.
+    boost::shared_ptr<pdat::CellData<double> > data_volume_fractions_last;
     
     /*
-     * Get the minimum number of ghost cells and the dimensions of the ghost cell box for denominator
-     * and numerator.
-     */
-    
-    hier::IntVector num_ghosts_min(d_dim);
-    
-    num_ghosts_min = num_ghosts_shear_viscosity;
-    num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
-    num_ghosts_min = hier::IntVector::min(num_ghosts_species_temperatures, num_ghosts_min);
-    num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
-    
-    const hier::IntVector ghostcell_dims_min = interior_dims + num_ghosts_min*2;
-    
-    /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
+     * Also, get the offsets of all data and dimensions of the ghost cell box for shear viscosity,
+     * temperature of a species and last volume fraction and allocate memory.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_shear_viscosity(d_dim);
+    hier::IntVector offset_volume_fractions(d_dim);
+    hier::IntVector offset_min(d_dim);
+    
+    hier::IntVector ghostcell_dims_min(d_dim);
+    
     if (domain.empty())
     {
+        // Get the numbers of ghost cells.
+        const hier::IntVector num_ghosts_shear_viscosity = data_shear_viscosity->getGhostCellWidth();
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        const hier::IntVector num_ghosts_species_temperatures = data_species_temperatures->getGhostCellWidth();
+        const hier::IntVector num_ghosts_volume_fractions = data_volume_fractions->getGhostCellWidth();
+        
+        // Get the interior box and the dimensions of box that covers the interior of patch.
+        const hier::Box interior_box = data_shear_viscosity->getBox();
+        const hier::IntVector interior_dims = interior_box.numberCells();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_species_temperatures->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_volume_fractions->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
+        /*
+         * Get the minimum number of ghost cells and the dimensions of the ghost cell box for shear viscosity,
+         * temperature of a species and last volume fraction.
+         */
+        
+        hier::IntVector num_ghosts_min(d_dim);
+        
+        num_ghosts_min = num_ghosts_shear_viscosity;
+        num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
+        num_ghosts_min = hier::IntVector::min(num_ghosts_species_temperatures, num_ghosts_min);
+        num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
+        
         hier::Box ghost_box = interior_box;
         ghost_box.grow(num_ghosts_min);
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_min = num_ghosts_min;
+        offset_shear_viscosity = num_ghosts_shear_viscosity;
+        offset_volume_fractions = num_ghosts_volume_fractions;
+        
+        ghostcell_dims_min = interior_dims + num_ghosts_min*2;
+        
+        data_shear_viscosity_species = boost::make_shared<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
+        data_temperature_species = boost::make_shared<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
+        
+        if (data_volume_fractions->getDepth() == d_num_species - 1)
+        {
+            data_volume_fractions_last = boost::make_shared<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
+        }
     }
     else
     {
@@ -1220,21 +1249,28 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
         TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_min = hier::IntVector::getZero(d_dim);
+        offset_shear_viscosity = domain.lower() - ghost_box_shear_viscosity.lower();
+        offset_volume_fractions = domain.lower() - ghost_box_volume_fractions.lower();
+        
+        ghostcell_dims_min = domain_dims;
+        
+        data_shear_viscosity_species =
+            boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+        data_temperature_species =
+            boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+        
+        if (data_volume_fractions->getDepth() == d_num_species - 1)
+        {
+            data_volume_fractions_last =
+                boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+        }
     }
     
-    /*
-     * Delcare data containers for shear viscosity and temperature of a species and species molecular
-     * properties.
-     */
-    
-    boost::shared_ptr<pdat::CellData<double> > data_shear_viscosity_species(
-        new pdat::CellData<double>(interior_box, 1, num_ghosts_min));
-    
-    boost::shared_ptr<pdat::CellData<double> > data_temperature_species(
-        new pdat::CellData<double>(interior_box, 1, num_ghosts_species_temperatures));
-    
+    // Delcare data containers for species molecular properties.
     std::vector<double> species_molecular_properties;
     std::vector<double*> species_molecular_properties_ptr;
     std::vector<const double*> species_molecular_properties_const_ptr;
@@ -1288,15 +1324,15 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
         if (d_dim == tbox::Dimension(1))
         {
             /*
-             * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+             * Get the local lower index, numbers of cells in each dimension and offsets.
              */
             
             const int domain_lo_0 = domain_lo[0];
             const int domain_dim_0 = domain_dims[0];
             
-            const int num_ghosts_0_shear_viscosity = num_ghosts_shear_viscosity[0];
-            const int num_ghosts_0_min = num_ghosts_min[0];
-            const int num_ghosts_0_volume_fractions = num_ghosts_volume_fractions[0];
+            const int offset_0_shear_viscosity = offset_shear_viscosity[0];
+            const int offset_0_min = offset_min[0];
+            const int offset_0_volume_fractions = offset_volume_fractions[0];
             
             for (int si = 0; si < d_num_species; si++)
             {
@@ -1318,9 +1354,9 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_shear_viscosity = i + num_ghosts_0_shear_viscosity;
-                    const int idx_min = i + num_ghosts_0_min;
-                    const int idx_volume_fractions = i + num_ghosts_0_volume_fractions;
+                    const int idx_shear_viscosity = i + offset_0_shear_viscosity;
+                    const int idx_min = i + offset_0_min;
+                    const int idx_volume_fractions = i + offset_0_volume_fractions;
                     
                     mu[idx_shear_viscosity] += mu_i[idx_min]*Z[si][idx_volume_fractions];
                 }
@@ -1329,7 +1365,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
         else if (d_dim == tbox::Dimension(2))
         {
             /*
-             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             * Get the local lower indices, numbers of cells in each dimension and offsets.
              */
             
             const int domain_lo_0 = domain_lo[0];
@@ -1337,16 +1373,16 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             const int domain_dim_0 = domain_dims[0];
             const int domain_dim_1 = domain_dims[1];
             
-            const int num_ghosts_0_shear_viscosity = num_ghosts_shear_viscosity[0];
-            const int num_ghosts_1_shear_viscosity = num_ghosts_shear_viscosity[1];
+            const int offset_0_shear_viscosity = offset_shear_viscosity[0];
+            const int offset_1_shear_viscosity = offset_shear_viscosity[1];
             const int ghostcell_dim_0_shear_viscosity = ghostcell_dims_shear_viscosity[0];
             
-            const int num_ghosts_0_min = num_ghosts_min[0];
-            const int num_ghosts_1_min = num_ghosts_min[1];
+            const int offset_0_min = offset_min[0];
+            const int offset_1_min = offset_min[1];
             const int ghostcell_dim_0_min = ghostcell_dims_min[0];
             
-            const int num_ghosts_0_volume_fractions = num_ghosts_volume_fractions[0];
-            const int num_ghosts_1_volume_fractions = num_ghosts_volume_fractions[1];
+            const int offset_0_volume_fractions = offset_volume_fractions[0];
+            const int offset_1_volume_fractions = offset_volume_fractions[1];
             const int ghostcell_dim_0_volume_fractions = ghostcell_dims_volume_fractions[0];
             
             for (int si = 0; si < d_num_species; si++)
@@ -1371,14 +1407,14 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx_shear_viscosity = (i + num_ghosts_0_shear_viscosity) +
-                            (j + num_ghosts_1_shear_viscosity)*ghostcell_dim_0_shear_viscosity;
+                        const int idx_shear_viscosity = (i + offset_0_shear_viscosity) +
+                            (j + offset_1_shear_viscosity)*ghostcell_dim_0_shear_viscosity;
                         
-                        const int idx_min = (i + num_ghosts_0_min) +
-                            (j + num_ghosts_1_min)*ghostcell_dim_0_min;
+                        const int idx_min = (i + offset_0_min) +
+                            (j + offset_1_min)*ghostcell_dim_0_min;
                         
-                        const int idx_volume_fractions = (i + num_ghosts_0_volume_fractions) +
-                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        const int idx_volume_fractions = (i + offset_0_volume_fractions) +
+                            (j + offset_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
                         
                         mu[idx_shear_viscosity] += mu_i[idx_min]*Z[si][idx_volume_fractions];
                     }
@@ -1388,7 +1424,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
         else if (d_dim == tbox::Dimension(3))
         {
             /*
-             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             * Get the local lower indices, numbers of cells in each dimension and offsets.
              */
             
             const int domain_lo_0 = domain_lo[0];
@@ -1398,21 +1434,21 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             const int domain_dim_1 = domain_dims[1];
             const int domain_dim_2 = domain_dims[2];
             
-            const int num_ghosts_0_shear_viscosity = num_ghosts_shear_viscosity[0];
-            const int num_ghosts_1_shear_viscosity = num_ghosts_shear_viscosity[1];
-            const int num_ghosts_2_shear_viscosity = num_ghosts_shear_viscosity[2];
+            const int offset_0_shear_viscosity = offset_shear_viscosity[0];
+            const int offset_1_shear_viscosity = offset_shear_viscosity[1];
+            const int offset_2_shear_viscosity = offset_shear_viscosity[2];
             const int ghostcell_dim_0_shear_viscosity = ghostcell_dims_shear_viscosity[0];
             const int ghostcell_dim_1_shear_viscosity = ghostcell_dims_shear_viscosity[1];
             
-            const int num_ghosts_0_min = num_ghosts_min[0];
-            const int num_ghosts_1_min = num_ghosts_min[1];
-            const int num_ghosts_2_min = num_ghosts_min[2];
+            const int offset_0_min = offset_min[0];
+            const int offset_1_min = offset_min[1];
+            const int offset_2_min = offset_min[2];
             const int ghostcell_dim_0_min = ghostcell_dims_min[0];
             const int ghostcell_dim_1_min = ghostcell_dims_min[1];
             
-            const int num_ghosts_0_volume_fractions = num_ghosts_volume_fractions[0];
-            const int num_ghosts_1_volume_fractions = num_ghosts_volume_fractions[1];
-            const int num_ghosts_2_volume_fractions = num_ghosts_volume_fractions[2];
+            const int offset_0_volume_fractions = offset_volume_fractions[0];
+            const int offset_1_volume_fractions = offset_volume_fractions[1];
+            const int offset_2_volume_fractions = offset_volume_fractions[2];
             const int ghostcell_dim_0_volume_fractions = ghostcell_dims_volume_fractions[0];
             const int ghostcell_dim_1_volume_fractions = ghostcell_dims_volume_fractions[1];
             
@@ -1440,19 +1476,19 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_shear_viscosity = (i + num_ghosts_0_shear_viscosity) +
-                                (j + num_ghosts_1_shear_viscosity)*ghostcell_dim_0_shear_viscosity +
-                                (k + num_ghosts_2_shear_viscosity)*ghostcell_dim_0_shear_viscosity*
+                            const int idx_shear_viscosity = (i + offset_0_shear_viscosity) +
+                                (j + offset_1_shear_viscosity)*ghostcell_dim_0_shear_viscosity +
+                                (k + offset_2_shear_viscosity)*ghostcell_dim_0_shear_viscosity*
                                     ghostcell_dim_1_shear_viscosity;
                             
-                            const int idx_min = (i + num_ghosts_0_min) +
-                                (j + num_ghosts_1_min)*ghostcell_dim_0_min +
-                                (k + num_ghosts_2_min)*ghostcell_dim_0_min*
+                            const int idx_min = (i + offset_0_min) +
+                                (j + offset_1_min)*ghostcell_dim_0_min +
+                                (k + offset_2_min)*ghostcell_dim_0_min*
                                     ghostcell_dim_1_min;
                             
-                            const int idx_volume_fractions = (i + num_ghosts_0_volume_fractions) +
-                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
-                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                            const int idx_volume_fractions = (i + offset_0_volume_fractions) +
+                                (j + offset_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + offset_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
                                     ghostcell_dim_1_volume_fractions;
                             
                             mu[idx_shear_viscosity] += mu_i[idx_min]*Z[si][idx_volume_fractions];
@@ -1464,17 +1500,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
     }
     else if (data_volume_fractions->getDepth() == d_num_species - 1)
     {
-        boost::shared_ptr<pdat::CellData<double> > data_volume_fractions_last(
-            new pdat::CellData<double>(interior_box, 1, num_ghosts_volume_fractions));
-        
-        if (domain.empty())
-        {
-            data_volume_fractions_last->fillAll(double(1));
-        }
-        else
-        {
-            data_volume_fractions_last->fillAll(double(1), domain);
-        }
+        data_volume_fractions_last->fillAll(double(1));
         
         /*
          * Get the pointers to the cell data of volume fractions.
@@ -1492,15 +1518,15 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
         if (d_dim == tbox::Dimension(1))
         {
             /*
-             * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+             * Get the local lower index, numbers of cells in each dimension and offsets.
              */
             
             const int domain_lo_0 = domain_lo[0];
             const int domain_dim_0 = domain_dims[0];
             
-            const int num_ghosts_0_shear_viscosity = num_ghosts_shear_viscosity[0];
-            const int num_ghosts_0_min = num_ghosts_min[0];
-            const int num_ghosts_0_volume_fractions = num_ghosts_volume_fractions[0];
+            const int offset_0_shear_viscosity = offset_shear_viscosity[0];
+            const int offset_0_min = offset_min[0];
+            const int offset_0_volume_fractions = offset_volume_fractions[0];
             
             for (int si = 0; si < d_num_species - 1; si++)
             {
@@ -1522,14 +1548,14 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_shear_viscosity = i + num_ghosts_0_shear_viscosity;
-                    const int idx_min = i + num_ghosts_0_min;
-                    const int idx_volume_fractions = i + num_ghosts_0_volume_fractions;
+                    const int idx_shear_viscosity = i + offset_0_shear_viscosity;
+                    const int idx_min = i + offset_0_min;
+                    const int idx_volume_fractions = i + offset_0_volume_fractions;
                     
                     mu[idx_shear_viscosity] += mu_i[idx_min]*Z[si][idx_volume_fractions];
                     
                     // Compute the volume fraction of the last species.
-                    Z_last[idx_volume_fractions] -= Z[si][idx_volume_fractions];
+                    Z_last[idx_min] -= Z[si][idx_volume_fractions];
                 }
             }
             
@@ -1551,17 +1577,16 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx_shear_viscosity = i + num_ghosts_0_shear_viscosity;
-                const int idx_min = i + num_ghosts_0_min;
-                const int idx_volume_fractions = i + num_ghosts_0_volume_fractions;
+                const int idx_shear_viscosity = i + offset_0_shear_viscosity;
+                const int idx_min = i + offset_0_min;
                 
-                mu[idx_shear_viscosity] += mu_i[idx_min]*Z_last[idx_volume_fractions];
+                mu[idx_shear_viscosity] += mu_i[idx_min]*Z_last[idx_min];
             }
         }
         else if (d_dim == tbox::Dimension(2))
         {
             /*
-             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             * Get the local lower indices, numbers of cells in each dimension and offsets.
              */
             
             const int domain_lo_0 = domain_lo[0];
@@ -1569,16 +1594,16 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             const int domain_dim_0 = domain_dims[0];
             const int domain_dim_1 = domain_dims[1];
             
-            const int num_ghosts_0_shear_viscosity = num_ghosts_shear_viscosity[0];
-            const int num_ghosts_1_shear_viscosity = num_ghosts_shear_viscosity[1];
+            const int offset_0_shear_viscosity = offset_shear_viscosity[0];
+            const int offset_1_shear_viscosity = offset_shear_viscosity[1];
             const int ghostcell_dim_0_shear_viscosity = ghostcell_dims_shear_viscosity[0];
             
-            const int num_ghosts_0_min = num_ghosts_min[0];
-            const int num_ghosts_1_min = num_ghosts_min[1];
+            const int offset_0_min = offset_min[0];
+            const int offset_1_min = offset_min[1];
             const int ghostcell_dim_0_min = ghostcell_dims_min[0];
             
-            const int num_ghosts_0_volume_fractions = num_ghosts_volume_fractions[0];
-            const int num_ghosts_1_volume_fractions = num_ghosts_volume_fractions[1];
+            const int offset_0_volume_fractions = offset_volume_fractions[0];
+            const int offset_1_volume_fractions = offset_volume_fractions[1];
             const int ghostcell_dim_0_volume_fractions = ghostcell_dims_volume_fractions[0];
             
             for (int si = 0; si < d_num_species - 1; si++)
@@ -1603,19 +1628,19 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx_shear_viscosity = (i + num_ghosts_0_shear_viscosity) +
-                            (j + num_ghosts_1_shear_viscosity)*ghostcell_dim_0_shear_viscosity;
+                        const int idx_shear_viscosity = (i + offset_0_shear_viscosity) +
+                            (j + offset_1_shear_viscosity)*ghostcell_dim_0_shear_viscosity;
                         
-                        const int idx_min = (i + num_ghosts_0_min) +
-                            (j + num_ghosts_1_min)*ghostcell_dim_0_min;
+                        const int idx_min = (i + offset_0_min) +
+                            (j + offset_1_min)*ghostcell_dim_0_min;
                         
-                        const int idx_volume_fractions = (i + num_ghosts_0_volume_fractions) +
-                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        const int idx_volume_fractions = (i + offset_0_volume_fractions) +
+                            (j + offset_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
                         
                         mu[idx_shear_viscosity] += mu_i[idx_min]*Z[si][idx_volume_fractions];
                         
                         // Compute the volume fraction of the last species.
-                        Z_last[idx_volume_fractions] -= Z[si][idx_volume_fractions];
+                        Z_last[idx_min] -= Z[si][idx_volume_fractions];
                     }
                 }
             }
@@ -1640,23 +1665,20 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_shear_viscosity = (i + num_ghosts_0_shear_viscosity) +
-                        (j + num_ghosts_1_shear_viscosity)*ghostcell_dim_0_shear_viscosity;
+                    const int idx_shear_viscosity = (i + offset_0_shear_viscosity) +
+                        (j + offset_1_shear_viscosity)*ghostcell_dim_0_shear_viscosity;
                     
-                    const int idx_min = (i + num_ghosts_0_min) +
-                        (j + num_ghosts_1_min)*ghostcell_dim_0_min;
+                    const int idx_min = (i + offset_0_min) +
+                        (j + offset_1_min)*ghostcell_dim_0_min;
                     
-                    const int idx_volume_fractions = (i + num_ghosts_0_volume_fractions) +
-                        (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
-                    
-                    mu[idx_shear_viscosity] += mu_i[idx_min]*Z_last[idx_volume_fractions];
+                    mu[idx_shear_viscosity] += mu_i[idx_min]*Z_last[idx_min];
                 }
             }
         }
         else if (d_dim == tbox::Dimension(3))
         {
             /*
-             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             * Get the local lower indices, numbers of cells in each dimension and offsets.
              */
             
             const int domain_lo_0 = domain_lo[0];
@@ -1666,21 +1688,21 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             const int domain_dim_1 = domain_dims[1];
             const int domain_dim_2 = domain_dims[2];
             
-            const int num_ghosts_0_shear_viscosity = num_ghosts_shear_viscosity[0];
-            const int num_ghosts_1_shear_viscosity = num_ghosts_shear_viscosity[1];
-            const int num_ghosts_2_shear_viscosity = num_ghosts_shear_viscosity[2];
+            const int offset_0_shear_viscosity = offset_shear_viscosity[0];
+            const int offset_1_shear_viscosity = offset_shear_viscosity[1];
+            const int offset_2_shear_viscosity = offset_shear_viscosity[2];
             const int ghostcell_dim_0_shear_viscosity = ghostcell_dims_shear_viscosity[0];
             const int ghostcell_dim_1_shear_viscosity = ghostcell_dims_shear_viscosity[1];
             
-            const int num_ghosts_0_min = num_ghosts_min[0];
-            const int num_ghosts_1_min = num_ghosts_min[1];
-            const int num_ghosts_2_min = num_ghosts_min[2];
+            const int offset_0_min = offset_min[0];
+            const int offset_1_min = offset_min[1];
+            const int offset_2_min = offset_min[2];
             const int ghostcell_dim_0_min = ghostcell_dims_min[0];
             const int ghostcell_dim_1_min = ghostcell_dims_min[1];
             
-            const int num_ghosts_0_volume_fractions = num_ghosts_volume_fractions[0];
-            const int num_ghosts_1_volume_fractions = num_ghosts_volume_fractions[1];
-            const int num_ghosts_2_volume_fractions = num_ghosts_volume_fractions[2];
+            const int offset_0_volume_fractions = offset_volume_fractions[0];
+            const int offset_1_volume_fractions = offset_volume_fractions[1];
+            const int offset_2_volume_fractions = offset_volume_fractions[2];
             const int ghostcell_dim_0_volume_fractions = ghostcell_dims_volume_fractions[0];
             const int ghostcell_dim_1_volume_fractions = ghostcell_dims_volume_fractions[1];
             
@@ -1708,25 +1730,25 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_shear_viscosity = (i + num_ghosts_0_shear_viscosity) +
-                                (j + num_ghosts_1_shear_viscosity)*ghostcell_dim_0_shear_viscosity +
-                                (k + num_ghosts_2_shear_viscosity)*ghostcell_dim_0_shear_viscosity*
+                            const int idx_shear_viscosity = (i + offset_0_shear_viscosity) +
+                                (j + offset_1_shear_viscosity)*ghostcell_dim_0_shear_viscosity +
+                                (k + offset_2_shear_viscosity)*ghostcell_dim_0_shear_viscosity*
                                     ghostcell_dim_1_shear_viscosity;
                             
-                            const int idx_min = (i + num_ghosts_0_min) +
-                                (j + num_ghosts_1_min)*ghostcell_dim_0_min +
-                                (k + num_ghosts_2_min)*ghostcell_dim_0_min*
+                            const int idx_min = (i + offset_0_min) +
+                                (j + offset_1_min)*ghostcell_dim_0_min +
+                                (k + offset_2_min)*ghostcell_dim_0_min*
                                     ghostcell_dim_1_min;
                             
-                            const int idx_volume_fractions = (i + num_ghosts_0_volume_fractions) +
-                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
-                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                            const int idx_volume_fractions = (i + offset_0_volume_fractions) +
+                                (j + offset_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + offset_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
                                     ghostcell_dim_1_volume_fractions;
                             
                             mu[idx_shear_viscosity] += mu_i[idx_min]*Z[si][idx_volume_fractions];
                             
                             // Compute the volume fraction of the last species.
-                            Z_last[idx_volume_fractions] -= Z[si][idx_volume_fractions];
+                            Z_last[idx_min] -= Z[si][idx_volume_fractions];
                         }
                     }
                 }
@@ -1754,22 +1776,17 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx_shear_viscosity = (i + num_ghosts_0_shear_viscosity) +
-                            (j + num_ghosts_1_shear_viscosity)*ghostcell_dim_0_shear_viscosity +
-                            (k + num_ghosts_2_shear_viscosity)*ghostcell_dim_0_shear_viscosity*
+                        const int idx_shear_viscosity = (i + offset_0_shear_viscosity) +
+                            (j + offset_1_shear_viscosity)*ghostcell_dim_0_shear_viscosity +
+                            (k + offset_2_shear_viscosity)*ghostcell_dim_0_shear_viscosity*
                                 ghostcell_dim_1_shear_viscosity;
                         
-                        const int idx_min = (i + num_ghosts_0_min) +
-                            (j + num_ghosts_1_min)*ghostcell_dim_0_min +
-                            (k + num_ghosts_2_min)*ghostcell_dim_0_min*
+                        const int idx_min = (i + offset_0_min) +
+                            (j + offset_1_min)*ghostcell_dim_0_min +
+                            (k + offset_2_min)*ghostcell_dim_0_min*
                                 ghostcell_dim_1_min;
                         
-                        const int idx_volume_fractions = (i + num_ghosts_0_volume_fractions) +
-                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
-                            (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
-                                ghostcell_dim_1_volume_fractions;
-                        
-                        mu[idx_shear_viscosity] += mu_i[idx_min]*Z_last[idx_volume_fractions];
+                        mu[idx_shear_viscosity] += mu_i[idx_min]*Z_last[idx_min];
                     }
                 }
             }
