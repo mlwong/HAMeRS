@@ -1,5 +1,6 @@
 #include "flow/flow_models/single-species/FlowModelSingleSpecies.hpp"
 
+#include "flow/flow_models/single-species/FlowModelBasicUtilitiesSingleSpecies.hpp"
 #include "flow/flow_models/single-species/FlowModelBoundaryUtilitiesSingleSpecies.hpp"
 #include "flow/flow_models/single-species/FlowModelRiemannSolverSingleSpecies.hpp"
 #include "flow/flow_models/single-species/FlowModelStatisticsUtilitiesSingleSpecies.hpp"
@@ -369,6 +370,16 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
         d_dim,
         d_grid_geometry,
         d_num_species));
+    
+    /*
+     * Initialize basic utilities object.
+     */
+    d_flow_model_basic_utilities.reset(new FlowModelBasicUtilitiesSingleSpecies(
+        "d_flow_model_basic_utilities",
+        d_dim,
+        d_grid_geometry,
+        d_num_species,
+        d_equation_of_state_mixing_rules));
     
     /*
      * Initialize statistics utilities object.

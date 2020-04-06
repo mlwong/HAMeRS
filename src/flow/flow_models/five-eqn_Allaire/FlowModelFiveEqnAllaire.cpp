@@ -1,5 +1,6 @@
 #include "flow/flow_models/five-eqn_Allaire/FlowModelFiveEqnAllaire.hpp"
 
+#include "flow/flow_models/five-eqn_Allaire/FlowModelBasicUtilitiesFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelBoundaryUtilitiesFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelRiemannSolverFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelStatisticsUtilitiesFiveEqnAllaire.hpp"
@@ -278,6 +279,16 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
         d_dim,
         d_grid_geometry,
         d_num_species));
+    
+    /*
+     * Initialize basic utilities object.
+     */
+    d_flow_model_basic_utilities.reset(new FlowModelBasicUtilitiesFiveEqnAllaire(
+        "d_flow_model_basic_utilities",
+        d_dim,
+        d_grid_geometry,
+        d_num_species,
+        d_equation_of_state_mixing_rules));
     
     /*
      * Initialize statistics utilities object.

@@ -70,6 +70,16 @@ FlowModel::setupRiemannSolver()
 
 
 /*
+ * Setup the basic utilties object.
+ */
+void
+FlowModel::setupBasicUtilities()
+{
+    d_flow_model_basic_utilities->setFlowModel(shared_from_this());
+}
+
+
+/*
  * Setup the statistics utilties object.
  */
 void

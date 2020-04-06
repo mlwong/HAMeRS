@@ -5,6 +5,7 @@
 
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
 #include "extn/visit_data_writer/ExtendedVisItDataWriter.hpp"
+#include "flow/flow_models/FlowModelBasicUtilities.hpp"
 #include "flow/flow_models/FlowModelBoundaryUtilities.hpp"
 #include "flow/flow_models/FlowModelRiemannSolver.hpp"
 #include "flow/flow_models/FlowModelStatisticsUtilities.hpp"
@@ -46,6 +47,7 @@ namespace AVERAGING
 }
 
 class FlowModelRiemannSolver;
+class FlowModelBasicUtilities;
 class FlowModelStatisticsUtilities;
 
 /*
@@ -145,6 +147,15 @@ class FlowModel:
         getFlowModelRiemannSolver() const
         {
             return d_flow_model_riemann_solver;
+        }
+        
+        /*
+         * Return the boost::shared_ptr to the basic utilities object.
+         */
+        const boost::shared_ptr<FlowModelBasicUtilities>&
+        getFlowModelBasicUtilities() const
+        {
+            return d_flow_model_basic_utilities;
         }
         
         /*
@@ -482,6 +493,12 @@ class FlowModel:
         setupRiemannSolver();
         
         /*
+         * Setup the basic utilties object.
+         */
+        void
+        setupBasicUtilities();
+        
+        /*
          * Setup the statistics utilties object.
          */
         void
@@ -634,6 +651,11 @@ class FlowModel:
          * boost::shared_ptr to the Riemann solver object for the flow model.
          */
         boost::shared_ptr<FlowModelRiemannSolver> d_flow_model_riemann_solver;
+        
+        /*
+         * boost::shared_ptr to the basic utilities object for the flow model.
+         */
+        boost::shared_ptr<FlowModelBasicUtilities> d_flow_model_basic_utilities;
         
         /*
          * boost::shared_ptr to the boundary utilities object for the flow model.
