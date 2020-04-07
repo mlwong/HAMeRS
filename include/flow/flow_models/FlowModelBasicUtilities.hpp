@@ -39,6 +39,90 @@ class FlowModelBasicUtilities
         }
         
         /*
+         * Convert conservative variables to primitive variables.
+         */
+        virtual void
+        convertConservativeVariablesToPrimitiveVariables(
+            std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables) = 0;
+        
+        /*
+         * Convert primitive variables to conservative variables.
+         */
+        virtual void
+        convertPrimitiveVariablesToConservativeVariables(
+            std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables) = 0;
+        
+        /*
+         * Get the number of projection variables for transformation between conservative
+         * variables and characteristic variables.
+         */
+        virtual int
+        getNumberOfProjectionVariablesForConservativeVariables() const = 0;
+        
+        /*
+         * Get the number of projection variables for transformation between primitive variables
+         * and characteristic variables.
+         */
+        virtual int
+        getNumberOfProjectionVariablesForPrimitiveVariables() const = 0;
+        
+        /*
+         * Compute the side data of the projection variables for transformation between conservative variables and
+         * characteristic variables.
+         */
+        virtual void
+        computeSideDataOfProjectionVariablesForConservativeVariables(
+            std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
+        
+        /*
+         * Compute the side data of the projection variables for transformation between primitive variables and
+         * characteristic variables.
+         */
+        virtual void
+        computeSideDataOfProjectionVariablesForPrimitiveVariables(
+            std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
+        
+        /*
+         * Compute the side data of characteristic variables from conservative variables.
+         */
+        virtual void
+        computeSideDataOfCharacteristicVariablesFromConservativeVariables(
+            std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
+            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
+            const int& idx_offset) = 0;
+        
+        /*
+         * Compute the side data of characteristic variables from primitive variables.
+         */
+        virtual void
+        computeSideDataOfCharacteristicVariablesFromPrimitiveVariables(
+            std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
+            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
+            const int& idx_offset) = 0;
+        
+        /*
+         * Compute the side data of conservative variables from characteristic variables.
+         */
+        virtual void
+        computeSideDataOfConservativeVariablesFromCharacteristicVariables(
+            std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
+        
+        /*
+         * Compute the side data of primitive variables from characteristic variables.
+         */
+        virtual void
+        computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
+            std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
+        
+        /*
          * Check whether the given cell conservative variables are within the bounds.
          */
         virtual void
