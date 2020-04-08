@@ -18,7 +18,11 @@ class FlowModelBasicUtilitiesFourEqnConservative: public FlowModelBasicUtilities
                     grid_geometry,
                     num_species),
             d_equation_of_state_mixing_rules(equation_of_state_mixing_rules)
-        {}
+        {
+            // Set the bounds for the variables.
+            d_Y_bound_lo = double(-0.001);
+            d_Y_bound_up = double(1.001);
+        }
         
         ~FlowModelBasicUtilitiesFourEqnConservative() {}
         
@@ -139,6 +143,12 @@ class FlowModelBasicUtilitiesFourEqnConservative: public FlowModelBasicUtilities
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables);
         
     private:
+        /*
+         * Upper and lower bounds on variables.
+         */
+        double d_Y_bound_lo;
+        double d_Y_bound_up;
+        
         /*
          * boost::shared_ptr to EquationOfStateMixingRules.
          */
