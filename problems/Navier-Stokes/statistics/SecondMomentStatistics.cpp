@@ -468,14 +468,14 @@ SecondMomentStatisticsUtilities::outputMixingWidthInXDirection(
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mole fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mole_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTIONS");
+                    d_flow_model_tmp->getCellData("MOLE_FRACTIONS");
                 
                 double* X = data_mole_fractions->getPointer(0);
                 
@@ -674,14 +674,14 @@ SecondMomentStatisticsUtilities::outputMixingWidthInXDirection(
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mole fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mole_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTIONS");
+                    d_flow_model_tmp->getCellData("MOLE_FRACTIONS");
                 
                 double* X = data_mole_fractions->getPointer(0);
                 
@@ -893,14 +893,14 @@ SecondMomentStatisticsUtilities::outputMixingWidthInXDirection(
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mole fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mole_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTIONS");
+                    d_flow_model_tmp->getCellData("MOLE_FRACTIONS");
                 
                 double* X = data_mole_fractions->getPointer(0);
                 
@@ -1207,14 +1207,14 @@ SecondMomentStatisticsUtilities::outputMixednessInXDirection(
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mole fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mole_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTIONS");
+                    d_flow_model_tmp->getCellData("MOLE_FRACTIONS");
                 
                 double* X = data_mole_fractions->getPointer(0);
                 
@@ -1436,14 +1436,14 @@ SecondMomentStatisticsUtilities::outputMixednessInXDirection(
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mole fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mole_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTIONS");
+                    d_flow_model_tmp->getCellData("MOLE_FRACTIONS");
                 
                 double* X = data_mole_fractions->getPointer(0);
                 
@@ -1678,14 +1678,14 @@ SecondMomentStatisticsUtilities::outputMixednessInXDirection(
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mole fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mole_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTIONS");
+                    d_flow_model_tmp->getCellData("MOLE_FRACTIONS");
                 
                 double* X = data_mole_fractions->getPointer(0);
                 
@@ -2049,20 +2049,20 @@ outputTurbulentMassFluxVelocityInXDirectionInMixingLayerWithHomogeneityInYZPlane
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mole fractions, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mole_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTIONS");
+                    d_flow_model_tmp->getCellData("MOLE_FRACTIONS");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> X;
                 X.reserve(d_num_species);
@@ -2298,17 +2298,17 @@ outputTurbulentMassFluxVelocityInXDirectionInMixingLayerWithHomogeneityInYZPlane
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -2695,20 +2695,20 @@ outputTurbulentMassFluxInXDirectionInMixingLayerWithHomogeneityInYZPlane(
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mole fractions, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mole_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTIONS");
+                    d_flow_model_tmp->getCellData("MOLE_FRACTIONS");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> X;
                 X.reserve(d_num_species);
@@ -2944,17 +2944,17 @@ outputTurbulentMassFluxInXDirectionInMixingLayerWithHomogeneityInYZPlane(
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -3338,17 +3338,17 @@ outputDensitySpecificVolumeCovarianceInMixingLayerWithHomogeneityInYZPlane(
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mole fractions and density data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mole_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTIONS");
+                    d_flow_model_tmp->getCellData("MOLE_FRACTIONS");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 std::vector<double*> X;
                 X.reserve(d_num_species);
@@ -3566,14 +3566,14 @@ outputDensitySpecificVolumeCovarianceInMixingLayerWithHomogeneityInYZPlane(
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 double* rho = data_density->getPointer(0);
                 
@@ -3942,17 +3942,17 @@ outputDensityTimesDensitySpecificVolumeCovarianceInMixingLayerWithHomogeneityInY
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mole fractions and density data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mole_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTIONS");
+                    d_flow_model_tmp->getCellData("MOLE_FRACTIONS");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 std::vector<double*> X;
                 X.reserve(d_num_species);
@@ -4170,14 +4170,14 @@ outputDensityTimesDensitySpecificVolumeCovarianceInMixingLayerWithHomogeneityInY
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 double* rho = data_density->getPointer(0);
                 
@@ -4549,20 +4549,20 @@ outputReynoldsNormalStressInXDirectionInMixingLayerWithHomogeneityInYZPlane(
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mole fractions, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mole_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTIONS");
+                    d_flow_model_tmp->getCellData("MOLE_FRACTIONS");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> X;
                 X.reserve(d_num_species);
@@ -4798,17 +4798,17 @@ outputReynoldsNormalStressInXDirectionInMixingLayerWithHomogeneityInYZPlane(
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -5196,20 +5196,20 @@ outputDensityTimesReynoldsNormalStressInXDirectionInMixingLayerWithHomogeneityIn
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mole fractions, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mole_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTIONS");
+                    d_flow_model_tmp->getCellData("MOLE_FRACTIONS");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> X;
                 X.reserve(d_num_species);
@@ -5445,17 +5445,17 @@ outputDensityTimesReynoldsNormalStressInXDirectionInMixingLayerWithHomogeneityIn
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -5843,20 +5843,20 @@ outputReynoldsNormalStressInYDirectionInMixingLayerWithHomogeneityInYZPlane(
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mole fractions, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mole_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTIONS");
+                    d_flow_model_tmp->getCellData("MOLE_FRACTIONS");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> X;
                 X.reserve(d_num_species);
@@ -6092,17 +6092,17 @@ outputReynoldsNormalStressInYDirectionInMixingLayerWithHomogeneityInYZPlane(
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* v = data_velocity->getPointer(1);
@@ -6490,20 +6490,20 @@ outputDensityTimesReynoldsNormalStressInYDirectionInMixingLayerWithHomogeneityIn
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mole fractions, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mole_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTIONS");
+                    d_flow_model_tmp->getCellData("MOLE_FRACTIONS");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> X;
                 X.reserve(d_num_species);
@@ -6739,17 +6739,17 @@ outputDensityTimesReynoldsNormalStressInYDirectionInMixingLayerWithHomogeneityIn
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* v = data_velocity->getPointer(1);
@@ -7137,20 +7137,20 @@ outputReynoldsNormalStressInZDirectionInMixingLayerWithHomogeneityInYZPlane(
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mole fractions, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mole_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTIONS");
+                    d_flow_model_tmp->getCellData("MOLE_FRACTIONS");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> X;
                 X.reserve(d_num_species);
@@ -7386,17 +7386,17 @@ outputReynoldsNormalStressInZDirectionInMixingLayerWithHomogeneityInYZPlane(
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* w = data_velocity->getPointer(2);
@@ -7784,20 +7784,20 @@ outputDensityTimesReynoldsNormalStressInZDirectionInMixingLayerWithHomogeneityIn
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mole fractions, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mole_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTIONS");
+                    d_flow_model_tmp->getCellData("MOLE_FRACTIONS");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> X;
                 X.reserve(d_num_species);
@@ -8033,17 +8033,17 @@ outputDensityTimesReynoldsNormalStressInZDirectionInMixingLayerWithHomogeneityIn
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* w = data_velocity->getPointer(2);
@@ -8435,20 +8435,20 @@ outputReynoldsShearStressInXYDirectionsInMixingLayerWithHomogeneityInYZPlane(
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mole fractions, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mole_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTIONS");
+                    d_flow_model_tmp->getCellData("MOLE_FRACTIONS");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> X;
                 X.reserve(d_num_species);
@@ -8694,17 +8694,17 @@ outputReynoldsShearStressInXYDirectionsInMixingLayerWithHomogeneityInYZPlane(
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -9102,20 +9102,20 @@ outputDensityTimesReynoldsShearStressInXYDirectionsInMixingLayerWithHomogeneityI
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mole fractions, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mole_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTIONS");
+                    d_flow_model_tmp->getCellData("MOLE_FRACTIONS");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> X;
                 X.reserve(d_num_species);
@@ -9361,17 +9361,17 @@ outputDensityTimesReynoldsShearStressInXYDirectionsInMixingLayerWithHomogeneityI
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -9769,20 +9769,20 @@ outputReynoldsShearStressInXZDirectionsInMixingLayerWithHomogeneityInYZPlane(
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mole fractions, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mole_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTIONS");
+                    d_flow_model_tmp->getCellData("MOLE_FRACTIONS");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> X;
                 X.reserve(d_num_species);
@@ -10028,17 +10028,17 @@ outputReynoldsShearStressInXZDirectionsInMixingLayerWithHomogeneityInYZPlane(
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -10436,20 +10436,20 @@ outputDensityTimesReynoldsShearStressInXZDirectionsInMixingLayerWithHomogeneityI
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mole fractions, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mole_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTIONS");
+                    d_flow_model_tmp->getCellData("MOLE_FRACTIONS");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> X;
                 X.reserve(d_num_species);
@@ -10695,17 +10695,17 @@ outputDensityTimesReynoldsShearStressInXZDirectionsInMixingLayerWithHomogeneityI
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -11103,20 +11103,20 @@ outputReynoldsShearStressInYZDirectionsInMixingLayerWithHomogeneityInYZPlane(
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mole fractions, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mole_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTIONS");
+                    d_flow_model_tmp->getCellData("MOLE_FRACTIONS");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> X;
                 X.reserve(d_num_species);
@@ -11362,17 +11362,17 @@ outputReynoldsShearStressInYZDirectionsInMixingLayerWithHomogeneityInYZPlane(
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* v = data_velocity->getPointer(1);
@@ -11770,20 +11770,20 @@ outputDensityTimesReynoldsShearStressInYZDirectionsInMixingLayerWithHomogeneityI
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mole fractions, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mole_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MOLE_FRACTIONS");
+                    d_flow_model_tmp->getCellData("MOLE_FRACTIONS");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> X;
                 X.reserve(d_num_species);
@@ -12029,17 +12029,17 @@ outputDensityTimesReynoldsShearStressInYZDirectionsInMixingLayerWithHomogeneityI
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                d_flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                    d_flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    d_flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* v = data_velocity->getPointer(1);
