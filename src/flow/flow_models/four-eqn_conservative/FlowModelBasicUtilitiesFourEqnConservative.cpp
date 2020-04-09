@@ -4288,7 +4288,7 @@ int
 FlowModelBasicUtilitiesFourEqnConservative::getNumberOfProjectionVariablesForConservativeVariables() const
 {
     TBOX_ERROR(d_object_name
-        << ": FlowModelFourEqnConservative::"
+        << ": FlowModelBasicUtilitiesFourEqnConservative::"
         << "getNumberOfProjectionVariablesForConservativeVariables()\n"
         << "Method getNumberOfProjectionVariablesForConservativeVariables()"
         << " is not yet implemented."
