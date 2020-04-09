@@ -3245,6 +3245,1098 @@ void
 FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForConservativeVariables(
     std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
 {
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    const hier::IntVector& num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+    
+    /*
+     * Get the dimensions of the interior and ghost boxes.
+     */
+    
+    const hier::Box interior_box = projection_variables[0]->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+    hier::Box ghost_box = interior_box;
+    ghost_box.grow(num_ghosts);
+    const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+    
+    // Create empty box.
+    const hier::Box empty_box(d_dim);
+    
+    /*
+     * Get the number of ghost cells and ghost cell dimension of projection variables.
+     */
+    
+    const hier::IntVector num_ghosts_projection_var = projection_variables[0]->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_projection_var =
+        projection_variables[0]->getGhostBox().numberCells();
+    
+    /*
+     * Check the size of variables.
+     */
+    
+    if (static_cast<int>(projection_variables.size()) != d_dim.getValue() + 5)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::"
+            << "computeSideDataOfProjectionVariablesForConservativeVariables()\n"
+            << "The number of projection variables are incorrect."
+            << std::endl);
+    }
+    
+    /*
+     * Check potential failures.
+     */
+    
+    for (int vi = 1; vi < d_dim.getValue() + 5; vi++)
+    {
+        const hier::IntVector interior_dims_projection_var =
+            projection_variables[vi]->getBox().numberCells();
+        if (interior_dims_projection_var != interior_dims)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::"
+                << "computeSideDataOfProjectionVariablesForConservativeVariables()\n"
+                << "The interior dimension of the projection variables does not match that of patch."
+                << std::endl);
+        }
+    }
+    
+    for (int vi = 1; vi < d_dim.getValue() + 5; vi++)
+    {
+        if (num_ghosts_projection_var != projection_variables[vi]->getGhostCellWidth())
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::"
+                << "computeSideDataOfProjectionVariablesForConservativeVariables()\n"
+                << "The projection variables don't have same ghost cell width."
+                << std::endl);
+        }
+    }
+    
+    if (num_ghosts_projection_var > num_ghosts)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::"
+            << "computeSideDataOfProjectionVariablesForConservativeVariables()\n"
+            << "The projection variables have ghost cell width larger than that of density."
+            << std::endl);
+    }
+    
+    // Get the cell data of the conservative variables.
+    
+    boost::shared_ptr<pdat::CellData<double> > data_density =
+        d_flow_model_tmp->getCellData("DENSITY");
+    
+    boost::shared_ptr<pdat::CellData<double> > data_momentum =
+        d_flow_model_tmp->getCellData("MOMENTUM");
+    
+    boost::shared_ptr<pdat::CellData<double> > data_total_energy =
+        d_flow_model_tmp->getCellData("TOTAL_ENERGY");
+    
+    // Get the pointers to the cell data of density and total energy.
+    
+    double* rho = data_density->getPointer(0);
+    double* E   = data_total_energy->getPointer(0);
+    
+    /*
+     * Create temporary side data of averaged conservative variables.
+     */
+    
+    boost::shared_ptr<pdat::SideData<double> > data_density_averaged(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_projection_var));
+    
+    boost::shared_ptr<pdat::SideData<double> > data_momentum_averaged(
+        new pdat::SideData<double>(interior_box, d_dim.getValue(), num_ghosts_projection_var));
+    
+    boost::shared_ptr<pdat::SideData<double> > data_total_energy_averaged(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_projection_var));
+    
+    /*
+     * Create other temporary side data.
+     */
+    
+    boost::shared_ptr<pdat::SideData<double> > data_internal_energy_averaged(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_projection_var));
+    
+    boost::shared_ptr<pdat::SideData<double> > data_pressure_averaged(
+        new pdat::SideData<double>(interior_box, 1, num_ghosts_projection_var));
+    
+    /*
+     * Declare pointers to the side data of averaged density and total energy.
+     */
+    
+    double* rho_average     = nullptr;
+    double* E_average       = nullptr;
+    double* e_average       = nullptr;
+    double* epsilon_average = nullptr;
+    double* p_average       = nullptr;
+    double* H_average       = nullptr;
+    
+    /*
+     * Get the thermodynamic properties of the species.
+     */
+    
+    const int num_thermo_properties = d_equation_of_state_mixing_rules->
+        getNumberOfSpeciesThermodynamicProperties();
+    
+    std::vector<double> thermo_properties;
+    std::vector<double*> thermo_properties_ptr;
+    std::vector<const double*> thermo_properties_const_ptr;
+    
+    thermo_properties.resize(num_thermo_properties);
+    thermo_properties_ptr.reserve(num_thermo_properties);
+    thermo_properties_const_ptr.reserve(num_thermo_properties);
+    
+    for (int ti = 0; ti < num_thermo_properties; ti++)
+    {
+        thermo_properties_ptr.push_back(&thermo_properties[ti]);
+        thermo_properties_const_ptr.push_back(&thermo_properties[ti]);
+    }
+    
+    d_equation_of_state_mixing_rules->getSpeciesThermodynamicProperties(
+        thermo_properties_ptr,
+        0);
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        const int interior_dim_0 = interior_dims[0];
+        
+        const int num_ghosts_0 = num_ghosts[0];
+        const int num_ghosts_0_projection_var = num_ghosts_projection_var[0];
+        
+        // Get the pointer to the cell data of momentum.
+        
+        double* rho_u = data_momentum->getPointer(0);
+        
+        // Declare pointers to the side data of averaged momentum and velocity.
+        
+        double* rho_u_average = nullptr;
+        double* u_average     = nullptr;
+        
+        switch (d_proj_var_conservative_averaging_type)
+        {
+            case AVERAGING_TMP::SIMPLE:
+            {
+                /*
+                 * Compute the averaged conservative variables in the x-direction.
+                 */
+                
+                rho_average   = data_density_averaged->getPointer(0);
+                rho_u_average = data_momentum_averaged->getPointer(0, 0);
+                E_average     = data_total_energy_averaged->getPointer(0);
+                
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -num_ghosts_0_projection_var;
+                     i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_face_x = i + num_ghosts_0_projection_var;
+                    const int idx_L = i - 1 + num_ghosts_0;
+                    const int idx_R = i + num_ghosts_0;
+                    
+                    rho_average[idx_face_x]   = double(1)/double(2)*(rho[idx_L] + rho[idx_R]);
+                    rho_u_average[idx_face_x] = double(1)/double(2)*(rho_u[idx_L] + rho_u[idx_R]);
+                    E_average[idx_face_x]     = double(1)/double(2)*(E[idx_L] + E[idx_R]);
+                }
+                
+                /*
+                 * Compute the projection variables in the x-direction.
+                 */
+                
+                u_average       = projection_variables[0]->getPointer(0);
+                e_average       = projection_variables[1]->getPointer(0);
+                epsilon_average = data_internal_energy_averaged->getPointer(0);
+                p_average       = data_pressure_averaged->getPointer(0);
+                H_average       = projection_variables[2]->getPointer(0);
+                
+                // Compute the velocity and internal energy.
+                
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -num_ghosts_0_projection_var;
+                     i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_face_x = i + num_ghosts_0_projection_var;
+                    
+                    u_average[idx_face_x] = rho_u_average[idx_face_x]/rho_average[idx_face_x];
+                    
+                    e_average[idx_face_x] = E_average[idx_face_x]/rho_average[idx_face_x];
+                    
+                    epsilon_average[idx_face_x] = e_average[idx_face_x] -
+                        double(1)/double(2)*u_average[idx_face_x]*u_average[idx_face_x];
+                }
+                
+                // Compute the presure, sound speed, partial pressure partial density and Gruneisen parameter.
+                
+                d_equation_of_state_mixing_rules->getEquationOfState()->computePressure(
+                    data_pressure_averaged,
+                    data_density_averaged,
+                    data_internal_energy_averaged,
+                    thermo_properties_const_ptr,
+                    0);
+                
+                d_equation_of_state_mixing_rules->getEquationOfState()->computeSoundSpeed(
+                    projection_variables[3],
+                    data_density_averaged,
+                    data_pressure_averaged,
+                    thermo_properties_const_ptr,
+                    0);
+                
+                d_equation_of_state_mixing_rules->getEquationOfState()->computePressureDerivativeWithDensity(
+                    projection_variables[4],
+                    data_density_averaged,
+                    data_pressure_averaged,
+                    thermo_properties_const_ptr,
+                    0);
+                
+                d_equation_of_state_mixing_rules->getEquationOfState()->computeGruneisenParameter(
+                    projection_variables[5],
+                    data_density_averaged,
+                    data_pressure_averaged,
+                    thermo_properties_const_ptr,
+                    0);
+                
+                // Compute the total specific enthalpy.
+                
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -num_ghosts_0_projection_var;
+                     i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_face_x = i + num_ghosts_0_projection_var;
+                    
+                    H_average[idx_face_x] = e_average[idx_face_x] +
+                        p_average[idx_face_x]/rho_average[idx_face_x];
+                }
+                
+                break;
+            }
+            case AVERAGING_TMP::ROE:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::"
+                    << "computeSideDataOfProjectionVariablesForConservativeVariables()\n"
+                    << "Roe averaging is not yet implemented."
+                    << std::endl);
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::"
+                    << "computeSideDataOfProjectionVariablesForConservativeVariables()\n"
+                    << "Unknown d_proj_var_conservative_averaging_type given."
+                    << std::endl);
+            }
+        }
+        
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        
+        const int num_ghosts_0 = num_ghosts[0];
+        const int num_ghosts_1 = num_ghosts[1];
+        const int ghostcell_dim_0 = ghostcell_dims[0];
+        
+        const int num_ghosts_0_projection_var = num_ghosts_projection_var[0];
+        const int num_ghosts_1_projection_var = num_ghosts_projection_var[1];
+        const int ghostcell_dim_0_projection_var = ghostcell_dims_projection_var[0];
+        
+        // Get the pointers to the cell data of momentum.
+        
+        double* rho_u = data_momentum->getPointer(0);
+        double* rho_v = data_momentum->getPointer(1);
+        
+        // Declare pointers to the side data of averaged momentum and velocity.
+        
+        double* rho_u_average = nullptr;
+        double* rho_v_average = nullptr;
+        double* u_average     = nullptr;
+        double* v_average     = nullptr;
+        
+        switch (d_proj_var_conservative_averaging_type)
+        {
+            case AVERAGING_TMP::SIMPLE:
+            {
+                /*
+                 * Compute the averaged conservative variables in the x-direction.
+                 */
+                
+                rho_average   = data_density_averaged->getPointer(0);
+                rho_u_average = data_momentum_averaged->getPointer(0, 0);
+                rho_v_average = data_momentum_averaged->getPointer(0, 1);
+                E_average     = data_total_energy_averaged->getPointer(0);
+                
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = -num_ghosts_0_projection_var;
+                         i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face_x = (i + num_ghosts_0_projection_var) +
+                            (j + num_ghosts_1_projection_var)*(ghostcell_dim_0_projection_var + 1);
+                        
+                        const int idx_L = (i - 1 + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0;
+                        
+                        const int idx_R = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0;
+                        
+                        rho_average[idx_face_x]   = double(1)/double(2)*(rho[idx_L] + rho[idx_R]);
+                        rho_u_average[idx_face_x] = double(1)/double(2)*(rho_u[idx_L] + rho_u[idx_R]);
+                        rho_v_average[idx_face_x] = double(1)/double(2)*(rho_v[idx_L] + rho_v[idx_R]);
+                        E_average[idx_face_x]     = double(1)/double(2)*(E[idx_L] + E[idx_R]);
+                    }
+                }
+                
+                /*
+                 * Compute the projection variables in the x-direction.
+                 */
+                
+                u_average       = projection_variables[0]->getPointer(0);
+                v_average       = projection_variables[1]->getPointer(0);
+                e_average       = projection_variables[2]->getPointer(0);
+                epsilon_average = data_internal_energy_averaged->getPointer(0);
+                p_average       = data_pressure_averaged->getPointer(0);
+                H_average       = projection_variables[3]->getPointer(0);
+                
+                // Compute the velocity and internal energy.
+                
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = -num_ghosts_0_projection_var;
+                         i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face_x = (i + num_ghosts_0_projection_var) +
+                            (j + num_ghosts_1_projection_var)*(ghostcell_dim_0_projection_var + 1);
+                        
+                        u_average[idx_face_x] = rho_u_average[idx_face_x]/rho_average[idx_face_x];
+                        v_average[idx_face_x] = rho_v_average[idx_face_x]/rho_average[idx_face_x];
+                        
+                        e_average[idx_face_x] = E_average[idx_face_x]/rho_average[idx_face_x];
+                        
+                        epsilon_average[idx_face_x] = e_average[idx_face_x] -
+                            double(1)/double(2)*(u_average[idx_face_x]*u_average[idx_face_x] +
+                                v_average[idx_face_x]*v_average[idx_face_x]);
+                    }
+                }
+                
+                // Compute the presure, sound speed, partial pressure partial density and Gruneisen parameter.
+                
+                d_equation_of_state_mixing_rules->getEquationOfState()->computePressure(
+                    data_pressure_averaged,
+                    data_density_averaged,
+                    data_internal_energy_averaged,
+                    thermo_properties_const_ptr,
+                    0);
+                
+                d_equation_of_state_mixing_rules->getEquationOfState()->computeSoundSpeed(
+                    projection_variables[4],
+                    data_density_averaged,
+                    data_pressure_averaged,
+                    thermo_properties_const_ptr,
+                    0);
+                
+                d_equation_of_state_mixing_rules->getEquationOfState()->computePressureDerivativeWithDensity(
+                    projection_variables[5],
+                    data_density_averaged,
+                    data_pressure_averaged,
+                    thermo_properties_const_ptr,
+                    0);
+                
+                d_equation_of_state_mixing_rules->getEquationOfState()->computeGruneisenParameter(
+                    projection_variables[6],
+                    data_density_averaged,
+                    data_pressure_averaged,
+                    thermo_properties_const_ptr,
+                    0);
+                
+                // Compute the total specific enthalpy.
+                
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = -num_ghosts_0_projection_var;
+                         i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face_x = (i + num_ghosts_0_projection_var) +
+                            (j + num_ghosts_1_projection_var)*(ghostcell_dim_0_projection_var + 1);
+                        
+                        H_average[idx_face_x] = e_average[idx_face_x] +
+                            p_average[idx_face_x]/rho_average[idx_face_x];
+                    }
+                }
+                
+                /*
+                 * Compute the averaged conservative variables in the y-direction.
+                 */
+                
+                rho_average   = data_density_averaged->getPointer(1);
+                rho_u_average = data_momentum_averaged->getPointer(1, 0);
+                rho_v_average = data_momentum_averaged->getPointer(1, 1);
+                E_average     = data_total_energy_averaged->getPointer(1);
+                
+                for (int j = -num_ghosts_1_projection_var;
+                     j < interior_dim_1 + 1 + num_ghosts_1_projection_var;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face_y = (i + num_ghosts_0_projection_var) +
+                            (j + num_ghosts_1_projection_var)*ghostcell_dim_0_projection_var;
+                        
+                        const int idx_B = (i + num_ghosts_0) +
+                            (j - 1 + num_ghosts_1)*ghostcell_dim_0;
+                        
+                        const int idx_T = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0;
+                        
+                        rho_average[idx_face_y]   = double(1)/double(2)*(rho[idx_B] + rho[idx_T]);
+                        rho_u_average[idx_face_y] = double(1)/double(2)*(rho_u[idx_B] + rho_u[idx_T]);
+                        rho_v_average[idx_face_y] = double(1)/double(2)*(rho_v[idx_B] + rho_v[idx_T]);
+                        E_average[idx_face_y]     = double(1)/double(2)*(E[idx_B] + E[idx_T]);
+                    }
+                }
+                
+                /*
+                 * Compute the projection variables in the y-direction.
+                 */
+                
+                u_average       = projection_variables[0]->getPointer(1);
+                v_average       = projection_variables[1]->getPointer(1);
+                e_average       = projection_variables[2]->getPointer(1);
+                epsilon_average = data_internal_energy_averaged->getPointer(1);
+                p_average       = data_pressure_averaged->getPointer(1);
+                H_average       = projection_variables[3]->getPointer(1);
+                
+                // Compute the velocity and internal energy.
+                
+                for (int j = -num_ghosts_1_projection_var;
+                     j < interior_dim_1 + 1 + num_ghosts_1_projection_var;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face_y = (i + num_ghosts_0_projection_var) +
+                            (j + num_ghosts_1_projection_var)*ghostcell_dim_0_projection_var;
+                        
+                        u_average[idx_face_y] = rho_u_average[idx_face_y]/rho_average[idx_face_y];
+                        v_average[idx_face_y] = rho_v_average[idx_face_y]/rho_average[idx_face_y];
+                        
+                        e_average[idx_face_y] = E_average[idx_face_y]/rho_average[idx_face_y];
+                        
+                        epsilon_average[idx_face_y] = e_average[idx_face_y] -
+                            double(1)/double(2)*(u_average[idx_face_y]*u_average[idx_face_y] +
+                                v_average[idx_face_y]*v_average[idx_face_y]);
+                    }
+                }
+                
+                // Compute the presure, sound speed, partial pressure partial density and Gruneisen parameter.
+                
+                d_equation_of_state_mixing_rules->getEquationOfState()->computePressure(
+                    data_pressure_averaged,
+                    data_density_averaged,
+                    data_internal_energy_averaged,
+                    thermo_properties_const_ptr,
+                    1);
+                
+                d_equation_of_state_mixing_rules->getEquationOfState()->computeSoundSpeed(
+                    projection_variables[4],
+                    data_density_averaged,
+                    data_pressure_averaged,
+                    thermo_properties_const_ptr,
+                    1);
+                
+                d_equation_of_state_mixing_rules->getEquationOfState()->computePressureDerivativeWithDensity(
+                    projection_variables[5],
+                    data_density_averaged,
+                    data_pressure_averaged,
+                    thermo_properties_const_ptr,
+                    1);
+                
+                d_equation_of_state_mixing_rules->getEquationOfState()->computeGruneisenParameter(
+                    projection_variables[6],
+                    data_density_averaged,
+                    data_pressure_averaged,
+                    thermo_properties_const_ptr,
+                    1);
+                
+                // Compute the total specific enthalpy.
+                
+                for (int j = -num_ghosts_1_projection_var;
+                     j < interior_dim_1 + 1 + num_ghosts_1_projection_var;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face_y = (i + num_ghosts_0_projection_var) +
+                            (j + num_ghosts_1_projection_var)*ghostcell_dim_0_projection_var;
+                        
+                        H_average[idx_face_y] = e_average[idx_face_y] +
+                            p_average[idx_face_y]/rho_average[idx_face_y];
+                    }
+                }
+                
+                break;
+            }
+            case AVERAGING_TMP::ROE:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::"
+                    << "computeSideDataOfProjectionVariablesForConservativeVariables()\n"
+                    << "Roe averaging is not yet implemented."
+                    << std::endl);
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::"
+                    << "computeSideDataOfProjectionVariablesForConservativeVariables()\n"
+                    << "Unknown d_proj_var_conservative_averaging_type given."
+                    << std::endl);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        const int interior_dim_2 = interior_dims[2];
+        
+        const int num_ghosts_0 = num_ghosts[0];
+        const int num_ghosts_1 = num_ghosts[1];
+        const int num_ghosts_2 = num_ghosts[2];
+        const int ghostcell_dim_0 = ghostcell_dims[0];
+        const int ghostcell_dim_1 = ghostcell_dims[1];
+        
+        const int num_ghosts_0_projection_var = num_ghosts_projection_var[0];
+        const int num_ghosts_1_projection_var = num_ghosts_projection_var[1];
+        const int num_ghosts_2_projection_var = num_ghosts_projection_var[2];
+        const int ghostcell_dim_0_projection_var = ghostcell_dims_projection_var[0];
+        const int ghostcell_dim_1_projection_var = ghostcell_dims_projection_var[1];
+        
+        // Get the pointers to the cell data of momentum.
+        
+        double* rho_u = data_momentum->getPointer(0);
+        double* rho_v = data_momentum->getPointer(1);
+        double* rho_w = data_momentum->getPointer(2);
+        
+        // Declare pointers to the side data of averaged momentum and velocity.
+        
+        double* rho_u_average = nullptr;
+        double* rho_v_average = nullptr;
+        double* rho_w_average = nullptr;
+        double* u_average     = nullptr;
+        double* v_average     = nullptr;
+        double* w_average     = nullptr;
+        
+        switch (d_proj_var_conservative_averaging_type)
+        {
+            case AVERAGING_TMP::SIMPLE:
+            {
+                /*
+                 * Compute the averaged conservative variables in the x-direction.
+                 */
+                
+                rho_average   = data_density_averaged->getPointer(0);
+                rho_u_average = data_momentum_averaged->getPointer(0, 0);
+                rho_v_average = data_momentum_averaged->getPointer(0, 1);
+                rho_w_average = data_momentum_averaged->getPointer(0, 2);
+                E_average     = data_total_energy_averaged->getPointer(0);
+                
+                for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = -num_ghosts_0_projection_var;
+                             i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
+                             i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_x = (i + num_ghosts_0_projection_var) +
+                                (j + num_ghosts_1_projection_var)*(ghostcell_dim_0_projection_var + 1) +
+                                (k + num_ghosts_2_projection_var)*(ghostcell_dim_0_projection_var + 1)*
+                                    ghostcell_dim_1_projection_var;
+                            
+                            const int idx_L = (i - 1 + num_ghosts_0) +
+                                (j + num_ghosts_1)*ghostcell_dim_0 +
+                                (k + num_ghosts_2)*ghostcell_dim_0*
+                                    ghostcell_dim_1;
+                            
+                            const int idx_R = (i + num_ghosts_0) +
+                                (j + num_ghosts_1)*ghostcell_dim_0 +
+                                (k + num_ghosts_2)*ghostcell_dim_0*
+                                    ghostcell_dim_1;
+                            
+                            rho_average[idx_face_x]   = double(1)/double(2)*(rho[idx_L] + rho[idx_R]);
+                            rho_u_average[idx_face_x] = double(1)/double(2)*(rho_u[idx_L] + rho_u[idx_R]);
+                            rho_v_average[idx_face_x] = double(1)/double(2)*(rho_v[idx_L] + rho_v[idx_R]);
+                            rho_w_average[idx_face_x] = double(1)/double(2)*(rho_w[idx_L] + rho_w[idx_R]);
+                            E_average[idx_face_x]     = double(1)/double(2)*(E[idx_L] + E[idx_R]);
+                        }
+                    }
+                }
+                
+                /*
+                 * Compute the projection variables in the x-direction.
+                 */
+                
+                u_average       = projection_variables[0]->getPointer(0);
+                v_average       = projection_variables[1]->getPointer(0);
+                w_average       = projection_variables[2]->getPointer(0);
+                e_average       = projection_variables[3]->getPointer(0);
+                epsilon_average = data_internal_energy_averaged->getPointer(0);
+                p_average       = data_pressure_averaged->getPointer(0);
+                H_average       = projection_variables[4]->getPointer(0);
+                
+                // Compute the velocity and internal energy.
+                
+                for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = -num_ghosts_0_projection_var;
+                             i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
+                             i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_x = (i + num_ghosts_0_projection_var) +
+                                (j + num_ghosts_1_projection_var)*(ghostcell_dim_0_projection_var + 1) +
+                                (k + num_ghosts_2_projection_var)*(ghostcell_dim_0_projection_var + 1)*
+                                    ghostcell_dim_1_projection_var;
+                            
+                            u_average[idx_face_x] = rho_u_average[idx_face_x]/rho_average[idx_face_x];
+                            v_average[idx_face_x] = rho_v_average[idx_face_x]/rho_average[idx_face_x];
+                            w_average[idx_face_x] = rho_w_average[idx_face_x]/rho_average[idx_face_x];
+                            
+                            e_average[idx_face_x] = E_average[idx_face_x]/rho_average[idx_face_x];
+                            
+                            epsilon_average[idx_face_x] = e_average[idx_face_x] -
+                                double(1)/double(2)*(u_average[idx_face_x]*u_average[idx_face_x] +
+                                    v_average[idx_face_x]*v_average[idx_face_x] +
+                                    w_average[idx_face_x]*w_average[idx_face_x]);
+                        }
+                    }
+                }
+                
+                // Compute the presure, sound speed, partial pressure partial density and Gruneisen parameter.
+                
+                d_equation_of_state_mixing_rules->getEquationOfState()->computePressure(
+                    data_pressure_averaged,
+                    data_density_averaged,
+                    data_internal_energy_averaged,
+                    thermo_properties_const_ptr,
+                    0);
+                
+                d_equation_of_state_mixing_rules->getEquationOfState()->computeSoundSpeed(
+                    projection_variables[5],
+                    data_density_averaged,
+                    data_pressure_averaged,
+                    thermo_properties_const_ptr,
+                    0);
+                
+                d_equation_of_state_mixing_rules->getEquationOfState()->computePressureDerivativeWithDensity(
+                    projection_variables[6],
+                    data_density_averaged,
+                    data_pressure_averaged,
+                    thermo_properties_const_ptr,
+                    0);
+                
+                d_equation_of_state_mixing_rules->getEquationOfState()->computeGruneisenParameter(
+                    projection_variables[7],
+                    data_density_averaged,
+                    data_pressure_averaged,
+                    thermo_properties_const_ptr,
+                    0);
+                
+                // Compute the total specific enthalpy.
+                
+                for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = -num_ghosts_0_projection_var;
+                             i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
+                             i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_x = (i + num_ghosts_0_projection_var) +
+                                (j + num_ghosts_1_projection_var)*(ghostcell_dim_0_projection_var + 1) +
+                                (k + num_ghosts_2_projection_var)*(ghostcell_dim_0_projection_var + 1)*
+                                    ghostcell_dim_1_projection_var;
+                            
+                            H_average[idx_face_x] = e_average[idx_face_x] +
+                                p_average[idx_face_x]/rho_average[idx_face_x];
+                        }
+                    }
+                }
+                
+                /*
+                 * Compute the averaged conservative variables in the y-direction.
+                 */
+                
+                rho_average   = data_density_averaged->getPointer(1);
+                rho_u_average = data_momentum_averaged->getPointer(1, 0);
+                rho_v_average = data_momentum_averaged->getPointer(1, 1);
+                rho_w_average = data_momentum_averaged->getPointer(1, 2);
+                E_average     = data_total_energy_averaged->getPointer(1);
+                
+                for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = -num_ghosts_1_projection_var;
+                         j < interior_dim_1 + 1 + num_ghosts_1_projection_var;
+                         j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_y = (i + num_ghosts_0_projection_var) +
+                                (j + num_ghosts_1_projection_var)*ghostcell_dim_0_projection_var +
+                                (k + num_ghosts_2_projection_var)*ghostcell_dim_0_projection_var*
+                                    (ghostcell_dim_1_projection_var + 1);
+                            
+                            const int idx_B = (i + num_ghosts_0) +
+                                (j - 1 + num_ghosts_1)*ghostcell_dim_0 +
+                                (k + num_ghosts_2)*ghostcell_dim_0*
+                                    ghostcell_dim_1;
+                            
+                            const int idx_T = (i + num_ghosts_0) +
+                                (j + num_ghosts_1)*ghostcell_dim_0 +
+                                (k + num_ghosts_2)*ghostcell_dim_0*
+                                    ghostcell_dim_1;
+                            
+                            rho_average[idx_face_y]   = double(1)/double(2)*(rho[idx_B] + rho[idx_T]);
+                            rho_u_average[idx_face_y] = double(1)/double(2)*(rho_u[idx_B] + rho_u[idx_T]);
+                            rho_v_average[idx_face_y] = double(1)/double(2)*(rho_v[idx_B] + rho_v[idx_T]);
+                            rho_w_average[idx_face_y] = double(1)/double(2)*(rho_w[idx_B] + rho_w[idx_T]);
+                            E_average[idx_face_y]     = double(1)/double(2)*(E[idx_B] + E[idx_T]);
+                        }
+                    }
+                }
+                
+                /*
+                 * Compute the projection variables in the y-direction.
+                 */
+                
+                u_average       = projection_variables[0]->getPointer(1);
+                v_average       = projection_variables[1]->getPointer(1);
+                w_average       = projection_variables[2]->getPointer(1);
+                e_average       = projection_variables[3]->getPointer(1);
+                epsilon_average = data_internal_energy_averaged->getPointer(1);
+                p_average       = data_pressure_averaged->getPointer(1);
+                H_average       = projection_variables[4]->getPointer(1);
+                
+                for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = -num_ghosts_1_projection_var;
+                         j < interior_dim_1 + 1 + num_ghosts_1_projection_var;
+                         j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_y = (i + num_ghosts_0_projection_var) +
+                                (j + num_ghosts_1_projection_var)*ghostcell_dim_0_projection_var +
+                                (k + num_ghosts_2_projection_var)*ghostcell_dim_0_projection_var*
+                                    (ghostcell_dim_1_projection_var + 1);
+                            
+                            u_average[idx_face_y] = rho_u_average[idx_face_y]/rho_average[idx_face_y];
+                            v_average[idx_face_y] = rho_v_average[idx_face_y]/rho_average[idx_face_y];
+                            w_average[idx_face_y] = rho_w_average[idx_face_y]/rho_average[idx_face_y];
+                            
+                            e_average[idx_face_y] = E_average[idx_face_y]/rho_average[idx_face_y];
+                            
+                            epsilon_average[idx_face_y] = e_average[idx_face_y] -
+                                double(1)/double(2)*(u_average[idx_face_y]*u_average[idx_face_y] +
+                                    v_average[idx_face_y]*v_average[idx_face_y] +
+                                    w_average[idx_face_y]*w_average[idx_face_y]);
+                        }
+                    }
+                }
+                
+                // Compute the presure, sound speed, partial pressure partial density and Gruneisen parameter.
+                
+                d_equation_of_state_mixing_rules->getEquationOfState()->computePressure(
+                    data_pressure_averaged,
+                    data_density_averaged,
+                    data_internal_energy_averaged,
+                    thermo_properties_const_ptr,
+                    1);
+                
+                d_equation_of_state_mixing_rules->getEquationOfState()->computeSoundSpeed(
+                    projection_variables[5],
+                    data_density_averaged,
+                    data_pressure_averaged,
+                    thermo_properties_const_ptr,
+                    1);
+                
+                d_equation_of_state_mixing_rules->getEquationOfState()->computePressureDerivativeWithDensity(
+                    projection_variables[6],
+                    data_density_averaged,
+                    data_pressure_averaged,
+                    thermo_properties_const_ptr,
+                    1);
+                
+                d_equation_of_state_mixing_rules->getEquationOfState()->computeGruneisenParameter(
+                    projection_variables[7],
+                    data_density_averaged,
+                    data_pressure_averaged,
+                    thermo_properties_const_ptr,
+                    1);
+                
+                // Compute the total specific enthalpy.
+                
+                for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = -num_ghosts_1_projection_var;
+                         j < interior_dim_1 + 1 + num_ghosts_1_projection_var;
+                         j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_y = (i + num_ghosts_0_projection_var) +
+                                (j + num_ghosts_1_projection_var)*ghostcell_dim_0_projection_var +
+                                (k + num_ghosts_2_projection_var)*ghostcell_dim_0_projection_var*
+                                    (ghostcell_dim_1_projection_var + 1);
+                            
+                            H_average[idx_face_y] = e_average[idx_face_y] +
+                                p_average[idx_face_y]/rho_average[idx_face_y];
+                        }
+                    }
+                }
+                
+                /*
+                 * Compute the averaged conservative variables in the z-direction.
+                 */
+                
+                rho_average   = data_density_averaged->getPointer(2);
+                rho_u_average = data_momentum_averaged->getPointer(2, 0);
+                rho_v_average = data_momentum_averaged->getPointer(2, 1);
+                rho_w_average = data_momentum_averaged->getPointer(2, 2);
+                E_average     = data_total_energy_averaged->getPointer(2);
+                
+                for (int k = -num_ghosts_2_projection_var;
+                     k < interior_dim_2 + 1 + num_ghosts_2_projection_var;
+                     k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_z = (i + num_ghosts_0_projection_var) +
+                                (j + num_ghosts_1_projection_var)*ghostcell_dim_0_projection_var +
+                                (k + num_ghosts_2_projection_var)*ghostcell_dim_0_projection_var*
+                                    ghostcell_dim_1_projection_var;
+                            
+                            const int idx_B = (i + num_ghosts_0) +
+                                (j + num_ghosts_1)*ghostcell_dim_0 +
+                                (k - 1 + num_ghosts_2)*ghostcell_dim_0*
+                                    ghostcell_dim_1;
+                            
+                            const int idx_F = (i + num_ghosts_0) +
+                                (j + num_ghosts_1)*ghostcell_dim_0 +
+                                (k + num_ghosts_2)*ghostcell_dim_0*
+                                    ghostcell_dim_1;
+                            
+                            rho_average[idx_face_z]   = double(1)/double(2)*(rho[idx_B] + rho[idx_F]);
+                            rho_u_average[idx_face_z] = double(1)/double(2)*(rho_u[idx_B] + rho_u[idx_F]);
+                            rho_v_average[idx_face_z] = double(1)/double(2)*(rho_v[idx_B] + rho_v[idx_F]);
+                            rho_w_average[idx_face_z] = double(1)/double(2)*(rho_w[idx_B] + rho_w[idx_F]);
+                            E_average[idx_face_z]     = double(1)/double(2)*(E[idx_B] + E[idx_F]);
+                        }
+                    }
+                }
+                
+                /*
+                 * Compute the projection variables in the z-direction.
+                 */
+                
+                u_average       = projection_variables[0]->getPointer(2);
+                v_average       = projection_variables[1]->getPointer(2);
+                w_average       = projection_variables[2]->getPointer(2);
+                e_average       = projection_variables[3]->getPointer(2);
+                epsilon_average = data_internal_energy_averaged->getPointer(2);
+                p_average       = data_pressure_averaged->getPointer(2);
+                H_average       = projection_variables[4]->getPointer(2);
+                
+                for (int k = -num_ghosts_2_projection_var;
+                     k < interior_dim_2 + 1 + num_ghosts_2_projection_var;
+                     k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_z = (i + num_ghosts_0_projection_var) +
+                                (j + num_ghosts_1_projection_var)*ghostcell_dim_0_projection_var +
+                                (k + num_ghosts_2_projection_var)*ghostcell_dim_0_projection_var*
+                                    ghostcell_dim_1_projection_var;
+                            
+                            u_average[idx_face_z] = rho_u_average[idx_face_z]/rho_average[idx_face_z];
+                            v_average[idx_face_z] = rho_v_average[idx_face_z]/rho_average[idx_face_z];
+                            w_average[idx_face_z] = rho_w_average[idx_face_z]/rho_average[idx_face_z];
+                            
+                            e_average[idx_face_z] = E_average[idx_face_z]/rho_average[idx_face_z];
+                            
+                            epsilon_average[idx_face_z] = e_average[idx_face_z] -
+                                double(1)/double(2)*(u_average[idx_face_z]*u_average[idx_face_z] +
+                                    v_average[idx_face_z]*v_average[idx_face_z] +
+                                    w_average[idx_face_z]*w_average[idx_face_z]);
+                        }
+                    }
+                }
+                
+                // Compute the presure, sound speed, partial pressure partial density and Gruneisen parameter.
+                
+                d_equation_of_state_mixing_rules->getEquationOfState()->computePressure(
+                    data_pressure_averaged,
+                    data_density_averaged,
+                    data_internal_energy_averaged,
+                    thermo_properties_const_ptr,
+                    2);
+                
+                d_equation_of_state_mixing_rules->getEquationOfState()->computeSoundSpeed(
+                    projection_variables[5],
+                    data_density_averaged,
+                    data_pressure_averaged,
+                    thermo_properties_const_ptr,
+                    2);
+                
+                d_equation_of_state_mixing_rules->getEquationOfState()->computePressureDerivativeWithDensity(
+                    projection_variables[6],
+                    data_density_averaged,
+                    data_pressure_averaged,
+                    thermo_properties_const_ptr,
+                    2);
+                
+                d_equation_of_state_mixing_rules->getEquationOfState()->computeGruneisenParameter(
+                    projection_variables[7],
+                    data_density_averaged,
+                    data_pressure_averaged,
+                    thermo_properties_const_ptr,
+                    2);
+                
+                // Compute the total specific enthalpy.
+                
+                for (int k = -num_ghosts_2_projection_var;
+                     k < interior_dim_2 + 1 + num_ghosts_2_projection_var;
+                     k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_z = (i + num_ghosts_0_projection_var) +
+                                (j + num_ghosts_1_projection_var)*ghostcell_dim_0_projection_var +
+                                (k + num_ghosts_2_projection_var)*ghostcell_dim_0_projection_var*
+                                    ghostcell_dim_1_projection_var;
+                            
+                            H_average[idx_face_z] = e_average[idx_face_z] +
+                                p_average[idx_face_z]/rho_average[idx_face_z];
+                        }
+                    }
+                }
+                
+                break;
+            }
+            case AVERAGING_TMP::ROE:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::"
+                    << "computeSideDataOfProjectionVariablesForConservativeVariables()\n"
+                    << "Roe averaging is not yet implemented."
+                    << std::endl);
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::"
+                    << "computeSideDataOfProjectionVariablesForConservativeVariables()\n"
+                    << "Unknown d_proj_var_conservative_averaging_type given."
+                    << std::endl);
+            }
+        }
+    }
 }
 
 

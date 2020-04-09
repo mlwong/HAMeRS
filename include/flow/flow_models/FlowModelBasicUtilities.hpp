@@ -12,6 +12,12 @@
 #include "boost/weak_ptr.hpp"
 #include <string>
 
+namespace AVERAGING_TMP
+{
+    enum TYPE { SIMPLE,
+                ROE };
+}
+
 class FlowModel;
 
 class FlowModelBasicUtilities
@@ -25,7 +31,9 @@ class FlowModelBasicUtilities
                 d_object_name(object_name),
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
-                d_num_species(num_species)
+                d_num_species(num_species),
+                d_proj_var_conservative_averaging_type(AVERAGING_TMP::SIMPLE),
+                d_proj_var_primitive_averaging_type(AVERAGING_TMP::SIMPLE)
         {}
         
         virtual ~FlowModelBasicUtilities() {}
@@ -179,6 +187,12 @@ protected:
          * boost::weak_ptr to FlowModel.
          */
         boost::weak_ptr<FlowModel> d_flow_model;
+        
+        /*
+         * Settings for projection variables.
+         */
+        AVERAGING_TMP::TYPE d_proj_var_conservative_averaging_type;
+        AVERAGING_TMP::TYPE d_proj_var_primitive_averaging_type;
         
 };
 
