@@ -4456,6 +4456,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForPri
     boost::shared_ptr<pdat::CellData<double> > data_sound_speed =
         d_flow_model_tmp->getCellData("SOUND_SPEED");
     
+    // Get the number of ghost cells and ghost cell dimension of sound speed.
     const hier::IntVector& num_subghosts_sound_speed = data_sound_speed->getGhostCellWidth();
     const hier::IntVector subghostcell_dims_sound_speed = data_sound_speed->getGhostBox().numberCells();
     
