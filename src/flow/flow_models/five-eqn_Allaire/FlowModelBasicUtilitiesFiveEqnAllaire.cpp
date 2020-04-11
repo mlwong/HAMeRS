@@ -18,12 +18,13 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
     const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
      * Get the dimensions of box that covers the interior of patch.
      */
     
-    const hier::Box interior_box = primitive_variables[0]->getBox();
+    const hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
     
     /*
@@ -70,7 +71,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
     if (!(num_eqn_primitive_var == num_eqn || num_eqn_primitive_var == num_eqn + 1))
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::"
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
             << "convertConservativeVariablesToPrimitiveVariables()\n"
             << "The number of primitive variables are incorrect."
             << std::endl);
@@ -79,7 +80,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
     if (!(num_eqn_conservative_var == num_eqn || num_eqn_conservative_var == num_eqn + 1))
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::"
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
             << "convertConservativeVariablesToPrimitiveVariables()\n"
             << "The number of conservative variables are incorrect."
             << std::endl);
@@ -89,7 +90,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
      * Check potential failures.
      */
     
-    for (int vi = 1; vi < static_cast<int>(primitive_variables.size()); vi++)
+    for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
     {
         const hier::IntVector interior_dims_primitive_var =
             primitive_variables[vi]->getBox().numberCells();
@@ -97,7 +98,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
         if (interior_dims_primitive_var != interior_dims)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFiveEqnAllaire::"
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
                 << "convertConservativeVariablesToPrimitiveVariables()\n"
                 << "The interior dimension of the primitive variables does not match that of patch."
                 << std::endl);
@@ -112,7 +113,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
         if (interior_dims_conservative_var != interior_dims)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFiveEqnAllaire::"
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
                 << "convertConservativeVariablesToPrimitiveVariables()\n"
                 << "The interior dimension of the conservative variables does not match that of patch."
                 << std::endl);
@@ -124,7 +125,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
         if (num_ghosts_primitive_var != primitive_variables[vi]->getGhostCellWidth())
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFiveEqnAllaire::"
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
                 << "convertConservativeVariablesToPrimitiveVariables()\n"
                 << "The primitive variables don't have same ghost cell width."
                 << std::endl);
@@ -136,7 +137,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
         if (num_ghosts_conservative_var != conservative_variables[vi]->getGhostCellWidth())
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFiveEqnAllaire::"
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
                 << "convertConservativeVariablesToPrimitiveVariables()\n"
                 << "The conservative variables don't have same ghost cell width."
                 << std::endl);
@@ -146,7 +147,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
     if (num_ghosts_primitive_var > num_ghosts_conservative_var)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::"
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
             << "convertConservativeVariablesToPrimitiveVariables()\n"
             << "The ghost cell width of primitive variables is larger than that of conservative variables."
             << std::endl);
@@ -2023,12 +2024,13 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
     const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
      * Get the dimensions of box that covers the interior of patch.
      */
     
-    const hier::Box interior_box = conservative_variables[0]->getBox();
+    const hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
     
     /*
@@ -2075,7 +2077,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
     if (!(num_eqn_conservative_var == num_eqn || num_eqn_conservative_var == num_eqn + 1))
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::"
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
             << "convertPrimitiveVariablesToConservativeVariables()\n"
             << "The number of conservative variables are incorrect."
             << std::endl);
@@ -2084,7 +2086,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
     if (!(num_eqn_primitive_var == num_eqn || num_eqn_primitive_var == num_eqn + 1))
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::"
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
             << "convertPrimitiveVariablesToConservativeVariables()\n"
             << "The number of primitive variables are incorrect."
             << std::endl);
@@ -2094,7 +2096,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
      * Check potential failures.
      */
     
-    for (int vi = 1; vi < static_cast<int>(conservative_variables.size()); vi++)
+    for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
     {
         const hier::IntVector interior_dims_conservative_var =
             conservative_variables[vi]->getBox().numberCells();
@@ -2102,7 +2104,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
         if (interior_dims_conservative_var != interior_dims)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFiveEqnAllaire::"
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
                 << "convertPrimitiveVariablesToConservativeVariables()\n"
                 << "The interior dimension of the conservative variables does not match that of patch."
                 << std::endl);
@@ -2117,7 +2119,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
         if (interior_dims_primitive_var != interior_dims)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFiveEqnAllaire::"
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
                 << "convertPrimitiveVariablesToConservativeVariables()\n"
                 << "The interior dimension of the primitive variables does not match that of patch."
                 << std::endl);
@@ -2129,7 +2131,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
         if (num_ghosts_conservative_var != conservative_variables[vi]->getGhostCellWidth())
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFiveEqnAllaire::"
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
                 << "convertPrimitiveVariablesToConservativeVariables()\n"
                 << "The conservative variables don't have same ghost cell width."
                 << std::endl);
@@ -2141,7 +2143,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
         if (num_ghosts_primitive_var != primitive_variables[vi]->getGhostCellWidth())
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFiveEqnAllaire::"
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
                 << "convertPrimitiveVariablesToConservativeVariables()\n"
                 << "The primitive variables don't have same ghost cell width."
                 << std::endl);
@@ -2151,7 +2153,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
     if (num_ghosts_conservative_var > num_ghosts_primitive_var)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::"
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
             << "convertPrimitiveVariablesToConservativeVariables()\n"
             << "The ghost cell width of conservative variables is larger than that of primitive variables."
             << std::endl);
@@ -4016,7 +4018,12 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkCellDataOfConservativeVariablesBound
     boost::shared_ptr<pdat::CellData<int> >& bounded_flag,
     const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables)
 {
-    // NEED IMPLEMENTATION!
+    TBOX_ERROR(d_object_name
+        << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+        << "checkCellDataOfConservativeVariablesBounded()\n"
+        << "Method checkCellDataOfConservativeVariablesBounded()"
+        << " is not yet implemented."
+        << std::endl);
 }
 
 
@@ -4038,12 +4045,13 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
     const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
      * Get the dimensions of box that covers the interior of patch.
      */
     
-    const hier::Box interior_box = bounded_flag->getBox();
+    const hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
     
     /*
@@ -4070,7 +4078,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
           static_cast<int>(conservative_variables.size()) - 1 == num_eqn))
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::"
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
             << "checkSideDataOfConservativeVariablesBounded()\n"
             << "The number of conservative variables are incorrect."
             << std::endl);
@@ -4088,11 +4096,20 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
         if (interior_dims_conservative_var != interior_dims)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFiveEqnAllaire::"
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
                 << "checkSideDataOfConservativeVariablesBounded()\n"
                 << "The interior dimension of the conservative variables does not match that of patch."
                 << std::endl);
         }
+    }
+    const hier::IntVector interior_dims_flag = bounded_flag->getBox().numberCells();
+    if (interior_dims_flag != interior_dims)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+            << "checkSideDataOfConservativeVariablesBounded()\n"
+            << "The interior dimension of the flag does not match that of patch."
+            << std::endl);
     }
     
     for (int ei = 1; ei < num_eqn; ei++)
@@ -4100,7 +4117,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
         if (num_ghosts_conservative_var != conservative_variables[ei]->getGhostCellWidth())
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFiveEqnAllaire::"
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
                 << "checkSideDataOfConservativeVariablesBounded()\n"
                 << "The conservative variables don't have same ghost cell width."
                 << std::endl);
@@ -4110,7 +4127,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
     if (num_ghosts_flag != num_ghosts_conservative_var)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::"
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
             << "checkSideDataOfConservativeVariablesBounded()\n"
             << "The ghost cell width of the flag does not match that of conservative variables."
             << std::endl);
@@ -5172,7 +5189,12 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkCellDataOfPrimitiveVariablesBounded(
     boost::shared_ptr<pdat::CellData<int> >& bounded_flag,
     const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables)
 {
-    // NEED IMPLEMENTATION!
+    TBOX_ERROR(d_object_name
+        << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+        << "checkCellDataOfPrimitiveVariablesBounded()\n"
+        << "Method checkCellDataOfPrimitiveVariablesBounded()"
+        << " is not yet implemented."
+        << std::endl);
 }
 
 
@@ -5194,12 +5216,13 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
     const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
      * Get the dimensions of box that covers the interior of patch.
      */
     
-    const hier::Box interior_box = bounded_flag->getBox();
+    const hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
     
     /*
@@ -5226,7 +5249,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
           static_cast<int>(primitive_variables.size()) - 1 == num_eqn))
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::"
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
             << "checkSideDataOfPrimitiveVariablesBounded()\n"
             << "The number of primitive variables are incorrect."
             << std::endl);
@@ -5244,11 +5267,20 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
         if (interior_dims_primitive_var != interior_dims)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFiveEqnAllaire::"
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
                 << "checkSideDataOfPrimitiveVariablesBounded()\n"
                 << "The interior dimension of the primitive variables does not match that of patch."
                 << std::endl);
         }
+    }
+    const hier::IntVector interior_dims_flag = bounded_flag->getBox().numberCells();
+    if (interior_dims_flag != interior_dims)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+            << "checkSideDataOfPrimitiveVariablesBounded()\n"
+            << "The interior dimension of the flag does not match that of patch."
+            << std::endl);
     }
     
     for (int ei = 1; ei < num_eqn; ei++)
@@ -5256,7 +5288,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
         if (num_ghosts_primitive_var != primitive_variables[ei]->getGhostCellWidth())
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFiveEqnAllaire::"
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
                 << "checkSideDataOfPrimitiveVariablesBounded()\n"
                 << "The primitive variables don't have same ghost cell width."
                 << std::endl);
@@ -5266,7 +5298,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
     if (num_ghosts_flag != num_ghosts_primitive_var)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::"
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
             << "checkSideDataOfPrimitiveVariablesBounded()\n"
             << "The ghost cell width of the flag does not match that of primitive variables."
             << std::endl);
@@ -7105,6 +7137,14 @@ void
 FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfProjectionVariablesForConservativeVariables(
     std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
 {
+    NULL_USE(projection_variables);
+    
+    TBOX_ERROR(d_object_name
+        << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+        << "computeSideDataOfProjectionVariablesForConservativeVariables()\n"
+        << "Method computeSideDataOfProjectionVariablesForConservativeVariables()"
+        << " is not yet implemented."
+        << std::endl);
 }
 
 
@@ -7116,6 +7156,730 @@ void
 FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfProjectionVariablesForPrimitiveVariables(
     std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
 {
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    const hier::IntVector& num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
+    
+    /*
+     * Get the dimensions of the interior and ghost boxes.
+     */
+    
+    const hier::Box interior_box = patch.getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+    hier::Box ghost_box = interior_box;
+    ghost_box.grow(num_ghosts);
+    const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+    
+    /*
+     * Get the number of ghost cells and ghost cell dimension of projection variables.
+     */
+    
+    const hier::IntVector num_ghosts_projection_var = projection_variables[0]->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_projection_var =
+        projection_variables[0]->getGhostBox().numberCells();
+    
+    /*
+     * Check the size of variables.
+     */
+    
+    if (static_cast<int>(projection_variables.size()) != d_num_species + 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+            << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
+            << "There should be number of species projection plus two variables."
+            << std::endl);
+    }
+    
+    /*
+     * Check potential failures.
+     */
+    
+    for (int vi = 0; vi < static_cast<int>(projection_variables.size()); vi++)
+    {
+        const hier::IntVector interior_dims_projection_var =
+            projection_variables[vi]->getBox().numberCells();
+        if (interior_dims_projection_var != interior_dims)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+                << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
+                << "The interior dimension of the projection variables does not match that of patch."
+                << std::endl);
+        }
+    }
+    
+    for (int vi = 1; vi < static_cast<int>(projection_variables.size()); vi++)
+    {
+        if (num_ghosts_projection_var != projection_variables[vi]->getGhostCellWidth())
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+                << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
+                << "The projection variables don't have same ghost cell width."
+                << std::endl);
+        }
+    }
+    
+    if (num_ghosts_projection_var > num_ghosts)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+            << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
+            << "The projection variables have ghost cell width larger than that of density."
+            << std::endl);
+    }
+    
+    // Get the cell data of the variable partial densities.
+    boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+        d_flow_model_tmp->getCellData("PARTIAL_DENSITY");
+    
+    // Get the cell data of total density and sound speed.
+    boost::shared_ptr<pdat::CellData<double> > data_density =
+        d_flow_model_tmp->getCellData("DENSITY");
+    
+    boost::shared_ptr<pdat::CellData<double> > data_sound_speed =
+        d_flow_model_tmp->getCellData("SOUND_SPEED");
+    
+    // Get the numbers of ghost cells and ghost cell dimensions of of total density and sound speed.
+    const hier::IntVector& num_subghosts_density = data_density->getGhostCellWidth();
+    const hier::IntVector subghostcell_dims_density = data_density->getGhostBox().numberCells();
+    
+    const hier::IntVector& num_subghosts_sound_speed = data_sound_speed->getGhostCellWidth();
+    const hier::IntVector subghostcell_dims_sound_speed = data_sound_speed->getGhostBox().numberCells();
+    
+    if (num_ghosts_projection_var > num_subghosts_density)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+            << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
+            << "The projection variables have ghost cell width larger than that of density."
+            << std::endl);
+    }
+    
+    if (num_ghosts_projection_var > num_subghosts_sound_speed)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+            << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
+            << "The projection variables have ghost cell width larger than that of sound speed."
+            << std::endl);
+    }
+    
+    // Get the pointers to the cell data of partial densities, total density and sound speed.
+    std::vector<double*> Z_rho;
+    Z_rho.reserve(d_num_species);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        Z_rho.push_back(data_partial_densities->getPointer(si));
+    }
+    double* rho = data_density->getPointer(0);
+    double* c = data_sound_speed->getPointer(0);
+    
+    /*
+     * Declare pointers to different data.
+     */
+    
+    std::vector<double*> Z_rho_average;
+    Z_rho_average.resize(d_num_species);
+    double* rho_average = nullptr;
+    double* c_average = nullptr;
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        const int interior_dim_0 = interior_dims[0];
+        
+        const int num_ghosts_0 = num_ghosts[0];
+        const int num_ghosts_0_projection_var = num_ghosts_projection_var[0];
+        const int num_subghosts_0_density = num_subghosts_density[0];
+        const int num_subghosts_0_sound_speed = num_subghosts_sound_speed[0];
+        
+        switch (d_proj_var_primitive_averaging_type)
+        {
+            case AVERAGING_TMP::SIMPLE:
+            {
+                /*
+                 * Compute the projection variables in the x-direction.
+                 */
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Z_rho_average[si] = projection_variables[si]->getPointer(0);
+                }
+                rho_average = projection_variables[d_num_species]->getPointer(0);
+                c_average = projection_variables[d_num_species + 1]->getPointer(0);
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = -num_ghosts_0_projection_var;
+                         i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face_x = i + num_ghosts_0_projection_var;
+                        const int idx_L = i - 1 + num_ghosts_0;
+                        const int idx_R = i + num_ghosts_0;
+                        
+                        Z_rho_average[si][idx_face_x] = double(1)/double(2)*(Z_rho[si][idx_L] + Z_rho[si][idx_R]);
+                    }
+                }
+                
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -num_ghosts_0_projection_var;
+                     i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_face_x = i + num_ghosts_0_projection_var;
+                    const int idx_density_L = i - 1 + num_subghosts_0_density;
+                    const int idx_density_R = i + num_subghosts_0_density;
+                    const int idx_sound_speed_L = i - 1 + num_subghosts_0_sound_speed;
+                    const int idx_sound_speed_R = i + num_subghosts_0_sound_speed;
+                    
+                    rho_average[idx_face_x] = double(1)/double(2)*(rho[idx_density_L] + rho[idx_density_R]);
+                    c_average[idx_face_x] = double(1)/double(2)*(c[idx_sound_speed_L] + c[idx_sound_speed_R]);
+                }
+                
+                break;
+            }
+            case AVERAGING_TMP::ROE:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+                    << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
+                    << "Roe averaging is not yet implemented."
+                    << std::endl);
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+                    << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
+                    << "Unknown d_proj_var_primitive_averaging_type given."
+                    << std::endl);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        
+        const int num_ghosts_0 = num_ghosts[0];
+        const int num_ghosts_1 = num_ghosts[1];
+        const int ghostcell_dim_0 = ghostcell_dims[0];
+        
+        const int num_ghosts_0_projection_var = num_ghosts_projection_var[0];
+        const int num_ghosts_1_projection_var = num_ghosts_projection_var[1];
+        const int ghostcell_dim_0_projection_var = ghostcell_dims_projection_var[0];
+        
+        const int num_subghosts_0_density = num_subghosts_density[0];
+        const int num_subghosts_1_density= num_subghosts_density[1];
+        const int subghostcell_dim_0_density = subghostcell_dims_density[0];
+        
+        const int num_subghosts_0_sound_speed = num_subghosts_sound_speed[0];
+        const int num_subghosts_1_sound_speed = num_subghosts_sound_speed[1];
+        const int subghostcell_dim_0_sound_speed = subghostcell_dims_sound_speed[0];
+        
+        switch (d_proj_var_primitive_averaging_type)
+        {
+            case AVERAGING_TMP::SIMPLE:
+            {
+                /*
+                 * Compute the projection variables in the x-direction.
+                 */
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Z_rho_average[si] = projection_variables[si]->getPointer(0);
+                }
+                rho_average = projection_variables[d_num_species]->getPointer(0);
+                c_average = projection_variables[d_num_species + 1]->getPointer(0);
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = -num_ghosts_0_projection_var;
+                             i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
+                             i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_x = (i + num_ghosts_0_projection_var) +
+                                (j + num_ghosts_1_projection_var)*(ghostcell_dim_0_projection_var + 1);
+                            
+                            const int idx_L = (i - 1 + num_ghosts_0) +
+                                (j + num_ghosts_1)*ghostcell_dim_0;
+                            
+                            const int idx_R = (i + num_ghosts_0) +
+                                (j + num_ghosts_1)*ghostcell_dim_0;
+                            
+                            Z_rho_average[si][idx_face_x] = double(1)/double(2)*(Z_rho[si][idx_L] + Z_rho[si][idx_R]);
+                        }
+                    }
+                }
+                
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = -num_ghosts_0_projection_var;
+                         i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face_x = (i + num_ghosts_0_projection_var) +
+                            (j + num_ghosts_1_projection_var)*(ghostcell_dim_0_projection_var + 1);
+                        
+                        const int idx_density_L = (i - 1 + num_subghosts_0_density) +
+                            (j + num_subghosts_1_density)*subghostcell_dim_0_density;
+                        
+                        const int idx_density_R = (i + num_subghosts_0_density) +
+                            (j + num_subghosts_1_density)*subghostcell_dim_0_density;
+                        
+                        const int idx_sound_speed_L = (i - 1 + num_subghosts_0_sound_speed) +
+                            (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed;
+                        
+                        const int idx_sound_speed_R = (i + num_subghosts_0_sound_speed) +
+                            (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed;
+                        
+                        rho_average[idx_face_x] = double(1)/double(2)*(rho[idx_density_L] + rho[idx_density_R]);
+                        c_average[idx_face_x] = double(1)/double(2)*(c[idx_sound_speed_L] + c[idx_sound_speed_R]);
+                    }
+                }
+                
+                /*
+                 * Compute the projection variables in the y-direction.
+                 */
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Z_rho_average[si] = projection_variables[si]->getPointer(1);
+                }
+                rho_average = projection_variables[d_num_species]->getPointer(1);
+                c_average = projection_variables[d_num_species + 1]->getPointer(1);
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    for (int j = -num_ghosts_1_projection_var;
+                         j < interior_dim_1 + 1 + num_ghosts_1_projection_var;
+                         j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_y = (i + num_ghosts_0_projection_var) +
+                                (j + num_ghosts_1_projection_var)*ghostcell_dim_0_projection_var;
+                            
+                            const int idx_B = (i + num_ghosts_0) +
+                                (j - 1 + num_ghosts_1)*ghostcell_dim_0;
+                            
+                            const int idx_T = (i + num_ghosts_0) +
+                                (j + num_ghosts_1)*ghostcell_dim_0;
+                            
+                            Z_rho_average[si][idx_face_y] = double(1)/double(2)*(Z_rho[si][idx_B] + Z_rho[si][idx_T]);
+                        }
+                    }
+                }
+                
+                for (int j = -num_ghosts_1_projection_var;
+                     j < interior_dim_1 + 1 + num_ghosts_1_projection_var;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face_y = (i + num_ghosts_0_projection_var) +
+                            (j + num_ghosts_1_projection_var)*ghostcell_dim_0_projection_var;
+                        
+                        const int idx_density_B = (i + num_subghosts_0_density) +
+                            (j - 1 + num_subghosts_1_density)*subghostcell_dim_0_density;
+                        
+                        const int idx_density_T = (i + num_subghosts_0_density) +
+                            (j + num_subghosts_1_density)*subghostcell_dim_0_density;
+                        
+                        const int idx_sound_speed_B = (i + num_subghosts_0_sound_speed) +
+                            (j - 1 + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed;
+                        
+                        const int idx_sound_speed_T = (i + num_subghosts_0_sound_speed) +
+                            (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed;
+                        
+                        rho_average[idx_face_y] = double(1)/double(2)*(rho[idx_density_B] + rho[idx_density_T]);
+                        c_average[idx_face_y] = double(1)/double(2)*(c[idx_sound_speed_B] + c[idx_sound_speed_T]);
+                    }
+                }
+                
+                break;
+            }
+            case AVERAGING_TMP::ROE:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+                    << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
+                    << "Roe averaging is not yet implemented."
+                    << std::endl);
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+                    << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
+                    << "Unknown d_proj_var_primitive_averaging_type given."
+                    << std::endl);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        const int interior_dim_2 = interior_dims[2];
+        
+        const int num_ghosts_0 = num_ghosts[0];
+        const int num_ghosts_1 = num_ghosts[1];
+        const int num_ghosts_2 = num_ghosts[2];
+        const int ghostcell_dim_0 = ghostcell_dims[0];
+        const int ghostcell_dim_1 = ghostcell_dims[1];
+        
+        const int num_ghosts_0_projection_var = num_ghosts_projection_var[0];
+        const int num_ghosts_1_projection_var = num_ghosts_projection_var[1];
+        const int num_ghosts_2_projection_var = num_ghosts_projection_var[2];
+        const int ghostcell_dim_0_projection_var = ghostcell_dims_projection_var[0];
+        const int ghostcell_dim_1_projection_var = ghostcell_dims_projection_var[1];
+        
+        const int num_subghosts_0_density = num_subghosts_density[0];
+        const int num_subghosts_1_density = num_subghosts_density[1];
+        const int num_subghosts_2_density = num_subghosts_density[2];
+        const int subghostcell_dim_0_density = subghostcell_dims_density[0];
+        const int subghostcell_dim_1_density = subghostcell_dims_density[1];
+        
+        const int num_subghosts_0_sound_speed = num_subghosts_sound_speed[0];
+        const int num_subghosts_1_sound_speed = num_subghosts_sound_speed[1];
+        const int num_subghosts_2_sound_speed = num_subghosts_sound_speed[2];
+        const int subghostcell_dim_0_sound_speed = subghostcell_dims_sound_speed[0];
+        const int subghostcell_dim_1_sound_speed = subghostcell_dims_sound_speed[1];
+        
+        switch (d_proj_var_primitive_averaging_type)
+        {
+            case AVERAGING_TMP::SIMPLE:
+            {
+                /*
+                 * Compute the projection variables in the x-direction.
+                 */
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Z_rho_average[si] = projection_variables[si]->getPointer(0);
+                }
+                rho_average = projection_variables[d_num_species]->getPointer(0);
+                c_average = projection_variables[d_num_species + 1]->getPointer(0);
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = -num_ghosts_0_projection_var;
+                                 i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
+                                 i++)
+                            {
+                                // Compute the linear indices.
+                                const int idx_face_x = (i + num_ghosts_0_projection_var) +
+                                    (j + num_ghosts_1_projection_var)*(ghostcell_dim_0_projection_var + 1) +
+                                    (k + num_ghosts_2_projection_var)*(ghostcell_dim_0_projection_var + 1)*
+                                        ghostcell_dim_1_projection_var;
+                                
+                                const int idx_L = (i - 1 + num_ghosts_0) +
+                                    (j + num_ghosts_1)*ghostcell_dim_0 +
+                                    (k + num_ghosts_2)*ghostcell_dim_0*
+                                        ghostcell_dim_1;
+                                
+                                const int idx_R = (i + num_ghosts_0) +
+                                    (j + num_ghosts_1)*ghostcell_dim_0 +
+                                    (k + num_ghosts_2)*ghostcell_dim_0*
+                                        ghostcell_dim_1;
+                                
+                                Z_rho_average[si][idx_face_x] = double(1)/double(2)*(Z_rho[si][idx_L] + Z_rho[si][idx_R]);
+                            }
+                        }
+                    }
+                }
+                
+                for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = -num_ghosts_0_projection_var;
+                             i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
+                             i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_x = (i + num_ghosts_0_projection_var) +
+                                (j + num_ghosts_1_projection_var)*(ghostcell_dim_0_projection_var + 1) +
+                                (k + num_ghosts_2_projection_var)*(ghostcell_dim_0_projection_var + 1)*
+                                    ghostcell_dim_1_projection_var;
+                            
+                            const int idx_density_L = (i - 1 + num_subghosts_0_density) +
+                                (j + num_subghosts_1_density)*subghostcell_dim_0_density +
+                                (k + num_subghosts_2_density)*subghostcell_dim_0_density*
+                                    subghostcell_dim_1_density;
+                            
+                            const int idx_density_R = (i + num_subghosts_0_density) +
+                                (j + num_subghosts_1_density)*subghostcell_dim_0_density +
+                                (k + num_subghosts_2_density)*subghostcell_dim_0_density*
+                                    subghostcell_dim_1_density;
+                            
+                            const int idx_sound_speed_L = (i - 1 + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_R = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            rho_average[idx_face_x] = double(1)/double(2)*(rho[idx_density_L] + rho[idx_density_R]);
+                            c_average[idx_face_x] = double(1)/double(2)*(c[idx_sound_speed_L] + c[idx_sound_speed_R]);
+                        }
+                    }
+                }
+                
+                /*
+                 * Compute the projection variables in the y-direction.
+                 */
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Z_rho_average[si] = projection_variables[si]->getPointer(1);
+                }
+                rho_average = projection_variables[d_num_species]->getPointer(1);
+                c_average = projection_variables[d_num_species + 1]->getPointer(1);
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = -num_ghosts_1_projection_var;
+                             j < interior_dim_1 + 1 + num_ghosts_1_projection_var;
+                             j++)
+                        {
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                // Compute the linear indices.
+                                const int idx_face_y = (i + num_ghosts_0_projection_var) +
+                                    (j + num_ghosts_1_projection_var)*ghostcell_dim_0_projection_var +
+                                    (k + num_ghosts_2_projection_var)*ghostcell_dim_0_projection_var*
+                                        (ghostcell_dim_1_projection_var + 1);
+                                
+                                const int idx_B = (i + num_ghosts_0) +
+                                    (j - 1 + num_ghosts_1)*ghostcell_dim_0 +
+                                    (k + num_ghosts_2)*ghostcell_dim_0*
+                                        ghostcell_dim_1;
+                                
+                                const int idx_T = (i + num_ghosts_0) +
+                                    (j + num_ghosts_1)*ghostcell_dim_0 +
+                                    (k + num_ghosts_2)*ghostcell_dim_0*
+                                        ghostcell_dim_1;
+                                
+                                Z_rho_average[si][idx_face_y] = double(1)/double(2)*(Z_rho[si][idx_B] + Z_rho[si][idx_T]);
+                            }
+                        }
+                    }
+                }
+                
+                for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = -num_ghosts_1_projection_var;
+                         j < interior_dim_1 + 1 + num_ghosts_1_projection_var;
+                         j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_y = (i + num_ghosts_0_projection_var) +
+                                (j + num_ghosts_1_projection_var)*ghostcell_dim_0_projection_var +
+                                (k + num_ghosts_2_projection_var)*ghostcell_dim_0_projection_var*
+                                    (ghostcell_dim_1_projection_var + 1);
+                            
+                            const int idx_density_B = (i + num_subghosts_0_density) +
+                                (j - 1 + num_subghosts_1_density)*subghostcell_dim_0_density +
+                                (k + num_subghosts_2_density)*subghostcell_dim_0_density*
+                                    subghostcell_dim_1_density;
+                            
+                            const int idx_density_T = (i + num_subghosts_0_density) +
+                                (j + num_subghosts_1_density)*subghostcell_dim_0_density +
+                                (k + num_subghosts_2_density)*subghostcell_dim_0_density*
+                                    subghostcell_dim_1_density;
+                            
+                            const int idx_sound_speed_B = (i + num_subghosts_0_sound_speed) +
+                                (j - 1 + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_T = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            rho_average[idx_face_y] = double(1)/double(2)*(rho[idx_density_B] + rho[idx_density_T]);
+                            c_average[idx_face_y] = double(1)/double(2)*(c[idx_sound_speed_B] + c[idx_sound_speed_T]);
+                        }
+                    }
+                }
+                
+                /*
+                 * Compute the projection variables in the z-direction.
+                 */
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Z_rho_average[si] = projection_variables[si]->getPointer(2);
+                }
+                rho_average = projection_variables[d_num_species]->getPointer(2);
+                c_average = projection_variables[d_num_species + 1]->getPointer(2);
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    for (int k = -num_ghosts_2_projection_var;
+                         k < interior_dim_2 + 1 + num_ghosts_2_projection_var;
+                         k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                // Compute the linear indices.
+                                const int idx_face_z = (i + num_ghosts_0_projection_var) +
+                                    (j + num_ghosts_1_projection_var)*ghostcell_dim_0_projection_var +
+                                    (k + num_ghosts_2_projection_var)*ghostcell_dim_0_projection_var*
+                                        ghostcell_dim_1_projection_var;
+                                
+                                const int idx_B = (i + num_ghosts_0) +
+                                    (j + num_ghosts_1)*ghostcell_dim_0 +
+                                    (k - 1 + num_ghosts_2)*ghostcell_dim_0*
+                                        ghostcell_dim_1;
+                                
+                                const int idx_F = (i + num_ghosts_0) +
+                                    (j + num_ghosts_1)*ghostcell_dim_0 +
+                                    (k + num_ghosts_2)*ghostcell_dim_0*
+                                        ghostcell_dim_1;
+                                
+                                Z_rho_average[si][idx_face_z] = double(1)/double(2)*(Z_rho[si][idx_B] + Z_rho[si][idx_F]);
+                            }
+                        }
+                    }
+                }
+                
+                for (int k = -num_ghosts_2_projection_var;
+                     k < interior_dim_2 + 1 + num_ghosts_2_projection_var;
+                     k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_z = (i + num_ghosts_0_projection_var) +
+                                (j + num_ghosts_1_projection_var)*ghostcell_dim_0_projection_var +
+                                (k + num_ghosts_2_projection_var)*ghostcell_dim_0_projection_var*
+                                    ghostcell_dim_1_projection_var;
+                            
+                            const int idx_density_B = (i + num_subghosts_0_density) +
+                                (j + num_subghosts_1_density)*subghostcell_dim_0_density +
+                                (k - 1 + num_subghosts_2_density)*subghostcell_dim_0_density*
+                                    subghostcell_dim_1_density;
+                            
+                            const int idx_density_F = (i + num_subghosts_0_density) +
+                                (j + num_subghosts_1_density)*subghostcell_dim_0_density +
+                                (k + num_subghosts_2_density)*subghostcell_dim_0_density*
+                                    subghostcell_dim_1_density;
+                            
+                            const int idx_sound_speed_B = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k - 1 + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            const int idx_sound_speed_F = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
+                            
+                            rho_average[idx_face_z] = double(1)/double(2)*(rho[idx_density_B] + rho[idx_density_F]);
+                            c_average[idx_face_z] = double(1)/double(2)*(c[idx_sound_speed_B] + c[idx_sound_speed_F]);
+                        }
+                    }
+                }
+                
+                break;
+            }
+            case AVERAGING_TMP::ROE:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+                    << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
+                    << "Roe averaging is not yet implemented."
+                    << std::endl);
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+                    << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
+                    << "Unknown d_proj_var_primitive_averaging_type given."
+                    << std::endl);
+            }
+        }
+    }
 }
 
 
@@ -7129,6 +7893,17 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesF
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
     const int& idx_offset)
 {
+    NULL_USE(characteristic_variables);
+    NULL_USE(conservative_variables);
+    NULL_USE(projection_variables);
+    NULL_USE(idx_offset);
+    
+    TBOX_ERROR(d_object_name
+        << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+        << "computeSideDataOfCharacteristicVariablesFromConservativeVariables()\n"
+        << "Method computeSideDataOfCharacteristicVariablesFromConservativeVariables()"
+        << " is not yet implemented."
+        << std::endl);
 }
 
 
@@ -7142,6 +7917,941 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesF
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
     const int& idx_offset)
 {
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
+    
+    /*
+     * Get the dimensions of box that covers the interior of patch.
+     */
+    
+    const hier::IntVector interior_dims = patch.getBox().numberCells();
+    
+    /*
+     * Get the numbers of ghost cells of the variables.
+     */
+    
+    const hier::IntVector num_ghosts_characteristic_var = characteristic_variables[0]->
+        getGhostCellWidth();
+    
+    std::vector<hier::IntVector> num_ghosts_primitive_var;
+    num_ghosts_primitive_var.reserve(static_cast<int>(primitive_variables.size()));
+    for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
+    {
+        num_ghosts_primitive_var.push_back(primitive_variables[vi]->
+            getGhostCellWidth());
+    }
+    
+    const hier::IntVector num_ghosts_projection_var = projection_variables[0]->getGhostCellWidth();
+    
+    /*
+     * Get the ghost cell dimensions of characteristic and primitive variables.
+     */
+    
+    const hier::IntVector ghostcell_dims_characteristic_var = characteristic_variables[0]->
+        getGhostBox().numberCells();
+    
+    std::vector<hier::IntVector> ghostcell_dims_primitive_var;
+    ghostcell_dims_primitive_var.reserve(static_cast<int>(primitive_variables.size()));
+    for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
+    {
+        ghostcell_dims_primitive_var.push_back(primitive_variables[vi]->
+            getGhostBox().numberCells());
+    }
+    
+    /*
+     * Check the size of variables.
+     */
+    
+    if (static_cast<int>(characteristic_variables.size()) != num_eqn)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+            << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
+            << "The number of characteristic variables are incorrect."
+            << std::endl);
+    }
+    if (static_cast<int>(primitive_variables.size()) != 4)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+            << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
+            << "The number of primitive variables are incorrect."
+            << std::endl);
+    }
+    if (primitive_variables[0]->getDepth() != d_num_species ||
+        primitive_variables[1]->getDepth() != d_dim.getValue() ||
+        primitive_variables[2]->getDepth() != 1)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+            << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
+            << "The depths of one or more primitive variables are incorrect."
+            << std::endl);
+    }
+    if (static_cast<int>(projection_variables.size()) != d_num_species + 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+            << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
+            << "There should be number of species projection plus two variables."
+            << std::endl);
+    }
+    
+    /*
+     * Check potential failures.
+     */
+    
+    for (int ei = 0; ei < num_eqn; ei++)
+    {
+        const hier::IntVector interior_dims_characteristic_var =
+            characteristic_variables[ei]->getBox().numberCells();
+        
+        if (interior_dims_characteristic_var != interior_dims)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+                << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
+                << "The interior dimension of the characteristic variables does not match that of patch."
+                << std::endl);
+        }
+    }
+    for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
+    {
+        const hier::IntVector interior_dims_primitive_var =
+            primitive_variables[vi]->getBox().numberCells();
+        
+        if (interior_dims_primitive_var != interior_dims)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+                << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
+                << "The interior dimension of the primitive variables does not match that of patch."
+                << std::endl);
+        }
+    }
+    for (int vi = 0; vi < d_num_species + 2; vi++)
+    {
+        const hier::IntVector interior_dims_projection_var = projection_variables[vi]->getBox().numberCells();
+        if (interior_dims_projection_var != interior_dims)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+                << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
+                << "The interior dimension of the projection variables does not match that of patch."
+                << std::endl);
+        }
+    }
+    
+    for (int ei = 1; ei < num_eqn; ei++)
+    {
+        if (num_ghosts_characteristic_var != characteristic_variables[ei]->getGhostCellWidth())
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+                << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
+                << "The characteristic variables don't have same ghost cell width."
+                << std::endl);
+        }
+    }
+    for (int vi = 1; vi < d_num_species + 2; vi++)
+    {
+        if (num_ghosts_projection_var != projection_variables[vi]->getGhostCellWidth())
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+                << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
+                << "The projection variables don't have same ghost cell width."
+                << std::endl);
+        }
+    }
+    
+    if (num_ghosts_projection_var != num_ghosts_characteristic_var)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+            << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
+            << "The ghost cell width of the projection variables does not match that of"
+            << " characteristic variables."
+            << std::endl);
+    }
+    
+    for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
+    {
+        if (num_ghosts_primitive_var[vi] - num_ghosts_characteristic_var
+                + (hier::IntVector::getOne(d_dim))*idx_offset < hier::IntVector::getZero(d_dim) ||
+            num_ghosts_characteristic_var - num_ghosts_primitive_var[vi]
+                + (hier::IntVector::getOne(d_dim))*(idx_offset + 1) > hier::IntVector::getZero(d_dim))
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+                << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
+                << "The offset index is too large or the number of ghost of characteristic variable"
+                << " is too large."
+                << std::endl);
+        }
+    }
+    
+    /*
+     * Declare containers to store pointers to different data.
+     */
+    
+    std::vector<double*> V;
+    V.reserve(num_eqn);
+    
+    int count_eqn = 0;
+    for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
+    {
+        int depth = primitive_variables[vi]->getDepth();
+        
+        for (int di = 0; di < depth; di++)
+        {
+            // If the last element of the primitive variable vector is not in the system of equations,
+            // ignore it.
+            if (count_eqn >= num_eqn)
+                break;
+            
+            V.push_back(primitive_variables[vi]->getPointer(di));
+            
+            count_eqn++;
+        }
+    }
+    
+    std::vector<double*> W;
+    W.resize(num_eqn);
+    
+    std::vector<double*> Z_rho_average;
+    Z_rho_average.resize(d_num_species);
+    double* rho_average = nullptr;
+    double* c_average = nullptr;
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        const int interior_dim_0 = interior_dims[0];
+        
+        const int num_ghosts_0_characteristic_var = num_ghosts_characteristic_var[0];
+        const int num_ghosts_0_Z_rho = num_ghosts_primitive_var[0][0];
+        const int num_ghosts_0_vel = num_ghosts_primitive_var[1][0];
+        const int num_ghosts_0_p = num_ghosts_primitive_var[2][0];
+        const int num_ghosts_0_Z = num_ghosts_primitive_var[3][0];
+        
+        const int idx_offset_Z_rho = idx_offset;
+        const int idx_offset_vel = idx_offset;
+        const int idx_offset_p = idx_offset;
+        const int idx_offset_Z = idx_offset;
+        
+        /*
+         * Compute the characteristic variables in the x-direction.
+         */
+        
+        for (int ei = 0; ei < num_eqn; ei++)
+        {
+            W[ei] = characteristic_variables[ei]->getPointer(0);
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Z_rho_average[si] = projection_variables[si]->getPointer(0);
+        }
+        rho_average = projection_variables[d_num_species]->getPointer(0);
+        c_average = projection_variables[d_num_species + 1]->getPointer(0);
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = -num_ghosts_0_characteristic_var;
+                 i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
+                 i++)
+            {
+                // Compute the linear indices.
+                const int idx_face = i + num_ghosts_0_characteristic_var;
+                const int idx_Z_rho = i + idx_offset_Z_rho + num_ghosts_0_Z_rho;
+                const int idx_p = i + idx_offset_p + num_ghosts_0_p;
+                
+                W[1 + si][idx_face] = V[si][idx_Z_rho] - Z_rho_average[si][idx_face]/
+                    (rho_average[idx_face]*c_average[idx_face]*
+                        c_average[idx_face])*V[d_num_species + 1][idx_p];
+            }
+        }
+        
+        for (int si = 0; si < d_num_species - 1; si++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = -num_ghosts_0_characteristic_var;
+                 i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
+                 i++)
+            {
+                // Compute the linear indices.
+                const int idx_face = i + num_ghosts_0_characteristic_var;
+                const int idx_Z = i + idx_offset_Z + num_ghosts_0_Z;
+                
+                W[d_num_species + 1 + si][idx_face] = V[d_num_species + 2 + si][idx_Z];
+            }
+        }
+        
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = -num_ghosts_0_characteristic_var;
+             i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
+             i++)
+        {
+            // Compute the linear indices.
+            const int idx_face = i + num_ghosts_0_characteristic_var;
+            const int idx_vel = i + idx_offset_vel + num_ghosts_0_vel;
+            const int idx_p = i + idx_offset_p + num_ghosts_0_p;
+            
+            W[0][idx_face] = V[d_num_species][idx_vel] -
+                double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 1][idx_p];
+            
+            W[2*d_num_species][idx_face] = V[d_num_species][idx_vel] +
+                double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 1][idx_p];
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        
+        const int num_ghosts_0_characteristic_var = num_ghosts_characteristic_var[0];
+        const int num_ghosts_1_characteristic_var = num_ghosts_characteristic_var[1];
+        const int ghostcell_dim_0_characteristic_var = ghostcell_dims_characteristic_var[0];
+        
+        const int num_ghosts_0_Z_rho = num_ghosts_primitive_var[0][0];
+        const int num_ghosts_1_Z_rho = num_ghosts_primitive_var[0][1];
+        const int ghostcell_dim_0_Z_rho = ghostcell_dims_primitive_var[0][0];
+        
+        const int num_ghosts_0_vel = num_ghosts_primitive_var[1][0];
+        const int num_ghosts_1_vel = num_ghosts_primitive_var[1][1];
+        const int ghostcell_dim_0_vel = ghostcell_dims_primitive_var[1][0];
+        
+        const int num_ghosts_0_p = num_ghosts_primitive_var[2][0];
+        const int num_ghosts_1_p = num_ghosts_primitive_var[2][1];
+        const int ghostcell_dim_0_p = ghostcell_dims_primitive_var[2][0];
+        
+        const int num_ghosts_0_Z = num_ghosts_primitive_var[3][0];
+        const int num_ghosts_1_Z = num_ghosts_primitive_var[3][1];
+        const int ghostcell_dim_0_Z = ghostcell_dims_primitive_var[3][0];
+        
+        const int idx_offset_Z_rho = idx_offset;
+        const int idx_offset_vel = idx_offset;
+        const int idx_offset_p = idx_offset;
+        const int idx_offset_Z = idx_offset;
+        
+        /*
+         * Compute the characteristic variables in the x-direction.
+         */
+        
+        for (int ei = 0; ei < num_eqn; ei++)
+        {
+            W[ei] = characteristic_variables[ei]->getPointer(0);
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Z_rho_average[si] = projection_variables[si]->getPointer(0);
+        }
+        rho_average = projection_variables[d_num_species]->getPointer(0);
+        c_average = projection_variables[d_num_species + 1]->getPointer(0);
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -num_ghosts_0_characteristic_var;
+                     i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                        (j + num_ghosts_1_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1);
+                    
+                    const int idx_Z_rho = (i + idx_offset_Z_rho + num_ghosts_0_Z_rho) +
+                        (j + num_ghosts_1_Z_rho)*ghostcell_dim_0_Z_rho;
+                    
+                    const int idx_p = (i + idx_offset_p + num_ghosts_0_p) +
+                        (j + num_ghosts_1_p)*ghostcell_dim_0_p;
+                    
+                    W[1 + si][idx_face] = V[si][idx_Z_rho] - Z_rho_average[si][idx_face]/
+                        (rho_average[idx_face]*c_average[idx_face]*c_average[idx_face])*
+                            V[d_num_species + 2][idx_p];
+                }
+            }
+        }
+        
+        for (int si = 0; si < d_num_species - 1; si++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -num_ghosts_0_characteristic_var;
+                     i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                        (j + num_ghosts_1_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1);
+                    
+                    const int idx_Z = (i + idx_offset_Z + num_ghosts_0_Z) +
+                        (j + num_ghosts_1_Z)*ghostcell_dim_0_Z;
+                    
+                    W[d_num_species + 2 + si][idx_face] = V[d_num_species + 3 + si][idx_Z];
+                }
+            }
+        }
+        
+        for (int j = 0; j < interior_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = -num_ghosts_0_characteristic_var;
+                 i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
+                 i++)
+            {
+                // Compute the linear indices.
+                const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                    (j + num_ghosts_1_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1);
+                
+                const int idx_vel = (i + idx_offset_vel + num_ghosts_0_vel) +
+                    (j + num_ghosts_1_vel)*ghostcell_dim_0_vel;
+                
+                const int idx_p = (i + idx_offset_p + num_ghosts_0_p) +
+                    (j + num_ghosts_1_p)*ghostcell_dim_0_p;
+                
+                W[0][idx_face] = V[d_num_species][idx_vel] -
+                    double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 2][idx_p];
+                
+                W[d_num_species + 1][idx_face] = V[d_num_species + 1][idx_vel];
+                
+                W[2*d_num_species + 1][idx_face] = V[d_num_species][idx_vel] +
+                    double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 2][idx_p];
+            }
+        }
+        
+        /*
+         * Compute the characteristic variables in the y-direction.
+         */
+        
+        for (int ei = 0; ei < num_eqn; ei++)
+        {
+            W[ei] = characteristic_variables[ei]->getPointer(1);
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Z_rho_average[si] = projection_variables[si]->getPointer(1);
+        }
+        rho_average = projection_variables[d_num_species]->getPointer(1);
+        c_average = projection_variables[d_num_species + 1]->getPointer(1);
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int j = -num_ghosts_1_characteristic_var;
+                 j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
+                 j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                        (j + num_ghosts_1_characteristic_var)*ghostcell_dim_0_characteristic_var;
+                    
+                    const int idx_Z_rho = (i + num_ghosts_0_Z_rho) +
+                        (j + idx_offset_Z_rho + num_ghosts_1_Z_rho)*ghostcell_dim_0_Z_rho;
+                    
+                    const int idx_p = (i + num_ghosts_0_p) +
+                        (j + idx_offset_p + num_ghosts_1_p)*ghostcell_dim_0_p;
+                    
+                    W[1 + si][idx_face] = V[si][idx_Z_rho] - Z_rho_average[si][idx_face]/
+                        (rho_average[idx_face]*c_average[idx_face]*c_average[idx_face])
+                            *V[d_num_species + 2][idx_p];
+                }
+            }
+        }
+        
+        for (int si = 0; si < d_num_species - 1; si++)
+        {
+            for (int j = -num_ghosts_1_characteristic_var;
+                 j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
+                 j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                        (j + num_ghosts_1_characteristic_var)*ghostcell_dim_0_characteristic_var;
+                    
+                    const int idx_Z = (i + num_ghosts_0_Z) +
+                        (j + idx_offset_Z + num_ghosts_1_Z)*ghostcell_dim_0_Z;
+                    
+                    W[d_num_species + 2 + si][idx_face] = V[d_num_species + 3 + si][idx_Z];
+                }
+            }
+        }
+        
+        for (int j = -num_ghosts_1_characteristic_var;
+             j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
+             j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                    (j + num_ghosts_1_characteristic_var)*ghostcell_dim_0_characteristic_var;
+                
+                const int idx_vel = (i + num_ghosts_0_vel) +
+                    (j + idx_offset_vel + num_ghosts_1_vel)*ghostcell_dim_0_vel;
+                
+                const int idx_p = (i + num_ghosts_0_p) +
+                    (j + idx_offset_p + num_ghosts_1_p)*ghostcell_dim_0_p;
+                
+                W[0][idx_face] = V[d_num_species + 1][idx_vel] -
+                    double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 2][idx_p];
+                
+                W[d_num_species + 1][idx_face] = V[d_num_species][idx_vel];
+                
+                W[2*d_num_species + 1][idx_face] = V[d_num_species + 1][idx_vel] +
+                    double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 2][idx_p];
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        const int interior_dim_2 = interior_dims[2];
+        
+        const int num_ghosts_0_characteristic_var = num_ghosts_characteristic_var[0];
+        const int num_ghosts_1_characteristic_var = num_ghosts_characteristic_var[1];
+        const int num_ghosts_2_characteristic_var = num_ghosts_characteristic_var[2];
+        const int ghostcell_dim_0_characteristic_var = ghostcell_dims_characteristic_var[0];
+        const int ghostcell_dim_1_characteristic_var = ghostcell_dims_characteristic_var[1];
+        
+        const int num_ghosts_0_Z_rho = num_ghosts_primitive_var[0][0];
+        const int num_ghosts_1_Z_rho = num_ghosts_primitive_var[0][1];
+        const int num_ghosts_2_Z_rho = num_ghosts_primitive_var[0][2];
+        const int ghostcell_dim_0_Z_rho = ghostcell_dims_primitive_var[0][0];
+        const int ghostcell_dim_1_Z_rho = ghostcell_dims_primitive_var[0][1];
+        
+        const int num_ghosts_0_vel = num_ghosts_primitive_var[1][0];
+        const int num_ghosts_1_vel = num_ghosts_primitive_var[1][1];
+        const int num_ghosts_2_vel = num_ghosts_primitive_var[1][2];
+        const int ghostcell_dim_0_vel = ghostcell_dims_primitive_var[1][0];
+        const int ghostcell_dim_1_vel = ghostcell_dims_primitive_var[1][1];
+        
+        const int num_ghosts_0_p = num_ghosts_primitive_var[2][0];
+        const int num_ghosts_1_p = num_ghosts_primitive_var[2][1];
+        const int num_ghosts_2_p = num_ghosts_primitive_var[2][2];
+        const int ghostcell_dim_0_p = ghostcell_dims_primitive_var[2][0];
+        const int ghostcell_dim_1_p = ghostcell_dims_primitive_var[2][1];
+        
+        const int num_ghosts_0_Z = num_ghosts_primitive_var[3][0];
+        const int num_ghosts_1_Z = num_ghosts_primitive_var[3][1];
+        const int num_ghosts_2_Z = num_ghosts_primitive_var[3][2];
+        const int ghostcell_dim_0_Z = ghostcell_dims_primitive_var[3][0];
+        const int ghostcell_dim_1_Z = ghostcell_dims_primitive_var[3][1];
+        
+        const int idx_offset_Z_rho = idx_offset;
+        const int idx_offset_vel = idx_offset;
+        const int idx_offset_p = idx_offset;
+        const int idx_offset_Z = idx_offset;
+        
+        /*
+         * Compute the characteristic variables in the x-direction.
+         */
+        
+        for (int ei = 0; ei < num_eqn; ei++)
+        {
+            W[ei] = characteristic_variables[ei]->getPointer(0);
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Z_rho_average[si] = projection_variables[si]->getPointer(0);
+        }
+        rho_average = projection_variables[d_num_species]->getPointer(0);
+        c_average = projection_variables[d_num_species + 1]->getPointer(0);
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = -num_ghosts_0_characteristic_var;
+                         i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                            (j + num_ghosts_1_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1) +
+                            (k + num_ghosts_2_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1)*
+                                ghostcell_dim_1_characteristic_var;
+                        
+                        const int idx_Z_rho = (i + idx_offset_Z_rho + num_ghosts_0_Z_rho) +
+                            (j + num_ghosts_1_Z_rho)*ghostcell_dim_0_Z_rho +
+                            (k + num_ghosts_2_Z_rho)*ghostcell_dim_0_Z_rho*
+                                ghostcell_dim_1_Z_rho;
+                        
+                        const int idx_p = (i + idx_offset_p + num_ghosts_0_p) +
+                            (j + num_ghosts_1_p)*ghostcell_dim_0_p +
+                            (k + num_ghosts_2_p)*ghostcell_dim_0_p*
+                                ghostcell_dim_1_p;
+                        
+                        W[1 + si][idx_face] = V[si][idx_Z_rho] - Z_rho_average[si][idx_face]/
+                            (rho_average[idx_face]*c_average[idx_face]*c_average[idx_face])*
+                                V[d_num_species + 3][idx_p];
+                    }
+                }
+            }
+        }
+        
+        for (int si = 0; si < d_num_species - 1; si++)
+        {
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = -num_ghosts_0_characteristic_var;
+                         i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                            (j + num_ghosts_1_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1) +
+                            (k + num_ghosts_2_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1)*
+                                ghostcell_dim_1_characteristic_var;
+                        
+                        const int idx_Z = (i + idx_offset_Z + num_ghosts_0_Z) +
+                            (j + num_ghosts_1_Z)*ghostcell_dim_0_Z +
+                            (k + num_ghosts_2_Z)*ghostcell_dim_0_Z*
+                                ghostcell_dim_1_Z;
+                        
+                        W[d_num_species + 3 + si][idx_face] = V[d_num_species + 4 + si][idx_Z];
+                    }
+                }
+            }
+        }
+        
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -num_ghosts_0_characteristic_var;
+                     i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                        (j + num_ghosts_1_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1) +
+                        (k + num_ghosts_2_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1)*
+                            ghostcell_dim_1_characteristic_var;
+                    
+                    const int idx_vel = (i + idx_offset_vel + num_ghosts_0_vel) +
+                        (j + num_ghosts_1_vel)*ghostcell_dim_0_vel +
+                        (k + num_ghosts_2_vel)*ghostcell_dim_0_vel*
+                            ghostcell_dim_1_vel;
+                    
+                    const int idx_p = (i + idx_offset_p + num_ghosts_0_p) +
+                        (j + num_ghosts_1_p)*ghostcell_dim_0_p +
+                        (k + num_ghosts_2_p)*ghostcell_dim_0_p*
+                            ghostcell_dim_1_p;
+                    
+                    W[0][idx_face] = V[d_num_species][idx_vel] -
+                        double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
+                    
+                    W[d_num_species + 1][idx_face] = V[d_num_species + 1][idx_vel];
+                    
+                    W[d_num_species + 2][idx_face] = V[d_num_species + 2][idx_vel];
+                    
+                    W[2*d_num_species + 2][idx_face] = V[d_num_species][idx_vel] +
+                        double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
+                }
+            }
+        }
+        
+        /*
+         * Compute the characteristic variables in the y-direction.
+         */
+        
+        for (int ei = 0; ei < num_eqn; ei++)
+        {
+            W[ei] = characteristic_variables[ei]->getPointer(1);
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Z_rho_average[si] = projection_variables[si]->getPointer(1);
+        }
+        rho_average = projection_variables[d_num_species]->getPointer(1);
+        c_average = projection_variables[d_num_species + 1]->getPointer(1);
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = -num_ghosts_1_characteristic_var;
+                     j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                            (j + num_ghosts_1_characteristic_var)*ghostcell_dim_0_characteristic_var +
+                            (k + num_ghosts_2_characteristic_var)*ghostcell_dim_0_characteristic_var*
+                                (ghostcell_dim_1_characteristic_var + 1);
+                        
+                        const int idx_Z_rho = (i + num_ghosts_0_Z_rho) +
+                            (j + idx_offset_Z_rho + num_ghosts_1_Z_rho)*ghostcell_dim_0_Z_rho +
+                            (k + num_ghosts_2_Z_rho)*ghostcell_dim_0_Z_rho*
+                                ghostcell_dim_1_Z_rho;
+                        
+                        const int idx_p = (i + num_ghosts_0_p) +
+                            (j + idx_offset_p + num_ghosts_1_p)*ghostcell_dim_0_p +
+                            (k + num_ghosts_2_p)*ghostcell_dim_0_p*
+                                ghostcell_dim_1_p;
+                        
+                        W[1 + si][idx_face] = V[si][idx_Z_rho] - Z_rho_average[si][idx_face]/
+                            (rho_average[idx_face]*c_average[idx_face]*c_average[idx_face])*
+                                V[d_num_species + 3][idx_p];
+                    }
+                }
+            }
+        }
+        
+        for (int si = 0; si < d_num_species - 1; si++)
+        {
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = -num_ghosts_1_characteristic_var;
+                     j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                            (j + num_ghosts_1_characteristic_var)*ghostcell_dim_0_characteristic_var +
+                            (k + num_ghosts_2_characteristic_var)*ghostcell_dim_0_characteristic_var*
+                                (ghostcell_dim_1_characteristic_var + 1);
+                        
+                        const int idx_Z = (i + num_ghosts_0_Z) +
+                            (j + idx_offset_Z + num_ghosts_1_Z)*ghostcell_dim_0_Z +
+                            (k + num_ghosts_2_Z)*ghostcell_dim_0_Z*
+                                ghostcell_dim_1_Z;
+                        
+                        W[d_num_species + 3 + si][idx_face] = V[d_num_species + 4 + si][idx_Z];
+                    }
+                }
+            }
+        }
+        
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = -num_ghosts_1_characteristic_var;
+                 j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
+                 j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                        (j + num_ghosts_1_characteristic_var)*ghostcell_dim_0_characteristic_var +
+                        (k + num_ghosts_2_characteristic_var)*ghostcell_dim_0_characteristic_var*
+                            (ghostcell_dim_1_characteristic_var + 1);
+                    
+                    const int idx_vel = (i + num_ghosts_0_vel) +
+                        (j + idx_offset_vel + num_ghosts_1_vel)*ghostcell_dim_0_vel +
+                        (k + num_ghosts_2_vel)*ghostcell_dim_0_vel*
+                            ghostcell_dim_1_vel;
+                    
+                    const int idx_p = (i + num_ghosts_0_p) +
+                        (j + idx_offset_p + num_ghosts_1_p)*ghostcell_dim_0_p +
+                        (k + num_ghosts_2_p)*ghostcell_dim_0_p*
+                            ghostcell_dim_1_p;
+                    
+                    W[0][idx_face] = V[d_num_species + 1][idx_vel] -
+                        double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
+                    
+                    W[d_num_species + 1][idx_face] = V[d_num_species][idx_vel];
+                    
+                    W[d_num_species + 2][idx_face] = V[d_num_species + 2][idx_vel];
+                    
+                    W[2*d_num_species + 2][idx_face] = V[d_num_species + 1][idx_vel] +
+                        double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
+                }
+            }
+        }
+        
+        /*
+         * Compute the characteristic variables in the z-direction.
+         */
+        
+        for (int ei = 0; ei < num_eqn; ei++)
+        {
+            W[ei] = characteristic_variables[ei]->getPointer(2);
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Z_rho_average[si] = projection_variables[si]->getPointer(2);
+        }
+        rho_average = projection_variables[d_num_species]->getPointer(2);
+        c_average = projection_variables[d_num_species + 1]->getPointer(2);
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int k = -num_ghosts_2_characteristic_var;
+                 k < interior_dim_2 + 1 + num_ghosts_2_characteristic_var;
+                 k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                            (j + num_ghosts_1_characteristic_var)*ghostcell_dim_0_characteristic_var +
+                            (k + num_ghosts_2_characteristic_var)*ghostcell_dim_0_characteristic_var*
+                                ghostcell_dim_1_characteristic_var;
+                        
+                        const int idx_Z_rho = (i + num_ghosts_0_Z_rho) +
+                            (j + num_ghosts_1_Z_rho)*ghostcell_dim_0_Z_rho +
+                            (k + idx_offset_Z_rho + num_ghosts_2_Z_rho)*ghostcell_dim_0_Z_rho*
+                                ghostcell_dim_1_Z_rho;
+                        
+                        const int idx_p = (i + num_ghosts_0_p) +
+                            (j + num_ghosts_1_p)*ghostcell_dim_0_p +
+                            (k + idx_offset_p + num_ghosts_2_p)*ghostcell_dim_0_p*
+                                ghostcell_dim_1_p;
+                        
+                        W[1 + si][idx_face] = V[si][idx_Z_rho] - Z_rho_average[si][idx_face]/
+                            (rho_average[idx_face]*c_average[idx_face]*c_average[idx_face])*
+                                V[d_num_species + 3][idx_p];
+                    }
+                }
+            }
+        }
+        
+        for (int si = 0; si < d_num_species - 1; si++)
+        {
+            for (int k = -num_ghosts_2_characteristic_var;
+                 k < interior_dim_2 + 1 + num_ghosts_2_characteristic_var;
+                 k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                            (j + num_ghosts_1_characteristic_var)*ghostcell_dim_0_characteristic_var +
+                            (k + num_ghosts_2_characteristic_var)*ghostcell_dim_0_characteristic_var*
+                                ghostcell_dim_1_characteristic_var;
+                        
+                        const int idx_Z = (i + num_ghosts_0_Z) +
+                            (j + num_ghosts_1_Z)*ghostcell_dim_0_Z +
+                            (k + idx_offset_Z + num_ghosts_2_Z)*ghostcell_dim_0_Z*
+                                ghostcell_dim_1_Z;
+                        
+                        W[d_num_species + 3 + si][idx_face] = V[d_num_species + 4 + si][idx_Z];
+                    }
+                }
+            }
+        }
+        
+        for (int k = -num_ghosts_2_characteristic_var;
+             k < interior_dim_2 + 1 + num_ghosts_2_characteristic_var;
+             k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                        (j + num_ghosts_1_characteristic_var)*ghostcell_dim_0_characteristic_var +
+                        (k + num_ghosts_2_characteristic_var)*ghostcell_dim_0_characteristic_var*
+                            ghostcell_dim_1_characteristic_var;
+                    
+                    const int idx_vel = (i + num_ghosts_0_vel) +
+                        (j + num_ghosts_1_vel)*ghostcell_dim_0_vel +
+                        (k + idx_offset_vel + num_ghosts_2_vel)*ghostcell_dim_0_vel*
+                            ghostcell_dim_1_vel;
+                    
+                    const int idx_p = (i + num_ghosts_0_p) +
+                        (j + num_ghosts_1_p)*ghostcell_dim_0_p +
+                        (k + idx_offset_p + num_ghosts_2_p)*ghostcell_dim_0_p*
+                            ghostcell_dim_1_p;
+                    
+                    W[0][idx_face] = V[d_num_species + 2][idx_vel] -
+                        double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
+                    
+                    W[d_num_species + 1][idx_face] = V[d_num_species][idx_vel];
+                    
+                    W[d_num_species + 2][idx_face] = V[d_num_species + 1][idx_vel];
+                    
+                    W[2*d_num_species + 2][idx_face] = V[d_num_species + 2][idx_vel] +
+                        double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
+                }
+            }
+        }
+    }
 }
 
 
@@ -7154,6 +8864,16 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfConservativeVariablesFro
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
 {
+    NULL_USE(conservative_variables);
+    NULL_USE(characteristic_variables);
+    NULL_USE(projection_variables);
+    
+    TBOX_ERROR(d_object_name
+        << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+        << "computeSideDataOfConservativeVariablesFromCharacteristicVariables()\n"
+        << "Method computeSideDataOfConservativeVariablesFromCharacteristicVariables()"
+        << " is not yet implemented."
+        << std::endl);
 }
 
 
@@ -7166,4 +8886,774 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
 {
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
+    
+    /*
+     * Get the dimensions of box that covers the interior of patch.
+     */
+    
+    const hier::IntVector interior_dims = patch.getBox().numberCells();
+    
+    /*
+     * Get the numbers of ghost cells of the variables.
+     */
+    
+    const hier::IntVector num_ghosts_primitive_var = primitive_variables[0]->
+        getGhostCellWidth();
+    
+    const hier::IntVector num_ghosts_characteristic_var = characteristic_variables[0]->
+        getGhostCellWidth();
+    
+    const hier::IntVector num_ghosts_projection_var = projection_variables[0]->getGhostCellWidth();
+    
+    /*
+     * Get the ghost cell dimensions of characteristic variables.
+     */
+    
+    const hier::IntVector ghostcell_dims_characteristic_var = characteristic_variables[0]->
+        getGhostBox().numberCells();
+    
+    /*
+     * Check the size of variables.
+     */
+    
+    if (static_cast<int>(primitive_variables.size()) != num_eqn)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+            << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
+            << "The number of characteristic variables are incorrect."
+            << std::endl);
+    }
+    if (static_cast<int>(characteristic_variables.size()) != num_eqn)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+            << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
+            << "The number of primitive variables are incorrect."
+            << std::endl);
+    }
+    if (static_cast<int>(projection_variables.size()) != d_num_species + 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+            << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
+            << "There should be number of species projection plus two variables."
+            << std::endl);
+    }
+    
+    /*
+     * Check potential failures.
+     */
+    
+    for (int ei = 0; ei < num_eqn; ei++)
+    {
+        const hier::IntVector interior_dims_primitive_var =
+            primitive_variables[ei]->getBox().numberCells();
+        
+        if (interior_dims_primitive_var != interior_dims)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+                << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
+                << "The interior dimension of the primitive variables does not match that of patch."
+                << std::endl);
+        }
+    }
+    for (int ei = 0; ei < num_eqn; ei++)
+    {
+        const hier::IntVector interior_dims_characteristic_var =
+            characteristic_variables[ei]->getBox().numberCells();
+        
+        if (interior_dims_characteristic_var != interior_dims)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+                << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
+                << "The interior dimension of the characteristic variables does not match that of patch."
+                << std::endl);
+        }
+    }
+    for (int vi = 0; vi < d_num_species + 2; vi++)
+    {
+        const hier::IntVector interior_dims_projection_var = projection_variables[vi]->getBox().numberCells();
+        if (interior_dims_projection_var != interior_dims)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+                << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
+                << "The interior dimension of the projection variables does not match that of patch."
+                << std::endl);
+        }
+    }
+    
+    for (int ei = 1; ei < num_eqn; ei++)
+    {
+        if (num_ghosts_primitive_var != primitive_variables[ei]->getGhostCellWidth())
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+                << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
+                << "The primitive variables don't have same ghost cell width."
+                << std::endl);
+        }
+    }
+    for (int ei = 1; ei < num_eqn; ei++)
+    {
+        if (num_ghosts_characteristic_var != characteristic_variables[ei]->getGhostCellWidth())
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+                << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
+                << "The characteristic variables don't have same ghost cell width."
+                << std::endl);
+        }
+    }
+    for (int vi = 1; vi < d_num_species + 2; vi++)
+    {
+        if (num_ghosts_projection_var != projection_variables[vi]->getGhostCellWidth())
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+                << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
+                << "The projection variables don't have same ghost cell width."
+                << std::endl);
+        }
+    }
+    
+    if (num_ghosts_projection_var != num_ghosts_primitive_var)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+            << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
+            << "The ghost cell width of the projection variables does not match that of"
+            << " primitive variables."
+            << std::endl);
+    }
+    if (num_ghosts_projection_var != num_ghosts_characteristic_var)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+            << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
+            << "The ghost cell width of the projection variables does not match that of"
+            << " characteristic variables."
+            << std::endl);
+    }
+    
+    /*
+     * Declare containers to store pointers to different data.
+     */
+    
+    std::vector<double*> V;
+    std::vector<double*> W;
+    V.resize(num_eqn);
+    W.resize(num_eqn);
+    
+    std::vector<double*> Z_rho_average;
+    Z_rho_average.resize(d_num_species);
+    double* rho_average = nullptr;
+    double* c_average = nullptr;
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        const int interior_dim_0 = interior_dims[0];
+        
+        const int num_ghosts_0_characteristic_var = num_ghosts_characteristic_var[0];
+        
+        /*
+         * Compute the primitive variables in the x-direction.
+         */
+        
+        for (int ei = 0; ei < num_eqn; ei++)
+        {
+            V[ei] = primitive_variables[ei]->getPointer(0);
+        }
+        
+        for (int ei = 0; ei < num_eqn; ei++)
+        {
+            W[ei] = characteristic_variables[ei]->getPointer(0);
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Z_rho_average[si] = projection_variables[si]->getPointer(0);
+        }
+        rho_average = projection_variables[d_num_species]->getPointer(0);
+        c_average = projection_variables[d_num_species + 1]->getPointer(0);
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = -num_ghosts_0_characteristic_var;
+                 i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
+                 i++)
+            {
+                // Compute the linear index.
+                const int idx_face = i + num_ghosts_0_characteristic_var;
+                
+                V[si][idx_face] = -double(1)/double(2)*Z_rho_average[si][idx_face]/
+                    c_average[idx_face]*W[0][idx_face] + W[si + 1][idx_face] +
+                        double(1)/double(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
+                            W[num_eqn - 1][idx_face];
+            }
+        }
+        
+        for (int si = 0; si < d_num_species - 1; si++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = -num_ghosts_0_characteristic_var;
+                 i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
+                 i++)
+            {
+                // Compute the linear index.
+                const int idx_face = i + num_ghosts_0_characteristic_var;
+                
+                V[d_num_species + 2 + si][idx_face] = W[d_num_species + 1 + si][idx_face];
+            }
+        }
+        
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = -num_ghosts_0_characteristic_var;
+             i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
+             i++)
+        {
+            // Compute the linear index.
+            const int idx_face = i + num_ghosts_0_characteristic_var;
+            
+            V[d_num_species][idx_face] = double(1)/double(2)*W[0][idx_face] +
+                double(1)/double(2)*W[num_eqn - 1][idx_face];
+            
+            V[d_num_species + 1][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
+                W[0][idx_face] + double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
+                    W[num_eqn - 1][idx_face];
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        
+        const int num_ghosts_0_characteristic_var = num_ghosts_characteristic_var[0];
+        const int num_ghosts_1_characteristic_var = num_ghosts_characteristic_var[1];
+        const int ghostcell_dim_0_characteristic_var = ghostcell_dims_characteristic_var[0];
+        
+        /*
+         * Compute the primitive variables in the x-direction.
+         */
+        
+        for (int ei = 0; ei < num_eqn; ei++)
+        {
+            V[ei] = primitive_variables[ei]->getPointer(0);
+        }
+        
+        for (int ei = 0; ei < num_eqn; ei++)
+        {
+            W[ei] = characteristic_variables[ei]->getPointer(0);
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Z_rho_average[si] = projection_variables[si]->getPointer(0);
+        }
+        rho_average = projection_variables[d_num_species]->getPointer(0);
+        c_average = projection_variables[d_num_species + 1]->getPointer(0);
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -num_ghosts_0_characteristic_var;
+                     i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
+                     i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                        (j + num_ghosts_1_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1);
+                    
+                    V[si][idx_face] = -double(1)/double(2)*Z_rho_average[si][idx_face]/
+                        c_average[idx_face]*W[0][idx_face] + W[si + 1][idx_face] +
+                            double(1)/double(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
+                                W[num_eqn - 1][idx_face];
+                }
+            }
+        }
+        
+        for (int si = 0; si < d_num_species - 1; si++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -num_ghosts_0_characteristic_var;
+                     i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
+                     i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                        (j + num_ghosts_1_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1);
+                    
+                    V[d_num_species + 3 + si][idx_face] = W[d_num_species + 2 + si][idx_face];
+                }
+            }
+        }
+        
+        for (int j = 0; j < interior_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = -num_ghosts_0_characteristic_var;
+                 i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
+                 i++)
+            {
+                // Compute the linear index.
+                const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                    (j + num_ghosts_1_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1);
+                
+                V[d_num_species][idx_face] = double(1)/double(2)*W[0][idx_face] +
+                    double(1)/double(2)*W[num_eqn - 1][idx_face];
+                
+                V[d_num_species + 1][idx_face] = W[d_num_species + 1][idx_face];
+                
+                V[d_num_species + 2][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
+                    W[0][idx_face] + double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
+                        W[num_eqn - 1][idx_face];
+            }
+        }
+        
+        /*
+         * Compute the primitive variables in the y-direction.
+         */
+        
+        for (int ei = 0; ei < num_eqn; ei++)
+        {
+            V[ei] = primitive_variables[ei]->getPointer(1);
+        }
+        
+        for (int ei = 0; ei < num_eqn; ei++)
+        {
+            W[ei] = characteristic_variables[ei]->getPointer(1);
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Z_rho_average[si] = projection_variables[si]->getPointer(1);
+        }
+        rho_average = projection_variables[d_num_species]->getPointer(1);
+        c_average = projection_variables[d_num_species + 1]->getPointer(1);
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int j = -num_ghosts_1_characteristic_var;
+                 j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
+                 j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                        (j + num_ghosts_1_characteristic_var)*ghostcell_dim_0_characteristic_var;
+                    
+                    V[si][idx_face] = -double(1)/double(2)*Z_rho_average[si][idx_face]/
+                        c_average[idx_face]*W[0][idx_face] + W[si + 1][idx_face] +
+                            double(1)/double(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
+                                W[num_eqn - 1][idx_face];
+                }
+            }
+        }
+        
+        for (int si = 0; si < d_num_species - 1; si++)
+        {
+            for (int j = -num_ghosts_1_characteristic_var;
+                 j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
+                 j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                        (j + num_ghosts_1_characteristic_var)*ghostcell_dim_0_characteristic_var;
+                    
+                    V[d_num_species + 3 + si][idx_face] = W[d_num_species + 2 + si][idx_face];
+                }
+            }
+        }
+        
+        for (int j = -num_ghosts_1_characteristic_var;
+             j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
+             j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
+            {
+                // Compute the linear index.
+                const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                    (j + num_ghosts_1_characteristic_var)*ghostcell_dim_0_characteristic_var;
+                
+                V[d_num_species][idx_face] = W[d_num_species + 1][idx_face];
+                
+                V[d_num_species + 1][idx_face] = double(1)/double(2)*W[0][idx_face] +
+                    double(1)/double(2)*W[num_eqn - 1][idx_face];
+                
+                V[d_num_species + 2][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
+                    W[0][idx_face] + double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
+                        W[num_eqn - 1][idx_face];
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        const int interior_dim_2 = interior_dims[2];
+        
+        const int num_ghosts_0_characteristic_var = num_ghosts_characteristic_var[0];
+        const int num_ghosts_1_characteristic_var = num_ghosts_characteristic_var[1];
+        const int num_ghosts_2_characteristic_var = num_ghosts_characteristic_var[2];
+        const int ghostcell_dim_0_characteristic_var = ghostcell_dims_characteristic_var[0];
+        const int ghostcell_dim_1_characteristic_var = ghostcell_dims_characteristic_var[1];
+        
+        /*
+         * Compute the primitive variables in the x-direction.
+         */
+        
+        for (int ei = 0; ei < num_eqn; ei++)
+        {
+            V[ei] = primitive_variables[ei]->getPointer(0);
+        }
+        
+        for (int ei = 0; ei < num_eqn; ei++)
+        {
+            W[ei] = characteristic_variables[ei]->getPointer(0);
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Z_rho_average[si] = projection_variables[si]->getPointer(0);
+        }
+        rho_average = projection_variables[d_num_species]->getPointer(0);
+        c_average = projection_variables[d_num_species + 1]->getPointer(0);
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = -num_ghosts_0_characteristic_var;
+                         i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
+                         i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                            (j + num_ghosts_1_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1) +
+                            (k + num_ghosts_2_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1)*
+                                ghostcell_dim_1_characteristic_var;
+                        
+                        V[si][idx_face] = -double(1)/double(2)*Z_rho_average[si][idx_face]/
+                            c_average[idx_face]*W[0][idx_face] + W[si + 1][idx_face] +
+                                double(1)/double(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
+                                    W[num_eqn - 1][idx_face];
+                    }
+                }
+            }
+        }
+        
+        for (int si = 0; si < d_num_species - 1; si++)
+        {
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = -num_ghosts_0_characteristic_var;
+                         i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
+                         i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                            (j + num_ghosts_1_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1) +
+                            (k + num_ghosts_2_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1)*
+                                ghostcell_dim_1_characteristic_var;
+                        
+                        V[d_num_species + 4 + si][idx_face] = W[d_num_species + 3 + si][idx_face];
+                    }
+                }
+            }
+        }
+        
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -num_ghosts_0_characteristic_var;
+                     i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
+                     i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                        (j + num_ghosts_1_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1) +
+                        (k + num_ghosts_2_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1)*
+                            ghostcell_dim_1_characteristic_var;
+                    
+                    V[d_num_species][idx_face] = double(1)/double(2)*W[0][idx_face] +
+                        double(1)/double(2)*W[num_eqn - 1][idx_face];
+                    
+                    V[d_num_species + 1][idx_face] = W[d_num_species + 1][idx_face];
+                    
+                    V[d_num_species + 2][idx_face] = W[d_num_species + 2][idx_face];
+                    
+                    V[d_num_species + 3][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
+                        W[0][idx_face] + double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
+                            W[num_eqn - 1][idx_face];
+                }
+            }
+        }
+        
+        /*
+         * Compute the primitive variables in the y-direction.
+         */
+        
+        for (int ei = 0; ei < num_eqn; ei++)
+        {
+            V[ei] = primitive_variables[ei]->getPointer(1);
+        }
+        
+        for (int ei = 0; ei < num_eqn; ei++)
+        {
+            W[ei] = characteristic_variables[ei]->getPointer(1);
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Z_rho_average[si] = projection_variables[si]->getPointer(1);
+        }
+        rho_average = projection_variables[d_num_species]->getPointer(1);
+        c_average = projection_variables[d_num_species + 1]->getPointer(1);
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = -num_ghosts_1_characteristic_var;
+                     j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                            (j + num_ghosts_1_characteristic_var)*ghostcell_dim_0_characteristic_var +
+                            (k + num_ghosts_2_characteristic_var)*ghostcell_dim_0_characteristic_var*
+                                (ghostcell_dim_1_characteristic_var + 1);
+                        
+                        V[si][idx_face] = -double(1)/double(2)*Z_rho_average[si][idx_face]/
+                            c_average[idx_face]*W[0][idx_face] + W[si + 1][idx_face] +
+                                double(1)/double(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
+                                    W[num_eqn - 1][idx_face];
+                    }
+                }
+            }
+        }
+        
+        for (int si = 0; si < d_num_species - 1; si++)
+        {
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = -num_ghosts_1_characteristic_var;
+                     j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                            (j + num_ghosts_1_characteristic_var)*ghostcell_dim_0_characteristic_var +
+                            (k + num_ghosts_2_characteristic_var)*ghostcell_dim_0_characteristic_var*
+                                (ghostcell_dim_1_characteristic_var + 1);
+                        
+                        V[d_num_species + 4 + si][idx_face] = W[d_num_species + 3 + si][idx_face];
+                    }
+                }
+            }
+        }
+        
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = -num_ghosts_1_characteristic_var;
+                 j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
+                 j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                        (j + num_ghosts_1_characteristic_var)*ghostcell_dim_0_characteristic_var +
+                        (k + num_ghosts_2_characteristic_var)*ghostcell_dim_0_characteristic_var*
+                            (ghostcell_dim_1_characteristic_var + 1);
+                    
+                    V[d_num_species][idx_face] = W[d_num_species + 1][idx_face];
+                    
+                    V[d_num_species + 1][idx_face] = double(1)/double(2)*W[0][idx_face] +
+                        double(1)/double(2)*W[num_eqn - 1][idx_face];
+                    
+                    V[d_num_species + 2][idx_face] = W[d_num_species + 2][idx_face];
+                    
+                    V[d_num_species + 3][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
+                        W[0][idx_face] + double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
+                            W[num_eqn - 1][idx_face];
+                }
+            }
+        }
+        
+        /*
+         * Compute the primitive variables in the z-direction.
+         */
+        
+        for (int ei = 0; ei < num_eqn; ei++)
+        {
+            V[ei] = primitive_variables[ei]->getPointer(2);
+        }
+        
+        for (int ei = 0; ei < num_eqn; ei++)
+        {
+            W[ei] = characteristic_variables[ei]->getPointer(2);
+        }
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Z_rho_average[si] = projection_variables[si]->getPointer(2);
+        }
+        rho_average = projection_variables[d_num_species]->getPointer(2);
+        c_average = projection_variables[d_num_species + 1]->getPointer(2);
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int k = -num_ghosts_2_characteristic_var;
+                 k < interior_dim_2 + 1 + num_ghosts_2_characteristic_var;
+                 k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                            (j + num_ghosts_1_characteristic_var)*ghostcell_dim_0_characteristic_var +
+                            (k + num_ghosts_2_characteristic_var)*ghostcell_dim_0_characteristic_var*
+                                ghostcell_dim_1_characteristic_var;
+                        
+                        V[si][idx_face] = -double(1)/double(2)*Z_rho_average[si][idx_face]/
+                            c_average[idx_face]*W[0][idx_face] + W[si + 1][idx_face] +
+                                double(1)/double(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
+                                    W[num_eqn - 1][idx_face];
+                    }
+                }
+            }
+        }
+        
+        for (int si = 0; si < d_num_species - 1; si++)
+        {
+            for (int k = -num_ghosts_2_characteristic_var;
+                 k < interior_dim_2 + 1 + num_ghosts_2_characteristic_var;
+                 k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                            (j + num_ghosts_1_characteristic_var)*ghostcell_dim_0_characteristic_var +
+                            (k + num_ghosts_2_characteristic_var)*ghostcell_dim_0_characteristic_var*
+                                ghostcell_dim_1_characteristic_var;
+                        
+                        V[d_num_species + 4 + si][idx_face] = W[d_num_species + 3 + si][idx_face];
+                    }
+                }
+            }
+        }
+        
+        for (int k = -num_ghosts_2_characteristic_var;
+             k < interior_dim_2 + 1 + num_ghosts_2_characteristic_var;
+             k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_0_characteristic_var) +
+                        (j + num_ghosts_1_characteristic_var)*ghostcell_dim_0_characteristic_var +
+                        (k + num_ghosts_2_characteristic_var)*ghostcell_dim_0_characteristic_var*
+                            ghostcell_dim_1_characteristic_var;
+                    
+                    V[d_num_species][idx_face] = W[d_num_species + 1][idx_face];
+                    
+                    V[d_num_species + 1][idx_face] = W[d_num_species + 2][idx_face];
+                    
+                    V[d_num_species + 2][idx_face] = double(1)/double(2)*W[0][idx_face] +
+                        double(1)/double(2)*W[num_eqn - 1][idx_face];
+                    
+                    V[d_num_species + 3][idx_face] = -double(1)/double(2)*rho_average[idx_face]*
+                        c_average[idx_face]*W[0][idx_face] +
+                            double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*W[num_eqn - 1][idx_face];
+                }
+            }
+        }
+    }
 }

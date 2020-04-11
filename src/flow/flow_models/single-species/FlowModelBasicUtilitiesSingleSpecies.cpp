@@ -2449,7 +2449,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfConservativeVariablesBounde
     if (interior_dims_flag != interior_dims)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::"
+            << ": FlowModelBasicUtilitiesSingleSpecies::"
             << "checkSideDataOfConservativeVariablesBounded()\n"
             << "The interior dimension of the flag does not match that of patch."
             << std::endl);
@@ -2888,7 +2888,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
     if (interior_dims_flag != interior_dims)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::"
+            << ": FlowModelBasicUtilitiesSingleSpecies::"
             << "checkSideDataOfPrimitiveVariablesBounded()\n"
             << "The interior dimension of the flag does not match that of patch."
             << std::endl);

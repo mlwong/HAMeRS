@@ -71,7 +71,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
     if (num_eqn_primitive_var != num_eqn)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::"
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
             << "convertConservativeVariablesToPrimitiveVariables()\n"
             << "The number of primitive variables are incorrect."
             << std::endl);
@@ -80,7 +80,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
     if (num_eqn_conservative_var != num_eqn)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::"
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
             << "convertConservativeVariablesToPrimitiveVariables()\n"
             << "The number of conservative variables are incorrect."
             << std::endl);
@@ -98,7 +98,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         if (interior_dims_primitive_var != interior_dims)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "convertConservativeVariablesToPrimitiveVariables()\n"
                 << "The interior dimension of the primitive variables does not match that of patch."
                 << std::endl);
@@ -113,7 +113,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         if (interior_dims_conservative_var != interior_dims)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "convertConservativeVariablesToPrimitiveVariables()\n"
                 << "The interior dimension of the conservative variables does not match that of patch."
                 << std::endl);
@@ -125,7 +125,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         if (num_ghosts_primitive_var != primitive_variables[vi]->getGhostCellWidth())
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "convertConservativeVariablesToPrimitiveVariables()\n"
                 << "The primitive variables don't have same ghost cell width."
                 << std::endl);
@@ -137,7 +137,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
         if (num_ghosts_conservative_var != conservative_variables[vi]->getGhostCellWidth())
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "convertConservativeVariablesToPrimitiveVariables()\n"
                 << "The conservative variables don't have same ghost cell width."
                 << std::endl);
@@ -147,7 +147,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
     if (num_ghosts_primitive_var > num_ghosts_conservative_var)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::"
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
             << "convertConservativeVariablesToPrimitiveVariables()\n"
             << "The ghost cell width of primitive variables is larger than that of conservative variables."
             << std::endl);
@@ -1435,7 +1435,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
     if (num_eqn_conservative_var != num_eqn)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::"
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
             << "convertPrimitiveVariablesToConservativeVariables()\n"
             << "The number of conservative variables are incorrect."
             << std::endl);
@@ -1444,7 +1444,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
     if (num_eqn_primitive_var != num_eqn)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::"
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
             << "convertPrimitiveVariablesToConservativeVariables()\n"
             << "The number of primitive variables are incorrect."
             << std::endl);
@@ -1462,7 +1462,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         if (interior_dims_conservative_var != interior_dims)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "convertPrimitiveVariablesToConservativeVariables()\n"
                 << "The interior dimension of the conservative variables does not match that of patch."
                 << std::endl);
@@ -1477,7 +1477,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         if (interior_dims_primitive_var != interior_dims)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "convertPrimitiveVariablesToConservativeVariables()\n"
                 << "The interior dimension of the primitive variables does not match that of patch."
                 << std::endl);
@@ -1489,7 +1489,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         if (num_ghosts_conservative_var != conservative_variables[vi]->getGhostCellWidth())
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "convertPrimitiveVariablesToConservativeVariables()\n"
                 << "The conservative variables don't have same ghost cell width."
                 << std::endl);
@@ -1501,7 +1501,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
         if (num_ghosts_primitive_var != primitive_variables[vi]->getGhostCellWidth())
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "convertPrimitiveVariablesToConservativeVariables()\n"
                 << "The primitive variables don't have same ghost cell width."
                 << std::endl);
@@ -1511,7 +1511,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
     if (num_ghosts_conservative_var > num_ghosts_primitive_var)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::"
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
             << "convertPrimitiveVariablesToConservativeVariables()\n"
             << "The ghost cell width of conservative variables is larger than that of primitive variables."
             << std::endl);
@@ -2736,7 +2736,12 @@ FlowModelBasicUtilitiesFourEqnConservative::checkCellDataOfConservativeVariables
     boost::shared_ptr<pdat::CellData<int> >& bounded_flag,
     const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables)
 {
-    // NEED IMPLEMENTATION!
+    TBOX_ERROR(d_object_name
+        << ": FlowModelBasicUtilitiesFourEqnConservative::"
+        << "checkCellDataOfConservativeVariablesBounded()\n"
+        << "Method checkCellDataOfConservativeVariablesBounded()"
+        << " is not yet implemented."
+        << std::endl);
 }
 
 
@@ -2790,7 +2795,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
     if (static_cast<int>(conservative_variables.size()) != num_eqn)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::"
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
             << "checkSideDataOfConservativeVariablesBounded()\n"
             << "The number of conservative variables are incorrect."
             << std::endl);
@@ -2808,7 +2813,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         if (interior_dims_conservative_var != interior_dims)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "checkSideDataOfConservativeVariablesBounded()\n"
                 << "The interior dimension of the conservative variables does not match that of patch."
                 << std::endl);
@@ -2818,7 +2823,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
     if (interior_dims_flag != interior_dims)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::"
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
             << "checkSideDataOfConservativeVariablesBounded()\n"
             << "The interior dimension of the flag does not match that of patch."
             << std::endl);
@@ -2829,7 +2834,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         if (num_ghosts_conservative_var != conservative_variables[ei]->getGhostCellWidth())
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "checkSideDataOfConservativeVariablesBounded()\n"
                 << "The conservative variables don't have same ghost cell width."
                 << std::endl);
@@ -2839,7 +2844,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
     if (num_ghosts_flag != num_ghosts_conservative_var)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::"
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
             << "checkSideDataOfConservativeVariablesBounded()\n"
             << "The ghost cell width of the flag does not match that of conservative variables."
             << std::endl);
@@ -3523,7 +3528,12 @@ FlowModelBasicUtilitiesFourEqnConservative::checkCellDataOfPrimitiveVariablesBou
     boost::shared_ptr<pdat::CellData<int> >& bounded_flag,
     const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables)
 {
-    // NEED IMPLEMENTATION!
+    TBOX_ERROR(d_object_name
+        << ": FlowModelBasicUtilitiesFourEqnConservative::"
+        << "checkCellDataOfPrimitiveVariablesBounded()\n"
+        << "Method checkCellDataOfPrimitiveVariablesBounded()"
+        << " is not yet implemented."
+        << std::endl);
 }
 
 
@@ -3577,7 +3587,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
     if (static_cast<int>(primitive_variables.size()) != num_eqn)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::"
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
             << "checkSideDataOfPrimitiveVariablesBounded()\n"
             << "The number of primitive variables are incorrect."
             << std::endl);
@@ -3595,7 +3605,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
         if (interior_dims_primitive_var != interior_dims)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "checkSideDataOfPrimitiveVariablesBounded()\n"
                 << "The interior dimension of the primitive variables does not match that of patch."
                 << std::endl);
@@ -3605,19 +3615,18 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
     if (interior_dims_flag != interior_dims)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::"
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
             << "checkSideDataOfPrimitiveVariablesBounded()\n"
             << "The interior dimension of the flag does not match that of patch."
             << std::endl);
     }
-    
     
     for (int ei = 1; ei < num_eqn; ei++)
     {
         if (num_ghosts_primitive_var != primitive_variables[ei]->getGhostCellWidth())
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "checkSideDataOfPrimitiveVariablesBounded()\n"
                 << "The primitive variables don't have same ghost cell width."
                 << std::endl);
@@ -3627,7 +3636,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
     if (num_ghosts_flag != num_ghosts_primitive_var)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::"
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
             << "checkSideDataOfPrimitiveVariablesBounded()\n"
             << "The ghost cell width of the flag does not match that of primitive variables."
             << std::endl);
@@ -4343,7 +4352,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
     NULL_USE(projection_variables);
     
     TBOX_ERROR(d_object_name
-        << ": FlowModelFourEqnConservative::"
+        << ": FlowModelBasicUtilitiesFourEqnConservative::"
         << "computeSideDataOfProjectionVariablesForConservativeVariables()\n"
         << "Method computeSideDataOfProjectionVariablesForConservativeVariables()"
         << " is not yet implemented."
@@ -4397,7 +4406,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
     if (static_cast<int>(projection_variables.size()) != d_num_species + 2)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::"
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
             << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
             << "There should be number of species projection plus two variables."
             << std::endl);
@@ -4414,7 +4423,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
         if (interior_dims_projection_var != interior_dims)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
                 << "The interior dimension of the projection variables does not match that of patch."
                 << std::endl);
@@ -4426,7 +4435,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
         if (num_ghosts_projection_var != projection_variables[vi]->getGhostCellWidth())
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
                 << "The projection variables don't have same ghost cell width."
                 << std::endl);
@@ -4436,7 +4445,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
     if (num_ghosts_projection_var > num_ghosts)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::"
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
             << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
             << "The projection variables have ghost cell width larger than that of conservative variables."
             << std::endl);
@@ -4562,7 +4571,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
             case AVERAGING_TMP::ROE:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelFourEqnConservative::"
+                    << ": FlowModelBasicUtilitiesFourEqnConservative::"
                     << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
                     << "Roe averaging is not yet implemented."
                     << std::endl);
@@ -4572,7 +4581,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelFourEqnConservative::"
+                    << ": FlowModelBasicUtilitiesFourEqnConservative::"
                     << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
                     << "Unknown d_proj_var_primitive_averaging_type given."
                     << std::endl);
@@ -4743,7 +4752,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
             case AVERAGING_TMP::ROE:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelFourEqnConservative::"
+                    << ": FlowModelBasicUtilitiesFourEqnConservative::"
                     << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
                     << "Roe averaging is not yet implemented."
                     << std::endl);
@@ -4753,7 +4762,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelFourEqnConservative::"
+                    << ": FlowModelBasicUtilitiesFourEqnConservative::"
                     << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
                     << "Unknown d_proj_var_primitive_averaging_type given."
                     << std::endl);
@@ -5066,7 +5075,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
             case AVERAGING_TMP::ROE:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelFourEqnConservative::"
+                    << ": FlowModelBasicUtilitiesFourEqnConservative::"
                     << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
                     << "Roe averaging is not yet implemented."
                     << std::endl);
@@ -5076,7 +5085,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelFourEqnConservative::"
+                    << ": FlowModelBasicUtilitiesFourEqnConservative::"
                     << "computeSideDataOfProjectionVariablesForPrimitiveVariables()\n"
                     << "Unknown d_proj_var_primitive_averaging_type given."
                     << std::endl);
@@ -5102,7 +5111,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
     NULL_USE(idx_offset);
     
     TBOX_ERROR(d_object_name
-        << ": FlowModelFourEqnConservative::"
+        << ": FlowModelBasicUtilitiesFourEqnConservative::"
         << "computeSideDataOfCharacteristicVariablesFromConservativeVariables()\n"
         << "Method computeSideDataOfCharacteristicVariablesFromConservativeVariables()"
         << " is not yet implemented."
@@ -5177,7 +5186,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
     if (static_cast<int>(characteristic_variables.size()) != num_eqn)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::"
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
             << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
             << "The number of characteristic variables are incorrect."
             << std::endl);
@@ -5185,7 +5194,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
     if (static_cast<int>(primitive_variables.size()) != 3)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::"
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
             << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
             << "The number of primitive variables are incorrect."
             << std::endl);
@@ -5195,7 +5204,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
         primitive_variables[2]->getDepth() != 1)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::"
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
             << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
             << "The depths of one or more primitive variables are incorrect."
             << std::endl);
@@ -5203,7 +5212,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
     if (static_cast<int>(projection_variables.size()) != d_num_species + 2)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::"
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
             << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
             << "There should be number of species projection plus two variables."
             << std::endl);
@@ -5221,7 +5230,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
         if (interior_dims_characteristic_var != interior_dims)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
                 << "The interior dimension of the characteristic variables does not match that of patch."
                 << std::endl);
@@ -5235,7 +5244,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
         if (interior_dims_primitive_var != interior_dims)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
                 << "The interior dimension of the primitive variables does not match that of patch."
                 << std::endl);
@@ -5247,7 +5256,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
         if (interior_dims_projection_var != interior_dims)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
                 << "The interior dimension of the projection variables does not match that of patch."
                 << std::endl);
@@ -5259,7 +5268,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
         if (num_ghosts_characteristic_var != characteristic_variables[ei]->getGhostCellWidth())
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
                 << "The characteristic variables don't have same ghost cell width."
                 << std::endl);
@@ -5270,7 +5279,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
         if (num_ghosts_projection_var != projection_variables[vi]->getGhostCellWidth())
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
                 << "The projection variables don't have same ghost cell width."
                 << std::endl);
@@ -5280,7 +5289,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
     if (num_ghosts_projection_var != num_ghosts_characteristic_var)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::"
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
             << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
             << "The ghost cell width of the projection variables does not match that of"
             << " characteristic variables."
@@ -5295,7 +5304,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
                 + (hier::IntVector::getOne(d_dim))*(idx_offset + 1) > hier::IntVector::getZero(d_dim))
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "computeSideDataOfCharacteristicVariablesFromPrimitiveVariables()\n"
                 << "The offset index is too large or the number of ghost of characteristic variable"
                 << " is too large."
@@ -5897,7 +5906,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfConservativeVariabl
     NULL_USE(projection_variables);
     
     TBOX_ERROR(d_object_name
-        << ": FlowModelFourEqnConservative::"
+        << ": FlowModelBasicUtilitiesFourEqnConservative::"
         << "computeSideDataOfConservativeVariablesFromCharacteristicVariables()\n"
         << "Method computeSideDataOfConservativeVariablesFromCharacteristicVariables()"
         << " is not yet implemented."
@@ -5958,7 +5967,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
     if (static_cast<int>(primitive_variables.size()) != num_eqn)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::"
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
             << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
             << "The number of characteristic variables are incorrect."
             << std::endl);
@@ -5966,7 +5975,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
     if (static_cast<int>(characteristic_variables.size()) != num_eqn)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::"
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
             << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
             << "The number of primitive variables are incorrect."
             << std::endl);
@@ -5974,7 +5983,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
     if (static_cast<int>(projection_variables.size()) != d_num_species + 2)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::"
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
             << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
             << "There should be number of species projection plus two variables."
             << std::endl);
@@ -5992,7 +6001,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
         if (interior_dims_primitive_var != interior_dims)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
                 << "The interior dimension of the primitive variables does not match that of patch."
                 << std::endl);
@@ -6006,7 +6015,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
         if (interior_dims_characteristic_var != interior_dims)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
                 << "The interior dimension of the characteristic variables does not match that of patch."
                 << std::endl);
@@ -6018,7 +6027,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
         if (interior_dims_projection_var != interior_dims)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
                 << "The interior dimension of the projection variables does not match that of patch."
                 << std::endl);
@@ -6030,7 +6039,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
         if (num_ghosts_primitive_var != primitive_variables[ei]->getGhostCellWidth())
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
                 << "The primitive variables don't have same ghost cell width."
                 << std::endl);
@@ -6041,7 +6050,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
         if (num_ghosts_characteristic_var != characteristic_variables[ei]->getGhostCellWidth())
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
                 << "The characteristic variables don't have same ghost cell width."
                 << std::endl);
@@ -6052,7 +6061,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
         if (num_ghosts_projection_var != projection_variables[vi]->getGhostCellWidth())
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::"
+                << ": FlowModelBasicUtilitiesFourEqnConservative::"
                 << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
                 << "The projection variables don't have same ghost cell width."
                 << std::endl);
@@ -6062,7 +6071,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
     if (num_ghosts_projection_var != num_ghosts_primitive_var)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::"
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
             << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
             << "The ghost cell width of the projection variables does not match that of"
             << " primitive variables."
@@ -6071,7 +6080,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
     if (num_ghosts_projection_var != num_ghosts_characteristic_var)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::"
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
             << "computeSideDataOfPrimitiveVariablesFromCharacteristicVariables()\n"
             << "The ghost cell width of the projection variables does not match that of"
             << " characteristic variables."
