@@ -18,12 +18,13 @@ FlowModelBasicUtilitiesSingleSpecies::convertConservativeVariablesToPrimitiveVar
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
     const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
      * Get the dimensions of box that covers the interior of patch.
      */
     
-    const hier::Box interior_box = primitive_variables[0]->getBox();
+    const hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
     
     /*
@@ -89,7 +90,7 @@ FlowModelBasicUtilitiesSingleSpecies::convertConservativeVariablesToPrimitiveVar
      * Check potential failures.
      */
     
-    for (int vi = 1; vi < static_cast<int>(primitive_variables.size()); vi++)
+    for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
     {
         const hier::IntVector interior_dims_primitive_var =
             primitive_variables[vi]->getBox().numberCells();
@@ -1195,12 +1196,13 @@ FlowModelBasicUtilitiesSingleSpecies::convertPrimitiveVariablesToConservativeVar
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
     const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
      * Get the dimensions of box that covers the interior of patch.
      */
     
-    const hier::Box interior_box = conservative_variables[0]->getBox();
+    const hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
     
     /*
@@ -1266,7 +1268,7 @@ FlowModelBasicUtilitiesSingleSpecies::convertPrimitiveVariablesToConservativeVar
      * Check potential failures.
      */
     
-    for (int vi = 1; vi < static_cast<int>(conservative_variables.size()); vi++)
+    for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
     {
         const hier::IntVector interior_dims_conservative_var =
             conservative_variables[vi]->getBox().numberCells();
@@ -2387,12 +2389,13 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfConservativeVariablesBounde
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
     const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
      * Get the dimensions of box that covers the interior of patch.
      */
     
-    const hier::Box interior_box = bounded_flag->getBox();
+    const hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
     
     /*
@@ -2441,6 +2444,15 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfConservativeVariablesBounde
                 << "The interior dimension of the conservative variables does not match that of patch."
                 << std::endl);
         }
+    }
+    const hier::IntVector interior_dims_flag = bounded_flag->getBox().numberCells();
+    if (interior_dims_flag != interior_dims)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::"
+            << "checkSideDataOfConservativeVariablesBounded()\n"
+            << "The interior dimension of the flag does not match that of patch."
+            << std::endl);
     }
     
     for (int ei = 1; ei < num_eqn; ei++)
@@ -2816,12 +2828,13 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
     const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
      * Get the dimensions of box that covers the interior of patch.
      */
     
-    const hier::Box interior_box = bounded_flag->getBox();
+    const hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
     
     /*
@@ -2870,6 +2883,15 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
                 << "The interior dimension of the primitive variables does not match that of patch."
                 << std::endl);
         }
+    }
+    const hier::IntVector interior_dims_flag = bounded_flag->getBox().numberCells();
+    if (interior_dims_flag != interior_dims)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::"
+            << "checkSideDataOfPrimitiveVariablesBounded()\n"
+            << "The interior dimension of the flag does not match that of patch."
+            << std::endl);
     }
     
     for (int ei = 1; ei < num_eqn; ei++)
@@ -3255,12 +3277,13 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForCon
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
     const hier::IntVector& num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
      * Get the dimensions of the interior and ghost boxes.
      */
     
-    const hier::Box interior_box = projection_variables[0]->getBox();
+    const hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
     
     hier::Box ghost_box = interior_box;
@@ -3292,7 +3315,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForCon
      * Check potential failures.
      */
     
-    for (int vi = 1; vi < d_dim.getValue() + 5; vi++)
+    for (int vi = 0; vi < d_dim.getValue() + 5; vi++)
     {
         const hier::IntVector interior_dims_projection_var =
             projection_variables[vi]->getBox().numberCells();
@@ -4355,12 +4378,13 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForPri
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
     const hier::IntVector& num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
      * Get the dimensions of the interior and ghost boxes.
      */
     
-    const hier::Box interior_box = projection_variables[0]->getBox();
+    const hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
     
     hier::Box ghost_box = interior_box;
@@ -4392,7 +4416,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForPri
      * Check potential failures.
      */
     
-    for (int vi = 1; vi < 2; vi++)
+    for (int vi = 0; vi < 2; vi++)
     {
         const hier::IntVector interior_dims_projection_var =
             projection_variables[vi]->getBox().numberCells();
@@ -4853,12 +4877,13 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
     const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
      * Get the dimensions of box that covers the interior of patch.
      */
     
-    const hier::IntVector interior_dims = characteristic_variables[0]->getBox().numberCells();
+    const hier::IntVector interior_dims = patch.getBox().numberCells();
     
     /*
      * Get the numbers of ghost cells of the variables.
@@ -4935,7 +4960,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
      * Check potential failures.
      */
     
-    for (int ei = 1; ei < num_eqn; ei++)
+    for (int ei = 0; ei < num_eqn; ei++)
     {
         const hier::IntVector interior_dims_characteristic_var =
             characteristic_variables[ei]->getBox().numberCells();
@@ -5600,12 +5625,13 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
     const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
      * Get the dimensions of box that covers the interior of patch.
      */
     
-    const hier::IntVector interior_dims = characteristic_variables[0]->getBox().numberCells();
+    const hier::IntVector interior_dims = patch.getBox().numberCells();
     
     /*
      * Get the numbers of ghost cells of the variables.
@@ -5682,7 +5708,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
      * Check potential failures.
      */
     
-    for (int ei = 1; ei < num_eqn; ei++)
+    for (int ei = 0; ei < num_eqn; ei++)
     {
         const hier::IntVector interior_dims_characteristic_var =
             characteristic_variables[ei]->getBox().numberCells();
@@ -6169,12 +6195,13 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfConservativeVariablesFrom
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
     const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
      * Get the dimensions of box that covers the interior of patch.
      */
     
-    const hier::IntVector interior_dims = conservative_variables[0]->getBox().numberCells();
+    const hier::IntVector interior_dims = patch.getBox().numberCells();
     
     /*
      * Get the numbers of ghost cells of the variables.
@@ -6228,7 +6255,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfConservativeVariablesFrom
      * Check potential failures.
      */
     
-    for (int ei = 1; ei < num_eqn; ei++)
+    for (int ei = 0; ei < num_eqn; ei++)
     {
         const hier::IntVector interior_dims_conservative_var =
             conservative_variables[ei]->getBox().numberCells();
@@ -6740,12 +6767,13 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfPrimitiveVariablesFromCha
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
     const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
      * Get the dimensions of box that covers the interior of patch.
      */
     
-    const hier::IntVector interior_dims = primitive_variables[0]->getBox().numberCells();
+    const hier::IntVector interior_dims = patch.getBox().numberCells();
     
     /*
      * Get the numbers of ghost cells of the variables.
@@ -6799,7 +6827,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfPrimitiveVariablesFromCha
      * Check potential failures.
      */
     
-    for (int ei = 1; ei < num_eqn; ei++)
+    for (int ei = 0; ei < num_eqn; ei++)
     {
         const hier::IntVector interior_dims_primitive_var =
             primitive_variables[ei]->getBox().numberCells();
