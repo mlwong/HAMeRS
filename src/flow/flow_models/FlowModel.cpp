@@ -1,6 +1,23 @@
 #include "flow/flow_models/FlowModel.hpp"
 
 /*
+ * Get registered patch.
+ */
+const hier::Patch&
+FlowModel::getRegisteredPatch() const
+{
+    if (!d_patch_registered)
+    {
+        TBOX_ERROR(d_object_name
+        << ": FlowModel::registerDiffusiveFluxes()\n"
+        << "Patch is not yet registered!"
+        << std::endl);
+    }
+    
+    return *d_patch;
+}
+
+/*
  * Register the required variables for the computation of diffusive fluxes in the registered patch.
  */
 void

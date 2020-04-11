@@ -117,7 +117,7 @@ class FlowModel:
          * Get the number of ghost cells of conservative variables.
          */
         const hier::IntVector&
-        getNumberOfGhostCells()
+        getNumberOfGhostCells() const
         {
             // Check whether a patch is already registered.
             if (!d_patch)
@@ -271,6 +271,11 @@ class FlowModel:
          * the patch are dumped.
          */
         virtual void unregisterPatch() = 0;
+        
+        /*
+         * Get registered patch.
+         */
+        const hier::Patch& getRegisteredPatch() const;
         
         /*
          * Compute the cell data of different registered derived variables with the registered data context.
