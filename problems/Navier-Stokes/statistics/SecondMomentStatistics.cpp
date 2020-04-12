@@ -466,7 +466,7 @@ SecondMomentStatisticsUtilities::outputMixingWidthInXDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MOLE_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -672,7 +672,7 @@ SecondMomentStatisticsUtilities::outputMixingWidthInXDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MOLE_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -891,7 +891,7 @@ SecondMomentStatisticsUtilities::outputMixingWidthInXDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MOLE_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -1205,7 +1205,7 @@ SecondMomentStatisticsUtilities::outputMixednessInXDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MOLE_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -1434,7 +1434,7 @@ SecondMomentStatisticsUtilities::outputMixednessInXDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MOLE_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -1676,7 +1676,7 @@ SecondMomentStatisticsUtilities::outputMixednessInXDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MOLE_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -2047,7 +2047,7 @@ outputTurbulentMassFluxVelocityInXDirectionInMixingLayerWithHomogeneityInYZPlane
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -2296,7 +2296,7 @@ outputTurbulentMassFluxVelocityInXDirectionInMixingLayerWithHomogeneityInYZPlane
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -2693,7 +2693,7 @@ outputTurbulentMassFluxInXDirectionInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -2942,7 +2942,7 @@ outputTurbulentMassFluxInXDirectionInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -3336,7 +3336,7 @@ outputDensitySpecificVolumeCovarianceInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -3564,7 +3564,7 @@ outputDensitySpecificVolumeCovarianceInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -3940,7 +3940,7 @@ outputDensityTimesDensitySpecificVolumeCovarianceInMixingLayerWithHomogeneityInY
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -4168,7 +4168,7 @@ outputDensityTimesDensitySpecificVolumeCovarianceInMixingLayerWithHomogeneityInY
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -4547,7 +4547,7 @@ outputReynoldsNormalStressInXDirectionInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -4796,7 +4796,7 @@ outputReynoldsNormalStressInXDirectionInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -5194,7 +5194,7 @@ outputDensityTimesReynoldsNormalStressInXDirectionInMixingLayerWithHomogeneityIn
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -5443,7 +5443,7 @@ outputDensityTimesReynoldsNormalStressInXDirectionInMixingLayerWithHomogeneityIn
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -5841,7 +5841,7 @@ outputReynoldsNormalStressInYDirectionInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -6090,7 +6090,7 @@ outputReynoldsNormalStressInYDirectionInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -6488,7 +6488,7 @@ outputDensityTimesReynoldsNormalStressInYDirectionInMixingLayerWithHomogeneityIn
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -6737,7 +6737,7 @@ outputDensityTimesReynoldsNormalStressInYDirectionInMixingLayerWithHomogeneityIn
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -7135,7 +7135,7 @@ outputReynoldsNormalStressInZDirectionInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -7384,7 +7384,7 @@ outputReynoldsNormalStressInZDirectionInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -7782,7 +7782,7 @@ outputDensityTimesReynoldsNormalStressInZDirectionInMixingLayerWithHomogeneityIn
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -8031,7 +8031,7 @@ outputDensityTimesReynoldsNormalStressInZDirectionInMixingLayerWithHomogeneityIn
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -8433,7 +8433,7 @@ outputReynoldsShearStressInXYDirectionsInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -8692,7 +8692,7 @@ outputReynoldsShearStressInXYDirectionsInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -9100,7 +9100,7 @@ outputDensityTimesReynoldsShearStressInXYDirectionsInMixingLayerWithHomogeneityI
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -9359,7 +9359,7 @@ outputDensityTimesReynoldsShearStressInXYDirectionsInMixingLayerWithHomogeneityI
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -9767,7 +9767,7 @@ outputReynoldsShearStressInXZDirectionsInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -10026,7 +10026,7 @@ outputReynoldsShearStressInXZDirectionsInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -10434,7 +10434,7 @@ outputDensityTimesReynoldsShearStressInXZDirectionsInMixingLayerWithHomogeneityI
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -10693,7 +10693,7 @@ outputDensityTimesReynoldsShearStressInXZDirectionsInMixingLayerWithHomogeneityI
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -11101,7 +11101,7 @@ outputReynoldsShearStressInYZDirectionsInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -11360,7 +11360,7 @@ outputReynoldsShearStressInYZDirectionsInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -11768,7 +11768,7 @@ outputDensityTimesReynoldsShearStressInYZDirectionsInMixingLayerWithHomogeneityI
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -12027,7 +12027,7 @@ outputDensityTimesReynoldsShearStressInYZDirectionsInMixingLayerWithHomogeneityI
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
                 flow_model_tmp->computeDerivedCellData();
                 
