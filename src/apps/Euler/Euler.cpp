@@ -118,8 +118,6 @@ Euler::Euler(
     
     d_flow_model = d_flow_model_manager->getFlowModel();
     
-    d_flow_model->setupBasicUtilities();
-    
     /*
      * Initialize d_convective_flux_reconstructor_manager and get the convective flux reconstructor object.
      */
