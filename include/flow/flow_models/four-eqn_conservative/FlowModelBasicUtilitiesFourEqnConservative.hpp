@@ -16,7 +16,8 @@ class FlowModelBasicUtilitiesFourEqnConservative: public FlowModelBasicUtilities
                     object_name,
                     dim,
                     grid_geometry,
-                    num_species),
+                    num_species,
+                    num_species + dim.getValue() + 1),
             d_equation_of_state_mixing_rules(equation_of_state_mixing_rules)
         {
             // Set the bounds for the variables.
@@ -31,8 +32,24 @@ class FlowModelBasicUtilitiesFourEqnConservative: public FlowModelBasicUtilities
          */
         void
         convertConservativeVariablesToPrimitiveVariables(
+            const std::vector<const double*>& conservative_variables,
+            const std::vector<double*>& primitive_variables);
+        
+        /*
+         * Convert conservative variables to primitive variables.
+         */
+        void
+        convertConservativeVariablesToPrimitiveVariables(
             std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables);
+        
+        /*
+         * Convert primitive variables to conservative variables.
+         */
+        void
+        convertPrimitiveVariablesToConservativeVariables(
+            const std::vector<const double*>& primitive_variables,
+            const std::vector<double*>& conservative_variables);
         
         /*
          * Convert primitive variables to conservative variables.

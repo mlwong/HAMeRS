@@ -5,6 +5,102 @@
  */
 void
 FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimitiveVariables(
+    const std::vector<const double*>& conservative_variables,
+    const std::vector<double*>& primitive_variables)
+{
+    const std::vector<const double*>& Q = conservative_variables;
+    const std::vector<double*>&       V = primitive_variables;
+    
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    if (static_cast<int>(Q.size()) != d_num_eqn)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
+            << "convertConservativeVariablesToPrimitiveVariables()\n"
+            << "Number of elements in conservative variables is not correct."
+            << std::endl);
+    }
+    
+    if (static_cast<int>(V.size()) != d_num_eqn)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
+            << "convertConservativeVariablesToPrimitiveVariables()\n"
+            << "Number of elements in primitive variables is not correct."
+            << std::endl);
+    }
+#endif
+    
+    // Compute the mixture density.
+    std::vector<const double*> rho_Y_ptr;
+    rho_Y_ptr.reserve(d_num_species);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        rho_Y_ptr.push_back(Q[si]);
+    }
+    const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+        rho_Y_ptr);
+    
+    // Compute the specific internal energy.
+    double epsilon = double(0);
+    if (d_dim == tbox::Dimension(1))
+    {
+        epsilon = ((*Q[d_num_species + d_dim.getValue()]) -
+            double(1)/double(2)*((*Q[d_num_species])*(*Q[d_num_species]))/rho)/rho;
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        epsilon = ((*Q[d_num_species + d_dim.getValue()]) -
+            double(1)/double(2)*((*Q[d_num_species])*(*Q[d_num_species]) +
+            (*Q[d_num_species + 1])*(*Q[d_num_species + 1]))/rho)/rho;
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        epsilon = ((*Q[d_num_species + d_dim.getValue()]) -
+            double(1)/double(2)*((*Q[d_num_species])*(*Q[d_num_species]) +
+            (*Q[d_num_species + 1])*(*Q[d_num_species + 1]) +
+            (*Q[d_num_species + 2])*(*Q[d_num_species + 2]))/rho)/rho;
+    }
+    
+    // Compute the mass fractions.
+    double Y[d_num_species];
+    for (int si = 0; si < d_num_species; si++)
+    {
+        Y[si] = (*Q[si])/rho;
+    }
+    
+    // Get the pointers to the mass fractions.
+    std::vector<const double*> Y_ptr;
+    Y_ptr.reserve(d_num_species);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        Y_ptr.push_back(&Y[si]);
+    }
+    
+    // Compute the pressure.
+    const double p = d_equation_of_state_mixing_rules->getPressure(
+        &rho,
+        &epsilon,
+        Y_ptr);
+    
+    // Convert the conservative variables to primitive variables.
+    for (int si = 0; si < d_num_species; si++)
+    {
+        *V[si] = *Q[si];
+    }
+    for (int di = 0; di < d_dim.getValue(); di++)
+    {
+        *V[d_num_species + di] = (*Q[d_num_species + di])/rho;
+    }
+    *V[d_num_species + d_dim.getValue()] = p;
+}
+
+
+/*
+ * Convert conservative variables to primitive variables.
+ */
+void
+FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimitiveVariables(
     std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables)
 {
@@ -17,7 +113,6 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
     }
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
     const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -51,8 +146,8 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
      * Get the size of variables.
      */
     
-    int num_eqn_primitive_var = 0;
-    int num_eqn_conservative_var = 0;
+    int d_num_eqn_primitive_var = 0;
+    int d_num_eqn_conservative_var = 0;
     
     /*
      * Check the size of variables.
@@ -60,15 +155,15 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
     
     for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
     {
-        num_eqn_primitive_var += primitive_variables[vi]->getDepth();
+        d_num_eqn_primitive_var += primitive_variables[vi]->getDepth();
     }
     
     for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
     {
-        num_eqn_conservative_var += conservative_variables[vi]->getDepth();
+        d_num_eqn_conservative_var += conservative_variables[vi]->getDepth();
     }
     
-    if (num_eqn_primitive_var != num_eqn)
+    if (d_num_eqn_primitive_var != d_num_eqn)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesFourEqnConservative::"
@@ -77,7 +172,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
             << std::endl);
     }
     
-    if (num_eqn_conservative_var != num_eqn)
+    if (d_num_eqn_conservative_var != d_num_eqn)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesFourEqnConservative::"
@@ -158,10 +253,10 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
      */
     
     std::vector<double*> V;
-    V.resize(num_eqn_primitive_var);
+    V.resize(d_num_eqn_primitive_var);
     
     std::vector<double*> Q;
-    Q.resize(num_eqn_conservative_var);
+    Q.resize(d_num_eqn_conservative_var);
     
     int count_eqn = 0;
     
@@ -1369,6 +1464,100 @@ FlowModelBasicUtilitiesFourEqnConservative::convertConservativeVariablesToPrimit
  */
 void
 FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservativeVariables(
+    const std::vector<const double*>& primitive_variables,
+    const std::vector<double*>& conservative_variables)
+{
+    const std::vector<const double*>& V = primitive_variables;
+    const std::vector<double*>&       Q = conservative_variables;
+    
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    if (static_cast<int>(V.size()) != d_num_eqn)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
+            << "convertPrimitiveVariablesToConservativeVariables()\n"
+            << "Number of elements in primitive variables is not correct."
+            << std::endl);
+    }
+    
+    if (static_cast<int>(Q.size()) != d_num_eqn)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesFourEqnConservative::"
+            << "convertPrimitiveVariablesToConservativeVariables()\n"
+            << "Number of elements in conservative variables is not correct."
+            << std::endl);
+    }
+#endif
+    
+    // Compute the mixture density.
+    std::vector<const double*> rho_Y_ptr;
+    rho_Y_ptr.reserve(d_num_species);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        rho_Y_ptr.push_back(V[si]);
+    }
+    const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+        rho_Y_ptr);
+    
+    // Compute the mass fractions.
+    double Y[d_num_species];
+    for (int si = 0; si < d_num_species; si++)
+    {
+        Y[si] = (*V[si])/rho;
+    }
+    
+    // Get the pointers to the mass fractions.
+    std::vector<const double*> Y_ptr;
+    Y_ptr.reserve(d_num_species);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        Y_ptr.push_back(&Y[si]);
+    }
+    
+    // Compute the total energy.
+    const double epsilon = d_equation_of_state_mixing_rules->getInternalEnergy(
+        &rho,
+        V[d_num_species + d_dim.getValue()],
+        Y_ptr);
+    
+    double E = double(0);
+    if (d_dim == tbox::Dimension(1))
+    {
+        E = rho*(epsilon + double(1)/double(2)*((*V[d_num_species])*(*V[d_num_species])));
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        E = rho*(epsilon + double(1)/double(2)*(
+            (*V[d_num_species])*(*V[d_num_species]) +
+            (*V[d_num_species + 1])*(*V[d_num_species + 1])));
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        E = rho*(epsilon + double(1)/double(2)*(
+            (*V[d_num_species])*(*V[d_num_species]) +
+            (*V[d_num_species + 1])*(*V[d_num_species + 1]) + 
+            (*V[d_num_species + 2])*(*V[d_num_species + 2])));
+    }
+    
+    // Convert the primitive variables to conservative variables.
+    for (int si = 0; si < d_num_species; si++)
+    {
+        *Q[si] = *V[si];
+    }
+    for (int di = 0; di < d_dim.getValue(); di++)
+    {
+        *Q[d_num_species + di] = rho*(*V[d_num_species + di]);
+    }
+    *Q[d_num_species + d_dim.getValue()] = E;
+}
+
+
+/*
+ * Convert primitive variables to conservative variables.
+ */
+void
+FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservativeVariables(
     std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables)
 {
@@ -1381,7 +1570,6 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
     }
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
     const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -1415,8 +1603,8 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
      * Get the size of variables.
      */
     
-    int num_eqn_conservative_var = 0;
-    int num_eqn_primitive_var = 0;
+    int d_num_eqn_conservative_var = 0;
+    int d_num_eqn_primitive_var = 0;
     
     /*
      * Check the size of variables.
@@ -1424,15 +1612,15 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
     
     for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
     {
-        num_eqn_conservative_var += conservative_variables[vi]->getDepth();
+        d_num_eqn_conservative_var += conservative_variables[vi]->getDepth();
     }
     
     for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
     {
-        num_eqn_primitive_var += primitive_variables[vi]->getDepth();
+        d_num_eqn_primitive_var += primitive_variables[vi]->getDepth();
     }
     
-    if (num_eqn_conservative_var != num_eqn)
+    if (d_num_eqn_conservative_var != d_num_eqn)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesFourEqnConservative::"
@@ -1441,7 +1629,7 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
             << std::endl);
     }
     
-    if (num_eqn_primitive_var != num_eqn)
+    if (d_num_eqn_primitive_var != d_num_eqn)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesFourEqnConservative::"
@@ -1522,10 +1710,10 @@ FlowModelBasicUtilitiesFourEqnConservative::convertPrimitiveVariablesToConservat
      */
     
     std::vector<double*> Q;
-    Q.resize(num_eqn_conservative_var);
+    Q.resize(d_num_eqn_conservative_var);
     
     std::vector<double*> V;
-    V.resize(num_eqn_primitive_var);
+    V.resize(d_num_eqn_primitive_var);
     
     int count_eqn = 0;
     
@@ -2762,7 +2950,6 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
     }
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
     const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -2792,7 +2979,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
      * Check the size of variables.
      */
     
-    if (static_cast<int>(conservative_variables.size()) != num_eqn)
+    if (static_cast<int>(conservative_variables.size()) != d_num_eqn)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesFourEqnConservative::"
@@ -2805,7 +2992,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
      * Check potential failures.
      */
     
-    for (int ei = 0; ei < num_eqn; ei++)
+    for (int ei = 0; ei < d_num_eqn; ei++)
     {
         const hier::IntVector interior_dims_conservative_var =
             conservative_variables[ei]->getBox().numberCells();
@@ -2829,7 +3016,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
             << std::endl);
     }
     
-    for (int ei = 1; ei < num_eqn; ei++)
+    for (int ei = 1; ei < d_num_eqn; ei++)
     {
         if (num_ghosts_conservative_var != conservative_variables[ei]->getGhostCellWidth())
         {
@@ -2865,7 +3052,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
     int* are_bounded = nullptr;
     
     std::vector<double*> Q;
-    Q.resize(num_eqn);
+    Q.resize(d_num_eqn);
     
     double* rho = nullptr;
     
@@ -2881,7 +3068,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         
         are_bounded = bounded_flag->getPointer(0);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             Q[ei] = conservative_variables[ei]->getPointer(0);
         }
@@ -2976,7 +3163,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         
         are_bounded = bounded_flag->getPointer(0);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             Q[ei] = conservative_variables[ei]->getPointer(0);
         }
@@ -3074,7 +3261,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         
         are_bounded = bounded_flag->getPointer(1);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             Q[ei] = conservative_variables[ei]->getPointer(1);
         }
@@ -3184,7 +3371,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         
         are_bounded = bounded_flag->getPointer(0);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             Q[ei] = conservative_variables[ei]->getPointer(0);
         }
@@ -3297,7 +3484,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         
         are_bounded = bounded_flag->getPointer(1);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             Q[ei] = conservative_variables[ei]->getPointer(1);
         }
@@ -3410,7 +3597,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfConservativeVariables
         
         are_bounded = bounded_flag->getPointer(2);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             Q[ei] = conservative_variables[ei]->getPointer(2);
         }
@@ -3554,7 +3741,6 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
     }
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
     const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -3584,7 +3770,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
      * Check the size of variables.
      */
     
-    if (static_cast<int>(primitive_variables.size()) != num_eqn)
+    if (static_cast<int>(primitive_variables.size()) != d_num_eqn)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesFourEqnConservative::"
@@ -3597,7 +3783,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
      * Check potential failures.
      */
     
-    for (int ei = 0; ei < num_eqn; ei++)
+    for (int ei = 0; ei < d_num_eqn; ei++)
     {
         const hier::IntVector interior_dims_primitive_var =
             primitive_variables[ei]->getBox().numberCells();
@@ -3621,7 +3807,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
             << std::endl);
     }
     
-    for (int ei = 1; ei < num_eqn; ei++)
+    for (int ei = 1; ei < d_num_eqn; ei++)
     {
         if (num_ghosts_primitive_var != primitive_variables[ei]->getGhostCellWidth())
         {
@@ -3657,7 +3843,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
     int* are_bounded = nullptr;
     
     std::vector<double*> V;
-    V.resize(num_eqn);
+    V.resize(d_num_eqn);
     
     double* rho = nullptr;
     
@@ -3673,7 +3859,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
         
         are_bounded = bounded_flag->getPointer(0);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
@@ -3768,7 +3954,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
         
         are_bounded = bounded_flag->getPointer(0);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
@@ -3866,7 +4052,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
         
         are_bounded = bounded_flag->getPointer(1);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(1);
         }
@@ -3976,7 +4162,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
         
         are_bounded = bounded_flag->getPointer(0);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
@@ -4089,7 +4275,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
         
         are_bounded = bounded_flag->getPointer(1);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(1);
         }
@@ -4202,7 +4388,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
         
         are_bounded = bounded_flag->getPointer(2);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(2);
         }
@@ -5138,7 +5324,6 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
     }
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
     const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -5183,7 +5368,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
      * Check the size of variables.
      */
     
-    if (static_cast<int>(characteristic_variables.size()) != num_eqn)
+    if (static_cast<int>(characteristic_variables.size()) != d_num_eqn)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesFourEqnConservative::"
@@ -5222,7 +5407,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
      * Check potential failures.
      */
     
-    for (int ei = 0; ei < num_eqn; ei++)
+    for (int ei = 0; ei < d_num_eqn; ei++)
     {
         const hier::IntVector interior_dims_characteristic_var =
             characteristic_variables[ei]->getBox().numberCells();
@@ -5263,7 +5448,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
         }
     }
     
-    for (int ei = 1; ei < num_eqn; ei++)
+    for (int ei = 1; ei < d_num_eqn; ei++)
     {
         if (num_ghosts_characteristic_var != characteristic_variables[ei]->getGhostCellWidth())
         {
@@ -5317,7 +5502,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
      */
     
     std::vector<double*> V;
-    V.reserve(num_eqn);
+    V.reserve(d_num_eqn);
     
     for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
     {
@@ -5330,7 +5515,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
     }
     
     std::vector<double*> W;
-    W.resize(num_eqn);
+    W.resize(d_num_eqn);
     
     std::vector<double*> rho_Y_average;
     rho_Y_average.resize(d_num_species);
@@ -5354,7 +5539,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
          * Compute the characteristic variables in the x-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(0);
         }
@@ -5434,7 +5619,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
          * Compute the characteristic variables in the x-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(0);
         }
@@ -5507,7 +5692,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
          * Compute the characteristic variables in the y-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(1);
         }
@@ -5614,7 +5799,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
          * Compute the characteristic variables in the x-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(0);
         }
@@ -5707,7 +5892,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
          * Compute the characteristic variables in the y-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(1);
         }
@@ -5800,7 +5985,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfCharacteristicVaria
          * Compute the characteristic variables in the z-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(2);
         }
@@ -5932,7 +6117,6 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
     }
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
     const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -5964,7 +6148,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
      * Check the size of variables.
      */
     
-    if (static_cast<int>(primitive_variables.size()) != num_eqn)
+    if (static_cast<int>(primitive_variables.size()) != d_num_eqn)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesFourEqnConservative::"
@@ -5972,7 +6156,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
             << "The number of characteristic variables are incorrect."
             << std::endl);
     }
-    if (static_cast<int>(characteristic_variables.size()) != num_eqn)
+    if (static_cast<int>(characteristic_variables.size()) != d_num_eqn)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesFourEqnConservative::"
@@ -5993,7 +6177,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
      * Check potential failures.
      */
     
-    for (int ei = 0; ei < num_eqn; ei++)
+    for (int ei = 0; ei < d_num_eqn; ei++)
     {
         const hier::IntVector interior_dims_primitive_var =
             primitive_variables[ei]->getBox().numberCells();
@@ -6007,7 +6191,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
                 << std::endl);
         }
     }
-    for (int ei = 0; ei < num_eqn; ei++)
+    for (int ei = 0; ei < d_num_eqn; ei++)
     {
         const hier::IntVector interior_dims_characteristic_var =
             characteristic_variables[ei]->getBox().numberCells();
@@ -6034,7 +6218,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
         }
     }
     
-    for (int ei = 1; ei < num_eqn; ei++)
+    for (int ei = 1; ei < d_num_eqn; ei++)
     {
         if (num_ghosts_primitive_var != primitive_variables[ei]->getGhostCellWidth())
         {
@@ -6045,7 +6229,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
                 << std::endl);
         }
     }
-    for (int ei = 1; ei < num_eqn; ei++)
+    for (int ei = 1; ei < d_num_eqn; ei++)
     {
         if (num_ghosts_characteristic_var != characteristic_variables[ei]->getGhostCellWidth())
         {
@@ -6093,8 +6277,8 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
     
     std::vector<double*> V;
     std::vector<double*> W;
-    V.resize(num_eqn);
-    W.resize(num_eqn);
+    V.resize(d_num_eqn);
+    W.resize(d_num_eqn);
     
     std::vector<double*> rho_Y_average;
     rho_Y_average.resize(d_num_species);
@@ -6111,12 +6295,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
          * Compute the primitive variables in the x-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(0);
         }
@@ -6142,7 +6326,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
                 
                 V[si][idx_face] = -double(1)/double(2)*rho_Y_average[si][idx_face]/c_average[idx_face]*W[0][idx_face] +
                     W[si + 1][idx_face] + double(1)/double(2)*rho_Y_average[si][idx_face]/c_average[idx_face]*
-                        W[num_eqn - 1][idx_face];
+                        W[d_num_eqn - 1][idx_face];
             }
         }
         
@@ -6157,11 +6341,11 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
             const int idx_face = i + num_ghosts_0_characteristic_var;
             
             V[d_num_species][idx_face] = double(1)/double(2)*W[0][idx_face] +
-                double(1)/double(2)*W[num_eqn - 1][idx_face];
+                double(1)/double(2)*W[d_num_eqn - 1][idx_face];
             
             V[d_num_species + 1][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
                 W[0][idx_face] + double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
-                    W[num_eqn - 1][idx_face];
+                    W[d_num_eqn - 1][idx_face];
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -6177,12 +6361,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
          * Compute the primitive variables in the x-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(0);
         }
@@ -6211,7 +6395,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
                     
                     V[si][idx_face] = -double(1)/double(2)*rho_Y_average[si][idx_face]/c_average[idx_face]*W[0][idx_face] +
                         W[si + 1][idx_face] + double(1)/double(2)*rho_Y_average[si][idx_face]/c_average[idx_face]*
-                            W[num_eqn - 1][idx_face];
+                            W[d_num_eqn - 1][idx_face];
                 }
             }
         }
@@ -6230,13 +6414,13 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
                     (j + num_ghosts_1_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1);
                 
                 V[d_num_species][idx_face] = double(1)/double(2)*W[0][idx_face] +
-                    double(1)/double(2)*W[num_eqn - 1][idx_face];
+                    double(1)/double(2)*W[d_num_eqn - 1][idx_face];
                 
                 V[d_num_species + 1][idx_face] = W[d_num_species + 1][idx_face];
                 
                 V[d_num_species + 2][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
                     W[0][idx_face] + double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
-                        W[num_eqn - 1][idx_face];
+                        W[d_num_eqn - 1][idx_face];
             }
         }
         
@@ -6244,12 +6428,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
          * Compute the primitive variables in the y-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(1);
         }
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(1);
         }
@@ -6278,7 +6462,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
                     
                     V[si][idx_face] = -double(1)/double(2)*rho_Y_average[si][idx_face]/c_average[idx_face]*W[0][idx_face] +
                         W[si + 1][idx_face] + double(1)/double(2)*rho_Y_average[si][idx_face]/c_average[idx_face]*
-                            W[num_eqn - 1][idx_face];
+                            W[d_num_eqn - 1][idx_face];
                 }
             }
         }
@@ -6299,11 +6483,11 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
                 V[d_num_species][idx_face] = W[d_num_species + 1][idx_face];
                 
                 V[d_num_species + 1][idx_face] = double(1)/double(2)*W[0][idx_face] +
-                    double(1)/double(2)*W[num_eqn - 1][idx_face];
+                    double(1)/double(2)*W[d_num_eqn - 1][idx_face];
                 
                 V[d_num_species + 2][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
                     W[0][idx_face] + double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
-                        W[num_eqn - 1][idx_face];
+                        W[d_num_eqn - 1][idx_face];
             }
         }
     }
@@ -6323,12 +6507,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
          * Compute the primitive variables in the x-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(0);
         }
@@ -6361,7 +6545,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
                         
                         V[si][idx_face] = -double(1)/double(2)*rho_Y_average[si][idx_face]/c_average[idx_face]*W[0][idx_face] +
                             W[si + 1][idx_face] + double(1)/double(2)*rho_Y_average[si][idx_face]/c_average[idx_face]*
-                                W[num_eqn - 1][idx_face];
+                                W[d_num_eqn - 1][idx_face];
                     }
                 }
             }
@@ -6385,7 +6569,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
                             ghostcell_dim_1_characteristic_var;
                     
                     V[d_num_species][idx_face] = double(1)/double(2)*W[0][idx_face] +
-                        double(1)/double(2)*W[num_eqn - 1][idx_face];
+                        double(1)/double(2)*W[d_num_eqn - 1][idx_face];
                     
                     V[d_num_species + 1][idx_face] = W[d_num_species + 1][idx_face];
                     
@@ -6393,7 +6577,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
                     
                     V[d_num_species + 3][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
                         W[0][idx_face] + double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
-                            W[num_eqn - 1][idx_face];
+                            W[d_num_eqn - 1][idx_face];
                 }
             }
         }
@@ -6402,12 +6586,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
          * Compute the primitive variables in the y-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(1);
         }
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(1);
         }
@@ -6440,7 +6624,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
                         
                         V[si][idx_face] = -double(1)/double(2)*rho_Y_average[si][idx_face]/c_average[idx_face]*W[0][idx_face] +
                             W[si + 1][idx_face] + double(1)/double(2)*rho_Y_average[si][idx_face]/c_average[idx_face]*
-                                W[num_eqn - 1][idx_face];
+                                W[d_num_eqn - 1][idx_face];
                     }
                 }
             }
@@ -6466,13 +6650,13 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
                     V[d_num_species][idx_face] = W[d_num_species + 1][idx_face];
                     
                     V[d_num_species + 1][idx_face] = double(1)/double(2)*W[0][idx_face] +
-                        double(1)/double(2)*W[num_eqn - 1][idx_face];
+                        double(1)/double(2)*W[d_num_eqn - 1][idx_face];
                     
                     V[d_num_species + 2][idx_face] = W[d_num_species + 2][idx_face];
                     
                     V[d_num_species + 3][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
                         W[0][idx_face] + double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
-                            W[num_eqn - 1][idx_face];
+                            W[d_num_eqn - 1][idx_face];
                 }
             }
         }
@@ -6481,12 +6665,12 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
          * Compute the primitive variables in the z-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(2);
         }
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(2);
         }
@@ -6519,7 +6703,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
                         
                         V[si][idx_face] = -double(1)/double(2)*rho_Y_average[si][idx_face]/c_average[idx_face]*W[0][idx_face] +
                             W[si + 1][idx_face] + double(1)/double(2)*rho_Y_average[si][idx_face]/c_average[idx_face]*
-                                W[num_eqn - 1][idx_face];
+                                W[d_num_eqn - 1][idx_face];
                     }
                 }
             }
@@ -6547,10 +6731,10 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfPrimitiveVariablesF
                     V[d_num_species + 1][idx_face] = W[d_num_species + 2][idx_face];
                     
                     V[d_num_species + 2][idx_face] = double(1)/double(2)*W[0][idx_face] +
-                        double(1)/double(2)*W[num_eqn - 1][idx_face];
+                        double(1)/double(2)*W[d_num_eqn - 1][idx_face];
                     
                     V[d_num_species + 3][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*W[0][idx_face] +
-                        double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*W[num_eqn - 1][idx_face];
+                        double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*W[d_num_eqn - 1][idx_face];
                 }
             }
         }

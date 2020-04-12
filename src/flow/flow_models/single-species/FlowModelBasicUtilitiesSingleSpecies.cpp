@@ -5,6 +5,102 @@
  */
 void
 FlowModelBasicUtilitiesSingleSpecies::convertConservativeVariablesToPrimitiveVariables(
+    const std::vector<const double*>& conservative_variables,
+    const std::vector<double*>& primitive_variables)
+{
+    const std::vector<const double*>& Q = conservative_variables;
+    const std::vector<double*>&       V = primitive_variables;
+    
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    if (static_cast<int>(Q.size()) != d_num_eqn)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesSingleSpecies::"
+            << "convertLocalCellDataPointersConservativeVariablesToPrimitiveVariables()\n"
+            << "Number of elements in conservative variables is not correct."
+            << std::endl);
+    }
+    
+    if (static_cast<int>(V.size()) != d_num_eqn)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesSingleSpecies::"
+            << "convertLocalCellDataPointersConservativeVariablesToPrimitiveVariables()\n"
+            << "Number of elements in primitive variables is not correct."
+            << std::endl);
+    }
+#endif
+    
+    // Get the pointers to the momentum components.
+    std::vector<const double*> m_ptr;
+    m_ptr.reserve(d_dim.getValue());
+    for (int di = 0; di < d_dim.getValue(); di++)
+    {
+        m_ptr.push_back(Q[1 + di]);
+    }
+    
+    /*
+     * Get the thermodynamic properties of the species.
+     */
+    
+    const int num_thermo_properties = d_equation_of_state_mixing_rules->
+        getNumberOfSpeciesThermodynamicProperties();
+    
+    std::vector<double> thermo_properties;
+    std::vector<double*> thermo_properties_ptr;
+    std::vector<const double*> thermo_properties_const_ptr;
+    
+    thermo_properties.resize(num_thermo_properties);
+    thermo_properties_ptr.reserve(num_thermo_properties);
+    thermo_properties_const_ptr.reserve(num_thermo_properties);
+    
+    for (int ti = 0; ti < num_thermo_properties; ti++)
+    {
+        thermo_properties_ptr.push_back(&thermo_properties[ti]);
+        thermo_properties_const_ptr.push_back(&thermo_properties[ti]);
+    }
+    
+    d_equation_of_state_mixing_rules->getSpeciesThermodynamicProperties(
+        thermo_properties_ptr,
+        0);
+    
+    // Compute the specific internal energy.
+    double epsilon = double(0);
+    if (d_dim == tbox::Dimension(1))
+    {
+        epsilon = (*Q[2] - double(1)/double(2)*(*Q[1])*(*Q[1])/(*Q[0]))/(*Q[0]);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        epsilon = (*Q[3] - double(1)/double(2)*((*Q[1])*(*Q[1]) + (*Q[2])*(*Q[2]))/(*Q[0]))/(*Q[0]);
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        epsilon = (*Q[4] - double(1)/double(2)*((*Q[1])*(*Q[1]) + (*Q[2])*(*Q[2]) + (*Q[3])*(*Q[3]))/(*Q[0]))/(*Q[0]);
+    }
+    
+    // Compute the pressure.
+    const double p = d_equation_of_state_mixing_rules->getEquationOfState()->
+        getPressure(
+            Q[0],
+            &epsilon,
+            thermo_properties_const_ptr);
+    
+    // Convert the conservative variables to primitive variables.
+    *V[0] = *Q[0];
+    for (int di = 0; di < d_dim.getValue(); di++)
+    {
+        *V[1 + di] = (*Q[1 + di])/(*Q[0]);
+    }
+    *V[1 + d_dim.getValue()] = p;
+}
+
+
+/*
+ * Convert conservative variables to primitive variables.
+ */
+void
+FlowModelBasicUtilitiesSingleSpecies::convertConservativeVariablesToPrimitiveVariables(
     std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables)
 {
@@ -17,7 +113,6 @@ FlowModelBasicUtilitiesSingleSpecies::convertConservativeVariablesToPrimitiveVar
     }
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
     const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -51,8 +146,8 @@ FlowModelBasicUtilitiesSingleSpecies::convertConservativeVariablesToPrimitiveVar
      * Get the size of variables.
      */
     
-    int num_eqn_primitive_var = 0;
-    int num_eqn_conservative_var = 0;
+    int d_num_eqn_primitive_var = 0;
+    int d_num_eqn_conservative_var = 0;
     
     /*
      * Check the size of variables.
@@ -60,15 +155,15 @@ FlowModelBasicUtilitiesSingleSpecies::convertConservativeVariablesToPrimitiveVar
     
     for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
     {
-        num_eqn_primitive_var += primitive_variables[vi]->getDepth();
+        d_num_eqn_primitive_var += primitive_variables[vi]->getDepth();
     }
     
     for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
     {
-        num_eqn_conservative_var += conservative_variables[vi]->getDepth();
+        d_num_eqn_conservative_var += conservative_variables[vi]->getDepth();
     }
     
-    if (num_eqn_primitive_var != num_eqn)
+    if (d_num_eqn_primitive_var != d_num_eqn)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesSingleSpecies::"
@@ -77,7 +172,7 @@ FlowModelBasicUtilitiesSingleSpecies::convertConservativeVariablesToPrimitiveVar
             << std::endl);
     }
     
-    if (num_eqn_conservative_var != num_eqn)
+    if (d_num_eqn_conservative_var != d_num_eqn)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesSingleSpecies::"
@@ -158,10 +253,10 @@ FlowModelBasicUtilitiesSingleSpecies::convertConservativeVariablesToPrimitiveVar
      */
     
     std::vector<double*> V;
-    V.resize(num_eqn_primitive_var);
+    V.resize(d_num_eqn_primitive_var);
     
     std::vector<double*> Q;
-    Q.resize(num_eqn_conservative_var);
+    Q.resize(d_num_eqn_conservative_var);
     
     int count_eqn = 0;
     
@@ -1183,6 +1278,93 @@ FlowModelBasicUtilitiesSingleSpecies::convertConservativeVariablesToPrimitiveVar
  */
 void
 FlowModelBasicUtilitiesSingleSpecies::convertPrimitiveVariablesToConservativeVariables(
+    const std::vector<const double*>& primitive_variables,
+    const std::vector<double*>& conservative_variables)
+{
+    const std::vector<const double*>& V = primitive_variables;
+    const std::vector<double*>&       Q = conservative_variables;
+    
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    if (static_cast<int>(V.size()) != d_num_eqn)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesSingleSpecies::"
+            << "convertPrimitiveVariablesToConservativeVariables()\n"
+            << "Number of elements in primitive variables is not correct."
+            << std::endl);
+    }
+    
+    if (static_cast<int>(Q.size()) != d_num_eqn)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesSingleSpecies::"
+            << "convertPrimitiveVariablesToConservativeVariables()\n"
+            << "Number of elements in conservative variables is not correct."
+            << std::endl);
+    }
+#endif
+    
+    /*
+     * Get the thermodynamic properties of the species.
+     */
+    
+    const int num_thermo_properties = d_equation_of_state_mixing_rules->
+        getNumberOfSpeciesThermodynamicProperties();
+    
+    std::vector<double> thermo_properties;
+    std::vector<double*> thermo_properties_ptr;
+    std::vector<const double*> thermo_properties_const_ptr;
+    
+    thermo_properties.resize(num_thermo_properties);
+    thermo_properties_ptr.reserve(num_thermo_properties);
+    thermo_properties_const_ptr.reserve(num_thermo_properties);
+    
+    for (int ti = 0; ti < num_thermo_properties; ti++)
+    {
+        thermo_properties_ptr.push_back(&thermo_properties[ti]);
+        thermo_properties_const_ptr.push_back(&thermo_properties[ti]);
+    }
+    
+    d_equation_of_state_mixing_rules->getSpeciesThermodynamicProperties(
+        thermo_properties_ptr,
+        0);
+    
+    // Compute the total energy.
+    const double epsilon = d_equation_of_state_mixing_rules->getEquationOfState()->
+        getInternalEnergy(
+            V[0],
+            V[1 + d_dim.getValue()],
+            thermo_properties_const_ptr);
+    
+    double E = double(0);
+    if (d_dim == tbox::Dimension(1))
+    {
+        E = (*V[0])*(epsilon + double(1)/double(2)*(*V[1])*(*V[1]));
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        E = (*V[0])*(epsilon + double(1)/double(2)*((*V[1])*(*V[1]) + (*V[2])*(*V[2])));
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        E = (*V[0])*(epsilon + double(1)/double(2)*((*V[1])*(*V[1]) + (*V[2])*(*V[2]) + (*V[3])*(*V[3])));
+    }
+    
+    // Convert the primitive variables to conservative variables.
+    *Q[0] = *V[0];
+    for (int di = 0; di < d_dim.getValue(); di++)
+    {
+        *Q[1 + di] = (*V[0])*(*V[1 + di]);
+    }
+    *Q[1 + d_dim.getValue()] = E;
+}
+
+
+/*
+ * Convert primitive variables to conservative variables.
+ */
+void
+FlowModelBasicUtilitiesSingleSpecies::convertPrimitiveVariablesToConservativeVariables(
     std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables)
 {
@@ -1195,7 +1377,6 @@ FlowModelBasicUtilitiesSingleSpecies::convertPrimitiveVariablesToConservativeVar
     }
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
     const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -1229,8 +1410,8 @@ FlowModelBasicUtilitiesSingleSpecies::convertPrimitiveVariablesToConservativeVar
      * Get the size of variables.
      */
     
-    int num_eqn_conservative_var = 0;
-    int num_eqn_primitive_var = 0;
+    int d_num_eqn_conservative_var = 0;
+    int d_num_eqn_primitive_var = 0;
     
     /*
      * Check the size of variables.
@@ -1238,15 +1419,15 @@ FlowModelBasicUtilitiesSingleSpecies::convertPrimitiveVariablesToConservativeVar
     
     for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
     {
-        num_eqn_conservative_var += conservative_variables[vi]->getDepth();
+        d_num_eqn_conservative_var += conservative_variables[vi]->getDepth();
     }
     
     for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
     {
-        num_eqn_primitive_var += primitive_variables[vi]->getDepth();
+        d_num_eqn_primitive_var += primitive_variables[vi]->getDepth();
     }
     
-    if (num_eqn_conservative_var != num_eqn)
+    if (d_num_eqn_conservative_var != d_num_eqn)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesSingleSpecies::"
@@ -1255,7 +1436,7 @@ FlowModelBasicUtilitiesSingleSpecies::convertPrimitiveVariablesToConservativeVar
             << std::endl);
     }
     
-    if (num_eqn_primitive_var != num_eqn)
+    if (d_num_eqn_primitive_var != d_num_eqn)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesSingleSpecies::"
@@ -1336,10 +1517,10 @@ FlowModelBasicUtilitiesSingleSpecies::convertPrimitiveVariablesToConservativeVar
      */
     
     std::vector<double*> Q;
-    Q.resize(num_eqn_conservative_var);
+    Q.resize(d_num_eqn_conservative_var);
     
     std::vector<double*> V;
-    V.resize(num_eqn_primitive_var);
+    V.resize(d_num_eqn_primitive_var);
     
     int count_eqn = 0;
     
@@ -2388,7 +2569,6 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfConservativeVariablesBounde
     }
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
     const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -2418,7 +2598,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfConservativeVariablesBounde
      * Check the size of variables.
      */
     
-    if (static_cast<int>(conservative_variables.size()) != num_eqn)
+    if (static_cast<int>(conservative_variables.size()) != d_num_eqn)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesSingleSpecies::"
@@ -2431,7 +2611,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfConservativeVariablesBounde
      * Check potential failures.
      */
     
-    for (int ei = 0; ei < num_eqn; ei++)
+    for (int ei = 0; ei < d_num_eqn; ei++)
     {
         const hier::IntVector interior_dims_conservative_var =
             conservative_variables[ei]->getBox().numberCells();
@@ -2455,7 +2635,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfConservativeVariablesBounde
             << std::endl);
     }
     
-    for (int ei = 1; ei < num_eqn; ei++)
+    for (int ei = 1; ei < d_num_eqn; ei++)
     {
         if (num_ghosts_conservative_var != conservative_variables[ei]->getGhostCellWidth())
         {
@@ -2483,7 +2663,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfConservativeVariablesBounde
      */
     
     std::vector<double*> Q;
-    Q.resize(num_eqn);
+    Q.resize(d_num_eqn);
     
     int* are_bounded = nullptr;
     
@@ -2499,7 +2679,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfConservativeVariablesBounde
         
         are_bounded = bounded_flag->getPointer(0);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             Q[ei] = conservative_variables[ei]->getPointer(0);
         }
@@ -2524,7 +2704,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfConservativeVariablesBounde
                 are_bounded[idx_face] &= 0;
             }
             
-            if (Q[num_eqn - 1][idx_face] > double(0))
+            if (Q[d_num_eqn - 1][idx_face] > double(0))
             {
                 are_bounded[idx_face] &= 1;
             }
@@ -2549,7 +2729,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfConservativeVariablesBounde
         
         are_bounded = bounded_flag->getPointer(0);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             Q[ei] = conservative_variables[ei]->getPointer(0);
         }
@@ -2577,7 +2757,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfConservativeVariablesBounde
                     are_bounded[idx_face] &= 0;
                 }
                 
-                if (Q[num_eqn - 1][idx_face] > double(0))
+                if (Q[d_num_eqn - 1][idx_face] > double(0))
                 {
                     are_bounded[idx_face] &= 1;
                 }
@@ -2594,7 +2774,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfConservativeVariablesBounde
         
         are_bounded = bounded_flag->getPointer(1);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             Q[ei] = conservative_variables[ei]->getPointer(1);
         }
@@ -2622,7 +2802,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfConservativeVariablesBounde
                     are_bounded[idx_face] &= 0;
                 }
                 
-                if (Q[num_eqn - 1][idx_face] > double(0))
+                if (Q[d_num_eqn - 1][idx_face] > double(0))
                 {
                     are_bounded[idx_face] &= 1;
                 }
@@ -2651,7 +2831,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfConservativeVariablesBounde
         
         are_bounded = bounded_flag->getPointer(0);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             Q[ei] = conservative_variables[ei]->getPointer(0);
         }
@@ -2683,7 +2863,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfConservativeVariablesBounde
                         are_bounded[idx_face] &= 0;
                     }
                     
-                    if (Q[num_eqn - 1][idx_face] > double(0))
+                    if (Q[d_num_eqn - 1][idx_face] > double(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -2701,7 +2881,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfConservativeVariablesBounde
         
         are_bounded = bounded_flag->getPointer(1);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             Q[ei] = conservative_variables[ei]->getPointer(1);
         }
@@ -2733,7 +2913,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfConservativeVariablesBounde
                         are_bounded[idx_face] &= 0;
                     }
                     
-                    if (Q[num_eqn - 1][idx_face] > double(0))
+                    if (Q[d_num_eqn - 1][idx_face] > double(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -2751,7 +2931,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfConservativeVariablesBounde
         
         are_bounded = bounded_flag->getPointer(2);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             Q[ei] = conservative_variables[ei]->getPointer(2);
         }
@@ -2783,7 +2963,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfConservativeVariablesBounde
                         are_bounded[idx_face] &= 0;
                     }
                     
-                    if (Q[num_eqn - 1][idx_face] > double(0))
+                    if (Q[d_num_eqn - 1][idx_face] > double(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -2827,7 +3007,6 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
     }
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
     const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -2857,7 +3036,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
      * Check the size of variables.
      */
     
-    if (static_cast<int>(primitive_variables.size()) != num_eqn)
+    if (static_cast<int>(primitive_variables.size()) != d_num_eqn)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesSingleSpecies::"
@@ -2870,7 +3049,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
      * Check potential failures.
      */
     
-    for (int ei = 0; ei < num_eqn; ei++)
+    for (int ei = 0; ei < d_num_eqn; ei++)
     {
         const hier::IntVector interior_dims_primitive_var =
             primitive_variables[ei]->getBox().numberCells();
@@ -2894,7 +3073,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
             << std::endl);
     }
     
-    for (int ei = 1; ei < num_eqn; ei++)
+    for (int ei = 1; ei < d_num_eqn; ei++)
     {
         if (num_ghosts_primitive_var != primitive_variables[ei]->getGhostCellWidth())
         {
@@ -2922,7 +3101,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
      */
     
     std::vector<double*> V;
-    V.resize(num_eqn);
+    V.resize(d_num_eqn);
     
     int* are_bounded = nullptr;
     
@@ -2938,7 +3117,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
         
         are_bounded = bounded_flag->getPointer(0);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
@@ -2963,7 +3142,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
                 are_bounded[idx_face] &= 0;
             }
             
-            if (V[num_eqn - 1][idx_face] > double(0))
+            if (V[d_num_eqn - 1][idx_face] > double(0))
             {
                 are_bounded[idx_face] &= 1;
             }
@@ -2988,7 +3167,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
         
         are_bounded = bounded_flag->getPointer(0);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
@@ -3016,7 +3195,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
                     are_bounded[idx_face] &= 0;
                 }
                 
-                if (V[num_eqn - 1][idx_face] > double(0))
+                if (V[d_num_eqn - 1][idx_face] > double(0))
                 {
                     are_bounded[idx_face] &= 1;
                 }
@@ -3033,7 +3212,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
         
         are_bounded = bounded_flag->getPointer(1);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(1);
         }
@@ -3061,7 +3240,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
                     are_bounded[idx_face] &= 0;
                 }
                 
-                if (V[num_eqn - 1][idx_face] > double(0))
+                if (V[d_num_eqn - 1][idx_face] > double(0))
                 {
                     are_bounded[idx_face] &= 1;
                 }
@@ -3090,7 +3269,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
         
         are_bounded = bounded_flag->getPointer(0);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
@@ -3122,7 +3301,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
                         are_bounded[idx_face] &= 0;
                     }
                     
-                    if (V[num_eqn - 1][idx_face] > double(0))
+                    if (V[d_num_eqn - 1][idx_face] > double(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -3140,7 +3319,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
         
         are_bounded = bounded_flag->getPointer(1);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(1);
         }
@@ -3172,7 +3351,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
                         are_bounded[idx_face] &= 0;
                     }
                     
-                    if (V[num_eqn - 1][idx_face] > double(0))
+                    if (V[d_num_eqn - 1][idx_face] > double(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -3190,7 +3369,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
         
         are_bounded = bounded_flag->getPointer(2);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(2);
         }
@@ -3222,7 +3401,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
                         are_bounded[idx_face] &= 0;
                     }
                     
-                    if (V[num_eqn - 1][idx_face] > double(0))
+                    if (V[d_num_eqn - 1][idx_face] > double(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -4877,7 +5056,6 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
     }
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
     const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -4922,7 +5100,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
      * Check the size of variables.
      */
     
-    if (static_cast<int>(characteristic_variables.size()) != num_eqn)
+    if (static_cast<int>(characteristic_variables.size()) != d_num_eqn)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesSingleSpecies::"
@@ -4961,7 +5139,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
      * Check potential failures.
      */
     
-    for (int ei = 0; ei < num_eqn; ei++)
+    for (int ei = 0; ei < d_num_eqn; ei++)
     {
         const hier::IntVector interior_dims_characteristic_var =
             characteristic_variables[ei]->getBox().numberCells();
@@ -5002,7 +5180,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
         }
     }
     
-    for (int ei = 1; ei < num_eqn; ei++)
+    for (int ei = 1; ei < d_num_eqn; ei++)
     {
         if (num_ghosts_characteristic_var != characteristic_variables[ei]->getGhostCellWidth())
         {
@@ -5057,7 +5235,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
      */
     
     std::vector<double*> Q;
-    Q.reserve(num_eqn);
+    Q.reserve(d_num_eqn);
     
     for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
     {
@@ -5070,7 +5248,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
     }
     
     std::vector<double*> W;
-    W.resize(num_eqn);
+    W.resize(d_num_eqn);
     
     double* e_average     = nullptr;
     double* c_average     = nullptr;
@@ -5098,7 +5276,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
          * Compute the characteristic variables in the x-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(0);
         }
@@ -5177,7 +5355,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
          * Compute the characteristic variables in the x-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(0);
         }
@@ -5243,7 +5421,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
          * Compute the characteristic variables in the y-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(1);
         }
@@ -5349,7 +5527,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
          * Compute the characteristic variables in the x-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(0);
         }
@@ -5435,7 +5613,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
          * Compute the characteristic variables in the y-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(1);
         }
@@ -5521,7 +5699,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
          * Compute the characteristic variables in the z-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(2);
         }
@@ -5625,7 +5803,6 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
     }
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
     const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -5670,7 +5847,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
      * Check the size of variables.
      */
     
-    if (static_cast<int>(characteristic_variables.size()) != num_eqn)
+    if (static_cast<int>(characteristic_variables.size()) != d_num_eqn)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesSingleSpecies::"
@@ -5709,7 +5886,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
      * Check potential failures.
      */
     
-    for (int ei = 0; ei < num_eqn; ei++)
+    for (int ei = 0; ei < d_num_eqn; ei++)
     {
         const hier::IntVector interior_dims_characteristic_var =
             characteristic_variables[ei]->getBox().numberCells();
@@ -5750,7 +5927,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
         }
     }
     
-    for (int ei = 1; ei < num_eqn; ei++)
+    for (int ei = 1; ei < d_num_eqn; ei++)
     {
         if (num_ghosts_characteristic_var != characteristic_variables[ei]->getGhostCellWidth())
         {
@@ -5801,7 +5978,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
      */
     
     std::vector<double*> V;
-    V.reserve(num_eqn);
+    V.reserve(d_num_eqn);
     
     for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
     {
@@ -5814,7 +5991,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
     }
     
     std::vector<double*> W;
-    W.resize(num_eqn);
+    W.resize(d_num_eqn);
     
     double* rho_average = nullptr;
     double* c_average = nullptr;
@@ -5836,7 +6013,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
          * Compute the characteristic variables in the x-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(0);
         }
@@ -5893,7 +6070,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
          * Compute the characteristic variables in the x-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(0);
         }
@@ -5936,7 +6113,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
          * Compute the characteristic variables in the y-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(1);
         }
@@ -6013,7 +6190,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
          * Compute the characteristic variables in the x-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(0);
         }
@@ -6068,7 +6245,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
          * Compute the characteristic variables in the y-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(1);
         }
@@ -6123,7 +6300,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
          * Compute the characteristic variables in the z-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(2);
         }
@@ -6195,7 +6372,6 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfConservativeVariablesFrom
     }
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
     const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -6227,7 +6403,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfConservativeVariablesFrom
      * Check the size of variables.
      */
     
-    if (static_cast<int>(conservative_variables.size()) != num_eqn)
+    if (static_cast<int>(conservative_variables.size()) != d_num_eqn)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesSingleSpecies::"
@@ -6235,7 +6411,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfConservativeVariablesFrom
             << "The number of characteristic variables are incorrect."
             << std::endl);
     }
-    if (static_cast<int>(characteristic_variables.size()) != num_eqn)
+    if (static_cast<int>(characteristic_variables.size()) != d_num_eqn)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesSingleSpecies::"
@@ -6256,7 +6432,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfConservativeVariablesFrom
      * Check potential failures.
      */
     
-    for (int ei = 0; ei < num_eqn; ei++)
+    for (int ei = 0; ei < d_num_eqn; ei++)
     {
         const hier::IntVector interior_dims_conservative_var =
             conservative_variables[ei]->getBox().numberCells();
@@ -6270,7 +6446,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfConservativeVariablesFrom
                 << std::endl);
         }
     }
-    for (int ei = 0; ei < num_eqn; ei++)
+    for (int ei = 0; ei < d_num_eqn; ei++)
     {
         const hier::IntVector interior_dims_characteristic_var =
             characteristic_variables[ei]->getBox().numberCells();
@@ -6297,7 +6473,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfConservativeVariablesFrom
         }
     }
     
-    for (int ei = 1; ei < num_eqn; ei++)
+    for (int ei = 1; ei < d_num_eqn; ei++)
     {
         if (num_ghosts_conservative_var != conservative_variables[ei]->getGhostCellWidth())
         {
@@ -6308,7 +6484,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfConservativeVariablesFrom
                 << std::endl);
         }
     }
-    for (int ei = 1; ei < num_eqn; ei++)
+    for (int ei = 1; ei < d_num_eqn; ei++)
     {
         if (num_ghosts_characteristic_var != characteristic_variables[ei]->getGhostCellWidth())
         {
@@ -6356,8 +6532,8 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfConservativeVariablesFrom
     
     std::vector<double*> Q;
     std::vector<double*> W;
-    Q.resize(num_eqn);
-    W.resize(num_eqn);
+    Q.resize(d_num_eqn);
+    W.resize(d_num_eqn);
     
     double* e_average     = nullptr;
     double* H_average     = nullptr;
@@ -6379,12 +6555,12 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfConservativeVariablesFrom
          * Compute the conservative variables in the x-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             Q[ei] = conservative_variables[ei]->getPointer(0);
         }
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(0);
         }
@@ -6437,12 +6613,12 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfConservativeVariablesFrom
          * Compute the conservative variables in the x-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             Q[ei] = conservative_variables[ei]->getPointer(0);
         }
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(0);
         }
@@ -6490,12 +6666,12 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfConservativeVariablesFrom
          * Compute the conservative variables in the y-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             Q[ei] = conservative_variables[ei]->getPointer(1);
         }
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(1);
         }
@@ -6561,12 +6737,12 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfConservativeVariablesFrom
          * Compute the conservative variables in the x-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             Q[ei] = conservative_variables[ei]->getPointer(0);
         }
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(0);
         }
@@ -6624,12 +6800,12 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfConservativeVariablesFrom
          * Compute the conservative variables in the y-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             Q[ei] = conservative_variables[ei]->getPointer(1);
         }
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(1);
         }
@@ -6687,12 +6863,12 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfConservativeVariablesFrom
          * Compute the conservative variables in the z-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             Q[ei] = conservative_variables[ei]->getPointer(2);
         }
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(2);
         }
@@ -6767,7 +6943,6 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfPrimitiveVariablesFromCha
     }
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
     const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -6799,7 +6974,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfPrimitiveVariablesFromCha
      * Check the size of variables.
      */
     
-    if (static_cast<int>(primitive_variables.size()) != num_eqn)
+    if (static_cast<int>(primitive_variables.size()) != d_num_eqn)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesSingleSpecies::"
@@ -6807,7 +6982,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfPrimitiveVariablesFromCha
             << "The number of characteristic variables are incorrect."
             << std::endl);
     }
-    if (static_cast<int>(characteristic_variables.size()) != num_eqn)
+    if (static_cast<int>(characteristic_variables.size()) != d_num_eqn)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesSingleSpecies::"
@@ -6828,7 +7003,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfPrimitiveVariablesFromCha
      * Check potential failures.
      */
     
-    for (int ei = 0; ei < num_eqn; ei++)
+    for (int ei = 0; ei < d_num_eqn; ei++)
     {
         const hier::IntVector interior_dims_primitive_var =
             primitive_variables[ei]->getBox().numberCells();
@@ -6842,7 +7017,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfPrimitiveVariablesFromCha
                 << std::endl);
         }
     }
-    for (int ei = 0; ei < num_eqn; ei++)
+    for (int ei = 0; ei < d_num_eqn; ei++)
     {
         const hier::IntVector interior_dims_characteristic_var =
             characteristic_variables[ei]->getBox().numberCells();
@@ -6869,7 +7044,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfPrimitiveVariablesFromCha
         }
     }
     
-    for (int ei = 1; ei < num_eqn; ei++)
+    for (int ei = 1; ei < d_num_eqn; ei++)
     {
         if (num_ghosts_primitive_var != primitive_variables[ei]->getGhostCellWidth())
         {
@@ -6880,7 +7055,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfPrimitiveVariablesFromCha
                 << std::endl);
         }
     }
-    for (int ei = 1; ei < num_eqn; ei++)
+    for (int ei = 1; ei < d_num_eqn; ei++)
     {
         if (num_ghosts_characteristic_var != characteristic_variables[ei]->getGhostCellWidth())
         {
@@ -6925,8 +7100,8 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfPrimitiveVariablesFromCha
     
     std::vector<double*> V;
     std::vector<double*> W;
-    V.resize(num_eqn);
-    W.resize(num_eqn);
+    V.resize(d_num_eqn);
+    W.resize(d_num_eqn);
     
     double* rho_average = nullptr;
     double* c_average = nullptr;
@@ -6941,12 +7116,12 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfPrimitiveVariablesFromCha
          * Compute the primitive variables in the x-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(0);
         }
@@ -6984,12 +7159,12 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfPrimitiveVariablesFromCha
          * Compute the primitive variables in the x-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(0);
         }
@@ -7023,12 +7198,12 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfPrimitiveVariablesFromCha
          * Compute the primitive variables in the y-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(1);
         }
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(1);
         }
@@ -7074,12 +7249,12 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfPrimitiveVariablesFromCha
          * Compute the primitive variables in the x-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(0);
         }
@@ -7119,12 +7294,12 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfPrimitiveVariablesFromCha
          * Compute the primitive variables in the y-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(1);
         }
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(1);
         }
@@ -7164,12 +7339,12 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfPrimitiveVariablesFromCha
          * Compute the primitive variables in the z-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(2);
         }
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(2);
         }

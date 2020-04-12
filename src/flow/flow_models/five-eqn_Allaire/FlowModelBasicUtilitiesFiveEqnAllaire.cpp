@@ -5,6 +5,126 @@
  */
 void
 FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVariables(
+    const std::vector<const double*>& conservative_variables,
+    const std::vector<double*>& primitive_variables)
+{
+    const std::vector<const double*>& Q = conservative_variables;
+    const std::vector<double*>&       V = primitive_variables;
+    
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    if (!(static_cast<int>(Q.size()) == d_num_eqn || static_cast<int>(Q.size()) == d_num_eqn + 1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+            << "convertPrimitiveVariablesToConservativeVariables()\n"
+            << "Number of elements in conservative variables is not correct."
+            << std::endl);
+    }
+    
+    if (!(static_cast<int>(V.size()) == d_num_eqn || static_cast<int>(V.size()) == d_num_eqn + 1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+            << "convertPrimitiveVariablesToConservativeVariables()\n"
+            << "Number of elements in primitive variables is not correct."
+            << std::endl);
+    }
+#endif
+    
+    // Compute the mixture density.
+    std::vector<const double*> Z_rho_ptr;
+    Z_rho_ptr.reserve(d_num_species);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        Z_rho_ptr.push_back(Q[si]);
+    }
+    const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+        Z_rho_ptr);
+    
+    // Compute the specific internal energy.
+    double epsilon = double(0);
+    if (d_dim == tbox::Dimension(1))
+    {
+        epsilon = ((*Q[d_num_species + d_dim.getValue()]) -
+            double(1)/double(2)*((*Q[d_num_species])*(*Q[d_num_species]))/rho)/rho;
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        epsilon = ((*Q[d_num_species + d_dim.getValue()]) -
+            double(1)/double(2)*((*Q[d_num_species])*(*Q[d_num_species]) +
+            (*Q[d_num_species + 1])*(*Q[d_num_species + 1]))/rho)/rho;
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        epsilon = ((*Q[d_num_species + d_dim.getValue()]) -
+            double(1)/double(2)*((*Q[d_num_species])*(*Q[d_num_species]) +
+            (*Q[d_num_species + 1])*(*Q[d_num_species + 1]) +
+            (*Q[d_num_species + 2])*(*Q[d_num_species + 2]))/rho)/rho;
+    }
+    
+    // Compute the mass fractions.
+    double Y[d_num_species];
+    for (int si = 0; si < d_num_species; si++)
+    {
+        Y[si] = (*Q[si])/rho;
+    }
+    
+    // Get the pointers to the mass fractions.
+    std::vector<const double*> Y_ptr;
+    Y_ptr.reserve(d_num_species);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        Y_ptr.push_back(&Y[si]);
+    }
+    
+    // Get the pointers to the volume fractions.
+    std::vector<const double*> Z_ptr;
+    Z_ptr.reserve(d_num_species - 1);
+    for (int si = 0; si < d_num_species - 1; si++)
+    {
+        Z_ptr.push_back(Q[d_num_species + d_dim.getValue() + 1 + si]);
+    }
+    
+    // Compute the pressure.
+    const double p = d_equation_of_state_mixing_rules->getPressure(
+        &rho,
+        &epsilon,
+        Y_ptr,
+        Z_ptr);
+    
+    // Convert the conservative variables to primitive variables.
+    for (int si = 0; si < d_num_species; si++)
+    {
+        *V[si] = *Q[si];
+    }
+    for (int di = 0; di < d_dim.getValue(); di++)
+    {
+        *V[d_num_species + di] = (*Q[d_num_species + di])/rho;
+    }
+    *V[d_num_species + d_dim.getValue()] = p;
+    
+    if (static_cast<int>(Q.size()) == d_num_eqn)
+    {
+        for (int si = 0; si < d_num_species - 1; si++)
+        {
+            *V[d_num_species + d_dim.getValue() + 1 + si] = *Q[d_num_species + d_dim.getValue() + 1 + si];
+        }
+    }
+    else
+    {
+        for (int si = 0; si < d_num_species; si++)
+        {
+            *V[d_num_species + d_dim.getValue() + 1 + si] = *Q[d_num_species + d_dim.getValue() + 1 + si];
+        }
+    }
+}
+
+
+/*
+ * Convert conservative variables to primitive variables.
+ */
+void
+FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVariables(
     std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables)
 {
@@ -17,7 +137,6 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
     }
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
     const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -51,8 +170,8 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
      * Get the size of variables.
      */
     
-    int num_eqn_primitive_var = 0;
-    int num_eqn_conservative_var = 0;
+    int d_num_eqn_primitive_var = 0;
+    int d_num_eqn_conservative_var = 0;
     
     /*
      * Check the size of variables.
@@ -60,15 +179,15 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
     
     for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
     {
-        num_eqn_primitive_var += primitive_variables[vi]->getDepth();
+        d_num_eqn_primitive_var += primitive_variables[vi]->getDepth();
     }
     
     for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
     {
-        num_eqn_conservative_var += conservative_variables[vi]->getDepth();
+        d_num_eqn_conservative_var += conservative_variables[vi]->getDepth();
     }
     
-    if (!(num_eqn_primitive_var == num_eqn || num_eqn_primitive_var == num_eqn + 1))
+    if (!(d_num_eqn_primitive_var == d_num_eqn || d_num_eqn_primitive_var == d_num_eqn + 1))
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
@@ -77,7 +196,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
             << std::endl);
     }
     
-    if (!(num_eqn_conservative_var == num_eqn || num_eqn_conservative_var == num_eqn + 1))
+    if (!(d_num_eqn_conservative_var == d_num_eqn || d_num_eqn_conservative_var == d_num_eqn + 1))
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
@@ -158,10 +277,10 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
      */
     
     std::vector<double*> V;
-    V.resize(num_eqn_primitive_var);
+    V.resize(d_num_eqn_primitive_var);
     
     std::vector<double*> Q;
-    Q.resize(num_eqn_conservative_var);
+    Q.resize(d_num_eqn_conservative_var);
     
     int count_eqn = 0;
     
@@ -371,7 +490,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
         }
         
         // Set the volume fractions.
-        if (num_eqn_primitive_var == num_eqn + 1)
+        if (d_num_eqn_primitive_var == d_num_eqn + 1)
         {
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
@@ -383,7 +502,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
                 // Compute the linear index.
                 const int idx_primitive_var = i + num_ghosts_0_primitive_var;
                 
-                V[num_eqn][idx_primitive_var] = double(1);
+                V[d_num_eqn][idx_primitive_var] = double(1);
             }
             
             for (int si = 0; si < d_num_species - 1; si++)
@@ -400,7 +519,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
                     const int idx_conservative_var = i + num_ghosts_0_conservative_var;
                     
                     V[d_num_species + d_dim.getValue() + 1 + si][idx_primitive_var] = Z[si][idx_conservative_var];
-                    V[num_eqn][idx_primitive_var] -= Z[si][idx_conservative_var];
+                    V[d_num_eqn][idx_primitive_var] -= Z[si][idx_conservative_var];
                 }
             }
         }
@@ -642,7 +761,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
         }
         
         // Set the volume fractions.
-        if (num_eqn_primitive_var == num_eqn + 1)
+        if (d_num_eqn_primitive_var == d_num_eqn + 1)
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
@@ -657,7 +776,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
                     const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
                         (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1);
                     
-                    V[num_eqn][idx_primitive_var] = double(1);
+                    V[d_num_eqn][idx_primitive_var] = double(1);
                 }
             }
             
@@ -680,7 +799,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
                             (j + num_ghosts_1_conservative_var)*(ghostcell_dim_0_conservative_var + 1);
                         
                         V[d_num_species + d_dim.getValue() + 1 + si][idx_primitive_var] = Z[si][idx_conservative_var];
-                        V[num_eqn][idx_primitive_var] -= Z[si][idx_conservative_var];
+                        V[d_num_eqn][idx_primitive_var] -= Z[si][idx_conservative_var];
                     }
                 }
             }
@@ -914,7 +1033,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
         }
         
         // Set the volume fractions.
-        if (num_eqn_primitive_var == num_eqn + 1)
+        if (d_num_eqn_primitive_var == d_num_eqn + 1)
         {
             for (int j = -num_ghosts_1_primitive_var;
                 j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
@@ -929,7 +1048,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
                     const int idx_primitive_var = (i + num_ghosts_0_primitive_var) +
                         (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var;
                     
-                    V[num_eqn][idx_primitive_var] = double(1);
+                    V[d_num_eqn][idx_primitive_var] = double(1);
                 }
             }
             
@@ -952,7 +1071,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
                             (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
                         
                         V[d_num_species + d_dim.getValue() + 1 + si][idx_primitive_var] = Z[si][idx_conservative_var];
-                        V[num_eqn][idx_primitive_var] -= Z[si][idx_conservative_var];
+                        V[d_num_eqn][idx_primitive_var] -= Z[si][idx_conservative_var];
                     }
                 }
             }
@@ -1247,7 +1366,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
         }
         
         // Set the volume fractions.
-        if (num_eqn_primitive_var == num_eqn + 1)
+        if (d_num_eqn_primitive_var == d_num_eqn + 1)
         {
             for (int k = 0; k < interior_dim_2; k++)
             {
@@ -1266,7 +1385,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
                             (k + num_ghosts_2_primitive_var)*(ghostcell_dim_0_primitive_var + 1)*
                                 ghostcell_dim_1_primitive_var;
                         
-                        V[num_eqn][idx_primitive_var] = double(1);
+                        V[d_num_eqn][idx_primitive_var] = double(1);
                     }
                 }
             }
@@ -1296,7 +1415,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
                                     ghostcell_dim_1_conservative_var;
                             
                             V[d_num_species + d_dim.getValue() + 1 + si][idx_primitive_var] = Z[si][idx_conservative_var];
-                            V[num_eqn][idx_primitive_var] -= Z[si][idx_conservative_var];
+                            V[d_num_eqn][idx_primitive_var] -= Z[si][idx_conservative_var];
                         }
                     }
                 }
@@ -1581,7 +1700,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
         }
         
         // Set the volume fractions.
-        if (num_eqn_primitive_var == num_eqn + 1)
+        if (d_num_eqn_primitive_var == d_num_eqn + 1)
         {
             for (int k = 0; k < interior_dim_2; k++)
             {
@@ -1600,7 +1719,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
                             (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
                                 (ghostcell_dim_1_primitive_var + 1);
                         
-                        V[num_eqn][idx_primitive_var] = double(1);
+                        V[d_num_eqn][idx_primitive_var] = double(1);
                     }
                 }
             }
@@ -1630,7 +1749,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
                                     (ghostcell_dim_1_conservative_var + 1);
                             
                             V[d_num_species + d_dim.getValue() + 1 + si][idx_primitive_var] = Z[si][idx_conservative_var];
-                            V[num_eqn][idx_primitive_var] -= Z[si][idx_conservative_var];
+                            V[d_num_eqn][idx_primitive_var] -= Z[si][idx_conservative_var];
                         }
                     }
                 }
@@ -1915,7 +2034,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
         }
         
         // Set the volume fractions.
-        if (num_eqn_primitive_var == num_eqn + 1)
+        if (d_num_eqn_primitive_var == d_num_eqn + 1)
         {
             for (int k = -num_ghosts_2_primitive_var;
                     k < interior_dim_2 + 1 + num_ghosts_2_primitive_var;
@@ -1934,7 +2053,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
                             (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
                                 ghostcell_dim_1_primitive_var;
                         
-                        V[num_eqn][idx_primitive_var] = double(1);
+                        V[d_num_eqn][idx_primitive_var] = double(1);
                     }
                 }
             }
@@ -1964,7 +2083,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
                                     ghostcell_dim_1_conservative_var;
                             
                             V[d_num_species + d_dim.getValue() + 1 + si][idx_primitive_var] = Z[si][idx_conservative_var];
-                            V[num_eqn][idx_primitive_var] -= Z[si][idx_conservative_var];
+                            V[d_num_eqn][idx_primitive_var] -= Z[si][idx_conservative_var];
                         }
                     }
                 }
@@ -2011,6 +2130,124 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertConservativeVariablesToPrimitiveVa
  */
 void
 FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVariables(
+    const std::vector<const double*>& primitive_variables,
+    const std::vector<double*>& conservative_variables)
+{
+    const std::vector<const double*>& V = primitive_variables;
+    const std::vector<double*>&       Q = conservative_variables;
+    
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    if (!(static_cast<int>(V.size()) == d_num_eqn || static_cast<int>(V.size()) == d_num_eqn + 1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+            << "convertPrimitiveVariablesToConservativeVariables()\n"
+            << "Number of elements in primitive variables is not correct."
+            << std::endl);
+    }
+    
+    if (!(static_cast<int>(Q.size()) == d_num_eqn || static_cast<int>(Q.size()) == d_num_eqn + 1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
+            << "convertPrimitiveVariablesToConservativeVariables()\n"
+            << "Number of elements in conservative variables is not correct."
+            << std::endl);
+    }
+#endif
+    
+    // Compute the mixture density.
+    std::vector<const double*> Z_rho_ptr;
+    Z_rho_ptr.reserve(d_num_species);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        Z_rho_ptr.push_back(V[si]);
+    }
+    const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+        Z_rho_ptr);
+    
+    // Compute the mass fractions.
+    double Y[d_num_species];
+    for (int si = 0; si < d_num_species; si++)
+    {
+        Y[si] = (*V[si])/rho;
+    }
+    
+    // Get the pointers to the mass fractions.
+    std::vector<const double*> Y_ptr;
+    Y_ptr.reserve(d_num_species);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        Y_ptr.push_back(&Y[si]);
+    }
+    
+    // Get the pointers to the volume fractions.
+    std::vector<const double*> Z_ptr;
+    Z_ptr.reserve(d_num_species - 1);
+    for (int si = 0; si < d_num_species - 1; si++)
+    {
+        Z_ptr.push_back(V[d_num_species + d_dim.getValue() + 1 + si]);
+    }
+    
+    // Compute the total energy.
+    const double epsilon = d_equation_of_state_mixing_rules->getInternalEnergy(
+        &rho,
+        V[d_num_species + d_dim.getValue()],
+        Y_ptr,
+        Z_ptr);
+    
+    double E = double(0);
+    if (d_dim == tbox::Dimension(1))
+    {
+        E = rho*(epsilon + double(1)/double(2)*((*V[d_num_species])*(*V[d_num_species])));
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        E = rho*(epsilon + double(1)/double(2)*(
+            (*V[d_num_species])*(*V[d_num_species]) +
+            (*V[d_num_species + 1])*(*V[d_num_species + 1])));
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        E = rho*(epsilon + double(1)/double(2)*(
+            (*V[d_num_species])*(*V[d_num_species]) +
+            (*V[d_num_species + 1])*(*V[d_num_species + 1]) + 
+            (*V[d_num_species + 2])*(*V[d_num_species + 2])));
+    }
+    
+    // Convert the primitive variables to conservative variables.
+    for (int si = 0; si < d_num_species; si++)
+    {
+        *Q[si] = *V[si];
+    }
+    for (int di = 0; di < d_dim.getValue(); di++)
+    {
+        *Q[d_num_species + di] = rho*(*V[d_num_species + di]);
+    }
+    *Q[d_num_species + d_dim.getValue()] = E;
+    
+    if (static_cast<int>(Q.size()) == d_num_eqn)
+    {
+        for (int si = 0; si < d_num_species - 1; si++)
+        {
+            *Q[d_num_species + d_dim.getValue() + 1 + si] = *V[d_num_species + d_dim.getValue() + 1 + si];
+        }
+    }
+    else
+    {
+        for (int si = 0; si < d_num_species; si++)
+        {
+            *Q[d_num_species + d_dim.getValue() + 1 + si] = *V[d_num_species + d_dim.getValue() + 1 + si];
+        }
+    }
+}
+
+
+/*
+ * Convert primitive variables to conservative variables.
+ */
+void
+FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVariables(
     std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables)
 {
@@ -2023,7 +2260,6 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
     }
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
     const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -2057,8 +2293,8 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
      * Get the size of variables.
      */
     
-    int num_eqn_conservative_var = 0;
-    int num_eqn_primitive_var = 0;
+    int d_num_eqn_conservative_var = 0;
+    int d_num_eqn_primitive_var = 0;
     
     /*
      * Check the size of variables.
@@ -2066,15 +2302,15 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
     
     for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
     {
-        num_eqn_conservative_var += conservative_variables[vi]->getDepth();
+        d_num_eqn_conservative_var += conservative_variables[vi]->getDepth();
     }
     
     for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
     {
-        num_eqn_primitive_var += primitive_variables[vi]->getDepth();
+        d_num_eqn_primitive_var += primitive_variables[vi]->getDepth();
     }
     
-    if (!(num_eqn_conservative_var == num_eqn || num_eqn_conservative_var == num_eqn + 1))
+    if (!(d_num_eqn_conservative_var == d_num_eqn || d_num_eqn_conservative_var == d_num_eqn + 1))
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
@@ -2083,7 +2319,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
             << std::endl);
     }
     
-    if (!(num_eqn_primitive_var == num_eqn || num_eqn_primitive_var == num_eqn + 1))
+    if (!(d_num_eqn_primitive_var == d_num_eqn || d_num_eqn_primitive_var == d_num_eqn + 1))
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
@@ -2164,10 +2400,10 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
      */
     
     std::vector<double*> Q;
-    Q.resize(num_eqn_conservative_var);
+    Q.resize(d_num_eqn_conservative_var);
     
     std::vector<double*> V;
-    V.resize(num_eqn_primitive_var);
+    V.resize(d_num_eqn_primitive_var);
     
     int count_eqn = 0;
     
@@ -2377,7 +2613,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
         }
         
         // Set the volume fractions.
-        if (num_eqn_conservative_var == num_eqn + 1)
+        if (d_num_eqn_conservative_var == d_num_eqn + 1)
         {
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
@@ -2389,7 +2625,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
                 // Compute the linear index.
                 const int idx_conservative_var = i + num_ghosts_0_conservative_var;
                 
-                Q[num_eqn][idx_conservative_var] = double(1);
+                Q[d_num_eqn][idx_conservative_var] = double(1);
             }
             
             for (int si = 0; si < d_num_species - 1; si++)
@@ -2406,7 +2642,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
                     const int idx_primitive_var    = i + num_ghosts_0_primitive_var;
                     
                     Q[d_num_species + d_dim.getValue() + 1 + si][idx_conservative_var] = Z[si][idx_primitive_var];
-                    Q[num_eqn][idx_conservative_var] -= Z[si][idx_primitive_var];
+                    Q[d_num_eqn][idx_conservative_var] -= Z[si][idx_primitive_var];
                 }
             }
         }
@@ -2646,7 +2882,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
         }
         
         // Set the volume fractions.
-        if (num_eqn_conservative_var == num_eqn + 1)
+        if (d_num_eqn_conservative_var == d_num_eqn + 1)
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
@@ -2661,7 +2897,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
                     const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
                         (j + num_ghosts_1_conservative_var)*(ghostcell_dim_0_conservative_var + 1);
                     
-                    Q[num_eqn][idx_conservative_var] = double(1);
+                    Q[d_num_eqn][idx_conservative_var] = double(1);
                 }
             }
             
@@ -2684,7 +2920,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
                             (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1);
                         
                         Q[d_num_species + d_dim.getValue() + 1 + si][idx_conservative_var] = Z[si][idx_primitive_var];
-                        Q[num_eqn][idx_conservative_var] -= Z[si][idx_primitive_var];
+                        Q[d_num_eqn][idx_conservative_var] -= Z[si][idx_primitive_var];
                     }
                 }
             }
@@ -2918,7 +3154,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
         }
         
         // Set the volume fractions.
-        if (num_eqn_conservative_var == num_eqn + 1)
+        if (d_num_eqn_conservative_var == d_num_eqn + 1)
         {
             for (int j = -num_ghosts_1_primitive_var;
                 j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
@@ -2933,7 +3169,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
                     const int idx_conservative_var = (i + num_ghosts_0_conservative_var) +
                         (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
                     
-                    Q[num_eqn][idx_conservative_var] = double(1);
+                    Q[d_num_eqn][idx_conservative_var] = double(1);
                 }
             }
             
@@ -2956,7 +3192,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
                             (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var;
                         
                         Q[d_num_species + d_dim.getValue() + 1 + si][idx_conservative_var] = Z[si][idx_primitive_var];
-                        Q[num_eqn][idx_conservative_var] -= Z[si][idx_primitive_var];
+                        Q[d_num_eqn][idx_conservative_var] -= Z[si][idx_primitive_var];
                     }
                 }
             }
@@ -3251,7 +3487,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
         }
         
         // Set the volume fractions.
-        if (num_eqn_conservative_var == num_eqn + 1)
+        if (d_num_eqn_conservative_var == d_num_eqn + 1)
         {
             for (int k = 0; k < interior_dim_2; k++)
             {
@@ -3270,7 +3506,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
                             (k + num_ghosts_2_conservative_var)*(ghostcell_dim_0_conservative_var + 1)*
                                 ghostcell_dim_1_conservative_var;
                         
-                        Q[num_eqn][idx_conservative_var] = double(1);
+                        Q[d_num_eqn][idx_conservative_var] = double(1);
                     }
                 }
             }
@@ -3300,7 +3536,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
                                     ghostcell_dim_1_primitive_var;
                             
                             Q[d_num_species + d_dim.getValue() + 1 + si][idx_conservative_var] = Z[si][idx_primitive_var];
-                            Q[num_eqn][idx_conservative_var] -= Z[si][idx_primitive_var];
+                            Q[d_num_eqn][idx_conservative_var] -= Z[si][idx_primitive_var];
                         }
                     }
                 }
@@ -3585,7 +3821,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
         }
         
         // Set the volume fractions.
-        if (num_eqn_conservative_var == num_eqn + 1)
+        if (d_num_eqn_conservative_var == d_num_eqn + 1)
         {
             for (int k = 0; k < interior_dim_2; k++)
             {
@@ -3604,7 +3840,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
                             (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
                                 (ghostcell_dim_1_conservative_var + 1);
                         
-                        Q[num_eqn][idx_conservative_var] = double(1);
+                        Q[d_num_eqn][idx_conservative_var] = double(1);
                     }
                 }
             }
@@ -3634,7 +3870,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
                                     (ghostcell_dim_1_primitive_var + 1);
                             
                             Q[d_num_species + d_dim.getValue() + 1 + si][idx_conservative_var] = Z[si][idx_primitive_var];
-                            Q[num_eqn][idx_conservative_var] -= Z[si][idx_primitive_var];
+                            Q[d_num_eqn][idx_conservative_var] -= Z[si][idx_primitive_var];
                         }
                     }
                 }
@@ -3919,7 +4155,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
         }
         
         // Set the volume fractions.
-        if (num_eqn_conservative_var == num_eqn + 1)
+        if (d_num_eqn_conservative_var == d_num_eqn + 1)
         {
             for (int k = -num_ghosts_2_conservative_var;
                     k < interior_dim_2 + 1 + num_ghosts_2_conservative_var;
@@ -3938,7 +4174,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
                             (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
                                 ghostcell_dim_1_conservative_var;
                         
-                        Q[num_eqn][idx_conservative_var] = double(1);
+                        Q[d_num_eqn][idx_conservative_var] = double(1);
                     }
                 }
             }
@@ -3968,7 +4204,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::convertPrimitiveVariablesToConservativeVa
                                     ghostcell_dim_1_primitive_var;
                             
                             Q[d_num_species + d_dim.getValue() + 1 + si][idx_conservative_var] = Z[si][idx_primitive_var];
-                            Q[num_eqn][idx_conservative_var] -= Z[si][idx_primitive_var];
+                            Q[d_num_eqn][idx_conservative_var] -= Z[si][idx_primitive_var];
                         }
                     }
                 }
@@ -4044,7 +4280,6 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
     }
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
     const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -4074,8 +4309,8 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
      * Check the size of variables.
      */
     
-    if (!(static_cast<int>(conservative_variables.size()) == num_eqn ||
-          static_cast<int>(conservative_variables.size()) - 1 == num_eqn))
+    if (!(static_cast<int>(conservative_variables.size()) == d_num_eqn ||
+          static_cast<int>(conservative_variables.size()) - 1 == d_num_eqn))
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
@@ -4088,7 +4323,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
      * Check potential failures.
      */
     
-    for (int ei = 0; ei < num_eqn; ei++)
+    for (int ei = 0; ei < d_num_eqn; ei++)
     {
         const hier::IntVector interior_dims_conservative_var =
             conservative_variables[ei]->getBox().numberCells();
@@ -4112,7 +4347,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
             << std::endl);
     }
     
-    for (int ei = 1; ei < num_eqn; ei++)
+    for (int ei = 1; ei < d_num_eqn; ei++)
     {
         if (num_ghosts_conservative_var != conservative_variables[ei]->getGhostCellWidth())
         {
@@ -4154,7 +4389,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
     int* are_bounded = nullptr;
     
     std::vector<double*> Q;
-    Q.resize(num_eqn);
+    Q.resize(d_num_eqn);
     
     double* Z_last = nullptr;
     
@@ -4172,7 +4407,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
         
         are_bounded = bounded_flag->getPointer(0);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             Q[ei] = conservative_variables[ei]->getPointer(0);
         }
@@ -4317,7 +4552,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
         
         are_bounded = bounded_flag->getPointer(0);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             Q[ei] = conservative_variables[ei]->getPointer(0);
         }
@@ -4473,7 +4708,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
         
         are_bounded = bounded_flag->getPointer(1);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             Q[ei] = conservative_variables[ei]->getPointer(1);
         }
@@ -4641,7 +4876,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
         
         are_bounded = bounded_flag->getPointer(0);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             Q[ei] = conservative_variables[ei]->getPointer(0);
         }
@@ -4822,7 +5057,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
         
         are_bounded = bounded_flag->getPointer(1);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             Q[ei] = conservative_variables[ei]->getPointer(1);
         }
@@ -5003,7 +5238,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfConservativeVariablesBound
         
         are_bounded = bounded_flag->getPointer(2);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             Q[ei] = conservative_variables[ei]->getPointer(2);
         }
@@ -5215,7 +5450,6 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
     }
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
     const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -5245,8 +5479,8 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
      * Check the size of variables.
      */
     
-    if (!(static_cast<int>(primitive_variables.size()) == num_eqn ||
-          static_cast<int>(primitive_variables.size()) - 1 == num_eqn))
+    if (!(static_cast<int>(primitive_variables.size()) == d_num_eqn ||
+          static_cast<int>(primitive_variables.size()) - 1 == d_num_eqn))
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
@@ -5259,7 +5493,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
      * Check potential failures.
      */
     
-    for (int ei = 0; ei < num_eqn; ei++)
+    for (int ei = 0; ei < d_num_eqn; ei++)
     {
         const hier::IntVector interior_dims_primitive_var =
             primitive_variables[ei]->getBox().numberCells();
@@ -5283,7 +5517,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
             << std::endl);
     }
     
-    for (int ei = 1; ei < num_eqn; ei++)
+    for (int ei = 1; ei < d_num_eqn; ei++)
     {
         if (num_ghosts_primitive_var != primitive_variables[ei]->getGhostCellWidth())
         {
@@ -5344,16 +5578,16 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
     int* are_bounded = nullptr;
     
     std::vector<double*> V;
-    V.resize(num_eqn);
+    V.resize(d_num_eqn);
     
     std::vector<double*> Z;
-    Z.resize(num_eqn);
+    Z.resize(d_num_eqn);
     
     double* rho = nullptr;
     double* p = nullptr;
     
     std::vector<double*> Y;
-    Y.resize(num_eqn);
+    Y.resize(d_num_eqn);
     
     double* Gamma;
     
@@ -5374,7 +5608,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
         
         are_bounded = bounded_flag->getPointer(0);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
@@ -5615,7 +5849,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
         
         are_bounded = bounded_flag->getPointer(0);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
@@ -5883,7 +6117,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
         
         are_bounded = bounded_flag->getPointer(1);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(1);
         }
@@ -6163,7 +6397,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
         
         are_bounded = bounded_flag->getPointer(0);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
@@ -6477,7 +6711,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
         
         are_bounded = bounded_flag->getPointer(1);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(1);
         }
@@ -6790,7 +7024,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::checkSideDataOfPrimitiveVariablesBounded(
         
         are_bounded = bounded_flag->getPointer(2);
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(2);
         }
@@ -7926,7 +8160,6 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesF
     }
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
     const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -7971,7 +8204,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesF
      * Check the size of variables.
      */
     
-    if (static_cast<int>(characteristic_variables.size()) != num_eqn)
+    if (static_cast<int>(characteristic_variables.size()) != d_num_eqn)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
@@ -8010,7 +8243,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesF
      * Check potential failures.
      */
     
-    for (int ei = 0; ei < num_eqn; ei++)
+    for (int ei = 0; ei < d_num_eqn; ei++)
     {
         const hier::IntVector interior_dims_characteristic_var =
             characteristic_variables[ei]->getBox().numberCells();
@@ -8051,7 +8284,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesF
         }
     }
     
-    for (int ei = 1; ei < num_eqn; ei++)
+    for (int ei = 1; ei < d_num_eqn; ei++)
     {
         if (num_ghosts_characteristic_var != characteristic_variables[ei]->getGhostCellWidth())
         {
@@ -8105,7 +8338,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesF
      */
     
     std::vector<double*> V;
-    V.reserve(num_eqn);
+    V.reserve(d_num_eqn);
     
     int count_eqn = 0;
     for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
@@ -8116,7 +8349,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesF
         {
             // If the last element of the primitive variable vector is not in the system of equations,
             // ignore it.
-            if (count_eqn >= num_eqn)
+            if (count_eqn >= d_num_eqn)
                 break;
             
             V.push_back(primitive_variables[vi]->getPointer(di));
@@ -8126,7 +8359,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesF
     }
     
     std::vector<double*> W;
-    W.resize(num_eqn);
+    W.resize(d_num_eqn);
     
     std::vector<double*> Z_rho_average;
     Z_rho_average.resize(d_num_species);
@@ -8152,7 +8385,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesF
          * Compute the characteristic variables in the x-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(0);
         }
@@ -8254,7 +8487,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesF
          * Compute the characteristic variables in the x-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(0);
         }
@@ -8350,7 +8583,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesF
          * Compute the characteristic variables in the y-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(1);
         }
@@ -8487,7 +8720,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesF
          * Compute the characteristic variables in the x-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(0);
         }
@@ -8610,7 +8843,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesF
          * Compute the characteristic variables in the y-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(1);
         }
@@ -8733,7 +8966,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfCharacteristicVariablesF
          * Compute the characteristic variables in the z-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(2);
         }
@@ -8895,7 +9128,6 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
     }
     
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
     const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -8927,7 +9159,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
      * Check the size of variables.
      */
     
-    if (static_cast<int>(primitive_variables.size()) != num_eqn)
+    if (static_cast<int>(primitive_variables.size()) != d_num_eqn)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
@@ -8935,7 +9167,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
             << "The number of characteristic variables are incorrect."
             << std::endl);
     }
-    if (static_cast<int>(characteristic_variables.size()) != num_eqn)
+    if (static_cast<int>(characteristic_variables.size()) != d_num_eqn)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelBasicUtilitiesFiveEqnAllaire::"
@@ -8956,7 +9188,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
      * Check potential failures.
      */
     
-    for (int ei = 0; ei < num_eqn; ei++)
+    for (int ei = 0; ei < d_num_eqn; ei++)
     {
         const hier::IntVector interior_dims_primitive_var =
             primitive_variables[ei]->getBox().numberCells();
@@ -8970,7 +9202,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
                 << std::endl);
         }
     }
-    for (int ei = 0; ei < num_eqn; ei++)
+    for (int ei = 0; ei < d_num_eqn; ei++)
     {
         const hier::IntVector interior_dims_characteristic_var =
             characteristic_variables[ei]->getBox().numberCells();
@@ -8997,7 +9229,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
         }
     }
     
-    for (int ei = 1; ei < num_eqn; ei++)
+    for (int ei = 1; ei < d_num_eqn; ei++)
     {
         if (num_ghosts_primitive_var != primitive_variables[ei]->getGhostCellWidth())
         {
@@ -9008,7 +9240,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
                 << std::endl);
         }
     }
-    for (int ei = 1; ei < num_eqn; ei++)
+    for (int ei = 1; ei < d_num_eqn; ei++)
     {
         if (num_ghosts_characteristic_var != characteristic_variables[ei]->getGhostCellWidth())
         {
@@ -9056,8 +9288,8 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
     
     std::vector<double*> V;
     std::vector<double*> W;
-    V.resize(num_eqn);
-    W.resize(num_eqn);
+    V.resize(d_num_eqn);
+    W.resize(d_num_eqn);
     
     std::vector<double*> Z_rho_average;
     Z_rho_average.resize(d_num_species);
@@ -9074,12 +9306,12 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
          * Compute the primitive variables in the x-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(0);
         }
@@ -9106,7 +9338,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
                 V[si][idx_face] = -double(1)/double(2)*Z_rho_average[si][idx_face]/
                     c_average[idx_face]*W[0][idx_face] + W[si + 1][idx_face] +
                         double(1)/double(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
-                            W[num_eqn - 1][idx_face];
+                            W[d_num_eqn - 1][idx_face];
             }
         }
         
@@ -9137,11 +9369,11 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
             const int idx_face = i + num_ghosts_0_characteristic_var;
             
             V[d_num_species][idx_face] = double(1)/double(2)*W[0][idx_face] +
-                double(1)/double(2)*W[num_eqn - 1][idx_face];
+                double(1)/double(2)*W[d_num_eqn - 1][idx_face];
             
             V[d_num_species + 1][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
                 W[0][idx_face] + double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
-                    W[num_eqn - 1][idx_face];
+                    W[d_num_eqn - 1][idx_face];
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -9157,12 +9389,12 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
          * Compute the primitive variables in the x-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(0);
         }
@@ -9192,7 +9424,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
                     V[si][idx_face] = -double(1)/double(2)*Z_rho_average[si][idx_face]/
                         c_average[idx_face]*W[0][idx_face] + W[si + 1][idx_face] +
                             double(1)/double(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
-                                W[num_eqn - 1][idx_face];
+                                W[d_num_eqn - 1][idx_face];
                 }
             }
         }
@@ -9231,13 +9463,13 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
                     (j + num_ghosts_1_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1);
                 
                 V[d_num_species][idx_face] = double(1)/double(2)*W[0][idx_face] +
-                    double(1)/double(2)*W[num_eqn - 1][idx_face];
+                    double(1)/double(2)*W[d_num_eqn - 1][idx_face];
                 
                 V[d_num_species + 1][idx_face] = W[d_num_species + 1][idx_face];
                 
                 V[d_num_species + 2][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
                     W[0][idx_face] + double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
-                        W[num_eqn - 1][idx_face];
+                        W[d_num_eqn - 1][idx_face];
             }
         }
         
@@ -9245,12 +9477,12 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
          * Compute the primitive variables in the y-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(1);
         }
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(1);
         }
@@ -9280,7 +9512,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
                     V[si][idx_face] = -double(1)/double(2)*Z_rho_average[si][idx_face]/
                         c_average[idx_face]*W[0][idx_face] + W[si + 1][idx_face] +
                             double(1)/double(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
-                                W[num_eqn - 1][idx_face];
+                                W[d_num_eqn - 1][idx_face];
                 }
             }
         }
@@ -9321,11 +9553,11 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
                 V[d_num_species][idx_face] = W[d_num_species + 1][idx_face];
                 
                 V[d_num_species + 1][idx_face] = double(1)/double(2)*W[0][idx_face] +
-                    double(1)/double(2)*W[num_eqn - 1][idx_face];
+                    double(1)/double(2)*W[d_num_eqn - 1][idx_face];
                 
                 V[d_num_species + 2][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
                     W[0][idx_face] + double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
-                        W[num_eqn - 1][idx_face];
+                        W[d_num_eqn - 1][idx_face];
             }
         }
     }
@@ -9345,12 +9577,12 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
          * Compute the primitive variables in the x-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(0);
         }
@@ -9384,7 +9616,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
                         V[si][idx_face] = -double(1)/double(2)*Z_rho_average[si][idx_face]/
                             c_average[idx_face]*W[0][idx_face] + W[si + 1][idx_face] +
                                 double(1)/double(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
-                                    W[num_eqn - 1][idx_face];
+                                    W[d_num_eqn - 1][idx_face];
                     }
                 }
             }
@@ -9433,7 +9665,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
                             ghostcell_dim_1_characteristic_var;
                     
                     V[d_num_species][idx_face] = double(1)/double(2)*W[0][idx_face] +
-                        double(1)/double(2)*W[num_eqn - 1][idx_face];
+                        double(1)/double(2)*W[d_num_eqn - 1][idx_face];
                     
                     V[d_num_species + 1][idx_face] = W[d_num_species + 1][idx_face];
                     
@@ -9441,7 +9673,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
                     
                     V[d_num_species + 3][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
                         W[0][idx_face] + double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
-                            W[num_eqn - 1][idx_face];
+                            W[d_num_eqn - 1][idx_face];
                 }
             }
         }
@@ -9450,12 +9682,12 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
          * Compute the primitive variables in the y-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(1);
         }
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(1);
         }
@@ -9489,7 +9721,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
                         V[si][idx_face] = -double(1)/double(2)*Z_rho_average[si][idx_face]/
                             c_average[idx_face]*W[0][idx_face] + W[si + 1][idx_face] +
                                 double(1)/double(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
-                                    W[num_eqn - 1][idx_face];
+                                    W[d_num_eqn - 1][idx_face];
                     }
                 }
             }
@@ -9540,13 +9772,13 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
                     V[d_num_species][idx_face] = W[d_num_species + 1][idx_face];
                     
                     V[d_num_species + 1][idx_face] = double(1)/double(2)*W[0][idx_face] +
-                        double(1)/double(2)*W[num_eqn - 1][idx_face];
+                        double(1)/double(2)*W[d_num_eqn - 1][idx_face];
                     
                     V[d_num_species + 2][idx_face] = W[d_num_species + 2][idx_face];
                     
                     V[d_num_species + 3][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
                         W[0][idx_face] + double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
-                            W[num_eqn - 1][idx_face];
+                            W[d_num_eqn - 1][idx_face];
                 }
             }
         }
@@ -9555,12 +9787,12 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
          * Compute the primitive variables in the z-direction.
          */
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             V[ei] = primitive_variables[ei]->getPointer(2);
         }
         
-        for (int ei = 0; ei < num_eqn; ei++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             W[ei] = characteristic_variables[ei]->getPointer(2);
         }
@@ -9594,7 +9826,7 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
                         V[si][idx_face] = -double(1)/double(2)*Z_rho_average[si][idx_face]/
                             c_average[idx_face]*W[0][idx_face] + W[si + 1][idx_face] +
                                 double(1)/double(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
-                                    W[num_eqn - 1][idx_face];
+                                    W[d_num_eqn - 1][idx_face];
                     }
                 }
             }
@@ -9647,11 +9879,11 @@ FlowModelBasicUtilitiesFiveEqnAllaire::computeSideDataOfPrimitiveVariablesFromCh
                     V[d_num_species + 1][idx_face] = W[d_num_species + 2][idx_face];
                     
                     V[d_num_species + 2][idx_face] = double(1)/double(2)*W[0][idx_face] +
-                        double(1)/double(2)*W[num_eqn - 1][idx_face];
+                        double(1)/double(2)*W[d_num_eqn - 1][idx_face];
                     
                     V[d_num_species + 3][idx_face] = -double(1)/double(2)*rho_average[idx_face]*
                         c_average[idx_face]*W[0][idx_face] +
-                            double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*W[num_eqn - 1][idx_face];
+                            double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*W[d_num_eqn - 1][idx_face];
                 }
             }
         }
