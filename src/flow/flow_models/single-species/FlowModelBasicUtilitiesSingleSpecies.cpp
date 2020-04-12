@@ -112,8 +112,8 @@ FlowModelBasicUtilitiesSingleSpecies::convertConservativeVariablesToPrimitiveVar
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
     
     /*
      * Get the dimensions of box that covers the interior of patch.
@@ -1376,8 +1376,8 @@ FlowModelBasicUtilitiesSingleSpecies::convertPrimitiveVariablesToConservativeVar
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
     
     /*
      * Get the dimensions of box that covers the interior of patch.
@@ -2568,8 +2568,8 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfConservativeVariablesBounde
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
     
     /*
      * Get the dimensions of box that covers the interior of patch.
@@ -3006,8 +3006,8 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
     
     /*
      * Get the dimensions of box that covers the interior of patch.
@@ -3417,6 +3417,81 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
 
 
 /*
+ * Register the required derived variables for transformation between conservative
+ * variables and characteristic variables.
+ */
+void
+FlowModelBasicUtilitiesSingleSpecies::registerDerivedVariablesForCharacteristicProjectionOfConservativeVariables(
+    const hier::IntVector& num_subghosts,
+    const AVERAGING_TMP::TYPE& averaging_type)
+{
+    NULL_USE(num_subghosts);
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    // Check whether a patch is already registered.
+    if (!flow_model_tmp->hasRegisteredPatch())
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesSingleSpecies::"
+            << "registerDerivedVariablesForCharacteristicProjectionOfConservativeVariables()\n"
+            << "No patch is registered yet."
+            << std::endl);
+    }
+    
+    d_proj_var_conservative_averaging_type = averaging_type;
+}
+
+
+/*
+ * Register the required derived variables for transformation between primitive variables
+ * and characteristic variables.
+ */
+void
+FlowModelBasicUtilitiesSingleSpecies::registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
+    const hier::IntVector& num_subghosts,
+    const AVERAGING_TMP::TYPE& averaging_type)
+{
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    // Check whether a patch is already registered.
+    if (!flow_model_tmp->hasRegisteredPatch())
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBasicUtilitiesSingleSpecies::"
+            << "registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables()\n"
+            << "No patch is registered yet."
+            << std::endl);
+    }
+    
+    d_proj_var_primitive_averaging_type = averaging_type;
+    
+    std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+    
+    num_subghosts_of_data.insert(
+        std::pair<std::string, hier::IntVector>("SOUND_SPEED", num_subghosts));
+    
+    flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+}
+
+
+/*
  * Get the number of projection variables for transformation between conservative
  * variables and characteristic variables.
  */
@@ -3454,9 +3529,9 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForCon
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const hier::IntVector& num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
-    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const hier::IntVector& num_ghosts = flow_model_tmp->getNumberOfGhostCells();
+    const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
     
     /*
      * Get the dimensions of the interior and ghost boxes.
@@ -3532,13 +3607,13 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForCon
     // Get the cell data of the conservative variables.
     
     boost::shared_ptr<pdat::CellData<double> > data_density =
-        d_flow_model_tmp->getCellData("DENSITY");
+        flow_model_tmp->getCellData("DENSITY");
     
     boost::shared_ptr<pdat::CellData<double> > data_momentum =
-        d_flow_model_tmp->getCellData("MOMENTUM");
+        flow_model_tmp->getCellData("MOMENTUM");
     
     boost::shared_ptr<pdat::CellData<double> > data_total_energy =
-        d_flow_model_tmp->getCellData("TOTAL_ENERGY");
+        flow_model_tmp->getCellData("TOTAL_ENERGY");
     
     // Get the pointers to the cell data of density and total energy.
     
@@ -4555,9 +4630,9 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForPri
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const hier::IntVector& num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
-    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const hier::IntVector& num_ghosts = flow_model_tmp->getNumberOfGhostCells();
+    const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
     
     /*
      * Get the dimensions of the interior and ghost boxes.
@@ -4629,11 +4704,11 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForPri
     
     // Get the cell data of the variable density.
     boost::shared_ptr<pdat::CellData<double> > data_density =
-        d_flow_model_tmp->getCellData("DENSITY");
+        flow_model_tmp->getCellData("DENSITY");
     
     // Get the cell data of sound speed.
     boost::shared_ptr<pdat::CellData<double> > data_sound_speed =
-        d_flow_model_tmp->getCellData("SOUND_SPEED");
+        flow_model_tmp->getCellData("SOUND_SPEED");
     
     // Get the number of ghost cells and ghost cell dimension of sound speed.
     const hier::IntVector& num_subghosts_sound_speed = data_sound_speed->getGhostCellWidth();
@@ -5055,8 +5130,8 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
     
     /*
      * Get the dimensions of box that covers the interior of patch.
@@ -5802,8 +5877,8 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
     
     /*
      * Get the dimensions of box that covers the interior of patch.
@@ -6371,8 +6446,8 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfConservativeVariablesFrom
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
     
     /*
      * Get the dimensions of box that covers the interior of patch.
@@ -6942,8 +7017,8 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfPrimitiveVariablesFromCha
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const hier::Patch& patch = d_flow_model_tmp->getRegisteredPatch();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
     
     /*
      * Get the dimensions of box that covers the interior of patch.

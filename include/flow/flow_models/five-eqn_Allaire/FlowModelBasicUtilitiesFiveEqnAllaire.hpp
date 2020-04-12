@@ -86,6 +86,24 @@ class FlowModelBasicUtilitiesFiveEqnAllaire: public FlowModelBasicUtilities
             const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables);
         
         /*
+         * Register the required derived variables for transformation between conservative
+         * variables and characteristic variables.
+         */
+        void
+        registerDerivedVariablesForCharacteristicProjectionOfConservativeVariables(
+            const hier::IntVector& num_subghosts,
+            const AVERAGING_TMP::TYPE& averaging_type);
+        
+        /*
+         * Register the required derived variables for transformation between primitive variables
+         * and characteristic variables.
+         */
+        void
+        registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
+            const hier::IntVector& num_subghosts,
+            const AVERAGING_TMP::TYPE& averaging_type);
+        
+        /*
          * Check whether the given side primitive variables are within the bounds.
          */
         void

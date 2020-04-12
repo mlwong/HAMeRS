@@ -1,6 +1,21 @@
 #include "flow/flow_models/FlowModel.hpp"
 
 /*
+ * Check whether a patch is registered or not.
+ */
+bool
+FlowModel::hasRegisteredPatch() const
+{
+    if (!d_patch_registered)
+    {
+        return false;
+    }
+    
+    return true;
+}
+
+
+/*
  * Get registered patch.
  */
 const hier::Patch&

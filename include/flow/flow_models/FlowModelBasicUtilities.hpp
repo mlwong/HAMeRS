@@ -81,6 +81,24 @@ class FlowModelBasicUtilities
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables) = 0;
         
         /*
+         * Register the required derived variables for transformation between conservative
+         * variables and characteristic variables.
+         */
+        virtual void
+        registerDerivedVariablesForCharacteristicProjectionOfConservativeVariables(
+            const hier::IntVector& num_subghosts,
+            const AVERAGING_TMP::TYPE& averaging_type) = 0;
+        
+        /*
+         * Register the required derived variables for transformation between primitive variables
+         * and characteristic variables.
+         */
+        virtual void
+        registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
+            const hier::IntVector& num_subghosts,
+            const AVERAGING_TMP::TYPE& averaging_type) = 0;
+        
+        /*
          * Get the number of projection variables for transformation between conservative
          * variables and characteristic variables.
          */

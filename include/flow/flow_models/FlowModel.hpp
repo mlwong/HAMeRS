@@ -273,6 +273,11 @@ class FlowModel:
         virtual void unregisterPatch() = 0;
         
         /*
+         * Check whether a patch is registered or not.
+         */
+        bool hasRegisteredPatch() const;
+        
+        /*
          * Get registered patch.
          */
         const hier::Patch& getRegisteredPatch() const;
