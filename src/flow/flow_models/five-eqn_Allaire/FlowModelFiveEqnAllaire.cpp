@@ -1184,7 +1184,7 @@ FlowModelFiveEqnAllaire::getCellData(
     
     boost::shared_ptr<pdat::CellData<double> > cell_data;
     
-    if (variable_key == "PARTIAL_DENSITY")
+    if (variable_key == "PARTIAL_DENSITIES")
     {
         cell_data = getCellDataOfPartialDensities();
     }

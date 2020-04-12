@@ -794,7 +794,7 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -915,25 +915,25 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -1011,7 +1011,7 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -1121,25 +1121,25 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -1229,7 +1229,7 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -1340,25 +1340,25 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -1458,7 +1458,7 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -1535,7 +1535,7 @@ RMIStatisticsUtilities::outputMixingWidthInYDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -1670,25 +1670,25 @@ RMIStatisticsUtilities::outputMixingWidthInYDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -1778,7 +1778,7 @@ RMIStatisticsUtilities::outputMixingWidthInYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -1889,25 +1889,25 @@ RMIStatisticsUtilities::outputMixingWidthInYDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -2007,7 +2007,7 @@ RMIStatisticsUtilities::outputMixingWidthInYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -2084,7 +2084,7 @@ RMIStatisticsUtilities::outputMixingWidthInZDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -2227,25 +2227,25 @@ RMIStatisticsUtilities::outputMixingWidthInZDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -2345,7 +2345,7 @@ RMIStatisticsUtilities::outputMixingWidthInZDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -2422,7 +2422,7 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -2541,25 +2541,25 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -2643,7 +2643,7 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -2770,25 +2770,25 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -2884,7 +2884,7 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -3012,25 +3012,25 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -3136,7 +3136,7 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -3227,7 +3227,7 @@ RMIStatisticsUtilities::outputMixednessInYDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -3365,25 +3365,25 @@ RMIStatisticsUtilities::outputMixednessInYDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -3479,7 +3479,7 @@ RMIStatisticsUtilities::outputMixednessInYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -3607,25 +3607,25 @@ RMIStatisticsUtilities::outputMixednessInYDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -3731,7 +3731,7 @@ RMIStatisticsUtilities::outputMixednessInYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -3822,7 +3822,7 @@ RMIStatisticsUtilities::outputMixednessInZDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -3968,25 +3968,25 @@ RMIStatisticsUtilities::outputMixednessInZDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -4092,7 +4092,7 @@ RMIStatisticsUtilities::outputMixednessInZDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -4175,7 +4175,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -4314,9 +4314,9 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -4326,19 +4326,19 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -4446,7 +4446,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -4521,9 +4521,9 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -4533,19 +4533,19 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -4656,7 +4656,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -4717,7 +4717,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -4856,9 +4856,9 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -4868,19 +4868,19 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -4988,7 +4988,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -5063,9 +5063,9 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -5075,19 +5075,19 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -5198,7 +5198,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -5292,7 +5292,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXYPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -5443,9 +5443,9 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXYPlane(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -5455,19 +5455,19 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXYPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -5592,7 +5592,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXYPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -5674,9 +5674,9 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXYPlane(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -5686,19 +5686,19 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXYPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -5828,7 +5828,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXYPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -5884,7 +5884,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -6035,9 +6035,9 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYZPlane(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -6047,19 +6047,19 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -6184,7 +6184,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -6266,9 +6266,9 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYZPlane(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -6278,19 +6278,19 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -6420,7 +6420,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -6476,7 +6476,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -6627,9 +6627,9 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXZPlane(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -6639,19 +6639,19 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -6776,7 +6776,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -6858,9 +6858,9 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXZPlane(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -6870,19 +6870,19 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -7012,7 +7012,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -7069,7 +7069,7 @@ outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -7212,9 +7212,9 @@ outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -7224,19 +7224,19 @@ outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -7355,7 +7355,7 @@ outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -7423,9 +7423,9 @@ outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -7435,19 +7435,19 @@ outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -7565,7 +7565,7 @@ outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -7618,7 +7618,7 @@ outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -7761,9 +7761,9 @@ outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -7773,19 +7773,19 @@ outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* v = data_velocity->getPointer(1);
@@ -7904,7 +7904,7 @@ outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -7972,9 +7972,9 @@ outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -7984,19 +7984,19 @@ outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* v = data_velocity->getPointer(1);
@@ -8117,7 +8117,7 @@ outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -8170,7 +8170,7 @@ outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -8313,9 +8313,9 @@ outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -8325,19 +8325,19 @@ outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* w = data_velocity->getPointer(2);
@@ -8456,7 +8456,7 @@ outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -8524,9 +8524,9 @@ outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -8536,19 +8536,19 @@ outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* w = data_velocity->getPointer(2);
@@ -8669,7 +8669,7 @@ outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -8721,7 +8721,7 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -8802,9 +8802,9 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -8814,19 +8814,19 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 
@@ -8962,7 +8962,7 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -9032,9 +9032,9 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -9044,19 +9044,19 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 
@@ -9255,7 +9255,7 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -9318,7 +9318,7 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -9388,9 +9388,9 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                  * and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -9403,22 +9403,22 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -9558,7 +9558,7 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -9627,9 +9627,9 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                  * and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -9642,22 +9642,22 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -9840,7 +9840,7 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -9910,9 +9910,9 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                  * and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -9925,22 +9925,22 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -10161,7 +10161,7 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -10226,7 +10226,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -10374,9 +10374,9 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
                  * the flow model and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -10395,9 +10395,9 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density, velocity, pressure and temperature
@@ -10405,19 +10405,19 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -10580,7 +10580,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -10676,25 +10676,25 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
                  * cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* u = data_velocity->getPointer(0);
                 double* v = data_velocity->getPointer(1);
@@ -10791,7 +10791,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -10902,7 +10902,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -11062,9 +11062,9 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
                  * the flow model and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -11083,9 +11083,9 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density, velocity, pressure and temperature
@@ -11093,19 +11093,19 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -11297,7 +11297,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -11400,25 +11400,25 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
                  * cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* u = data_velocity->getPointer(0);
                 double* v = data_velocity->getPointer(1);
@@ -11530,7 +11530,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -11635,7 +11635,7 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -11778,9 +11778,9 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -11793,22 +11793,22 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -11934,7 +11934,7 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -12022,9 +12022,9 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -12034,19 +12034,19 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -12155,7 +12155,7 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -12248,7 +12248,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -12387,9 +12387,9 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -12402,22 +12402,22 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -12540,7 +12540,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -12621,9 +12621,9 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -12633,19 +12633,19 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -12750,7 +12750,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -12841,7 +12841,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -12980,9 +12980,9 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -12995,22 +12995,22 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -13133,7 +13133,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -13214,9 +13214,9 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -13226,19 +13226,19 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* v = data_velocity->getPointer(1);
@@ -13343,7 +13343,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -13432,7 +13432,7 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -13587,9 +13587,9 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -13602,22 +13602,22 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -13764,7 +13764,7 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -13859,9 +13859,9 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -13871,19 +13871,19 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -14010,7 +14010,7 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -14098,7 +14098,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -14245,9 +14245,9 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -14260,22 +14260,22 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -14416,7 +14416,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -14497,9 +14497,9 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -14509,19 +14509,19 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -14640,7 +14640,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -14724,7 +14724,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -14871,9 +14871,9 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -14886,22 +14886,22 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -15042,7 +15042,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -15123,9 +15123,9 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -15135,19 +15135,19 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* v = data_velocity->getPointer(1);
@@ -15266,7 +15266,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -15350,7 +15350,7 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -15497,9 +15497,9 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -15512,22 +15512,22 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -15668,7 +15668,7 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -15749,9 +15749,9 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -15761,19 +15761,19 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* w = data_velocity->getPointer(2);
@@ -15892,7 +15892,7 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -15976,7 +15976,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -16115,9 +16115,9 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -16130,22 +16130,22 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -16268,7 +16268,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -16349,9 +16349,9 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -16361,19 +16361,19 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -16478,7 +16478,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -16570,7 +16570,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -16709,9 +16709,9 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -16724,22 +16724,22 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -16862,7 +16862,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -16943,9 +16943,9 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -16955,19 +16955,19 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* v = data_velocity->getPointer(1);
@@ -17072,7 +17072,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -17164,7 +17164,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -17311,9 +17311,9 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -17326,22 +17326,22 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -17482,7 +17482,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -17563,9 +17563,9 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -17575,19 +17575,19 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -17706,7 +17706,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -17791,7 +17791,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -17938,9 +17938,9 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -17953,22 +17953,22 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -18109,7 +18109,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -18190,9 +18190,9 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -18202,19 +18202,19 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* v = data_velocity->getPointer(1);
@@ -18333,7 +18333,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -18418,7 +18418,7 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -18565,9 +18565,9 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -18580,22 +18580,22 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -18736,7 +18736,7 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -18817,9 +18817,9 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -18829,19 +18829,19 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* w = data_velocity->getPointer(2);
@@ -18960,7 +18960,7 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -19045,7 +19045,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -19188,9 +19188,9 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -19203,22 +19203,22 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -19344,7 +19344,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -19432,9 +19432,9 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -19444,19 +19444,19 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -19565,7 +19565,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -19659,7 +19659,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -19810,9 +19810,9 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -19825,22 +19825,22 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -19984,7 +19984,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -20072,9 +20072,9 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -20084,19 +20084,19 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -20219,7 +20219,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -20306,7 +20306,7 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -20457,9 +20457,9 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -20472,22 +20472,22 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -20631,7 +20631,7 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -20719,9 +20719,9 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -20731,19 +20731,19 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -20866,7 +20866,7 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -20953,7 +20953,7 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -21104,9 +21104,9 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -21119,22 +21119,22 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -21278,7 +21278,7 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -21366,9 +21366,9 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -21378,19 +21378,19 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* v = data_velocity->getPointer(1);
@@ -21513,7 +21513,7 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -21600,7 +21600,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -21743,9 +21743,9 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -21758,22 +21758,22 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -21899,7 +21899,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -21991,9 +21991,9 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -22003,19 +22003,19 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -22127,7 +22127,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -22234,7 +22234,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -22377,9 +22377,9 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -22392,22 +22392,22 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -22533,7 +22533,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -22625,9 +22625,9 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -22637,19 +22637,19 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -22761,7 +22761,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -22868,7 +22868,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -23023,9 +23023,9 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -23038,22 +23038,22 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -23200,7 +23200,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -23303,9 +23303,9 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -23315,19 +23315,19 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -23460,7 +23460,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -23573,7 +23573,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -23728,9 +23728,9 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -23743,22 +23743,22 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -23905,7 +23905,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -24008,9 +24008,9 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -24020,19 +24020,19 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -24165,7 +24165,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -24278,7 +24278,7 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -24433,9 +24433,9 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -24448,22 +24448,22 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -24610,7 +24610,7 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -24713,9 +24713,9 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -24725,19 +24725,19 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -24870,7 +24870,7 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -24983,7 +24983,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -25126,9 +25126,9 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -25141,22 +25141,22 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -25282,7 +25282,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -25380,9 +25380,9 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -25392,19 +25392,19 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -25519,7 +25519,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -25638,7 +25638,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -25793,9 +25793,9 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -25808,22 +25808,22 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -25970,7 +25970,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -26079,9 +26079,9 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -26091,19 +26091,19 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -26239,7 +26239,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -26364,7 +26364,7 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -26519,9 +26519,9 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -26534,22 +26534,22 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -26696,7 +26696,7 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -26805,9 +26805,9 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -26817,19 +26817,19 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -26965,7 +26965,7 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -27090,7 +27090,7 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -27245,9 +27245,9 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -27260,22 +27260,22 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -27422,7 +27422,7 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -27531,9 +27531,9 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -27543,19 +27543,19 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -27691,7 +27691,7 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -27816,7 +27816,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -27955,9 +27955,9 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -27970,22 +27970,22 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -28108,7 +28108,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -28189,9 +28189,9 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                  * cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -28201,19 +28201,19 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -28317,7 +28317,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -28408,7 +28408,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -28555,9 +28555,9 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -28570,22 +28570,22 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -28726,7 +28726,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -28807,9 +28807,9 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -28819,19 +28819,19 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 double* u = data_velocity->getPointer(0);
@@ -28949,7 +28949,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -29033,7 +29033,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -29172,9 +29172,9 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
                  * the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -29184,19 +29184,19 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction and density data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -29308,7 +29308,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -29389,25 +29389,25 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
                  * cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 double* rho = data_density->getPointer(0);
                 
@@ -29500,7 +29500,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -29591,7 +29591,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -29738,9 +29738,9 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -29750,19 +29750,19 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction and density data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -29888,7 +29888,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -29969,25 +29969,25 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 double* rho = data_density->getPointer(0);
                 
@@ -30090,7 +30090,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -30172,7 +30172,7 @@ RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYDirectio
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -30307,9 +30307,9 @@ RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYDirectio
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -30319,19 +30319,19 @@ RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYDirectio
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction and density data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -30441,7 +30441,7 @@ RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYDirectio
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -30532,7 +30532,7 @@ RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -30675,9 +30675,9 @@ RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYZPlane(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -30687,19 +30687,19 @@ RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction and density data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -30823,7 +30823,7 @@ RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -30909,7 +30909,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -31048,9 +31048,9 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -31060,19 +31060,19 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction and density data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -31184,7 +31184,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -31271,25 +31271,25 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
                  * cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 double* rho = data_density->getPointer(0);
                 
@@ -31383,7 +31383,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -31486,7 +31486,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -31633,9 +31633,9 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -31645,19 +31645,19 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction and density data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -31783,7 +31783,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -31870,25 +31870,25 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 double* rho = data_density->getPointer(0);
                 
@@ -31992,7 +31992,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -32086,7 +32086,7 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -32205,9 +32205,9 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
                  * and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -32220,22 +32220,22 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -32352,7 +32352,7 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -32478,9 +32478,9 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
                  * and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -32493,22 +32493,22 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -32651,7 +32651,7 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -32778,9 +32778,9 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
                  * and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -32793,22 +32793,22 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -32969,7 +32969,7 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -33059,7 +33059,7 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -33178,9 +33178,9 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
                  * and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -33193,22 +33193,22 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -33314,7 +33314,7 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -33440,9 +33440,9 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
                  * and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -33455,22 +33455,22 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -33602,7 +33602,7 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -33729,9 +33729,9 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
                  * and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -33744,22 +33744,22 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -33909,7 +33909,7 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -33999,7 +33999,7 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -34118,9 +34118,9 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
                  * model and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -34136,9 +34136,9 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density, pressure and temperature data inside
@@ -34146,16 +34146,16 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -34267,7 +34267,7 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -34393,9 +34393,9 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
                  * model and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -34411,9 +34411,9 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density, pressure and temperature data inside
@@ -34421,16 +34421,16 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -34575,7 +34575,7 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -34702,9 +34702,9 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
                  * model and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -34720,9 +34720,9 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density, pressure and temperature data inside
@@ -34730,16 +34730,16 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -34906,7 +34906,7 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -34996,7 +34996,7 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -35115,9 +35115,9 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
                  * and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -35130,22 +35130,22 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -35251,7 +35251,7 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -35377,9 +35377,9 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
                  * and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -35392,22 +35392,22 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -35539,7 +35539,7 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -35666,9 +35666,9 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
                  * and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -35681,22 +35681,22 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -35846,7 +35846,7 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -35936,7 +35936,7 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -36055,9 +36055,9 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
                  * model and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -36073,9 +36073,9 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density, pressure and temperature data inside
@@ -36083,16 +36083,16 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -36204,7 +36204,7 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -36330,9 +36330,9 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
                  * model and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -36348,9 +36348,9 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density, pressure and temperature data inside
@@ -36358,16 +36358,16 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -36512,7 +36512,7 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -36639,9 +36639,9 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
                  * model and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -36657,9 +36657,9 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density, pressure and temperature data inside
@@ -36667,16 +36667,16 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -36843,7 +36843,7 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -36933,7 +36933,7 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -37052,9 +37052,9 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
                  * and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -37067,22 +37067,22 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -37188,7 +37188,7 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -37314,9 +37314,9 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
                  * and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -37329,22 +37329,22 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -37476,7 +37476,7 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -37603,9 +37603,9 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
                  * and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -37618,22 +37618,22 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -37783,7 +37783,7 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -37873,7 +37873,7 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -37992,9 +37992,9 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
                  * model and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -38010,9 +38010,9 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density, pressure and temperature data inside
@@ -38020,16 +38020,16 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -38147,7 +38147,7 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -38273,9 +38273,9 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
                  * model and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -38291,9 +38291,9 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density, pressure and temperature data inside
@@ -38301,16 +38301,16 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -38461,7 +38461,7 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -38588,9 +38588,9 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
                  * model and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -38606,9 +38606,9 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, density, pressure and temperature data inside
@@ -38616,16 +38616,16 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getCellData("DENSITY");
+                    flow_model_tmp->getCellData("DENSITY");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -38798,7 +38798,7 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -38888,7 +38888,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -39009,25 +39009,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -39105,7 +39105,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -39230,25 +39230,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -39338,7 +39338,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -39464,25 +39464,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -39582,7 +39582,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -39674,7 +39674,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -39795,25 +39795,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -39891,7 +39891,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -40016,25 +40016,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -40124,7 +40124,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -40250,25 +40250,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -40368,7 +40368,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -40460,7 +40460,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -40581,25 +40581,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -40677,7 +40677,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -40802,25 +40802,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -40910,7 +40910,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -41036,25 +41036,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -41154,7 +41154,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -41246,7 +41246,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -41367,25 +41367,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -41463,7 +41463,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -41588,25 +41588,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -41696,7 +41696,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -41822,25 +41822,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -41940,7 +41940,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -42032,7 +42032,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -42153,25 +42153,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -42249,7 +42249,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -42360,25 +42360,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -42468,7 +42468,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -42580,25 +42580,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -42698,7 +42698,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -42776,7 +42776,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -42897,25 +42897,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -42993,7 +42993,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -43104,25 +43104,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -43212,7 +43212,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -43324,25 +43324,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -43442,7 +43442,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -43520,7 +43520,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -43641,25 +43641,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -43737,7 +43737,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -43848,25 +43848,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -43956,7 +43956,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -44068,25 +44068,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -44186,7 +44186,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -44264,7 +44264,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -44385,25 +44385,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -44481,7 +44481,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -44592,25 +44592,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -44700,7 +44700,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -44812,25 +44812,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -44930,7 +44930,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -45008,7 +45008,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -45129,25 +45129,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -45225,7 +45225,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -45336,25 +45336,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -45444,7 +45444,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -45556,25 +45556,25 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
                 
@@ -45674,7 +45674,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -45744,7 +45744,7 @@ RMIStatisticsUtilities::outputNumericalInterfaceThickness(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -45834,25 +45834,25 @@ RMIStatisticsUtilities::outputNumericalInterfaceThickness(
                  * cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", num_ghosts));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -45993,7 +45993,7 @@ RMIStatisticsUtilities::outputNumericalInterfaceThickness(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -46065,25 +46065,25 @@ RMIStatisticsUtilities::outputNumericalInterfaceThickness(
                  * cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", num_ghosts));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -46377,7 +46377,7 @@ RMIStatisticsUtilities::outputNumericalInterfaceThickness(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -46451,25 +46451,25 @@ RMIStatisticsUtilities::outputNumericalInterfaceThickness(
                  * cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", num_ghosts));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeDerivedCellData();
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -47008,7 +47008,7 @@ RMIStatisticsUtilities::outputNumericalInterfaceThickness(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         

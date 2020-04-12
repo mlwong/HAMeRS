@@ -4717,7 +4717,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
     
     // Get the cell data of the variable partial densities.
     boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
-        flow_model_tmp->getCellData("PARTIAL_DENSITY");
+        flow_model_tmp->getCellData("PARTIAL_DENSITIES");
     
     // Get the cell data of total density and sound speed.
     boost::shared_ptr<pdat::CellData<double> > data_density =
