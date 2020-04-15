@@ -92,7 +92,7 @@ class FlowModelBasicUtilitiesFiveEqnAllaire: public FlowModelBasicUtilities
         void
         registerDerivedVariablesForCharacteristicProjectionOfConservativeVariables(
             const hier::IntVector& num_subghosts,
-            const AVERAGING_TMP::TYPE& averaging_type);
+            const AVERAGING::TYPE& averaging_type);
         
         /*
          * Register the required derived variables for transformation between primitive variables
@@ -101,7 +101,7 @@ class FlowModelBasicUtilitiesFiveEqnAllaire: public FlowModelBasicUtilities
         void
         registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
             const hier::IntVector& num_subghosts,
-            const AVERAGING_TMP::TYPE& averaging_type);
+            const AVERAGING::TYPE& averaging_type);
         
         /*
          * Check whether the given side primitive variables are within the bounds.

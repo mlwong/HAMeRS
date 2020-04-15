@@ -94,7 +94,7 @@ class FlowModelBasicUtilitiesSingleSpecies: public FlowModelBasicUtilities
         void
         registerDerivedVariablesForCharacteristicProjectionOfConservativeVariables(
             const hier::IntVector& num_subghosts,
-            const AVERAGING_TMP::TYPE& averaging_type);
+            const AVERAGING::TYPE& averaging_type);
         
         /*
          * Register the required derived variables for transformation between primitive variables
@@ -103,7 +103,7 @@ class FlowModelBasicUtilitiesSingleSpecies: public FlowModelBasicUtilities
         void
         registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
             const hier::IntVector& num_subghosts,
-            const AVERAGING_TMP::TYPE& averaging_type);
+            const AVERAGING::TYPE& averaging_type);
         
         /*
          * Get the number of projection variables for transformation between conservative

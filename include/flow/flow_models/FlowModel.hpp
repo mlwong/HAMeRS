@@ -40,12 +40,6 @@ namespace VAR
                 PRIMITIVE };
 }
 
-namespace AVERAGING
-{
-    enum TYPE { SIMPLE,
-                ROE };
-}
-
 class FlowModelRiemannSolver;
 class FlowModelBasicUtilities;
 class FlowModelStatisticsUtilities;
@@ -80,8 +74,6 @@ class FlowModel:
                 d_ghost_box(hier::Box::getEmptyBox(dim)),
                 d_interior_dims(hier::IntVector::getZero(d_dim)),
                 d_ghostcell_dims(hier::IntVector::getZero(d_dim)),
-                d_proj_var_conservative_averaging_type(AVERAGING::SIMPLE),
-                d_proj_var_primitive_averaging_type(AVERAGING::SIMPLE),
                 d_global_derived_cell_data_computed(false)
         {
             NULL_USE(flow_model_db);
@@ -242,24 +234,6 @@ class FlowModel:
             const std::unordered_map<std::string, hier::IntVector>& num_subghosts_of_data) = 0;
         
         /*
-         * Register the required derived variables for transformation between conservative
-         * variables and characteristic variables.
-         */
-        virtual void
-        registerDerivedVariablesForCharacteristicProjectionOfConservativeVariables(
-            const hier::IntVector& num_subghosts,
-            const AVERAGING::TYPE& averaging_type) = 0;
-        
-        /*
-         * Register the required derived variables for transformation between primitive variables
-         * and characteristic variables.
-         */
-        virtual void
-        registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
-            const hier::IntVector& num_subghosts,
-            const AVERAGING::TYPE& averaging_type) = 0;
-        
-        /*
          * Register the required variables for the computation of diffusive fluxes in the registered patch.
          */
         virtual void
@@ -333,138 +307,6 @@ class FlowModel:
          */
         virtual std::vector<boost::shared_ptr<pdat::CellData<double> > >
         getCellDataOfPrimitiveVariables() = 0;
-        
-        /*
-         * Get the number of projection variables for transformation between conservative
-         * variables and characteristic variables.
-         */
-        virtual int
-        getNumberOfProjectionVariablesForConservativeVariables() const = 0;
-        
-        /*
-         * Get the number of projection variables for transformation between primitive variables
-         * and characteristic variables.
-         */
-        virtual int
-        getNumberOfProjectionVariablesForPrimitiveVariables() const = 0;
-        
-        /*
-         * Compute the side data of the projection variables for transformation between conservative variables and
-         * characteristic variables.
-         */
-        virtual void
-        computeSideDataOfProjectionVariablesForConservativeVariables(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
-        
-        /*
-         * Compute the side data of the projection variables for transformation between primitive variables and
-         * characteristic variables.
-         */
-        virtual void
-        computeSideDataOfProjectionVariablesForPrimitiveVariables(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
-        
-        /*
-         * Compute the side data of characteristic variables from conservative variables.
-         */
-        virtual void
-        computeSideDataOfCharacteristicVariablesFromConservativeVariables(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
-            const int& idx_offset) = 0;
-        
-        /*
-         * Compute the side data of characteristic variables from primitive variables.
-         */
-        virtual void
-        computeSideDataOfCharacteristicVariablesFromPrimitiveVariables(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
-            const int& idx_offset) = 0;
-        
-        /*
-         * Compute the side data of conservative variables from characteristic variables.
-         */
-        virtual void
-        computeSideDataOfConservativeVariablesFromCharacteristicVariables(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
-        
-        /*
-         * Compute the side data of primitive variables from characteristic variables.
-         */
-        virtual void
-        computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
-        
-        /*
-         * Check whether the given cell conservative variables are within the bounds.
-         */
-        virtual void
-        checkCellDataOfConservativeVariablesBounded(
-            boost::shared_ptr<pdat::CellData<int> >& bounded_flag,
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables) = 0;
-        
-        /*
-         * Check whether the given side conservative variables are within the bounds.
-         */
-        virtual void
-        checkSideDataOfConservativeVariablesBounded(
-            boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables) = 0;
-        
-        /*
-         * Check whether the given cell primitive variables are within the bounds.
-         */
-        virtual void
-        checkCellDataOfPrimitiveVariablesBounded(
-            boost::shared_ptr<pdat::CellData<int> >& bounded_flag,
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables) = 0;
-        
-        /*
-         * Check whether the given side primitive variables are within the bounds.
-         */
-        virtual void
-        checkSideDataOfPrimitiveVariablesBounded(
-            boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables) = 0;
-        
-        /*
-         * Convert conservative variables to primitive variables.
-         */
-        virtual void
-        convertConservativeVariablesToPrimitiveVariables(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables) = 0;
-        
-        /*
-         * Convert primitive variables to conservative variables.
-         */
-        virtual void
-        convertPrimitiveVariablesToConservativeVariables(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables) = 0;
-        
-        /*
-         * Convert conservative variables to primitive variables.
-         */
-        virtual void
-        convertConservativeVariablesToPrimitiveVariables(
-            const std::vector<const double*>& conservative_variables,
-            const std::vector<double*>& primitive_variables) = 0;
-        
-        /*
-         * Convert primitive variables to conservative variables.
-         */
-        virtual void
-        convertPrimitiveVariablesToConservativeVariables(
-            const std::vector<const double*>& primitive_variables,
-            const std::vector<double*>& conservative_variables) = 0;
         
         /*
          * Get the variables for the derivatives in the diffusive fluxes.
@@ -640,12 +482,6 @@ class FlowModel:
          */
         hier::IntVector d_interior_dims;
         hier::IntVector d_ghostcell_dims;
-        
-        /*
-         * Settings for projection variables.
-         */
-        AVERAGING::TYPE d_proj_var_conservative_averaging_type;
-        AVERAGING::TYPE d_proj_var_primitive_averaging_type;
         
         /*
          * Whether all or part of global derived cell data is computed.

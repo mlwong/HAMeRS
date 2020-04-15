@@ -582,7 +582,9 @@ EulerBoundaryConditions::readDirichletBoundaryDataEntry(
     }
     
     // Convert the primitive boundary data to conservative boundary data.
-    d_flow_model->convertPrimitiveVariablesToConservativeVariables(V_ptr, Q_ptr);
+    d_flow_model->setupBasicUtilities();
+    boost::shared_ptr<FlowModelBasicUtilities> basic_utilities = d_flow_model->getFlowModelBasicUtilities();
+    basic_utilities->convertPrimitiveVariablesToConservativeVariables(V_ptr, Q_ptr);
     
     std::vector<boost::shared_ptr<pdat::CellVariable<double> > > conservative_var =
         d_flow_model->getConservativeVariables();

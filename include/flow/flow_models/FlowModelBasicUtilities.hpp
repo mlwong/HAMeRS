@@ -12,7 +12,7 @@
 #include "boost/weak_ptr.hpp"
 #include <string>
 
-namespace AVERAGING_TMP
+namespace AVERAGING
 {
     enum TYPE { SIMPLE,
                 ROE };
@@ -34,8 +34,8 @@ class FlowModelBasicUtilities
                 d_grid_geometry(grid_geometry),
                 d_num_species(num_species),
                 d_num_eqn(num_eqn),
-                d_proj_var_conservative_averaging_type(AVERAGING_TMP::SIMPLE),
-                d_proj_var_primitive_averaging_type(AVERAGING_TMP::SIMPLE)
+                d_proj_var_conservative_averaging_type(AVERAGING::SIMPLE),
+                d_proj_var_primitive_averaging_type(AVERAGING::SIMPLE)
         {}
         
         virtual ~FlowModelBasicUtilities() {}
@@ -81,13 +81,45 @@ class FlowModelBasicUtilities
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables) = 0;
         
         /*
+         * Check whether the given cell conservative variables are within the bounds.
+         */
+        virtual void
+        checkCellDataOfConservativeVariablesBounded(
+            boost::shared_ptr<pdat::CellData<int> >& bounded_flag,
+            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables) = 0;
+        
+        /*
+         * Check whether the given side conservative variables are within the bounds.
+         */
+        virtual void
+        checkSideDataOfConservativeVariablesBounded(
+            boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables) = 0;
+        
+        /*
+         * Check whether the given cell primitive variables are within the bounds.
+         */
+        virtual void
+        checkCellDataOfPrimitiveVariablesBounded(
+            boost::shared_ptr<pdat::CellData<int> >& bounded_flag,
+            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables) = 0;
+        
+        /*
+         * Check whether the given side primitive variables are within the bounds.
+         */
+        virtual void
+        checkSideDataOfPrimitiveVariablesBounded(
+            boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables) = 0;
+        
+        /*
          * Register the required derived variables for transformation between conservative
          * variables and characteristic variables.
          */
         virtual void
         registerDerivedVariablesForCharacteristicProjectionOfConservativeVariables(
             const hier::IntVector& num_subghosts,
-            const AVERAGING_TMP::TYPE& averaging_type) = 0;
+            const AVERAGING::TYPE& averaging_type) = 0;
         
         /*
          * Register the required derived variables for transformation between primitive variables
@@ -96,7 +128,7 @@ class FlowModelBasicUtilities
         virtual void
         registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
             const hier::IntVector& num_subghosts,
-            const AVERAGING_TMP::TYPE& averaging_type) = 0;
+            const AVERAGING::TYPE& averaging_type) = 0;
         
         /*
          * Get the number of projection variables for transformation between conservative
@@ -166,38 +198,6 @@ class FlowModelBasicUtilities
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
         
-        /*
-         * Check whether the given cell conservative variables are within the bounds.
-         */
-        virtual void
-        checkCellDataOfConservativeVariablesBounded(
-            boost::shared_ptr<pdat::CellData<int> >& bounded_flag,
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables) = 0;
-        
-        /*
-         * Check whether the given side conservative variables are within the bounds.
-         */
-        virtual void
-        checkSideDataOfConservativeVariablesBounded(
-            boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables) = 0;
-        
-        /*
-         * Check whether the given cell primitive variables are within the bounds.
-         */
-        virtual void
-        checkCellDataOfPrimitiveVariablesBounded(
-            boost::shared_ptr<pdat::CellData<int> >& bounded_flag,
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables) = 0;
-        
-        /*
-         * Check whether the given side primitive variables are within the bounds.
-         */
-        virtual void
-        checkSideDataOfPrimitiveVariablesBounded(
-            boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables) = 0;
-        
 protected:
         /*
          * The object name is used for error/warning reporting.
@@ -232,8 +232,8 @@ protected:
         /*
          * Settings for projection variables.
          */
-        AVERAGING_TMP::TYPE d_proj_var_conservative_averaging_type;
-        AVERAGING_TMP::TYPE d_proj_var_primitive_averaging_type;
+        AVERAGING::TYPE d_proj_var_conservative_averaging_type;
+        AVERAGING::TYPE d_proj_var_primitive_averaging_type;
         
 };
 

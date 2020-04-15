@@ -2924,6 +2924,9 @@ FlowModelBasicUtilitiesFourEqnConservative::checkCellDataOfConservativeVariables
     boost::shared_ptr<pdat::CellData<int> >& bounded_flag,
     const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables)
 {
+    NULL_USE(bounded_flag);
+    NULL_USE(conservative_variables);
+    
     TBOX_ERROR(d_object_name
         << ": FlowModelBasicUtilitiesFourEqnConservative::"
         << "checkCellDataOfConservativeVariablesBounded()\n"
@@ -3715,6 +3718,9 @@ FlowModelBasicUtilitiesFourEqnConservative::checkCellDataOfPrimitiveVariablesBou
     boost::shared_ptr<pdat::CellData<int> >& bounded_flag,
     const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables)
 {
+    NULL_USE(bounded_flag);
+    NULL_USE(primitive_variables);
+    
     TBOX_ERROR(d_object_name
         << ": FlowModelBasicUtilitiesFourEqnConservative::"
         << "checkCellDataOfPrimitiveVariablesBounded()\n"
@@ -4505,7 +4511,7 @@ FlowModelBasicUtilitiesFourEqnConservative::checkSideDataOfPrimitiveVariablesBou
 void
 FlowModelBasicUtilitiesFourEqnConservative::registerDerivedVariablesForCharacteristicProjectionOfConservativeVariables(
     const hier::IntVector& num_subghosts,
-    const AVERAGING_TMP::TYPE& averaging_type)
+    const AVERAGING::TYPE& averaging_type)
 {
     NULL_USE(num_subghosts);
     
@@ -4540,7 +4546,7 @@ FlowModelBasicUtilitiesFourEqnConservative::registerDerivedVariablesForCharacter
 void
 FlowModelBasicUtilitiesFourEqnConservative::registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
     const hier::IntVector& num_subghosts,
-    const AVERAGING_TMP::TYPE& averaging_type)
+    const AVERAGING::TYPE& averaging_type)
 {
     if (d_flow_model.expired())
     {
@@ -4781,7 +4787,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
         
         switch (d_proj_var_primitive_averaging_type)
         {
-            case AVERAGING_TMP::SIMPLE:
+            case AVERAGING::SIMPLE:
             {
                 /*
                  * Compute the projection variables in the x-direction.
@@ -4832,7 +4838,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
                 
                 break;
             }
-            case AVERAGING_TMP::ROE:
+            case AVERAGING::ROE:
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelBasicUtilitiesFourEqnConservative::"
@@ -4875,7 +4881,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
         
         switch (d_proj_var_primitive_averaging_type)
         {
-            case AVERAGING_TMP::SIMPLE:
+            case AVERAGING::SIMPLE:
             {
                 /*
                  * Compute the projection variables in the x-direction.
@@ -5013,7 +5019,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
                 
                 break;
             }
-            case AVERAGING_TMP::ROE:
+            case AVERAGING::ROE:
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelBasicUtilitiesFourEqnConservative::"
@@ -5065,7 +5071,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
         
         switch (d_proj_var_primitive_averaging_type)
         {
-            case AVERAGING_TMP::SIMPLE:
+            case AVERAGING::SIMPLE:
             {
                 /*
                  * Compute the projection variables in the x-direction.
@@ -5336,7 +5342,7 @@ FlowModelBasicUtilitiesFourEqnConservative::computeSideDataOfProjectionVariables
                 
                 break;
             }
-            case AVERAGING_TMP::ROE:
+            case AVERAGING::ROE:
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelBasicUtilitiesFourEqnConservative::"
