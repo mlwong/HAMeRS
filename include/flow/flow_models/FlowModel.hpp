@@ -69,7 +69,6 @@ class FlowModel:
                 d_num_eqn(num_eqn),
                 d_num_ghosts(-hier::IntVector::getOne(d_dim)),
                 d_patch(nullptr),
-                d_patch_registered(false),
                 d_interior_box(hier::Box::getEmptyBox(dim)),
                 d_ghost_box(hier::Box::getEmptyBox(dim)),
                 d_interior_dims(hier::IntVector::getZero(d_dim)),
@@ -465,11 +464,6 @@ class FlowModel:
          * boost::shared_ptr to patch data context.
          */
         boost::shared_ptr<hier::VariableContext> d_data_context;
-        
-        /*
-         * Boolean to determine whether a patch is already registered.
-         */
-        bool d_patch_registered;
         
         /*
          * Interior box and box with ghost cells.

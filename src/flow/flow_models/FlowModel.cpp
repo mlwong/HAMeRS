@@ -6,7 +6,7 @@
 bool
 FlowModel::hasRegisteredPatch() const
 {
-    if (!d_patch_registered)
+    if (d_patch == nullptr)
     {
         return false;
     }
@@ -21,7 +21,7 @@ FlowModel::hasRegisteredPatch() const
 const hier::Patch&
 FlowModel::getRegisteredPatch() const
 {
-    if (!d_patch_registered)
+    if (d_patch == nullptr)
     {
         TBOX_ERROR(d_object_name
         << ": FlowModel::registerDiffusiveFluxes()\n"
