@@ -46,11 +46,6 @@ class ConvectiveFluxReconstructorFirstOrderHLLC: public ConvectiveFluxReconstruc
         std::vector<EQN_FORM::TYPE> d_eqn_form;
         bool d_has_advective_eqn_form;
         
-        /*
-         * boost::shared_ptr to the Riemann solver object.
-         */
-        boost::shared_ptr<FlowModelRiemannSolver> d_riemann_solver;
-        
 };
 
 #endif /* CONVECTIVE_FLUX_RECONSTRUCTOR_FIRST_ORDER_HLLC_HPP */

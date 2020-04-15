@@ -50,7 +50,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
     d_flow_model->setupRiemannSolver();
     d_flow_model->setupBasicUtilities();
     
-    d_riemann_solver = d_flow_model->getFlowModelRiemannSolver();
+    boost::shared_ptr<FlowModelRiemannSolver> riemann_solver = d_flow_model->getFlowModelRiemannSolver();
     boost::shared_ptr<FlowModelBasicUtilities> basic_utilities = d_flow_model->getFlowModelBasicUtilities();
     
     // Get the dimensions of box that covers the interior of patch.
@@ -432,7 +432,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         if (d_has_advective_eqn_form)
         {
-            d_riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
+            riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
                 convective_flux_midpoint,
                 velocity_midpoint,
                 primitive_variables_minus,
@@ -442,7 +442,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         }
         else
         {
-            d_riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
+            riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
                 convective_flux_midpoint,
                 primitive_variables_minus,
                 primitive_variables_plus,
@@ -1031,7 +1031,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         if (d_has_advective_eqn_form)
         {
-            d_riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
+            riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
                 convective_flux_midpoint_HLLC,
                 velocity_midpoint,
                 primitive_variables_minus,
@@ -1041,7 +1041,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         }
         else
         {
-            d_riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
+            riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
                 convective_flux_midpoint_HLLC,
                 primitive_variables_minus,
                 primitive_variables_plus,
@@ -1049,7 +1049,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                 RIEMANN_SOLVER::HLLC);
         }
         
-        d_riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
+        riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
             convective_flux_midpoint_HLLC_HLL,
             primitive_variables_minus,
             primitive_variables_plus,
@@ -1112,7 +1112,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         if (d_has_advective_eqn_form)
         {
-            d_riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
+            riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
                 convective_flux_midpoint_HLLC,
                 velocity_midpoint,
                 primitive_variables_minus,
@@ -1122,7 +1122,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         }
         else
         {
-            d_riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
+            riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
                 convective_flux_midpoint_HLLC,
                 primitive_variables_minus,
                 primitive_variables_plus,
@@ -1130,7 +1130,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                 RIEMANN_SOLVER::HLLC);
         }
         
-        d_riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
+        riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
             convective_flux_midpoint_HLLC_HLL,
             primitive_variables_minus,
             primitive_variables_plus,
@@ -2036,7 +2036,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         if (d_has_advective_eqn_form)
         {
-            d_riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
+            riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
                 convective_flux_midpoint_HLLC,
                 velocity_midpoint,
                 primitive_variables_minus,
@@ -2046,7 +2046,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         }
         else
         {
-            d_riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
+            riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
                 convective_flux_midpoint_HLLC,
                 primitive_variables_minus,
                 primitive_variables_plus,
@@ -2054,7 +2054,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                 RIEMANN_SOLVER::HLLC);
         }
         
-        d_riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
+        riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
             convective_flux_midpoint_HLLC_HLL,
             primitive_variables_minus,
             primitive_variables_plus,
@@ -2131,7 +2131,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         if (d_has_advective_eqn_form)
         {
-            d_riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
+            riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
                 convective_flux_midpoint_HLLC,
                 velocity_midpoint,
                 primitive_variables_minus,
@@ -2141,7 +2141,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         }
         else
         {
-            d_riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
+            riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
                 convective_flux_midpoint_HLLC,
                 primitive_variables_minus,
                 primitive_variables_plus,
@@ -2149,7 +2149,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                 RIEMANN_SOLVER::HLLC);
         }
         
-        d_riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
+        riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
             convective_flux_midpoint_HLLC_HLL,
             primitive_variables_minus,
             primitive_variables_plus,
@@ -2226,7 +2226,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         if (d_has_advective_eqn_form)
         {
-            d_riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
+            riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
                 convective_flux_midpoint_HLLC,
                 velocity_midpoint,
                 primitive_variables_minus,
@@ -2236,7 +2236,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         }
         else
         {
-            d_riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
+            riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
                 convective_flux_midpoint_HLLC,
                 primitive_variables_minus,
                 primitive_variables_plus,
@@ -2244,7 +2244,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                 RIEMANN_SOLVER::HLLC);
         }
         
-        d_riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
+        riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
             convective_flux_midpoint_HLLC_HLL,
             primitive_variables_minus,
             primitive_variables_plus,
