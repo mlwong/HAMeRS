@@ -1842,6 +1842,8 @@ RungeKuttaLevelIntegrator::advanceLevel(
                         false,
                         new_time);
                 
+                t_patch_num_kernel->stop();
+                
                 for (int si = 0; si < static_cast<int>(spectral_radiuses.size()); si++)
                 {
                     spectral_radiuses[si] = tbox::MathUtilities<double>::Max(
