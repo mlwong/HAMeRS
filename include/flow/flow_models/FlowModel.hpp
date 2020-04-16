@@ -7,6 +7,7 @@
 #include "extn/visit_data_writer/ExtendedVisItDataWriter.hpp"
 #include "flow/flow_models/FlowModelBasicUtilities.hpp"
 #include "flow/flow_models/FlowModelBoundaryUtilities.hpp"
+#include "flow/flow_models/FlowModelDiffusiveFluxUtilities.hpp"
 #include "flow/flow_models/FlowModelRiemannSolver.hpp"
 #include "flow/flow_models/FlowModelStatisticsUtilities.hpp"
 #include "util/Directions.hpp"
@@ -42,6 +43,7 @@ namespace VAR
 
 class FlowModelRiemannSolver;
 class FlowModelBasicUtilities;
+class FlowModelDiffusiveFluxUtilities;
 class FlowModelStatisticsUtilities;
 
 /*
@@ -147,6 +149,15 @@ class FlowModel:
         getFlowModelBasicUtilities() const
         {
             return d_flow_model_basic_utilities;
+        }
+        
+        /*
+         * Return the boost::shared_ptr to the diffusive flux utilities object.
+         */
+        const boost::shared_ptr<FlowModelDiffusiveFluxUtilities>&
+        getFlowModelDiffusiveFluxUtilities() const
+        {
+            return d_flow_model_diffusive_flux_utilities;
         }
         
         /*
@@ -350,6 +361,12 @@ class FlowModel:
         setupBasicUtilities();
         
         /*
+         * Setup the diffusive flux utilties object.
+         */
+        void
+        setupDiffusiveFluxUtilities();
+        
+        /*
          * Setup the statistics utilties object.
          */
         void
@@ -496,6 +513,11 @@ class FlowModel:
          * boost::shared_ptr to the basic utilities object for the flow model.
          */
         boost::shared_ptr<FlowModelBasicUtilities> d_flow_model_basic_utilities;
+        
+        /*
+         * boost::shared_ptr to the diffusive flux utilities object for the flow model.
+         */
+        boost::shared_ptr<FlowModelDiffusiveFluxUtilities> d_flow_model_diffusive_flux_utilities;
         
         /*
          * boost::shared_ptr to the boundary utilities object for the flow model.

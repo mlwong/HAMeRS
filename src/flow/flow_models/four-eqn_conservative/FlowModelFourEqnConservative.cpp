@@ -2,6 +2,7 @@
 
 #include "flow/flow_models/four-eqn_conservative/FlowModelBasicUtilitiesFourEqnConservative.hpp"
 #include "flow/flow_models/four-eqn_conservative/FlowModelBoundaryUtilitiesFourEqnConservative.hpp"
+#include "flow/flow_models/four-eqn_conservative/FlowModelDiffusiveFluxUtilitiesFourEqnConservative.hpp"
 #include "flow/flow_models/four-eqn_conservative/FlowModelRiemannSolverFourEqnConservative.hpp"
 #include "flow/flow_models/four-eqn_conservative/FlowModelStatisticsUtilitiesFourEqnConservative.hpp"
 
@@ -388,6 +389,15 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
         d_grid_geometry,
         d_num_species,
         d_equation_of_state_mixing_rules));
+    
+    /*
+     * Initialize diffusive flux utilities object.
+     */
+    d_flow_model_diffusive_flux_utilities.reset(new FlowModelDiffusiveFluxUtilitiesFourEqnConservative(
+        "d_flow_model_diffusive_flux_utilities",
+        d_dim,
+        d_grid_geometry,
+        d_num_species));
     
     /*
      * Initialize statistics utilities object.

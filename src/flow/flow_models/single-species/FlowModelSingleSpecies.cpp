@@ -2,6 +2,7 @@
 
 #include "flow/flow_models/single-species/FlowModelBasicUtilitiesSingleSpecies.hpp"
 #include "flow/flow_models/single-species/FlowModelBoundaryUtilitiesSingleSpecies.hpp"
+#include "flow/flow_models/single-species/FlowModelDiffusiveFluxUtilitiesSingleSpecies.hpp"
 #include "flow/flow_models/single-species/FlowModelRiemannSolverSingleSpecies.hpp"
 #include "flow/flow_models/single-species/FlowModelStatisticsUtilitiesSingleSpecies.hpp"
 
@@ -380,6 +381,15 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
         d_grid_geometry,
         d_num_species,
         d_equation_of_state_mixing_rules));
+    
+    /*
+     * Initialize diffusive flux utilities object.
+     */
+    d_flow_model_diffusive_flux_utilities.reset(new FlowModelDiffusiveFluxUtilitiesSingleSpecies(
+        "d_flow_model_diffusive_flux_utilities",
+        d_dim,
+        d_grid_geometry,
+        d_num_species));
     
     /*
      * Initialize statistics utilities object.

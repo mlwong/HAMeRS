@@ -2,6 +2,7 @@
 
 #include "flow/flow_models/five-eqn_Allaire/FlowModelBasicUtilitiesFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelBoundaryUtilitiesFiveEqnAllaire.hpp"
+#include "flow/flow_models/five-eqn_Allaire/FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelRiemannSolverFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelStatisticsUtilitiesFiveEqnAllaire.hpp"
 
@@ -289,6 +290,15 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
         d_grid_geometry,
         d_num_species,
         d_equation_of_state_mixing_rules));
+    
+    /*
+     * Initialize diffusive flux utilities object.
+     */
+    d_flow_model_diffusive_flux_utilities.reset(new FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire(
+        "d_flow_model_diffusive_flux_utilities",
+        d_dim,
+        d_grid_geometry,
+        d_num_species));
     
     /*
      * Initialize statistics utilities object.

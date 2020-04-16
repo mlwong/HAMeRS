@@ -112,6 +112,16 @@ FlowModel::setupBasicUtilities()
 
 
 /*
+ * Setup the diffusive flux utilties object.
+ */
+void
+FlowModel::setupDiffusiveFluxUtilities()
+{
+    d_flow_model_diffusive_flux_utilities->setFlowModel(shared_from_this());
+}
+
+
+/*
  * Setup the statistics utilties object.
  */
 void
