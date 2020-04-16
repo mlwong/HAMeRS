@@ -79,6 +79,9 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
     NULL_USE(time);
     NULL_USE(RK_step_number);
     
+    d_flow_model->setupRiemannSolver();
+    boost::shared_ptr<FlowModelRiemannSolver> riemann_solver = d_flow_model->getFlowModelRiemannSolver();
+    
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
@@ -141,9 +144,6 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
          */
         
         d_flow_model->registerPatchWithDataContext(patch, data_context);
-        
-        d_flow_model->setupRiemannSolver();
-        boost::shared_ptr<FlowModelRiemannSolver> riemann_solver = d_flow_model->getFlowModelRiemannSolver();
         
         /*
          * Get the pointers to the conservative variables.
@@ -323,9 +323,6 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
          */
         
         d_flow_model->registerPatchWithDataContext(patch, data_context);
-        
-        d_flow_model->setupRiemannSolver();
-        boost::shared_ptr<FlowModelRiemannSolver> riemann_solver = d_flow_model->getFlowModelRiemannSolver();
         
         /*
          * Get the pointers to the conservative variables.
@@ -614,9 +611,6 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
          */
         
         d_flow_model->registerPatchWithDataContext(patch, data_context);
-        
-        d_flow_model->setupRiemannSolver();
-        boost::shared_ptr<FlowModelRiemannSolver> riemann_solver = d_flow_model->getFlowModelRiemannSolver();
         
         /*
          * Get the pointers to the conservative variables.

@@ -468,6 +468,12 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
     NULL_USE(time);
     NULL_USE(RK_step_number);
     
+    d_flow_model->setupRiemannSolver();
+    d_flow_model->setupBasicUtilities();
+    
+    boost::shared_ptr<FlowModelRiemannSolver> riemann_solver = d_flow_model->getFlowModelRiemannSolver();
+    boost::shared_ptr<FlowModelBasicUtilities> basic_utilities = d_flow_model->getFlowModelBasicUtilities();
+    
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
@@ -559,12 +565,6 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
          */
         
         d_flow_model->registerPatchWithDataContext(patch, data_context);
-        
-        d_flow_model->setupRiemannSolver();
-        d_flow_model->setupBasicUtilities();
-        
-        boost::shared_ptr<FlowModelRiemannSolver> riemann_solver = d_flow_model->getFlowModelRiemannSolver();
-        boost::shared_ptr<FlowModelBasicUtilities> basic_utilities = d_flow_model->getFlowModelBasicUtilities();
         
         std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
         
@@ -1000,12 +1000,6 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
          */
         
         d_flow_model->registerPatchWithDataContext(patch, data_context);
-        
-        d_flow_model->setupRiemannSolver();
-        d_flow_model->setupBasicUtilities();
-        
-        boost::shared_ptr<FlowModelRiemannSolver> riemann_solver = d_flow_model->getFlowModelRiemannSolver();
-        boost::shared_ptr<FlowModelBasicUtilities> basic_utilities = d_flow_model->getFlowModelBasicUtilities();
         
         std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
         
@@ -1875,12 +1869,6 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
          */
         
         d_flow_model->registerPatchWithDataContext(patch, data_context);
-        
-        d_flow_model->setupRiemannSolver();
-        d_flow_model->setupBasicUtilities();
-        
-        boost::shared_ptr<FlowModelRiemannSolver> riemann_solver = d_flow_model->getFlowModelRiemannSolver();
-        boost::shared_ptr<FlowModelBasicUtilities> basic_utilities = d_flow_model->getFlowModelBasicUtilities();
         
         std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
         
