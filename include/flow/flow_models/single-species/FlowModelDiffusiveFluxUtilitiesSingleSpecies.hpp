@@ -2,6 +2,9 @@
 #define FLOW_MODEL_DIFFUSIVE_FLUX_UTILITIES_SINGLE_SPECIES_HPP
 
 #include "flow/flow_models/FlowModelDiffusiveFluxUtilities.hpp"
+#include "util/mixing_rules/equations_of_bulk_viscosity/EquationOfBulkViscosityMixingRulesManager.hpp"
+#include "util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosityMixingRulesManager.hpp"
+#include "util/mixing_rules/equations_of_thermal_conductivity/EquationOfThermalConductivityMixingRulesManager.hpp"
 
 class FlowModelDiffusiveFluxUtilitiesSingleSpecies: public FlowModelDiffusiveFluxUtilities
 {
@@ -10,13 +13,28 @@ class FlowModelDiffusiveFluxUtilitiesSingleSpecies: public FlowModelDiffusiveFlu
             const std::string& object_name,
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
-            const int& num_species):
+            const int& num_species,
+            const boost::shared_ptr<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
+            const boost::shared_ptr<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules,
+            const boost::shared_ptr<EquationOfThermalConductivityMixingRules> equation_of_thermal_conductivity_mixing_rules):
                 FlowModelDiffusiveFluxUtilities(
                     object_name,
                     dim,
                     grid_geometry,
                     num_species,
-                    2 + dim.getValue())
+                    2 + dim.getValue()),
+                d_num_subghosts_shear_viscosity(-hier::IntVector::getOne(d_dim)),
+                d_num_subghosts_bulk_viscosity(-hier::IntVector::getOne(d_dim)),
+                d_num_subghosts_thermal_conductivity(-hier::IntVector::getOne(d_dim)),
+                d_subghost_box_shear_viscosity(hier::Box::getEmptyBox(dim)),
+                d_subghost_box_bulk_viscosity(hier::Box::getEmptyBox(dim)),
+                d_subghost_box_thermal_conductivity(hier::Box::getEmptyBox(dim)),
+                d_subghostcell_dims_shear_viscosity(hier::IntVector::getZero(d_dim)),
+                d_subghostcell_dims_bulk_viscosity(hier::IntVector::getZero(d_dim)),
+                d_subghostcell_dims_thermal_conductivity(hier::IntVector::getZero(d_dim)),
+                d_equation_of_shear_viscosity_mixing_rules(equation_of_shear_viscosity_mixing_rules),
+                d_equation_of_bulk_viscosity_mixing_rules(equation_of_bulk_viscosity_mixing_rules),
+                d_equation_of_thermal_conductivity_mixing_rules(equation_of_thermal_conductivity_mixing_rules)
         {}
         
         ~FlowModelDiffusiveFluxUtilitiesSingleSpecies() {}
@@ -27,6 +45,11 @@ class FlowModelDiffusiveFluxUtilitiesSingleSpecies: public FlowModelDiffusiveFlu
         void
         registerDiffusiveFluxes(
             const hier::IntVector& num_subghosts);
+        
+        /*
+         * The cell data of all derived variables in the patch for this class are dumped.
+         */
+        void clearData();
         
         /*
          * Get the variables for the derivatives in the diffusive fluxes.
@@ -49,6 +72,53 @@ class FlowModelDiffusiveFluxUtilitiesSingleSpecies: public FlowModelDiffusiveFlu
             const DIRECTION::TYPE& derivative_direction);
         
     private:
+        /*
+         * Number of sub-ghost cells of derived cell data for this class.
+         */
+        hier::IntVector d_num_subghosts_shear_viscosity;
+        hier::IntVector d_num_subghosts_bulk_viscosity;
+        hier::IntVector d_num_subghosts_thermal_conductivity;
+        
+        /*
+         * Boxes with sub-ghost cells of derived cell data for this class.
+         */
+        hier::Box d_subghost_box_shear_viscosity;
+        hier::Box d_subghost_box_bulk_viscosity;
+        hier::Box d_subghost_box_thermal_conductivity;
+        
+        /*
+         * Dimensions of boxes with sub-ghost cells of derived cell data for this class.
+         */
+        hier::IntVector d_subghostcell_dims_shear_viscosity;
+        hier::IntVector d_subghostcell_dims_bulk_viscosity;
+        hier::IntVector d_subghostcell_dims_thermal_conductivity;
+        
+        /*
+         * boost::shared_ptr to derived cell data for this class.
+         */
+        boost::shared_ptr<pdat::CellData<double> > d_data_diffusivities;
+        
+        boost::shared_ptr<pdat::CellData<double> > d_data_shear_viscosity;
+        boost::shared_ptr<pdat::CellData<double> > d_data_bulk_viscosity;
+        boost::shared_ptr<pdat::CellData<double> > d_data_thermal_conductivity;
+        
+        /*
+         * boost::shared_ptr to EquationOfShearViscosityMixingRules.
+         */
+        const boost::shared_ptr<EquationOfShearViscosityMixingRules>
+            d_equation_of_shear_viscosity_mixing_rules;
+        
+        /*
+         * boost::shared_ptr to EquationOfBulkViscosityMixingRules.
+         */
+        const boost::shared_ptr<EquationOfBulkViscosityMixingRules>
+            d_equation_of_bulk_viscosity_mixing_rules;
+        
+        /*
+         * boost::shared_ptr to EquationOfThermalConductivityMixingRules.
+         */
+        const boost::shared_ptr<EquationOfThermalConductivityMixingRules>
+            d_equation_of_thermal_conductivity_mixing_rules;
         
 };
 

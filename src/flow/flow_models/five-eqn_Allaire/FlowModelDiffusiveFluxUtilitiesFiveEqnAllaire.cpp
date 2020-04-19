@@ -16,6 +16,19 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::registerDiffusiveFluxes(const hie
 
 
 /*
+ * The cell data of all derived variables in the patch for this class are dumped.
+ */
+void
+FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::clearData()
+{
+    TBOX_ERROR(d_object_name
+        << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::clearData()\n"
+        << "Function is not yet implemented!"
+        << std::endl);
+}
+
+
+/*
  * Get the variables for the derivatives in the diffusive fluxes.
  */
 void

@@ -397,7 +397,11 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
         "d_flow_model_diffusive_flux_utilities",
         d_dim,
         d_grid_geometry,
-        d_num_species));
+        d_num_species,
+        d_equation_of_mass_diffusivity_mixing_rules,
+        d_equation_of_shear_viscosity_mixing_rules,
+        d_equation_of_bulk_viscosity_mixing_rules,
+        d_equation_of_thermal_conductivity_mixing_rules));
     
     /*
      * Initialize statistics utilities object.
@@ -990,8 +994,6 @@ FlowModelFourEqnConservative::unregisterPatch()
             << std::endl);
     }
     
-    d_patch = nullptr;
-    
     d_num_ghosts                      = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_density           = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_mass_fractions    = -hier::IntVector::getOne(d_dim);
@@ -1067,6 +1069,7 @@ FlowModelFourEqnConservative::unregisterPatch()
     
     d_global_derived_cell_data_computed = false;
     
+    d_patch = nullptr;
     clearDataContext();
 }
 

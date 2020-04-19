@@ -2,6 +2,10 @@
 #define FLOW_MODEL_DIFFUSIVE_FLUX_UTILITIES_FOUR_EQN_CONSERVATIVE_HPP
 
 #include "flow/flow_models/FlowModelDiffusiveFluxUtilities.hpp"
+#include "util/mixing_rules/equations_of_bulk_viscosity/EquationOfBulkViscosityMixingRulesManager.hpp"
+#include "util/mixing_rules/equations_of_mass_diffusivity/EquationOfMassDiffusivityMixingRulesManager.hpp"
+#include "util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosityMixingRulesManager.hpp"
+#include "util/mixing_rules/equations_of_thermal_conductivity/EquationOfThermalConductivityMixingRulesManager.hpp"
 
 class FlowModelDiffusiveFluxUtilitiesFourEqnConservative: public FlowModelDiffusiveFluxUtilities
 {
@@ -10,13 +14,21 @@ class FlowModelDiffusiveFluxUtilitiesFourEqnConservative: public FlowModelDiffus
             const std::string& object_name,
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
-            const int& num_species):
+            const int& num_species,
+            const boost::shared_ptr<EquationOfMassDiffusivityMixingRules> equation_of_mass_diffusivity_mixing_rules,
+            const boost::shared_ptr<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
+            const boost::shared_ptr<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules,
+            const boost::shared_ptr<EquationOfThermalConductivityMixingRules> equation_of_thermal_conductivity_mixing_rules):
                 FlowModelDiffusiveFluxUtilities(
                     object_name,
                     dim,
                     grid_geometry,
                     num_species,
-                    num_species + dim.getValue() + 1)
+                    num_species + dim.getValue() + 1),
+                d_equation_of_mass_diffusivity_mixing_rules(equation_of_mass_diffusivity_mixing_rules),
+                d_equation_of_shear_viscosity_mixing_rules(equation_of_shear_viscosity_mixing_rules),
+                d_equation_of_bulk_viscosity_mixing_rules(equation_of_bulk_viscosity_mixing_rules),
+                d_equation_of_thermal_conductivity_mixing_rules(equation_of_thermal_conductivity_mixing_rules)
         {}
         
         ~FlowModelDiffusiveFluxUtilitiesFourEqnConservative() {}
@@ -27,6 +39,11 @@ class FlowModelDiffusiveFluxUtilitiesFourEqnConservative: public FlowModelDiffus
         void
         registerDiffusiveFluxes(
             const hier::IntVector& num_subghosts);
+        
+        /*
+         * The cell data of all derived variables in the patch for this class are dumped.
+         */
+        void clearData();
         
         /*
          * Get the variables for the derivatives in the diffusive fluxes.
@@ -49,6 +66,29 @@ class FlowModelDiffusiveFluxUtilitiesFourEqnConservative: public FlowModelDiffus
             const DIRECTION::TYPE& derivative_direction);
         
     private:
+        /*
+         * boost::shared_ptr to EquationOfMassDiffusivityMixingRules.
+         */
+        const boost::shared_ptr<EquationOfMassDiffusivityMixingRules>
+            d_equation_of_mass_diffusivity_mixing_rules;
+        
+        /*
+         * boost::shared_ptr to EquationOfShearViscosityMixingRules.
+         */
+        const boost::shared_ptr<EquationOfShearViscosityMixingRules>
+            d_equation_of_shear_viscosity_mixing_rules;
+        
+        /*
+         * boost::shared_ptr to EquationOfBulkViscosityMixingRules.
+         */
+        const boost::shared_ptr<EquationOfBulkViscosityMixingRules>
+            d_equation_of_bulk_viscosity_mixing_rules;
+        
+        /*
+         * boost::shared_ptr to EquationOfThermalConductivityMixingRules.
+         */
+        const boost::shared_ptr<EquationOfThermalConductivityMixingRules>
+            d_equation_of_thermal_conductivity_mixing_rules;
         
 };
 

@@ -389,7 +389,10 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
         "d_flow_model_diffusive_flux_utilities",
         d_dim,
         d_grid_geometry,
-        d_num_species));
+        d_num_species,
+        d_equation_of_shear_viscosity_mixing_rules,
+        d_equation_of_bulk_viscosity_mixing_rules,
+        d_equation_of_thermal_conductivity_mixing_rules));
     
     /*
      * Initialize statistics utilities object.
@@ -922,8 +925,6 @@ FlowModelSingleSpecies::unregisterPatch()
             << std::endl);
     }
     
-    d_patch = nullptr;
-    
     d_num_ghosts                      = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_velocity          = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_internal_energy   = -hier::IntVector::getOne(d_dim);
@@ -983,10 +984,14 @@ FlowModelSingleSpecies::unregisterPatch()
     d_data_max_wave_speed_y.reset();
     d_data_max_wave_speed_z.reset();
     d_data_max_diffusivity.reset();
+    
+    d_flow_model_diffusive_flux_utilities->clearData();
+    
     d_data_diffusivities.reset();
     
     d_global_derived_cell_data_computed = false;
     
+    d_patch = nullptr;
     clearDataContext();
 }
 

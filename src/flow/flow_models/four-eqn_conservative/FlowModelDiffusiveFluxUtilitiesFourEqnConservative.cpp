@@ -16,6 +16,19 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::registerDiffusiveFluxes(cons
 
 
 /*
+ * The cell data of all derived variables in the patch for this class are dumped.
+ */
+void
+FlowModelDiffusiveFluxUtilitiesFourEqnConservative::clearData()
+{
+    TBOX_ERROR(d_object_name
+        << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::clearData()\n"
+        << "Function is not yet implemented!"
+        << std::endl);
+}
+
+
+/*
  * Get the variables for the derivatives in the diffusive fluxes.
  */
 void

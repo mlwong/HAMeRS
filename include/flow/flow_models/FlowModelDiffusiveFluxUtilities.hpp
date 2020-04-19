@@ -29,7 +29,11 @@ class FlowModelDiffusiveFluxUtilities
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
                 d_num_species(num_species),
-                d_num_eqn(num_eqn)
+                d_num_eqn(num_eqn),
+                d_derived_cell_data_computed(false),
+                d_num_subghosts_diffusivities(-hier::IntVector::getOne(d_dim)),
+                d_subghost_box_diffusivities(hier::Box::getEmptyBox(dim)),
+                d_subghostcell_dims_diffusivities(hier::IntVector::getZero(d_dim))
         {}
         
         virtual ~FlowModelDiffusiveFluxUtilities() {}
@@ -48,6 +52,12 @@ class FlowModelDiffusiveFluxUtilities
         virtual void
         registerDiffusiveFluxes(
             const hier::IntVector& num_subghosts);
+        
+        /*
+         * The cell data of all derived variables in the patch for this class are dumped.
+         */
+        virtual void clearData()
+        {}
         
         /*
          * Get the variables for the derivatives in the diffusive fluxes.
@@ -94,6 +104,26 @@ protected:
          * Number of equations.
          */
         const int d_num_eqn;
+        
+        /*
+         * Whether all or part of global derived cell data related to this class is computed.
+         */
+        bool d_derived_cell_data_computed;
+        
+        /*
+         * Number of sub-ghost cells of diffusivities.
+         */
+        hier::IntVector d_num_subghosts_diffusivities;
+        
+        /*
+         * Box with sub-ghost cells of diffusivities.
+         */
+        hier::Box d_subghost_box_diffusivities;
+        
+        /*
+         * Dimensions of box with sub-ghost cells of diffusivities.
+         */
+        hier::IntVector d_subghostcell_dims_diffusivities;
         
         /*
          * boost::weak_ptr to FlowModel.
