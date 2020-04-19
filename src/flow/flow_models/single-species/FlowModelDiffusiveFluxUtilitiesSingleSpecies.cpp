@@ -23,6 +23,10 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::registerDiffusiveFluxes(const hier
     
     const hier::Box interior_box = patch.getBox();
     
+    /*
+     * Register the required derived variables in flow model.
+     */
+    
     std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
     
     num_subghosts_of_data.insert(
@@ -35,6 +39,10 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::registerDiffusiveFluxes(const hier
         std::pair<std::string, hier::IntVector>("TEMPERATURE", num_subghosts));
     
     flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+    
+    /*
+     * Set ghost boxes of derived cell variables for this class.
+     */
     
     d_num_subghosts_diffusivities = num_subghosts;
     d_subghost_box_diffusivities = interior_box;
@@ -958,6 +966,9 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxDiffusivities(
     const DIRECTION::TYPE& flux_direction,
     const DIRECTION::TYPE& derivative_direction)
 {
+    // Create empty box.
+    const hier::Box empty_box(d_dim);
+    
     if (d_flow_model.expired())
     {
         TBOX_ERROR(d_object_name
@@ -965,9 +976,6 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxDiffusivities(
             << "The object is not setup yet!"
             << std::endl);
     }
-    
-    // Create empty box.
-    const hier::Box empty_box(d_dim);
     
     boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
@@ -1021,9 +1029,14 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxDiffusivities(
          * Create cell data of shear viscosity, bulk viscosity and thermal conductivity.
          */
         
-        d_data_shear_viscosity.reset(new pdat::CellData<double>(interior_box, 1, d_num_subghosts_shear_viscosity));
-        d_data_bulk_viscosity.reset(new pdat::CellData<double>(interior_box, 1, d_num_subghosts_bulk_viscosity));
-        d_data_thermal_conductivity.reset(new pdat::CellData<double>(interior_box, 1, d_num_subghosts_thermal_conductivity));
+        d_data_shear_viscosity.reset(new pdat::CellData<double>(
+            interior_box, 1, d_num_subghosts_shear_viscosity));
+        
+        d_data_bulk_viscosity.reset(new pdat::CellData<double>(
+            interior_box, 1, d_num_subghosts_bulk_viscosity));
+        
+        d_data_thermal_conductivity.reset(new pdat::CellData<double>(
+            interior_box, 1, d_num_subghosts_thermal_conductivity));
         
         // Get the pointers to the cell data of shear viscosity, bulk viscosity and thermal conductivity.
         double* mu    = d_data_shear_viscosity->getPointer(0);

@@ -96,8 +96,6 @@ class FlowModelDiffusiveFluxUtilitiesSingleSpecies: public FlowModelDiffusiveFlu
         /*
          * boost::shared_ptr to derived cell data for this class.
          */
-        boost::shared_ptr<pdat::CellData<double> > d_data_diffusivities;
-        
         boost::shared_ptr<pdat::CellData<double> > d_data_shear_viscosity;
         boost::shared_ptr<pdat::CellData<double> > d_data_bulk_viscosity;
         boost::shared_ptr<pdat::CellData<double> > d_data_thermal_conductivity;

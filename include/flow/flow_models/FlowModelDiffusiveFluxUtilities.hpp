@@ -126,6 +126,11 @@ protected:
         hier::IntVector d_subghostcell_dims_diffusivities;
         
         /*
+         * boost::shared_ptr to cell data of diffusivities.
+         */
+        boost::shared_ptr<pdat::CellData<double> > d_data_diffusivities;
+        
+        /*
          * boost::weak_ptr to FlowModel.
          */
         boost::weak_ptr<FlowModel> d_flow_model;
