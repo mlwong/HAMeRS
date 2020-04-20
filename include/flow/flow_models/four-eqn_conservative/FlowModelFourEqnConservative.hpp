@@ -85,7 +85,7 @@ class FlowModelFourEqnConservative: public FlowModel
         
         /*
          * Unregister the registered patch. The registered data context and the cell data of all derived variables in
-         * the patch are dumped.
+         * the patch are cleared.
          */
         void unregisterPatch();
         

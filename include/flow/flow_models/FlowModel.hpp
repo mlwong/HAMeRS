@@ -75,7 +75,7 @@ class FlowModel:
                 d_ghost_box(hier::Box::getEmptyBox(dim)),
                 d_interior_dims(hier::IntVector::getZero(d_dim)),
                 d_ghostcell_dims(hier::IntVector::getZero(d_dim)),
-                d_global_derived_cell_data_computed(false)
+                d_derived_cell_data_computed(false)
         {
             NULL_USE(flow_model_db);
         }
@@ -245,7 +245,7 @@ class FlowModel:
         
         /*
          * Unregister the registered patch. The registered data context and the cell data of all derived variables in
-         * the patch are dumped.
+         * the patch are cleared.
          */
         virtual void unregisterPatch() = 0;
         
@@ -470,7 +470,7 @@ class FlowModel:
         /*
          * Whether all or part of global derived cell data is computed.
          */
-        bool d_global_derived_cell_data_computed;
+        bool d_derived_cell_data_computed;
         
         /*
          * boost::shared_ptr to the plotting context.

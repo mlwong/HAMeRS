@@ -110,7 +110,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::registerDerivedVariablesForD
 
 
 /*
- * The cell data of all derived variables in the patch for this class are dumped.
+ * The cell data of all derived variables in the patch for this class are cleared.
  */
 void
 FlowModelDiffusiveFluxUtilitiesFourEqnConservative::clearCellData()

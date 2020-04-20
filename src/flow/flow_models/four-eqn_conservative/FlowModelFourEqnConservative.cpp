@@ -733,7 +733,7 @@ FlowModelFourEqnConservative::registerDerivedVariables(
     }
     
     // Check whether all or part of derived cell data is already computed.
-    if (d_global_derived_cell_data_computed)
+    if (d_derived_cell_data_computed)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::registerDerivedVariables()\n"
@@ -913,7 +913,7 @@ FlowModelFourEqnConservative::registerDerivedVariables(
 
 /*
  * Unregister the registered patch. The registered data context and all global derived
- * cell data in the patch are dumped.
+ * cell data in the patch are cleared.
  */
 void
 FlowModelFourEqnConservative::unregisterPatch()
@@ -998,7 +998,7 @@ FlowModelFourEqnConservative::unregisterPatch()
     
     d_flow_model_diffusive_flux_utilities->clearCellData();
     
-    d_global_derived_cell_data_computed = false;
+    d_derived_cell_data_computed = false;
     
     d_patch = nullptr;
     clearDataContext();
@@ -1023,7 +1023,7 @@ FlowModelFourEqnConservative::computeDerivedCellData(const hier::Box& domain)
     /*
      * Set the boxes and their dimensions for the derived cell variables.
      */
-    if (!d_global_derived_cell_data_computed)
+    if (!d_derived_cell_data_computed)
     {
         setDerivedCellVariableGhostBoxes();
     }
@@ -1184,7 +1184,7 @@ FlowModelFourEqnConservative::computeDerivedCellData(const hier::Box& domain)
         }
     }
     
-    d_global_derived_cell_data_computed = true;
+    d_derived_cell_data_computed = true;
 }
 
 
