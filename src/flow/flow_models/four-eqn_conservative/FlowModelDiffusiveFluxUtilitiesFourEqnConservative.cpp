@@ -1,10 +1,47 @@
 #include "flow/flow_models/four-eqn_conservative/FlowModelDiffusiveFluxUtilitiesFourEqnConservative.hpp"
 
+FlowModelDiffusiveFluxUtilitiesFourEqnConservative::FlowModelDiffusiveFluxUtilitiesFourEqnConservative(
+    const std::string& object_name,
+    const tbox::Dimension& dim,
+    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+    const int& num_species,
+    const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules,
+    const boost::shared_ptr<EquationOfMassDiffusivityMixingRules> equation_of_mass_diffusivity_mixing_rules,
+    const boost::shared_ptr<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
+    const boost::shared_ptr<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules,
+    const boost::shared_ptr<EquationOfThermalConductivityMixingRules> equation_of_thermal_conductivity_mixing_rules):
+        FlowModelDiffusiveFluxUtilities(
+            object_name,
+            dim,
+            grid_geometry,
+            num_species,
+            num_species + dim.getValue() + 1),
+        d_num_subghosts_mass_diffusivities(-hier::IntVector::getOne(d_dim)),
+        d_num_subghosts_shear_viscosity(-hier::IntVector::getOne(d_dim)),
+        d_num_subghosts_bulk_viscosity(-hier::IntVector::getOne(d_dim)),
+        d_num_subghosts_thermal_conductivity(-hier::IntVector::getOne(d_dim)),
+        d_subghost_box_mass_diffusivities(hier::Box::getEmptyBox(dim)),
+        d_subghost_box_shear_viscosity(hier::Box::getEmptyBox(dim)),
+        d_subghost_box_bulk_viscosity(hier::Box::getEmptyBox(dim)),
+        d_subghost_box_thermal_conductivity(hier::Box::getEmptyBox(dim)),
+        d_subghostcell_dims_mass_diffusivities(hier::IntVector::getZero(d_dim)),
+        d_subghostcell_dims_shear_viscosity(hier::IntVector::getZero(d_dim)),
+        d_subghostcell_dims_bulk_viscosity(hier::IntVector::getZero(d_dim)),
+        d_subghostcell_dims_thermal_conductivity(hier::IntVector::getZero(d_dim)),
+        d_equation_of_state_mixing_rules(equation_of_state_mixing_rules),
+        d_equation_of_mass_diffusivity_mixing_rules(equation_of_mass_diffusivity_mixing_rules),
+        d_equation_of_shear_viscosity_mixing_rules(equation_of_shear_viscosity_mixing_rules),
+        d_equation_of_bulk_viscosity_mixing_rules(equation_of_bulk_viscosity_mixing_rules),
+        d_equation_of_thermal_conductivity_mixing_rules(equation_of_thermal_conductivity_mixing_rules)
+{}
+
+
 /*
  * Register the required variables for the computation of diffusive fluxes in the registered patch.
  */
 void
-FlowModelDiffusiveFluxUtilitiesFourEqnConservative::registerDiffusiveFluxes(const hier::IntVector& num_subghosts)
+FlowModelDiffusiveFluxUtilitiesFourEqnConservative::registerDerivedVariablesForDiffusiveFluxes(
+    const hier::IntVector& num_subghosts)
 {
     if (d_flow_model.expired())
     {
@@ -76,28 +113,8 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::registerDiffusiveFluxes(cons
  * The cell data of all derived variables in the patch for this class are dumped.
  */
 void
-FlowModelDiffusiveFluxUtilitiesFourEqnConservative::clearData()
+FlowModelDiffusiveFluxUtilitiesFourEqnConservative::clearCellData()
 {
-    if (d_flow_model.expired())
-    {
-        TBOX_ERROR(d_object_name
-            << ": "
-            << "The object is not setup yet!"
-            << std::endl);
-    }
-    
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
-    
-    // Check whether a patch is already registered.
-    if (!flow_model_tmp->hasRegisteredPatch())
-    {
-        TBOX_ERROR(d_object_name
-            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::"
-            << "clearData()\n"
-            << "No patch is registered yet."
-            << std::endl);
-    }
-    
     d_num_subghosts_diffusivities        = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_mass_diffusivities   = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_shear_viscosity      = -hier::IntVector::getOne(d_dim);
@@ -130,7 +147,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::clearData()
  * Get the variables for the derivatives in the diffusive fluxes.
  */
 void
-FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxVariablesForDerivative(
+FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVariablesForDerivative(
     std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_var_data,
     std::vector<std::vector<int> >& derivative_var_component_idx,
     const DIRECTION::TYPE& flux_direction,
@@ -239,7 +256,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxVariablesFor
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxVariablesForDerivative()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                             << "There are only x-direction for one-dimensional problem."
                             << std::endl);
                     }
@@ -250,7 +267,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxVariablesFor
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxVariablesForDerivative()\n"
+                    << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                     << "There are only x-direction for one-dimensional problem."
                     << std::endl);
             }
@@ -392,7 +409,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxVariablesFor
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxVariablesForDerivative()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                             << "There are only x-direction and y-direction for two-dimensional problem."
                             << std::endl);
                     }
@@ -532,7 +549,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxVariablesFor
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxVariablesForDerivative()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                             << "There are only x-direction and y-direction for two-dimensional problem."
                             << std::endl);
                     }
@@ -543,7 +560,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxVariablesFor
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxVariablesForDerivative()\n"
+                    << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                     << "There are only x-direction and y-direction for two-dimensional problem."
                     << std::endl);
             }
@@ -749,7 +766,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxVariablesFor
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxVariablesForDerivative()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                             << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                             << std::endl);
                     }
@@ -953,7 +970,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxVariablesFor
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxVariablesForDerivative()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                             << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                             << std::endl);
                     }
@@ -1157,7 +1174,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxVariablesFor
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxVariablesForDerivative()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                             << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                             << std::endl);
                     }
@@ -1168,7 +1185,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxVariablesFor
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxVariablesForDerivative()\n"
+                    << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                     << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                     << std::endl);
             }
@@ -1181,7 +1198,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxVariablesFor
  * Get the diffusivities in the diffusive flux.
  */
 void
-FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxDiffusivities(
+FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDiffusivities(
     std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& diffusivities_data,
     std::vector<std::vector<int> >& diffusivities_component_idx,
     const DIRECTION::TYPE& flux_direction,
@@ -2072,7 +2089,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxDiffusivitie
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxDiffusivities()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDiffusivities()\n"
                             << "There are only x-direction for one-dimensional problem."
                             << std::endl);
                     }
@@ -2083,7 +2100,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxDiffusivitie
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxDiffusivities()\n"
+                    << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDiffusivities()\n"
                     << "There are only x-direction for one-dimensional problem."
                     << std::endl);
             }
@@ -2234,7 +2251,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxDiffusivitie
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxDiffusivities()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDiffusivities()\n"
                             << "There are only x-direction and y-direction for two-dimensional problem."
                             << std::endl);
                     }
@@ -2383,7 +2400,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxDiffusivitie
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxDiffusivities()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDiffusivities()\n"
                             << "There are only x-direction and y-direction for two-dimensional problem."
                             << std::endl);
                     }
@@ -2394,7 +2411,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxDiffusivitie
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxDiffusivities()\n"
+                    << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDiffusivities()\n"
                     << "There are only x-direction and y-direction for two-dimensional problem."
                     << std::endl);
             }
@@ -2615,7 +2632,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxDiffusivitie
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxDiffusivities()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDiffusivities()\n"
                             << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                             << std::endl);
                     }
@@ -2834,7 +2851,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxDiffusivitie
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxDiffusivities()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDiffusivities()\n"
                             << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                             << std::endl);
                     }
@@ -3053,7 +3070,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxDiffusivitie
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxDiffusivities()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDiffusivities()\n"
                             << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                             << std::endl);
                     }
@@ -3064,7 +3081,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxDiffusivitie
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getDiffusiveFluxDiffusivities()\n"
+                    << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDiffusivities()\n"
                     << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                     << std::endl);
             }

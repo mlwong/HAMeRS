@@ -244,13 +244,6 @@ class FlowModel:
             const std::unordered_map<std::string, hier::IntVector>& num_subghosts_of_data) = 0;
         
         /*
-         * Register the required variables for the computation of diffusive fluxes in the registered patch.
-         */
-        virtual void
-        registerDiffusiveFluxes(
-            const hier::IntVector& num_subghosts);
-        
-        /*
          * Unregister the registered patch. The registered data context and the cell data of all derived variables in
          * the patch are dumped.
          */
@@ -317,26 +310,6 @@ class FlowModel:
          */
         virtual std::vector<boost::shared_ptr<pdat::CellData<double> > >
         getCellDataOfPrimitiveVariables() = 0;
-        
-        /*
-         * Get the variables for the derivatives in the diffusive fluxes.
-         */
-        virtual void
-        getDiffusiveFluxVariablesForDerivative(
-            std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_var_data,
-            std::vector<std::vector<int> >& derivative_var_component_idx,
-            const DIRECTION::TYPE& flux_direction,
-            const DIRECTION::TYPE& derivative_direction);
-        
-        /*
-         * Get the diffusivities in the diffusive flux.
-         */
-        virtual void
-        getDiffusiveFluxDiffusivities(
-            std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& diffusivities_data,
-            std::vector<std::vector<int> >& diffusivities_component_idx,
-            const DIRECTION::TYPE& flux_direction,
-            const DIRECTION::TYPE& derivative_direction);
         
         /*
          * Set the plotting context.

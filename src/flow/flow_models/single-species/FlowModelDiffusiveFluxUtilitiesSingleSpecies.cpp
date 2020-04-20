@@ -1,10 +1,40 @@
 #include "flow/flow_models/single-species/FlowModelDiffusiveFluxUtilitiesSingleSpecies.hpp"
 
+FlowModelDiffusiveFluxUtilitiesSingleSpecies::FlowModelDiffusiveFluxUtilitiesSingleSpecies(
+    const std::string& object_name,
+    const tbox::Dimension& dim,
+    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+    const int& num_species,
+    const boost::shared_ptr<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
+    const boost::shared_ptr<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules,
+    const boost::shared_ptr<EquationOfThermalConductivityMixingRules> equation_of_thermal_conductivity_mixing_rules):
+        FlowModelDiffusiveFluxUtilities(
+            object_name,
+            dim,
+            grid_geometry,
+            num_species,
+            2 + dim.getValue()),
+        d_num_subghosts_shear_viscosity(-hier::IntVector::getOne(d_dim)),
+        d_num_subghosts_bulk_viscosity(-hier::IntVector::getOne(d_dim)),
+        d_num_subghosts_thermal_conductivity(-hier::IntVector::getOne(d_dim)),
+        d_subghost_box_shear_viscosity(hier::Box::getEmptyBox(dim)),
+        d_subghost_box_bulk_viscosity(hier::Box::getEmptyBox(dim)),
+        d_subghost_box_thermal_conductivity(hier::Box::getEmptyBox(dim)),
+        d_subghostcell_dims_shear_viscosity(hier::IntVector::getZero(d_dim)),
+        d_subghostcell_dims_bulk_viscosity(hier::IntVector::getZero(d_dim)),
+        d_subghostcell_dims_thermal_conductivity(hier::IntVector::getZero(d_dim)),
+        d_equation_of_shear_viscosity_mixing_rules(equation_of_shear_viscosity_mixing_rules),
+        d_equation_of_bulk_viscosity_mixing_rules(equation_of_bulk_viscosity_mixing_rules),
+        d_equation_of_thermal_conductivity_mixing_rules(equation_of_thermal_conductivity_mixing_rules)
+{}
+
+
 /*
  * Register the required variables for the computation of diffusive fluxes in the registered patch.
  */
 void
-FlowModelDiffusiveFluxUtilitiesSingleSpecies::registerDiffusiveFluxes(const hier::IntVector& num_subghosts)
+FlowModelDiffusiveFluxUtilitiesSingleSpecies::registerDerivedVariablesForDiffusiveFluxes(
+    const hier::IntVector& num_subghosts)
 {
     if (d_flow_model.expired())
     {
@@ -67,28 +97,8 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::registerDiffusiveFluxes(const hier
  * The cell data of all derived variables in the patch for this class are dumped.
  */
 void
-FlowModelDiffusiveFluxUtilitiesSingleSpecies::clearData()
+FlowModelDiffusiveFluxUtilitiesSingleSpecies::clearCellData()
 {
-    if (d_flow_model.expired())
-    {
-        TBOX_ERROR(d_object_name
-            << ": "
-            << "The object is not setup yet!"
-            << std::endl);
-    }
-    
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
-    
-    // Check whether a patch is already registered.
-    if (!flow_model_tmp->hasRegisteredPatch())
-    {
-        TBOX_ERROR(d_object_name
-            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::"
-            << "clearData()\n"
-            << "No patch is registered yet."
-            << std::endl);
-    }
-    
     d_num_subghosts_diffusivities        = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_shear_viscosity      = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_bulk_viscosity       = -hier::IntVector::getOne(d_dim);
@@ -117,7 +127,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::clearData()
  * Get the variables for the derivatives in the diffusive fluxes.
  */
 void
-FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxVariablesForDerivative(
+FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxVariablesForDerivative(
     std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_var_data,
     std::vector<std::vector<int> >& derivative_var_component_idx,
     const DIRECTION::TYPE& flux_direction,
@@ -192,7 +202,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxVariablesForDeriva
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxVariablesForDerivative()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                             << "There are only x-direction for one-dimensional problem."
                             << std::endl);
                     }
@@ -203,7 +213,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxVariablesForDeriva
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxVariablesForDerivative()\n"
+                    << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                     << "There are only x-direction for one-dimensional problem."
                     << std::endl);
             }
@@ -312,7 +322,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxVariablesForDeriva
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxVariablesForDerivative()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                             << "There are only x-direction and y-direction for two-dimensional problem."
                             << std::endl);
                     }
@@ -419,7 +429,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxVariablesForDeriva
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxVariablesForDerivative()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                             << "There are only x-direction and y-direction for two-dimensional problem."
                             << std::endl);
                     }
@@ -430,7 +440,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxVariablesForDeriva
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxVariablesForDerivative()\n"
+                    << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                     << "There are only x-direction and y-direction for two-dimensional problem."
                     << std::endl);
             }
@@ -600,7 +610,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxVariablesForDeriva
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxVariablesForDerivative()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                             << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                             << std::endl);
                     }
@@ -768,7 +778,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxVariablesForDeriva
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxVariablesForDerivative()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                             << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                             << std::endl);
                     }
@@ -936,7 +946,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxVariablesForDeriva
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxVariablesForDerivative()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                             << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                             << std::endl);
                     }
@@ -947,7 +957,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxVariablesForDeriva
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxVariablesForDerivative()\n"
+                    << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                     << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                     << std::endl);
             }
@@ -960,7 +970,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxVariablesForDeriva
  * Get the diffusivities in the diffusive flux.
  */
 void
-FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxDiffusivities(
+FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusivities(
     std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& diffusivities_data,
     std::vector<std::vector<int> >& diffusivities_component_idx,
     const DIRECTION::TYPE& flux_direction,
@@ -1372,7 +1382,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxDiffusivities(
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxDiffusivities()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusivities()\n"
                             << "There are only x-direction for one-dimensional problem."
                             << std::endl);
                     }
@@ -1383,7 +1393,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxDiffusivities(
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxDiffusivities()\n"
+                    << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusivities()\n"
                     << "There are only x-direction for one-dimensional problem."
                     << std::endl);
             }
@@ -1492,7 +1502,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxDiffusivities(
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxDiffusivities()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusivities()\n"
                             << "There are only x-direction and y-direction for two-dimensional problem."
                             << std::endl);
                     }
@@ -1599,7 +1609,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxDiffusivities(
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxDiffusivities()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusivities()\n"
                             << "There are only x-direction and y-direction for two-dimensional problem."
                             << std::endl);
                     }
@@ -1610,7 +1620,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxDiffusivities(
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxDiffusivities()\n"
+                    << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusivities()\n"
                     << "There are only x-direction and y-direction for two-dimensional problem."
                     << std::endl);
             }
@@ -1780,7 +1790,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxDiffusivities(
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxDiffusivities()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusivities()\n"
                             << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                             << std::endl);
                     }
@@ -1948,7 +1958,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxDiffusivities(
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxDiffusivities()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusivities()\n"
                             << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                             << std::endl);
                     }
@@ -2116,7 +2126,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxDiffusivities(
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxDiffusivities()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusivities()\n"
                             << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                             << std::endl);
                     }
@@ -2127,7 +2137,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxDiffusivities(
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxDiffusivities()\n"
+                    << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusivities()\n"
                     << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                     << std::endl);
             }

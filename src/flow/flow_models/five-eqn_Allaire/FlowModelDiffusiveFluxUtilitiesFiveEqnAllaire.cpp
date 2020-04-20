@@ -1,10 +1,35 @@
 #include "flow/flow_models/five-eqn_Allaire/FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire.hpp"
 
+FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire(
+    const std::string& object_name,
+    const tbox::Dimension& dim,
+    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+    const int& num_species,
+    const boost::shared_ptr<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
+    const boost::shared_ptr<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules):
+        FlowModelDiffusiveFluxUtilities(
+            object_name,
+            dim,
+            grid_geometry,
+            num_species,
+            dim.getValue() + 2*num_species),
+        d_num_subghosts_shear_viscosity(-hier::IntVector::getOne(d_dim)),
+        d_num_subghosts_bulk_viscosity(-hier::IntVector::getOne(d_dim)),
+        d_subghost_box_shear_viscosity(hier::Box::getEmptyBox(dim)),
+        d_subghost_box_bulk_viscosity(hier::Box::getEmptyBox(dim)),
+        d_subghostcell_dims_shear_viscosity(hier::IntVector::getZero(d_dim)),
+        d_subghostcell_dims_bulk_viscosity(hier::IntVector::getZero(d_dim)),
+        d_equation_of_shear_viscosity_mixing_rules(equation_of_shear_viscosity_mixing_rules),
+        d_equation_of_bulk_viscosity_mixing_rules(equation_of_bulk_viscosity_mixing_rules)
+{}
+
+
 /*
  * Register the required variables for the computation of diffusive fluxes in the registered patch.
  */
 void
-FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::registerDiffusiveFluxes(const hier::IntVector& num_subghosts)
+FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::registerDerivedVariablesForDiffusiveFluxes(
+    const hier::IntVector& num_subghosts)
 {
     if (d_flow_model.expired())
     {
@@ -52,14 +77,14 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::registerDiffusiveFluxes(const hie
     d_subghost_box_diffusivities.grow(d_num_subghosts_diffusivities);
     d_subghostcell_dims_diffusivities = d_subghost_box_diffusivities.numberCells();
     
-    d_num_subghosts_shear_viscosity      = d_num_subghosts_diffusivities;
-    d_num_subghosts_bulk_viscosity       = d_num_subghosts_diffusivities;
+    d_num_subghosts_shear_viscosity = d_num_subghosts_diffusivities;
+    d_num_subghosts_bulk_viscosity  = d_num_subghosts_diffusivities;
     
-    d_subghost_box_shear_viscosity      = d_subghost_box_diffusivities;
-    d_subghost_box_bulk_viscosity       = d_subghost_box_diffusivities;
+    d_subghost_box_shear_viscosity = d_subghost_box_diffusivities;
+    d_subghost_box_bulk_viscosity  = d_subghost_box_diffusivities;
     
-    d_subghostcell_dims_shear_viscosity      = d_subghostcell_dims_diffusivities;
-    d_subghostcell_dims_bulk_viscosity       = d_subghostcell_dims_diffusivities;
+    d_subghostcell_dims_shear_viscosity = d_subghostcell_dims_diffusivities;
+    d_subghostcell_dims_bulk_viscosity  = d_subghostcell_dims_diffusivities;
 }
 
 
@@ -67,28 +92,8 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::registerDiffusiveFluxes(const hie
  * The cell data of all derived variables in the patch for this class are dumped.
  */
 void
-FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::clearData()
+FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::clearCellData()
 {
-    if (d_flow_model.expired())
-    {
-        TBOX_ERROR(d_object_name
-            << ": "
-            << "The object is not setup yet!"
-            << std::endl);
-    }
-    
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
-    
-    // Check whether a patch is already registered.
-    if (!flow_model_tmp->hasRegisteredPatch())
-    {
-        TBOX_ERROR(d_object_name
-            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::"
-            << "clearData()\n"
-            << "No patch is registered yet."
-            << std::endl);
-    }
-    
     d_num_subghosts_diffusivities   = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_shear_viscosity = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_bulk_viscosity  = -hier::IntVector::getOne(d_dim);
@@ -113,7 +118,7 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::clearData()
  * Get the variables for the derivatives in the diffusive fluxes.
  */
 void
-FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxVariablesForDerivative(
+FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxVariablesForDerivative(
     std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_var_data,
     std::vector<std::vector<int> >& derivative_var_component_idx,
     const DIRECTION::TYPE& flux_direction,
@@ -183,7 +188,7 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxVariablesForDeriv
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxVariablesForDerivative()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                             << "There are only x-direction for one-dimensional problem."
                             << std::endl);
                     }
@@ -194,7 +199,7 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxVariablesForDeriv
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxVariablesForDerivative()\n"
+                    << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                     << "There are only x-direction for one-dimensional problem."
                     << std::endl);
             }
@@ -305,7 +310,7 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxVariablesForDeriv
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxVariablesForDerivative()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                             << "There are only x-direction and y-direction for two-dimensional problem."
                             << std::endl);
                     }
@@ -414,7 +419,7 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxVariablesForDeriv
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxVariablesForDerivative()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                             << "There are only x-direction and y-direction for two-dimensional problem."
                             << std::endl);
                     }
@@ -425,7 +430,7 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxVariablesForDeriv
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxVariablesForDerivative()\n"
+                    << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                     << "There are only x-direction and y-direction for two-dimensional problem."
                     << std::endl);
             }
@@ -600,7 +605,7 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxVariablesForDeriv
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxVariablesForDerivative()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                             << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                             << std::endl);
                     }
@@ -773,7 +778,7 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxVariablesForDeriv
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxVariablesForDerivative()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                             << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                             << std::endl);
                     }
@@ -946,7 +951,7 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxVariablesForDeriv
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxVariablesForDerivative()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                             << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                             << std::endl);
                     }
@@ -957,7 +962,7 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxVariablesForDeriv
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxVariablesForDerivative()\n"
+                    << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                     << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                     << std::endl);
             }
@@ -970,7 +975,7 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxVariablesForDeriv
  * Get the diffusivities in the diffusive flux.
  */
 void
-FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxDiffusivities(
+FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusivities(
     std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& diffusivities_data,
     std::vector<std::vector<int> >& diffusivities_component_idx,
     const DIRECTION::TYPE& flux_direction,
@@ -1305,7 +1310,7 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxDiffusivities(
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxDiffusivities()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusivities()\n"
                             << "There are only x-direction for one-dimensional problem."
                             << std::endl);
                     }
@@ -1316,7 +1321,7 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxDiffusivities(
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxDiffusivities()\n"
+                    << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusivities()\n"
                     << "There are only x-direction for one-dimensional problem."
                     << std::endl);
             }
@@ -1427,7 +1432,7 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxDiffusivities(
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxDiffusivities()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusivities()\n"
                             << "There are only x-direction and y-direction for two-dimensional problem."
                             << std::endl);
                     }
@@ -1536,7 +1541,7 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxDiffusivities(
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxDiffusivities()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusivities()\n"
                             << "There are only x-direction and y-direction for two-dimensional problem."
                             << std::endl);
                     }
@@ -1547,7 +1552,7 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxDiffusivities(
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxDiffusivities()\n"
+                    << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusivities()\n"
                     << "There are only x-direction and y-direction for two-dimensional problem."
                     << std::endl);
             }
@@ -1722,7 +1727,7 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxDiffusivities(
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxDiffusivities()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusivities()\n"
                             << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                             << std::endl);
                     }
@@ -1895,7 +1900,7 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxDiffusivities(
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxDiffusivities()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusivities()\n"
                             << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                             << std::endl);
                     }
@@ -2068,7 +2073,7 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxDiffusivities(
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxDiffusivities()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusivities()\n"
                             << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                             << std::endl);
                     }
@@ -2079,7 +2084,7 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxDiffusivities(
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxDiffusivities()\n"
+                    << ": FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusivities()\n"
                     << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                     << std::endl);
             }

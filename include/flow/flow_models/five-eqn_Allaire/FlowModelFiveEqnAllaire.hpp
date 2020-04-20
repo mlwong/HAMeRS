@@ -82,13 +82,6 @@ class FlowModelFiveEqnAllaire: public FlowModel
             const std::unordered_map<std::string, hier::IntVector>& num_subghosts_of_data);
         
         /*
-         * Register the required variables for the computation of diffusive fluxes in the registered patch.
-         */
-        void
-        registerDiffusiveFluxes(
-            const hier::IntVector& num_subghosts);
-        
-        /*
          * Unregister the registered patch. The registered data context and the cell data of all derived variables in
          * the patch are dumped.
          */
@@ -135,26 +128,6 @@ class FlowModelFiveEqnAllaire: public FlowModel
          */
         std::vector<boost::shared_ptr<pdat::CellData<double> > >
         getCellDataOfPrimitiveVariables();
-        
-        /*
-         * Get the variables for the derivatives in the diffusive fluxes.
-         */
-        void
-        getDiffusiveFluxVariablesForDerivative(
-            std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_var_data,
-            std::vector<std::vector<int> >& derivative_var_component_idx,
-            const DIRECTION::TYPE& flux_direction,
-            const DIRECTION::TYPE& derivative_direction);
-        
-        /*
-         * Get the diffusivities in the diffusive flux.
-         */
-        void
-        getDiffusiveFluxDiffusivities(
-            std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& diffusivities_data,
-            std::vector<std::vector<int> >& diffusivities_component_idx,
-            const DIRECTION::TYPE& flux_direction,
-            const DIRECTION::TYPE& derivative_direction);
         
         /*
          * Compute derived plot quantities registered with the VisIt data writers from data that
@@ -312,7 +285,6 @@ class FlowModelFiveEqnAllaire: public FlowModel
         hier::IntVector d_num_subghosts_max_wave_speed_y;
         hier::IntVector d_num_subghosts_max_wave_speed_z;
         hier::IntVector d_num_subghosts_max_diffusivity;
-        hier::IntVector d_num_subghosts_diffusivities;
         
         /*
          * Boxes with sub-ghost cells of derived cell data.
@@ -331,7 +303,6 @@ class FlowModelFiveEqnAllaire: public FlowModel
         hier::Box d_subghost_box_max_wave_speed_y;
         hier::Box d_subghost_box_max_wave_speed_z;
         hier::Box d_subghost_box_max_diffusivity;
-        hier::Box d_subghost_box_diffusivities;
         
         /*
          * Dimensions of boxes with sub-ghost cells of derived cell data.
@@ -350,7 +321,6 @@ class FlowModelFiveEqnAllaire: public FlowModel
         hier::IntVector d_subghostcell_dims_max_wave_speed_y;
         hier::IntVector d_subghostcell_dims_max_wave_speed_z;
         hier::IntVector d_subghostcell_dims_max_diffusivity;
-        hier::IntVector d_subghostcell_dims_diffusivities;
         
         /*
          * boost::shared_ptr to derived cell data.
@@ -369,7 +339,6 @@ class FlowModelFiveEqnAllaire: public FlowModel
         boost::shared_ptr<pdat::CellData<double> > d_data_max_wave_speed_y;
         boost::shared_ptr<pdat::CellData<double> > d_data_max_wave_speed_z;
         boost::shared_ptr<pdat::CellData<double> > d_data_max_diffusivity;
-        boost::shared_ptr<pdat::CellData<double> > d_data_diffusivities;
         
         /*
          * Upper and lower bounds on variables.

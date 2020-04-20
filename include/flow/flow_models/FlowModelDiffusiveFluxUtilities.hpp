@@ -24,17 +24,7 @@ class FlowModelDiffusiveFluxUtilities
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
-            const int& num_eqn):
-                d_object_name(object_name),
-                d_dim(dim),
-                d_grid_geometry(grid_geometry),
-                d_num_species(num_species),
-                d_num_eqn(num_eqn),
-                d_derived_cell_data_computed(false),
-                d_num_subghosts_diffusivities(-hier::IntVector::getOne(d_dim)),
-                d_subghost_box_diffusivities(hier::Box::getEmptyBox(dim)),
-                d_subghostcell_dims_diffusivities(hier::IntVector::getZero(d_dim))
-        {}
+            const int& num_eqn);
         
         virtual ~FlowModelDiffusiveFluxUtilities() {}
         
@@ -50,20 +40,20 @@ class FlowModelDiffusiveFluxUtilities
          * Register the required variables for the computation of diffusive fluxes in the registered patch.
          */
         virtual void
-        registerDiffusiveFluxes(
+        registerDerivedVariablesForDiffusiveFluxes(
             const hier::IntVector& num_subghosts);
         
         /*
          * The cell data of all derived variables in the patch for this class are dumped.
          */
-        virtual void clearData()
+        virtual void clearCellData()
         {}
         
         /*
          * Get the variables for the derivatives in the diffusive fluxes.
          */
         virtual void
-        getDiffusiveFluxVariablesForDerivative(
+        getCellDataOfDiffusiveFluxVariablesForDerivative(
             std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_var_data,
             std::vector<std::vector<int> >& derivative_var_component_idx,
             const DIRECTION::TYPE& flux_direction,
@@ -73,7 +63,7 @@ class FlowModelDiffusiveFluxUtilities
          * Get the diffusivities in the diffusive flux.
          */
         virtual void
-        getDiffusiveFluxDiffusivities(
+        getCellDataOfDiffusiveFluxDiffusivities(
             std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& diffusivities_data,
             std::vector<std::vector<int> >& diffusivities_component_idx,
             const DIRECTION::TYPE& flux_direction,

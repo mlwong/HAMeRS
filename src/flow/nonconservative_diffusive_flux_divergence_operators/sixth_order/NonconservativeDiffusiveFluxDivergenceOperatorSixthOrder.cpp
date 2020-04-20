@@ -75,6 +75,11 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
     TBOX_ASSERT(variable_diffusive_flux_divergence);
 #endif
     
+    d_flow_model->setupDiffusiveFluxUtilities();
+    
+    boost::shared_ptr<FlowModelDiffusiveFluxUtilities> diffusive_flux_utilities =
+        d_flow_model->getFlowModelDiffusiveFluxUtilities();
+    
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
@@ -106,7 +111,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         
         d_flow_model->registerPatchWithDataContext(patch, data_context);
         
-        d_flow_model->registerDiffusiveFluxes(d_num_diff_ghosts);
+        diffusive_flux_utilities->registerDerivedVariablesForDiffusiveFluxes(d_num_diff_ghosts);
         
         d_flow_model->computeDerivedCellData();
         
@@ -137,14 +142,14 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
          */
         
         // Get the variables for the terms in x-direction in the diffusive flux in x-direction.
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_x,
             var_component_idx_x,
             DIRECTION::X_DIRECTION,
             DIRECTION::X_DIRECTION);
         
         // Get the diffusivities for the terms in x-direction in the diffusive flux in x-direction.
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_x,
             diffusivities_component_idx_x,
             DIRECTION::X_DIRECTION,
@@ -218,7 +223,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         
         d_flow_model->registerPatchWithDataContext(patch, data_context);
         
-        d_flow_model->registerDiffusiveFluxes(d_num_diff_ghosts);
+        diffusive_flux_utilities->registerDerivedVariablesForDiffusiveFluxes(d_num_diff_ghosts);
         
         d_flow_model->computeDerivedCellData();
         
@@ -265,14 +270,14 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
          */
         
         // Get the variables for the terms in x-direction in the diffusive flux in x-direction.
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_x,
             var_component_idx_x,
             DIRECTION::X_DIRECTION,
             DIRECTION::X_DIRECTION);
         
         // Get the diffusivities for the terms in x-direction in the diffusive flux in x-direction.
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_x,
             diffusivities_component_idx_x,
             DIRECTION::X_DIRECTION,
@@ -333,14 +338,14 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         var_derivative_xx.clear();
         
         // Get the variables for the terms in y-direction in the diffusive flux in x-direction.
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_y,
             var_component_idx_y,
             DIRECTION::X_DIRECTION,
             DIRECTION::Y_DIRECTION);
         
         // Get the diffusivities for the terms in y-direction in the diffusive flux in x-direction.
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_y,
             diffusivities_component_idx_y,
             DIRECTION::X_DIRECTION,
@@ -417,14 +422,14 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
          */
         
         // Get the variables for the terms in x-direction in the diffusive flux in y-direction.
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_x,
             var_component_idx_x,
             DIRECTION::Y_DIRECTION,
             DIRECTION::X_DIRECTION);
         
         // Get the diffusivities for the terms in x-direction in the diffusive flux in y-direction.
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_x,
             diffusivities_component_idx_x,
             DIRECTION::Y_DIRECTION,
@@ -497,14 +502,14 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         var_derivative_yx.clear();
         
         // Get the variables for the terms in y-direction in the diffusive flux in y-direction.
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_y,
             var_component_idx_y,
             DIRECTION::Y_DIRECTION,
             DIRECTION::Y_DIRECTION);
         
         // Get the diffusivities for the terms in y-direction in the diffusive flux in y-direction.
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_y,
             diffusivities_component_idx_y,
             DIRECTION::Y_DIRECTION,
@@ -578,7 +583,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         
         d_flow_model->registerPatchWithDataContext(patch, data_context);
         
-        d_flow_model->registerDiffusiveFluxes(d_num_diff_ghosts);
+        diffusive_flux_utilities->registerDerivedVariablesForDiffusiveFluxes(d_num_diff_ghosts);
         
         d_flow_model->computeDerivedCellData();
         
@@ -643,14 +648,14 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
          */
         
         // Get the variables for the terms in x-direction in the diffusive flux in x-direction.
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_x,
             var_component_idx_x,
             DIRECTION::X_DIRECTION,
             DIRECTION::X_DIRECTION);
         
         // Get the diffusivities for the terms in x-direction in the diffusive flux in x-direction.
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_x,
             diffusivities_component_idx_x,
             DIRECTION::X_DIRECTION,
@@ -711,14 +716,14 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         var_derivative_xx.clear();
         
         // Get the variables for the terms in y-direction in the diffusive flux in x-direction.
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_y,
             var_component_idx_y,
             DIRECTION::X_DIRECTION,
             DIRECTION::Y_DIRECTION);
         
         // Get the diffusivities for the terms in y-direction in the diffusive flux in x-direction.
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_y,
             diffusivities_component_idx_y,
             DIRECTION::X_DIRECTION,
@@ -791,14 +796,14 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         var_derivative_xy.clear();
         
         // Get the variables for the terms in z-direction in the diffusive flux in x-direction.
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_z,
             var_component_idx_z,
             DIRECTION::X_DIRECTION,
             DIRECTION::Z_DIRECTION);
         
         // Get the diffusivities for the terms in z-direction in the diffusive flux in x-direction.
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_z,
             diffusivities_component_idx_z,
             DIRECTION::X_DIRECTION,
@@ -875,14 +880,14 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
          */
         
         // Get the variables for the terms in x-direction in the diffusive flux in y-direction.
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_x,
             var_component_idx_x,
             DIRECTION::Y_DIRECTION,
             DIRECTION::X_DIRECTION);
         
         // Get the diffusivities for the terms in x-direction in the diffusive flux in y-direction.
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_x,
             diffusivities_component_idx_x,
             DIRECTION::Y_DIRECTION,
@@ -955,14 +960,14 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         var_derivative_yx.clear();
         
         // Get the variables for the terms in y-direction in the diffusive flux in y-direction.
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_y,
             var_component_idx_y,
             DIRECTION::Y_DIRECTION,
             DIRECTION::Y_DIRECTION);
         
         // Get the diffusivities for the terms in y-direction in the diffusive flux in y-direction.
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_y,
             diffusivities_component_idx_y,
             DIRECTION::Y_DIRECTION,
@@ -1023,14 +1028,14 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         var_derivative_yy.clear();
         
         // Get the variables for the terms in z-direction in the diffusive flux in y-direction.
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_z,
             var_component_idx_z,
             DIRECTION::Y_DIRECTION,
             DIRECTION::Z_DIRECTION);
         
         // Get the diffusivities for the terms in z-direction in the diffusive flux in y-direction.
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_z,
             diffusivities_component_idx_z,
             DIRECTION::Y_DIRECTION,
@@ -1107,14 +1112,14 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
          */
         
         // Get the variables for the terms in x-direction in the diffusive flux in z-direction.
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_x,
             var_component_idx_x,
             DIRECTION::Z_DIRECTION,
             DIRECTION::X_DIRECTION);
         
         // Get the diffusivities for the terms in x-direction in the diffusive flux in z-direction.
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_x,
             diffusivities_component_idx_x,
             DIRECTION::Z_DIRECTION,
@@ -1187,14 +1192,14 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         var_derivative_zx.clear();
         
         // Get the variables for the terms in y-direction in the diffusive flux in z-direction.
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_y,
             var_component_idx_y,
             DIRECTION::Z_DIRECTION,
             DIRECTION::Y_DIRECTION);
         
         // Get the diffusivities for the terms in y-direction in the diffusive flux in z-direction.
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_y,
             diffusivities_component_idx_y,
             DIRECTION::Z_DIRECTION,
@@ -1267,14 +1272,14 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         var_derivative_zy.clear();
         
         // Get the variables for the terms in z-direction in the diffusive flux in z-direction.
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_z,
             var_component_idx_z,
             DIRECTION::Z_DIRECTION,
             DIRECTION::Z_DIRECTION);
         
         // Get the diffusivities for the terms in z-direction in the diffusive flux in z-direction.
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_z,
             diffusivities_component_idx_z,
             DIRECTION::Z_DIRECTION,
