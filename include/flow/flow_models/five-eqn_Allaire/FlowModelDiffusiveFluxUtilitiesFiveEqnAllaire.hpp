@@ -21,6 +21,12 @@ class FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire: public FlowModelDiffusiveFl
                     grid_geometry,
                     num_species,
                     dim.getValue() + 2*num_species),
+                d_num_subghosts_shear_viscosity(-hier::IntVector::getOne(d_dim)),
+                d_num_subghosts_bulk_viscosity(-hier::IntVector::getOne(d_dim)),
+                d_subghost_box_shear_viscosity(hier::Box::getEmptyBox(dim)),
+                d_subghost_box_bulk_viscosity(hier::Box::getEmptyBox(dim)),
+                d_subghostcell_dims_shear_viscosity(hier::IntVector::getZero(d_dim)),
+                d_subghostcell_dims_bulk_viscosity(hier::IntVector::getZero(d_dim)),
                 d_equation_of_shear_viscosity_mixing_rules(equation_of_shear_viscosity_mixing_rules),
                 d_equation_of_bulk_viscosity_mixing_rules(equation_of_bulk_viscosity_mixing_rules)
         {}
@@ -60,6 +66,30 @@ class FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire: public FlowModelDiffusiveFl
             const DIRECTION::TYPE& derivative_direction);
         
     private:
+        /*
+         * Number of sub-ghost cells of derived cell data for this class.
+         */
+        hier::IntVector d_num_subghosts_shear_viscosity;
+        hier::IntVector d_num_subghosts_bulk_viscosity;
+        
+        /*
+         * Boxes with sub-ghost cells of derived cell data for this class.
+         */
+        hier::Box d_subghost_box_shear_viscosity;
+        hier::Box d_subghost_box_bulk_viscosity;
+        
+        /*
+         * Dimensions of boxes with sub-ghost cells of derived cell data for this class.
+         */
+        hier::IntVector d_subghostcell_dims_shear_viscosity;
+        hier::IntVector d_subghostcell_dims_bulk_viscosity;
+        
+        /*
+         * boost::shared_ptr to derived cell data for this class.
+         */
+        boost::shared_ptr<pdat::CellData<double> > d_data_shear_viscosity;
+        boost::shared_ptr<pdat::CellData<double> > d_data_bulk_viscosity;
+        
         /*
          * boost::shared_ptr to EquationOfShearViscosityMixingRules.
          */

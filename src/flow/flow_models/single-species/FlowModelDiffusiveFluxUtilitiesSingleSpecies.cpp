@@ -1005,25 +1005,17 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getDiffusiveFluxDiffusivities(
             flow_model_tmp->getCellData("TEMPERATURE");
         
         /*
-         * Get the numbers of ghost cells.
+         * Get the number of ghost cells of velocity.
          */
         
         const hier::IntVector num_subghosts_velocity = data_velocity->getGhostCellWidth();
-        const hier::IntVector num_subghosts_pressure = data_pressure->getGhostCellWidth();
-        const hier::IntVector num_subghosts_temperature = data_temperature->getGhostCellWidth();
         
         /*
-         * Get the dimensions of the ghost cell boxes.
+         * Get the dimensions of the ghost cell box of velocity.
          */
         
         const hier::Box subghost_box_velocity = data_velocity->getGhostBox();
         const hier::IntVector subghostcell_dims_velocity = subghost_box_velocity.numberCells();
-        
-        const hier::Box subghost_box_pressure = data_pressure->getGhostBox();
-        const hier::IntVector subghostcell_dims_pressure = subghost_box_pressure.numberCells();
-        
-        const hier::Box subghost_box_temperature = data_temperature->getGhostBox();
-        const hier::IntVector subghostcell_dims_temperature = subghost_box_temperature.numberCells();
         
         /*
          * Create cell data of shear viscosity, bulk viscosity and thermal conductivity.
