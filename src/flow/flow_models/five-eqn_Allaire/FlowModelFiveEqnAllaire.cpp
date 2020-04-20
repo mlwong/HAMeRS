@@ -827,7 +827,7 @@ FlowModelFiveEqnAllaire::registerDiffusiveFluxes(
     
     setNumberOfSubGhosts(
         num_subghosts,
-        "SPECIES_TEMPERATURE",
+        "SPECIES_TEMPERATURES",
         "DIFFUSIVE_FLUX");
     
     d_num_subghosts_diffusivities = 
@@ -1206,13 +1206,13 @@ FlowModelFiveEqnAllaire::getCellData(
         }
         cell_data = d_data_sound_speed;
     }
-    else if (variable_key == "SPECIES_TEMPERATURE")
+    else if (variable_key == "SPECIES_TEMPERATURES")
     {
         if (!d_data_species_temperatures)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFiveEqnAllaire::getCellData()\n"
-                << "Cell data of 'SPECIES_TEMPERATURE' is not registered/computed yet."
+                << "Cell data of 'SPECIES_TEMPERATURES' is not registered/computed yet."
                 << std::endl);
         }
         cell_data = d_data_species_temperatures;
@@ -4847,7 +4847,7 @@ FlowModelFiveEqnAllaire::setNumberOfSubGhosts(
         setNumberOfSubGhosts(num_subghosts, "MASS_FRACTIONS", parent_variable_name);
         setNumberOfSubGhosts(num_subghosts, "PRESSURE", parent_variable_name);
     }
-    else if (variable_name == "SPECIES_TEMPERATURE")
+    else if (variable_name == "SPECIES_TEMPERATURES")
     {
         if (d_num_subghosts_species_temperatures > -hier::IntVector::getOne(d_dim))
         {
@@ -5083,7 +5083,7 @@ FlowModelFiveEqnAllaire::setNumberOfSubGhosts(
         setNumberOfSubGhosts(num_subghosts, "DENSITY", parent_variable_name);
         setNumberOfSubGhosts(num_subghosts, "MASS_FRACTIONS", parent_variable_name);
         setNumberOfSubGhosts(num_subghosts, "PRESSURE", parent_variable_name);
-        setNumberOfSubGhosts(num_subghosts, "SPECIES_TEMPERATURE", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "SPECIES_TEMPERATURES", parent_variable_name);
     }
 }
 
@@ -6681,7 +6681,7 @@ FlowModelFiveEqnAllaire::computeCellDataOfSpeciesTemperaturesWithPressure(
         TBOX_ERROR(d_object_name
             << ": FlowModelFiveEqnAllaire::"
             << "computeCellDataOfSpeciesTemperaturesWithPressure()\n"
-            << "Cell data of 'SPECIES_TEMPERATURE' is not yet registered."
+            << "Cell data of 'SPECIES_TEMPERATURES' is not yet registered."
             << std::endl);
     }
 }

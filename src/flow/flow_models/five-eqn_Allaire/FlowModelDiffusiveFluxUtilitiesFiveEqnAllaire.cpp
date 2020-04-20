@@ -39,7 +39,7 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::registerDiffusiveFluxes(const hie
         std::pair<std::string, hier::IntVector>("PRESSURE", num_subghosts));
     
     num_subghosts_of_data.insert(
-        std::pair<std::string, hier::IntVector>("SPECIES_TEMPERATURE", num_subghosts));
+        std::pair<std::string, hier::IntVector>("SPECIES_TEMPERATURES", num_subghosts));
     
     flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
     
@@ -1020,7 +1020,7 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getDiffusiveFluxDiffusivities(
         
         // Get the cell data of species temperature.
         boost::shared_ptr<pdat::CellData<double> > data_species_temperatures =
-            flow_model_tmp->getCellData("SPECIES_TEMPERATURE");
+            flow_model_tmp->getCellData("SPECIES_TEMPERATURES");
         
         /*
          * Get the number of ghost cells of velocity.
