@@ -106,6 +106,12 @@ class FlowModelFiveEqnAllaire: public FlowModel
         getCellData(const std::vector<std::string>& variable_keys);
         
         /*
+         * Get the cell data of species cell variables in the registered patch.
+         */
+        std::vector<boost::shared_ptr<pdat::CellData<double> > >
+        getSpeciesCellData(const std::string& variable_key);
+        
+        /*
          * Fill the cell data of conservative variables in the interior box with value zero.
          */
         void
@@ -232,9 +238,15 @@ class FlowModelFiveEqnAllaire: public FlowModel
             const hier::Box& domain);
         
         /*
-         * Compute the cell data of species temperatures with pressure in the registered patch.
+         * Compute the cell data of species densities in the registered patch.
          */
-        void computeCellDataOfSpeciesTemperaturesWithPressure(
+        void computeCellDataOfSpeciesDensities(
+            const hier::Box& domain);
+        
+        /*
+         * Compute the cell data of species temperatures with species temperatures and pressure in the registered patch.
+         */
+        void computeCellDataOfSpeciesTemperaturesWithSpeciesDensitiesAndPressure(
             const hier::Box& domain);
         
         /*
@@ -277,7 +289,6 @@ class FlowModelFiveEqnAllaire: public FlowModel
         hier::IntVector d_num_subghosts_internal_energy;
         hier::IntVector d_num_subghosts_pressure;
         hier::IntVector d_num_subghosts_sound_speed;
-        hier::IntVector d_num_subghosts_species_temperatures;
         hier::IntVector d_num_subghosts_convective_flux_x;
         hier::IntVector d_num_subghosts_convective_flux_y;
         hier::IntVector d_num_subghosts_convective_flux_z;
@@ -285,6 +296,8 @@ class FlowModelFiveEqnAllaire: public FlowModel
         hier::IntVector d_num_subghosts_max_wave_speed_y;
         hier::IntVector d_num_subghosts_max_wave_speed_z;
         hier::IntVector d_num_subghosts_max_diffusivity;
+        hier::IntVector d_num_subghosts_species_densities;
+        hier::IntVector d_num_subghosts_species_temperatures;
         
         /*
          * Boxes with sub-ghost cells of derived cell data.
@@ -295,7 +308,6 @@ class FlowModelFiveEqnAllaire: public FlowModel
         hier::Box d_subghost_box_internal_energy;
         hier::Box d_subghost_box_pressure;
         hier::Box d_subghost_box_sound_speed;
-        hier::Box d_subghost_box_species_temperatures;
         hier::Box d_subghost_box_convective_flux_x;
         hier::Box d_subghost_box_convective_flux_y;
         hier::Box d_subghost_box_convective_flux_z;
@@ -303,6 +315,8 @@ class FlowModelFiveEqnAllaire: public FlowModel
         hier::Box d_subghost_box_max_wave_speed_y;
         hier::Box d_subghost_box_max_wave_speed_z;
         hier::Box d_subghost_box_max_diffusivity;
+        hier::Box d_subghost_box_species_densities;
+        hier::Box d_subghost_box_species_temperatures;
         
         /*
          * Dimensions of boxes with sub-ghost cells of derived cell data.
@@ -313,7 +327,6 @@ class FlowModelFiveEqnAllaire: public FlowModel
         hier::IntVector d_subghostcell_dims_internal_energy;
         hier::IntVector d_subghostcell_dims_pressure;
         hier::IntVector d_subghostcell_dims_sound_speed;
-        hier::IntVector d_subghostcell_dims_species_temperatures;
         hier::IntVector d_subghostcell_dims_convective_flux_x;
         hier::IntVector d_subghostcell_dims_convective_flux_y;
         hier::IntVector d_subghostcell_dims_convective_flux_z;
@@ -321,6 +334,8 @@ class FlowModelFiveEqnAllaire: public FlowModel
         hier::IntVector d_subghostcell_dims_max_wave_speed_y;
         hier::IntVector d_subghostcell_dims_max_wave_speed_z;
         hier::IntVector d_subghostcell_dims_max_diffusivity;
+        hier::IntVector d_subghostcell_dims_species_densities;
+        hier::IntVector d_subghostcell_dims_species_temperatures;
         
         /*
          * boost::shared_ptr to derived cell data.
@@ -331,7 +346,6 @@ class FlowModelFiveEqnAllaire: public FlowModel
         boost::shared_ptr<pdat::CellData<double> > d_data_internal_energy;
         boost::shared_ptr<pdat::CellData<double> > d_data_pressure;
         boost::shared_ptr<pdat::CellData<double> > d_data_sound_speed;
-        boost::shared_ptr<pdat::CellData<double> > d_data_species_temperatures;
         boost::shared_ptr<pdat::CellData<double> > d_data_convective_flux_x;
         boost::shared_ptr<pdat::CellData<double> > d_data_convective_flux_y;
         boost::shared_ptr<pdat::CellData<double> > d_data_convective_flux_z;
@@ -339,6 +353,8 @@ class FlowModelFiveEqnAllaire: public FlowModel
         boost::shared_ptr<pdat::CellData<double> > d_data_max_wave_speed_y;
         boost::shared_ptr<pdat::CellData<double> > d_data_max_wave_speed_z;
         boost::shared_ptr<pdat::CellData<double> > d_data_max_diffusivity;
+        std::vector<boost::shared_ptr<pdat::CellData<double> > > d_data_species_densities;
+        std::vector<boost::shared_ptr<pdat::CellData<double> > > d_data_species_temperatures;
         
         /*
          * Upper and lower bounds on variables.

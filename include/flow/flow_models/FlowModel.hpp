@@ -288,6 +288,12 @@ class FlowModel:
         getCellData(const std::vector<std::string>& variable_keys) = 0;
         
         /*
+         * Get the cell data of species cell variables in the registered patch.
+         */
+        virtual std::vector<boost::shared_ptr<pdat::CellData<double> > >
+        getSpeciesCellData(const std::string& variable_key) = 0;
+        
+        /*
          * Fill the cell data of conservative variables in the interior box with value zero.
          */
         virtual void

@@ -106,6 +106,28 @@ class EquationOfBulkViscosityMixingRules
         computeBulkViscosity(
             boost::shared_ptr<pdat::CellData<double> >& data_bulk_viscosity,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& data_species_temperatures,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeBulkViscosity(
+                data_bulk_viscosity,
+                data_pressure,
+                data_species_temperatures,
+                data_mass_fractions,
+                data_volume_fractions,
+                empty_box);
+        }
+        
+        /*
+         * Compute the bulk viscosity of the mixture with isobaric equilibrium assumption.
+         */
+        // NEED TO REMOVE DUE TO VECTOR OF SPECIES TEMPERATURES
+        void
+        computeBulkViscosity(
+            boost::shared_ptr<pdat::CellData<double> >& data_bulk_viscosity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const boost::shared_ptr<pdat::CellData<double> >& data_species_temperatures,
             const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
             const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions) const
@@ -122,6 +144,19 @@ class EquationOfBulkViscosityMixingRules
         
         /*
          * Compute the bulk viscosity of the mixture with isobaric equilibrium assumption.
+         */
+        virtual void
+        computeBulkViscosity(
+            boost::shared_ptr<pdat::CellData<double> >& data_bulk_viscosity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& data_species_temperatures,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the bulk viscosity of the mixture with isobaric equilibrium assumption.
+        // NEED TO REMOVE DUE TO VECTOR OF SPECIES TEMPERATURES
          */
         virtual void
         computeBulkViscosity(

@@ -1201,6 +1201,23 @@ void
 EquationOfShearViscosityMixingRulesChapmanEnskog::computeShearViscosity(
     boost::shared_ptr<pdat::CellData<double> >& data_shear_viscosity,
     const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& data_species_temperatures,
+    const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+    const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
+    const hier::Box& domain) const
+{
+    // NEED TO IMPLEMENT DUE TO VECTOR OF SPECIES TEMPERATURES
+}
+
+
+/*
+ * Compute the shear viscosity of the mixture with isobaric equilibrium assumption.
+ */
+// NEED TO REMOVE DUE TO VECTOR OF SPECIES TEMPERATURES
+void
+EquationOfShearViscosityMixingRulesChapmanEnskog::computeShearViscosity(
+    boost::shared_ptr<pdat::CellData<double> >& data_shear_viscosity,
+    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
     const boost::shared_ptr<pdat::CellData<double> >& data_species_temperatures,
     const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
     const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,

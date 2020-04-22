@@ -1286,6 +1286,22 @@ FlowModelSingleSpecies::getCellData(
 
 
 /*
+ * Get the cell data of species cell variables in the registered patch.
+ */
+std::vector<boost::shared_ptr<pdat::CellData<double> > >
+FlowModelSingleSpecies::getSpeciesCellData(
+    const std::string& variable_key)
+{
+    TBOX_ERROR(d_object_name
+        << ": Method FlowModelSingleSpecies::getSpeciesCellData() is not implemented yet!"
+        << std::endl);
+    
+    std::vector<boost::shared_ptr<pdat::CellData<double> > > tmp;
+    return tmp;
+}
+
+
+/*
  * Fill the cell data of conservative variables in the interior box with value zero.
  */
 void
