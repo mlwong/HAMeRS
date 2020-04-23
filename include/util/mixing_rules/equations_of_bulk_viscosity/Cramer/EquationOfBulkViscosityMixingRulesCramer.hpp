@@ -83,19 +83,6 @@ class EquationOfBulkViscosityMixingRulesCramer: public EquationOfBulkViscosityMi
             const hier::Box& domain) const;
         
         /*
-         * Compute the bulk viscosity of the mixture with isobaric equilibrium assumption.
-         */
-        // NEED TO REMOVE DUE TO VECTOR OF SPECIES TEMPERATURES
-        void
-        computeBulkViscosity(
-            boost::shared_ptr<pdat::CellData<double> >& data_bulk_viscosity,
-            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_species_temperatures,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
-            const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
-            const hier::Box& domain) const;
-        
-        /*
          * Get the number of molecular properties of a species.
          */
         int

@@ -1040,14 +1040,14 @@ EquationOfShearViscosityMixingRulesConstant::getShearViscosity(
     const std::vector<const double*>& mass_fractions,
     const std::vector<const double*>& volume_fractions) const
 {
+    NULL_USE(mass_fractions);
+    
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     TBOX_ASSERT((static_cast<int>(species_temperatures.size()) == d_num_species));
     TBOX_ASSERT((static_cast<int>(volume_fractions.size()) == d_num_species) ||
                 (static_cast<int>(volume_fractions.size()) == d_num_species - 1));
 #endif
-    
-    NULL_USE(mass_fractions);
     
     double mu = double(0);
     
@@ -1146,37 +1146,31 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
     const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
     const hier::Box& domain) const
 {
-    // NEED TO IMPLEMENT DUE TO VECTOR OF SPECIES TEMPERATURES
-}
-
-
-/*
- * Compute the shear viscosity of the mixture with isobaric equilibrium assumption.
- */
-// NEED TO REMOVE DUE TO VECTOR OF SPECIES TEMPERATURES
-void
-EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
-    boost::shared_ptr<pdat::CellData<double> >& data_shear_viscosity,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::CellData<double> >& data_species_temperatures,
-    const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
-    const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
-    const hier::Box& domain) const
-{
+    NULL_USE(data_mass_fractions);
+    
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     
     TBOX_ASSERT(data_shear_viscosity);
     TBOX_ASSERT(data_pressure);
-    TBOX_ASSERT(data_species_temperatures);
     TBOX_ASSERT(data_volume_fractions);
     
-    TBOX_ASSERT(data_species_temperatures->getDepth() == d_num_species);
+    TBOX_ASSERT(static_cast<int>(data_species_temperatures.size()) == d_num_species);
     TBOX_ASSERT((data_volume_fractions->getDepth() == d_num_species) ||
                 (data_volume_fractions->getDepth() == d_num_species - 1));
-#endif
     
-    NULL_USE(data_mass_fractions);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        TBOX_ASSERT(data_species_temperatures[si]);
+    }
+    
+    for (int si = 1; si < d_num_species; si++)
+    {
+        TBOX_ASSERT(data_species_temperatures[si]->getBox().isSpatiallyEqual(data_species_temperatures[0]->getBox()));
+        TBOX_ASSERT(data_species_temperatures[si]->getGhostCellWidth() ==
+            data_species_temperatures[0]->getGhostCellWidth());
+    }
+#endif
     
     // Get the dimensions of the ghost cell boxes.
     const hier::Box ghost_box_shear_viscosity = data_shear_viscosity->getGhostBox();
@@ -1185,17 +1179,16 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
     const hier::Box ghost_box_volume_fractions = data_volume_fractions->getGhostBox();
     const hier::IntVector ghostcell_dims_volume_fractions = ghost_box_volume_fractions.numberCells();
     
-    // Delcare data containers for shear viscosity and temperature of a species.
+    // Delcare data container for shear viscosity of a species.
     boost::shared_ptr<pdat::CellData<double> > data_shear_viscosity_species;
-    boost::shared_ptr<pdat::CellData<double> > data_temperature_species;;
     
     // Declare data container for last volume fraction.
     boost::shared_ptr<pdat::CellData<double> > data_volume_fractions_last;
     
     /*
      * Get the local lower index and number of cells in each direction of the domain.
-     * Also, get the offsets of all data and dimensions of the ghost cell box for shear viscosity,
-     * temperature of a species and last volume fraction and allocate memory.
+     * Also, get the offsets of all data and dimensions of the ghost cell box for shear viscosity
+     * of a species and last volume fraction and allocate memory.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -1212,7 +1205,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
         // Get the numbers of ghost cells.
         const hier::IntVector num_ghosts_shear_viscosity = data_shear_viscosity->getGhostCellWidth();
         const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-        const hier::IntVector num_ghosts_species_temperatures = data_species_temperatures->getGhostCellWidth();
+        const hier::IntVector num_ghosts_species_temperatures = data_species_temperatures[0]->getGhostCellWidth();
         const hier::IntVector num_ghosts_volume_fractions = data_volume_fractions->getGhostCellWidth();
         
         // Get the interior box and the dimensions of box that covers the interior of patch.
@@ -1221,13 +1214,13 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
-        TBOX_ASSERT(data_species_temperatures->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_species_temperatures[0]->getBox().isSpatiallyEqual(interior_box));
         TBOX_ASSERT(data_volume_fractions->getBox().isSpatiallyEqual(interior_box));
 #endif
         
         /*
-         * Get the minimum number of ghost cells and the dimensions of the ghost cell box for shear viscosity,
-         * temperature of a species and last volume fraction.
+         * Get the minimum number of ghost cells and the dimensions of the ghost cell box for shear viscosity
+         * of a species and last volume fraction.
          */
         
         hier::IntVector num_ghosts_min(d_dim);
@@ -1250,7 +1243,6 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
         ghostcell_dims_min = interior_dims + num_ghosts_min*2;
         
         data_shear_viscosity_species = boost::make_shared<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
-        data_temperature_species = boost::make_shared<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
         
         if (data_volume_fractions->getDepth() == d_num_species - 1)
         {
@@ -1262,7 +1254,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
         TBOX_ASSERT(data_shear_viscosity->getGhostBox().contains(domain));
         TBOX_ASSERT(data_pressure->getGhostBox().contains(domain));
-        TBOX_ASSERT(data_species_temperatures->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_species_temperatures[0]->getGhostBox().contains(domain));
         TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
 #endif
         
@@ -1276,8 +1268,6 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
         ghostcell_dims_min = domain_dims;
         
         data_shear_viscosity_species =
-            boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
-        data_temperature_species =
             boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
         
         if (data_volume_fractions->getDepth() == d_num_species - 1)
@@ -1353,15 +1343,13 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             
             for (int si = 0; si < d_num_species; si++)
             {
-                data_temperature_species->copyDepth(0, *data_species_temperatures, si);
-                
                 getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
                 
                 d_equation_of_shear_viscosity->
                     computeShearViscosity(
                         data_shear_viscosity_species,
                         data_pressure,
-                        data_temperature_species,
+                        data_species_temperatures[si],
                         species_molecular_properties_const_ptr,
                         domain);
                 
@@ -1404,15 +1392,13 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             
             for (int si = 0; si < d_num_species; si++)
             {
-                data_temperature_species->copyDepth(0, *data_species_temperatures, si);
-                
                 getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
                 
                 d_equation_of_shear_viscosity->
                     computeShearViscosity(
                         data_shear_viscosity_species,
                         data_pressure,
-                        data_temperature_species,
+                        data_species_temperatures[si],
                         species_molecular_properties_const_ptr,
                         domain);
                 
@@ -1471,15 +1457,13 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             
             for (int si = 0; si < d_num_species; si++)
             {
-                data_temperature_species->copyDepth(0, *data_species_temperatures, si);
-                
                 getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
                 
                 d_equation_of_shear_viscosity->
                     computeShearViscosity(
                         data_shear_viscosity_species,
                         data_pressure,
-                        data_temperature_species,
+                        data_species_temperatures[si],
                         species_molecular_properties_const_ptr,
                         domain);
                 
@@ -1547,15 +1531,13 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             
             for (int si = 0; si < d_num_species - 1; si++)
             {
-                data_temperature_species->copyDepth(0, *data_species_temperatures, si);
-                
                 getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
                 
                 d_equation_of_shear_viscosity->
                     computeShearViscosity(
                         data_shear_viscosity_species,
                         data_pressure,
-                        data_temperature_species,
+                        data_species_temperatures[si],
                         species_molecular_properties_const_ptr,
                         domain);
                 
@@ -1576,15 +1558,13 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 }
             }
             
-            data_temperature_species->copyDepth(0, *data_species_temperatures, d_num_species - 1);
-            
             getSpeciesMolecularProperties(species_molecular_properties_ptr, d_num_species - 1);
             
             d_equation_of_shear_viscosity->
                 computeShearViscosity(
                     data_shear_viscosity_species,
                     data_pressure,
-                    data_temperature_species,
+                    data_species_temperatures[d_num_species - 1],
                     species_molecular_properties_const_ptr,
                     domain);
             
@@ -1625,15 +1605,13 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             
             for (int si = 0; si < d_num_species - 1; si++)
             {
-                data_temperature_species->copyDepth(0, *data_species_temperatures, si);
-                
                 getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
                 
                 d_equation_of_shear_viscosity->
                     computeShearViscosity(
                         data_shear_viscosity_species,
                         data_pressure,
-                        data_temperature_species,
+                        data_species_temperatures[si],
                         species_molecular_properties_const_ptr,
                         domain);
                 
@@ -1662,15 +1640,13 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 }
             }
             
-            data_temperature_species->copyDepth(0, *data_species_temperatures, d_num_species - 1);
-            
             getSpeciesMolecularProperties(species_molecular_properties_ptr, d_num_species - 1);
             
             d_equation_of_shear_viscosity->
                 computeShearViscosity(
                     data_shear_viscosity_species,
                     data_pressure,
-                    data_temperature_species,
+                    data_species_temperatures[d_num_species - 1],
                     species_molecular_properties_const_ptr,
                     domain);
             
@@ -1725,15 +1701,13 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
             
             for (int si = 0; si < d_num_species - 1; si++)
             {
-                data_temperature_species->copyDepth(0, *data_species_temperatures, si);
-                
                 getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
                 
                 d_equation_of_shear_viscosity->
                     computeShearViscosity(
                         data_shear_viscosity_species,
                         data_pressure,
-                        data_temperature_species,
+                        data_species_temperatures[si],
                         species_molecular_properties_const_ptr,
                         domain);
                 
@@ -1771,15 +1745,13 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                 }
             }
             
-            data_temperature_species->copyDepth(0, *data_species_temperatures, d_num_species - 1);
-            
             getSpeciesMolecularProperties(species_molecular_properties_ptr, d_num_species - 1);
             
             d_equation_of_shear_viscosity->
                 computeShearViscosity(
                     data_shear_viscosity_species,
                     data_pressure,
-                    data_temperature_species,
+                    data_species_temperatures[d_num_species - 1],
                     species_molecular_properties_const_ptr,
                     domain);
             

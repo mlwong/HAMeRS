@@ -1023,9 +1023,9 @@ FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire::getCellDataOfDiffusiveFluxDiffusi
         boost::shared_ptr<pdat::CellData<double> > data_pressure =
             flow_model_tmp->getCellData("PRESSURE");
         
-        // Get the cell data of species temperature.
-        boost::shared_ptr<pdat::CellData<double> > data_species_temperatures =
-            flow_model_tmp->getCellData("SPECIES_TEMPERATURES");
+        // Get the cell data of species temperatures.
+        std::vector<boost::shared_ptr<pdat::CellData<double> > > data_species_temperatures =
+            flow_model_tmp->getSpeciesCellData("SPECIES_TEMPERATURES");
         
         /*
          * Get the number of ghost cells of velocity.
