@@ -871,8 +871,8 @@ void FlowModelFiveEqnAllaire::unregisterPatch()
     d_data_max_wave_speed_y.reset();
     d_data_max_wave_speed_z.reset();
     d_data_max_diffusivity.reset();
-    d_data_species_densities.resize(d_num_species, nullptr);
-    d_data_species_temperatures.resize(d_num_species, nullptr);
+    d_data_species_densities.assign(d_num_species, nullptr);
+    d_data_species_temperatures.assign(d_num_species, nullptr);
     
     d_flow_model_diffusive_flux_utilities->clearCellData();
     
