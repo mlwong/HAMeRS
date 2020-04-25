@@ -81,6 +81,9 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::registerDerivedVariablesForD
     num_subghosts_of_data.insert(
         std::pair<std::string, hier::IntVector>("TEMPERATURE", num_subghosts));
     
+    num_subghosts_of_data.insert(
+        std::pair<std::string, hier::IntVector>("SPECIES_ENTHALPIES", num_subghosts));
+    
     flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
     
     /*
@@ -1250,6 +1253,19 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
         boost::shared_ptr<pdat::CellData<double> > data_temperature =
             flow_model_tmp->getCellData("TEMPERATURE");
         
+        // Get the cell data of species enthalpies.
+        std::vector<boost::shared_ptr<pdat::CellData<double> > > data_species_enthalpies =
+            flow_model_tmp->getSpeciesCellData("SPECIES_ENTHALPIES");
+        
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+        for (int si = 1; si < d_num_species; si++)
+        {
+            TBOX_ASSERT(data_species_enthalpies[si]->getBox().isSpatiallyEqual(data_species_enthalpies[0]->getBox()));
+            TBOX_ASSERT(data_species_enthalpies[si]->getGhostCellWidth() ==
+                data_species_enthalpies[0]->getGhostCellWidth());
+        }
+#endif
+        
         /*
          * Get the numbers of ghost cells.
          */
@@ -1257,6 +1273,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
         const hier::IntVector num_subghosts_density = data_density->getGhostCellWidth();
         const hier::IntVector num_subghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
         const hier::IntVector num_subghosts_velocity = data_velocity->getGhostCellWidth();
+        const hier::IntVector num_subghosts_species_enthalpies = data_species_enthalpies[0]->getGhostCellWidth();
         
         /*
          * Get the dimensions of the ghost cell boxes.
@@ -1270,6 +1287,9 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
         
         const hier::Box subghost_box_velocity = data_velocity->getGhostBox();
         const hier::IntVector subghostcell_dims_velocity = subghost_box_velocity.numberCells();
+        
+        const hier::Box subghost_box_species_enthalpies = data_species_enthalpies[0]->getGhostBox();
+        const hier::IntVector subghostcell_dims_species_enthalpies = subghost_box_species_enthalpies.numberCells();
         
         /*
          * Create cell data of mass diffusivities, shear viscosity, bulk viscosity and thermal conductivity.
@@ -1304,6 +1324,12 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
         for (int si = 0; si < d_num_species; si++)
         {
             D.push_back(d_data_mass_diffusivities->getPointer(si));
+        }
+        std::vector<double*> h_i;
+        h_i.reserve(d_num_species);
+        for (int si = 0; si < d_num_species; si++)
+        {
+            h_i.push_back(data_species_enthalpies[si]->getPointer(0));
         }
         double* mu    = d_data_shear_viscosity->getPointer(0);
         double* mu_v  = d_data_bulk_viscosity->getPointer(0);
@@ -1340,69 +1366,6 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
             data_temperature,
             data_mass_fractions,
             empty_box);
-        
-        /*
-         * Compute enthalpy of each species.
-         */
-        
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > data_enthalpies;
-        data_enthalpies.reserve(d_num_species);
-        
-        for (int si = 0; si < d_num_species; si++)
-        {
-            data_enthalpies.push_back(boost::make_shared<pdat::CellData<double> >(
-                interior_box, 1, d_num_subghosts_diffusivities));
-        }
-        
-        std::vector<double*> h;
-        h.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            h.push_back(data_enthalpies[si]->getPointer(0));
-        }
-        
-        for (int si = 0; si < d_num_species; si++)
-        {
-            std::vector<double> species_thermo_properties;
-            std::vector<double*> species_thermo_properties_ptr;
-            std::vector<const double*> species_thermo_properties_const_ptr;
-            
-            const int num_thermo_properties = d_equation_of_state_mixing_rules->
-                getNumberOfSpeciesThermodynamicProperties(si);
-            
-            species_thermo_properties.resize(num_thermo_properties);
-            species_thermo_properties_ptr.reserve(num_thermo_properties);
-            species_thermo_properties_const_ptr.reserve(num_thermo_properties);
-            
-            for (int ti = 0; ti < num_thermo_properties; ti++)
-            {
-                species_thermo_properties_ptr.push_back(&species_thermo_properties[ti]);
-                species_thermo_properties_const_ptr.push_back(&species_thermo_properties[ti]);
-            }
-            
-            d_equation_of_state_mixing_rules->getSpeciesThermodynamicProperties(
-                species_thermo_properties_ptr,
-                si);
-            
-            boost::shared_ptr<pdat::CellData<double> > data_density_species(
-                new pdat::CellData<double>(interior_box, 1, d_num_subghosts_diffusivities));
-            
-            d_equation_of_state_mixing_rules->getEquationOfState(si)->
-                computeDensity(
-                    data_density_species,
-                    data_pressure,
-                    data_temperature,
-                    species_thermo_properties_const_ptr,
-                    empty_box);
-            
-            d_equation_of_state_mixing_rules->getEquationOfState(si)->
-                computeEnthalpy(
-                    data_enthalpies[si],
-                    data_density_species,
-                    data_pressure,
-                    species_thermo_properties_const_ptr,
-                    empty_box);
-        }
         
         if (d_dim == tbox::Dimension(1))
         {
@@ -1501,10 +1464,11 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
                     const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
                     const int idx_mass_diffusivities = i + d_num_subghosts_mass_diffusivities[0];
                     const int idx_density = i + num_subghosts_density[0];
+                    const int idx_species_enthalpies = i + num_subghosts_species_enthalpies[0];
                     
                     D_ptr[component_idx][idx_diffusivities] =
                         -rho[idx_density]*D[si][idx_mass_diffusivities]*
-                            h[si][idx_diffusivities];
+                            h_i[si][idx_species_enthalpies];
                 }
             }
             
@@ -1524,10 +1488,11 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
                         const int idx_mass_diffusivities = i + d_num_subghosts_mass_diffusivities[0];
                         const int idx_density = i + num_subghosts_density[0];
                         const int idx_mass_fractions = i + num_subghosts_mass_fractions[0];
+                        const int idx_species_enthalpies = i + num_subghosts_species_enthalpies[0];
                         
                         D_ptr[component_idx][idx_diffusivities] =
                             rho[idx_density]*Y[si][idx_mass_fractions]*D[sj][idx_mass_diffusivities]*
-                                h[si][idx_diffusivities];
+                                h_i[si][idx_species_enthalpies];
                     }
                 }
             }
@@ -1690,9 +1655,12 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
                         const int idx_density = (i + num_subghosts_density[0]) +
                             (j + num_subghosts_density[1])*subghostcell_dims_density[0];
                         
+                        const int idx_species_enthalpies = (i + num_subghosts_species_enthalpies[0]) +
+                            (j + num_subghosts_species_enthalpies[1])*subghostcell_dims_species_enthalpies[0];
+                        
                         D_ptr[component_idx][idx_diffusivities] =
                             -rho[idx_density]*D[si][idx_mass_diffusivities]*
-                                h[si][idx_diffusivities];
+                                h_i[si][idx_species_enthalpies];
                     }
                 }
             }
@@ -1725,9 +1693,12 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
                             const int idx_mass_fractions = (i + num_subghosts_mass_fractions[0]) +
                                 (j + num_subghosts_mass_fractions[1])*subghostcell_dims_mass_fractions[0];
                             
+                            const int idx_species_enthalpies = (i + num_subghosts_species_enthalpies[0]) +
+                                (j + num_subghosts_species_enthalpies[1])*subghostcell_dims_species_enthalpies[0];
+                            
                             D_ptr[component_idx][idx_diffusivities] =
                                 rho[idx_density]*Y[si][idx_mass_fractions]*D[sj][idx_mass_diffusivities]*
-                                    h[si][idx_diffusivities];
+                                    h_i[si][idx_species_enthalpies];
                         }
                     }
                 }
@@ -1947,9 +1918,14 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
                                 (k + num_subghosts_density[2])*subghostcell_dims_density[0]*
                                     subghostcell_dims_density[1];
                             
+                            const int idx_species_enthalpies = (i + num_subghosts_species_enthalpies[0]) +
+                                (j + num_subghosts_species_enthalpies[1])*subghostcell_dims_species_enthalpies[0] +
+                                (k + num_subghosts_species_enthalpies[2])*subghostcell_dims_species_enthalpies[0]*
+                                    subghostcell_dims_species_enthalpies[1];
+                            
                             D_ptr[component_idx][idx_diffusivities] =
                                 -rho[idx_density]*D[si][idx_mass_diffusivities]*
-                                    h[si][idx_diffusivities];
+                                    h_i[si][idx_species_enthalpies];
                         }
                     }
                 }
@@ -1995,9 +1971,14 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
                                     (k + num_subghosts_mass_fractions[2])*subghostcell_dims_mass_fractions[0]*
                                         subghostcell_dims_mass_fractions[1];
                                 
+                                const int idx_species_enthalpies = (i + num_subghosts_species_enthalpies[0]) +
+                                    (j + num_subghosts_species_enthalpies[1])*subghostcell_dims_species_enthalpies[0] +
+                                    (k + num_subghosts_species_enthalpies[2])*subghostcell_dims_species_enthalpies[0]*
+                                        subghostcell_dims_species_enthalpies[1];
+                                
                                 D_ptr[component_idx][idx_diffusivities] =
                                     rho[idx_density]*Y[si][idx_mass_fractions]*D[sj][idx_mass_diffusivities]*
-                                        h[si][idx_diffusivities];
+                                        h_i[si][idx_species_enthalpies];
                             }
                         }
                     }
