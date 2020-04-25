@@ -265,6 +265,18 @@ class FlowModelFourEqnConservative: public FlowModel
             const hier::Box& domain);
         
         /*
+         * Compute the cell data of species densities with pressure and temperature in the registered patch.
+         */
+        void computeCellDataOfSpeciesDensitiesWithPressureAndTemperature(
+            const hier::Box& domain);
+        
+        /*
+         * Compute the cell data of species enthalpies with species densities and pressure in the registered patch.
+         */
+        void computeCellDataOfSpeciesEnthalpiesWithSpeciesDensitiesAndPressure(
+            const hier::Box& domain);
+        
+        /*
          * boost::shared_ptr to registered conservative variables.
          */
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_partial_densities;
@@ -289,6 +301,8 @@ class FlowModelFourEqnConservative: public FlowModel
         hier::IntVector d_num_subghosts_max_wave_speed_y;
         hier::IntVector d_num_subghosts_max_wave_speed_z;
         hier::IntVector d_num_subghosts_max_diffusivity;
+        hier::IntVector d_num_subghosts_species_densities;
+        hier::IntVector d_num_subghosts_species_enthalpies;
         
         /*
          * Boxes with sub-ghost cells of derived cell data.
@@ -308,6 +322,8 @@ class FlowModelFourEqnConservative: public FlowModel
         hier::Box d_subghost_box_max_wave_speed_y;
         hier::Box d_subghost_box_max_wave_speed_z;
         hier::Box d_subghost_box_max_diffusivity;
+        hier::Box d_subghost_box_species_densities;
+        hier::Box d_subghost_box_species_enthalpies;
         
         /*
          * Dimensions of boxes with sub-ghost cells of derived cell data.
@@ -327,6 +343,8 @@ class FlowModelFourEqnConservative: public FlowModel
         hier::IntVector d_subghostcell_dims_max_wave_speed_y;
         hier::IntVector d_subghostcell_dims_max_wave_speed_z;
         hier::IntVector d_subghostcell_dims_max_diffusivity;
+        hier::IntVector d_subghostcell_dims_species_densities;
+        hier::IntVector d_subghostcell_dims_species_enthalpies;
         
         /*
          * boost::shared_ptr to derived cell data.
@@ -346,6 +364,8 @@ class FlowModelFourEqnConservative: public FlowModel
         boost::shared_ptr<pdat::CellData<double> > d_data_max_wave_speed_y;
         boost::shared_ptr<pdat::CellData<double> > d_data_max_wave_speed_z;
         boost::shared_ptr<pdat::CellData<double> > d_data_max_diffusivity;
+        std::vector<boost::shared_ptr<pdat::CellData<double> > > d_data_species_densities;
+        std::vector<boost::shared_ptr<pdat::CellData<double> > > d_data_species_enthalpies;
         
         /*
          * Upper and lower bounds on variables.

@@ -238,18 +238,6 @@ class FlowModelFiveEqnAllaire: public FlowModel
             const hier::Box& domain);
         
         /*
-         * Compute the cell data of species densities in the registered patch.
-         */
-        void computeCellDataOfSpeciesDensities(
-            const hier::Box& domain);
-        
-        /*
-         * Compute the cell data of species temperatures with species temperatures and pressure in the registered patch.
-         */
-        void computeCellDataOfSpeciesTemperaturesWithSpeciesDensitiesAndPressure(
-            const hier::Box& domain);
-        
-        /*
          * Compute the cell data of convective flux with velocity and pressure in the registered
          * patch.
          */
@@ -270,6 +258,18 @@ class FlowModelFiveEqnAllaire: public FlowModel
          * and temperature in the registered patch.
          */
         void computeCellDataOfMaxDiffusivityWithDensityMassFractionsPressureAndTemperature(
+            const hier::Box& domain);
+        
+        /*
+         * Compute the cell data of species densities in the registered patch.
+         */
+        void computeCellDataOfSpeciesDensities(
+            const hier::Box& domain);
+        
+        /*
+         * Compute the cell data of species temperatures with species densities and pressure in the registered patch.
+         */
+        void computeCellDataOfSpeciesTemperaturesWithSpeciesDensitiesAndPressure(
             const hier::Box& domain);
         
         /*

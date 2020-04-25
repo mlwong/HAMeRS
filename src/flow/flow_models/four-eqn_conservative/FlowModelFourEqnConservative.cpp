@@ -38,6 +38,8 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
         d_num_subghosts_max_wave_speed_y(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_max_wave_speed_z(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_max_diffusivity(-hier::IntVector::getOne(d_dim)),
+        d_num_subghosts_species_densities(-hier::IntVector::getOne(d_dim)),
+        d_num_subghosts_species_enthalpies(-hier::IntVector::getOne(d_dim)),
         d_subghost_box_density(hier::Box::getEmptyBox(dim)),
         d_subghost_box_mass_fractions(hier::Box::getEmptyBox(dim)),
         d_subghost_box_mole_fractions(hier::Box::getEmptyBox(dim)),
@@ -53,6 +55,8 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
         d_subghost_box_max_wave_speed_y(hier::Box::getEmptyBox(dim)),
         d_subghost_box_max_wave_speed_z(hier::Box::getEmptyBox(dim)),
         d_subghost_box_max_diffusivity(hier::Box::getEmptyBox(dim)),
+        d_subghost_box_species_densities(hier::Box::getEmptyBox(dim)),
+        d_subghost_box_species_enthalpies(hier::Box::getEmptyBox(dim)),
         d_subghostcell_dims_density(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_mass_fractions(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_mole_fractions(hier::IntVector::getZero(d_dim)),
@@ -67,7 +71,9 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
         d_subghostcell_dims_max_wave_speed_x(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_max_wave_speed_y(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_max_wave_speed_z(hier::IntVector::getZero(d_dim)),
-        d_subghostcell_dims_max_diffusivity(hier::IntVector::getZero(d_dim))
+        d_subghostcell_dims_max_diffusivity(hier::IntVector::getZero(d_dim)),
+        d_subghostcell_dims_species_densities(hier::IntVector::getZero(d_dim)),
+        d_subghostcell_dims_species_enthalpies(hier::IntVector::getZero(d_dim))
 {
     d_eqn_form.reserve(d_num_eqn);
     
@@ -426,6 +432,12 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
             d_num_species,
             d_num_eqn,
             d_equation_of_state_mixing_rules));
+    
+    /*
+     * Initialize pointers to species cell data.
+     */
+    d_data_species_densities.resize(d_num_species, nullptr);
+    d_data_species_enthalpies.resize(d_num_species, nullptr);
 }
 
 
@@ -927,58 +939,64 @@ FlowModelFourEqnConservative::unregisterPatch()
             << std::endl);
     }
     
-    d_num_ghosts                      = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_density           = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_mass_fractions    = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_mole_fractions    = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_velocity          = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_internal_energy   = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_pressure          = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_sound_speed       = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_temperature       = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_convective_flux_x = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_convective_flux_y = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_convective_flux_z = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_max_wave_speed_x  = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_max_wave_speed_y  = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_max_wave_speed_z  = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_max_diffusivity   = -hier::IntVector::getOne(d_dim);
+    d_num_ghosts                       = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_density            = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_mass_fractions     = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_mole_fractions     = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_velocity           = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_internal_energy    = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_pressure           = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_sound_speed        = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_temperature        = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_convective_flux_x  = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_convective_flux_y  = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_convective_flux_z  = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_max_wave_speed_x   = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_max_wave_speed_y   = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_max_wave_speed_z   = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_max_diffusivity    = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_species_densities  = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_species_enthalpies = -hier::IntVector::getOne(d_dim);
     
-    d_interior_box                   = hier::Box::getEmptyBox(d_dim);
-    d_ghost_box                      = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_density           = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_mass_fractions    = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_mole_fractions    = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_velocity          = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_internal_energy   = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_pressure          = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_sound_speed       = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_temperature       = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_convective_flux_x = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_convective_flux_y = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_convective_flux_z = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_max_wave_speed_x  = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_max_wave_speed_y  = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_max_wave_speed_z  = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_max_diffusivity   = hier::Box::getEmptyBox(d_dim);
+    d_interior_box                    = hier::Box::getEmptyBox(d_dim);
+    d_ghost_box                       = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_density            = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_mass_fractions     = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_mole_fractions     = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_velocity           = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_internal_energy    = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_pressure           = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_sound_speed        = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_temperature        = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_convective_flux_x  = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_convective_flux_y  = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_convective_flux_z  = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_max_wave_speed_x   = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_max_wave_speed_y   = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_max_wave_speed_z   = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_max_diffusivity    = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_species_densities  = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_species_enthalpies = hier::Box::getEmptyBox(d_dim);
     
-    d_interior_dims                       = hier::IntVector::getZero(d_dim);
-    d_ghostcell_dims                      = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_density           = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_mass_fractions    = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_mole_fractions    = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_velocity          = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_internal_energy   = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_pressure          = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_sound_speed       = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_temperature       = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_convective_flux_x = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_convective_flux_y = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_convective_flux_z = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_max_wave_speed_x  = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_max_wave_speed_y  = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_max_wave_speed_z  = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_max_diffusivity   = hier::IntVector::getZero(d_dim);
+    d_interior_dims                        = hier::IntVector::getZero(d_dim);
+    d_ghostcell_dims                       = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_density            = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_mass_fractions     = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_mole_fractions     = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_velocity           = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_internal_energy    = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_pressure           = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_sound_speed        = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_temperature        = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_convective_flux_x  = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_convective_flux_y  = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_convective_flux_z  = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_max_wave_speed_x   = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_max_wave_speed_y   = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_max_wave_speed_z   = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_max_diffusivity    = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_species_densities  = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_species_enthalpies = hier::IntVector::getZero(d_dim);
     
     d_data_density.reset();
     d_data_mass_fractions.reset();
@@ -995,6 +1013,8 @@ FlowModelFourEqnConservative::unregisterPatch()
     d_data_max_wave_speed_y.reset();
     d_data_max_wave_speed_z.reset();
     d_data_max_diffusivity.reset();
+    d_data_species_densities.assign(d_num_species, nullptr);
+    d_data_species_enthalpies.assign(d_num_species, nullptr);
     
     d_flow_model_diffusive_flux_utilities->clearCellData();
     
@@ -1180,6 +1200,26 @@ FlowModelFourEqnConservative::computeDerivedCellData(const hier::Box& domain)
         if (!d_data_max_diffusivity)
         {
             computeCellDataOfMaxDiffusivityWithDensityMassFractionsPressureAndTemperature(
+                domain);
+        }
+    }
+    
+    // Compute the species densities cell data.
+    if (d_num_subghosts_species_densities > -hier::IntVector::getOne(d_dim))
+    {
+        if (!d_data_species_densities[0])
+        {
+            computeCellDataOfSpeciesDensitiesWithPressureAndTemperature(
+                domain);
+        }
+    }
+    
+    // Compute the species enthalpies cell data.
+    if (d_num_subghosts_species_enthalpies > -hier::IntVector::getOne(d_dim))
+    {
+        if (!d_data_species_enthalpies[0])
+        {
+            computeCellDataOfSpeciesEnthalpiesWithSpeciesDensitiesAndPressure(
                 domain);
         }
     }
@@ -1421,12 +1461,49 @@ std::vector<boost::shared_ptr<pdat::CellData<double> > >
 FlowModelFourEqnConservative::getSpeciesCellData(
     const std::string& variable_key)
 {
-    TBOX_ERROR(d_object_name
-        << ": Method FlowModelFourEqnConservative::getSpeciesCellData() is not implemented yet!"
-        << std::endl);
+    // Check whether the patch is already registered.
+    if (!d_patch)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelFourEqnConservative::getSpeciesCellData()\n"
+            << "No patch is registered yet."
+            << std::endl);
+    }
     
-    std::vector<boost::shared_ptr<pdat::CellData<double> > > tmp;
-    return tmp;
+    std::vector<boost::shared_ptr<pdat::CellData<double> > > species_cell_data;
+    
+    if (variable_key == "SPECIES_DENSITIES")
+    {
+        if (!d_data_species_densities[0])
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelFourEqnConservative::getCellData()\n"
+                << "Cell data of 'SPECIES_DENSITIES' is not registered/computed yet."
+                << std::endl);
+        }
+        species_cell_data = d_data_species_densities;
+    }
+    else if (variable_key == "SPECIES_ENTHALPIES")
+    {
+        if (!d_data_species_enthalpies[0])
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelFourEqnConservative::getCellData()\n"
+                << "Cell data of 'SPECIES_ENTHALPIES' is not registered/computed yet."
+                << std::endl);
+        }
+        species_cell_data = d_data_species_enthalpies;
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelFourEqnConservative::getSpeciesCellData()\n"
+            << "Unknown cell data with variable_key = '" << variable_key
+            << "' requested."
+            << std::endl);
+    }
+    
+    return species_cell_data;
 }
 
 
@@ -3048,6 +3125,64 @@ FlowModelFourEqnConservative::setNumberOfSubGhosts(
         setNumberOfSubGhosts(num_subghosts, "PRESSURE", parent_variable_name);
         setNumberOfSubGhosts(num_subghosts, "TEMPERATURE", parent_variable_name);
     }
+    else if (variable_name == "SPECIES_DENSITIES")
+    {
+        if (d_num_subghosts_species_densities > -hier::IntVector::getOne(d_dim))
+        {
+            if (num_subghosts > d_num_subghosts_species_densities)
+            {
+                /*
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelFiveEqnAllaire::setNumberOfSubGhosts()\n"
+                    << "Number of ghosts of '"
+                    << parent_variable_name
+                    << "' exceeds"
+                    << " number of ghosts of '"
+                    << variable_name
+                    << "'."
+                    << std::endl);
+                */
+                
+                d_num_subghosts_species_densities = num_subghosts;
+            }
+        }
+        else
+        {
+            d_num_subghosts_species_densities = num_subghosts;
+        }
+        
+        setNumberOfSubGhosts(num_subghosts, "PRESSURE", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "TEMPERATURE", parent_variable_name);
+    }
+    else if (variable_name == "SPECIES_ENTHALPIES")
+    {
+        if (d_num_subghosts_species_enthalpies > -hier::IntVector::getOne(d_dim))
+        {
+            if (num_subghosts > d_num_subghosts_species_enthalpies)
+            {
+                /*
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelFiveEqnAllaire::setNumberOfSubGhosts()\n"
+                    << "Number of ghosts of '"
+                    << parent_variable_name
+                    << "' exceeds"
+                    << " number of ghosts of '"
+                    << variable_name
+                    << "'."
+                    << std::endl);
+                */
+                
+                d_num_subghosts_species_enthalpies = num_subghosts;
+            }
+        }
+        else
+        {
+            d_num_subghosts_species_enthalpies = num_subghosts;
+        }
+        
+        setNumberOfSubGhosts(num_subghosts, "SPECIES_DENSITIES", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "PRESSURE", parent_variable_name);
+    }
 }
 
 
@@ -3160,6 +3295,20 @@ FlowModelFourEqnConservative::setDerivedCellVariableGhostBoxes()
         d_subghost_box_max_diffusivity = d_interior_box;
         d_subghost_box_max_diffusivity.grow(d_num_subghosts_max_diffusivity);
         d_subghostcell_dims_max_diffusivity = d_subghost_box_max_diffusivity.numberCells();
+    }
+    
+    if (d_num_subghosts_species_densities > -hier::IntVector::getOne(d_dim))
+    {
+        d_subghost_box_species_densities = d_interior_box;
+        d_subghost_box_species_densities.grow(d_num_subghosts_species_densities);
+        d_subghostcell_dims_species_densities = d_subghost_box_species_densities.numberCells();
+    }
+    
+    if (d_num_subghosts_species_enthalpies > -hier::IntVector::getOne(d_dim))
+    {
+        d_subghost_box_species_enthalpies = d_interior_box;
+        d_subghost_box_species_enthalpies.grow(d_num_subghosts_species_enthalpies);
+        d_subghostcell_dims_species_enthalpies = d_subghost_box_species_enthalpies.numberCells();
     }
 }
 
@@ -6222,6 +6371,162 @@ FlowModelFourEqnConservative::computeCellDataOfMaxDiffusivityWithDensityMassFrac
             << ": FlowModelFourEqnConservative::"
             << "computeCellDataOfMaxDiffusivityWithDensityMassFractionsPressureAndTemperature()\n"
             << "Cell data of 'MAX_DIFFUSIVITY' is not yet registered."
+            << std::endl);
+    }
+}
+
+
+/*
+ * Compute the cell data of species densities with pressure and temperature in the registered patch.
+ */
+void
+FlowModelFourEqnConservative::computeCellDataOfSpeciesDensitiesWithPressureAndTemperature(
+    const hier::Box& domain)
+{
+    if (d_num_subghosts_species_densities > -hier::IntVector::getOne(d_dim))
+    {
+        // Create the cell data of species densities.
+        for (int si = 0; si < d_num_species; si++)
+        {
+            d_data_species_densities[si].reset(
+                new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_species_densities));
+        }
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        if (!domain.empty())
+        {
+            TBOX_ASSERT(d_subghost_box_species_densities.contains(domain));
+        }
+#endif
+        
+        if (!d_data_pressure)
+        {
+            computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(domain);
+        }
+        
+        if (!d_data_temperature)
+        {
+            computeCellDataOfTemperatureWithDensityMassFractionsAndPressure(domain);
+        }
+        
+        // Compute the density of each species.
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            std::vector<double> species_thermo_properties;
+            std::vector<double*> species_thermo_properties_ptr;
+            std::vector<const double*> species_thermo_properties_const_ptr;
+            
+            const int num_thermo_properties = d_equation_of_state_mixing_rules->
+                getNumberOfSpeciesThermodynamicProperties(si);
+            
+            species_thermo_properties.resize(num_thermo_properties);
+            species_thermo_properties_ptr.reserve(num_thermo_properties);
+            species_thermo_properties_const_ptr.reserve(num_thermo_properties);
+            
+            for (int ti = 0; ti < num_thermo_properties; ti++)
+            {
+                species_thermo_properties_ptr.push_back(&species_thermo_properties[ti]);
+                species_thermo_properties_const_ptr.push_back(&species_thermo_properties[ti]);
+            }
+            
+            d_equation_of_state_mixing_rules->getSpeciesThermodynamicProperties(
+                species_thermo_properties_ptr,
+                si);
+            
+            d_equation_of_state_mixing_rules->getEquationOfState(si)->
+                computeDensity(
+                    d_data_species_densities[si],
+                    d_data_pressure,
+                    d_data_temperature,
+                    species_thermo_properties_const_ptr,
+                    domain);
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelFourEqnConservative::"
+            << "computeCellDataOfSpeciesDensitiesWithPressureAndTemperature()\n"
+            << "Cell data of 'SPECIES_DENSITIES' is not yet registered."
+            << std::endl);
+    }
+}
+
+
+/*
+ * Compute the cell data of species enthalpies with species densities and pressure in the registered patch.
+ */
+void
+FlowModelFourEqnConservative::computeCellDataOfSpeciesEnthalpiesWithSpeciesDensitiesAndPressure(
+    const hier::Box& domain)
+{
+    if (d_num_subghosts_species_enthalpies > -hier::IntVector::getOne(d_dim))
+    {
+        // Create the cell data of species enthalpies.
+        for (int si = 0; si < d_num_species; si++)
+        {
+            d_data_species_enthalpies[si].reset(
+                new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_species_enthalpies));
+        }
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        if (!domain.empty())
+        {
+            TBOX_ASSERT(d_subghost_box_species_enthalpies.contains(domain));
+        }
+#endif
+        
+        if (!d_data_species_densities[0])
+        {
+            computeCellDataOfSpeciesDensitiesWithPressureAndTemperature(domain);
+        }
+        
+        if (!d_data_pressure)
+        {
+            computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(domain);
+        }
+        
+        // Compute the temperature of each species.
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            std::vector<double> species_thermo_properties;
+            std::vector<double*> species_thermo_properties_ptr;
+            std::vector<const double*> species_thermo_properties_const_ptr;
+            
+            const int num_thermo_properties = d_equation_of_state_mixing_rules->
+                getNumberOfSpeciesThermodynamicProperties(si);
+            
+            species_thermo_properties.resize(num_thermo_properties);
+            species_thermo_properties_ptr.reserve(num_thermo_properties);
+            species_thermo_properties_const_ptr.reserve(num_thermo_properties);
+            
+            for (int ti = 0; ti < num_thermo_properties; ti++)
+            {
+                species_thermo_properties_ptr.push_back(&species_thermo_properties[ti]);
+                species_thermo_properties_const_ptr.push_back(&species_thermo_properties[ti]);
+            }
+            
+            d_equation_of_state_mixing_rules->getSpeciesThermodynamicProperties(
+                species_thermo_properties_ptr,
+                si);
+            
+            d_equation_of_state_mixing_rules->getEquationOfState(si)->
+                computeEnthalpy(
+                    d_data_species_enthalpies[si],
+                    d_data_species_densities[si],
+                    d_data_pressure,
+                    species_thermo_properties_const_ptr,
+                    domain);
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelFourEqnConservative::"
+            << "computeCellDataOfSpeciesEnthalpiesWithSpeciesDensitiesAndPressure()\n"
+            << "Cell data of 'SPECIES_ENTHALPIES' is not yet registered."
             << std::endl);
     }
 }

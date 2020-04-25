@@ -966,26 +966,6 @@ FlowModelFiveEqnAllaire::computeDerivedCellData(const hier::Box& domain)
         }
     }
     
-    // Compute the species densities cell data.
-    if (d_num_subghosts_species_densities > -hier::IntVector::getOne(d_dim))
-    {
-        if (!d_data_species_densities[0])
-        {
-            computeCellDataOfSpeciesDensities(
-                domain);
-        }
-    }
-    
-    // Compute the species temperatures cell data.
-    if (d_num_subghosts_species_temperatures > -hier::IntVector::getOne(d_dim))
-    {
-        if (!d_data_species_temperatures[0])
-        {
-            computeCellDataOfSpeciesTemperaturesWithSpeciesDensitiesAndPressure(
-                domain);
-        }
-    }
-    
     // Compute the x-direction convective flux cell data.
     if (d_num_subghosts_convective_flux_x > -hier::IntVector::getOne(d_dim))
     {
@@ -1058,6 +1038,26 @@ FlowModelFiveEqnAllaire::computeDerivedCellData(const hier::Box& domain)
         if (!d_data_max_diffusivity)
         {
             computeCellDataOfMaxDiffusivityWithDensityMassFractionsPressureAndTemperature(
+                domain);
+        }
+    }
+    
+    // Compute the species densities cell data.
+    if (d_num_subghosts_species_densities > -hier::IntVector::getOne(d_dim))
+    {
+        if (!d_data_species_densities[0])
+        {
+            computeCellDataOfSpeciesDensities(
+                domain);
+        }
+    }
+    
+    // Compute the species temperatures cell data.
+    if (d_num_subghosts_species_temperatures > -hier::IntVector::getOne(d_dim))
+    {
+        if (!d_data_species_temperatures[0])
+        {
+            computeCellDataOfSpeciesTemperaturesWithSpeciesDensitiesAndPressure(
                 domain);
         }
     }
@@ -2909,61 +2909,6 @@ FlowModelFiveEqnAllaire::setNumberOfSubGhosts(
         setNumberOfSubGhosts(num_subghosts, "MASS_FRACTIONS", parent_variable_name);
         setNumberOfSubGhosts(num_subghosts, "PRESSURE", parent_variable_name);
     }
-    else if (variable_name == "SPECIES_DENSITIES")
-    {
-        if (d_num_subghosts_species_densities > -hier::IntVector::getOne(d_dim))
-        {
-            if (num_subghosts > d_num_subghosts_species_densities)
-            {
-                /*
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFiveEqnAllaire::setNumberOfSubGhosts()\n"
-                    << "Number of ghosts of '"
-                    << parent_variable_name
-                    << "' exceeds"
-                    << " number of ghosts of '"
-                    << variable_name
-                    << "'."
-                    << std::endl);
-                */
-                
-                d_num_subghosts_species_densities = num_subghosts;
-            }
-        }
-        else
-        {
-            d_num_subghosts_species_densities = num_subghosts;
-        }
-    }
-    else if (variable_name == "SPECIES_TEMPERATURES")
-    {
-        if (d_num_subghosts_species_temperatures > -hier::IntVector::getOne(d_dim))
-        {
-            if (num_subghosts > d_num_subghosts_species_temperatures)
-            {
-                /*
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFiveEqnAllaire::setNumberOfSubGhosts()\n"
-                    << "Number of ghosts of '"
-                    << parent_variable_name
-                    << "' exceeds"
-                    << " number of ghosts of '"
-                    << variable_name
-                    << "'."
-                    << std::endl);
-                */
-                
-                d_num_subghosts_species_temperatures = num_subghosts;
-            }
-        }
-        else
-        {
-            d_num_subghosts_species_temperatures = num_subghosts;
-        }
-        
-        setNumberOfSubGhosts(num_subghosts, "SPECIES_DENSITIES", parent_variable_name);
-        setNumberOfSubGhosts(num_subghosts, "PRESSURE", parent_variable_name);
-    }
     else if (variable_name == "CONVECTIVE_FLUX_X")
     {
         if (d_num_subghosts_convective_flux_x > -hier::IntVector::getOne(d_dim))
@@ -3174,6 +3119,61 @@ FlowModelFiveEqnAllaire::setNumberOfSubGhosts(
         setNumberOfSubGhosts(num_subghosts, "PRESSURE", parent_variable_name);
         setNumberOfSubGhosts(num_subghosts, "SPECIES_TEMPERATURES", parent_variable_name);
     }
+    else if (variable_name == "SPECIES_DENSITIES")
+    {
+        if (d_num_subghosts_species_densities > -hier::IntVector::getOne(d_dim))
+        {
+            if (num_subghosts > d_num_subghosts_species_densities)
+            {
+                /*
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelFiveEqnAllaire::setNumberOfSubGhosts()\n"
+                    << "Number of ghosts of '"
+                    << parent_variable_name
+                    << "' exceeds"
+                    << " number of ghosts of '"
+                    << variable_name
+                    << "'."
+                    << std::endl);
+                */
+                
+                d_num_subghosts_species_densities = num_subghosts;
+            }
+        }
+        else
+        {
+            d_num_subghosts_species_densities = num_subghosts;
+        }
+    }
+    else if (variable_name == "SPECIES_TEMPERATURES")
+    {
+        if (d_num_subghosts_species_temperatures > -hier::IntVector::getOne(d_dim))
+        {
+            if (num_subghosts > d_num_subghosts_species_temperatures)
+            {
+                /*
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelFiveEqnAllaire::setNumberOfSubGhosts()\n"
+                    << "Number of ghosts of '"
+                    << parent_variable_name
+                    << "' exceeds"
+                    << " number of ghosts of '"
+                    << variable_name
+                    << "'."
+                    << std::endl);
+                */
+                
+                d_num_subghosts_species_temperatures = num_subghosts;
+            }
+        }
+        else
+        {
+            d_num_subghosts_species_temperatures = num_subghosts;
+        }
+        
+        setNumberOfSubGhosts(num_subghosts, "SPECIES_DENSITIES", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "PRESSURE", parent_variable_name);
+    }
 }
 
 
@@ -3225,20 +3225,6 @@ FlowModelFiveEqnAllaire::setDerivedCellVariableGhostBoxes()
         d_subghostcell_dims_sound_speed = d_subghost_box_sound_speed.numberCells();
     }
     
-    if (d_num_subghosts_species_densities > -hier::IntVector::getOne(d_dim))
-    {
-        d_subghost_box_species_densities = d_interior_box;
-        d_subghost_box_species_densities.grow(d_num_subghosts_species_densities);
-        d_subghostcell_dims_species_densities = d_subghost_box_species_densities.numberCells();
-    }
-    
-    if (d_num_subghosts_species_temperatures > -hier::IntVector::getOne(d_dim))
-    {
-        d_subghost_box_species_temperatures = d_interior_box;
-        d_subghost_box_species_temperatures.grow(d_num_subghosts_species_temperatures);
-        d_subghostcell_dims_species_temperatures = d_subghost_box_species_temperatures.numberCells();
-    }
-    
     if (d_num_subghosts_convective_flux_x > -hier::IntVector::getOne(d_dim))
     {
         d_subghost_box_convective_flux_x = d_interior_box;
@@ -3286,6 +3272,20 @@ FlowModelFiveEqnAllaire::setDerivedCellVariableGhostBoxes()
         d_subghost_box_max_diffusivity = d_interior_box;
         d_subghost_box_max_diffusivity.grow(d_num_subghosts_max_diffusivity);
         d_subghostcell_dims_max_diffusivity = d_subghost_box_max_diffusivity.numberCells();
+    }
+    
+    if (d_num_subghosts_species_densities > -hier::IntVector::getOne(d_dim))
+    {
+        d_subghost_box_species_densities = d_interior_box;
+        d_subghost_box_species_densities.grow(d_num_subghosts_species_densities);
+        d_subghostcell_dims_species_densities = d_subghost_box_species_densities.numberCells();
+    }
+    
+    if (d_num_subghosts_species_temperatures > -hier::IntVector::getOne(d_dim))
+    {
+        d_subghost_box_species_temperatures = d_interior_box;
+        d_subghost_box_species_temperatures.grow(d_num_subghosts_species_temperatures);
+        d_subghostcell_dims_species_temperatures = d_subghost_box_species_temperatures.numberCells();
     }
 }
 
@@ -4457,298 +4457,6 @@ FlowModelFiveEqnAllaire::computeCellDataOfSoundSpeedWithDensityMassFractionsAndP
             << ": FlowModelFiveEqnAllaire::"
             << "computeCellDataOfSoundSpeedWithDensityMassFractionsAndPressure()\n"
             << "Cell data of 'SOUND_SPEED' is not yet registered."
-            << std::endl);
-    }
-}
-
-
-/*
- * Compute the cell data of species densities in the registered patch.
- */
-void
-FlowModelFiveEqnAllaire::computeCellDataOfSpeciesDensities(
-    const hier::Box& domain)
-{
-    if (d_num_subghosts_species_densities > -hier::IntVector::getOne(d_dim))
-    {
-        // Create the cell data of species densities.
-        for (int si = 0; si < d_num_species; si++)
-        {
-            d_data_species_densities[0].reset(
-                new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_species_densities));
-        }
-        
-        /*
-         * Get the local lower index and number of cells in each direction of the domain.
-         */
-        
-        hier::IntVector domain_lo(d_dim);
-        hier::IntVector domain_dims(d_dim);
-        
-        if (domain.empty())
-        {
-            domain_lo = -d_num_subghosts_species_densities;
-            domain_dims = d_subghostcell_dims_species_densities;
-        }
-        else
-        {
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-            TBOX_ASSERT(d_subghost_box_species_densities.contains(domain));
-#endif
-            
-            domain_lo = domain.lower() - d_interior_box.lower();
-            domain_dims = domain.numberCells();
-        }
-        
-        // Get the cell data of the variable partial densities.
-        boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
-            getCellDataOfPartialDensities();
-        
-        // Get the cell data of the variable volume fractions.
-        boost::shared_ptr<pdat::CellData<double> > data_volume_fractions =
-            getCellDataOfVolumeFractions();
-        
-        // Get the pointers to the cell data of species densities, partial densities and volume fractions.
-        std::vector<double*> rho_i;
-        rho_i.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            rho_i.push_back(d_data_species_densities[si]->getPointer(0));
-        }
-        std::vector<double*> Z_rho;
-        Z_rho.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Z_rho.push_back(data_partial_densities->getPointer(si));
-        }
-        std::vector<double*> Z;
-        Z.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Z.push_back(data_volume_fractions->getPointer(si));
-        }
-        
-        // Compute the species densities fields.
-        
-        if (d_dim == tbox::Dimension(1))
-        {
-            /*
-             * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
-             */
-            
-            const int domain_lo_0 = domain_lo[0];
-            const int domain_dim_0 = domain_dims[0];
-            
-            const int num_ghosts_0 = d_num_ghosts[0];
-            const int num_subghosts_0_species_densities = d_num_subghosts_species_densities[0];
-            
-            for (int si = 0; si < d_num_species; si++)
-            {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
-                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
-                {
-                    // Compute the linear indices.
-                    const int idx = i + num_ghosts_0;
-                    const int idx_species_densities = i + num_subghosts_0_species_densities;
-                    
-                    rho_i[si][idx_species_densities] = Z_rho[si][idx]/Z[si][idx];
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(2))
-        {
-            /*
-             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
-             */
-            
-            const int domain_lo_0 = domain_lo[0];
-            const int domain_lo_1 = domain_lo[1];
-            const int domain_dim_0 = domain_dims[0];
-            const int domain_dim_1 = domain_dims[1];
-            
-            const int num_ghosts_0 = d_num_ghosts[0];
-            const int num_ghosts_1 = d_num_ghosts[1];
-            const int ghostcell_dim_0 = d_ghostcell_dims[0];
-            
-            const int num_subghosts_0_species_densities = d_num_subghosts_species_densities[0];
-            const int num_subghosts_1_species_densities = d_num_subghosts_species_densities[1];
-            const int subghostcell_dim_0_species_densities = d_subghostcell_dims_species_densities[0];
-            
-            for (int si = 0; si < d_num_species; si++)
-            {
-                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
-                {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx = (i + num_ghosts_0) +
-                            (j + num_ghosts_1)*ghostcell_dim_0;
-                        
-                        const int idx_species_densities = (i + num_subghosts_0_species_densities) +
-                            (j + num_subghosts_1_species_densities)*subghostcell_dim_0_species_densities;
-                        
-                        rho_i[si][idx_species_densities] = Z_rho[si][idx]/Z[si][idx];
-                    }
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            /*
-             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
-             */
-            
-            const int domain_lo_0 = domain_lo[0];
-            const int domain_lo_1 = domain_lo[1];
-            const int domain_lo_2 = domain_lo[2];
-            const int domain_dim_0 = domain_dims[0];
-            const int domain_dim_1 = domain_dims[1];
-            const int domain_dim_2 = domain_dims[2];
-            
-            const int num_ghosts_0 = d_num_ghosts[0];
-            const int num_ghosts_1 = d_num_ghosts[1];
-            const int num_ghosts_2 = d_num_ghosts[2];
-            const int ghostcell_dim_0 = d_ghostcell_dims[0];
-            const int ghostcell_dim_1 = d_ghostcell_dims[1];
-            
-            const int num_subghosts_0_species_densities = d_num_subghosts_species_densities[0];
-            const int num_subghosts_1_species_densities = d_num_subghosts_species_densities[1];
-            const int num_subghosts_2_species_densities = d_num_subghosts_species_densities[2];
-            const int subghostcell_dim_0_species_densities = d_subghostcell_dims_species_densities[0];
-            const int subghostcell_dim_1_species_densities = d_subghostcell_dims_species_densities[1];
-            
-            for (int si = 0; si < d_num_species; si++)
-            {
-                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
-                {
-                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
-                    {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
-                        {
-                            // Compute the linear indices.
-                            const int idx = (i + num_ghosts_0) +
-                                (j + num_ghosts_1)*ghostcell_dim_0 +
-                                (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
-                            
-                            const int idx_species_densities = (i + num_subghosts_0_species_densities) +
-                                (j + num_subghosts_1_species_densities)*subghostcell_dim_0_species_densities +
-                                (k + num_subghosts_2_species_densities)*subghostcell_dim_0_species_densities*
-                                    subghostcell_dim_1_species_densities;
-                            
-                            rho_i[si][idx_species_densities] = Z_rho[si][idx]/Z[si][idx];
-                        }
-                    }
-                }
-            }
-        }
-    }
-    else
-    {
-        TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::"
-            << "computeCellDataOfSpeciesDensities()\n"
-            << "Cell data of 'SPECIES_DENSITIES' is not yet registered."
-            << std::endl);
-    }
-}
-
-
-/*
- * Compute the cell data of species temperatures with pressure in the registered patch.
- */
-void
-FlowModelFiveEqnAllaire::computeCellDataOfSpeciesTemperaturesWithSpeciesDensitiesAndPressure(
-    const hier::Box& domain)
-{
-    if (d_num_subghosts_species_temperatures > -hier::IntVector::getOne(d_dim))
-    {
-        // Create the cell data of species temperatures.
-        for (int si = 0; si < d_num_species; si++)
-        {
-            d_data_species_densities[0].reset(
-                new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_species_temperatures));
-        }
-        
-        /*
-         * Get the local lower index and number of cells in each direction of the domain.
-         */
-        
-        hier::IntVector domain_lo(d_dim);
-        hier::IntVector domain_dims(d_dim);
-        
-        if (domain.empty())
-        {
-            domain_lo = -d_num_subghosts_species_temperatures;
-            domain_dims = d_subghostcell_dims_species_temperatures;
-        }
-        else
-        {
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-            TBOX_ASSERT(d_subghost_box_species_temperatures.contains(domain));
-#endif
-            
-            domain_lo = domain.lower() - d_interior_box.lower();
-            domain_dims = domain.numberCells();
-        }
-        
-        if (!d_data_species_densities[0])
-        {
-            computeCellDataOfSpeciesDensities(domain);
-        }
-        
-        if (!d_data_pressure)
-        {
-            computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(domain);
-        }
-        
-        // Compute the temperature of each species.
-        
-        for (int si = 0; si < d_num_species; si++)
-        {
-            std::vector<double> species_thermo_properties;
-            std::vector<double*> species_thermo_properties_ptr;
-            std::vector<const double*> species_thermo_properties_const_ptr;
-            
-            const int num_thermo_properties = d_equation_of_state_mixing_rules->
-                getNumberOfSpeciesThermodynamicProperties(si);
-            
-            species_thermo_properties.resize(num_thermo_properties);
-            species_thermo_properties_ptr.reserve(num_thermo_properties);
-            species_thermo_properties_const_ptr.reserve(num_thermo_properties);
-            
-            for (int ti = 0; ti < num_thermo_properties; ti++)
-            {
-                species_thermo_properties_ptr.push_back(&species_thermo_properties[ti]);
-                species_thermo_properties_const_ptr.push_back(&species_thermo_properties[ti]);
-            }
-            
-            d_equation_of_state_mixing_rules->getSpeciesThermodynamicProperties(
-                species_thermo_properties_ptr,
-                si);
-            
-            d_equation_of_state_mixing_rules->getEquationOfState(si)->
-                computeTemperature(
-                    d_data_species_temperatures[si],
-                    d_data_species_densities[si],
-                    d_data_pressure,
-                    species_thermo_properties_const_ptr,
-                    domain);
-        }
-    }
-    else
-    {
-        TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::"
-            << "computeCellDataOfSpeciesTemperaturesWithSpeciesDensitiesAndPressure()\n"
-            << "Cell data of 'SPECIES_TEMPERATURES' is not yet registered."
             << std::endl);
     }
 }
@@ -6487,6 +6195,283 @@ FlowModelFiveEqnAllaire::computeCellDataOfMaxDiffusivityWithDensityMassFractions
             << ": FlowModelFiveEqnAllaire::"
             << "computeCellDataOfMaxDiffusivityWithDensityMassFractionsPressureAndTemperature()\n"
             << "Cell data of 'MAX_DIFFUSIVITY' is not yet registered."
+            << std::endl);
+    }
+}
+
+
+/*
+ * Compute the cell data of species densities in the registered patch.
+ */
+void
+FlowModelFiveEqnAllaire::computeCellDataOfSpeciesDensities(
+    const hier::Box& domain)
+{
+    if (d_num_subghosts_species_densities > -hier::IntVector::getOne(d_dim))
+    {
+        // Create the cell data of species densities.
+        for (int si = 0; si < d_num_species; si++)
+        {
+            d_data_species_densities[si].reset(
+                new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_species_densities));
+        }
+        
+        /*
+         * Get the local lower index and number of cells in each direction of the domain.
+         */
+        
+        hier::IntVector domain_lo(d_dim);
+        hier::IntVector domain_dims(d_dim);
+        
+        if (domain.empty())
+        {
+            domain_lo = -d_num_subghosts_species_densities;
+            domain_dims = d_subghostcell_dims_species_densities;
+        }
+        else
+        {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(d_subghost_box_species_densities.contains(domain));
+#endif
+            
+            domain_lo = domain.lower() - d_interior_box.lower();
+            domain_dims = domain.numberCells();
+        }
+        
+        // Get the cell data of the variable partial densities.
+        boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+            getCellDataOfPartialDensities();
+        
+        // Get the cell data of the variable volume fractions.
+        boost::shared_ptr<pdat::CellData<double> > data_volume_fractions =
+            getCellDataOfVolumeFractions();
+        
+        // Get the pointers to the cell data of species densities, partial densities and volume fractions.
+        std::vector<double*> rho_i;
+        rho_i.reserve(d_num_species);
+        for (int si = 0; si < d_num_species; si++)
+        {
+            rho_i.push_back(d_data_species_densities[si]->getPointer(0));
+        }
+        std::vector<double*> Z_rho;
+        Z_rho.reserve(d_num_species);
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Z_rho.push_back(data_partial_densities->getPointer(si));
+        }
+        std::vector<double*> Z;
+        Z.reserve(d_num_species);
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Z.push_back(data_volume_fractions->getPointer(si));
+        }
+        
+        // Compute the species densities fields.
+        
+        if (d_dim == tbox::Dimension(1))
+        {
+            /*
+             * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_dim_0 = domain_dims[0];
+            
+            const int num_ghosts_0 = d_num_ghosts[0];
+            const int num_subghosts_0_species_densities = d_num_subghosts_species_densities[0];
+            
+            for (int si = 0; si < d_num_species; si++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx = i + num_ghosts_0;
+                    const int idx_species_densities = i + num_subghosts_0_species_densities;
+                    
+                    rho_i[si][idx_species_densities] = Z_rho[si][idx]/Z[si][idx];
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            
+            const int num_ghosts_0 = d_num_ghosts[0];
+            const int num_ghosts_1 = d_num_ghosts[1];
+            const int ghostcell_dim_0 = d_ghostcell_dims[0];
+            
+            const int num_subghosts_0_species_densities = d_num_subghosts_species_densities[0];
+            const int num_subghosts_1_species_densities = d_num_subghosts_species_densities[1];
+            const int subghostcell_dim_0_species_densities = d_subghostcell_dims_species_densities[0];
+            
+            for (int si = 0; si < d_num_species; si++)
+            {
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0;
+                        
+                        const int idx_species_densities = (i + num_subghosts_0_species_densities) +
+                            (j + num_subghosts_1_species_densities)*subghostcell_dim_0_species_densities;
+                        
+                        rho_i[si][idx_species_densities] = Z_rho[si][idx]/Z[si][idx];
+                    }
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_lo_2 = domain_lo[2];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            const int domain_dim_2 = domain_dims[2];
+            
+            const int num_ghosts_0 = d_num_ghosts[0];
+            const int num_ghosts_1 = d_num_ghosts[1];
+            const int num_ghosts_2 = d_num_ghosts[2];
+            const int ghostcell_dim_0 = d_ghostcell_dims[0];
+            const int ghostcell_dim_1 = d_ghostcell_dims[1];
+            
+            const int num_subghosts_0_species_densities = d_num_subghosts_species_densities[0];
+            const int num_subghosts_1_species_densities = d_num_subghosts_species_densities[1];
+            const int num_subghosts_2_species_densities = d_num_subghosts_species_densities[2];
+            const int subghostcell_dim_0_species_densities = d_subghostcell_dims_species_densities[0];
+            const int subghostcell_dim_1_species_densities = d_subghostcell_dims_species_densities[1];
+            
+            for (int si = 0; si < d_num_species; si++)
+            {
+                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+                {
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx = (i + num_ghosts_0) +
+                                (j + num_ghosts_1)*ghostcell_dim_0 +
+                                (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
+                            
+                            const int idx_species_densities = (i + num_subghosts_0_species_densities) +
+                                (j + num_subghosts_1_species_densities)*subghostcell_dim_0_species_densities +
+                                (k + num_subghosts_2_species_densities)*subghostcell_dim_0_species_densities*
+                                    subghostcell_dim_1_species_densities;
+                            
+                            rho_i[si][idx_species_densities] = Z_rho[si][idx]/Z[si][idx];
+                        }
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelFiveEqnAllaire::"
+            << "computeCellDataOfSpeciesDensities()\n"
+            << "Cell data of 'SPECIES_DENSITIES' is not yet registered."
+            << std::endl);
+    }
+}
+
+
+/*
+ * Compute the cell data of species temperatures with species densities and pressure in the registered patch.
+ */
+void
+FlowModelFiveEqnAllaire::computeCellDataOfSpeciesTemperaturesWithSpeciesDensitiesAndPressure(
+    const hier::Box& domain)
+{
+    if (d_num_subghosts_species_temperatures > -hier::IntVector::getOne(d_dim))
+    {
+        // Create the cell data of species temperatures.
+        for (int si = 0; si < d_num_species; si++)
+        {
+            d_data_species_temperatures[si].reset(
+                new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_species_temperatures));
+        }
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        if (!domain.empty())
+        {
+            TBOX_ASSERT(d_subghost_box_species_temperatures.contains(domain));
+        }
+#endif
+        
+        if (!d_data_species_densities[0])
+        {
+            computeCellDataOfSpeciesDensities(domain);
+        }
+        
+        if (!d_data_pressure)
+        {
+            computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(domain);
+        }
+        
+        // Compute the temperature of each species.
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            std::vector<double> species_thermo_properties;
+            std::vector<double*> species_thermo_properties_ptr;
+            std::vector<const double*> species_thermo_properties_const_ptr;
+            
+            const int num_thermo_properties = d_equation_of_state_mixing_rules->
+                getNumberOfSpeciesThermodynamicProperties(si);
+            
+            species_thermo_properties.resize(num_thermo_properties);
+            species_thermo_properties_ptr.reserve(num_thermo_properties);
+            species_thermo_properties_const_ptr.reserve(num_thermo_properties);
+            
+            for (int ti = 0; ti < num_thermo_properties; ti++)
+            {
+                species_thermo_properties_ptr.push_back(&species_thermo_properties[ti]);
+                species_thermo_properties_const_ptr.push_back(&species_thermo_properties[ti]);
+            }
+            
+            d_equation_of_state_mixing_rules->getSpeciesThermodynamicProperties(
+                species_thermo_properties_ptr,
+                si);
+            
+            d_equation_of_state_mixing_rules->getEquationOfState(si)->
+                computeTemperature(
+                    d_data_species_temperatures[si],
+                    d_data_species_densities[si],
+                    d_data_pressure,
+                    species_thermo_properties_const_ptr,
+                    domain);
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelFiveEqnAllaire::"
+            << "computeCellDataOfSpeciesTemperaturesWithSpeciesDensitiesAndPressure()\n"
+            << "Cell data of 'SPECIES_TEMPERATURES' is not yet registered."
             << std::endl);
     }
 }
