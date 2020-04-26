@@ -401,7 +401,6 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
         d_dim,
         d_grid_geometry,
         d_num_species,
-        d_equation_of_state_mixing_rules,
         d_equation_of_mass_diffusivity_mixing_rules,
         d_equation_of_shear_viscosity_mixing_rules,
         d_equation_of_bulk_viscosity_mixing_rules,
@@ -919,6 +918,22 @@ FlowModelFourEqnConservative::registerDerivedVariables(
             num_subghosts_of_data.find("MAX_DIFFUSIVITY")->second,
             "MAX_DIFFUSIVITY",
             "MAX_DIFFUSIVITY");
+    }
+    
+    if (num_subghosts_of_data.find("SPECIES_DENSITIES") != num_subghosts_of_data.end())
+    {
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("SPECIES_DENSITIES")->second,
+            "SPECIES_DENSITIES",
+            "SPECIES_DENSITIES");
+    }
+    
+    if (num_subghosts_of_data.find("SPECIES_ENTHALPIES") != num_subghosts_of_data.end())
+    {
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("SPECIES_ENTHALPIES")->second,
+            "SPECIES_ENTHALPIES",
+            "SPECIES_ENTHALPIES");
     }
 }
 
@@ -1477,7 +1492,7 @@ FlowModelFourEqnConservative::getSpeciesCellData(
         if (!d_data_species_densities[0])
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::getCellData()\n"
+                << ": FlowModelFourEqnConservative::getSpeciesCellData()\n"
                 << "Cell data of 'SPECIES_DENSITIES' is not registered/computed yet."
                 << std::endl);
         }
@@ -1488,7 +1503,7 @@ FlowModelFourEqnConservative::getSpeciesCellData(
         if (!d_data_species_enthalpies[0])
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::getCellData()\n"
+                << ": FlowModelFourEqnConservative::getSpeciesCellData()\n"
                 << "Cell data of 'SPECIES_ENTHALPIES' is not registered/computed yet."
                 << std::endl);
         }

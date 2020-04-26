@@ -786,6 +786,22 @@ FlowModelFiveEqnAllaire::registerDerivedVariables(
             "MAX_DIFFUSIVITY",
             "MAX_DIFFUSIVITY");
     }
+    
+    if (num_subghosts_of_data.find("SPECIES_DENSITIES") != num_subghosts_of_data.end())
+    {
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("SPECIES_DENSITIES")->second,
+            "SPECIES_DENSITIES",
+            "SPECIES_DENSITIES");
+    }
+    
+    if (num_subghosts_of_data.find("SPECIES_TEMPERATURES") != num_subghosts_of_data.end())
+    {
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("SPECIES_TEMPERATURES")->second,
+            "SPECIES_TEMPERATURES",
+            "SPECIES_TEMPERATURES");
+    }
 }
 
 
@@ -1298,7 +1314,7 @@ FlowModelFiveEqnAllaire::getSpeciesCellData(
         if (!d_data_species_densities[0])
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFiveEqnAllaire::getCellData()\n"
+                << ": FlowModelFiveEqnAllaire::getSpeciesCellData()\n"
                 << "Cell data of 'SPECIES_DENSITIES' is not registered/computed yet."
                 << std::endl);
         }
@@ -1309,7 +1325,7 @@ FlowModelFiveEqnAllaire::getSpeciesCellData(
         if (!d_data_species_temperatures[0])
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelFiveEqnAllaire::getCellData()\n"
+                << ": FlowModelFiveEqnAllaire::getSpeciesCellData()\n"
                 << "Cell data of 'SPECIES_TEMPERATURES' is not registered/computed yet."
                 << std::endl);
         }

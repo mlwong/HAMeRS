@@ -15,7 +15,6 @@ class FlowModelDiffusiveFluxUtilitiesFourEqnConservative: public FlowModelDiffus
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
-            const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules,
             const boost::shared_ptr<EquationOfMassDiffusivityMixingRules> equation_of_mass_diffusivity_mixing_rules,
             const boost::shared_ptr<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
             const boost::shared_ptr<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules,
@@ -87,12 +86,6 @@ class FlowModelDiffusiveFluxUtilitiesFourEqnConservative: public FlowModelDiffus
         boost::shared_ptr<pdat::CellData<double> > d_data_shear_viscosity;
         boost::shared_ptr<pdat::CellData<double> > d_data_bulk_viscosity;
         boost::shared_ptr<pdat::CellData<double> > d_data_thermal_conductivity;
-        
-        /*
-         * boost::shared_ptr to EquationOfStateMixingRules.
-         */
-        const boost::shared_ptr<EquationOfStateMixingRules>
-            d_equation_of_state_mixing_rules;
         
         /*
          * boost::shared_ptr to EquationOfMassDiffusivityMixingRules.
