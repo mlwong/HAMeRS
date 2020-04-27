@@ -34,6 +34,44 @@ FlowModel::getRegisteredPatch() const
 
 
 /*
+ * Get sub-domain box.
+ */
+const hier::Box&
+FlowModel::getSubdomainBox() const
+{
+    if (d_patch == nullptr)
+    {
+        TBOX_ERROR(d_object_name
+        << ": FlowModel::getSubdomainBox()\n"
+        << "Patch is not yet registered!"
+        << std::endl);
+    }
+    
+    return d_subdomain_box;
+}
+
+
+/*
+ * Set sub-domain box.
+ */
+void
+FlowModel::setSubdomainBox(const hier::Box& subdomain_box)
+{
+    if (d_patch == nullptr)
+    {
+        TBOX_ERROR(d_object_name
+        << ": FlowModel::getSubdomainBox()\n"
+        << "Patch is not yet registered!"
+        << std::endl);
+    }
+    
+    TBOX_ASSERT(d_ghost_box.contains(subdomain_box));
+    
+    d_subdomain_box = subdomain_box;
+}
+
+
+/*
  * Setup the Riemann solver object.
  */
 void

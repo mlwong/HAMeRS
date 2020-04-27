@@ -1044,7 +1044,7 @@ FlowModelFourEqnConservative::unregisterPatch()
  * Compute the cell data of different registered derived variables with the registered data context.
  */
 void
-FlowModelFourEqnConservative::computeDerivedCellData(const hier::Box& domain)
+FlowModelFourEqnConservative::computeDerivedCellData()
 {
     // Check whether a patch is already registered.
     if (!d_patch)
@@ -1069,7 +1069,7 @@ FlowModelFourEqnConservative::computeDerivedCellData(const hier::Box& domain)
         if (!d_data_density)
         {
             computeCellDataOfDensity(
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -1079,7 +1079,7 @@ FlowModelFourEqnConservative::computeDerivedCellData(const hier::Box& domain)
         if (!d_data_mass_fractions)
         {
             computeCellDataOfMassFractionsWithDensity(
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -1089,7 +1089,7 @@ FlowModelFourEqnConservative::computeDerivedCellData(const hier::Box& domain)
         if (!d_data_mole_fractions)
         {
             computeCellDataOfMoleFractionsWithMassFractions(
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -1099,7 +1099,7 @@ FlowModelFourEqnConservative::computeDerivedCellData(const hier::Box& domain)
         if (!d_data_velocity)
         {
             computeCellDataOfVelocityWithDensity(
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -1109,7 +1109,7 @@ FlowModelFourEqnConservative::computeDerivedCellData(const hier::Box& domain)
         if (!d_data_internal_energy)
         {
             computeCellDataOfInternalEnergyWithDensityAndVelocity(
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -1119,7 +1119,7 @@ FlowModelFourEqnConservative::computeDerivedCellData(const hier::Box& domain)
         if (!d_data_pressure)
         {
             computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -1129,7 +1129,7 @@ FlowModelFourEqnConservative::computeDerivedCellData(const hier::Box& domain)
         if (!d_data_sound_speed)
         {
             computeCellDataOfSoundSpeedWithDensityMassFractionsAndPressure(
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -1139,7 +1139,7 @@ FlowModelFourEqnConservative::computeDerivedCellData(const hier::Box& domain)
         if (!d_data_temperature)
         {
             computeCellDataOfTemperatureWithDensityMassFractionsAndPressure(
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -1150,7 +1150,7 @@ FlowModelFourEqnConservative::computeDerivedCellData(const hier::Box& domain)
         {
             computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 DIRECTION::X_DIRECTION,
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -1161,7 +1161,7 @@ FlowModelFourEqnConservative::computeDerivedCellData(const hier::Box& domain)
         {
             computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 DIRECTION::Y_DIRECTION,
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -1172,7 +1172,7 @@ FlowModelFourEqnConservative::computeDerivedCellData(const hier::Box& domain)
         {
             computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 DIRECTION::Z_DIRECTION,
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -1183,7 +1183,7 @@ FlowModelFourEqnConservative::computeDerivedCellData(const hier::Box& domain)
         {
             computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                 DIRECTION::X_DIRECTION,
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -1194,7 +1194,7 @@ FlowModelFourEqnConservative::computeDerivedCellData(const hier::Box& domain)
         {
             computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                 DIRECTION::Y_DIRECTION,
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -1205,7 +1205,7 @@ FlowModelFourEqnConservative::computeDerivedCellData(const hier::Box& domain)
         {
             computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                 DIRECTION::Z_DIRECTION,
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -1215,7 +1215,7 @@ FlowModelFourEqnConservative::computeDerivedCellData(const hier::Box& domain)
         if (!d_data_max_diffusivity)
         {
             computeCellDataOfMaxDiffusivityWithDensityMassFractionsPressureAndTemperature(
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -1225,7 +1225,7 @@ FlowModelFourEqnConservative::computeDerivedCellData(const hier::Box& domain)
         if (!d_data_species_densities[0])
         {
             computeCellDataOfSpeciesDensitiesWithPressureAndTemperature(
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -1235,7 +1235,7 @@ FlowModelFourEqnConservative::computeDerivedCellData(const hier::Box& domain)
         if (!d_data_species_enthalpies[0])
         {
             computeCellDataOfSpeciesEnthalpiesWithSpeciesDensitiesAndPressure(
-                domain);
+                d_subdomain_box);
         }
     }
     

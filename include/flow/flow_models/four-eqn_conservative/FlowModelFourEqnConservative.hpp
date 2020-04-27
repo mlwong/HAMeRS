@@ -93,7 +93,7 @@ class FlowModelFourEqnConservative: public FlowModel
          * Compute the cell data of different registered derived variables with the registered data context.
          */
         void
-        computeDerivedCellData(const hier::Box& domain);
+        computeDerivedCellData();
         
         /*
          * Get the cell data of one cell variable in the registered patch.

@@ -95,8 +95,8 @@ protected:
          */
         const int d_num_eqn;
         
-        /*
-         * Whether all or part of global derived cell data related to this class is computed.
+        /* 
+         * Whether all derived cell data related to this class is computed in full domain or sub-domain.
          */
         bool d_derived_cell_data_computed;
         

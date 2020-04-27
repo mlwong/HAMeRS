@@ -943,7 +943,7 @@ FlowModelSingleSpecies::unregisterPatch()
  * Compute the cell data of different registered derived variables with the registered data context.
  */
 void
-FlowModelSingleSpecies::computeDerivedCellData(const hier::Box& domain)
+FlowModelSingleSpecies::computeDerivedCellData()
 {
     // Check whether a patch is already registered.
     if (!d_patch)
@@ -968,7 +968,7 @@ FlowModelSingleSpecies::computeDerivedCellData(const hier::Box& domain)
         if (!d_data_velocity)
         {
             computeCellDataOfVelocity(
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -978,7 +978,7 @@ FlowModelSingleSpecies::computeDerivedCellData(const hier::Box& domain)
         if (!d_data_internal_energy)
         {
             computeCellDataOfInternalEnergyWithVelocity(
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -988,7 +988,7 @@ FlowModelSingleSpecies::computeDerivedCellData(const hier::Box& domain)
         if (!d_data_pressure)
         {
             computeCellDataOfPressureWithInternalEnergy(
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -998,7 +998,7 @@ FlowModelSingleSpecies::computeDerivedCellData(const hier::Box& domain)
         if (!d_data_sound_speed)
         {
             computeCellDataOfSoundSpeedWithPressure(
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -1008,7 +1008,7 @@ FlowModelSingleSpecies::computeDerivedCellData(const hier::Box& domain)
         if (!d_data_temperature)
         {
             computeCellDataOfTemperatureWithPressure(
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -1019,7 +1019,7 @@ FlowModelSingleSpecies::computeDerivedCellData(const hier::Box& domain)
         {
             computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 DIRECTION::X_DIRECTION,
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -1030,7 +1030,7 @@ FlowModelSingleSpecies::computeDerivedCellData(const hier::Box& domain)
         {
             computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 DIRECTION::Y_DIRECTION,
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -1041,7 +1041,7 @@ FlowModelSingleSpecies::computeDerivedCellData(const hier::Box& domain)
         {
             computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 DIRECTION::Z_DIRECTION,
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -1052,7 +1052,7 @@ FlowModelSingleSpecies::computeDerivedCellData(const hier::Box& domain)
         {
             computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                 DIRECTION::X_DIRECTION,
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -1063,7 +1063,7 @@ FlowModelSingleSpecies::computeDerivedCellData(const hier::Box& domain)
         {
             computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                 DIRECTION::Y_DIRECTION,
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -1074,7 +1074,7 @@ FlowModelSingleSpecies::computeDerivedCellData(const hier::Box& domain)
         {
             computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                 DIRECTION::Z_DIRECTION,
-                domain);
+                d_subdomain_box);
         }
     }
     
@@ -1084,7 +1084,7 @@ FlowModelSingleSpecies::computeDerivedCellData(const hier::Box& domain)
         if (!d_data_max_diffusivity)
         {
             computeCellDataOfMaxDiffusivityWithPressureAndTemperature(
-                domain);
+                d_subdomain_box);
         }
     }
     

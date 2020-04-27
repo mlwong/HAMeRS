@@ -75,6 +75,7 @@ class FlowModel:
                 d_ghost_box(hier::Box::getEmptyBox(dim)),
                 d_interior_dims(hier::IntVector::getZero(d_dim)),
                 d_ghostcell_dims(hier::IntVector::getZero(d_dim)),
+                d_subdomain_box(hier::Box::getEmptyBox(dim)),
                 d_derived_cell_data_computed(false)
         {
             NULL_USE(flow_model_db);
@@ -260,20 +261,20 @@ class FlowModel:
         const hier::Patch& getRegisteredPatch() const;
         
         /*
-         * Compute the cell data of different registered derived variables with the registered data context.
+         * Get sub-domain box.
          */
-        void
-        computeDerivedCellData()
-        {
-            const hier::Box empty_box(d_dim);
-            computeDerivedCellData(empty_box);
-        }
+        const hier::Box& getSubdomainBox() const;
+        
+        /*
+         * Set sub-domain box.
+         */
+        void setSubdomainBox(const hier::Box& subdomain_box);
         
         /*
          * Compute the cell data of different registered derived variables with the registered data context.
          */
         virtual void
-        computeDerivedCellData(const hier::Box& domain) = 0;
+        computeDerivedCellData() = 0;
         
         /*
          * Get the cell data of one cell variable in the registered patch.
@@ -474,7 +475,12 @@ class FlowModel:
         hier::IntVector d_ghostcell_dims;
         
         /*
-         * Whether all or part of global derived cell data is computed.
+         * Sub-domain box to compute the derived cell data.
+         */
+        hier::Box d_subdomain_box;
+        
+        /*
+         * Whether all derived cell data is computed in full domain or sub-domain.
          */
         bool d_derived_cell_data_computed;
         
