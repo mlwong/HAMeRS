@@ -88,6 +88,11 @@ class FlowModelFiveEqnAllaire: public FlowModel
         void unregisterPatch();
         
         /*
+         * Allocate memory for cell data of different registered derived variables.
+         */
+        void allocateMemoryForDerivedCellData();
+        
+        /*
          * Compute the cell data of different registered derived variables with the registered data context.
          */
         void

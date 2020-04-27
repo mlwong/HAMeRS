@@ -89,6 +89,11 @@ class FlowModelSingleSpecies: public FlowModel
         void unregisterPatch();
         
         /*
+         * Allocate memory for cell data of different registered derived variables.
+         */
+        void allocateMemoryForDerivedCellData();
+        
+        /*
          * Compute the cell data of different registered derived variables with the registered data context.
          */
         void
@@ -313,6 +318,22 @@ class FlowModelSingleSpecies: public FlowModel
         boost::shared_ptr<pdat::CellData<double> > d_data_max_wave_speed_y;
         boost::shared_ptr<pdat::CellData<double> > d_data_max_wave_speed_z;
         boost::shared_ptr<pdat::CellData<double> > d_data_max_diffusivity;
+        
+        /*
+         * Whether derived cell data is computed.
+         */
+        bool d_cell_data_velocity_computed;
+        bool d_cell_data_internal_energy_computed;
+        bool d_cell_data_pressure_computed;
+        bool d_cell_data_sound_speed_computed;
+        bool d_cell_data_temperature_computed;
+        bool d_cell_data_convective_flux_x_computed;
+        bool d_cell_data_convective_flux_y_computed;
+        bool d_cell_data_convective_flux_z_computed;
+        bool d_cell_data_max_wave_speed_x_computed;
+        bool d_cell_data_max_wave_speed_y_computed;
+        bool d_cell_data_max_wave_speed_z_computed;
+        bool d_cell_data_max_diffusivity_computed;
         
         /*
          * A string variable to describe the equation of shear viscosity used.

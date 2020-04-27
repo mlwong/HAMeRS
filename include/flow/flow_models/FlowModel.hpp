@@ -271,10 +271,14 @@ class FlowModel:
         void setSubdomainBox(const hier::Box& subdomain_box);
         
         /*
+         * Allocate memory for cell data of different registered derived variables.
+         */
+        virtual void allocateMemoryForDerivedCellData() = 0;
+        
+        /*
          * Compute the cell data of different registered derived variables with the registered data context.
          */
-        virtual void
-        computeDerivedCellData() = 0;
+        virtual void computeDerivedCellData() = 0;
         
         /*
          * Get the cell data of one cell variable in the registered patch.

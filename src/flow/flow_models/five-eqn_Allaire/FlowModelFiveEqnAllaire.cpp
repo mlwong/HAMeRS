@@ -699,30 +699,6 @@ FlowModelFiveEqnAllaire::registerDerivedVariables(
             "SOUND_SPEED");
     }
     
-    if (num_subghosts_of_data.find("DILATATION") != num_subghosts_of_data.end())
-    {
-        setNumberOfSubGhosts(
-            num_subghosts_of_data.find("DILATATION")->second,
-            "DILATATION",
-            "DILATATION");
-    }
-    
-    if (num_subghosts_of_data.find("VORTICITY") != num_subghosts_of_data.end())
-    {
-        setNumberOfSubGhosts(
-            num_subghosts_of_data.find("VORTICITY")->second,
-            "VORTICITY",
-            "VORTICITY");
-    }
-    
-    if (num_subghosts_of_data.find("ENSTROPHY") != num_subghosts_of_data.end())
-    {
-        setNumberOfSubGhosts(
-            num_subghosts_of_data.find("ENSTROPHY")->second,
-            "ENSTROPHY",
-            "ENSTROPHY");
-    }
-    
     if (num_subghosts_of_data.find("CONVECTIVE_FLUX_X") != num_subghosts_of_data.end())
     {
         setNumberOfSubGhosts(
@@ -896,6 +872,19 @@ void FlowModelFiveEqnAllaire::unregisterPatch()
     
     d_patch = nullptr;
     clearDataContext();
+}
+
+
+/*
+ * Allocate memory for cell data of different registered derived variables.
+ */
+void
+FlowModelFiveEqnAllaire::allocateMemoryForDerivedCellData()
+{
+    TBOX_ERROR(d_object_name
+        << ": FlowModelFiveEqnAllaire::allocateMemoryForDerivedCellData()"
+        << " is not implemented yet."
+        << std::endl);
 }
 
 
