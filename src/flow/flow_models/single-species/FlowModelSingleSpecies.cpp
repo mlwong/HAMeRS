@@ -2841,7 +2841,7 @@ FlowModelSingleSpecies::computeCellDataOfInternalEnergyWithVelocity(
             boost::shared_ptr<pdat::CellData<double> > data_total_energy =
                 getCellDataOfTotalEnergy();
             
-            if (!d_data_velocity)
+            if (!d_cell_data_velocity_computed)
             {
                 computeCellDataOfVelocity(domain);
             }
@@ -3041,7 +3041,7 @@ FlowModelSingleSpecies::computeCellDataOfPressureWithInternalEnergy(
             boost::shared_ptr<pdat::CellData<double> > data_density =
                 getCellDataOfDensity();
             
-            if (!d_data_internal_energy)
+            if (!d_cell_data_internal_energy_computed)
             {
                 computeCellDataOfInternalEnergyWithVelocity(domain);
             }
@@ -3094,7 +3094,7 @@ FlowModelSingleSpecies::computeCellDataOfSoundSpeedWithPressure(
             boost::shared_ptr<pdat::CellData<double> > data_density =
                 getCellDataOfDensity();
             
-            if (!d_data_pressure)
+            if (!d_cell_data_pressure_computed)
             {
                 computeCellDataOfPressureWithInternalEnergy(domain);
             }
@@ -3147,7 +3147,7 @@ FlowModelSingleSpecies::computeCellDataOfTemperatureWithPressure(
             boost::shared_ptr<pdat::CellData<double> > data_density =
                 getCellDataOfDensity();
             
-            if (!d_data_pressure)
+            if (!d_cell_data_pressure_computed)
             {
                 computeCellDataOfPressureWithInternalEnergy(domain);
             }
@@ -3235,12 +3235,12 @@ FlowModelSingleSpecies::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 boost::shared_ptr<pdat::CellData<double> > data_total_energy =
                     getCellDataOfTotalEnergy();
                 
-                if (!d_data_velocity)
+                if (!d_cell_data_velocity_computed)
                 {
                     computeCellDataOfVelocity(domain);
                 }
                 
-                if (!d_data_pressure)
+                if (!d_cell_data_pressure_computed)
                 {
                     computeCellDataOfPressureWithInternalEnergy(domain);
                 }
@@ -3488,12 +3488,12 @@ FlowModelSingleSpecies::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 boost::shared_ptr<pdat::CellData<double> > data_total_energy =
                     getCellDataOfTotalEnergy();
                 
-                if (!d_data_velocity)
+                if (!d_cell_data_velocity_computed)
                 {
                     computeCellDataOfVelocity(domain);
                 }
                 
-                if (!d_data_pressure)
+                if (!d_cell_data_pressure_computed)
                 {
                     computeCellDataOfPressureWithInternalEnergy(domain);
                 }
@@ -3712,12 +3712,12 @@ FlowModelSingleSpecies::computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 boost::shared_ptr<pdat::CellData<double> > data_total_energy =
                     getCellDataOfTotalEnergy();
                 
-                if (!d_data_velocity)
+                if (!d_cell_data_velocity_computed)
                 {
                     computeCellDataOfVelocity(domain);
                 }
                 
-                if (!d_data_pressure)
+                if (!d_cell_data_pressure_computed)
                 {
                     computeCellDataOfPressureWithInternalEnergy(domain);
                 }
@@ -3872,12 +3872,12 @@ FlowModelSingleSpecies::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                     domain_dims = domain.numberCells();
                 }
                 
-                if (!d_data_velocity)
+                if (!d_cell_data_velocity_computed)
                 {
                     computeCellDataOfVelocity(domain);
                 }
                 
-                if (!d_data_sound_speed)
+                if (!d_cell_data_sound_speed_computed)
                 {
                     computeCellDataOfSoundSpeedWithPressure(domain);
                 }
@@ -4065,12 +4065,12 @@ FlowModelSingleSpecies::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                     domain_dims = domain.numberCells();
                 }
                 
-                if (!d_data_velocity)
+                if (!d_cell_data_velocity_computed)
                 {
                     computeCellDataOfVelocity(domain);
                 }
                 
-                if (!d_data_sound_speed)
+                if (!d_cell_data_sound_speed_computed)
                 {
                     computeCellDataOfSoundSpeedWithPressure(domain);
                 }
@@ -4238,12 +4238,12 @@ FlowModelSingleSpecies::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                     domain_dims = domain.numberCells();
                 }
                 
-                if (!d_data_velocity)
+                if (!d_cell_data_velocity_computed)
                 {
                     computeCellDataOfVelocity(domain);
                 }
                 
-                if (!d_data_sound_speed)
+                if (!d_cell_data_sound_speed_computed)
                 {
                     computeCellDataOfSoundSpeedWithPressure(domain);
                 }
@@ -4390,12 +4390,12 @@ FlowModelSingleSpecies::computeCellDataOfMaxDiffusivityWithPressureAndTemperatur
             boost::shared_ptr<pdat::CellData<double> > data_density =
                 getCellDataOfDensity();
             
-            if (!d_data_pressure)
+            if (!d_cell_data_pressure_computed)
             {
                 computeCellDataOfPressureWithInternalEnergy(domain);
             }
             
-            if (!d_data_temperature)
+            if (!d_cell_data_temperature_computed)
             {
                 computeCellDataOfTemperatureWithPressure(domain);
             }
