@@ -950,9 +950,12 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
     {
         if (!d_cell_data_velocity_computed)
         {
-            // Create the cell data of velocity.
-            d_data_velocity.reset(
-                new pdat::CellData<double>(d_interior_box, d_dim.getValue(), d_num_subghosts_velocity));
+            if (!d_data_velocity)
+            {
+                // Create the cell data of velocity.
+                d_data_velocity.reset(
+                    new pdat::CellData<double>(d_interior_box, d_dim.getValue(), d_num_subghosts_velocity));
+            }
         }
         else
         {
@@ -967,9 +970,12 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
     {
         if (!d_cell_data_internal_energy_computed)
         {
-            // Create the cell data of internal energy.
-            d_data_internal_energy.reset(
-                new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_internal_energy));
+            if (!d_data_internal_energy)
+            {
+                // Create the cell data of internal energy.
+                d_data_internal_energy.reset(
+                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_internal_energy));
+            }
         }
         else
         {
@@ -984,9 +990,12 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
     {
         if (!d_cell_data_pressure_computed)
         {
-            // Create the cell data of pressure.
-            d_data_pressure.reset(
-                new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_pressure));
+            if (!d_data_pressure)
+            {
+                // Create the cell data of pressure.
+                d_data_pressure.reset(
+                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_pressure));
+            }
         }
         else
         {
@@ -1001,9 +1010,12 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
     {
         if (!d_cell_data_sound_speed_computed)
         {
-            // Create the cell data of sound speed.
-            d_data_sound_speed.reset(
-                new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_sound_speed));
+            if (!d_data_sound_speed)
+            {
+                // Create the cell data of sound speed.
+                d_data_sound_speed.reset(
+                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_sound_speed));
+            }
         }
         else
         {
@@ -1018,9 +1030,12 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
     {
         if (!d_cell_data_temperature_computed)
         {
-            // Create the cell data of temperature.
-            d_data_temperature.reset(
-                new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_temperature));
+            if (!d_data_temperature)
+            {
+                // Create the cell data of temperature.
+                d_data_temperature.reset(
+                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_temperature));
+            }
         }
         else
         {
@@ -1035,9 +1050,12 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
     {
         if (!d_cell_data_convective_flux_x_computed)
         {
-            // Create the cell data of convective flux in the x-direction.
-            d_data_convective_flux_x.reset(
-                new pdat::CellData<double>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_x));
+            if (!d_data_convective_flux_x)
+            {
+                // Create the cell data of convective flux in the x-direction.
+                d_data_convective_flux_x.reset(
+                    new pdat::CellData<double>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_x));
+            }
         }
         else
         {
@@ -1052,9 +1070,12 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
     {
         if (!d_cell_data_convective_flux_y_computed)
         {
-            // Create the cell data of convective flux in the y-direction.
-            d_data_convective_flux_y.reset(
-                new pdat::CellData<double>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_y));
+            if (!d_data_convective_flux_y)
+            {
+                // Create the cell data of convective flux in the y-direction.
+                d_data_convective_flux_y.reset(
+                    new pdat::CellData<double>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_y));
+            }
         }
         else
         {
@@ -1069,9 +1090,12 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
     {
         if (!d_cell_data_convective_flux_z_computed)
         {
-            // Create the cell data of convective flux in the z-direction.
-            d_data_convective_flux_z.reset(
-                new pdat::CellData<double>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_z));
+            if (!d_data_convective_flux_z)
+            {
+                // Create the cell data of convective flux in the z-direction.
+                d_data_convective_flux_z.reset(
+                    new pdat::CellData<double>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_z));
+            }
         }
         else
         {
@@ -1086,9 +1110,12 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
     {
         if (!d_cell_data_max_wave_speed_x_computed)
         {
-            // Create the cell data of maximum wave speed in the x-direction.
-            d_data_max_wave_speed_x.reset(
-                new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_wave_speed_x));
+            if (!d_data_max_wave_speed_x)
+            {
+                // Create the cell data of maximum wave speed in the x-direction.
+                d_data_max_wave_speed_x.reset(
+                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_wave_speed_x));
+            }
         }
         else
         {
@@ -1103,9 +1130,12 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
     {
         if (!d_cell_data_max_wave_speed_y_computed)
         {
-            // Create the cell data of maximum wave speed in the y-direction.
-            d_data_max_wave_speed_y.reset(
-                new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_wave_speed_y));
+            if (!d_data_max_wave_speed_y)
+            {
+                // Create the cell data of maximum wave speed in the y-direction.
+                d_data_max_wave_speed_y.reset(
+                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_wave_speed_y));
+            }
         }
         else
         {
@@ -1120,9 +1150,12 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
     {
         if (!d_cell_data_max_wave_speed_z_computed)
         {
-            // Create the cell data of maximum wave speed in the z-direction.
-            d_data_max_wave_speed_z.reset(
-                new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_wave_speed_z));
+            if (!d_data_max_wave_speed_z)
+            {
+                // Create the cell data of maximum wave speed in the z-direction.
+                d_data_max_wave_speed_z.reset(
+                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_wave_speed_z));
+            }
         }
         else
         {
@@ -1137,9 +1170,12 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
     {
         if (!d_cell_data_max_diffusivity_computed)
         {
-            // Create the cell data of maximum diffusivity.
-            d_data_max_diffusivity.reset(
-                new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
+            if (!d_data_max_diffusivity)
+            {
+                // Create the cell data of maximum diffusivity.
+                d_data_max_diffusivity.reset(
+                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
+            }
         }
         else
         {
@@ -1178,7 +1214,7 @@ FlowModelSingleSpecies::computeDerivedCellData()
     // Compute the velocity cell data.
     if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_data_velocity)
+        if (!d_cell_data_velocity_computed)
         {
             computeCellDataOfVelocity(
                 d_subdomain_box);
@@ -1188,7 +1224,7 @@ FlowModelSingleSpecies::computeDerivedCellData()
     // Compute the internal energy cell data.
     if (d_num_subghosts_internal_energy > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_data_internal_energy)
+        if (!d_cell_data_internal_energy_computed)
         {
             computeCellDataOfInternalEnergyWithVelocity(
                 d_subdomain_box);
@@ -1198,7 +1234,7 @@ FlowModelSingleSpecies::computeDerivedCellData()
     // Compute the pressure cell data.
     if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_data_pressure)
+        if (!d_cell_data_pressure_computed)
         {
             computeCellDataOfPressureWithInternalEnergy(
                 d_subdomain_box);
@@ -1208,7 +1244,7 @@ FlowModelSingleSpecies::computeDerivedCellData()
     // Compute the sound speed cell data.
     if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_data_sound_speed)
+        if (!d_cell_data_sound_speed_computed)
         {
             computeCellDataOfSoundSpeedWithPressure(
                 d_subdomain_box);
@@ -1218,7 +1254,7 @@ FlowModelSingleSpecies::computeDerivedCellData()
     // Compute the temperature cell data.
     if (d_num_subghosts_temperature > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_data_temperature)
+        if (!d_cell_data_temperature_computed)
         {
             computeCellDataOfTemperatureWithPressure(
                 d_subdomain_box);
@@ -1228,7 +1264,7 @@ FlowModelSingleSpecies::computeDerivedCellData()
     // Compute the x-direction convective flux cell data.
     if (d_num_subghosts_convective_flux_x > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_data_convective_flux_x)
+        if (!d_cell_data_convective_flux_x_computed)
         {
             computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 DIRECTION::X_DIRECTION,
@@ -1239,7 +1275,7 @@ FlowModelSingleSpecies::computeDerivedCellData()
     // Compute the y-direction convective flux cell data.
     if (d_num_subghosts_convective_flux_y > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_data_convective_flux_y)
+        if (!d_cell_data_convective_flux_y_computed)
         {
             computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 DIRECTION::Y_DIRECTION,
@@ -1250,7 +1286,7 @@ FlowModelSingleSpecies::computeDerivedCellData()
     // Compute the z-direction convective flux cell data.
     if (d_num_subghosts_convective_flux_z > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_data_convective_flux_z)
+        if (!d_cell_data_convective_flux_z_computed)
         {
             computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 DIRECTION::Z_DIRECTION,
@@ -1261,7 +1297,7 @@ FlowModelSingleSpecies::computeDerivedCellData()
     // Compute the x-direction maximum wave speed cell data.
     if (d_num_subghosts_max_wave_speed_x > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_data_max_wave_speed_x)
+        if (!d_cell_data_max_wave_speed_x_computed)
         {
             computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                 DIRECTION::X_DIRECTION,
@@ -1272,7 +1308,7 @@ FlowModelSingleSpecies::computeDerivedCellData()
     // Compute the y-direction maximum wave speed cell data.
     if (d_num_subghosts_max_wave_speed_y > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_data_max_wave_speed_y)
+        if (!d_cell_data_max_wave_speed_y_computed)
         {
             computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                 DIRECTION::Y_DIRECTION,
@@ -1283,7 +1319,7 @@ FlowModelSingleSpecies::computeDerivedCellData()
     // Compute the z-direction maximum wave speed cell data.
     if (d_num_subghosts_max_wave_speed_z > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_data_max_wave_speed_z)
+        if (!d_cell_data_max_wave_speed_z_computed)
         {
             computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                 DIRECTION::Z_DIRECTION,
@@ -1294,7 +1330,7 @@ FlowModelSingleSpecies::computeDerivedCellData()
     // Compute the maximum diffusivity cell data.
     if (d_num_subghosts_max_diffusivity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_data_max_diffusivity)
+        if (!d_cell_data_max_diffusivity_computed)
         {
             computeCellDataOfMaxDiffusivityWithPressureAndTemperature(
                 d_subdomain_box);
