@@ -373,6 +373,27 @@ class FlowModelFourEqnConservative: public FlowModel
         std::vector<boost::shared_ptr<pdat::CellData<double> > > d_data_species_enthalpies;
         
         /*
+         * Whether derived cell data is computed.
+         */
+        bool d_cell_data_density_computed;
+        bool d_cell_data_mass_fractions_computed;
+        bool d_cell_data_mole_fractions_computed;
+        bool d_cell_data_velocity_computed;
+        bool d_cell_data_internal_energy_computed;
+        bool d_cell_data_pressure_computed;
+        bool d_cell_data_sound_speed_computed;
+        bool d_cell_data_temperature_computed;
+        bool d_cell_data_convective_flux_x_computed;
+        bool d_cell_data_convective_flux_y_computed;
+        bool d_cell_data_convective_flux_z_computed;
+        bool d_cell_data_max_wave_speed_x_computed;
+        bool d_cell_data_max_wave_speed_y_computed;
+        bool d_cell_data_max_wave_speed_z_computed;
+        bool d_cell_data_max_diffusivity_computed;
+        bool d_cell_data_species_densities_computed;
+        bool d_cell_data_species_enthalpies_computed;
+        
+        /*
          * Upper and lower bounds on variables.
          */
         double d_Y_bound_lo;
