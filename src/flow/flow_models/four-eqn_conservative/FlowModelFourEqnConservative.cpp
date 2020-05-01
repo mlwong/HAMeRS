@@ -968,6 +968,7 @@ FlowModelFourEqnConservative::unregisterPatch()
     
     d_interior_box                    = hier::Box::getEmptyBox(d_dim);
     d_ghost_box                       = hier::Box::getEmptyBox(d_dim);
+    d_subdomain_box                   = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_density            = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_mass_fractions     = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_mole_fractions     = hier::Box::getEmptyBox(d_dim);

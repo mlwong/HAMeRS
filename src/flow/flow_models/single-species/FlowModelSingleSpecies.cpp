@@ -877,6 +877,7 @@ FlowModelSingleSpecies::unregisterPatch()
     
     d_interior_box                   = hier::Box::getEmptyBox(d_dim);
     d_ghost_box                      = hier::Box::getEmptyBox(d_dim);
+    d_subdomain_box                  = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_velocity          = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_internal_energy   = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_pressure          = hier::Box::getEmptyBox(d_dim);
