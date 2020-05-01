@@ -1372,7 +1372,7 @@ FlowModelSingleSpecies::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "VELOCITY")
     {
-        if (!d_data_velocity)
+        if (!d_cell_data_velocity_computed)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::getCellData()\n"
@@ -1383,7 +1383,7 @@ FlowModelSingleSpecies::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "INTERNAL_ENERGY")
     {
-        if (!d_data_internal_energy)
+        if (!d_cell_data_internal_energy_computed)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::getCellData()\n"
@@ -1394,7 +1394,7 @@ FlowModelSingleSpecies::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "PRESSURE")
     {
-        if (!d_data_pressure)
+        if (!d_cell_data_pressure_computed)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::getCellData()\n"
@@ -1405,7 +1405,7 @@ FlowModelSingleSpecies::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "SOUND_SPEED")
     {
-        if (!d_data_sound_speed)
+        if (!d_cell_data_sound_speed_computed)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::getCellData()\n"
@@ -1416,7 +1416,7 @@ FlowModelSingleSpecies::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "TEMPERATURE")
     {
-        if (!d_data_temperature)
+        if (!d_cell_data_temperature_computed)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::getCellData()\n"
@@ -1427,7 +1427,7 @@ FlowModelSingleSpecies::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "CONVECTIVE_FLUX_X")
     {
-        if (!d_data_convective_flux_x)
+        if (!d_cell_data_convective_flux_x_computed)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::getCellData()\n"
@@ -1438,7 +1438,7 @@ FlowModelSingleSpecies::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "CONVECTIVE_FLUX_Y")
     {
-        if (!d_data_convective_flux_y)
+        if (!d_cell_data_convective_flux_y_computed)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::getCellData()\n"
@@ -1449,7 +1449,7 @@ FlowModelSingleSpecies::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "CONVECTIVE_FLUX_Z")
     {
-        if (!d_data_convective_flux_z)
+        if (!d_cell_data_convective_flux_z_computed)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::getCellData()\n"
@@ -1460,7 +1460,7 @@ FlowModelSingleSpecies::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "MAX_WAVE_SPEED_X")
     {
-        if (!d_data_max_wave_speed_x)
+        if (!d_cell_data_max_wave_speed_x_computed)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::getCellData()\n"
@@ -1471,7 +1471,7 @@ FlowModelSingleSpecies::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "MAX_WAVE_SPEED_Y")
     {
-        if (!d_data_max_wave_speed_y)
+        if (!d_cell_data_max_wave_speed_y_computed)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::getCellData()\n"
@@ -1482,7 +1482,7 @@ FlowModelSingleSpecies::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "MAX_WAVE_SPEED_Z")
     {
-        if (!d_data_max_wave_speed_z)
+        if (!d_cell_data_max_wave_speed_z_computed)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::getCellData()\n"
@@ -1493,7 +1493,7 @@ FlowModelSingleSpecies::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "MAX_DIFFUSIVITY")
     {
-        if (!d_data_max_diffusivity)
+        if (!d_cell_data_max_diffusivity_computed)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelSingleSpecies::getCellData()\n"
