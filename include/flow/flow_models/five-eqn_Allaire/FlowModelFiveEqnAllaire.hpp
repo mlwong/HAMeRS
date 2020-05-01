@@ -381,14 +381,6 @@ class FlowModelFiveEqnAllaire: public FlowModel
         bool d_cell_data_species_temperatures_computed;
         
         /*
-         * Upper and lower bounds on variables.
-         */
-        double d_Y_bound_lo;
-        double d_Y_bound_up;
-        double d_Z_bound_lo;
-        double d_Z_bound_up;
-        
-        /*
          * A string variable to describe the equation of shear viscosity used.
          */
         std::string d_equation_of_shear_viscosity_str;

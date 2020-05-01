@@ -39,21 +39,21 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
         d_num_subghosts_max_diffusivity(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_species_densities(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_species_temperatures(-hier::IntVector::getOne(d_dim)),
-        d_subghost_box_density(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_mass_fractions(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_velocity(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_internal_energy(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_pressure(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_sound_speed(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_convective_flux_x(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_convective_flux_y(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_convective_flux_z(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_max_wave_speed_x(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_max_wave_speed_y(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_max_wave_speed_z(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_max_diffusivity(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_species_densities(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_species_temperatures(hier::Box::getEmptyBox(dim)),
+        d_subghost_box_density(hier::Box::getEmptyBox(d_dim)),
+        d_subghost_box_mass_fractions(hier::Box::getEmptyBox(d_dim)),
+        d_subghost_box_velocity(hier::Box::getEmptyBox(d_dim)),
+        d_subghost_box_internal_energy(hier::Box::getEmptyBox(d_dim)),
+        d_subghost_box_pressure(hier::Box::getEmptyBox(d_dim)),
+        d_subghost_box_sound_speed(hier::Box::getEmptyBox(d_dim)),
+        d_subghost_box_convective_flux_x(hier::Box::getEmptyBox(d_dim)),
+        d_subghost_box_convective_flux_y(hier::Box::getEmptyBox(d_dim)),
+        d_subghost_box_convective_flux_z(hier::Box::getEmptyBox(d_dim)),
+        d_subghost_box_max_wave_speed_x(hier::Box::getEmptyBox(d_dim)),
+        d_subghost_box_max_wave_speed_y(hier::Box::getEmptyBox(d_dim)),
+        d_subghost_box_max_wave_speed_z(hier::Box::getEmptyBox(d_dim)),
+        d_subghost_box_max_diffusivity(hier::Box::getEmptyBox(d_dim)),
+        d_subghost_box_species_densities(hier::Box::getEmptyBox(d_dim)),
+        d_subghost_box_species_temperatures(hier::Box::getEmptyBox(d_dim)),
         d_subghostcell_dims_density(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_mass_fractions(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_velocity(hier::IntVector::getZero(d_dim)),
@@ -107,12 +107,6 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
     {
         d_eqn_form.push_back(EQN_FORM::ADVECTIVE);
     }
-    
-    // Set the bounds for the variables.
-    d_Y_bound_lo = double(-0.001);
-    d_Y_bound_up = double(1.001);
-    d_Z_bound_lo = double(-1000.0);
-    d_Z_bound_up = double(1000.0);
     
     /*
      * Initialize the conservative variables.

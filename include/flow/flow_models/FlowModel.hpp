@@ -71,11 +71,11 @@ class FlowModel:
                 d_num_eqn(num_eqn),
                 d_num_ghosts(-hier::IntVector::getOne(d_dim)),
                 d_patch(nullptr),
-                d_interior_box(hier::Box::getEmptyBox(dim)),
-                d_ghost_box(hier::Box::getEmptyBox(dim)),
+                d_interior_box(hier::Box::getEmptyBox(d_dim)),
+                d_ghost_box(hier::Box::getEmptyBox(d_dim)),
                 d_interior_dims(hier::IntVector::getZero(d_dim)),
                 d_ghostcell_dims(hier::IntVector::getZero(d_dim)),
-                d_subdomain_box(hier::Box::getEmptyBox(dim)),
+                d_subdomain_box(hier::Box::getEmptyBox(d_dim)),
                 d_derived_cell_data_computed(false)
         {
             NULL_USE(flow_model_db);

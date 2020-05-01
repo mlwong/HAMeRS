@@ -394,12 +394,6 @@ class FlowModelFourEqnConservative: public FlowModel
         bool d_cell_data_species_enthalpies_computed;
         
         /*
-         * Upper and lower bounds on variables.
-         */
-        double d_Y_bound_lo;
-        double d_Y_bound_up;
-        
-        /*
          * A string variable to describe the equation of mass diffusivity used.
          */
         std::string d_equation_of_mass_diffusivity_str;
