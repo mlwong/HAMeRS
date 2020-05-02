@@ -374,6 +374,8 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -579,6 +581,8 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -798,6 +802,8 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -1073,6 +1079,8 @@ SBIStatisticsUtilities::outputCentroidInXDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -1263,6 +1271,8 @@ SBIStatisticsUtilities::outputCentroidInXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -1464,6 +1474,8 @@ SBIStatisticsUtilities::outputCentroidInXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -1742,6 +1754,8 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -1887,6 +1901,8 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -2042,6 +2058,8 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -2276,6 +2294,8 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -2421,6 +2441,8 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -2576,6 +2598,8 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -2817,6 +2841,8 @@ SBIStatisticsUtilities::outputInterfaceMinInYDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -2971,6 +2997,8 @@ SBIStatisticsUtilities::outputInterfaceMinInYDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -3212,6 +3240,8 @@ SBIStatisticsUtilities::outputInterfaceMaxInYDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -3366,6 +3396,8 @@ SBIStatisticsUtilities::outputInterfaceMaxInYDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -3614,6 +3646,8 @@ SBIStatisticsUtilities::outputInterfaceMinInZDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -3861,6 +3895,8 @@ SBIStatisticsUtilities::outputInterfaceMaxInZDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -4085,6 +4121,8 @@ SBIStatisticsUtilities::outputCirculation(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -4304,6 +4342,8 @@ SBIStatisticsUtilities::outputCirculation(
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -4654,6 +4694,8 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -4892,6 +4934,8 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -5175,6 +5219,8 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -5560,6 +5606,8 @@ SBIStatisticsUtilities::outputEnstrophyIntegrated(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -5786,6 +5834,8 @@ SBIStatisticsUtilities::outputEnstrophyIntegrated(
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 

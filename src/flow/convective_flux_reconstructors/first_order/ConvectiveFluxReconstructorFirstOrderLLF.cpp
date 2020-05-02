@@ -148,6 +148,8 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
         
         d_flow_model->registerDerivedVariables(num_subghosts_of_data);
         
+        d_flow_model->allocateMemoryForDerivedCellData();
+        
         d_flow_model->computeDerivedCellData();
         
         /*
@@ -356,6 +358,8 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("CONVECTIVE_FLUX_Y", d_num_conv_ghosts));
         
         d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+        
+        d_flow_model->allocateMemoryForDerivedCellData();
         
         d_flow_model->computeDerivedCellData();
         
@@ -710,6 +714,8 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("CONVECTIVE_FLUX_Z", d_num_conv_ghosts));
         
         d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+        
+        d_flow_model->allocateMemoryForDerivedCellData();
         
         d_flow_model->computeDerivedCellData();
         

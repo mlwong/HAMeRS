@@ -1065,6 +1065,8 @@ MultiresolutionTagger::computeMultiresolutionSensorValuesOnPatch(
                     
                     d_flow_model->registerDerivedVariables(num_subghosts_of_data);
                     
+                    d_flow_model->allocateMemoryForDerivedCellData();
+                    
                     d_flow_model->computeDerivedCellData();
                     
                     // Get the pointer to density data inside the flow model.
@@ -1133,6 +1135,8 @@ MultiresolutionTagger::computeMultiresolutionSensorValuesOnPatch(
                             "TOTAL_ENERGY", d_num_multiresolution_ghosts));
                     
                     d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                    
+                    d_flow_model->allocateMemoryForDerivedCellData();
                     
                     d_flow_model->computeDerivedCellData();
                     
@@ -1203,6 +1207,8 @@ MultiresolutionTagger::computeMultiresolutionSensorValuesOnPatch(
                             "PRESSURE", d_num_multiresolution_ghosts));
                     
                     d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                    
+                    d_flow_model->allocateMemoryForDerivedCellData();
                     
                     d_flow_model->computeDerivedCellData();
                     

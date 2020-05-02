@@ -578,6 +578,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
             d_num_conv_ghosts,
             AVERAGING::SIMPLE);
         
+        d_flow_model->allocateMemoryForDerivedCellData();
+        
         d_flow_model->computeDerivedCellData();
         
         /*
@@ -1013,6 +1015,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         basic_utilities->registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
             d_num_conv_ghosts,
             AVERAGING::SIMPLE);
+        
+        d_flow_model->allocateMemoryForDerivedCellData();
         
         d_flow_model->computeDerivedCellData();
         
@@ -1883,6 +1887,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         basic_utilities->registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
             d_num_conv_ghosts,
             AVERAGING::SIMPLE);
+        
+        d_flow_model->allocateMemoryForDerivedCellData();
         
         d_flow_model->computeDerivedCellData();
         

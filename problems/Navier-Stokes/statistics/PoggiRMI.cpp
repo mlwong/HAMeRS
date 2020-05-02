@@ -926,6 +926,8 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -1131,6 +1133,8 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -1350,6 +1354,8 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -1681,6 +1687,8 @@ RMIStatisticsUtilities::outputMixingWidthInYDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -1899,6 +1907,8 @@ RMIStatisticsUtilities::outputMixingWidthInYDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -2238,6 +2248,8 @@ RMIStatisticsUtilities::outputMixingWidthInZDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -2552,6 +2564,8 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -2780,6 +2794,8 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -3022,6 +3038,8 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -3376,6 +3394,8 @@ RMIStatisticsUtilities::outputMixednessInYDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -3617,6 +3637,8 @@ RMIStatisticsUtilities::outputMixednessInYDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -3979,6 +4001,8 @@ RMIStatisticsUtilities::outputMixednessInZDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -4328,6 +4352,8 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -4534,6 +4560,8 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXDirection(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -4870,6 +4898,8 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -5076,6 +5106,8 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYDirection(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -5457,6 +5489,8 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXYPlane(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -5687,6 +5721,8 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXYPlane(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -6049,6 +6085,8 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYZPlane(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -6279,6 +6317,8 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYZPlane(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -6641,6 +6681,8 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXZPlane(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -6871,6 +6913,8 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXZPlane(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -7226,6 +7270,8 @@ outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -7436,6 +7482,8 @@ outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -7775,6 +7823,8 @@ outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -7985,6 +8035,8 @@ outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -8327,6 +8379,8 @@ outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -8537,6 +8591,8 @@ outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -8816,6 +8872,8 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -9045,6 +9103,8 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -9405,6 +9465,8 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -9643,6 +9705,8 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -9926,6 +9990,8 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -10397,6 +10463,8 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -10686,6 +10754,8 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -11085,6 +11155,8 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -11410,6 +11482,8 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -11795,6 +11869,8 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -12035,6 +12111,8 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -12404,6 +12482,8 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -12634,6 +12714,8 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -12997,6 +13079,8 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -13227,6 +13311,8 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -13604,6 +13690,8 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -13872,6 +13960,8 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -14262,6 +14352,8 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -14510,6 +14602,8 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -14888,6 +14982,8 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -15136,6 +15232,8 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -15514,6 +15612,8 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -15762,6 +15862,8 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -16132,6 +16234,8 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -16362,6 +16466,8 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -16726,6 +16832,8 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -16956,6 +17064,8 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -17328,6 +17438,8 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -17576,6 +17688,8 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -17955,6 +18069,8 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -18203,6 +18319,8 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -18582,6 +18700,8 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -18830,6 +18950,8 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -19205,6 +19327,8 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -19445,6 +19569,8 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -19827,6 +19953,8 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -20085,6 +20213,8 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -20474,6 +20604,8 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -20732,6 +20864,8 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -21121,6 +21255,8 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -21379,6 +21515,8 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -21760,6 +21898,8 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -22004,6 +22144,8 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -22394,6 +22536,8 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -22638,6 +22782,8 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -23040,6 +23186,8 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -23316,6 +23464,8 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -23745,6 +23895,8 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -24021,6 +24173,8 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -24450,6 +24604,8 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -24726,6 +24882,8 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -25143,6 +25301,8 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -25393,6 +25553,8 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -25810,6 +25972,8 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -26092,6 +26256,8 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -26536,6 +26702,8 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -26818,6 +26986,8 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -27262,6 +27432,8 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -27544,6 +27716,8 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -27972,6 +28146,8 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -28202,6 +28378,8 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -28572,6 +28750,8 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -28820,6 +29000,8 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                     std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -29186,6 +29368,8 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -29399,6 +29583,8 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -29752,6 +29938,8 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -29979,6 +30167,8 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -30320,6 +30510,8 @@ RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYDirectio
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -30688,6 +30880,8 @@ RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYZPlane(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -31062,6 +31256,8 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -31281,6 +31477,8 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -31647,6 +31845,8 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -31880,6 +32080,8 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
                     std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -32222,6 +32424,8 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -32494,6 +32698,8 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -32794,6 +33000,8 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -33195,6 +33403,8 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -33456,6 +33666,8 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -33745,6 +33957,8 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -34138,6 +34352,8 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -34412,6 +34628,8 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -34721,6 +34939,8 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -35132,6 +35352,8 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -35393,6 +35615,8 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -35682,6 +35906,8 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -36075,6 +36301,8 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -36349,6 +36577,8 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -36658,6 +36888,8 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -37069,6 +37301,8 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -37330,6 +37564,8 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -37619,6 +37855,8 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -38012,6 +38250,8 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -38292,6 +38532,8 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -38607,6 +38849,8 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -39020,6 +39264,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -39240,6 +39486,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -39474,6 +39722,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -39806,6 +40056,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -40026,6 +40278,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -40260,6 +40514,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -40592,6 +40848,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -40812,6 +41070,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -41046,6 +41306,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -41378,6 +41640,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -41598,6 +41862,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -41832,6 +42098,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -42164,6 +42432,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -42370,6 +42640,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -42590,6 +42862,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -42908,6 +43182,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -43114,6 +43390,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -43334,6 +43612,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -43652,6 +43932,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -43858,6 +44140,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -44078,6 +44362,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -44396,6 +44682,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -44602,6 +44890,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -44822,6 +45112,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -45140,6 +45432,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -45346,6 +45640,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -45566,6 +45862,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -45845,6 +46143,8 @@ RMIStatisticsUtilities::outputNumericalInterfaceThickness(
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
                 flow_model_tmp->computeDerivedCellData();
                 
                 /*
@@ -46075,6 +46375,8 @@ RMIStatisticsUtilities::outputNumericalInterfaceThickness(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", num_ghosts));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 
@@ -46461,6 +46763,8 @@ RMIStatisticsUtilities::outputNumericalInterfaceThickness(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", num_ghosts));
                 
                 flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
                 
                 flow_model_tmp->computeDerivedCellData();
                 

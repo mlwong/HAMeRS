@@ -653,6 +653,8 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         
         d_flow_model->registerDerivedVariables(num_subghosts_of_data);
         
+        d_flow_model->allocateMemoryForDerivedCellData();
+        
         d_flow_model->computeDerivedCellData();
         
         /*
@@ -712,7 +714,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         
         d_flow_model->unregisterPatch();
         
-        spectral_radiuses_and_dt[1] = 1.0/spectral_radiuses_and_dt[1];
+        spectral_radiuses_and_dt[1] = double(1)/spectral_radiuses_and_dt[1];
     }
     else if (d_dim == tbox::Dimension(2))
     {
@@ -756,6 +758,8 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                 "MAX_DIFFUSIVITY", num_ghosts));
         
         d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+        
+        d_flow_model->allocateMemoryForDerivedCellData();
         
         d_flow_model->computeDerivedCellData();
         
@@ -839,7 +843,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         
         d_flow_model->unregisterPatch();
         
-        spectral_radiuses_and_dt[2] = 1.0/spectral_radiuses_and_dt[2];
+        spectral_radiuses_and_dt[2] = double(1)/spectral_radiuses_and_dt[2];
     }
     else if (d_dim == tbox::Dimension(3))
     {
@@ -889,6 +893,8 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                 "MAX_DIFFUSIVITY", num_ghosts));
         
         d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+        
+        d_flow_model->allocateMemoryForDerivedCellData();
         
         d_flow_model->computeDerivedCellData();
         
@@ -995,7 +1001,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         
         d_flow_model->unregisterPatch();
         
-        spectral_radiuses_and_dt[3] = 1.0/spectral_radiuses_and_dt[3];
+        spectral_radiuses_and_dt[3] = double(1)/spectral_radiuses_and_dt[3];
     }
     
     t_compute_dt->stop();

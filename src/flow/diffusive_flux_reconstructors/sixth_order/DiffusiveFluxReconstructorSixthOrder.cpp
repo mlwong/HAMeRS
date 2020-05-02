@@ -121,6 +121,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         diffusive_flux_utilities->registerDerivedVariablesForDiffusiveFluxes(d_num_diff_ghosts);
         
+        d_flow_model->allocateMemoryForDerivedCellData();
+        
         d_flow_model->computeDerivedCellData();
         
         /*
@@ -294,6 +296,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         d_flow_model->registerPatchWithDataContext(patch, data_context);
         
         diffusive_flux_utilities->registerDerivedVariablesForDiffusiveFluxes(d_num_diff_ghosts);
+        
+        d_flow_model->allocateMemoryForDerivedCellData();
         
         d_flow_model->computeDerivedCellData();
         
@@ -824,6 +828,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         d_flow_model->registerPatchWithDataContext(patch, data_context);
         
         diffusive_flux_utilities->registerDerivedVariablesForDiffusiveFluxes(d_num_diff_ghosts);
+        
+        d_flow_model->allocateMemoryForDerivedCellData();
         
         d_flow_model->computeDerivedCellData();
         

@@ -1571,6 +1571,8 @@ GradientTagger::computeGradientSensorValuesOnPatch(
                     
                     d_flow_model->registerDerivedVariables(num_subghosts_of_data);
                     
+                    d_flow_model->allocateMemoryForDerivedCellData();
+                    
                     d_flow_model->computeDerivedCellData();
                     
                     // Get the pointer to density data inside the flow model.
@@ -1626,6 +1628,8 @@ GradientTagger::computeGradientSensorValuesOnPatch(
                         std::pair<std::string, hier::IntVector>("TOTAL_ENERGY", d_num_gradient_ghosts));
                     
                     d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                    
+                    d_flow_model->allocateMemoryForDerivedCellData();
                     
                     d_flow_model->computeDerivedCellData();
                     
@@ -1685,6 +1689,8 @@ GradientTagger::computeGradientSensorValuesOnPatch(
                         std::pair<std::string, hier::IntVector>("PRESSURE", d_num_gradient_ghosts));
                     
                     d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                    
+                    d_flow_model->allocateMemoryForDerivedCellData();
                     
                     d_flow_model->computeDerivedCellData();
                     
@@ -1764,6 +1770,8 @@ GradientTagger::computeGradientSensorValuesOnPatch(
                     
                     d_flow_model->registerDerivedVariables(num_subghosts_of_data);
                     
+                    d_flow_model->allocateMemoryForDerivedCellData();
+                    
                     d_flow_model->computeDerivedCellData();
                     
                     // Get the pointer to density data inside the flow model.
@@ -1821,6 +1829,8 @@ GradientTagger::computeGradientSensorValuesOnPatch(
                         std::pair<std::string, hier::IntVector>("TOTAL_ENERGY", d_num_gradient_ghosts));
                     
                     d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                    
+                    d_flow_model->allocateMemoryForDerivedCellData();
                     
                     d_flow_model->computeDerivedCellData();
                     
@@ -1880,6 +1890,8 @@ GradientTagger::computeGradientSensorValuesOnPatch(
                         std::pair<std::string, hier::IntVector>("PRESSURE", d_num_gradient_ghosts));
                     
                     d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                    
+                    d_flow_model->allocateMemoryForDerivedCellData();
                     
                     d_flow_model->computeDerivedCellData();
                     
@@ -2407,6 +2419,8 @@ GradientTagger::tagCellsOnPatch(
                     
                     d_flow_model->registerDerivedVariables(num_subghosts_of_data);
                     
+                    d_flow_model->allocateMemoryForDerivedCellData();
+                    
                     d_flow_model->computeDerivedCellData();
                     
                     /*
@@ -2456,6 +2470,8 @@ GradientTagger::tagCellsOnPatch(
                         std::pair<std::string, hier::IntVector>("TOTAL_ENERGY", d_num_gradient_ghosts));
                     
                     d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                    
+                    d_flow_model->allocateMemoryForDerivedCellData();
                     
                     d_flow_model->computeDerivedCellData();
                     
@@ -2507,6 +2523,8 @@ GradientTagger::tagCellsOnPatch(
                         std::pair<std::string, hier::IntVector>("PRESSURE", d_num_gradient_ghosts));
                     
                     d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                    
+                    d_flow_model->allocateMemoryForDerivedCellData();
                     
                     d_flow_model->computeDerivedCellData();
                     
