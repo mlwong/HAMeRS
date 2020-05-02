@@ -44,10 +44,14 @@ class FlowModelDiffusiveFluxUtilities
             const hier::IntVector& num_subghosts);
         
         /*
-         * The cell data of all derived variables in the patch for this class are cleared.
+         * Allocate memory for cell data of all registered derived variables in the registered patch for this class.
          */
-        virtual void clearCellData()
-        {}
+        virtual void allocateMemoryForDerivedCellData() = 0;
+        
+        /*
+         * Clear cell data of all derived variables in the registered patch for this class.
+         */
+        virtual void clearCellData() = 0;
         
         /*
          * Get the variables for the derivatives in the diffusive fluxes.
@@ -119,6 +123,11 @@ protected:
          * boost::shared_ptr to cell data of diffusivities.
          */
         boost::shared_ptr<pdat::CellData<double> > d_data_diffusivities;
+        
+        /*
+         * Whether cell data of diffusivities is computed.
+         */
+        bool d_cell_data_diffusivities_computed;
         
         /*
          * boost::weak_ptr to FlowModel.

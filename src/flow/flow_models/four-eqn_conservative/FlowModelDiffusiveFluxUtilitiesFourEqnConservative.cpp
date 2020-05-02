@@ -19,14 +19,18 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::FlowModelDiffusiveFluxUtilit
         d_num_subghosts_shear_viscosity(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_bulk_viscosity(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_thermal_conductivity(-hier::IntVector::getOne(d_dim)),
-        d_subghost_box_mass_diffusivities(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_shear_viscosity(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_bulk_viscosity(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_thermal_conductivity(hier::Box::getEmptyBox(dim)),
+        d_subghost_box_mass_diffusivities(hier::Box::getEmptyBox(d_dim)),
+        d_subghost_box_shear_viscosity(hier::Box::getEmptyBox(d_dim)),
+        d_subghost_box_bulk_viscosity(hier::Box::getEmptyBox(d_dim)),
+        d_subghost_box_thermal_conductivity(hier::Box::getEmptyBox(d_dim)),
         d_subghostcell_dims_mass_diffusivities(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_shear_viscosity(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_bulk_viscosity(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_thermal_conductivity(hier::IntVector::getZero(d_dim)),
+        d_cell_data_mass_diffusivities_computed(false),
+        d_cell_data_shear_viscosity_computed(false),
+        d_cell_data_bulk_viscosity_computed(false),
+        d_cell_data_thermal_conductivity_computed(false),
         d_equation_of_mass_diffusivity_mixing_rules(equation_of_mass_diffusivity_mixing_rules),
         d_equation_of_shear_viscosity_mixing_rules(equation_of_shear_viscosity_mixing_rules),
         d_equation_of_bulk_viscosity_mixing_rules(equation_of_bulk_viscosity_mixing_rules),
@@ -111,7 +115,145 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::registerDerivedVariablesForD
 
 
 /*
- * The cell data of all derived variables in the patch for this class are cleared.
+ * Allocate memory for cell data of all registered derived variables in the registered patch for this class.
+ */
+void
+FlowModelDiffusiveFluxUtilitiesFourEqnConservative::allocateMemoryForDerivedCellData()
+{
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
+    const hier::Box interior_box = patch.getBox();
+    
+    if (d_num_subghosts_mass_diffusivities > -hier::IntVector::getOne(d_dim))
+    {
+        if (!d_cell_data_mass_diffusivities_computed)
+        {
+            if (!d_data_mass_diffusivities)
+            {
+                // Create the cell data of mass diffusivities.
+                d_data_mass_diffusivities.reset(new pdat::CellData<double>(
+                    interior_box, d_num_species, d_num_subghosts_mass_diffusivities));
+            }
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::allocateMemoryForDerivedCellData()\n"
+                << "Cell data of 'MASS_DIFFUSIVITIES' is aleady computed."
+                << std::endl);
+        }
+    }
+    
+    if (d_num_subghosts_shear_viscosity > -hier::IntVector::getOne(d_dim))
+    {
+        if (!d_cell_data_shear_viscosity_computed)
+        {
+            if (!d_data_shear_viscosity)
+            {
+                // Create the cell data of shear viscosity.
+                d_data_shear_viscosity.reset(new pdat::CellData<double>(
+                    interior_box, 1, d_num_subghosts_shear_viscosity));
+            }
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::allocateMemoryForDerivedCellData()\n"
+                << "Cell data of 'SHEAR_VISCOSITY' is aleady computed."
+                << std::endl);
+        }
+    }
+    
+    if (d_num_subghosts_bulk_viscosity > -hier::IntVector::getOne(d_dim))
+    {
+        if (!d_cell_data_bulk_viscosity_computed)
+        {
+            if (!d_data_bulk_viscosity)
+            {
+                // Create the cell data of bulk viscosity.
+                d_data_bulk_viscosity.reset(new pdat::CellData<double>(
+                    interior_box, 1, d_num_subghosts_bulk_viscosity));
+            }
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::allocateMemoryForDerivedCellData()\n"
+                << "Cell data of 'BULK_VISCOSITY' is aleady computed."
+                << std::endl);
+        }
+    }
+    
+    if (d_num_subghosts_thermal_conductivity > -hier::IntVector::getOne(d_dim))
+    {
+        if (!d_cell_data_thermal_conductivity_computed)
+        {
+            if (!d_data_thermal_conductivity)
+            {
+                // Create the cell data of thermal conductivity.
+                d_data_thermal_conductivity.reset(new pdat::CellData<double>(
+                    interior_box, 1, d_num_subghosts_thermal_conductivity));
+            }
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::allocateMemoryForDerivedCellData()\n"
+                << "Cell data of 'THERMAL_CONDUCTIVITY' is aleady computed."
+                << std::endl);
+        }
+    }
+    
+    if (d_num_subghosts_diffusivities > -hier::IntVector::getOne(d_dim))
+    {
+        if (!d_cell_data_diffusivities_computed)
+        {
+            if (!d_data_diffusivities)
+            {
+                if (d_dim == tbox::Dimension(1))
+                {
+                    d_data_diffusivities.reset(new pdat::CellData<double>(
+                        interior_box,
+                        2*d_num_species*(d_num_species + 1) + 3,
+                        d_num_subghosts_diffusivities));
+                }
+                else if (d_dim == tbox::Dimension(2))
+                {
+                    d_data_diffusivities.reset(new pdat::CellData<double>(
+                        interior_box,
+                        2*d_num_species*(d_num_species + 1) + 10,
+                        d_num_subghosts_diffusivities));
+                }
+                else if (d_dim == tbox::Dimension(3))
+                {
+                    d_data_diffusivities.reset(new pdat::CellData<double>(
+                        interior_box,
+                        2*d_num_species*(d_num_species + 1) + 13,
+                        d_num_subghosts_diffusivities));
+                }
+            }
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::allocateMemoryForDerivedCellData()\n"
+                << "Cell data of 'DIFFUSIVITIES' is aleady computed."
+                << std::endl);
+        }
+    }
+}
+
+
+/*
+ * Clear cell data of all derived variables in the registered patch for this class.
  */
 void
 FlowModelDiffusiveFluxUtilitiesFourEqnConservative::clearCellData()
@@ -139,6 +281,12 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::clearCellData()
     d_data_shear_viscosity.reset();
     d_data_bulk_viscosity.reset();
     d_data_thermal_conductivity.reset();
+    
+    d_cell_data_diffusivities_computed        = false;
+    d_cell_data_mass_diffusivities_computed   = false;
+    d_cell_data_shear_viscosity_computed      = false;
+    d_cell_data_bulk_viscosity_computed       = false;
+    d_cell_data_thermal_conductivity_computed = false;
     
     d_derived_cell_data_computed = false;
 }
@@ -1264,6 +1412,74 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
         }
 #endif
         
+        if (!d_cell_data_mass_diffusivities_computed)
+        {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(d_data_mass_diffusivities);
+#endif
+            
+            // Compute the mass diffusivity fields.
+            d_equation_of_mass_diffusivity_mixing_rules->computeMassDiffusivities(
+                d_data_mass_diffusivities,
+                data_pressure,
+                data_temperature,
+                data_mass_fractions,
+                empty_box);
+            
+            d_cell_data_mass_diffusivities_computed = true;
+        }
+        
+        if (!d_cell_data_shear_viscosity_computed)
+        {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(d_data_shear_viscosity);
+#endif
+            
+            // Compute the shear viscosity field.
+            d_equation_of_shear_viscosity_mixing_rules->computeShearViscosity(
+                d_data_shear_viscosity,
+                data_pressure,
+                data_temperature,
+                data_mass_fractions,
+                empty_box);
+            
+            d_cell_data_shear_viscosity_computed = true;
+        }
+        
+        if (!d_cell_data_bulk_viscosity_computed)
+        {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(d_data_bulk_viscosity);
+#endif
+            
+            // Compute the bulk viscosity field.
+            d_equation_of_bulk_viscosity_mixing_rules->computeBulkViscosity(
+                d_data_bulk_viscosity,
+                data_pressure,
+                data_temperature,
+                data_mass_fractions,
+                empty_box);
+            
+            d_cell_data_bulk_viscosity_computed = true;
+        }
+        
+        if (!d_cell_data_thermal_conductivity_computed)
+        {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(d_data_thermal_conductivity);
+#endif
+            
+            // Compute the thermal conductivity field.
+            d_equation_of_thermal_conductivity_mixing_rules->computeThermalConductivity(
+                d_data_thermal_conductivity,
+                data_pressure,
+                data_temperature,
+                data_mass_fractions,
+                empty_box);
+            
+            d_cell_data_thermal_conductivity_computed = true;
+        }
+        
         /*
          * Get the numbers of ghost cells.
          */
@@ -1288,22 +1504,6 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
         
         const hier::Box subghost_box_species_enthalpies = data_species_enthalpies[0]->getGhostBox();
         const hier::IntVector subghostcell_dims_species_enthalpies = subghost_box_species_enthalpies.numberCells();
-        
-        /*
-         * Create cell data of mass diffusivities, shear viscosity, bulk viscosity and thermal conductivity.
-         */
-        
-        d_data_mass_diffusivities.reset(new pdat::CellData<double>(
-            interior_box, d_num_species, d_num_subghosts_mass_diffusivities));
-        
-        d_data_shear_viscosity.reset(new pdat::CellData<double>(
-            interior_box, 1, d_num_subghosts_shear_viscosity));
-        
-        d_data_bulk_viscosity.reset(new pdat::CellData<double>(
-            interior_box, 1, d_num_subghosts_bulk_viscosity));
-        
-        d_data_thermal_conductivity.reset(new pdat::CellData<double>(
-            interior_box, 1, d_num_subghosts_thermal_conductivity));
         
         /*
          * Get the pointers to the cell data of density, mass fractions, mass diffusivities, shear
@@ -1333,84 +1533,37 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
         double* mu_v  = d_data_bulk_viscosity->getPointer(0);
         double* kappa = d_data_thermal_conductivity->getPointer(0);
         
-        // Compute the mass diffusivity fields.
-        d_equation_of_mass_diffusivity_mixing_rules->computeMassDiffusivities(
-            d_data_mass_diffusivities,
-            data_pressure,
-            data_temperature,
-            data_mass_fractions,
-            empty_box);
-        
-        // Compute the shear viscosity field.
-        d_equation_of_shear_viscosity_mixing_rules->computeShearViscosity(
-            d_data_shear_viscosity,
-            data_pressure,
-            data_temperature,
-            data_mass_fractions,
-            empty_box);
-        
-        // Compute the bulk viscosity field.
-        d_equation_of_bulk_viscosity_mixing_rules->computeBulkViscosity(
-            d_data_bulk_viscosity,
-            data_pressure,
-            data_temperature,
-            data_mass_fractions,
-            empty_box);
-        
-        // Compute the thermal conductivity field.
-        d_equation_of_thermal_conductivity_mixing_rules->computeThermalConductivity(
-            d_data_thermal_conductivity,
-            data_pressure,
-            data_temperature,
-            data_mass_fractions,
-            empty_box);
-        
-        if (d_dim == tbox::Dimension(1))
+        if (!d_cell_data_diffusivities_computed)
         {
-            d_data_diffusivities.reset(new pdat::CellData<double>(
-                interior_box,
-                2*d_num_species*(d_num_species + 1) + 3,
-                d_num_subghosts_diffusivities));
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(d_data_diffusivities);
+#endif
             
-            // Get the pointer to cell data of velocity and diffusivities.
-            double* u = data_velocity->getPointer(0);
-            
-            std::vector<double*> D_ptr;
-            D_ptr.reserve(2*d_num_species*(d_num_species + 1) + 3);
-            
-            for (int i = 0; i < 2*d_num_species*(d_num_species + 1) + 3; i++)
+            if (d_dim == tbox::Dimension(1))
             {
-                D_ptr.push_back(d_data_diffusivities->getPointer(i));
-            }
-            
-            /*
-             * Compute the diffusivities.
-             */
-            
-            // Mass equations.
-            for (int si = 0; si < d_num_species; si++)
-            {
-                const int component_idx = si*(d_num_species + 1);
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+                TBOX_ASSERT(d_data_diffusivities->getDepth() == 2*d_num_species*(d_num_species + 1) + 3);
+#endif
                 
-                for (int i = -d_num_subghosts_diffusivities[0];
-                     i < interior_dims[0] + d_num_subghosts_diffusivities[0];
-                     i++)
+                // Get the pointer to cell data of velocity and diffusivities.
+                double* u = data_velocity->getPointer(0);
+                
+                std::vector<double*> D_ptr;
+                D_ptr.reserve(2*d_num_species*(d_num_species + 1) + 3);
+                
+                for (int i = 0; i < 2*d_num_species*(d_num_species + 1) + 3; i++)
                 {
-                    // Compute the linear indices.
-                    const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
-                    const int idx_mass_diffusivities = i + d_num_subghosts_mass_diffusivities[0];
-                    const int idx_density = i + num_subghosts_density[0];
-                    
-                    D_ptr[component_idx][idx_diffusivities] =
-                        -rho[idx_density]*D[si][idx_mass_diffusivities];
+                    D_ptr.push_back(d_data_diffusivities->getPointer(i));
                 }
-            }
-            
-            for (int si = 0; si < d_num_species; si++)
-            {
-                for (int sj = 0; sj < d_num_species; sj++)
+                
+                /*
+                 * Compute the diffusivities.
+                 */
+                
+                // Mass equations.
+                for (int si = 0; si < d_num_species; si++)
                 {
-                    const int component_idx = si*(d_num_species + 1) + sj + 1;
+                    const int component_idx = si*(d_num_species + 1);
                     
                     for (int i = -d_num_subghosts_diffusivities[0];
                          i < interior_dims[0] + d_num_subghosts_diffusivities[0];
@@ -1420,279 +1573,93 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
                         const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
                         const int idx_mass_diffusivities = i + d_num_subghosts_mass_diffusivities[0];
                         const int idx_density = i + num_subghosts_density[0];
-                        const int idx_mass_fractions = i + num_subghosts_mass_fractions[0];
-                        
-                        D_ptr[component_idx][idx_diffusivities] =
-                            rho[idx_density]*Y[si][idx_mass_fractions]*D[sj][idx_mass_diffusivities];
-                    }
-                }
-            }
-            
-            // Momentum and energy equations.
-            for (int i = -d_num_subghosts_diffusivities[0];
-                 i < interior_dims[0] + d_num_subghosts_diffusivities[0];
-                 i++)
-            {
-                // Compute the linear indices.
-                const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
-                const int idx_shear_viscosity = i + d_num_subghosts_shear_viscosity[0];
-                const int idx_bulk_viscosity = i + d_num_subghosts_bulk_viscosity[0];
-                const int idx_thermal_conductivity = i + d_num_subghosts_thermal_conductivity[0];
-                const int idx_velocity = i + num_subghosts_velocity[0];
-                
-                D_ptr[d_num_species*(d_num_species + 1)][idx_diffusivities] =
-                    -(double(4)/double(3)*mu[idx_shear_viscosity] + mu_v[idx_bulk_viscosity]);
-                D_ptr[d_num_species*(d_num_species + 1) + 1][idx_diffusivities] =
-                    -u[idx_velocity]*(double(4)/double(3)*mu[idx_shear_viscosity] + mu_v[idx_bulk_viscosity]);
-                D_ptr[d_num_species*(d_num_species + 1) + 2][idx_diffusivities] =
-                    -kappa[idx_thermal_conductivity];
-            }
-            
-            // Energy equation.
-            for (int si = 0; si < d_num_species; si++)
-            {
-                const int component_idx =
-                    d_num_species*(d_num_species + 1) + 3 + si*(d_num_species + 1);
-                
-                for (int i = -d_num_subghosts_diffusivities[0];
-                     i < interior_dims[0] + d_num_subghosts_diffusivities[0];
-                     i++)
-                {
-                    // Compute the linear indices.
-                    const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
-                    const int idx_mass_diffusivities = i + d_num_subghosts_mass_diffusivities[0];
-                    const int idx_density = i + num_subghosts_density[0];
-                    const int idx_species_enthalpies = i + num_subghosts_species_enthalpies[0];
-                    
-                    D_ptr[component_idx][idx_diffusivities] =
-                        -rho[idx_density]*D[si][idx_mass_diffusivities]*
-                            h_i[si][idx_species_enthalpies];
-                }
-            }
-            
-            for (int si = 0; si < d_num_species; si++)
-            {
-                for (int sj = 0; sj < d_num_species; sj++)
-                {
-                    const int component_idx =
-                        d_num_species*(d_num_species + 1) + 4 + si*(d_num_species + 1) + sj;
-                    
-                    for (int i = -d_num_subghosts_diffusivities[0];
-                         i < interior_dims[0] + d_num_subghosts_diffusivities[0];
-                         i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
-                        const int idx_mass_diffusivities = i + d_num_subghosts_mass_diffusivities[0];
-                        const int idx_density = i + num_subghosts_density[0];
-                        const int idx_mass_fractions = i + num_subghosts_mass_fractions[0];
-                        const int idx_species_enthalpies = i + num_subghosts_species_enthalpies[0];
-                        
-                        D_ptr[component_idx][idx_diffusivities] =
-                            rho[idx_density]*Y[si][idx_mass_fractions]*D[sj][idx_mass_diffusivities]*
-                                h_i[si][idx_species_enthalpies];
-                    }
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(2))
-        {
-            d_data_diffusivities.reset(new pdat::CellData<double>(
-                interior_box,
-                2*d_num_species*(d_num_species + 1) + 10,
-                d_num_subghosts_diffusivities));
-            
-            // Get the pointer to cell data of velocity and diffusivities.
-            double* u = data_velocity->getPointer(0);
-            double* v = data_velocity->getPointer(1);
-            
-            std::vector<double*> D_ptr;
-            D_ptr.reserve(2*d_num_species*(d_num_species + 1) + 10);
-            
-            for (int i = 0; i < 2*d_num_species*(d_num_species + 1) + 10; i++)
-            {
-                D_ptr.push_back(d_data_diffusivities->getPointer(i));
-            }
-            
-            /*
-             * Compute the diffusivities.
-             */
-            
-            // Mass equations.
-            for (int si = 0; si < d_num_species; si++)
-            {
-                const int component_idx = si*(d_num_species + 1);
-                
-                for (int j = -d_num_subghosts_diffusivities[1];
-                     j < interior_dims[1] + d_num_subghosts_diffusivities[1];
-                     j++)
-                {
-                    for (int i = -d_num_subghosts_diffusivities[0];
-                         i < interior_dims[0] + d_num_subghosts_diffusivities[0];
-                         i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
-                            (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0];
-                        
-                        const int idx_mass_diffusivities = (i + d_num_subghosts_mass_diffusivities[0]) +
-                            (j + d_num_subghosts_mass_diffusivities[1])*d_subghostcell_dims_mass_diffusivities[0];
-                        
-                        const int idx_density = (i + num_subghosts_density[0]) +
-                            (j + num_subghosts_density[1])*subghostcell_dims_density[0];
                         
                         D_ptr[component_idx][idx_diffusivities] =
                             -rho[idx_density]*D[si][idx_mass_diffusivities];
                     }
                 }
-            }
-            
-            for (int si = 0; si < d_num_species; si++)
-            {
-                for (int sj = 0; sj < d_num_species; sj++)
+                
+                for (int si = 0; si < d_num_species; si++)
                 {
-                    const int component_idx = si*(d_num_species + 1) + sj + 1;
-                    
-                    for (int j = -d_num_subghosts_diffusivities[1];
-                         j < interior_dims[1] + d_num_subghosts_diffusivities[1];
-                         j++)
+                    for (int sj = 0; sj < d_num_species; sj++)
                     {
+                        const int component_idx = si*(d_num_species + 1) + sj + 1;
+                        
                         for (int i = -d_num_subghosts_diffusivities[0];
                              i < interior_dims[0] + d_num_subghosts_diffusivities[0];
                              i++)
                         {
                             // Compute the linear indices.
-                            const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
-                                (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0];
-                            
-                            const int idx_mass_diffusivities = (i + d_num_subghosts_mass_diffusivities[0]) +
-                                (j + d_num_subghosts_mass_diffusivities[1])*d_subghostcell_dims_mass_diffusivities[0];
-                            
-                            const int idx_density = (i + num_subghosts_density[0]) +
-                                (j + num_subghosts_density[1])*subghostcell_dims_density[0];
-                            
-                            const int idx_mass_fractions = (i + num_subghosts_mass_fractions[0]) +
-                                (j + num_subghosts_mass_fractions[1])*subghostcell_dims_mass_fractions[0];
+                            const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
+                            const int idx_mass_diffusivities = i + d_num_subghosts_mass_diffusivities[0];
+                            const int idx_density = i + num_subghosts_density[0];
+                            const int idx_mass_fractions = i + num_subghosts_mass_fractions[0];
                             
                             D_ptr[component_idx][idx_diffusivities] =
                                 rho[idx_density]*Y[si][idx_mass_fractions]*D[sj][idx_mass_diffusivities];
                         }
                     }
                 }
-            }
-            
-            // Momentum and energy equations.
-            for (int j = -d_num_subghosts_diffusivities[1];
-                 j < interior_dims[1] + d_num_subghosts_diffusivities[1];
-                 j++)
-            {
+                
+                // Momentum and energy equations.
                 for (int i = -d_num_subghosts_diffusivities[0];
                      i < interior_dims[0] + d_num_subghosts_diffusivities[0];
                      i++)
                 {
                     // Compute the linear indices.
-                    const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
-                        (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0];
-                    
-                    const int idx_shear_viscosity = (i + d_num_subghosts_shear_viscosity[0]) +
-                        (j + d_num_subghosts_shear_viscosity[1])*d_subghostcell_dims_shear_viscosity[0];
-                    
-                    const int idx_bulk_viscosity = (i + d_num_subghosts_bulk_viscosity[0]) +
-                        (j + d_num_subghosts_bulk_viscosity[1])*d_subghostcell_dims_bulk_viscosity[0];
-                    
-                    const int idx_thermal_conductivity = (i + d_num_subghosts_thermal_conductivity[0]) +
-                        (j + d_num_subghosts_thermal_conductivity[1])*d_subghostcell_dims_thermal_conductivity[0];
-                    
-                    const int idx_velocity = (i + num_subghosts_velocity[0]) +
-                        (j + num_subghosts_velocity[1])*subghostcell_dims_velocity[0];
+                    const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
+                    const int idx_shear_viscosity = i + d_num_subghosts_shear_viscosity[0];
+                    const int idx_bulk_viscosity = i + d_num_subghosts_bulk_viscosity[0];
+                    const int idx_thermal_conductivity = i + d_num_subghosts_thermal_conductivity[0];
+                    const int idx_velocity = i + num_subghosts_velocity[0];
                     
                     D_ptr[d_num_species*(d_num_species + 1)][idx_diffusivities] =
                         -(double(4)/double(3)*mu[idx_shear_viscosity] + mu_v[idx_bulk_viscosity]);
                     D_ptr[d_num_species*(d_num_species + 1) + 1][idx_diffusivities] =
-                        double(2)/double(3)*mu[idx_shear_viscosity] - mu_v[idx_bulk_viscosity];
-                    D_ptr[d_num_species*(d_num_species + 1) + 2][idx_diffusivities] =
-                        -mu[idx_shear_viscosity];
-                    D_ptr[d_num_species*(d_num_species + 1) + 3][idx_diffusivities] =
                         -u[idx_velocity]*(double(4)/double(3)*mu[idx_shear_viscosity] + mu_v[idx_bulk_viscosity]);
-                    D_ptr[d_num_species*(d_num_species + 1) + 4][idx_diffusivities] =
-                        -v[idx_velocity]*(double(4)/double(3)*mu[idx_shear_viscosity] + mu_v[idx_bulk_viscosity]);
-                    D_ptr[d_num_species*(d_num_species + 1) + 5][idx_diffusivities] =
-                        u[idx_velocity]*(double(2)/double(3)*mu[idx_shear_viscosity] - mu_v[idx_bulk_viscosity]);
-                    D_ptr[d_num_species*(d_num_species + 1) + 6][idx_diffusivities] =
-                        v[idx_velocity]*(double(2)/double(3)*mu[idx_shear_viscosity] - mu_v[idx_bulk_viscosity]);
-                    D_ptr[d_num_species*(d_num_species + 1) + 7][idx_diffusivities] =
-                        -u[idx_velocity]*mu[idx_shear_viscosity];
-                    D_ptr[d_num_species*(d_num_species + 1) + 8][idx_diffusivities] =
-                        -v[idx_velocity]*mu[idx_shear_viscosity];
-                    D_ptr[d_num_species*(d_num_species + 1) + 9][idx_diffusivities] =
+                    D_ptr[d_num_species*(d_num_species + 1) + 2][idx_diffusivities] =
                         -kappa[idx_thermal_conductivity];
                 }
-            }
-            
-            // Energy equation.
-            for (int si = 0; si < d_num_species; si++)
-            {
-                const int component_idx =
-                    d_num_species*(d_num_species + 1) + 10 + si*(d_num_species + 1);
                 
-                for (int j = -d_num_subghosts_diffusivities[1];
-                     j < interior_dims[1] + d_num_subghosts_diffusivities[1];
-                     j++)
+                // Energy equation.
+                for (int si = 0; si < d_num_species; si++)
                 {
+                    const int component_idx =
+                        d_num_species*(d_num_species + 1) + 3 + si*(d_num_species + 1);
+                    
                     for (int i = -d_num_subghosts_diffusivities[0];
                          i < interior_dims[0] + d_num_subghosts_diffusivities[0];
                          i++)
                     {
                         // Compute the linear indices.
-                        const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
-                            (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0];
-                        
-                        const int idx_mass_diffusivities = (i + d_num_subghosts_mass_diffusivities[0]) +
-                            (j + d_num_subghosts_mass_diffusivities[1])*d_subghostcell_dims_mass_diffusivities[0];
-                        
-                        const int idx_density = (i + num_subghosts_density[0]) +
-                            (j + num_subghosts_density[1])*subghostcell_dims_density[0];
-                        
-                        const int idx_species_enthalpies = (i + num_subghosts_species_enthalpies[0]) +
-                            (j + num_subghosts_species_enthalpies[1])*subghostcell_dims_species_enthalpies[0];
+                        const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
+                        const int idx_mass_diffusivities = i + d_num_subghosts_mass_diffusivities[0];
+                        const int idx_density = i + num_subghosts_density[0];
+                        const int idx_species_enthalpies = i + num_subghosts_species_enthalpies[0];
                         
                         D_ptr[component_idx][idx_diffusivities] =
                             -rho[idx_density]*D[si][idx_mass_diffusivities]*
                                 h_i[si][idx_species_enthalpies];
                     }
                 }
-            }
-            
-            for (int si = 0; si < d_num_species; si++)
-            {
-                for (int sj = 0; sj < d_num_species; sj++)
+                
+                for (int si = 0; si < d_num_species; si++)
                 {
-                    const int component_idx =
-                        d_num_species*(d_num_species + 1) + 11 + si*(d_num_species + 1) + sj;
-                    
-                    for (int j = -d_num_subghosts_diffusivities[1];
-                         j < interior_dims[1] + d_num_subghosts_diffusivities[1];
-                         j++)
+                    for (int sj = 0; sj < d_num_species; sj++)
                     {
+                        const int component_idx =
+                            d_num_species*(d_num_species + 1) + 4 + si*(d_num_species + 1) + sj;
+                        
                         for (int i = -d_num_subghosts_diffusivities[0];
                              i < interior_dims[0] + d_num_subghosts_diffusivities[0];
                              i++)
                         {
                             // Compute the linear indices.
-                            const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
-                                (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0];
-                            
-                            const int idx_mass_diffusivities = (i + d_num_subghosts_mass_diffusivities[0]) +
-                                (j + d_num_subghosts_mass_diffusivities[1])*d_subghostcell_dims_mass_diffusivities[0];
-                            
-                            const int idx_density = (i + num_subghosts_density[0]) +
-                                (j + num_subghosts_density[1])*subghostcell_dims_density[0];
-                            
-                            const int idx_mass_fractions = (i + num_subghosts_mass_fractions[0]) +
-                                (j + num_subghosts_mass_fractions[1])*subghostcell_dims_mass_fractions[0];
-                            
-                            const int idx_species_enthalpies = (i + num_subghosts_species_enthalpies[0]) +
-                                (j + num_subghosts_species_enthalpies[1])*subghostcell_dims_species_enthalpies[0];
+                            const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
+                            const int idx_mass_diffusivities = i + d_num_subghosts_mass_diffusivities[0];
+                            const int idx_density = i + num_subghosts_density[0];
+                            const int idx_mass_fractions = i + num_subghosts_mass_fractions[0];
+                            const int idx_species_enthalpies = i + num_subghosts_species_enthalpies[0];
                             
                             D_ptr[component_idx][idx_diffusivities] =
                                 rho[idx_density]*Y[si][idx_mass_fractions]*D[sj][idx_mass_diffusivities]*
@@ -1701,40 +1668,33 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
                     }
                 }
             }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            d_data_diffusivities.reset(new pdat::CellData<double>(
-                interior_box,
-                2*d_num_species*(d_num_species + 1) + 13,
-                d_num_subghosts_diffusivities));
-            
-            // Get the pointer to cell data of velocity and diffusivities.
-            double* u = data_velocity->getPointer(0);
-            double* v = data_velocity->getPointer(1);
-            double* w = data_velocity->getPointer(2);
-            
-            std::vector<double*> D_ptr;
-            D_ptr.reserve(2*d_num_species*(d_num_species + 1) + 13);
-            
-            for (int i = 0; i < 2*d_num_species*(d_num_species + 1) + 13; i++)
+            else if (d_dim == tbox::Dimension(2))
             {
-                D_ptr.push_back(d_data_diffusivities->getPointer(i));
-            }
-            
-            /*
-             * Compute the diffusivities.
-             */
-            
-            // Mass equations.
-            for (int si = 0; si < d_num_species; si++)
-            {
-                const int component_idx = si*(d_num_species + 1);
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+                TBOX_ASSERT(d_data_diffusivities->getDepth() == 2*d_num_species*(d_num_species + 1) + 10);
+#endif
                 
-                for (int k = -d_num_subghosts_diffusivities[2];
-                     k < interior_dims[2] + d_num_subghosts_diffusivities[2];
-                     k++)
+                // Get the pointer to cell data of velocity and diffusivities.
+                double* u = data_velocity->getPointer(0);
+                double* v = data_velocity->getPointer(1);
+                
+                std::vector<double*> D_ptr;
+                D_ptr.reserve(2*d_num_species*(d_num_species + 1) + 10);
+                
+                for (int i = 0; i < 2*d_num_species*(d_num_species + 1) + 10; i++)
                 {
+                    D_ptr.push_back(d_data_diffusivities->getPointer(i));
+                }
+                
+                /*
+                 * Compute the diffusivities.
+                 */
+                
+                // Mass equations.
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    const int component_idx = si*(d_num_species + 1);
+                    
                     for (int j = -d_num_subghosts_diffusivities[1];
                          j < interior_dims[1] + d_num_subghosts_diffusivities[1];
                          j++)
@@ -1745,37 +1705,26 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
                         {
                             // Compute the linear indices.
                             const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
-                                (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0] +
-                                (k + d_num_subghosts_diffusivities[2])*d_subghostcell_dims_diffusivities[0]*
-                                    d_subghostcell_dims_diffusivities[1];
+                                (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0];
                             
                             const int idx_mass_diffusivities = (i + d_num_subghosts_mass_diffusivities[0]) +
-                                (j + d_num_subghosts_mass_diffusivities[1])*d_subghostcell_dims_mass_diffusivities[0] +
-                                (k + d_num_subghosts_mass_diffusivities[2])*d_subghostcell_dims_mass_diffusivities[0]*
-                                    d_subghostcell_dims_mass_diffusivities[1];
+                                (j + d_num_subghosts_mass_diffusivities[1])*d_subghostcell_dims_mass_diffusivities[0];
                             
                             const int idx_density = (i + num_subghosts_density[0]) +
-                                (j + num_subghosts_density[1])*subghostcell_dims_density[0] +
-                                (k + num_subghosts_density[2])*subghostcell_dims_density[0]*
-                                    subghostcell_dims_density[1];
+                                (j + num_subghosts_density[1])*subghostcell_dims_density[0];
                             
                             D_ptr[component_idx][idx_diffusivities] =
                                 -rho[idx_density]*D[si][idx_mass_diffusivities];
                         }
                     }
                 }
-            }
-            
-            for (int si = 0; si < d_num_species; si++)
-            {
-                for (int sj = 0; sj < d_num_species; sj++)
+                
+                for (int si = 0; si < d_num_species; si++)
                 {
-                    const int component_idx = si*(d_num_species + 1) + sj + 1;
-                    
-                    for (int k = -d_num_subghosts_diffusivities[2];
-                         k < interior_dims[2] + d_num_subghosts_diffusivities[2];
-                         k++)
+                    for (int sj = 0; sj < d_num_species; sj++)
                     {
+                        const int component_idx = si*(d_num_species + 1) + sj + 1;
+                        
                         for (int j = -d_num_subghosts_diffusivities[1];
                              j < interior_dims[1] + d_num_subghosts_diffusivities[1];
                              j++)
@@ -1786,24 +1735,16 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
                             {
                                 // Compute the linear indices.
                                 const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
-                                    (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0] +
-                                    (k + d_num_subghosts_diffusivities[2])*d_subghostcell_dims_diffusivities[0]*
-                                        d_subghostcell_dims_diffusivities[1];
+                                    (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0];
                                 
                                 const int idx_mass_diffusivities = (i + d_num_subghosts_mass_diffusivities[0]) +
-                                    (j + d_num_subghosts_mass_diffusivities[1])*d_subghostcell_dims_mass_diffusivities[0] +
-                                    (k + d_num_subghosts_mass_diffusivities[2])*d_subghostcell_dims_mass_diffusivities[0]*
-                                        d_subghostcell_dims_mass_diffusivities[1];
+                                    (j + d_num_subghosts_mass_diffusivities[1])*d_subghostcell_dims_mass_diffusivities[0];
                                 
                                 const int idx_density = (i + num_subghosts_density[0]) +
-                                    (j + num_subghosts_density[1])*subghostcell_dims_density[0] +
-                                    (k + num_subghosts_density[2])*subghostcell_dims_density[0]*
-                                        subghostcell_dims_density[1];
+                                    (j + num_subghosts_density[1])*subghostcell_dims_density[0];
                                 
                                 const int idx_mass_fractions = (i + num_subghosts_mass_fractions[0]) +
-                                    (j + num_subghosts_mass_fractions[1])*subghostcell_dims_mass_fractions[0] +
-                                    (k + num_subghosts_mass_fractions[2])*subghostcell_dims_mass_fractions[0]*
-                                        subghostcell_dims_mass_fractions[1];
+                                    (j + num_subghosts_mass_fractions[1])*subghostcell_dims_mass_fractions[0];
                                 
                                 D_ptr[component_idx][idx_diffusivities] =
                                     rho[idx_density]*Y[si][idx_mass_fractions]*D[sj][idx_mass_diffusivities];
@@ -1811,13 +1752,8 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
                         }
                     }
                 }
-            }
-            
-            // Momentum and energy equations.
-            for (int k = -d_num_subghosts_diffusivities[2];
-                 k < interior_dims[2] + d_num_subghosts_diffusivities[2];
-                 k++)
-            {
+                
+                // Momentum and energy equations.
                 for (int j = -d_num_subghosts_diffusivities[1];
                      j < interior_dims[1] + d_num_subghosts_diffusivities[1];
                      j++)
@@ -1828,29 +1764,19 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
                     {
                         // Compute the linear indices.
                         const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
-                            (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0] +
-                            (k + d_num_subghosts_diffusivities[2])*d_subghostcell_dims_diffusivities[0]*
-                                d_subghostcell_dims_diffusivities[1];
+                            (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0];
                         
                         const int idx_shear_viscosity = (i + d_num_subghosts_shear_viscosity[0]) +
-                            (j + d_num_subghosts_shear_viscosity[1])*d_subghostcell_dims_shear_viscosity[0] +
-                            (k + d_num_subghosts_shear_viscosity[2])*d_subghostcell_dims_shear_viscosity[0]*
-                                d_subghostcell_dims_shear_viscosity[1];
+                            (j + d_num_subghosts_shear_viscosity[1])*d_subghostcell_dims_shear_viscosity[0];
                         
                         const int idx_bulk_viscosity = (i + d_num_subghosts_bulk_viscosity[0]) +
-                            (j + d_num_subghosts_bulk_viscosity[1])*d_subghostcell_dims_bulk_viscosity[0] +
-                            (k + d_num_subghosts_bulk_viscosity[2])*d_subghostcell_dims_bulk_viscosity[0]*
-                                d_subghostcell_dims_bulk_viscosity[1];
+                            (j + d_num_subghosts_bulk_viscosity[1])*d_subghostcell_dims_bulk_viscosity[0];
                         
                         const int idx_thermal_conductivity = (i + d_num_subghosts_thermal_conductivity[0]) +
-                            (j + d_num_subghosts_thermal_conductivity[1])*d_subghostcell_dims_thermal_conductivity[0] +
-                            (k + d_num_subghosts_thermal_conductivity[2])*d_subghostcell_dims_thermal_conductivity[0]*
-                                d_subghostcell_dims_thermal_conductivity[1];
+                            (j + d_num_subghosts_thermal_conductivity[1])*d_subghostcell_dims_thermal_conductivity[0];
                         
                         const int idx_velocity = (i + num_subghosts_velocity[0]) +
-                            (j + num_subghosts_velocity[1])*subghostcell_dims_velocity[0] +
-                            (k + num_subghosts_velocity[2])*subghostcell_dims_velocity[0]*
-                                subghostcell_dims_velocity[1];
+                            (j + num_subghosts_velocity[1])*subghostcell_dims_velocity[0];
                         
                         D_ptr[d_num_species*(d_num_species + 1)][idx_diffusivities] =
                             -(double(4)/double(3)*mu[idx_shear_viscosity] + mu_v[idx_bulk_viscosity]);
@@ -1863,35 +1789,24 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
                         D_ptr[d_num_species*(d_num_species + 1) + 4][idx_diffusivities] =
                             -v[idx_velocity]*(double(4)/double(3)*mu[idx_shear_viscosity] + mu_v[idx_bulk_viscosity]);
                         D_ptr[d_num_species*(d_num_species + 1) + 5][idx_diffusivities] =
-                            -w[idx_velocity]*(double(4)/double(3)*mu[idx_shear_viscosity] + mu_v[idx_bulk_viscosity]);
-                        D_ptr[d_num_species*(d_num_species + 1) + 6][idx_diffusivities] =
                             u[idx_velocity]*(double(2)/double(3)*mu[idx_shear_viscosity] - mu_v[idx_bulk_viscosity]);
-                        D_ptr[d_num_species*(d_num_species + 1) + 7][idx_diffusivities] =
+                        D_ptr[d_num_species*(d_num_species + 1) + 6][idx_diffusivities] =
                             v[idx_velocity]*(double(2)/double(3)*mu[idx_shear_viscosity] - mu_v[idx_bulk_viscosity]);
-                        D_ptr[d_num_species*(d_num_species + 1) + 8][idx_diffusivities] =
-                            w[idx_velocity]*(double(2)/double(3)*mu[idx_shear_viscosity] - mu_v[idx_bulk_viscosity]);
-                        D_ptr[d_num_species*(d_num_species + 1) + 9][idx_diffusivities] =
+                        D_ptr[d_num_species*(d_num_species + 1) + 7][idx_diffusivities] =
                             -u[idx_velocity]*mu[idx_shear_viscosity];
-                        D_ptr[d_num_species*(d_num_species + 1) + 10][idx_diffusivities] =
+                        D_ptr[d_num_species*(d_num_species + 1) + 8][idx_diffusivities] =
                             -v[idx_velocity]*mu[idx_shear_viscosity];
-                        D_ptr[d_num_species*(d_num_species + 1) + 11][idx_diffusivities] =
-                            -w[idx_velocity]*mu[idx_shear_viscosity];
-                        D_ptr[d_num_species*(d_num_species + 1) + 12][idx_diffusivities] =
+                        D_ptr[d_num_species*(d_num_species + 1) + 9][idx_diffusivities] =
                             -kappa[idx_thermal_conductivity];
                     }
                 }
-            }
-            
-            // Energy equation.
-            for (int si = 0; si < d_num_species; si++)
-            {
-                const int component_idx =
-                    d_num_species*(d_num_species + 1) + 13 + si*(d_num_species + 1);
                 
-                for (int k = -d_num_subghosts_diffusivities[2];
-                     k < interior_dims[2] + d_num_subghosts_diffusivities[2];
-                     k++)
+                // Energy equation.
+                for (int si = 0; si < d_num_species; si++)
                 {
+                    const int component_idx =
+                        d_num_species*(d_num_species + 1) + 10 + si*(d_num_species + 1);
+                    
                     for (int j = -d_num_subghosts_diffusivities[1];
                          j < interior_dims[1] + d_num_subghosts_diffusivities[1];
                          j++)
@@ -1902,24 +1817,16 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
                         {
                             // Compute the linear indices.
                             const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
-                                (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0] +
-                                (k + d_num_subghosts_diffusivities[2])*d_subghostcell_dims_diffusivities[0]*
-                                    d_subghostcell_dims_diffusivities[1];
+                                (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0];
                             
                             const int idx_mass_diffusivities = (i + d_num_subghosts_mass_diffusivities[0]) +
-                                (j + d_num_subghosts_mass_diffusivities[1])*d_subghostcell_dims_mass_diffusivities[0] +
-                                (k + d_num_subghosts_mass_diffusivities[2])*d_subghostcell_dims_mass_diffusivities[0]*
-                                    d_subghostcell_dims_mass_diffusivities[1];
+                                (j + d_num_subghosts_mass_diffusivities[1])*d_subghostcell_dims_mass_diffusivities[0];
                             
                             const int idx_density = (i + num_subghosts_density[0]) +
-                                (j + num_subghosts_density[1])*subghostcell_dims_density[0] +
-                                (k + num_subghosts_density[2])*subghostcell_dims_density[0]*
-                                    subghostcell_dims_density[1];
+                                (j + num_subghosts_density[1])*subghostcell_dims_density[0];
                             
                             const int idx_species_enthalpies = (i + num_subghosts_species_enthalpies[0]) +
-                                (j + num_subghosts_species_enthalpies[1])*subghostcell_dims_species_enthalpies[0] +
-                                (k + num_subghosts_species_enthalpies[2])*subghostcell_dims_species_enthalpies[0]*
-                                    subghostcell_dims_species_enthalpies[1];
+                                (j + num_subghosts_species_enthalpies[1])*subghostcell_dims_species_enthalpies[0];
                             
                             D_ptr[component_idx][idx_diffusivities] =
                                 -rho[idx_density]*D[si][idx_mass_diffusivities]*
@@ -1927,14 +1834,73 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
                         }
                     }
                 }
-            }
-            
-            for (int si = 0; si < d_num_species; si++)
-            {
-                for (int sj = 0; sj < d_num_species; sj++)
+                
+                for (int si = 0; si < d_num_species; si++)
                 {
-                    const int component_idx =
-                        d_num_species*(d_num_species + 1) + 14 + si*(d_num_species + 1) + sj;
+                    for (int sj = 0; sj < d_num_species; sj++)
+                    {
+                        const int component_idx =
+                            d_num_species*(d_num_species + 1) + 11 + si*(d_num_species + 1) + sj;
+                        
+                        for (int j = -d_num_subghosts_diffusivities[1];
+                             j < interior_dims[1] + d_num_subghosts_diffusivities[1];
+                             j++)
+                        {
+                            for (int i = -d_num_subghosts_diffusivities[0];
+                                 i < interior_dims[0] + d_num_subghosts_diffusivities[0];
+                                 i++)
+                            {
+                                // Compute the linear indices.
+                                const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
+                                    (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0];
+                                
+                                const int idx_mass_diffusivities = (i + d_num_subghosts_mass_diffusivities[0]) +
+                                    (j + d_num_subghosts_mass_diffusivities[1])*d_subghostcell_dims_mass_diffusivities[0];
+                                
+                                const int idx_density = (i + num_subghosts_density[0]) +
+                                    (j + num_subghosts_density[1])*subghostcell_dims_density[0];
+                                
+                                const int idx_mass_fractions = (i + num_subghosts_mass_fractions[0]) +
+                                    (j + num_subghosts_mass_fractions[1])*subghostcell_dims_mass_fractions[0];
+                                
+                                const int idx_species_enthalpies = (i + num_subghosts_species_enthalpies[0]) +
+                                    (j + num_subghosts_species_enthalpies[1])*subghostcell_dims_species_enthalpies[0];
+                                
+                                D_ptr[component_idx][idx_diffusivities] =
+                                    rho[idx_density]*Y[si][idx_mass_fractions]*D[sj][idx_mass_diffusivities]*
+                                        h_i[si][idx_species_enthalpies];
+                            }
+                        }
+                    }
+                }
+            }
+            else if (d_dim == tbox::Dimension(3))
+            {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+                TBOX_ASSERT(d_data_diffusivities->getDepth() == 2*d_num_species*(d_num_species + 1) + 13);
+#endif
+                
+                // Get the pointer to cell data of velocity and diffusivities.
+                double* u = data_velocity->getPointer(0);
+                double* v = data_velocity->getPointer(1);
+                double* w = data_velocity->getPointer(2);
+                
+                std::vector<double*> D_ptr;
+                D_ptr.reserve(2*d_num_species*(d_num_species + 1) + 13);
+                
+                for (int i = 0; i < 2*d_num_species*(d_num_species + 1) + 13; i++)
+                {
+                    D_ptr.push_back(d_data_diffusivities->getPointer(i));
+                }
+                
+                /*
+                 * Compute the diffusivities.
+                 */
+                
+                // Mass equations.
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    const int component_idx = si*(d_num_species + 1);
                     
                     for (int k = -d_num_subghosts_diffusivities[2];
                          k < interior_dims[2] + d_num_subghosts_diffusivities[2];
@@ -1964,10 +1930,162 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
                                     (k + num_subghosts_density[2])*subghostcell_dims_density[0]*
                                         subghostcell_dims_density[1];
                                 
-                                const int idx_mass_fractions = (i + num_subghosts_mass_fractions[0]) +
-                                    (j + num_subghosts_mass_fractions[1])*subghostcell_dims_mass_fractions[0] +
-                                    (k + num_subghosts_mass_fractions[2])*subghostcell_dims_mass_fractions[0]*
-                                        subghostcell_dims_mass_fractions[1];
+                                D_ptr[component_idx][idx_diffusivities] =
+                                    -rho[idx_density]*D[si][idx_mass_diffusivities];
+                            }
+                        }
+                    }
+                }
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    for (int sj = 0; sj < d_num_species; sj++)
+                    {
+                        const int component_idx = si*(d_num_species + 1) + sj + 1;
+                        
+                        for (int k = -d_num_subghosts_diffusivities[2];
+                             k < interior_dims[2] + d_num_subghosts_diffusivities[2];
+                             k++)
+                        {
+                            for (int j = -d_num_subghosts_diffusivities[1];
+                                 j < interior_dims[1] + d_num_subghosts_diffusivities[1];
+                                 j++)
+                            {
+                                for (int i = -d_num_subghosts_diffusivities[0];
+                                     i < interior_dims[0] + d_num_subghosts_diffusivities[0];
+                                     i++)
+                                {
+                                    // Compute the linear indices.
+                                    const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
+                                        (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0] +
+                                        (k + d_num_subghosts_diffusivities[2])*d_subghostcell_dims_diffusivities[0]*
+                                            d_subghostcell_dims_diffusivities[1];
+                                    
+                                    const int idx_mass_diffusivities = (i + d_num_subghosts_mass_diffusivities[0]) +
+                                        (j + d_num_subghosts_mass_diffusivities[1])*d_subghostcell_dims_mass_diffusivities[0] +
+                                        (k + d_num_subghosts_mass_diffusivities[2])*d_subghostcell_dims_mass_diffusivities[0]*
+                                            d_subghostcell_dims_mass_diffusivities[1];
+                                    
+                                    const int idx_density = (i + num_subghosts_density[0]) +
+                                        (j + num_subghosts_density[1])*subghostcell_dims_density[0] +
+                                        (k + num_subghosts_density[2])*subghostcell_dims_density[0]*
+                                            subghostcell_dims_density[1];
+                                    
+                                    const int idx_mass_fractions = (i + num_subghosts_mass_fractions[0]) +
+                                        (j + num_subghosts_mass_fractions[1])*subghostcell_dims_mass_fractions[0] +
+                                        (k + num_subghosts_mass_fractions[2])*subghostcell_dims_mass_fractions[0]*
+                                            subghostcell_dims_mass_fractions[1];
+                                    
+                                    D_ptr[component_idx][idx_diffusivities] =
+                                        rho[idx_density]*Y[si][idx_mass_fractions]*D[sj][idx_mass_diffusivities];
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Momentum and energy equations.
+                for (int k = -d_num_subghosts_diffusivities[2];
+                     k < interior_dims[2] + d_num_subghosts_diffusivities[2];
+                     k++)
+                {
+                    for (int j = -d_num_subghosts_diffusivities[1];
+                         j < interior_dims[1] + d_num_subghosts_diffusivities[1];
+                         j++)
+                    {
+                        for (int i = -d_num_subghosts_diffusivities[0];
+                             i < interior_dims[0] + d_num_subghosts_diffusivities[0];
+                             i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
+                                (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0] +
+                                (k + d_num_subghosts_diffusivities[2])*d_subghostcell_dims_diffusivities[0]*
+                                    d_subghostcell_dims_diffusivities[1];
+                            
+                            const int idx_shear_viscosity = (i + d_num_subghosts_shear_viscosity[0]) +
+                                (j + d_num_subghosts_shear_viscosity[1])*d_subghostcell_dims_shear_viscosity[0] +
+                                (k + d_num_subghosts_shear_viscosity[2])*d_subghostcell_dims_shear_viscosity[0]*
+                                    d_subghostcell_dims_shear_viscosity[1];
+                            
+                            const int idx_bulk_viscosity = (i + d_num_subghosts_bulk_viscosity[0]) +
+                                (j + d_num_subghosts_bulk_viscosity[1])*d_subghostcell_dims_bulk_viscosity[0] +
+                                (k + d_num_subghosts_bulk_viscosity[2])*d_subghostcell_dims_bulk_viscosity[0]*
+                                    d_subghostcell_dims_bulk_viscosity[1];
+                            
+                            const int idx_thermal_conductivity = (i + d_num_subghosts_thermal_conductivity[0]) +
+                                (j + d_num_subghosts_thermal_conductivity[1])*d_subghostcell_dims_thermal_conductivity[0] +
+                                (k + d_num_subghosts_thermal_conductivity[2])*d_subghostcell_dims_thermal_conductivity[0]*
+                                    d_subghostcell_dims_thermal_conductivity[1];
+                            
+                            const int idx_velocity = (i + num_subghosts_velocity[0]) +
+                                (j + num_subghosts_velocity[1])*subghostcell_dims_velocity[0] +
+                                (k + num_subghosts_velocity[2])*subghostcell_dims_velocity[0]*
+                                    subghostcell_dims_velocity[1];
+                            
+                            D_ptr[d_num_species*(d_num_species + 1)][idx_diffusivities] =
+                                -(double(4)/double(3)*mu[idx_shear_viscosity] + mu_v[idx_bulk_viscosity]);
+                            D_ptr[d_num_species*(d_num_species + 1) + 1][idx_diffusivities] =
+                                double(2)/double(3)*mu[idx_shear_viscosity] - mu_v[idx_bulk_viscosity];
+                            D_ptr[d_num_species*(d_num_species + 1) + 2][idx_diffusivities] =
+                                -mu[idx_shear_viscosity];
+                            D_ptr[d_num_species*(d_num_species + 1) + 3][idx_diffusivities] =
+                                -u[idx_velocity]*(double(4)/double(3)*mu[idx_shear_viscosity] + mu_v[idx_bulk_viscosity]);
+                            D_ptr[d_num_species*(d_num_species + 1) + 4][idx_diffusivities] =
+                                -v[idx_velocity]*(double(4)/double(3)*mu[idx_shear_viscosity] + mu_v[idx_bulk_viscosity]);
+                            D_ptr[d_num_species*(d_num_species + 1) + 5][idx_diffusivities] =
+                                -w[idx_velocity]*(double(4)/double(3)*mu[idx_shear_viscosity] + mu_v[idx_bulk_viscosity]);
+                            D_ptr[d_num_species*(d_num_species + 1) + 6][idx_diffusivities] =
+                                u[idx_velocity]*(double(2)/double(3)*mu[idx_shear_viscosity] - mu_v[idx_bulk_viscosity]);
+                            D_ptr[d_num_species*(d_num_species + 1) + 7][idx_diffusivities] =
+                                v[idx_velocity]*(double(2)/double(3)*mu[idx_shear_viscosity] - mu_v[idx_bulk_viscosity]);
+                            D_ptr[d_num_species*(d_num_species + 1) + 8][idx_diffusivities] =
+                                w[idx_velocity]*(double(2)/double(3)*mu[idx_shear_viscosity] - mu_v[idx_bulk_viscosity]);
+                            D_ptr[d_num_species*(d_num_species + 1) + 9][idx_diffusivities] =
+                                -u[idx_velocity]*mu[idx_shear_viscosity];
+                            D_ptr[d_num_species*(d_num_species + 1) + 10][idx_diffusivities] =
+                                -v[idx_velocity]*mu[idx_shear_viscosity];
+                            D_ptr[d_num_species*(d_num_species + 1) + 11][idx_diffusivities] =
+                                -w[idx_velocity]*mu[idx_shear_viscosity];
+                            D_ptr[d_num_species*(d_num_species + 1) + 12][idx_diffusivities] =
+                                -kappa[idx_thermal_conductivity];
+                        }
+                    }
+                }
+                
+                // Energy equation.
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    const int component_idx =
+                        d_num_species*(d_num_species + 1) + 13 + si*(d_num_species + 1);
+                    
+                    for (int k = -d_num_subghosts_diffusivities[2];
+                         k < interior_dims[2] + d_num_subghosts_diffusivities[2];
+                         k++)
+                    {
+                        for (int j = -d_num_subghosts_diffusivities[1];
+                             j < interior_dims[1] + d_num_subghosts_diffusivities[1];
+                             j++)
+                        {
+                            for (int i = -d_num_subghosts_diffusivities[0];
+                                 i < interior_dims[0] + d_num_subghosts_diffusivities[0];
+                                 i++)
+                            {
+                                // Compute the linear indices.
+                                const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
+                                    (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0] +
+                                    (k + d_num_subghosts_diffusivities[2])*d_subghostcell_dims_diffusivities[0]*
+                                        d_subghostcell_dims_diffusivities[1];
+                                
+                                const int idx_mass_diffusivities = (i + d_num_subghosts_mass_diffusivities[0]) +
+                                    (j + d_num_subghosts_mass_diffusivities[1])*d_subghostcell_dims_mass_diffusivities[0] +
+                                    (k + d_num_subghosts_mass_diffusivities[2])*d_subghostcell_dims_mass_diffusivities[0]*
+                                        d_subghostcell_dims_mass_diffusivities[1];
+                                
+                                const int idx_density = (i + num_subghosts_density[0]) +
+                                    (j + num_subghosts_density[1])*subghostcell_dims_density[0] +
+                                    (k + num_subghosts_density[2])*subghostcell_dims_density[0]*
+                                        subghostcell_dims_density[1];
                                 
                                 const int idx_species_enthalpies = (i + num_subghosts_species_enthalpies[0]) +
                                     (j + num_subghosts_species_enthalpies[1])*subghostcell_dims_species_enthalpies[0] +
@@ -1975,13 +2093,69 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
                                         subghostcell_dims_species_enthalpies[1];
                                 
                                 D_ptr[component_idx][idx_diffusivities] =
-                                    rho[idx_density]*Y[si][idx_mass_fractions]*D[sj][idx_mass_diffusivities]*
+                                    -rho[idx_density]*D[si][idx_mass_diffusivities]*
                                         h_i[si][idx_species_enthalpies];
                             }
                         }
                     }
                 }
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    for (int sj = 0; sj < d_num_species; sj++)
+                    {
+                        const int component_idx =
+                            d_num_species*(d_num_species + 1) + 14 + si*(d_num_species + 1) + sj;
+                        
+                        for (int k = -d_num_subghosts_diffusivities[2];
+                             k < interior_dims[2] + d_num_subghosts_diffusivities[2];
+                             k++)
+                        {
+                            for (int j = -d_num_subghosts_diffusivities[1];
+                                 j < interior_dims[1] + d_num_subghosts_diffusivities[1];
+                                 j++)
+                            {
+                                for (int i = -d_num_subghosts_diffusivities[0];
+                                     i < interior_dims[0] + d_num_subghosts_diffusivities[0];
+                                     i++)
+                                {
+                                    // Compute the linear indices.
+                                    const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
+                                        (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0] +
+                                        (k + d_num_subghosts_diffusivities[2])*d_subghostcell_dims_diffusivities[0]*
+                                            d_subghostcell_dims_diffusivities[1];
+                                    
+                                    const int idx_mass_diffusivities = (i + d_num_subghosts_mass_diffusivities[0]) +
+                                        (j + d_num_subghosts_mass_diffusivities[1])*d_subghostcell_dims_mass_diffusivities[0] +
+                                        (k + d_num_subghosts_mass_diffusivities[2])*d_subghostcell_dims_mass_diffusivities[0]*
+                                            d_subghostcell_dims_mass_diffusivities[1];
+                                    
+                                    const int idx_density = (i + num_subghosts_density[0]) +
+                                        (j + num_subghosts_density[1])*subghostcell_dims_density[0] +
+                                        (k + num_subghosts_density[2])*subghostcell_dims_density[0]*
+                                            subghostcell_dims_density[1];
+                                    
+                                    const int idx_mass_fractions = (i + num_subghosts_mass_fractions[0]) +
+                                        (j + num_subghosts_mass_fractions[1])*subghostcell_dims_mass_fractions[0] +
+                                        (k + num_subghosts_mass_fractions[2])*subghostcell_dims_mass_fractions[0]*
+                                            subghostcell_dims_mass_fractions[1];
+                                    
+                                    const int idx_species_enthalpies = (i + num_subghosts_species_enthalpies[0]) +
+                                        (j + num_subghosts_species_enthalpies[1])*subghostcell_dims_species_enthalpies[0] +
+                                        (k + num_subghosts_species_enthalpies[2])*subghostcell_dims_species_enthalpies[0]*
+                                            subghostcell_dims_species_enthalpies[1];
+                                    
+                                    D_ptr[component_idx][idx_diffusivities] =
+                                        rho[idx_density]*Y[si][idx_mass_fractions]*D[sj][idx_mass_diffusivities]*
+                                            h_i[si][idx_species_enthalpies];
+                                }
+                            }
+                        }
+                    }
+                }
             }
+            
+            d_cell_data_diffusivities_computed = true;
         }
         
         d_derived_cell_data_computed = true;

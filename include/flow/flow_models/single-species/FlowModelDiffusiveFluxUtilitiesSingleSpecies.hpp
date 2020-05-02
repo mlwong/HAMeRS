@@ -28,7 +28,12 @@ class FlowModelDiffusiveFluxUtilitiesSingleSpecies: public FlowModelDiffusiveFlu
             const hier::IntVector& num_subghosts);
         
         /*
-         * The cell data of all derived variables in the patch for this class are cleared.
+         * Allocate memory for cell data of all registered derived variables in the registered patch for this class.
+         */
+        void allocateMemoryForDerivedCellData();
+        
+        /*
+         * Clear cell data of all derived variables in the registered patch for this class.
          */
         void clearCellData();
         
@@ -80,6 +85,13 @@ class FlowModelDiffusiveFluxUtilitiesSingleSpecies: public FlowModelDiffusiveFlu
         boost::shared_ptr<pdat::CellData<double> > d_data_shear_viscosity;
         boost::shared_ptr<pdat::CellData<double> > d_data_bulk_viscosity;
         boost::shared_ptr<pdat::CellData<double> > d_data_thermal_conductivity;
+        
+        /*
+         * Whether derived cell data for this class is computed.
+         */
+        bool d_cell_data_shear_viscosity_computed;
+        bool d_cell_data_bulk_viscosity_computed;
+        bool d_cell_data_thermal_conductivity_computed;
         
         /*
          * boost::shared_ptr to EquationOfShearViscosityMixingRules.

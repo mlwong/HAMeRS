@@ -17,12 +17,15 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::FlowModelDiffusiveFluxUtilitiesSin
         d_num_subghosts_shear_viscosity(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_bulk_viscosity(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_thermal_conductivity(-hier::IntVector::getOne(d_dim)),
-        d_subghost_box_shear_viscosity(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_bulk_viscosity(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_thermal_conductivity(hier::Box::getEmptyBox(dim)),
+        d_subghost_box_shear_viscosity(hier::Box::getEmptyBox(d_dim)),
+        d_subghost_box_bulk_viscosity(hier::Box::getEmptyBox(d_dim)),
+        d_subghost_box_thermal_conductivity(hier::Box::getEmptyBox(d_dim)),
         d_subghostcell_dims_shear_viscosity(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_bulk_viscosity(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_thermal_conductivity(hier::IntVector::getZero(d_dim)),
+        d_cell_data_shear_viscosity_computed(false),
+        d_cell_data_bulk_viscosity_computed(false),
+        d_cell_data_thermal_conductivity_computed(false),
         d_equation_of_shear_viscosity_mixing_rules(equation_of_shear_viscosity_mixing_rules),
         d_equation_of_bulk_viscosity_mixing_rules(equation_of_bulk_viscosity_mixing_rules),
         d_equation_of_thermal_conductivity_mixing_rules(equation_of_thermal_conductivity_mixing_rules)
@@ -94,7 +97,117 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::registerDerivedVariablesForDiffusi
 
 
 /*
- * The cell data of all derived variables in the patch for this class are cleared.
+ * Allocate memory for cell data of all registered derived variables in the registered patch for this class.
+ */
+void
+FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForDerivedCellData()
+{
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
+    const hier::Box interior_box = patch.getBox();
+    
+    if (d_num_subghosts_shear_viscosity > -hier::IntVector::getOne(d_dim))
+    {
+        if (!d_cell_data_shear_viscosity_computed)
+        {
+            if (!d_data_shear_viscosity)
+            {
+                // Create the cell data of shear viscosity.
+                d_data_shear_viscosity.reset(new pdat::CellData<double>(
+                    interior_box, 1, d_num_subghosts_shear_viscosity));
+            }
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForDerivedCellData()\n"
+                << "Cell data of 'SHEAR_VISCOSITY' is aleady computed."
+                << std::endl);
+        }
+    }
+    
+    if (d_num_subghosts_bulk_viscosity > -hier::IntVector::getOne(d_dim))
+    {
+        if (!d_cell_data_bulk_viscosity_computed)
+        {
+            if (!d_data_bulk_viscosity)
+            {
+                d_data_bulk_viscosity.reset(new pdat::CellData<double>(
+                    interior_box, 1, d_num_subghosts_bulk_viscosity));
+            }
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForDerivedCellData()\n"
+                << "Cell data of 'BULK_VISCOSITY' is aleady computed."
+                << std::endl);
+        }
+    }
+    
+    if (d_num_subghosts_thermal_conductivity > -hier::IntVector::getOne(d_dim))
+    {
+        if (!d_cell_data_thermal_conductivity_computed)
+        {
+            if (!d_data_thermal_conductivity)
+            {
+                d_data_thermal_conductivity.reset(new pdat::CellData<double>(
+                    interior_box, 1, d_num_subghosts_thermal_conductivity));
+            }
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForDerivedCellData()\n"
+                << "Cell data of 'THERMAL_CONDUCTIVITY' is aleady computed."
+                << std::endl);
+        }
+    }
+    
+    if (d_num_subghosts_diffusivities > -hier::IntVector::getOne(d_dim))
+    {
+        if (!d_cell_data_diffusivities_computed)
+        {
+            if (!d_data_diffusivities)
+            {
+                if (d_dim == tbox::Dimension(1))
+                {
+                    d_data_diffusivities.reset(new pdat::CellData<double>(
+                        interior_box, 3, d_num_subghosts_diffusivities));
+                }
+                else if (d_dim == tbox::Dimension(2))
+                {
+                    d_data_diffusivities.reset(new pdat::CellData<double>(
+                        interior_box, 10, d_num_subghosts_diffusivities));
+                }
+                else if (d_dim == tbox::Dimension(3))
+                {
+                    d_data_diffusivities.reset(new pdat::CellData<double>(
+                        interior_box, 13, d_num_subghosts_diffusivities));
+                }
+            }
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForDerivedCellData()\n"
+                << "Cell data of 'DIFFUSIVITIES' is aleady computed."
+                << std::endl);
+        }
+    }
+}
+
+
+/*
+ * Clear cell data of all derived variables in the registered patch for this class.
  */
 void
 FlowModelDiffusiveFluxUtilitiesSingleSpecies::clearCellData()
@@ -118,6 +231,11 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::clearCellData()
     d_data_shear_viscosity.reset();
     d_data_bulk_viscosity.reset();
     d_data_thermal_conductivity.reset();
+    
+    d_cell_data_diffusivities_computed        = false;
+    d_cell_data_shear_viscosity_computed      = false;
+    d_cell_data_bulk_viscosity_computed       = false;
+    d_cell_data_thermal_conductivity_computed = false;
     
     d_derived_cell_data_computed = false;
 }
@@ -1015,37 +1133,6 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusiv
             flow_model_tmp->getCellData("TEMPERATURE");
         
         /*
-         * Get the number of ghost cells of velocity.
-         */
-        
-        const hier::IntVector num_subghosts_velocity = data_velocity->getGhostCellWidth();
-        
-        /*
-         * Get the dimensions of the ghost cell box of velocity.
-         */
-        
-        const hier::Box subghost_box_velocity = data_velocity->getGhostBox();
-        const hier::IntVector subghostcell_dims_velocity = subghost_box_velocity.numberCells();
-        
-        /*
-         * Create cell data of shear viscosity, bulk viscosity and thermal conductivity.
-         */
-        
-        d_data_shear_viscosity.reset(new pdat::CellData<double>(
-            interior_box, 1, d_num_subghosts_shear_viscosity));
-        
-        d_data_bulk_viscosity.reset(new pdat::CellData<double>(
-            interior_box, 1, d_num_subghosts_bulk_viscosity));
-        
-        d_data_thermal_conductivity.reset(new pdat::CellData<double>(
-            interior_box, 1, d_num_subghosts_thermal_conductivity));
-        
-        // Get the pointers to the cell data of shear viscosity, bulk viscosity and thermal conductivity.
-        double* mu    = d_data_shear_viscosity->getPointer(0);
-        double* mu_v  = d_data_bulk_viscosity->getPointer(0);
-        double* kappa = d_data_thermal_conductivity->getPointer(0);
-        
-        /*
          * Get the molecular properties of the species for shear viscosity.
          */
         
@@ -1120,160 +1207,144 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusiv
             molecular_properties_thermal_conductivity_ptr,
             0);
         
-        // Compute the shear viscosity field.
-        d_equation_of_shear_viscosity_mixing_rules->getEquationOfShearViscosity()->
-            computeShearViscosity(
-                d_data_shear_viscosity,
-                data_pressure,
-                data_temperature,
-                molecular_properties_shear_viscosity_const_ptr,
-                empty_box);
-        
-        // Compute the bulk viscosity field.
-        d_equation_of_bulk_viscosity_mixing_rules->getEquationOfBulkViscosity()->
-            computeBulkViscosity(
-                d_data_bulk_viscosity,
-                data_pressure,
-                data_temperature,
-                molecular_properties_bulk_viscosity_const_ptr,
-                empty_box);
-        
-        // Compute the thermal conductivity field.
-        d_equation_of_thermal_conductivity_mixing_rules->getEquationOfThermalConductivity()->
-            computeThermalConductivity(
-                d_data_thermal_conductivity,
-                data_pressure,
-                data_temperature,
-                molecular_properties_thermal_conductivity_const_ptr,
-                empty_box);
-        
-        if (d_dim == tbox::Dimension(1))
+        if (!d_cell_data_shear_viscosity_computed)
         {
-            d_data_diffusivities.reset(new pdat::CellData<double>(
-                interior_box, 3, d_num_subghosts_diffusivities));
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(d_data_shear_viscosity);
+#endif
             
-            // Get the pointer to cell data of velocity and diffusivities.
-            double* u = data_velocity->getPointer(0);
+            // Compute the shear viscosity field.
+            d_equation_of_shear_viscosity_mixing_rules->getEquationOfShearViscosity()->
+                computeShearViscosity(
+                    d_data_shear_viscosity,
+                    data_pressure,
+                    data_temperature,
+                    molecular_properties_shear_viscosity_const_ptr,
+                    empty_box);
             
-            double* D_00 = d_data_diffusivities->getPointer(0);
-            double* D_01 = d_data_diffusivities->getPointer(1);
-            double* D_02 = d_data_diffusivities->getPointer(2);
-            
-            /*
-             * Compute the diffusivities.
-             */
-            for (int i = -d_num_subghosts_diffusivities[0];
-                 i < interior_dims[0] + d_num_subghosts_diffusivities[0];
-                 i++)
-            {
-                // Compute the linear indices.
-                const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
-                const int idx_shear_viscosity = i + d_num_subghosts_shear_viscosity[0];
-                const int idx_bulk_viscosity = i + d_num_subghosts_bulk_viscosity[0];
-                const int idx_thermal_conductivity = i + d_num_subghosts_thermal_conductivity[0];
-                const int idx_velocity = i + num_subghosts_velocity[0];
-                
-                D_00[idx_diffusivities] = -(double(4)/double(3)*mu[idx_shear_viscosity] + mu_v[idx_bulk_viscosity]);
-                D_01[idx_diffusivities] = -u[idx_velocity]*(double(4)/double(3)*mu[idx_shear_viscosity] +
-                    mu_v[idx_bulk_viscosity]);
-                D_02[idx_diffusivities] = -kappa[idx_thermal_conductivity];
-            }
+            d_cell_data_shear_viscosity_computed = true;
         }
-        else if (d_dim == tbox::Dimension(2))
+        
+        if (!d_cell_data_bulk_viscosity_computed)
         {
-            d_data_diffusivities.reset(new pdat::CellData<double>(
-                interior_box, 10, d_num_subghosts_diffusivities));
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(d_data_bulk_viscosity);
+#endif
             
-            // Get the pointer to cell data of velocity and diffusivities.
-            double* u = data_velocity->getPointer(0);
-            double* v = data_velocity->getPointer(1);
+            // Compute the bulk viscosity field.
+            d_equation_of_bulk_viscosity_mixing_rules->getEquationOfBulkViscosity()->
+                computeBulkViscosity(
+                    d_data_bulk_viscosity,
+                    data_pressure,
+                    data_temperature,
+                    molecular_properties_bulk_viscosity_const_ptr,
+                    empty_box);
             
-            double* D_00 = d_data_diffusivities->getPointer(0);
-            double* D_01 = d_data_diffusivities->getPointer(1);
-            double* D_02 = d_data_diffusivities->getPointer(2);
-            double* D_03 = d_data_diffusivities->getPointer(3);
-            double* D_04 = d_data_diffusivities->getPointer(4);
-            double* D_05 = d_data_diffusivities->getPointer(5);
-            double* D_06 = d_data_diffusivities->getPointer(6);
-            double* D_07 = d_data_diffusivities->getPointer(7);
-            double* D_08 = d_data_diffusivities->getPointer(8);
-            double* D_09 = d_data_diffusivities->getPointer(9);
+            d_cell_data_bulk_viscosity_computed = true;
+        }
+        
+        if (!d_cell_data_thermal_conductivity_computed)
+        {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(d_data_thermal_conductivity);
+#endif
             
-            /*
-             * Compute the diffusivities.
-             */
-            for (int j = -d_num_subghosts_diffusivities[1];
-                 j < interior_dims[1] + d_num_subghosts_diffusivities[1];
-                 j++)
+            // Compute the thermal conductivity field.
+            d_equation_of_thermal_conductivity_mixing_rules->getEquationOfThermalConductivity()->
+                computeThermalConductivity(
+                    d_data_thermal_conductivity,
+                    data_pressure,
+                    data_temperature,
+                    molecular_properties_thermal_conductivity_const_ptr,
+                    empty_box);
+            
+            d_cell_data_thermal_conductivity_computed = true;
+        }
+        
+        /*
+         * Get the number of ghost cells of velocity.
+         */
+        
+        const hier::IntVector num_subghosts_velocity = data_velocity->getGhostCellWidth();
+        
+        /*
+         * Get the dimensions of the ghost cell box of velocity.
+         */
+        
+        const hier::Box subghost_box_velocity = data_velocity->getGhostBox();
+        const hier::IntVector subghostcell_dims_velocity = subghost_box_velocity.numberCells();
+        
+        /*
+         * Get the pointers to the cell data of shear viscosity, bulk viscosity and thermal conductivity.
+         */
+        
+        double* mu    = d_data_shear_viscosity->getPointer(0);
+        double* mu_v  = d_data_bulk_viscosity->getPointer(0);
+        double* kappa = d_data_thermal_conductivity->getPointer(0);
+        
+        if (!d_cell_data_diffusivities_computed)
+        {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(d_data_diffusivities);
+#endif
+            
+            if (d_dim == tbox::Dimension(1))
             {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+                TBOX_ASSERT(d_data_diffusivities->getDepth() == 3);
+#endif
+                
+                // Get the pointer to cell data of velocity and diffusivities.
+                double* u = data_velocity->getPointer(0);
+                
+                double* D_00 = d_data_diffusivities->getPointer(0);
+                double* D_01 = d_data_diffusivities->getPointer(1);
+                double* D_02 = d_data_diffusivities->getPointer(2);
+                
+                /*
+                 * Compute the diffusivities.
+                 */
                 for (int i = -d_num_subghosts_diffusivities[0];
                      i < interior_dims[0] + d_num_subghosts_diffusivities[0];
                      i++)
                 {
                     // Compute the linear indices.
-                    const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
-                        (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0];
-                    
-                    const int idx_shear_viscosity = (i + d_num_subghosts_shear_viscosity[0]) +
-                        (j + d_num_subghosts_shear_viscosity[1])*d_subghostcell_dims_shear_viscosity[0];
-                    
-                    const int idx_bulk_viscosity = (i + d_num_subghosts_bulk_viscosity[0]) +
-                        (j + d_num_subghosts_bulk_viscosity[1])*d_subghostcell_dims_bulk_viscosity[0];
-                    
-                    const int idx_thermal_conductivity = (i + d_num_subghosts_thermal_conductivity[0]) +
-                        (j + d_num_subghosts_thermal_conductivity[1])*d_subghostcell_dims_thermal_conductivity[0];
-                    
-                    const int idx_velocity = (i + num_subghosts_velocity[0]) +
-                        (j + num_subghosts_velocity[1])*subghostcell_dims_velocity[0];
+                    const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
+                    const int idx_shear_viscosity = i + d_num_subghosts_shear_viscosity[0];
+                    const int idx_bulk_viscosity = i + d_num_subghosts_bulk_viscosity[0];
+                    const int idx_thermal_conductivity = i + d_num_subghosts_thermal_conductivity[0];
+                    const int idx_velocity = i + num_subghosts_velocity[0];
                     
                     D_00[idx_diffusivities] = -(double(4)/double(3)*mu[idx_shear_viscosity] + mu_v[idx_bulk_viscosity]);
-                    D_01[idx_diffusivities] = double(2)/double(3)*mu[idx_shear_viscosity] - mu_v[idx_bulk_viscosity];
-                    D_02[idx_diffusivities] = -mu[idx_shear_viscosity];
-                    D_03[idx_diffusivities] = -u[idx_velocity]*(double(4)/double(3)*mu[idx_shear_viscosity] +
+                    D_01[idx_diffusivities] = -u[idx_velocity]*(double(4)/double(3)*mu[idx_shear_viscosity] +
                         mu_v[idx_bulk_viscosity]);
-                    D_04[idx_diffusivities] = -v[idx_velocity]*(double(4)/double(3)*mu[idx_shear_viscosity] +
-                        mu_v[idx_bulk_viscosity]);
-                    D_05[idx_diffusivities] = u[idx_velocity]*(double(2)/double(3)*mu[idx_shear_viscosity] -
-                        mu_v[idx_bulk_viscosity]);
-                    D_06[idx_diffusivities] = v[idx_velocity]*(double(2)/double(3)*mu[idx_shear_viscosity] -
-                        mu_v[idx_bulk_viscosity]);
-                    D_07[idx_diffusivities] = -u[idx_velocity]*mu[idx_shear_viscosity];
-                    D_08[idx_diffusivities] = -v[idx_velocity]*mu[idx_shear_viscosity];
-                    D_09[idx_diffusivities] = -kappa[idx_thermal_conductivity];
+                    D_02[idx_diffusivities] = -kappa[idx_thermal_conductivity];
                 }
             }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            d_data_diffusivities.reset(new pdat::CellData<double>(
-                interior_box, 13, d_num_subghosts_diffusivities));
-            
-            // Get the pointer to cell data of velocity and diffusivities.
-            double* u = data_velocity->getPointer(0);
-            double* v = data_velocity->getPointer(1);
-            double* w = data_velocity->getPointer(2);
-            
-            double* D_00 = d_data_diffusivities->getPointer(0);
-            double* D_01 = d_data_diffusivities->getPointer(1);
-            double* D_02 = d_data_diffusivities->getPointer(2);
-            double* D_03 = d_data_diffusivities->getPointer(3);
-            double* D_04 = d_data_diffusivities->getPointer(4);
-            double* D_05 = d_data_diffusivities->getPointer(5);
-            double* D_06 = d_data_diffusivities->getPointer(6);
-            double* D_07 = d_data_diffusivities->getPointer(7);
-            double* D_08 = d_data_diffusivities->getPointer(8);
-            double* D_09 = d_data_diffusivities->getPointer(9);
-            double* D_10 = d_data_diffusivities->getPointer(10);
-            double* D_11 = d_data_diffusivities->getPointer(11);
-            double* D_12 = d_data_diffusivities->getPointer(12);
-            
-            /*
-             * Compute the diffusivities.
-             */
-            for (int k = -d_num_subghosts_diffusivities[2];
-                 k < interior_dims[2] + d_num_subghosts_diffusivities[2];
-                 k++)
+            else if (d_dim == tbox::Dimension(2))
             {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+                TBOX_ASSERT(d_data_diffusivities->getDepth() == 10);
+#endif
+                
+                // Get the pointer to cell data of velocity and diffusivities.
+                double* u = data_velocity->getPointer(0);
+                double* v = data_velocity->getPointer(1);
+                
+                double* D_00 = d_data_diffusivities->getPointer(0);
+                double* D_01 = d_data_diffusivities->getPointer(1);
+                double* D_02 = d_data_diffusivities->getPointer(2);
+                double* D_03 = d_data_diffusivities->getPointer(3);
+                double* D_04 = d_data_diffusivities->getPointer(4);
+                double* D_05 = d_data_diffusivities->getPointer(5);
+                double* D_06 = d_data_diffusivities->getPointer(6);
+                double* D_07 = d_data_diffusivities->getPointer(7);
+                double* D_08 = d_data_diffusivities->getPointer(8);
+                double* D_09 = d_data_diffusivities->getPointer(9);
+                
+                /*
+                 * Compute the diffusivities.
+                 */
                 for (int j = -d_num_subghosts_diffusivities[1];
                      j < interior_dims[1] + d_num_subghosts_diffusivities[1];
                      j++)
@@ -1282,30 +1353,21 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusiv
                          i < interior_dims[0] + d_num_subghosts_diffusivities[0];
                          i++)
                     {
+                        // Compute the linear indices.
                         const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
-                            (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0] +
-                            (k + d_num_subghosts_diffusivities[2])*d_subghostcell_dims_diffusivities[0]*
-                                d_subghostcell_dims_diffusivities[1];
+                            (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0];
                         
                         const int idx_shear_viscosity = (i + d_num_subghosts_shear_viscosity[0]) +
-                            (j + d_num_subghosts_shear_viscosity[1])*d_subghostcell_dims_shear_viscosity[0] +
-                            (k + d_num_subghosts_shear_viscosity[2])*d_subghostcell_dims_shear_viscosity[0]*
-                                d_subghostcell_dims_shear_viscosity[1];
+                            (j + d_num_subghosts_shear_viscosity[1])*d_subghostcell_dims_shear_viscosity[0];
                         
                         const int idx_bulk_viscosity = (i + d_num_subghosts_bulk_viscosity[0]) +
-                            (j + d_num_subghosts_bulk_viscosity[1])*d_subghostcell_dims_bulk_viscosity[0] +
-                            (k + d_num_subghosts_bulk_viscosity[2])*d_subghostcell_dims_bulk_viscosity[0]*
-                                d_subghostcell_dims_bulk_viscosity[1];
+                            (j + d_num_subghosts_bulk_viscosity[1])*d_subghostcell_dims_bulk_viscosity[0];
                         
                         const int idx_thermal_conductivity = (i + d_num_subghosts_thermal_conductivity[0]) +
-                            (j + d_num_subghosts_thermal_conductivity[1])*d_subghostcell_dims_thermal_conductivity[0] +
-                            (k + d_num_subghosts_thermal_conductivity[2])*d_subghostcell_dims_thermal_conductivity[0]*
-                                d_subghostcell_dims_thermal_conductivity[1];
+                            (j + d_num_subghosts_thermal_conductivity[1])*d_subghostcell_dims_thermal_conductivity[0];
                         
                         const int idx_velocity = (i + num_subghosts_velocity[0]) +
-                            (j + num_subghosts_velocity[1])*subghostcell_dims_velocity[0] +
-                            (k + num_subghosts_velocity[2])*subghostcell_dims_velocity[0]*
-                                subghostcell_dims_velocity[1];
+                            (j + num_subghosts_velocity[1])*subghostcell_dims_velocity[0];
                         
                         D_00[idx_diffusivities] = -(double(4)/double(3)*mu[idx_shear_viscosity] + mu_v[idx_bulk_viscosity]);
                         D_01[idx_diffusivities] = double(2)/double(3)*mu[idx_shear_viscosity] - mu_v[idx_bulk_viscosity];
@@ -1314,21 +1376,106 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellDataOfDiffusiveFluxDiffusiv
                             mu_v[idx_bulk_viscosity]);
                         D_04[idx_diffusivities] = -v[idx_velocity]*(double(4)/double(3)*mu[idx_shear_viscosity] +
                             mu_v[idx_bulk_viscosity]);
-                        D_05[idx_diffusivities] = -w[idx_velocity]*(double(4)/double(3)*mu[idx_shear_viscosity] +
+                        D_05[idx_diffusivities] = u[idx_velocity]*(double(2)/double(3)*mu[idx_shear_viscosity] -
                             mu_v[idx_bulk_viscosity]);
-                        D_06[idx_diffusivities] = u[idx_velocity]*(double(2)/double(3)*mu[idx_shear_viscosity] -
+                        D_06[idx_diffusivities] = v[idx_velocity]*(double(2)/double(3)*mu[idx_shear_viscosity] -
                             mu_v[idx_bulk_viscosity]);
-                        D_07[idx_diffusivities] = v[idx_velocity]*(double(2)/double(3)*mu[idx_shear_viscosity] -
-                            mu_v[idx_bulk_viscosity]);
-                        D_08[idx_diffusivities] = w[idx_velocity]*(double(2)/double(3)*mu[idx_shear_viscosity] -
-                            mu_v[idx_bulk_viscosity]);
-                        D_09[idx_diffusivities] = -u[idx_velocity]*mu[idx_shear_viscosity];
-                        D_10[idx_diffusivities] = -v[idx_velocity]*mu[idx_shear_viscosity];
-                        D_11[idx_diffusivities] = -w[idx_velocity]*mu[idx_shear_viscosity];
-                        D_12[idx_diffusivities] = -kappa[idx_thermal_conductivity];
+                        D_07[idx_diffusivities] = -u[idx_velocity]*mu[idx_shear_viscosity];
+                        D_08[idx_diffusivities] = -v[idx_velocity]*mu[idx_shear_viscosity];
+                        D_09[idx_diffusivities] = -kappa[idx_thermal_conductivity];
                     }
                 }
             }
+            else if (d_dim == tbox::Dimension(3))
+            {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+                TBOX_ASSERT(d_data_diffusivities->getDepth() == 13);
+#endif
+                
+                // Get the pointer to cell data of velocity and diffusivities.
+                double* u = data_velocity->getPointer(0);
+                double* v = data_velocity->getPointer(1);
+                double* w = data_velocity->getPointer(2);
+                
+                double* D_00 = d_data_diffusivities->getPointer(0);
+                double* D_01 = d_data_diffusivities->getPointer(1);
+                double* D_02 = d_data_diffusivities->getPointer(2);
+                double* D_03 = d_data_diffusivities->getPointer(3);
+                double* D_04 = d_data_diffusivities->getPointer(4);
+                double* D_05 = d_data_diffusivities->getPointer(5);
+                double* D_06 = d_data_diffusivities->getPointer(6);
+                double* D_07 = d_data_diffusivities->getPointer(7);
+                double* D_08 = d_data_diffusivities->getPointer(8);
+                double* D_09 = d_data_diffusivities->getPointer(9);
+                double* D_10 = d_data_diffusivities->getPointer(10);
+                double* D_11 = d_data_diffusivities->getPointer(11);
+                double* D_12 = d_data_diffusivities->getPointer(12);
+                
+                /*
+                 * Compute the diffusivities.
+                 */
+                for (int k = -d_num_subghosts_diffusivities[2];
+                     k < interior_dims[2] + d_num_subghosts_diffusivities[2];
+                     k++)
+                {
+                    for (int j = -d_num_subghosts_diffusivities[1];
+                         j < interior_dims[1] + d_num_subghosts_diffusivities[1];
+                         j++)
+                    {
+                        for (int i = -d_num_subghosts_diffusivities[0];
+                             i < interior_dims[0] + d_num_subghosts_diffusivities[0];
+                             i++)
+                        {
+                            const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
+                                (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0] +
+                                (k + d_num_subghosts_diffusivities[2])*d_subghostcell_dims_diffusivities[0]*
+                                    d_subghostcell_dims_diffusivities[1];
+                            
+                            const int idx_shear_viscosity = (i + d_num_subghosts_shear_viscosity[0]) +
+                                (j + d_num_subghosts_shear_viscosity[1])*d_subghostcell_dims_shear_viscosity[0] +
+                                (k + d_num_subghosts_shear_viscosity[2])*d_subghostcell_dims_shear_viscosity[0]*
+                                    d_subghostcell_dims_shear_viscosity[1];
+                            
+                            const int idx_bulk_viscosity = (i + d_num_subghosts_bulk_viscosity[0]) +
+                                (j + d_num_subghosts_bulk_viscosity[1])*d_subghostcell_dims_bulk_viscosity[0] +
+                                (k + d_num_subghosts_bulk_viscosity[2])*d_subghostcell_dims_bulk_viscosity[0]*
+                                    d_subghostcell_dims_bulk_viscosity[1];
+                            
+                            const int idx_thermal_conductivity = (i + d_num_subghosts_thermal_conductivity[0]) +
+                                (j + d_num_subghosts_thermal_conductivity[1])*d_subghostcell_dims_thermal_conductivity[0] +
+                                (k + d_num_subghosts_thermal_conductivity[2])*d_subghostcell_dims_thermal_conductivity[0]*
+                                    d_subghostcell_dims_thermal_conductivity[1];
+                            
+                            const int idx_velocity = (i + num_subghosts_velocity[0]) +
+                                (j + num_subghosts_velocity[1])*subghostcell_dims_velocity[0] +
+                                (k + num_subghosts_velocity[2])*subghostcell_dims_velocity[0]*
+                                    subghostcell_dims_velocity[1];
+                            
+                            D_00[idx_diffusivities] = -(double(4)/double(3)*mu[idx_shear_viscosity] + mu_v[idx_bulk_viscosity]);
+                            D_01[idx_diffusivities] = double(2)/double(3)*mu[idx_shear_viscosity] - mu_v[idx_bulk_viscosity];
+                            D_02[idx_diffusivities] = -mu[idx_shear_viscosity];
+                            D_03[idx_diffusivities] = -u[idx_velocity]*(double(4)/double(3)*mu[idx_shear_viscosity] +
+                                mu_v[idx_bulk_viscosity]);
+                            D_04[idx_diffusivities] = -v[idx_velocity]*(double(4)/double(3)*mu[idx_shear_viscosity] +
+                                mu_v[idx_bulk_viscosity]);
+                            D_05[idx_diffusivities] = -w[idx_velocity]*(double(4)/double(3)*mu[idx_shear_viscosity] +
+                                mu_v[idx_bulk_viscosity]);
+                            D_06[idx_diffusivities] = u[idx_velocity]*(double(2)/double(3)*mu[idx_shear_viscosity] -
+                                mu_v[idx_bulk_viscosity]);
+                            D_07[idx_diffusivities] = v[idx_velocity]*(double(2)/double(3)*mu[idx_shear_viscosity] -
+                                mu_v[idx_bulk_viscosity]);
+                            D_08[idx_diffusivities] = w[idx_velocity]*(double(2)/double(3)*mu[idx_shear_viscosity] -
+                                mu_v[idx_bulk_viscosity]);
+                            D_09[idx_diffusivities] = -u[idx_velocity]*mu[idx_shear_viscosity];
+                            D_10[idx_diffusivities] = -v[idx_velocity]*mu[idx_shear_viscosity];
+                            D_11[idx_diffusivities] = -w[idx_velocity]*mu[idx_shear_viscosity];
+                            D_12[idx_diffusivities] = -kappa[idx_thermal_conductivity];
+                        }
+                    }
+                }
+            }
+            
+            d_cell_data_diffusivities_computed = true;
         }
         
         d_derived_cell_data_computed = true;
