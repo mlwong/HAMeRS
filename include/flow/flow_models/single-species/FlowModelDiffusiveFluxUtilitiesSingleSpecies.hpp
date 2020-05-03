@@ -28,14 +28,19 @@ class FlowModelDiffusiveFluxUtilitiesSingleSpecies: public FlowModelDiffusiveFlu
             const hier::IntVector& num_subghosts);
         
         /*
-         * Allocate memory for cell data of all registered derived variables in the registered patch for this class.
+         * Allocate memory for cell data of different registered derived variables in the registered patch for this class.
          */
         void allocateMemoryForDerivedCellData();
         
         /*
-         * Clear cell data of all derived variables in the registered patch for this class.
+         * Clear cell data of different derived variables in the registered patch for this class.
          */
         void clearCellData();
+        
+        /*
+         * Compute cell data of different registered derived variables for this class.
+         */
+        void computeDerivedCellData();
         
         /*
          * Get the variables for the derivatives in the diffusive fluxes.
@@ -58,6 +63,43 @@ class FlowModelDiffusiveFluxUtilitiesSingleSpecies: public FlowModelDiffusiveFlu
             const DIRECTION::TYPE& derivative_direction);
         
     private:
+        /*
+         * Set the number of sub-ghost cells of a variable.
+         * This function can be called recursively if the variables are computed recursively.
+         */
+        void
+        setNumberOfSubGhosts(
+            const hier::IntVector& num_subghosts,
+            const std::string& variable_name,
+            const std::string& parent_variable_name);
+        
+        /*
+         * Set the ghost boxes of derived cell variables.
+         */
+        void
+        setDerivedCellVariableGhostBoxes();
+        
+        /*
+         * Compute the cell data of shear viscosity in the registered patch.
+         */
+        void computeCellDataOfShearViscosity();
+        
+        /*
+         * Compute the cell data of bulk viscosity in the registered patch.
+         */
+        void computeCellDataOfBulkViscosity();
+        
+        /*
+         * Compute the cell data of thermal conductivity in the registered patch.
+         */
+        void computeCellDataOfThermalConductivity();
+        
+        /*
+         * Compute the cell data of diffusivities in the registered patch.
+         */
+        void
+        computeCellDataOfDiffusivities();
+        
         /*
          * Number of sub-ghost cells of derived cell data for this class.
          */

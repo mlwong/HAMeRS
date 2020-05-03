@@ -20,21 +20,6 @@ FlowModelDiffusiveFluxUtilities::FlowModelDiffusiveFluxUtilities(
 
 
 /*
- * Register the required variables for the computation of diffusive fluxes in the registered patch.
- */
-void
-FlowModelDiffusiveFluxUtilities::registerDerivedVariablesForDiffusiveFluxes(const hier::IntVector& num_subghosts)
-{
-    NULL_USE(num_subghosts);
-    
-    TBOX_ERROR(d_object_name
-        << ": FlowModelDiffusiveFluxUtilities::registerDerivedVariablesForDiffusiveFluxes()\n"
-        << "Function is not yet implemented!"
-        << std::endl);
-}
-
-
-/*
  * Get the variables for the derivatives in the diffusive fluxes.
  */
 void

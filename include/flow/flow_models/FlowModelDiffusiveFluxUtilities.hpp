@@ -41,17 +41,22 @@ class FlowModelDiffusiveFluxUtilities
          */
         virtual void
         registerDerivedVariablesForDiffusiveFluxes(
-            const hier::IntVector& num_subghosts);
+            const hier::IntVector& num_subghosts) = 0;
         
         /*
-         * Allocate memory for cell data of all registered derived variables in the registered patch for this class.
+         * Allocate memory for cell data of different registered derived variables in the registered patch for this class.
          */
         virtual void allocateMemoryForDerivedCellData() = 0;
         
         /*
-         * Clear cell data of all derived variables in the registered patch for this class.
+         * Clear cell data of different derived variables in the registered patch for this class.
          */
         virtual void clearCellData() = 0;
+        
+        /*
+         * Compute cell data of different registered derived variables for this class.
+         */
+        virtual void computeDerivedCellData() = 0;
         
         /*
          * Get the variables for the derivatives in the diffusive fluxes.
