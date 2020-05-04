@@ -19,6 +19,15 @@ class FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire: public FlowModelDiffusiveFl
         ~FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire() {}
         
         /*
+         * Register different derived variables related to this class in the registered patch. The
+         * derived variables to be registered are given as entires in a map of the variable name to
+         * the number of sub-ghost cells required.
+         */
+        void
+        registerDerivedVariables(
+            const std::unordered_map<std::string, hier::IntVector>& num_subghosts_of_data);
+        
+        /*
          * Register the required variables for the computation of diffusive fluxes in the registered patch.
          */
         void
@@ -26,19 +35,33 @@ class FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire: public FlowModelDiffusiveFl
             const hier::IntVector& num_subghosts);
         
         /*
-         * Allocate memory for cell data of different registered derived variables in the registered patch for this class.
+         * Allocate memory for cell data of different registered derived variables related to this
+         * class in the registered patch.
          */
         void allocateMemoryForDerivedCellData();
         
         /*
-         * Clear cell data of different derived variables in the registered patch for this class.
+         * Clear cell data of different derived variables related to this class in the registered patch.
          */
         void clearCellData();
         
         /*
-         * Compute cell data of different registered derived variables for this class.
+         * Compute cell data of different registered derived variables related to this class.
          */
         void computeDerivedCellData();
+        
+        /*
+         * Get the cell data of one cell variable related to this class in the registered patch.
+         */
+        boost::shared_ptr<pdat::CellData<double> >
+        getCellData(const std::string& variable_key);
+        
+        /*
+         * Get the cell data of different cell variables related to this class in the registered patch.
+         */
+        std::vector<boost::shared_ptr<pdat::CellData<double> > >
+        getCellData(
+            const std::vector<std::string>& variable_keys);
         
         /*
          * Get the variables for the derivatives in the diffusive fluxes.
@@ -94,31 +117,31 @@ class FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire: public FlowModelDiffusiveFl
         computeCellDataOfDiffusivities();
         
         /*
-         * Number of sub-ghost cells of derived cell data for this class.
+         * Number of sub-ghost cells of derived cell data related to this class.
          */
         hier::IntVector d_num_subghosts_shear_viscosity;
         hier::IntVector d_num_subghosts_bulk_viscosity;
         
         /*
-         * Boxes with sub-ghost cells of derived cell data for this class.
+         * Boxes with sub-ghost cells of derived cell data related to this class.
          */
         hier::Box d_subghost_box_shear_viscosity;
         hier::Box d_subghost_box_bulk_viscosity;
         
         /*
-         * Dimensions of boxes with sub-ghost cells of derived cell data for this class.
+         * Dimensions of boxes with sub-ghost cells of derived cell data related to this class.
          */
         hier::IntVector d_subghostcell_dims_shear_viscosity;
         hier::IntVector d_subghostcell_dims_bulk_viscosity;
         
         /*
-         * boost::shared_ptr to derived cell data for this class.
+         * boost::shared_ptr to derived cell data related to this class.
          */
         boost::shared_ptr<pdat::CellData<double> > d_data_shear_viscosity;
         boost::shared_ptr<pdat::CellData<double> > d_data_bulk_viscosity;
         
         /*
-         * Whether derived cell data for this class is computed.
+         * Whether derived cell data related to this class is computed.
          */
         bool d_cell_data_shear_viscosity_computed;
         bool d_cell_data_bulk_viscosity_computed;

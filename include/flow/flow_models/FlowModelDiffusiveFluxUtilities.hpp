@@ -13,6 +13,7 @@
 
 #include "boost/weak_ptr.hpp"
 #include <string>
+#include <unordered_map>
 
 class FlowModel;
 
@@ -37,26 +38,49 @@ class FlowModelDiffusiveFluxUtilities
         }
         
         /*
+         * Register different derived variables related to this class in the registered patch. The
+         * derived variables to be registered are given as entires in a map of the variable name to
+         * the number of sub-ghost cells required.
+         */
+        virtual void
+        registerDerivedVariables(
+            const std::unordered_map<std::string, hier::IntVector>& num_subghosts_of_data);
+        
+        /*
          * Register the required variables for the computation of diffusive fluxes in the registered patch.
          */
         virtual void
         registerDerivedVariablesForDiffusiveFluxes(
-            const hier::IntVector& num_subghosts) = 0;
+            const hier::IntVector& num_subghosts);
         
         /*
-         * Allocate memory for cell data of different registered derived variables in the registered patch for this class.
+         * Allocate memory for cell data of different registered derived variables related to this
+         * class in the registered patch.
          */
-        virtual void allocateMemoryForDerivedCellData() = 0;
+        virtual void allocateMemoryForDerivedCellData();
         
         /*
-         * Clear cell data of different derived variables in the registered patch for this class.
+         * Clear cell data of different derived variables related to this class in the registered patch.
          */
-        virtual void clearCellData() = 0;
+        virtual void clearCellData();
         
         /*
-         * Compute cell data of different registered derived variables for this class.
+         * Compute cell data of different registered derived variables related to this class.
          */
-        virtual void computeDerivedCellData() = 0;
+        virtual void computeDerivedCellData();
+        
+        /*
+         * Get the cell data of one cell variable related to this class in the registered patch.
+         */
+        virtual boost::shared_ptr<pdat::CellData<double> >
+        getCellData(const std::string& variable_key);
+        
+        /*
+         * Get the cell data of different cell variables related to this class in the registered patch.
+         */
+        virtual std::vector<boost::shared_ptr<pdat::CellData<double> > >
+        getCellData(
+            const std::vector<std::string>& variable_keys);
         
         /*
          * Get the variables for the derivatives in the diffusive fluxes.

@@ -121,9 +121,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         diffusive_flux_utilities->registerDerivedVariablesForDiffusiveFluxes(d_num_diff_ghosts);
         
-        d_flow_model->allocateMemoryForDerivedCellData();
+        diffusive_flux_utilities->allocateMemoryForDerivedCellData();
         
-        d_flow_model->computeDerivedCellData();
+        diffusive_flux_utilities->computeDerivedCellData();
         
         /*
          * Delcare containers for computing fluxes in different directions.
@@ -297,9 +297,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         diffusive_flux_utilities->registerDerivedVariablesForDiffusiveFluxes(d_num_diff_ghosts);
         
-        d_flow_model->allocateMemoryForDerivedCellData();
+        diffusive_flux_utilities->allocateMemoryForDerivedCellData();
         
-        d_flow_model->computeDerivedCellData();
+        diffusive_flux_utilities->computeDerivedCellData();
         
         /*
          * Delcare containers for computing fluxes in different directions.
@@ -829,9 +829,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         diffusive_flux_utilities->registerDerivedVariablesForDiffusiveFluxes(d_num_diff_ghosts);
         
-        d_flow_model->allocateMemoryForDerivedCellData();
+        diffusive_flux_utilities->allocateMemoryForDerivedCellData();
         
-        d_flow_model->computeDerivedCellData();
+        diffusive_flux_utilities->computeDerivedCellData();
         
         /*
          * Delcare containers for computing fluxes in different directions.

@@ -33,6 +33,122 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::FlowModelDiffusiveFluxUtilitiesSin
 
 
 /*
+ * Register different derived variables related to this class in the registered patch. The
+ * derived variables to be registered are given as entires in a map of the variable name to
+ * the number of sub-ghost cells required.
+ */
+void
+FlowModelDiffusiveFluxUtilitiesSingleSpecies::registerDerivedVariables(
+    const std::unordered_map<std::string, hier::IntVector>& num_subghosts_of_data)
+{
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    // Check whether a patch is already registered.
+    if (!flow_model_tmp->hasRegisteredPatch())
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::"
+            << "computeDerivedCellData()\n"
+            << "No patch is registered yet."
+            << std::endl);
+    }
+    
+    // Check whether all or part of derived cell data is alredy computed.
+    if (d_derived_cell_data_computed)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::registerDerivedVariables()\n"
+            << "Derived cell data is already computed."
+            << std::endl);
+    }
+    
+    for (std::unordered_map<std::string, hier::IntVector>::const_iterator it = num_subghosts_of_data.begin();
+         it != num_subghosts_of_data.end();
+         it++)
+    {
+        if ((it->second < hier::IntVector::getZero(d_dim)) ||
+            (it->second > flow_model_tmp->getNumberOfGhostCells()))
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::registerDerivedVariables()\n"
+                << "The number of sub-ghost cells of variable '"
+                << it->first
+                << "' is not between zero and number of ghosts of conservative variables."
+                << std::endl);
+        }
+    }
+    
+    if (num_subghosts_of_data.find("SHEAR_VISCOSITY") != num_subghosts_of_data.end())
+    {
+        std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data_flow_model;
+        
+        num_subghosts_of_data_flow_model.insert(std::pair<std::string, hier::IntVector>(
+            "PRESSURE",
+            num_subghosts_of_data.find("SHEAR_VISCOSITY")->second));
+        
+        num_subghosts_of_data_flow_model.insert(std::pair<std::string, hier::IntVector>(
+            "TEMPERATURE",
+            num_subghosts_of_data.find("SHEAR_VISCOSITY")->second));
+        
+        flow_model_tmp->registerDerivedVariables(num_subghosts_of_data_flow_model);
+        
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("SHEAR_VISCOSITY")->second,
+            "SHEAR_VISCOSITY",
+            "SHEAR_VISCOSITY");
+    }
+    
+    if (num_subghosts_of_data.find("BULK_VISCOSITY") != num_subghosts_of_data.end())
+    {
+        std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data_flow_model;
+        
+        num_subghosts_of_data_flow_model.insert(std::pair<std::string, hier::IntVector>(
+            "PRESSURE",
+            num_subghosts_of_data.find("BULK_VISCOSITY")->second));
+        
+        num_subghosts_of_data_flow_model.insert(std::pair<std::string, hier::IntVector>(
+            "TEMPERATURE",
+            num_subghosts_of_data.find("BULK_VISCOSITY")->second));
+        
+        flow_model_tmp->registerDerivedVariables(num_subghosts_of_data_flow_model);
+        
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("BULK_VISCOSITY")->second,
+            "BULK_VISCOSITY",
+            "BULK_VISCOSITY");
+    }
+    
+    if (num_subghosts_of_data.find("THERMAL_CONDUCTIVITY") != num_subghosts_of_data.end())
+    {
+        std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data_flow_model;
+        
+        num_subghosts_of_data_flow_model.insert(std::pair<std::string, hier::IntVector>(
+            "PRESSURE",
+            num_subghosts_of_data.find("THERMAL_CONDUCTIVITY")->second));
+        
+        num_subghosts_of_data_flow_model.insert(std::pair<std::string, hier::IntVector>(
+            "TEMPERATURE",
+            num_subghosts_of_data.find("THERMAL_CONDUCTIVITY")->second));
+        
+        flow_model_tmp->registerDerivedVariables(num_subghosts_of_data_flow_model);
+        
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("THERMAL_CONDUCTIVITY")->second,
+            "THERMAL_CONDUCTIVITY",
+            "THERMAL_CONDUCTIVITY");
+    }
+}
+
+
+/*
  * Register the required variables for the computation of diffusive fluxes in the registered patch.
  */
 void
@@ -48,13 +164,34 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::registerDerivedVariablesForDiffusi
     }
     
     boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
-    const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
     
-    /*
-     * Get the interior box.
-     */
+    // Check whether a patch is already registered.
+    if (!flow_model_tmp->hasRegisteredPatch())
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::"
+            << "computeDerivedCellData()\n"
+            << "No patch is registered yet."
+            << std::endl);
+    }
     
-    const hier::Box interior_box = patch.getBox();
+    // Check whether all or part of derived cell data is alredy computed.
+    if (d_derived_cell_data_computed)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::registerDerivedVariables()\n"
+            << "Derived cell data is already computed."
+            << std::endl);
+    }
+    
+    if ((num_subghosts < hier::IntVector::getZero(d_dim)) ||
+        (num_subghosts > flow_model_tmp->getNumberOfGhostCells()))
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::registerDerivedVariables()\n"
+            << "The number of sub-ghost cells of variable is not between zero and number of ghosts of conservative variables."
+            << std::endl);
+    }
     
     /*
      * Register the required derived variables in flow model.
@@ -81,7 +218,8 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::registerDerivedVariablesForDiffusi
 
 
 /*
- * Allocate memory for cell data of all registered derived variables in the registered patch for this class.
+ * Allocate memory for cell data of different registered derived variables related to this
+ * class in the registered patch.
  */
 void
 FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForDerivedCellData()
@@ -95,6 +233,9 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForDerivedCellData()
     }
     
     boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    flow_model_tmp->allocateMemoryForDerivedCellData();
+    
     const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
     const hier::Box interior_box = patch.getBox();
     
@@ -191,7 +332,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForDerivedCellData()
 
 
 /*
- * Clear cell data of different derived variables in the registered patch for this class.
+ * Clear cell data of different derived variables related to this class in the registered patch.
  */
 void
 FlowModelDiffusiveFluxUtilitiesSingleSpecies::clearCellData()
@@ -226,7 +367,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::clearCellData()
 
 
 /*
- * Compute cell data of different registered derived variables for this class.
+ * Compute cell data of different registered derived variables related to this class.
  */
 void
 FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeDerivedCellData()
@@ -298,6 +439,91 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeDerivedCellData()
     }
     
     d_derived_cell_data_computed = true;
+}
+
+
+/*
+ * Get the cell data of one cell variable related to this class in the registered patch.
+ */
+boost::shared_ptr<pdat::CellData<double> >
+FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellData(const std::string& variable_key)
+{
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    // Check whether a patch is already registered.
+    if (!flow_model_tmp->hasRegisteredPatch())
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::"
+            << "computeDerivedCellData()\n"
+            << "No patch is registered yet."
+            << std::endl);
+    }
+    
+    boost::shared_ptr<pdat::CellData<double> > cell_data;
+    
+    if (variable_key == "SHEAR_VISCOSITY")
+    {
+        if (!d_cell_data_shear_viscosity_computed)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellData()\n"
+                << "Cell data of 'SHEAR_VISCOSITY' is not registered/computed yet."
+                << std::endl);
+        }
+        cell_data = d_data_shear_viscosity;
+    }
+    else if (variable_key == "BULK_VISCOSITY")
+    {
+        if (!d_cell_data_bulk_viscosity_computed)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellData()\n"
+                << "Cell data of 'BULK_VISCOSITY' is not registered/computed yet."
+                << std::endl);
+        }
+        cell_data = d_data_bulk_viscosity;
+    }
+    else if (variable_key == "THERMAL_CONDUCTIVITY")
+    {
+        if (!d_cell_data_thermal_conductivity_computed)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellData()\n"
+                << "Cell data of 'THERMAL_CONDUCTIVITY' is not registered/computed yet."
+                << std::endl);
+        }
+        cell_data = d_data_thermal_conductivity;
+    }
+    
+    return cell_data;
+}
+
+
+/*
+ * Get the cell data of different cell variables related to this class in the registered patch.
+ */
+std::vector<boost::shared_ptr<pdat::CellData<double> > >
+FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellData(
+    const std::vector<std::string>& variable_keys)
+{
+    std::vector<boost::shared_ptr<pdat::CellData<double> > > cell_data(
+        static_cast<int>(variable_keys.size()));
+    
+    for (int vi = 0; static_cast<int>(variable_keys.size()); vi++)
+    {
+        cell_data[vi] = getCellData(variable_keys[vi]);
+    }
+    
+    return cell_data;
 }
 
 

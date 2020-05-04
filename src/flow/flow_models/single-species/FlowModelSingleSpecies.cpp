@@ -703,7 +703,6 @@ FlowModelSingleSpecies::registerPatchWithDataContext(
 void
 FlowModelSingleSpecies::registerDerivedVariables(
     const std::unordered_map<std::string, hier::IntVector>& num_subghosts_of_data)
-
 {
     // Check whether a patch is already registered.
     if (!d_patch)
