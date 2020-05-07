@@ -9,6 +9,7 @@
 #include "flow/flow_models/FlowModelBoundaryUtilities.hpp"
 #include "flow/flow_models/FlowModelDiffusiveFluxUtilities.hpp"
 #include "flow/flow_models/FlowModelRiemannSolver.hpp"
+#include "flow/flow_models/FlowModelSourceUtilities.hpp"
 #include "flow/flow_models/FlowModelStatisticsUtilities.hpp"
 #include "util/Directions.hpp"
 #include "util/mixing_rules/equations_of_state/EquationOfStateMixingRulesManager.hpp"
@@ -44,6 +45,7 @@ namespace VAR
 class FlowModelRiemannSolver;
 class FlowModelBasicUtilities;
 class FlowModelDiffusiveFluxUtilities;
+class FlowModelSourceUtilities;
 class FlowModelStatisticsUtilities;
 
 /*
@@ -351,6 +353,12 @@ class FlowModel:
         setupDiffusiveFluxUtilities();
         
         /*
+         * Setup the source flux utilties object.
+         */
+        void
+        setupSourceUtilities();
+        
+        /*
          * Setup the statistics utilties object.
          */
         void
@@ -507,6 +515,11 @@ class FlowModel:
          * boost::shared_ptr to the diffusive flux utilities object for the flow model.
          */
         boost::shared_ptr<FlowModelDiffusiveFluxUtilities> d_flow_model_diffusive_flux_utilities;
+        
+        /*
+         * boost::shared_ptr to the source utilities object for the flow model.
+         */
+        boost::shared_ptr<FlowModelSourceUtilities> d_flow_model_source_utilities;
         
         /*
          * boost::shared_ptr to the boundary utilities object for the flow model.

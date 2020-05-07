@@ -4,6 +4,7 @@
 #include "flow/flow_models/four-eqn_conservative/FlowModelBoundaryUtilitiesFourEqnConservative.hpp"
 #include "flow/flow_models/four-eqn_conservative/FlowModelDiffusiveFluxUtilitiesFourEqnConservative.hpp"
 #include "flow/flow_models/four-eqn_conservative/FlowModelRiemannSolverFourEqnConservative.hpp"
+#include "flow/flow_models/four-eqn_conservative/FlowModelSourceUtilitiesFourEqnConservative.hpp"
 #include "flow/flow_models/four-eqn_conservative/FlowModelStatisticsUtilitiesFourEqnConservative.hpp"
 
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelFourEqnConservative::s_variable_partial_densities;
@@ -418,6 +419,17 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
         d_equation_of_shear_viscosity_mixing_rules,
         d_equation_of_bulk_viscosity_mixing_rules,
         d_equation_of_thermal_conductivity_mixing_rules));
+    
+    /*
+     * Initialize source utilities object.
+     */
+    d_flow_model_source_utilities.reset(new FlowModelSourceUtilitiesFourEqnConservative(
+        "d_flow_model_source_utilities",
+        d_dim,
+        d_grid_geometry,
+        d_num_species,
+        flow_model_db,
+        d_equation_of_state_mixing_rules));
     
     /*
      * Initialize statistics utilities object.

@@ -4,6 +4,7 @@
 #include "flow/flow_models/single-species/FlowModelBoundaryUtilitiesSingleSpecies.hpp"
 #include "flow/flow_models/single-species/FlowModelDiffusiveFluxUtilitiesSingleSpecies.hpp"
 #include "flow/flow_models/single-species/FlowModelRiemannSolverSingleSpecies.hpp"
+#include "flow/flow_models/single-species/FlowModelSourceUtilitiesSingleSpecies.hpp"
 #include "flow/flow_models/single-species/FlowModelStatisticsUtilitiesSingleSpecies.hpp"
 
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelSingleSpecies::s_variable_density;
@@ -402,6 +403,17 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
         d_equation_of_shear_viscosity_mixing_rules,
         d_equation_of_bulk_viscosity_mixing_rules,
         d_equation_of_thermal_conductivity_mixing_rules));
+    
+    /*
+     * Initialize source utilities object.
+     */
+    d_flow_model_source_utilities.reset(new FlowModelSourceUtilitiesSingleSpecies(
+        "d_flow_model_source_utilities",
+        d_dim,
+        d_grid_geometry,
+        d_num_species,
+        flow_model_db,
+        d_equation_of_state_mixing_rules));
     
     /*
      * Initialize statistics utilities object.
