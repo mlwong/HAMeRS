@@ -73,10 +73,6 @@ FlowModelDiffusiveFluxUtilities::allocateMemoryForDerivedCellData()
 void
 FlowModelDiffusiveFluxUtilities::clearCellData()
 {
-    TBOX_ERROR(d_object_name
-        << ": FlowModelDiffusiveFluxUtilities::clearCellData()\n"
-        << "Function is not yet implemented!"
-        << std::endl);
 }
 
 
