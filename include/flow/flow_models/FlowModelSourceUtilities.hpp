@@ -22,15 +22,7 @@ class FlowModelSourceUtilities
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
             const int& num_eqn,
-            const boost::shared_ptr<tbox::Database>& flow_model_db):
-                d_object_name(object_name),
-                d_dim(dim),
-                d_grid_geometry(grid_geometry),
-                d_num_species(num_species),
-                d_num_eqn(num_eqn)
-        {
-            NULL_USE(flow_model_db);
-        }
+            const boost::shared_ptr<tbox::Database>& flow_model_db);
         
         virtual ~FlowModelSourceUtilities() {}
         
@@ -43,16 +35,44 @@ class FlowModelSourceUtilities
         }
         
         /*
+         * Register the required variables for the computation of source terms in the registered patch.
+         */
+        virtual void
+        registerDerivedVariablesForSource(
+            const hier::IntVector& num_subghosts);
+        
+        /*
+         * Allocate memory for cell data of different registered derived variables related to this
+         * class in the registered patch.
+         */
+        virtual void allocateMemoryForDerivedCellData();
+        
+        /*
+         * Clear cell data of different derived variables related to this class in the registered patch.
+         */
+        virtual void clearCellData();
+        
+        /*
+         * Compute cell data of different registered derived variables related to this class.
+         */
+        virtual void computeDerivedCellData();
+        
+        /*
          * Compute the source on a patch.
          */
         virtual void
         computeSourceOnPatch(
-            hier::Patch& patch,
             const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
-            const boost::shared_ptr<hier::VariableContext>& data_context,
             const double time,
             const double dt,
-            const int RK_step_number) = 0;
+            const int RK_step_number);
+        
+        /*
+         * Put the characteristics of this class into the restart database.
+         */
+        virtual void
+        putToRestart(
+            const boost::shared_ptr<tbox::Database>& restart_db) const;
         
 protected:
         /*
@@ -79,6 +99,11 @@ protected:
          * Number of equations.
          */
         const int d_num_eqn;
+        
+        /*
+         * Whether there are source terms.
+         */
+        bool d_has_source_terms;
         
         /*
          * boost::weak_ptr to FlowModel.

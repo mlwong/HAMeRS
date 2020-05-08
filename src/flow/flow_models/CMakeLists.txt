@@ -4,6 +4,7 @@ set(flow_models_source_files
     FlowModelManager.cpp
     FlowModel.cpp
     FlowModelDiffusiveFluxUtilities.cpp
+    FlowModelSourceUtilities.cpp
     ./single-species/FlowModelSingleSpecies.cpp
     ./single-species/FlowModelBasicUtilitiesSingleSpecies.cpp
     ./single-species/FlowModelBoundaryUtilitiesSingleSpecies.cpp

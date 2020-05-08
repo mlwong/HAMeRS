@@ -164,6 +164,15 @@ class FlowModel:
         }
         
         /*
+         * Return the boost::shared_ptr to the source utilities object.
+         */
+        const boost::shared_ptr<FlowModelSourceUtilities>&
+        getFlowModelSourceUtilities() const
+        {
+            return d_flow_model_source_utilities;
+        }
+        
+        /*
          * Return the boost::shared_ptr to the boundary utilities object.
          */
         const boost::shared_ptr<FlowModelBoundaryUtilities>&
@@ -261,6 +270,11 @@ class FlowModel:
          * Get registered patch.
          */
         const hier::Patch& getRegisteredPatch() const;
+        
+        /*
+         * Return boost::shared_ptr to patch data context.
+         */
+        const boost::shared_ptr<hier::VariableContext>& getDataContext() const;
         
         /*
          * Get sub-domain box.
@@ -394,15 +408,6 @@ class FlowModel:
         setDataContext(const boost::shared_ptr<hier::VariableContext>& context)
         {
            d_data_context = context;
-        }
-        
-        /*
-         * Return boost::shared_ptr to patch data context.
-         */
-        boost::shared_ptr<hier::VariableContext>
-        getDataContext() const
-        {
-           return d_data_context;
         }
         
         /*

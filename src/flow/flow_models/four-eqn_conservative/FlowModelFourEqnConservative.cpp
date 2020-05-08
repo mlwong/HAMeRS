@@ -559,6 +559,11 @@ FlowModelFourEqnConservative::putToRestart(
     }
     
     /*
+     * Put the properties of d_flow_model_source_utilities into the restart database.
+     */
+    d_flow_model_source_utilities->putToRestart(restart_db);
+    
+    /*
      * Put the properties of d_flow_model_statistics_utilities into the restart database.
      */
     d_flow_model_statistics_utilities->putToRestart(restart_db);
@@ -1052,6 +1057,7 @@ FlowModelFourEqnConservative::unregisterPatch()
     d_cell_data_species_enthalpies_computed = false;
     
     d_flow_model_diffusive_flux_utilities->clearCellData();
+    d_flow_model_source_utilities->clearCellData();
     
     d_derived_cell_data_computed = false;
     

@@ -34,6 +34,24 @@ FlowModel::getRegisteredPatch() const
 
 
 /*
+ * Return boost::shared_ptr to patch data context.
+ */
+const boost::shared_ptr<hier::VariableContext>&
+FlowModel::getDataContext() const
+{
+    if (d_patch == nullptr)
+    {
+        TBOX_ERROR(d_object_name
+        << ": FlowModel::getDataContext()\n"
+        << "Patch is not yet registered!"
+        << std::endl);
+    }
+    
+   return d_data_context;
+}
+
+
+/*
  * Get sub-domain box.
  */
 const hier::Box&

@@ -883,6 +883,38 @@ Euler::computeFluxesAndSourcesOnPatch(
                 RK_step_number);
     }
     
+    /*
+     * Compute the source.
+     */
+    
+    d_flow_model->setupSourceUtilities();
+    
+    boost::shared_ptr<FlowModelSourceUtilities> source_utilities =
+        d_flow_model->getFlowModelSourceUtilities();
+    
+    if (data_context)
+    {
+        d_flow_model->registerPatchWithDataContext(patch, data_context);
+    }
+    else
+    {
+        d_flow_model->registerPatchWithDataContext(patch, getDataContext());
+    }
+    
+    source_utilities->registerDerivedVariablesForSource(hier::IntVector::getZero(d_dim));
+    
+    source_utilities->allocateMemoryForDerivedCellData();
+    
+    source_utilities->computeDerivedCellData();
+    
+    source_utilities->computeSourceOnPatch(
+        d_variable_source,
+        time,
+        dt,
+        RK_step_number);
+    
+    d_flow_model->unregisterPatch();
+    
     t_compute_fluxes_sources->stop();
 }
 
