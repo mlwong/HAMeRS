@@ -12,7 +12,11 @@ FlowModelSourceUtilities::FlowModelSourceUtilities(
         d_grid_geometry(grid_geometry),
         d_num_species(num_species),
         d_num_eqn(num_eqn),
-        d_has_source_terms(false)
+        d_has_source_terms(false),
+        d_derived_cell_data_computed(false),
+        d_num_subghosts_source_terms(-hier::IntVector::getOne(d_dim)),
+        d_subghost_box_source_terms(hier::Box::getEmptyBox(dim)),
+        d_subghostcell_dims_source_terms(hier::IntVector::getZero(d_dim))
 {
     if (flow_model_db->keyExists("has_source_terms"))
     {
@@ -26,16 +30,26 @@ FlowModelSourceUtilities::FlowModelSourceUtilities(
 
 
 /*
+ * Check whether there are any source terms.
+ */
+bool
+FlowModelSourceUtilities::hasSourceTerms() const
+{
+    return d_has_source_terms;
+}
+
+
+/*
  * Register the required variables for the computation of source terms in the registered patch.
  */
 void
-FlowModelSourceUtilities::registerDerivedVariablesForSource(
+FlowModelSourceUtilities::registerDerivedVariablesForSourceTerms(
     const hier::IntVector& num_subghosts)
 {
     NULL_USE(num_subghosts);
     
     TBOX_ERROR(d_object_name
-        << ": FlowModelSourceUtilities::registerDerivedVariablesForSource()\n"
+        << ": FlowModelSourceUtilities::registerDerivedVariablesForSourceTerms()\n"
         << "Function is not yet implemented!"
         << std::endl);
 }
@@ -78,10 +92,10 @@ FlowModelSourceUtilities::computeDerivedCellData()
 
 
 /*
- * Compute the source on a patch.
+ * Compute all source terms on a patch.
  */
 void
-FlowModelSourceUtilities::computeSourceOnPatch(
+FlowModelSourceUtilities::computeSourceTermsOnPatch(
     const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
     const double time,
     const double dt,

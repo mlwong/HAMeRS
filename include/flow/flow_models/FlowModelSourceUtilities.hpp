@@ -27,6 +27,11 @@ class FlowModelSourceUtilities
         virtual ~FlowModelSourceUtilities() {}
         
         /*
+         * Check whether there are any source terms.
+         */
+        bool hasSourceTerms() const;
+        
+        /*
          * Set the weak pointer to the flow model from the parent FlowModel class.
          */
         void setFlowModel(const boost::weak_ptr<FlowModel>& flow_model)
@@ -38,7 +43,7 @@ class FlowModelSourceUtilities
          * Register the required variables for the computation of source terms in the registered patch.
          */
         virtual void
-        registerDerivedVariablesForSource(
+        registerDerivedVariablesForSourceTerms(
             const hier::IntVector& num_subghosts);
         
         /*
@@ -58,10 +63,10 @@ class FlowModelSourceUtilities
         virtual void computeDerivedCellData();
         
         /*
-         * Compute the source on a patch.
+         * Compute all source terms on a patch.
          */
         virtual void
-        computeSourceOnPatch(
+        computeSourceTermsOnPatch(
             const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
             const double time,
             const double dt,
@@ -104,6 +109,27 @@ protected:
          * Whether there are source terms.
          */
         bool d_has_source_terms;
+        
+        /* 
+         * Whether all derived cell data related to this class is computed in full domain or sub-domain.
+         */
+        bool d_derived_cell_data_computed;
+        
+        
+        /*
+         * Number of sub-ghost cells of source terms.
+         */
+        hier::IntVector d_num_subghosts_source_terms;
+        
+        /*
+         * Box with sub-ghost cells of source terms.
+         */
+        hier::Box d_subghost_box_source_terms;
+        
+        /*
+         * Dimensions of box with sub-ghost cells of source terms.
+         */
+        hier::IntVector d_subghostcell_dims_source_terms;
         
         /*
          * boost::weak_ptr to FlowModel.

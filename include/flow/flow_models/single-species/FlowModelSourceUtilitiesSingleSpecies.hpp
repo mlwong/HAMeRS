@@ -20,7 +20,7 @@ class FlowModelSourceUtilitiesSingleSpecies: public FlowModelSourceUtilities
          * Register the required variables for the computation of source terms in the registered patch.
          */
         void
-        registerDerivedVariablesForSource(
+        registerDerivedVariablesForSourceTerms(
             const hier::IntVector& num_subghosts);
         
         /*
@@ -40,10 +40,10 @@ class FlowModelSourceUtilitiesSingleSpecies: public FlowModelSourceUtilities
         void computeDerivedCellData();
         
         /*
-         * Compute the source on a patch.
+         * Compute all source terms on a patch.
          */
         void
-        computeSourceOnPatch(
+        computeSourceTermsOnPatch(
             const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
             const double time,
             const double dt,
