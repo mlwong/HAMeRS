@@ -233,7 +233,6 @@ FlowModelSourceUtilitiesSingleSpecies::computeSourceTermsOnPatch(
     const int RK_step_number)
 {
     NULL_USE(time);
-    NULL_USE(dt);
     NULL_USE(RK_step_number);
     
     if (d_has_source_terms)
@@ -317,8 +316,8 @@ FlowModelSourceUtilitiesSingleSpecies::computeSourceTermsOnPatch(
                     const int idx_momentum = i + num_subghosts_momentum[0];
                     const int idx_density  = i + num_subghosts_density[0];
                     
-                    S[1][idx_source] += rho[idx_density]*d_gravity[0];
-                    S[2][idx_source] += rho_u[idx_momentum]*d_gravity[0];
+                    S[1][idx_source] += dt*rho[idx_density]*d_gravity[0];
+                    S[2][idx_source] += dt*rho_u[idx_momentum]*d_gravity[0];
                 }
             }
             else if (d_dim == tbox::Dimension(2))
@@ -348,9 +347,9 @@ FlowModelSourceUtilitiesSingleSpecies::computeSourceTermsOnPatch(
                         const int idx_density = (i + num_subghosts_density[0]) +
                             (j + num_subghosts_density[1])*subghostcell_dims_density[0];
                         
-                        S[0][idx_source] += rho[idx_density]*d_gravity[0];
-                        S[1][idx_source] += rho[idx_density]*d_gravity[1];
-                        S[2][idx_source] +=
+                        S[1][idx_source] += dt*rho[idx_density]*d_gravity[0];
+                        S[2][idx_source] += dt*rho[idx_density]*d_gravity[1];
+                        S[3][idx_source] += dt*
                             (rho_u[idx_momentum]*d_gravity[0] +
                              rho_v[idx_momentum]*d_gravity[1]);
                     }
@@ -393,10 +392,10 @@ FlowModelSourceUtilitiesSingleSpecies::computeSourceTermsOnPatch(
                                 (k + num_subghosts_density[2])*subghostcell_dims_density[0]*
                                     subghostcell_dims_density[1];
                             
-                            S[0][idx_source] += rho[idx_density]*d_gravity[0];
-                            S[1][idx_source] += rho[idx_density]*d_gravity[1];
-                            S[2][idx_source] += rho[idx_density]*d_gravity[2];
-                            S[3][idx_source] +=
+                            S[1][idx_source] += dt*rho[idx_density]*d_gravity[0];
+                            S[2][idx_source] += dt*rho[idx_density]*d_gravity[1];
+                            S[3][idx_source] += dt*rho[idx_density]*d_gravity[2];
+                            S[4][idx_source] += dt*
                                 (rho_u[idx_momentum]*d_gravity[0] +
                                  rho_v[idx_momentum]*d_gravity[1] +
                                  rho_w[idx_momentum]*d_gravity[2]);
