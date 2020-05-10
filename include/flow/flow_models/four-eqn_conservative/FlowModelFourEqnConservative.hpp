@@ -375,23 +375,23 @@ class FlowModelFourEqnConservative: public FlowModel
         /*
          * Whether derived cell data is computed.
          */
-        bool d_cell_data_density_computed;
-        bool d_cell_data_mass_fractions_computed;
-        bool d_cell_data_mole_fractions_computed;
-        bool d_cell_data_velocity_computed;
-        bool d_cell_data_internal_energy_computed;
-        bool d_cell_data_pressure_computed;
-        bool d_cell_data_sound_speed_computed;
-        bool d_cell_data_temperature_computed;
-        bool d_cell_data_convective_flux_x_computed;
-        bool d_cell_data_convective_flux_y_computed;
-        bool d_cell_data_convective_flux_z_computed;
-        bool d_cell_data_max_wave_speed_x_computed;
-        bool d_cell_data_max_wave_speed_y_computed;
-        bool d_cell_data_max_wave_speed_z_computed;
-        bool d_cell_data_max_diffusivity_computed;
-        bool d_cell_data_species_densities_computed;
-        bool d_cell_data_species_enthalpies_computed;
+        bool d_cell_data_computed_density;
+        bool d_cell_data_computed_mass_fractions;
+        bool d_cell_data_computed_mole_fractions;
+        bool d_cell_data_computed_velocity;
+        bool d_cell_data_computed_internal_energy;
+        bool d_cell_data_computed_pressure;
+        bool d_cell_data_computed_sound_speed;
+        bool d_cell_data_computed_temperature;
+        bool d_cell_data_computed_convective_flux_x;
+        bool d_cell_data_computed_convective_flux_y;
+        bool d_cell_data_computed_convective_flux_z;
+        bool d_cell_data_computed_max_wave_speed_x;
+        bool d_cell_data_computed_max_wave_speed_y;
+        bool d_cell_data_computed_max_wave_speed_z;
+        bool d_cell_data_computed_max_diffusivity;
+        bool d_cell_data_computed_species_densities;
+        bool d_cell_data_computed_species_enthalpies;
         
         /*
          * A string variable to describe the equation of mass diffusivity used.

@@ -15,7 +15,7 @@ FlowModelDiffusiveFluxUtilities::FlowModelDiffusiveFluxUtilities(
         d_num_subghosts_diffusivities(-hier::IntVector::getOne(d_dim)),
         d_subghost_box_diffusivities(hier::Box::getEmptyBox(dim)),
         d_subghostcell_dims_diffusivities(hier::IntVector::getZero(d_dim)),
-        d_cell_data_diffusivities_computed(false)
+        d_cell_data_computed_diffusivities(false)
 {}
 
 

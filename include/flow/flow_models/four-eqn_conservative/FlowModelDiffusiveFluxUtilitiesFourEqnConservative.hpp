@@ -165,10 +165,10 @@ class FlowModelDiffusiveFluxUtilitiesFourEqnConservative: public FlowModelDiffus
         /*
          * Whether derived cell data related to this class is computed.
          */
-        bool d_cell_data_mass_diffusivities_computed;
-        bool d_cell_data_shear_viscosity_computed;
-        bool d_cell_data_bulk_viscosity_computed;
-        bool d_cell_data_thermal_conductivity_computed;
+        bool d_cell_data_computed_mass_diffusivities;
+        bool d_cell_data_computed_shear_viscosity;
+        bool d_cell_data_computed_bulk_viscosity;
+        bool d_cell_data_computed_thermal_conductivity;
         
         /*
          * boost::shared_ptr to EquationOfMassDiffusivityMixingRules.

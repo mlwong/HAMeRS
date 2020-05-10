@@ -23,9 +23,9 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::FlowModelDiffusiveFluxUtilitiesSin
         d_subghostcell_dims_shear_viscosity(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_bulk_viscosity(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_thermal_conductivity(hier::IntVector::getZero(d_dim)),
-        d_cell_data_shear_viscosity_computed(false),
-        d_cell_data_bulk_viscosity_computed(false),
-        d_cell_data_thermal_conductivity_computed(false),
+        d_cell_data_computed_shear_viscosity(false),
+        d_cell_data_computed_bulk_viscosity(false),
+        d_cell_data_computed_thermal_conductivity(false),
         d_equation_of_shear_viscosity_mixing_rules(equation_of_shear_viscosity_mixing_rules),
         d_equation_of_bulk_viscosity_mixing_rules(equation_of_bulk_viscosity_mixing_rules),
         d_equation_of_thermal_conductivity_mixing_rules(equation_of_thermal_conductivity_mixing_rules)
@@ -241,7 +241,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForDerivedCellData()
     
     if (d_num_subghosts_shear_viscosity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_shear_viscosity_computed)
+        if (!d_cell_data_computed_shear_viscosity)
         {
             if (!d_data_shear_viscosity)
             {
@@ -261,7 +261,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForDerivedCellData()
     
     if (d_num_subghosts_bulk_viscosity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_bulk_viscosity_computed)
+        if (!d_cell_data_computed_bulk_viscosity)
         {
             if (!d_data_bulk_viscosity)
             {
@@ -280,7 +280,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForDerivedCellData()
     
     if (d_num_subghosts_thermal_conductivity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_thermal_conductivity_computed)
+        if (!d_cell_data_computed_thermal_conductivity)
         {
             if (!d_data_thermal_conductivity)
             {
@@ -299,7 +299,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::allocateMemoryForDerivedCellData()
     
     if (d_num_subghosts_diffusivities > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_diffusivities_computed)
+        if (!d_cell_data_computed_diffusivities)
         {
             if (!d_data_diffusivities)
             {
@@ -357,10 +357,10 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::clearCellData()
     d_data_bulk_viscosity.reset();
     d_data_thermal_conductivity.reset();
     
-    d_cell_data_diffusivities_computed        = false;
-    d_cell_data_shear_viscosity_computed      = false;
-    d_cell_data_bulk_viscosity_computed       = false;
-    d_cell_data_thermal_conductivity_computed = false;
+    d_cell_data_computed_diffusivities        = false;
+    d_cell_data_computed_shear_viscosity      = false;
+    d_cell_data_computed_bulk_viscosity       = false;
+    d_cell_data_computed_thermal_conductivity = false;
     
     d_derived_cell_data_computed = false;
 }
@@ -405,7 +405,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeDerivedCellData()
     // Compute the shear viscosity cell data.
     if (d_num_subghosts_shear_viscosity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_shear_viscosity_computed)
+        if (!d_cell_data_computed_shear_viscosity)
         {
             computeCellDataOfShearViscosity();
         }
@@ -414,7 +414,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeDerivedCellData()
     // Compute the bulk viscosity cell data.
     if (d_num_subghosts_bulk_viscosity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_bulk_viscosity_computed)
+        if (!d_cell_data_computed_bulk_viscosity)
         {
             computeCellDataOfBulkViscosity();
         }
@@ -423,7 +423,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeDerivedCellData()
     // Compute the thermal conductivity cell data.
     if (d_num_subghosts_thermal_conductivity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_thermal_conductivity_computed)
+        if (!d_cell_data_computed_thermal_conductivity)
         {
             computeCellDataOfThermalConductivity();
         }
@@ -432,7 +432,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeDerivedCellData()
     // Compute the diffusivities cell data.
     if (d_num_subghosts_diffusivities > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_diffusivities_computed)
+        if (!d_cell_data_computed_diffusivities)
         {
             computeCellDataOfDiffusivities();
         }
@@ -472,7 +472,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellData(const std::string& var
     
     if (variable_key == "SHEAR_VISCOSITY")
     {
-        if (!d_cell_data_shear_viscosity_computed)
+        if (!d_cell_data_computed_shear_viscosity)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellData()\n"
@@ -483,7 +483,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellData(const std::string& var
     }
     else if (variable_key == "BULK_VISCOSITY")
     {
-        if (!d_cell_data_bulk_viscosity_computed)
+        if (!d_cell_data_computed_bulk_viscosity)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellData()\n"
@@ -494,7 +494,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellData(const std::string& var
     }
     else if (variable_key == "THERMAL_CONDUCTIVITY")
     {
-        if (!d_cell_data_thermal_conductivity_computed)
+        if (!d_cell_data_computed_thermal_conductivity)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelDiffusiveFluxUtilitiesSingleSpecies::getCellData()\n"
@@ -2367,7 +2367,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeCellDataOfShearViscosity()
     
     if (d_num_subghosts_shear_viscosity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_shear_viscosity_computed)
+        if (!d_cell_data_computed_shear_viscosity)
         {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
             TBOX_ASSERT(d_data_shear_viscosity);
@@ -2425,7 +2425,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeCellDataOfShearViscosity()
                     molecular_properties_shear_viscosity_const_ptr,
                     empty_box);
             
-            d_cell_data_shear_viscosity_computed = true;
+            d_cell_data_computed_shear_viscosity = true;
         }
     }
     else
@@ -2449,7 +2449,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeCellDataOfBulkViscosity()
     
     if (d_num_subghosts_bulk_viscosity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_bulk_viscosity_computed)
+        if (!d_cell_data_computed_bulk_viscosity)
         {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
             TBOX_ASSERT(d_data_bulk_viscosity);
@@ -2507,7 +2507,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeCellDataOfBulkViscosity()
                     molecular_properties_bulk_viscosity_const_ptr,
                     empty_box);
             
-            d_cell_data_bulk_viscosity_computed = true;
+            d_cell_data_computed_bulk_viscosity = true;
         }
     }
     else
@@ -2531,7 +2531,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeCellDataOfThermalConductivi
     
     if (d_num_subghosts_thermal_conductivity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_thermal_conductivity_computed)
+        if (!d_cell_data_computed_thermal_conductivity)
         {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
             TBOX_ASSERT(d_data_thermal_conductivity);
@@ -2589,7 +2589,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeCellDataOfThermalConductivi
                     molecular_properties_thermal_conductivity_const_ptr,
                     empty_box);
             
-            d_cell_data_thermal_conductivity_computed = true;
+            d_cell_data_computed_thermal_conductivity = true;
         }
     }
     else
@@ -2610,7 +2610,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeCellDataOfDiffusivities()
 {
     if (d_num_subghosts_diffusivities > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_diffusivities_computed)
+        if (!d_cell_data_computed_diffusivities)
         {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
             TBOX_ASSERT(d_data_diffusivities);
@@ -2634,17 +2634,17 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeCellDataOfDiffusivities()
             const hier::Box interior_box = patch.getBox();
             const hier::IntVector interior_dims = interior_box.numberCells();
             
-            if (!d_cell_data_shear_viscosity_computed)
+            if (!d_cell_data_computed_shear_viscosity)
             {
                 computeCellDataOfShearViscosity();
             }
             
-            if (!d_cell_data_bulk_viscosity_computed)
+            if (!d_cell_data_computed_bulk_viscosity)
             {
                 computeCellDataOfBulkViscosity();
             }
             
-            if (!d_cell_data_thermal_conductivity_computed)
+            if (!d_cell_data_computed_thermal_conductivity)
             {
                 computeCellDataOfThermalConductivity();
             }
@@ -2861,7 +2861,7 @@ FlowModelDiffusiveFluxUtilitiesSingleSpecies::computeCellDataOfDiffusivities()
                 }
             }
             
-            d_cell_data_diffusivities_computed = true;
+            d_cell_data_computed_diffusivities = true;
         }
     }
     else

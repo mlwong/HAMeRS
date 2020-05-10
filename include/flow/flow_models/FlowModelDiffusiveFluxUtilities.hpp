@@ -156,7 +156,7 @@ protected:
         /*
          * Whether cell data of diffusivities is computed.
          */
-        bool d_cell_data_diffusivities_computed;
+        bool d_cell_data_computed_diffusivities;
         
         /*
          * boost::weak_ptr to FlowModel.
