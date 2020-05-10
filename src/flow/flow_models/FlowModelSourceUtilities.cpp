@@ -56,6 +56,23 @@ FlowModelSourceUtilities::registerDerivedVariablesForSourceTerms(
 
 
 /*
+ * Register the required variables for the computation of local stable time increment for
+ * source terms in the registered patch.
+ */
+void
+FlowModelSourceUtilities::registerDerivedVariablesForSourceTermsStableDt(
+    const hier::IntVector& num_subghosts)
+{
+    NULL_USE(num_subghosts);
+    
+    TBOX_ERROR(d_object_name
+        << ": FlowModelSourceUtilities::registerDerivedVariablesForSourceTermsStableDt()\n"
+        << "Function is not yet implemented!"
+        << std::endl);
+}
+
+
+/*
  * Allocate memory for cell data of different registered derived variables related to this
  * class in the registered patch.
  */
@@ -106,6 +123,22 @@ FlowModelSourceUtilities::computeSourceTermsOnPatch(
     NULL_USE(dt);
     NULL_USE(RK_step_number);
 }
+
+
+/*
+ * Get local stable time increment for source terms.
+ */
+double
+FlowModelSourceUtilities::getStableDtOnPatch()
+{
+    TBOX_ERROR(d_object_name
+        << ": FlowModelSourceUtilities::getStableDtOnPatch()\n"
+        << "Function is not yet implemented!"
+        << std::endl);
+    
+    return double(0);
+}
+
 
 /*
  * Put the characteristics of this class into the restart database.

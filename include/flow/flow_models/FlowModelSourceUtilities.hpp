@@ -47,6 +47,14 @@ class FlowModelSourceUtilities
             const hier::IntVector& num_subghosts);
         
         /*
+         * Register the required variables for the computation of local stable time increment for
+         * source terms in the registered patch.
+         */
+        virtual void
+        registerDerivedVariablesForSourceTermsStableDt(
+            const hier::IntVector& num_subghosts);
+        
+        /*
          * Allocate memory for cell data of different registered derived variables related to this
          * class in the registered patch.
          */
@@ -71,6 +79,12 @@ class FlowModelSourceUtilities
             const double time,
             const double dt,
             const int RK_step_number);
+        
+        /*
+         * Get local stable time increment for source terms.
+         */
+        virtual double
+        getStableDtOnPatch();
         
         /*
          * Put the characteristics of this class into the restart database.
@@ -114,7 +128,6 @@ protected:
          * Whether all derived cell data related to this class is computed in full domain or sub-domain.
          */
         bool d_derived_cell_data_computed;
-        
         
         /*
          * Number of sub-ghost cells of source terms.

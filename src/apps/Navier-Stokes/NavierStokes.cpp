@@ -643,6 +643,11 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         
         hier::IntVector num_ghosts = d_flow_model->getNumberOfGhostCells();
         
+        d_flow_model->setupSourceUtilities();
+        
+        boost::shared_ptr<FlowModelSourceUtilities> source_utilities =
+            d_flow_model->getFlowModelSourceUtilities();
+        
         std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
         num_subghosts_of_data.insert(
             std::pair<std::string, hier::IntVector>(
@@ -653,9 +658,24 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         
         d_flow_model->registerDerivedVariables(num_subghosts_of_data);
         
+        if (source_utilities->hasSourceTerms())
+        {
+            source_utilities->registerDerivedVariablesForSourceTermsStableDt(hier::IntVector::getZero(d_dim));
+        }
+        
         d_flow_model->allocateMemoryForDerivedCellData();
         
+        if (source_utilities->hasSourceTerms())
+        {
+            source_utilities->allocateMemoryForDerivedCellData();
+        }
+        
         d_flow_model->computeDerivedCellData();
+        
+        if (source_utilities->hasSourceTerms())
+        {
+            source_utilities->computeDerivedCellData();
+        }
         
         /*
          * Get the pointers to the maximum wave speed and maximum diffusivity inside the flow model.
@@ -708,13 +728,20 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
             spectral_radiuses_and_dt_1 = fmax(spectral_radiuses_and_dt_1, spectral_radius_diffusive);
         }
         
+        spectral_radiuses_and_dt[1] = double(1)/spectral_radiuses_and_dt[1];
+        
+        if (source_utilities->hasSourceTerms())
+        {
+            const double stable_dt_source = source_utilities->getStableDtOnPatch();
+            
+            spectral_radiuses_and_dt[1] = fmin(stable_dt_source, spectral_radiuses_and_dt[1]);
+        }
+        
         /*
          * Unregister the patch and data of all registered derived cell variables in the flow model.
          */
         
         d_flow_model->unregisterPatch();
-        
-        spectral_radiuses_and_dt[1] = double(1)/spectral_radiuses_and_dt[1];
     }
     else if (d_dim == tbox::Dimension(2))
     {
@@ -746,6 +773,11 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         ghost_box.grow(num_ghosts);
         const hier::IntVector ghostcell_dims = ghost_box.numberCells();
         
+        d_flow_model->setupSourceUtilities();
+        
+        boost::shared_ptr<FlowModelSourceUtilities> source_utilities =
+            d_flow_model->getFlowModelSourceUtilities();
+        
         std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
         num_subghosts_of_data.insert(
             std::pair<std::string, hier::IntVector>(
@@ -759,9 +791,24 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         
         d_flow_model->registerDerivedVariables(num_subghosts_of_data);
         
+        if (source_utilities->hasSourceTerms())
+        {
+            source_utilities->registerDerivedVariablesForSourceTermsStableDt(hier::IntVector::getZero(d_dim));
+        }
+        
         d_flow_model->allocateMemoryForDerivedCellData();
         
+        if (source_utilities->hasSourceTerms())
+        {
+            source_utilities->allocateMemoryForDerivedCellData();
+        }
+        
         d_flow_model->computeDerivedCellData();
+        
+        if (source_utilities->hasSourceTerms())
+        {
+            source_utilities->computeDerivedCellData();
+        }
         
         /*
          * Get the pointers to the maximum wave speeds and maximum diffusivity inside the flow model.
@@ -837,13 +884,20 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
             }
         }
         
+        spectral_radiuses_and_dt[2] = double(1)/spectral_radiuses_and_dt[2];
+        
+        if (source_utilities->hasSourceTerms())
+        {
+            const double stable_dt_source = source_utilities->getStableDtOnPatch();
+            
+            spectral_radiuses_and_dt[2] = fmin(stable_dt_source, spectral_radiuses_and_dt[2]);
+        }
+        
         /*
          * Unregister the patch and data of all registered derived cell variables in the flow model.
          */
         
         d_flow_model->unregisterPatch();
-        
-        spectral_radiuses_and_dt[2] = double(1)/spectral_radiuses_and_dt[2];
     }
     else if (d_dim == tbox::Dimension(3))
     {
@@ -878,6 +932,11 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         ghost_box.grow(num_ghosts);
         const hier::IntVector ghostcell_dims = ghost_box.numberCells();
         
+        d_flow_model->setupSourceUtilities();
+        
+        boost::shared_ptr<FlowModelSourceUtilities> source_utilities =
+            d_flow_model->getFlowModelSourceUtilities();
+        
         std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
         num_subghosts_of_data.insert(
             std::pair<std::string, hier::IntVector>(
@@ -894,9 +953,24 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         
         d_flow_model->registerDerivedVariables(num_subghosts_of_data);
         
+        if (source_utilities->hasSourceTerms())
+        {
+            source_utilities->registerDerivedVariablesForSourceTermsStableDt(hier::IntVector::getZero(d_dim));
+        }
+        
         d_flow_model->allocateMemoryForDerivedCellData();
         
+        if (source_utilities->hasSourceTerms())
+        {
+            source_utilities->allocateMemoryForDerivedCellData();
+        }
+        
         d_flow_model->computeDerivedCellData();
+        
+        if (source_utilities->hasSourceTerms())
+        {
+            source_utilities->computeDerivedCellData();
+        }
         
         /*
          * Get the pointers to the maximum wave speeds and maximum diffusivity inside the flow model.
@@ -995,13 +1069,20 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
             }
         }
         
+        spectral_radiuses_and_dt[3] = double(1)/spectral_radiuses_and_dt[3];
+        
+        if (source_utilities->hasSourceTerms())
+        {
+            const double stable_dt_source = source_utilities->getStableDtOnPatch();
+            
+            spectral_radiuses_and_dt[3] = fmin(stable_dt_source, spectral_radiuses_and_dt[3]);
+        }
+        
         /*
          * Unregister the patch and data of all registered derived cell variables in the flow model.
          */
         
         d_flow_model->unregisterPatch();
-        
-        spectral_radiuses_and_dt[3] = double(1)/spectral_radiuses_and_dt[3];
     }
     
     t_compute_dt->stop();
@@ -1131,19 +1212,19 @@ NavierStokes::computeFluxesAndSourcesOnPatch(
         {
             d_flow_model->registerPatchWithDataContext(patch, getDataContext());
         }
-    
+        
         source_utilities->registerDerivedVariablesForSourceTerms(hier::IntVector::getZero(d_dim));
-    
+        
         source_utilities->allocateMemoryForDerivedCellData();
-    
+        
         source_utilities->computeDerivedCellData();
-    
+        
         source_utilities->computeSourceTermsOnPatch(
             d_variable_source,
             time,
             dt,
             RK_step_number);
-    
+        
         d_flow_model->unregisterPatch();
     }
     

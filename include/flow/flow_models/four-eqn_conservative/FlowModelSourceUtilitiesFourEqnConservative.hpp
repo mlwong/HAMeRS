@@ -24,6 +24,14 @@ class FlowModelSourceUtilitiesFourEqnConservative: public FlowModelSourceUtiliti
             const hier::IntVector& num_subghosts);
         
         /*
+         * Register the required variables for the computation of local stable time increment for
+         * source terms in the registered patch.
+         */
+        void
+        registerDerivedVariablesForSourceTermsStableDt(
+            const hier::IntVector& num_subghosts);
+        
+        /*
          * Allocate memory for cell data of different registered derived variables related to this
          * class in the registered patch.
          */
@@ -50,6 +58,12 @@ class FlowModelSourceUtilitiesFourEqnConservative: public FlowModelSourceUtiliti
             const int RK_step_number);
         
         /*
+         * Get local stable time increment for source terms.
+         */
+        double
+        getStableDtOnPatch();
+        
+        /*
          * Put the characteristics of this class into the restart database.
          */
         void
@@ -57,6 +71,27 @@ class FlowModelSourceUtilitiesFourEqnConservative: public FlowModelSourceUtiliti
             const boost::shared_ptr<tbox::Database>& restart_db) const;
         
     private:
+        /*
+         * Set the number of sub-ghost cells of a variable.
+         * This function can be called recursively if the variables are computed recursively.
+         */
+        void
+        setNumberOfSubGhosts(
+            const hier::IntVector& num_subghosts,
+            const std::string& variable_name,
+            const std::string& parent_variable_name);
+        
+        /*
+         * Set the ghost boxes of derived cell variables.
+         */
+        void
+        setDerivedCellVariableGhostBoxes();
+        
+        /*
+         * Compute the cell data of Gruneisen parameter in the registered patch.
+         */
+        void computeCellDataOfGruneisenParameter();
+        
         /*
          * Whether there is gravity.
          */
@@ -66,6 +101,31 @@ class FlowModelSourceUtilitiesFourEqnConservative: public FlowModelSourceUtiliti
          * Gravity vector.
          */
         std::vector<double> d_gravity;
+        
+        /*
+         * Number of sub-ghost cells of derived cell data related to this class.
+         */
+        hier::IntVector d_num_subghosts_gruneisen_parameter;
+        
+        /*
+         * Boxes with sub-ghost cells of derived cell data related to this class.
+         */
+        hier::Box d_subghost_box_gruneisen_parameter;
+        
+        /*
+         * Dimensions of boxes with sub-ghost cells of derived cell data related to this class.
+         */
+        hier::IntVector d_subghostcell_dims_gruneisen_parameter;
+        
+        /*
+         * boost::shared_ptr to derived cell data related to this class.
+         */
+        boost::shared_ptr<pdat::CellData<double> > d_data_gruneisen_parameter;
+        
+        /*
+         * Whether derived cell data related to this class is computed.
+         */
+        bool d_cell_data_computed_gruneisen_parameter;
         
         /*
          * boost::shared_ptr to EquationOfStateMixingRules.
