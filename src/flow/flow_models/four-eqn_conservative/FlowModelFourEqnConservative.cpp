@@ -75,23 +75,23 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
         d_subghostcell_dims_max_diffusivity(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_species_densities(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_species_enthalpies(hier::IntVector::getZero(d_dim)),
-        d_cell_data_density_computed(false),
-        d_cell_data_mass_fractions_computed(false),
-        d_cell_data_mole_fractions_computed(false),
-        d_cell_data_velocity_computed(false),
-        d_cell_data_internal_energy_computed(false),
-        d_cell_data_pressure_computed(false),
-        d_cell_data_sound_speed_computed(false),
-        d_cell_data_temperature_computed(false),
-        d_cell_data_convective_flux_x_computed(false),
-        d_cell_data_convective_flux_y_computed(false),
-        d_cell_data_convective_flux_z_computed(false),
-        d_cell_data_max_wave_speed_x_computed(false),
-        d_cell_data_max_wave_speed_y_computed(false),
-        d_cell_data_max_wave_speed_z_computed(false),
-        d_cell_data_max_diffusivity_computed(false),
-        d_cell_data_species_densities_computed(false),
-        d_cell_data_species_enthalpies_computed(false)
+        d_cell_data_computed_density(false),
+        d_cell_data_computed_mass_fractions(false),
+        d_cell_data_computed_mole_fractions(false),
+        d_cell_data_computed_velocity(false),
+        d_cell_data_computed_internal_energy(false),
+        d_cell_data_computed_pressure(false),
+        d_cell_data_computed_sound_speed(false),
+        d_cell_data_computed_temperature(false),
+        d_cell_data_computed_convective_flux_x(false),
+        d_cell_data_computed_convective_flux_y(false),
+        d_cell_data_computed_convective_flux_z(false),
+        d_cell_data_computed_max_wave_speed_x(false),
+        d_cell_data_computed_max_wave_speed_y(false),
+        d_cell_data_computed_max_wave_speed_z(false),
+        d_cell_data_computed_max_diffusivity(false),
+        d_cell_data_computed_species_densities(false),
+        d_cell_data_computed_species_enthalpies(false)
 {
     d_eqn_form.reserve(d_num_eqn);
     
@@ -1038,23 +1038,23 @@ FlowModelFourEqnConservative::unregisterPatch()
     d_data_species_densities.assign(d_num_species, nullptr);
     d_data_species_enthalpies.assign(d_num_species, nullptr);
     
-    d_cell_data_density_computed            = false;
-    d_cell_data_mass_fractions_computed     = false;
-    d_cell_data_mole_fractions_computed     = false;
-    d_cell_data_velocity_computed           = false;
-    d_cell_data_internal_energy_computed    = false;
-    d_cell_data_pressure_computed           = false;
-    d_cell_data_sound_speed_computed        = false;
-    d_cell_data_temperature_computed        = false;
-    d_cell_data_convective_flux_x_computed  = false;
-    d_cell_data_convective_flux_y_computed  = false;
-    d_cell_data_convective_flux_z_computed  = false;
-    d_cell_data_max_wave_speed_x_computed   = false;
-    d_cell_data_max_wave_speed_y_computed   = false;
-    d_cell_data_max_wave_speed_z_computed   = false;
-    d_cell_data_max_diffusivity_computed    = false;
-    d_cell_data_species_densities_computed  = false;
-    d_cell_data_species_enthalpies_computed = false;
+    d_cell_data_computed_density            = false;
+    d_cell_data_computed_mass_fractions     = false;
+    d_cell_data_computed_mole_fractions     = false;
+    d_cell_data_computed_velocity           = false;
+    d_cell_data_computed_internal_energy    = false;
+    d_cell_data_computed_pressure           = false;
+    d_cell_data_computed_sound_speed        = false;
+    d_cell_data_computed_temperature        = false;
+    d_cell_data_computed_convective_flux_x  = false;
+    d_cell_data_computed_convective_flux_y  = false;
+    d_cell_data_computed_convective_flux_z  = false;
+    d_cell_data_computed_max_wave_speed_x   = false;
+    d_cell_data_computed_max_wave_speed_y   = false;
+    d_cell_data_computed_max_wave_speed_z   = false;
+    d_cell_data_computed_max_diffusivity    = false;
+    d_cell_data_computed_species_densities  = false;
+    d_cell_data_computed_species_enthalpies = false;
     
     d_flow_model_diffusive_flux_utilities->clearCellData();
     d_flow_model_source_utilities->clearCellData();
@@ -1074,7 +1074,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
 {
     if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_density_computed)
+        if (!d_cell_data_computed_density)
         {
             if (!d_data_density)
             {
@@ -1094,7 +1094,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
     
     if (d_num_subghosts_mass_fractions > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_mass_fractions_computed)
+        if (!d_cell_data_computed_mass_fractions)
         {
             if (!d_data_mass_fractions)
             {
@@ -1114,7 +1114,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
     
     if (d_num_subghosts_mole_fractions > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_mole_fractions_computed)
+        if (!d_cell_data_computed_mole_fractions)
         {
             if (!d_data_mole_fractions)
             {
@@ -1134,7 +1134,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
     
     if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_velocity_computed)
+        if (!d_cell_data_computed_velocity)
         {
             if (!d_data_velocity)
             {
@@ -1154,7 +1154,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
     
     if (d_num_subghosts_internal_energy > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_internal_energy_computed)
+        if (!d_cell_data_computed_internal_energy)
         {
             if (!d_data_internal_energy)
             {
@@ -1174,7 +1174,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
     
     if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_pressure_computed)
+        if (!d_cell_data_computed_pressure)
         {
             if (!d_data_pressure)
             {
@@ -1194,7 +1194,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
     
     if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_sound_speed_computed)
+        if (!d_cell_data_computed_sound_speed)
         {
             if (!d_data_sound_speed)
             {
@@ -1214,7 +1214,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
     
     if (d_num_subghosts_temperature > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_temperature_computed)
+        if (!d_cell_data_computed_temperature)
         {
             if (!d_data_temperature)
             {
@@ -1234,7 +1234,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
     
     if (d_num_subghosts_convective_flux_x > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_convective_flux_x_computed)
+        if (!d_cell_data_computed_convective_flux_x)
         {
             if (!d_data_convective_flux_x)
             {
@@ -1254,7 +1254,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
     
     if (d_num_subghosts_convective_flux_y > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_convective_flux_y_computed)
+        if (!d_cell_data_computed_convective_flux_y)
         {
             if (!d_data_convective_flux_y)
             {
@@ -1274,7 +1274,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
     
     if (d_num_subghosts_convective_flux_z > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_convective_flux_z_computed)
+        if (!d_cell_data_computed_convective_flux_z)
         {
             if (!d_data_convective_flux_z)
             {
@@ -1294,7 +1294,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
     
     if (d_num_subghosts_max_wave_speed_x > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_max_wave_speed_x_computed)
+        if (!d_cell_data_computed_max_wave_speed_x)
         {
             if (!d_data_max_wave_speed_x)
             {
@@ -1314,7 +1314,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
     
     if (d_num_subghosts_max_wave_speed_y > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_max_wave_speed_y_computed)
+        if (!d_cell_data_computed_max_wave_speed_y)
         {
             if (!d_data_max_wave_speed_y)
             {
@@ -1334,7 +1334,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
     
     if (d_num_subghosts_max_wave_speed_z > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_max_wave_speed_z_computed)
+        if (!d_cell_data_computed_max_wave_speed_z)
         {
             if (!d_data_max_wave_speed_z)
             {
@@ -1354,7 +1354,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
     
     if (d_num_subghosts_max_diffusivity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_max_diffusivity_computed)
+        if (!d_cell_data_computed_max_diffusivity)
         {
             if (!d_data_max_diffusivity)
             {
@@ -1374,7 +1374,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
     
     if (d_num_subghosts_species_densities > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_species_densities_computed)
+        if (!d_cell_data_computed_species_densities)
         {
             // Create the cell data of species densities.
             for (int si = 0; si < d_num_species; si++)
@@ -1397,7 +1397,7 @@ FlowModelFourEqnConservative::allocateMemoryForDerivedCellData()
     
     if (d_num_subghosts_species_enthalpies > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_species_enthalpies_computed)
+        if (!d_cell_data_computed_species_enthalpies)
         {
             // Create the cell data of species enthalpies.
             for (int si = 0; si < d_num_species; si++)
@@ -1443,7 +1443,7 @@ FlowModelFourEqnConservative::computeDerivedCellData()
     // Compute the total density cell data.
     if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_density_computed)
+        if (!d_cell_data_computed_density)
         {
             computeCellDataOfDensity(
                 d_subdomain_box);
@@ -1453,7 +1453,7 @@ FlowModelFourEqnConservative::computeDerivedCellData()
     // Compute the mass fraction cell data.
     if (d_num_subghosts_mass_fractions > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_mass_fractions_computed)
+        if (!d_cell_data_computed_mass_fractions)
         {
             computeCellDataOfMassFractionsWithDensity(
                 d_subdomain_box);
@@ -1463,7 +1463,7 @@ FlowModelFourEqnConservative::computeDerivedCellData()
     // Compute the mole fraction cell data.
     if (d_num_subghosts_mole_fractions > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_mole_fractions_computed)
+        if (!d_cell_data_computed_mole_fractions)
         {
             computeCellDataOfMoleFractionsWithMassFractions(
                 d_subdomain_box);
@@ -1473,7 +1473,7 @@ FlowModelFourEqnConservative::computeDerivedCellData()
     // Compute the velocity cell data.
     if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_velocity_computed)
+        if (!d_cell_data_computed_velocity)
         {
             computeCellDataOfVelocityWithDensity(
                 d_subdomain_box);
@@ -1483,7 +1483,7 @@ FlowModelFourEqnConservative::computeDerivedCellData()
     // Compute the internal energy cell data.
     if (d_num_subghosts_internal_energy > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_internal_energy_computed)
+        if (!d_cell_data_computed_internal_energy)
         {
             computeCellDataOfInternalEnergyWithDensityAndVelocity(
                 d_subdomain_box);
@@ -1493,7 +1493,7 @@ FlowModelFourEqnConservative::computeDerivedCellData()
     // Compute the pressure cell data.
     if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_pressure_computed)
+        if (!d_cell_data_computed_pressure)
         {
             computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(
                 d_subdomain_box);
@@ -1503,7 +1503,7 @@ FlowModelFourEqnConservative::computeDerivedCellData()
     // Compute the sound speed cell data.
     if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_sound_speed_computed)
+        if (!d_cell_data_computed_sound_speed)
         {
             computeCellDataOfSoundSpeedWithDensityMassFractionsAndPressure(
                 d_subdomain_box);
@@ -1513,7 +1513,7 @@ FlowModelFourEqnConservative::computeDerivedCellData()
     // Compute the temperature cell data.
     if (d_num_subghosts_temperature > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_temperature_computed)
+        if (!d_cell_data_computed_temperature)
         {
             computeCellDataOfTemperatureWithDensityMassFractionsAndPressure(
                 d_subdomain_box);
@@ -1523,7 +1523,7 @@ FlowModelFourEqnConservative::computeDerivedCellData()
     // Compute the x-direction convective flux cell data.
     if (d_num_subghosts_convective_flux_x > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_convective_flux_x_computed)
+        if (!d_cell_data_computed_convective_flux_x)
         {
             computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 DIRECTION::X_DIRECTION,
@@ -1534,7 +1534,7 @@ FlowModelFourEqnConservative::computeDerivedCellData()
     // Compute the y-direction convective flux cell data.
     if (d_num_subghosts_convective_flux_y > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_convective_flux_y_computed)
+        if (!d_cell_data_computed_convective_flux_y)
         {
             computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 DIRECTION::Y_DIRECTION,
@@ -1545,7 +1545,7 @@ FlowModelFourEqnConservative::computeDerivedCellData()
     // Compute the z-direction convective flux cell data.
     if (d_num_subghosts_convective_flux_z > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_convective_flux_z_computed)
+        if (!d_cell_data_computed_convective_flux_z)
         {
             computeCellDataOfConvectiveFluxWithVelocityAndPressure(
                 DIRECTION::Z_DIRECTION,
@@ -1556,7 +1556,7 @@ FlowModelFourEqnConservative::computeDerivedCellData()
     // Compute the x-direction maximum wave speed cell data.
     if (d_num_subghosts_max_wave_speed_x > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_max_wave_speed_x_computed)
+        if (!d_cell_data_computed_max_wave_speed_x)
         {
             computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                 DIRECTION::X_DIRECTION,
@@ -1567,7 +1567,7 @@ FlowModelFourEqnConservative::computeDerivedCellData()
     // Compute the y-direction maximum wave speed cell data.
     if (d_num_subghosts_max_wave_speed_y > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_max_wave_speed_y_computed)
+        if (!d_cell_data_computed_max_wave_speed_y)
         {
             computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                 DIRECTION::Y_DIRECTION,
@@ -1578,7 +1578,7 @@ FlowModelFourEqnConservative::computeDerivedCellData()
     // Compute the z-direction maximum wave speed cell data.
     if (d_num_subghosts_max_wave_speed_z > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_max_wave_speed_z_computed)
+        if (!d_cell_data_computed_max_wave_speed_z)
         {
             computeCellDataOfMaxWaveSpeedWithVelocityAndSoundSpeed(
                 DIRECTION::Z_DIRECTION,
@@ -1589,7 +1589,7 @@ FlowModelFourEqnConservative::computeDerivedCellData()
     // Compute the maximum diffusivity cell data.
     if (d_num_subghosts_max_diffusivity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_max_diffusivity_computed)
+        if (!d_cell_data_computed_max_diffusivity)
         {
             computeCellDataOfMaxDiffusivityWithDensityMassFractionsPressureAndTemperature(
                 d_subdomain_box);
@@ -1599,7 +1599,7 @@ FlowModelFourEqnConservative::computeDerivedCellData()
     // Compute the species densities cell data.
     if (d_num_subghosts_species_densities > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_species_densities_computed)
+        if (!d_cell_data_computed_species_densities)
         {
             computeCellDataOfSpeciesDensitiesWithPressureAndTemperature(
                 d_subdomain_box);
@@ -1609,7 +1609,7 @@ FlowModelFourEqnConservative::computeDerivedCellData()
     // Compute the species enthalpies cell data.
     if (d_num_subghosts_species_enthalpies > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_species_enthalpies_computed)
+        if (!d_cell_data_computed_species_enthalpies)
         {
             computeCellDataOfSpeciesEnthalpiesWithSpeciesDensitiesAndPressure(
                 d_subdomain_box);
@@ -1651,7 +1651,7 @@ FlowModelFourEqnConservative::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "DENSITY")
     {
-        if (!d_cell_data_density_computed)
+        if (!d_cell_data_computed_density)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::getCellData()\n"
@@ -1662,7 +1662,7 @@ FlowModelFourEqnConservative::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "MASS_FRACTIONS")
     {
-        if (!d_cell_data_mass_fractions_computed)
+        if (!d_cell_data_computed_mass_fractions)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::getCellData()\n"
@@ -1673,7 +1673,7 @@ FlowModelFourEqnConservative::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "MOLE_FRACTIONS")
     {
-        if (!d_cell_data_mole_fractions_computed)
+        if (!d_cell_data_computed_mole_fractions)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::getCellData()\n"
@@ -1684,7 +1684,7 @@ FlowModelFourEqnConservative::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "VELOCITY")
     {
-        if (!d_cell_data_velocity_computed)
+        if (!d_cell_data_computed_velocity)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::getCellData()\n"
@@ -1695,7 +1695,7 @@ FlowModelFourEqnConservative::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "INTERNAL_ENERGY")
     {
-        if (!d_cell_data_internal_energy_computed)
+        if (!d_cell_data_computed_internal_energy)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::getCellData()\n"
@@ -1706,7 +1706,7 @@ FlowModelFourEqnConservative::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "PRESSURE")
     {
-        if (!d_cell_data_pressure_computed)
+        if (!d_cell_data_computed_pressure)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::getCellData()\n"
@@ -1717,7 +1717,7 @@ FlowModelFourEqnConservative::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "SOUND_SPEED")
     {
-        if (!d_cell_data_sound_speed_computed)
+        if (!d_cell_data_computed_sound_speed)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::getCellData()\n"
@@ -1728,7 +1728,7 @@ FlowModelFourEqnConservative::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "TEMPERATURE")
     {
-        if (!d_cell_data_temperature_computed)
+        if (!d_cell_data_computed_temperature)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::getCellData()\n"
@@ -1739,7 +1739,7 @@ FlowModelFourEqnConservative::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "CONVECTIVE_FLUX_X")
     {
-        if (!d_cell_data_convective_flux_x_computed)
+        if (!d_cell_data_computed_convective_flux_x)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::getCellData()\n"
@@ -1750,7 +1750,7 @@ FlowModelFourEqnConservative::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "CONVECTIVE_FLUX_Y")
     {
-        if (!d_cell_data_convective_flux_y_computed)
+        if (!d_cell_data_computed_convective_flux_y)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::getCellData()\n"
@@ -1761,7 +1761,7 @@ FlowModelFourEqnConservative::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "CONVECTIVE_FLUX_Z")
     {
-        if (!d_cell_data_convective_flux_z_computed)
+        if (!d_cell_data_computed_convective_flux_z)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::getCellData()\n"
@@ -1772,7 +1772,7 @@ FlowModelFourEqnConservative::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "MAX_WAVE_SPEED_X")
     {
-        if (!d_cell_data_max_wave_speed_x_computed)
+        if (!d_cell_data_computed_max_wave_speed_x)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::getCellData()\n"
@@ -1783,7 +1783,7 @@ FlowModelFourEqnConservative::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "MAX_WAVE_SPEED_Y")
     {
-        if (!d_cell_data_max_wave_speed_y_computed)
+        if (!d_cell_data_computed_max_wave_speed_y)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::getCellData()\n"
@@ -1794,7 +1794,7 @@ FlowModelFourEqnConservative::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "MAX_WAVE_SPEED_Z")
     {
-        if (!d_cell_data_max_wave_speed_z_computed)
+        if (!d_cell_data_computed_max_wave_speed_z)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::getCellData()\n"
@@ -1805,7 +1805,7 @@ FlowModelFourEqnConservative::getCellData(const std::string& variable_key)
     }
     else if (variable_key == "MAX_DIFFUSIVITY")
     {
-        if (!d_cell_data_max_diffusivity_computed)
+        if (!d_cell_data_computed_max_diffusivity)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::getCellData()\n"
@@ -1866,7 +1866,7 @@ FlowModelFourEqnConservative::getSpeciesCellData(
     
     if (variable_key == "SPECIES_DENSITIES")
     {
-        if (!d_cell_data_species_densities_computed)
+        if (!d_cell_data_computed_species_densities)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::getSpeciesCellData()\n"
@@ -1877,7 +1877,7 @@ FlowModelFourEqnConservative::getSpeciesCellData(
     }
     else if (variable_key == "SPECIES_ENTHALPIES")
     {
-        if (!d_cell_data_species_enthalpies_computed)
+        if (!d_cell_data_computed_species_enthalpies)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::getSpeciesCellData()\n"
@@ -3759,7 +3759,7 @@ FlowModelFourEqnConservative::computeCellDataOfDensity(
 {
     if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_density_computed)
+        if (!d_cell_data_computed_density)
         {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
             TBOX_ASSERT(d_data_density);
@@ -3774,7 +3774,7 @@ FlowModelFourEqnConservative::computeCellDataOfDensity(
                 data_partial_densities,
                 domain);
             
-            d_cell_data_density_computed = true;
+            d_cell_data_computed_density = true;
         }
     }
     else
@@ -3796,7 +3796,7 @@ FlowModelFourEqnConservative::computeCellDataOfMassFractionsWithDensity(
 {
     if (d_num_subghosts_mass_fractions > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_mass_fractions_computed)
+        if (!d_cell_data_computed_mass_fractions)
         {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
             TBOX_ASSERT(d_data_mass_fractions);
@@ -3828,7 +3828,7 @@ FlowModelFourEqnConservative::computeCellDataOfMassFractionsWithDensity(
             boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
                 getCellDataOfPartialDensities();
             
-            if (!d_cell_data_density_computed)
+            if (!d_cell_data_computed_density)
             {
                 computeCellDataOfDensity(domain);
             }
@@ -3991,7 +3991,7 @@ FlowModelFourEqnConservative::computeCellDataOfMassFractionsWithDensity(
                 }
             }
             
-            d_cell_data_mass_fractions_computed = true;
+            d_cell_data_computed_mass_fractions = true;
         }
     }
     else
@@ -4013,7 +4013,7 @@ FlowModelFourEqnConservative::computeCellDataOfMoleFractionsWithMassFractions(
 {
     if (d_num_subghosts_mole_fractions > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_mole_fractions_computed)
+        if (!d_cell_data_computed_mole_fractions)
         {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
             TBOX_ASSERT(d_data_mole_fractions);
@@ -4041,7 +4041,7 @@ FlowModelFourEqnConservative::computeCellDataOfMoleFractionsWithMassFractions(
                 domain_dims = domain.numberCells();
             }
             
-            if (!d_cell_data_mass_fractions_computed)
+            if (!d_cell_data_computed_mass_fractions)
             {
                 computeCellDataOfMassFractionsWithDensity(domain);
             }
@@ -4207,7 +4207,7 @@ FlowModelFourEqnConservative::computeCellDataOfMoleFractionsWithMassFractions(
                 }
             }
             
-            d_cell_data_mole_fractions_computed = true;
+            d_cell_data_computed_mole_fractions = true;
         }
     }
     else
@@ -4229,7 +4229,7 @@ FlowModelFourEqnConservative::computeCellDataOfVelocityWithDensity(
 {
     if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_velocity_computed)
+        if (!d_cell_data_computed_velocity)
         {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
             TBOX_ASSERT(d_data_velocity);
@@ -4261,7 +4261,7 @@ FlowModelFourEqnConservative::computeCellDataOfVelocityWithDensity(
             boost::shared_ptr<pdat::CellData<double> > data_momentum =
                 getCellDataOfMomentum();
             
-            if (!d_cell_data_density_computed)
+            if (!d_cell_data_computed_density)
             {
                 computeCellDataOfDensity(domain);
             }
@@ -4430,7 +4430,7 @@ FlowModelFourEqnConservative::computeCellDataOfVelocityWithDensity(
                 }
             }
             
-            d_cell_data_velocity_computed = true;
+            d_cell_data_computed_velocity = true;
         }
     }
     else
@@ -4453,7 +4453,7 @@ FlowModelFourEqnConservative::computeCellDataOfInternalEnergyWithDensityAndVeloc
 {
     if (d_num_subghosts_internal_energy > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_internal_energy_computed)
+        if (!d_cell_data_computed_internal_energy)
         {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
             TBOX_ASSERT(d_data_internal_energy);
@@ -4485,12 +4485,12 @@ FlowModelFourEqnConservative::computeCellDataOfInternalEnergyWithDensityAndVeloc
             boost::shared_ptr<pdat::CellData<double> > data_total_energy =
                 getCellDataOfTotalEnergy();
             
-            if (!d_cell_data_density_computed)
+            if (!d_cell_data_computed_density)
             {
                 computeCellDataOfDensity(domain);
             }
             
-            if (!d_cell_data_velocity_computed)
+            if (!d_cell_data_computed_velocity)
             {
                 computeCellDataOfVelocityWithDensity(domain);
             }
@@ -4670,7 +4670,7 @@ FlowModelFourEqnConservative::computeCellDataOfInternalEnergyWithDensityAndVeloc
                 }
             }
             
-            d_cell_data_internal_energy_computed = true;
+            d_cell_data_computed_internal_energy = true;
         }
     }
     else
@@ -4694,23 +4694,23 @@ FlowModelFourEqnConservative::computeCellDataOfPressureWithDensityMassFractionsA
 {
     if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_pressure_computed)
+        if (!d_cell_data_computed_pressure)
         {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
             TBOX_ASSERT(d_data_pressure);
 #endif
             
-            if (!d_cell_data_density_computed)
+            if (!d_cell_data_computed_density)
             {
                 computeCellDataOfDensity(domain);
             }
             
-            if (!d_cell_data_mass_fractions_computed)
+            if (!d_cell_data_computed_mass_fractions)
             {
                 computeCellDataOfMassFractionsWithDensity(domain);
             }
             
-            if (!d_cell_data_internal_energy_computed)
+            if (!d_cell_data_computed_internal_energy)
             {
                 computeCellDataOfInternalEnergyWithDensityAndVelocity(domain);
             }
@@ -4723,7 +4723,7 @@ FlowModelFourEqnConservative::computeCellDataOfPressureWithDensityMassFractionsA
                 d_data_mass_fractions,
                 domain);
             
-            d_cell_data_pressure_computed = true;
+            d_cell_data_computed_pressure = true;
         }
     }
     else
@@ -4747,7 +4747,7 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
 {
     if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_sound_speed_computed)
+        if (!d_cell_data_computed_sound_speed)
         {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
             TBOX_ASSERT(d_data_sound_speed);
@@ -4775,17 +4775,17 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
                 domain_dims = domain.numberCells();
             }
             
-            if (!d_cell_data_density_computed)
+            if (!d_cell_data_computed_density)
             {
                 computeCellDataOfDensity(domain);
             }
             
-            if (!d_cell_data_mass_fractions_computed)
+            if (!d_cell_data_computed_mass_fractions)
             {
                 computeCellDataOfMassFractionsWithDensity(domain);
             }
             
-            if (!d_cell_data_pressure_computed)
+            if (!d_cell_data_computed_pressure)
             {
                 computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(domain);
             }
@@ -5082,7 +5082,7 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
                 }
             }
             
-            d_cell_data_sound_speed_computed = true;
+            d_cell_data_computed_sound_speed = true;
         }
     }
     else
@@ -5106,23 +5106,23 @@ FlowModelFourEqnConservative::computeCellDataOfTemperatureWithDensityMassFractio
 {
     if (d_num_subghosts_temperature > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_temperature_computed)
+        if (!d_cell_data_computed_temperature)
         {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
             TBOX_ASSERT(d_data_temperature);
 #endif
             
-            if (!d_cell_data_density_computed)
+            if (!d_cell_data_computed_density)
             {
                 computeCellDataOfDensity(domain);
             }
             
-            if (!d_cell_data_mass_fractions_computed)
+            if (!d_cell_data_computed_mass_fractions)
             {
                 computeCellDataOfMassFractionsWithDensity(domain);
             }
             
-            if (!d_cell_data_pressure_computed)
+            if (!d_cell_data_computed_pressure)
             {
                 computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(domain);
             }
@@ -5135,7 +5135,7 @@ FlowModelFourEqnConservative::computeCellDataOfTemperatureWithDensityMassFractio
                 d_data_mass_fractions,
                 domain);
             
-            d_cell_data_temperature_computed = true;
+            d_cell_data_computed_temperature = true;
         }
     }
     else
@@ -5162,7 +5162,7 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
     {
         if (d_num_subghosts_convective_flux_x > -hier::IntVector::getOne(d_dim))
         {
-            if (!d_cell_data_convective_flux_x_computed)
+            if (!d_cell_data_computed_convective_flux_x)
             {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
                 TBOX_ASSERT(d_data_convective_flux_x);
@@ -5207,12 +5207,12 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                 boost::shared_ptr<pdat::CellData<double> > data_total_energy =
                     getCellDataOfTotalEnergy();
                 
-                if (!d_cell_data_velocity_computed)
+                if (!d_cell_data_computed_velocity)
                 {
                     computeCellDataOfVelocityWithDensity(domain);
                 }
                 
-                if (!d_cell_data_pressure_computed)
+                if (!d_cell_data_computed_pressure)
                 {
                     computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(domain);
                 }
@@ -5479,7 +5479,7 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                     }
                 }
                 
-                d_cell_data_convective_flux_x_computed = true;
+                d_cell_data_computed_convective_flux_x = true;
             }
         }
         else
@@ -5495,7 +5495,7 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
     {
         if (d_num_subghosts_convective_flux_y > -hier::IntVector::getOne(d_dim))
         {
-            if (!d_cell_data_convective_flux_y_computed)
+            if (!d_cell_data_computed_convective_flux_y)
             {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
                 TBOX_ASSERT(d_data_convective_flux_y);
@@ -5540,12 +5540,12 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                 boost::shared_ptr<pdat::CellData<double> > data_total_energy =
                     getCellDataOfTotalEnergy();
                 
-                if (!d_cell_data_pressure_computed)
+                if (!d_cell_data_computed_pressure)
                 {
                     computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(domain);
                 }
                 
-                if (!d_cell_data_velocity_computed)
+                if (!d_cell_data_computed_velocity)
                 {
                     computeCellDataOfVelocityWithDensity(domain);
                 }
@@ -5768,7 +5768,7 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                     }
                 }
                 
-                d_cell_data_convective_flux_y_computed = true;
+                d_cell_data_computed_convective_flux_y = true;
             }
         }
         else
@@ -5784,7 +5784,7 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
     {
         if (d_num_subghosts_convective_flux_z > -hier::IntVector::getOne(d_dim))
         {
-            if (!d_cell_data_convective_flux_z_computed)
+            if (!d_cell_data_computed_convective_flux_z)
             {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
                 TBOX_ASSERT(d_data_convective_flux_z);
@@ -5829,12 +5829,12 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                 boost::shared_ptr<pdat::CellData<double> > data_total_energy =
                     getCellDataOfTotalEnergy();
                 
-                if (!d_cell_data_pressure_computed)
+                if (!d_cell_data_computed_pressure)
                 {
                     computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(domain);
                 }
                 
-                if (!d_cell_data_velocity_computed)
+                if (!d_cell_data_computed_velocity)
                 {
                     computeCellDataOfVelocityWithDensity(domain);
                 }
@@ -5974,7 +5974,7 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                     }
                 }
                 
-                d_cell_data_convective_flux_z_computed = true;
+                d_cell_data_computed_convective_flux_z = true;
             }
         }
         else
@@ -6002,7 +6002,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
     {
         if (d_num_subghosts_max_wave_speed_x > -hier::IntVector::getOne(d_dim))
         {
-            if (!d_cell_data_max_wave_speed_x_computed)
+            if (!d_cell_data_computed_max_wave_speed_x)
             {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
                 TBOX_ASSERT(d_data_max_wave_speed_x);
@@ -6030,12 +6030,12 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
                     domain_dims = domain.numberCells();
                 }
                 
-                if (!d_cell_data_velocity_computed)
+                if (!d_cell_data_computed_velocity)
                 {
                     computeCellDataOfVelocityWithDensity(domain);
                 }
                 
-                if (!d_cell_data_sound_speed_computed)
+                if (!d_cell_data_computed_sound_speed)
                 {
                     computeCellDataOfSoundSpeedWithDensityMassFractionsAndPressure(domain);
                 }
@@ -6180,7 +6180,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
                     }
                 }
                 
-                d_cell_data_max_wave_speed_x_computed = true;
+                d_cell_data_computed_max_wave_speed_x = true;
             }
         }
         else
@@ -6196,7 +6196,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
     {
         if (d_num_subghosts_max_wave_speed_y > -hier::IntVector::getOne(d_dim))
         {
-            if (!d_cell_data_max_wave_speed_y_computed)
+            if (!d_cell_data_computed_max_wave_speed_y)
             {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
                 TBOX_ASSERT(d_data_max_wave_speed_y);
@@ -6224,12 +6224,12 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
                     domain_dims = domain.numberCells();
                 }
                 
-                if (!d_cell_data_sound_speed_computed)
+                if (!d_cell_data_computed_sound_speed)
                 {
                     computeCellDataOfSoundSpeedWithDensityMassFractionsAndPressure(domain);
                 }
                 
-                if (!d_cell_data_velocity_computed)
+                if (!d_cell_data_computed_velocity)
                 {
                     computeCellDataOfVelocityWithDensity(domain);
                 }
@@ -6355,7 +6355,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
                     }
                 }
                 
-                d_cell_data_max_wave_speed_y_computed = true;
+                d_cell_data_computed_max_wave_speed_y = true;
             }
         }
         else
@@ -6371,7 +6371,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
     {
         if (d_num_subghosts_max_wave_speed_z > -hier::IntVector::getOne(d_dim))
         {
-            if (!d_cell_data_max_wave_speed_z_computed)
+            if (!d_cell_data_computed_max_wave_speed_z)
             {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
                 TBOX_ASSERT(d_data_max_wave_speed_z);
@@ -6399,12 +6399,12 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
                     domain_dims = domain.numberCells();
                 }
                 
-                if (!d_cell_data_sound_speed_computed)
+                if (!d_cell_data_computed_sound_speed)
                 {
                     computeCellDataOfSoundSpeedWithDensityMassFractionsAndPressure(domain);
                 }
                 
-                if (!d_cell_data_velocity_computed)
+                if (!d_cell_data_computed_velocity)
                 {
                     computeCellDataOfVelocityWithDensity(domain);
                 }
@@ -6485,7 +6485,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxWaveSpeedWithVelocityAndSoundS
                     }
                 }
                 
-                d_cell_data_max_wave_speed_z_computed = true;
+                d_cell_data_computed_max_wave_speed_z = true;
             }
         }
         else
@@ -6523,7 +6523,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxDiffusivityWithDensityMassFrac
     
     if (d_num_subghosts_max_diffusivity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_max_diffusivity_computed)
+        if (!d_cell_data_computed_max_diffusivity)
         {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
             TBOX_ASSERT(d_data_max_diffusivity);
@@ -6551,22 +6551,22 @@ FlowModelFourEqnConservative::computeCellDataOfMaxDiffusivityWithDensityMassFrac
                 domain_dims = domain.numberCells();
             }
             
-            if (!d_cell_data_density_computed)
+            if (!d_cell_data_computed_density)
             {
                 computeCellDataOfDensity(domain);
             }
             
-            if (!d_cell_data_mass_fractions_computed)
+            if (!d_cell_data_computed_mass_fractions)
             {
                 computeCellDataOfMassFractionsWithDensity(domain);
             }
             
-            if (!d_cell_data_pressure_computed)
+            if (!d_cell_data_computed_pressure)
             {
                 computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(domain);
             }
             
-            if (!d_cell_data_temperature_computed)
+            if (!d_cell_data_computed_temperature)
             {
                 computeCellDataOfTemperatureWithDensityMassFractionsAndPressure(domain);
             }
@@ -6828,7 +6828,7 @@ FlowModelFourEqnConservative::computeCellDataOfMaxDiffusivityWithDensityMassFrac
                 }
             }
             
-            d_cell_data_max_diffusivity_computed = true;
+            d_cell_data_computed_max_diffusivity = true;
         }
     }
     else
@@ -6851,7 +6851,7 @@ FlowModelFourEqnConservative::computeCellDataOfSpeciesDensitiesWithPressureAndTe
 {
     if (d_num_subghosts_species_densities > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_species_densities_computed)
+        if (!d_cell_data_computed_species_densities)
         {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
             for (int si = 0; si < d_num_species; si++)
@@ -6867,12 +6867,12 @@ FlowModelFourEqnConservative::computeCellDataOfSpeciesDensitiesWithPressureAndTe
             }
 #endif
             
-            if (!d_cell_data_pressure_computed)
+            if (!d_cell_data_computed_pressure)
             {
                 computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(domain);
             }
             
-            if (!d_cell_data_temperature_computed)
+            if (!d_cell_data_computed_temperature)
             {
                 computeCellDataOfTemperatureWithDensityMassFractionsAndPressure(domain);
             }
@@ -6911,7 +6911,7 @@ FlowModelFourEqnConservative::computeCellDataOfSpeciesDensitiesWithPressureAndTe
                         domain);
             }
             
-            d_cell_data_species_densities_computed = true;
+            d_cell_data_computed_species_densities = true;
         }
     }
     else
@@ -6934,7 +6934,7 @@ FlowModelFourEqnConservative::computeCellDataOfSpeciesEnthalpiesWithSpeciesDensi
 {
     if (d_num_subghosts_species_enthalpies > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_species_enthalpies_computed)
+        if (!d_cell_data_computed_species_enthalpies)
         {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
             for (int si = 0; si < d_num_species; si++)
@@ -6950,12 +6950,12 @@ FlowModelFourEqnConservative::computeCellDataOfSpeciesEnthalpiesWithSpeciesDensi
             }
 #endif
             
-            if (!d_cell_data_species_densities_computed)
+            if (!d_cell_data_computed_species_densities)
             {
                 computeCellDataOfSpeciesDensitiesWithPressureAndTemperature(domain);
             }
             
-            if (!d_cell_data_pressure_computed)
+            if (!d_cell_data_computed_pressure)
             {
                 computeCellDataOfPressureWithDensityMassFractionsAndInternalEnergy(domain);
             }
@@ -6994,7 +6994,7 @@ FlowModelFourEqnConservative::computeCellDataOfSpeciesEnthalpiesWithSpeciesDensi
                         domain);
             }
             
-            d_cell_data_species_enthalpies_computed = true;
+            d_cell_data_computed_species_enthalpies = true;
         }
     }
     else

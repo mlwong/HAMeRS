@@ -27,10 +27,10 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::FlowModelDiffusiveFluxUtilit
         d_subghostcell_dims_shear_viscosity(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_bulk_viscosity(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_thermal_conductivity(hier::IntVector::getZero(d_dim)),
-        d_cell_data_mass_diffusivities_computed(false),
-        d_cell_data_shear_viscosity_computed(false),
-        d_cell_data_bulk_viscosity_computed(false),
-        d_cell_data_thermal_conductivity_computed(false),
+        d_cell_data_computed_mass_diffusivities(false),
+        d_cell_data_computed_shear_viscosity(false),
+        d_cell_data_computed_bulk_viscosity(false),
+        d_cell_data_computed_thermal_conductivity(false),
         d_equation_of_mass_diffusivity_mixing_rules(equation_of_mass_diffusivity_mixing_rules),
         d_equation_of_shear_viscosity_mixing_rules(equation_of_shear_viscosity_mixing_rules),
         d_equation_of_bulk_viscosity_mixing_rules(equation_of_bulk_viscosity_mixing_rules),
@@ -62,7 +62,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::registerDerivedVariables(
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::"
-            << "computeDerivedCellData()\n"
+            << "registerDerivedVariables()\n"
             << "No patch is registered yet."
             << std::endl);
     }
@@ -212,7 +212,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::registerDerivedVariablesForD
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::"
-            << "computeDerivedCellData()\n"
+            << "registerDerivedVariablesForDiffusiveFluxes()\n"
             << "No patch is registered yet."
             << std::endl);
     }
@@ -221,7 +221,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::registerDerivedVariablesForD
     if (d_derived_cell_data_computed)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::registerDerivedVariables()\n"
+            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::registerDerivedVariablesForDiffusiveFluxes()\n"
             << "Derived cell data is already computed."
             << std::endl);
     }
@@ -230,7 +230,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::registerDerivedVariablesForD
         (num_subghosts > flow_model_tmp->getNumberOfGhostCells()))
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::registerDerivedVariables()\n"
+            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::registerDerivedVariablesForDiffusiveFluxes()\n"
             << "The number of sub-ghost cells of variable is not between zero and number of ghosts of conservative variables."
             << std::endl);
     }
@@ -292,7 +292,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::allocateMemoryForDerivedCell
     
     if (d_num_subghosts_mass_diffusivities > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_mass_diffusivities_computed)
+        if (!d_cell_data_computed_mass_diffusivities)
         {
             if (!d_data_mass_diffusivities)
             {
@@ -312,7 +312,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::allocateMemoryForDerivedCell
     
     if (d_num_subghosts_shear_viscosity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_shear_viscosity_computed)
+        if (!d_cell_data_computed_shear_viscosity)
         {
             if (!d_data_shear_viscosity)
             {
@@ -332,7 +332,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::allocateMemoryForDerivedCell
     
     if (d_num_subghosts_bulk_viscosity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_bulk_viscosity_computed)
+        if (!d_cell_data_computed_bulk_viscosity)
         {
             if (!d_data_bulk_viscosity)
             {
@@ -352,7 +352,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::allocateMemoryForDerivedCell
     
     if (d_num_subghosts_thermal_conductivity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_thermal_conductivity_computed)
+        if (!d_cell_data_computed_thermal_conductivity)
         {
             if (!d_data_thermal_conductivity)
             {
@@ -372,7 +372,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::allocateMemoryForDerivedCell
     
     if (d_num_subghosts_diffusivities > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_diffusivities_computed)
+        if (!d_cell_data_computed_diffusivities)
         {
             if (!d_data_diffusivities)
             {
@@ -440,11 +440,11 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::clearCellData()
     d_data_bulk_viscosity.reset();
     d_data_thermal_conductivity.reset();
     
-    d_cell_data_diffusivities_computed        = false;
-    d_cell_data_mass_diffusivities_computed   = false;
-    d_cell_data_shear_viscosity_computed      = false;
-    d_cell_data_bulk_viscosity_computed       = false;
-    d_cell_data_thermal_conductivity_computed = false;
+    d_cell_data_computed_diffusivities        = false;
+    d_cell_data_computed_mass_diffusivities   = false;
+    d_cell_data_computed_shear_viscosity      = false;
+    d_cell_data_computed_bulk_viscosity       = false;
+    d_cell_data_computed_thermal_conductivity = false;
     
     d_derived_cell_data_computed = false;
 }
@@ -489,7 +489,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeDerivedCellData()
     // Compute the mass diffusivities cell data.
     if (d_num_subghosts_mass_diffusivities > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_mass_diffusivities_computed)
+        if (!d_cell_data_computed_mass_diffusivities)
         {
             computeCellDataOfMassDiffusivities();
         }
@@ -498,7 +498,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeDerivedCellData()
     // Compute the shear viscosity cell data.
     if (d_num_subghosts_shear_viscosity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_shear_viscosity_computed)
+        if (!d_cell_data_computed_shear_viscosity)
         {
             computeCellDataOfShearViscosity();
         }
@@ -507,7 +507,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeDerivedCellData()
     // Compute the bulk viscosity cell data.
     if (d_num_subghosts_bulk_viscosity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_bulk_viscosity_computed)
+        if (!d_cell_data_computed_bulk_viscosity)
         {
             computeCellDataOfBulkViscosity();
         }
@@ -516,7 +516,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeDerivedCellData()
     // Compute the thermal conductivity cell data.
     if (d_num_subghosts_thermal_conductivity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_thermal_conductivity_computed)
+        if (!d_cell_data_computed_thermal_conductivity)
         {
             computeCellDataOfThermalConductivity();
         }
@@ -525,7 +525,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeDerivedCellData()
     // Compute the diffusivities cell data.
     if (d_num_subghosts_diffusivities > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_diffusivities_computed)
+        if (!d_cell_data_computed_diffusivities)
         {
             computeCellDataOfDiffusivities();
         }
@@ -556,7 +556,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellData(const std::strin
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::"
-            << "computeDerivedCellData()\n"
+            << "getCellData()\n"
             << "No patch is registered yet."
             << std::endl);
     }
@@ -565,7 +565,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellData(const std::strin
     
     if (variable_key == "MASS_DIFFUSIVITIES")
     {
-        if (!d_cell_data_mass_diffusivities_computed)
+        if (!d_cell_data_computed_mass_diffusivities)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellData()\n"
@@ -576,7 +576,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellData(const std::strin
     }
     else if (variable_key == "SHEAR_VISCOSITY")
     {
-        if (!d_cell_data_shear_viscosity_computed)
+        if (!d_cell_data_computed_shear_viscosity)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellData()\n"
@@ -587,7 +587,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellData(const std::strin
     }
     else if (variable_key == "BULK_VISCOSITY")
     {
-        if (!d_cell_data_bulk_viscosity_computed)
+        if (!d_cell_data_computed_bulk_viscosity)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellData()\n"
@@ -598,7 +598,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellData(const std::strin
     }
     else if (variable_key == "THERMAL_CONDUCTIVITY")
     {
-        if (!d_cell_data_thermal_conductivity_computed)
+        if (!d_cell_data_computed_thermal_conductivity)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellData()\n"
@@ -744,7 +744,8 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVa
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::"
+                            << "getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                             << "There are only x-direction for one-dimensional problem."
                             << std::endl);
                     }
@@ -755,7 +756,8 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVa
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
+                    << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::"
+                    << "getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                     << "There are only x-direction for one-dimensional problem."
                     << std::endl);
             }
@@ -897,7 +899,8 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVa
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::"
+                            << "getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                             << "There are only x-direction and y-direction for two-dimensional problem."
                             << std::endl);
                     }
@@ -1037,7 +1040,8 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVa
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::"
+                            << "getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                             << "There are only x-direction and y-direction for two-dimensional problem."
                             << std::endl);
                     }
@@ -1048,7 +1052,8 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVa
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
+                    << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::"
+                    << "getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                     << "There are only x-direction and y-direction for two-dimensional problem."
                     << std::endl);
             }
@@ -1254,7 +1259,8 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVa
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::"
+                            << "getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                             << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                             << std::endl);
                     }
@@ -1458,7 +1464,8 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVa
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::"
+                            << "getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                             << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                             << std::endl);
                     }
@@ -1662,7 +1669,8 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVa
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::"
+                            << "getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                             << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                             << std::endl);
                     }
@@ -1673,7 +1681,8 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVa
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
+                    << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::"
+                    << "getCellDataOfDiffusiveFluxVariablesForDerivative()\n"
                     << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                     << std::endl);
             }
@@ -1707,7 +1716,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::"
-            << "computeDerivedCellData()\n"
+            << "getCellDataOfDiffusiveFluxDiffusivities()\n"
             << "No patch is registered yet."
             << std::endl);
     }
@@ -1796,7 +1805,8 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDiffusivities()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::"
+                            << "getCellDataOfDiffusiveFluxDiffusivities()\n"
                             << "There are only x-direction for one-dimensional problem."
                             << std::endl);
                     }
@@ -1807,7 +1817,8 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDiffusivities()\n"
+                    << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::"
+                    << "getCellDataOfDiffusiveFluxDiffusivities()\n"
                     << "There are only x-direction for one-dimensional problem."
                     << std::endl);
             }
@@ -1958,7 +1969,8 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDiffusivities()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::"
+                            << "getCellDataOfDiffusiveFluxDiffusivities()\n"
                             << "There are only x-direction and y-direction for two-dimensional problem."
                             << std::endl);
                     }
@@ -2107,7 +2119,8 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDiffusivities()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::"
+                            << "getCellDataOfDiffusiveFluxDiffusivities()\n"
                             << "There are only x-direction and y-direction for two-dimensional problem."
                             << std::endl);
                     }
@@ -2118,7 +2131,8 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDiffusivities()\n"
+                    << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::"
+                    << "getCellDataOfDiffusiveFluxDiffusivities()\n"
                     << "There are only x-direction and y-direction for two-dimensional problem."
                     << std::endl);
             }
@@ -2339,7 +2353,8 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDiffusivities()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::"
+                            << "getCellDataOfDiffusiveFluxDiffusivities()\n"
                             << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                             << std::endl);
                     }
@@ -2558,7 +2573,8 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDiffusivities()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::"
+                            << "getCellDataOfDiffusiveFluxDiffusivities()\n"
                             << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                             << std::endl);
                     }
@@ -2777,7 +2793,8 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
                     default:
                     {
                         TBOX_ERROR(d_object_name
-                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDiffusivities()\n"
+                            << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::"
+                            << "getCellDataOfDiffusiveFluxDiffusivities()\n"
                             << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                             << std::endl);
                     }
@@ -2788,7 +2805,8 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDiffusivities()\n"
+                    << ": FlowModelDiffusiveFluxUtilitiesFourEqnConservative::"
+                    << "getCellDataOfDiffusiveFluxDiffusivities()\n"
                     << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                     << std::endl);
             }
@@ -2957,7 +2975,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeCellDataOfMassDiffusi
     
     if (d_num_subghosts_mass_diffusivities > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_mass_diffusivities_computed)
+        if (!d_cell_data_computed_mass_diffusivities)
         {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
             TBOX_ASSERT(d_data_mass_diffusivities);
@@ -2993,7 +3011,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeCellDataOfMassDiffusi
                 data_mass_fractions,
                 empty_box);
             
-            d_cell_data_mass_diffusivities_computed = true;
+            d_cell_data_computed_mass_diffusivities = true;
         }
     }
     else
@@ -3017,7 +3035,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeCellDataOfShearViscos
     
     if (d_num_subghosts_shear_viscosity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_shear_viscosity_computed)
+        if (!d_cell_data_computed_shear_viscosity)
         {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
             TBOX_ASSERT(d_data_shear_viscosity);
@@ -3053,7 +3071,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeCellDataOfShearViscos
                 data_mass_fractions,
                 empty_box);
             
-            d_cell_data_shear_viscosity_computed = true;
+            d_cell_data_computed_shear_viscosity = true;
         }
     }
     else
@@ -3077,7 +3095,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeCellDataOfBulkViscosi
     
     if (d_num_subghosts_bulk_viscosity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_bulk_viscosity_computed)
+        if (!d_cell_data_computed_bulk_viscosity)
         {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
             TBOX_ASSERT(d_data_bulk_viscosity);
@@ -3113,7 +3131,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeCellDataOfBulkViscosi
                 data_mass_fractions,
                 empty_box);
             
-            d_cell_data_bulk_viscosity_computed = true;
+            d_cell_data_computed_bulk_viscosity = true;
         }
     }
     else
@@ -3137,7 +3155,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeCellDataOfThermalCond
     
     if (d_num_subghosts_thermal_conductivity > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_thermal_conductivity_computed)
+        if (!d_cell_data_computed_thermal_conductivity)
         {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
             TBOX_ASSERT(d_data_thermal_conductivity);
@@ -3173,7 +3191,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeCellDataOfThermalCond
                 data_mass_fractions,
                 empty_box);
             
-            d_cell_data_thermal_conductivity_computed = true;
+            d_cell_data_computed_thermal_conductivity = true;
         }
     }
     else
@@ -3194,7 +3212,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeCellDataOfDiffusiviti
 {
     if (d_num_subghosts_diffusivities > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_cell_data_diffusivities_computed)
+        if (!d_cell_data_computed_diffusivities)
         {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
             TBOX_ASSERT(d_data_diffusivities);
@@ -3218,22 +3236,22 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeCellDataOfDiffusiviti
             const hier::Box interior_box = patch.getBox();
             const hier::IntVector interior_dims = interior_box.numberCells();
             
-            if (!d_cell_data_mass_diffusivities_computed)
+            if (!d_cell_data_computed_mass_diffusivities)
             {
                 computeCellDataOfMassDiffusivities();
             }
             
-            if (!d_cell_data_shear_viscosity_computed)
+            if (!d_cell_data_computed_shear_viscosity)
             {
                 computeCellDataOfShearViscosity();
             }
             
-            if (!d_cell_data_bulk_viscosity_computed)
+            if (!d_cell_data_computed_bulk_viscosity)
             {
                 computeCellDataOfBulkViscosity();
             }
             
-            if (!d_cell_data_thermal_conductivity_computed)
+            if (!d_cell_data_computed_thermal_conductivity)
             {
                 computeCellDataOfThermalConductivity();
             }
@@ -3932,7 +3950,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeCellDataOfDiffusiviti
                 }
             }
             
-            d_cell_data_diffusivities_computed = true;
+            d_cell_data_computed_diffusivities = true;
         }
     }
     else
