@@ -721,10 +721,16 @@ FlowModelSourceUtilitiesFourEqnConservative::putToRestart(
 {
     restart_db->putBool("d_has_source_terms", d_has_source_terms);
     
-    restart_db->putBool("d_has_gravity", d_has_gravity);
-    if (d_has_gravity)
+    if (d_has_source_terms)
     {
-        restart_db->putVector("d_gravity", d_gravity);
+        boost::shared_ptr<tbox::Database> restart_source_terms_db =
+            restart_db->putDatabase("d_source_terms");
+        
+        restart_source_terms_db->putBool("d_has_gravity", d_has_gravity);
+        if (d_has_gravity)
+        {
+            restart_source_terms_db->putVector("d_gravity", d_gravity);
+        }
     }
 }
 
