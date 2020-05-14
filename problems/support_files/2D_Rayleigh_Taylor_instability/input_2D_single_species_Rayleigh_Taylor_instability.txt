@@ -3,83 +3,87 @@ Application = "Euler"
 Euler
 {
     // Name of project
-    project_name = "2D Richtmyer-Meshkov instability"
-    
+    project_name = "2D Rayleigh-Taylor instability"
+
     // Number of species
-    num_species = 2
-    
+    num_species = 1
+
     // Flow model to use
-    flow_model = "FOUR_EQN_CONSERVATIVE"
-    
+    flow_model = "SINGLE_SPECIES"
+
     Flow_model
     {
         // Equation of state to use
         equation_of_state = "IDEAL_GAS"
-        
+
         Equation_of_state_mixing_rules
         {
-            species_gamma = 1.09312, 1.39909
-            species_R = 56.927, 296.803
-        }
-    }
-    
-    // Convective flux reconstructor to use
-    convective_flux_reconstructor = "WCNS6_LD_HLLC_HLL"
-    
-    Convective_flux_reconstructor {}
-    
-    Boundary_data
-    {
-        boundary_edge_xlo
-        {
-            boundary_condition = "FLOW"
-        }
-        boundary_edge_xhi
-        {
-            boundary_condition = "FLOW"
+            species_gamma = 1.66666666667
+            species_R = 1.0
         }
 
+        has_source_terms = TRUE
+
+        Source_terms
+        {
+            has_gravity = TRUE
+            gravity = 0.0, 1.0
+        }
+    }
+
+    // Convective flux reconstructor to use
+    convective_flux_reconstructor = "WCNS6_LD_HLLC_HLL"
+
+    Convective_flux_reconstructor{}
+
+    Boundary_data
+    {
+        // Set the boundary conditions for edges
+        boundary_edge_xlo
+        {
+            boundary_condition = "REFLECT"
+        }
+
+        boundary_edge_xhi
+        {
+            boundary_condition = "REFLECT"
+        }
+
+        boundary_edge_ylo
+        {
+            boundary_condition = "DIRICHLET"
+            density            = 2.0
+            velocity           = 0.0, 0.0
+            pressure           = 1.0
+        }
+
+        boundary_edge_yhi
+        {
+            boundary_condition = "DIRICHLET"
+            density            = 1.0
+            velocity           = 0.0, 0.0
+            pressure           = 2.5
+        }
+
+        // Set the boundary conditions for nodes
         boundary_node_xlo_ylo
         {
-            boundary_condition = "XFLOW"
+            boundary_condition = "XREFLECT"
         }
+
         boundary_node_xhi_ylo
         {
-            boundary_condition = "XFLOW"
+            boundary_condition = "XREFLECT"
         }
+
         boundary_node_xlo_yhi
         {
-            boundary_condition = "XFLOW"
+            boundary_condition = "XREFLECT"
         }
+
         boundary_node_xhi_yhi
         {
-            boundary_condition = "XFLOW"
-        }
-    }
-    
-    Value_tagger
-    {
-        variables = "MASS_FRACTION"
-        
-        uses_global_tol_up = FALSE
-        uses_global_tol_lo = FALSE
-        
-        uses_local_tol_up = TRUE
-        uses_local_tol_lo = TRUE
-        
-        local_tol_up = 0.999
-        local_tol_lo = 0.001
-    }
-    
-    Gradient_tagger
-    {
-        gradient_sensors = "JAMESON_GRADIENT"
-        
-        JAMESON_GRADIENT
-        {
-            Jameson_gradient_variables = "PRESSURE"
-            
-            Jameson_gradient_tol = 0.002
+            boundary_condition = "XREFLECT"
         }
     }
 }
@@ -90,7 +94,7 @@ Main
     dim = 2
     
     // Base name of log file
-    base_name = "2D_Richtmyer_Meshkov_instability"
+    base_name = "2D_RTI"
     
     // Whether all nodes log to individual files,
     // if false only node 0 will log 
@@ -100,9 +104,9 @@ Main
     // Setting to dump viz output: CONSTANT_TIME_INTERVAL, CONSTANT_TIMESTEP_INTERVAL
     viz_dump_setting = "CONSTANT_TIME_INTERVAL"
     // Frequency at which to dump viz output (0 to turn off)
-    viz_dump_interval = 1.0e-6
+    viz_dump_interval = 0.00975
     // Name of directory in which to place viz output
-    viz_dump_dirname = "viz_2D_Richtmyer_Meshkov_instability"
+    viz_dump_dirname = "viz_2D_Rayleigh_Taylor_instability"
     // Number of processors which write to each viz file
     visit_number_procs_per_file = 1
     
@@ -115,36 +119,22 @@ Main
 CartesianGeometry
 {
     // Lower and upper indices of computational domain
-    domain_boxes = [(0, 0), (511, 31)]
-    x_lo         = 0.0, 0.0     // Lower end of computational domain
-    x_up         = 0.016, 0.001 // Upper end of computational domain
+    domain_boxes = [(0, 0), (59, 239)]
+    x_lo         = 0.0,  0.0 // Lower end of computational domain
+    x_up         = 0.25, 1.0 // Upper end of computational domain
 
     // Periodic dimension. A non-zero value indicates that the direction is periodic
-    periodic_dimension = 0, 1
+    periodic_dimension = 0, 0
 }
 
 ExtendedTagAndInitialize
 {
-    at_0
-    {
-        cycle = 0
-        // First tagging method for refinement to use
-        tag_0
-        {
-            tagging_method = "VALUE_DETECTOR"
-        }
-        // Second tagging method for refinement to use
-        tag_1
-        {
-            tagging_method = "GRADIENT_DETECTOR"
-        }
-    }
 }
 
 PatchHierarchy
 {
     // Maximum number of levels in hierarchy
-    max_levels = 3
+    max_levels = 1
 
     ratio_to_coarser
     {
@@ -165,19 +155,23 @@ PatchHierarchy
 
 GriddingAlgorithm{}
 
-RungeKuttaLevelIntegrator{
-   cfl                       = 0.5e0   // max cfl factor used in problem
-   cfl_init                  = 0.5e0   // initial cfl factor
-   lag_dt_computation        = FALSE
-   use_ghosts_to_compute_dt  = TRUE
+RungeKuttaLevelIntegrator
+{
+    cfl                      = 0.5e0 // Max cfl factor used in problem
+    cfl_init                 = 0.5e0 // Initial cfl factor
+    lag_dt_computation       = FALSE
+    use_ghosts_to_compute_dt = TRUE
 }
 
 TimeRefinementIntegrator
 {
-    start_time           = 0.0e0 // Initial simulation time
-    end_time             = 1.0e0 // Final simulation time
-    grow_dt              = 1.0e0 // Growth factor for timesteps
-    max_integrator_steps = 10000 // Max number of simulation timesteps
+    start_time           = 0.0e0  // Initial simulation time
+    end_time             = 1.95e0 // Final simulation time
+    grow_dt              = 1.0e0  // Growth factor for timesteps
+    max_integrator_steps = 10000  // Max number of simulation timesteps
+    tag_buffer           = 2, 2   // array of integer values (one for each level that
+                                  // may be refined representing the number of cells
+                                  // by which tagged cells are buffered)
 }
 
 TimerManager
