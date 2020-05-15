@@ -130,7 +130,7 @@ DifferenceFirstOrder::computeDifferenceWithVariableLocalMean(
         offset_difference = domain.lower() - ghost_box_difference.lower();
     }
     
-    // Determine whether local mean is requred to be completed.
+    // Determine whether local mean is required to be completed.
     bool compute_variable_local_mean = false;
     if (variable_local_mean)
     {

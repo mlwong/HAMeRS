@@ -121,7 +121,7 @@ DifferenceSecondOrder::computeDifferenceWithVariableLocalMean(
         
         TBOX_ASSERT(shrinked_ghost_box_cell_data.contains(domain));
         TBOX_ASSERT(ghost_box_difference.contains(domain));
-#endif        
+#endif
         
         domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
@@ -130,7 +130,7 @@ DifferenceSecondOrder::computeDifferenceWithVariableLocalMean(
         offset_difference = domain.lower() - ghost_box_difference.lower();
     }
     
-    // Determine whether local mean is requred to be completed.
+    // Determine whether local mean is required to be completed.
     bool compute_variable_local_mean = false;
     if (variable_local_mean)
     {
