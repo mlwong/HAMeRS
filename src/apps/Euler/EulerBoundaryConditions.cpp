@@ -931,7 +931,7 @@ EulerBoundaryConditions::readPrimitiveDataEntry(
     
     std::vector<double> data_primitive_var;
     
-    std::vector<std::string> primitive_var_names = d_flow_model->getNamesOfPrimitiveVariables();
+    std::vector<std::string> primitive_var_names = d_flow_model->getNamesOfPrimitiveVariables(true);
     
     for (int vi = 0; vi < static_cast<int>(primitive_var_names.size()); vi++)
     {
