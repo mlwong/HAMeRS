@@ -444,7 +444,6 @@ FlowModelSourceUtilitiesFiveEqnAllaire::computeSourceTermsOnPatch(
             
             if (d_dim == tbox::Dimension(1))
             {
-                
                 // Get the pointer to cell data of momentum.
                 double* rho_u = data_momentum->getPointer(0);
                 
@@ -499,7 +498,7 @@ FlowModelSourceUtilitiesFiveEqnAllaire::computeSourceTermsOnPatch(
                     }
                 }
             }
-            else if (d_dim == tbox::Dimension(2))
+            else if (d_dim == tbox::Dimension(3))
             {
                 // Get the pointer to cell data of momentum.
                 double* rho_u = data_momentum->getPointer(0);
