@@ -75,6 +75,11 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
     TBOX_ASSERT(variable_diffusive_flux);
 #endif
     
+    d_flow_model->setupDiffusiveFluxUtilities();
+    
+    boost::shared_ptr<FlowModelDiffusiveFluxUtilities> diffusive_flux_utilities =
+        d_flow_model->getFlowModelDiffusiveFluxUtilities();
+    
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
@@ -114,9 +119,11 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         d_flow_model->registerPatchWithDataContext(patch, data_context);
         
-        d_flow_model->registerDiffusiveFlux(d_num_diff_ghosts);
+        diffusive_flux_utilities->registerDerivedVariablesForDiffusiveFluxes(d_num_diff_ghosts);
         
-        d_flow_model->computeGlobalDerivedCellData();
+        diffusive_flux_utilities->allocateMemoryForDerivedCellData();
+        
+        diffusive_flux_utilities->computeDerivedCellData();
         
         /*
          * Delcare containers for computing fluxes in different directions.
@@ -149,14 +156,14 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         // Get the variables for the derivatives in the diffusive flux.
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_x,
             var_component_idx_x,
             DIRECTION::X_DIRECTION,
             DIRECTION::X_DIRECTION);
         
         // Get the diffusivities in the diffusive flux.
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_x,
             diffusivities_component_idx_x,
             DIRECTION::X_DIRECTION,
@@ -288,9 +295,11 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         d_flow_model->registerPatchWithDataContext(patch, data_context);
         
-        d_flow_model->registerDiffusiveFlux(d_num_diff_ghosts);
+        diffusive_flux_utilities->registerDerivedVariablesForDiffusiveFluxes(d_num_diff_ghosts);
         
-        d_flow_model->computeGlobalDerivedCellData();
+        diffusive_flux_utilities->allocateMemoryForDerivedCellData();
+        
+        diffusive_flux_utilities->computeDerivedCellData();
         
         /*
          * Delcare containers for computing fluxes in different directions.
@@ -333,26 +342,26 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         // Get the variables for the derivatives in the diffusive flux.
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_x,
             var_component_idx_x,
             DIRECTION::X_DIRECTION,
             DIRECTION::X_DIRECTION);
         
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_y,
             var_component_idx_y,
             DIRECTION::X_DIRECTION,
             DIRECTION::Y_DIRECTION);
         
         // Get the diffusivities in the diffusive flux.
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_x,
             diffusivities_component_idx_x,
             DIRECTION::X_DIRECTION,
             DIRECTION::X_DIRECTION);
         
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_y,
             diffusivities_component_idx_y,
             DIRECTION::X_DIRECTION,
@@ -563,26 +572,26 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         // Get the variables for the derivatives in the diffusive flux.
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_x,
             var_component_idx_x,
             DIRECTION::Y_DIRECTION,
             DIRECTION::X_DIRECTION);
         
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_y,
             var_component_idx_y,
             DIRECTION::Y_DIRECTION,
             DIRECTION::Y_DIRECTION);
         
         // Get the diffusivities in the diffusive flux.
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_x,
             diffusivities_component_idx_x,
             DIRECTION::Y_DIRECTION,
             DIRECTION::X_DIRECTION);
         
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_y,
             diffusivities_component_idx_y,
             DIRECTION::Y_DIRECTION,
@@ -818,9 +827,11 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         
         d_flow_model->registerPatchWithDataContext(patch, data_context);
         
-        d_flow_model->registerDiffusiveFlux(d_num_diff_ghosts);
+        diffusive_flux_utilities->registerDerivedVariablesForDiffusiveFluxes(d_num_diff_ghosts);
         
-        d_flow_model->computeGlobalDerivedCellData();
+        diffusive_flux_utilities->allocateMemoryForDerivedCellData();
+        
+        diffusive_flux_utilities->computeDerivedCellData();
         
         /*
          * Delcare containers for computing fluxes in different directions.
@@ -873,38 +884,38 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         // Get the variables for the derivatives in the diffusive flux.
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_x,
             var_component_idx_x,
             DIRECTION::X_DIRECTION,
             DIRECTION::X_DIRECTION);
         
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_y,
             var_component_idx_y,
             DIRECTION::X_DIRECTION,
             DIRECTION::Y_DIRECTION);
         
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_z,
             var_component_idx_z,
             DIRECTION::X_DIRECTION,
             DIRECTION::Z_DIRECTION);
         
         // Get the diffusivities in the diffusive flux.
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_x,
             diffusivities_component_idx_x,
             DIRECTION::X_DIRECTION,
             DIRECTION::X_DIRECTION);
         
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_y,
             diffusivities_component_idx_y,
             DIRECTION::X_DIRECTION,
             DIRECTION::Y_DIRECTION);
         
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_z,
             diffusivities_component_idx_z,
             DIRECTION::X_DIRECTION,
@@ -1228,38 +1239,38 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         // Get the variables for the derivatives in the diffusive flux.
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_x,
             var_component_idx_x,
             DIRECTION::Y_DIRECTION,
             DIRECTION::X_DIRECTION);
         
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_y,
             var_component_idx_y,
             DIRECTION::Y_DIRECTION,
             DIRECTION::Y_DIRECTION);
         
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_z,
             var_component_idx_z,
             DIRECTION::Y_DIRECTION,
             DIRECTION::Z_DIRECTION);
         
         // Get the diffusivities in the diffusive flux.
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_x,
             diffusivities_component_idx_x,
             DIRECTION::Y_DIRECTION,
             DIRECTION::X_DIRECTION);
         
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_y,
             diffusivities_component_idx_y,
             DIRECTION::Y_DIRECTION,
             DIRECTION::Y_DIRECTION);
         
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_z,
             diffusivities_component_idx_z,
             DIRECTION::Y_DIRECTION,
@@ -1583,38 +1594,38 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          */
         
         // Get the variables for the derivatives in the diffusive flux.
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_x,
             var_component_idx_x,
             DIRECTION::Z_DIRECTION,
             DIRECTION::X_DIRECTION);
         
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_y,
             var_component_idx_y,
             DIRECTION::Z_DIRECTION,
             DIRECTION::Y_DIRECTION);
         
-        d_flow_model->getDiffusiveFluxVariablesForDerivative(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxVariablesForDerivative(
             var_data_z,
             var_component_idx_z,
             DIRECTION::Z_DIRECTION,
             DIRECTION::Z_DIRECTION);
         
         // Get the diffusivities in the diffusive flux.
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_x,
             diffusivities_component_idx_x,
             DIRECTION::Z_DIRECTION,
             DIRECTION::X_DIRECTION);
         
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_y,
             diffusivities_component_idx_y,
             DIRECTION::Z_DIRECTION,
             DIRECTION::Y_DIRECTION);
         
-        d_flow_model->getDiffusiveFluxDiffusivities(
+        diffusive_flux_utilities->getCellDataOfDiffusiveFluxDiffusivities(
             diffusivities_data_z,
             diffusivities_component_idx_z,
             DIRECTION::Z_DIRECTION,

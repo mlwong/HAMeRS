@@ -51,7 +51,7 @@ class EquationOfShearViscosityMixingRules
             const boost::shared_ptr<tbox::Database>& restart_db) const = 0;
         
         /*
-         * Compute the shear viscosity of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the shear viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual double
         getShearViscosity(
@@ -60,7 +60,7 @@ class EquationOfShearViscosityMixingRules
             const std::vector<const double*>& mass_fractions) const = 0;
         
         /*
-         * Compute the shear viscosity of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the shear viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeShearViscosity(
@@ -79,7 +79,7 @@ class EquationOfShearViscosityMixingRules
         }
         
         /*
-         * Compute the shear viscosity of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the shear viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual void
         computeShearViscosity(
@@ -106,7 +106,7 @@ class EquationOfShearViscosityMixingRules
         computeShearViscosity(
             boost::shared_ptr<pdat::CellData<double> >& data_shear_viscosity,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_species_temperatures,
+            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& data_species_temperatures,
             const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
             const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions) const
         {
@@ -128,7 +128,7 @@ class EquationOfShearViscosityMixingRules
         computeShearViscosity(
             boost::shared_ptr<pdat::CellData<double> >& data_shear_viscosity,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_species_temperatures,
+            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& data_species_temperatures,
             const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
             const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
             const hier::Box& domain) const = 0;

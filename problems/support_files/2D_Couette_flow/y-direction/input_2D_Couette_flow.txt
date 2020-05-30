@@ -1,0 +1,184 @@
+Application = "Navier-Stokes"
+
+NavierStokes
+{
+    // Name of project
+    project_name = "2D Couette flow in y-direction"
+    
+    // Number of species
+    num_species = 1
+    
+    // Flow model to use
+    flow_model = "SINGLE_SPECIES"
+    
+    Flow_model
+    {
+        // Equation of state to use
+        equation_of_state = "IDEAL_GAS"
+        
+        Equation_of_state_mixing_rules
+        {
+            species_gamma = 1.4
+            species_R = 287.142857143
+        }
+        
+        // Equation of shear viscosity to use
+        equation_of_shear_viscosity = "CONSTANT"
+        
+        Equation_of_shear_viscosity_mixing_rules
+        {
+            species_mu = 0.417
+            species_M  = 1.0
+        }
+        
+        // Equation of bulk viscosity to use
+        equation_of_bulk_viscosity = "CONSTANT"
+        
+        Equation_of_bulk_viscosity_mixing_rules
+        {
+            species_mu_v = 0.0
+            species_M    = 1.0
+        }
+        
+        // Equation of thermal conductivity to use
+        equation_of_thermal_conductivity = "PRANDTL"
+        
+        Equation_of_thermal_conductivity_mixing_rules
+        {
+            species_c_p = 1005
+            species_Pr  = 0.72
+            species_M   = 1.0
+            species_mu  = 0.417
+            
+            equation_of_shear_viscosity = "CONSTANT"
+        }
+    }
+    
+    // Convective flux reconstructor to use
+    convective_flux_reconstructor = "WCNS5_JS_HLLC_HLL"
+    
+    Convective_flux_reconstructor{}
+    
+    use_conservative_form_diffusive_flux = TRUE
+    
+    // Diffusive flux reconstructor to use
+    diffusive_flux_reconstructor = "SIXTH_ORDER"
+    
+    Diffusive_flux_reconstructor{}
+    
+    Boundary_data
+    {
+        boundary_edge_xlo
+        {
+            boundary_condition = "ISOTHERMAL_NO_SLIP"
+            temperature        = 300.0
+            velocity           = 0.0, 0.0
+        }
+        boundary_edge_xhi
+        {
+            boundary_condition = "ISOTHERMAL_NO_SLIP"
+            temperature        = 300.0
+            velocity           = 0.0, 69.445
+        }
+        
+        boundary_node_xlo_ylo
+        {
+            boundary_condition = "XISOTHERMAL_NO_SLIP"
+        }
+        boundary_node_xhi_ylo
+        {
+            boundary_condition = "XISOTHERMAL_NO_SLIP"
+        }
+        boundary_node_xlo_yhi
+        {
+            boundary_condition = "XISOTHERMAL_NO_SLIP"
+        }
+        boundary_node_xhi_yhi
+        {
+            boundary_condition = "XISOTHERMAL_NO_SLIP"
+        }
+    }
+}
+
+Main
+{
+    // Dimension of problem
+    dim = 2
+    
+    // Base name of log file
+    base_name = "2D_Couette_flow_y"
+    
+    // Whether all nodes log to individual files,
+    // if false only node 0 will log 
+    log_all_nodes = TRUE
+    
+    // Visualization dump parameters
+    // Setting to dump viz output: CONSTANT_TIME_INTERVAL, CONSTANT_TIMESTEP_INTERVAL
+    viz_dump_setting = "CONSTANT_TIME_INTERVAL"
+    // Frequency at which to dump viz output (0 to turn off)
+    viz_dump_interval = 0.05
+    // Name of directory in which to place viz output
+    viz_dump_dirname = "viz_2D_Couette_flow_y"
+    // Number of processors which write to each viz file
+    visit_number_procs_per_file = 1
+    
+    // Restart dump parameters
+    // Frequency at which to dump restart output
+    // (-1 to be as same as viz_dump_interval, 0 to turn off)
+    restart_interval = -1
+}
+
+CartesianGeometry
+{
+    domain_boxes = [(0, 0), (95, 15)] // Lower and upper indices of compuational domain
+    x_lo         = 0.0, 0.0  // Lower end of computational domain
+    x_up         = 1.0, 1.0  // Upper end of computational domain
+    
+    // Periodic_dimension. A non-zero value indicates that the direction is periodic
+   periodic_dimension = 0, 1
+}
+
+ExtendedTagAndInitialize{}
+
+PatchHierarchy
+{
+    // Maximum number of levels in hierarchy
+    max_levels = 1
+    
+    ratio_to_coarser{}
+    
+    largest_patch_size
+    {
+        level_0 = 1000, 1000
+    }
+    
+    smallest_patch_size
+    {
+        level_0 = 4, 4
+    }
+}
+
+GriddingAlgorithm{}
+
+RungeKuttaLevelIntegrator
+{
+    cfl                      = 0.5e0 // Max cfl factor used in problem
+    cfl_init                 = 0.5e0 // Initial cfl factor
+    lag_dt_computation       = FALSE
+    use_ghosts_to_compute_dt = TRUE
+}
+
+TimeRefinementIntegrator
+{
+    start_time           = 0.0    // Initial simulation time
+    end_time             = 1000.0 // Final simulation time
+    grow_dt              = 1.0    // Growth factor for timesteps
+    max_integrator_steps = 100000 // Max number of simulation timesteps
+}
+
+TimerManager
+{
+    print_threshold = 0.01
+    timer_list      = "apps::main::*"
+}
+

@@ -465,31 +465,34 @@ class EquationOfStateIdealGas: public EquationOfState
             const hier::Box& domain) const;
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+         * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+         * constant density divided by density).
          */
         double
-        getIsochoricPartialInternalEnergyPartialPressure(
+        getGruneisenParameter(
             const double* const density,
             const double* const pressure,
             const std::vector<const double*>& thermo_properties) const;
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+         * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+         * constant density divided by density).
          */
         void
-        computeIsochoricPartialInternalEnergyPartialPressure(
-            boost::shared_ptr<pdat::CellData<double> >& data_partial_internal_energy_partial_pressure,
+        computeGruneisenParameter(
+            boost::shared_ptr<pdat::CellData<double> >& data_gruneisen_parameter,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const std::vector<const double*>& thermo_properties,
             const hier::Box& domain) const;
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+         * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+         * constant density divided by density).
          */
         void
-        computeIsochoricPartialInternalEnergyPartialPressure(
-            boost::shared_ptr<pdat::SideData<double> >& data_partial_internal_energy_partial_pressure,
+        computeGruneisenParameter(
+            boost::shared_ptr<pdat::SideData<double> >& data_gruneisen_parameter,
             const boost::shared_ptr<pdat::SideData<double> >& data_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
             const std::vector<const double*>& thermo_properties,
@@ -497,22 +500,24 @@ class EquationOfStateIdealGas: public EquationOfState
             const hier::Box& domain) const;
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+         * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+         * constant density divided by density).
          */
         void
-        computeIsochoricPartialInternalEnergyPartialPressure(
-            boost::shared_ptr<pdat::CellData<double> >& data_partial_internal_energy_partial_pressure,
+        computeGruneisenParameter(
+            boost::shared_ptr<pdat::CellData<double> >& data_gruneisen_parameter,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
             const hier::Box& domain) const;
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+         * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+         * constant density divided by density).
          */
         void
-        computeIsochoricPartialInternalEnergyPartialPressure(
-            boost::shared_ptr<pdat::SideData<double> >& data_partial_internal_energy_partial_pressure,
+        computeGruneisenParameter(
+            boost::shared_ptr<pdat::SideData<double> >& data_gruneisen_parameter,
             const boost::shared_ptr<pdat::SideData<double> >& data_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
             const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
@@ -520,31 +525,31 @@ class EquationOfStateIdealGas: public EquationOfState
             const hier::Box& domain) const;
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+         * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         double
-        getIsobaricPartialInternalEnergyPartialDensity(
+        getPressureDerivativeWithDensity(
             const double* const density,
             const double* const pressure,
             const std::vector<const double*>& thermo_properties) const;
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+         * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         void
-        computeIsobaricPartialInternalEnergyPartialDensity(
-            boost::shared_ptr<pdat::CellData<double> >& data_partial_internal_energy_partial_density,
+        computePressureDerivativeWithDensity(
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const std::vector<const double*>& thermo_properties,
             const hier::Box& domain) const;
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+         * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         void
-        computeIsobaricPartialInternalEnergyPartialDensity(
-            boost::shared_ptr<pdat::SideData<double> >& data_partial_internal_energy_partial_density,
+        computePressureDerivativeWithDensity(
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
             const std::vector<const double*>& thermo_properties,
@@ -552,22 +557,22 @@ class EquationOfStateIdealGas: public EquationOfState
             const hier::Box& domain) const;
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+         * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         void
-        computeIsobaricPartialInternalEnergyPartialDensity(
-            boost::shared_ptr<pdat::CellData<double> >& data_partial_internal_energy_partial_density,
+        computePressureDerivativeWithDensity(
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
             const hier::Box& domain) const;
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+         * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         void
-        computeIsobaricPartialInternalEnergyPartialDensity(
-            boost::shared_ptr<pdat::SideData<double> >& data_partial_internal_energy_partial_density,
+        computePressureDerivativeWithDensity(
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
             const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
@@ -639,9 +644,9 @@ class EquationOfStateIdealGas: public EquationOfState
             const double* const rho,
             const double* const epsilon,
             const double& gamma,
-            const hier::IntVector& num_ghosts_pressure,
-            const hier::IntVector& num_ghosts_density,
-            const hier::IntVector& num_ghosts_internal_energy,
+            const hier::IntVector& offset_pressure,
+            const hier::IntVector& offset_density,
+            const hier::IntVector& offset_internal_energy,
             const hier::IntVector& ghostcell_dims_pressure,
             const hier::IntVector& ghostcell_dims_density,
             const hier::IntVector& ghostcell_dims_internal_energy,
@@ -657,10 +662,10 @@ class EquationOfStateIdealGas: public EquationOfState
             const double* const rho,
             const double* const epsilon,
             const double* const gamma,
-            const hier::IntVector& num_ghosts_pressure,
-            const hier::IntVector& num_ghosts_density,
-            const hier::IntVector& num_ghosts_internal_energy,
-            const hier::IntVector& num_ghosts_thermo_properties,
+            const hier::IntVector& offset_pressure,
+            const hier::IntVector& offset_density,
+            const hier::IntVector& offset_internal_energy,
+            const hier::IntVector& offset_thermo_properties,
             const hier::IntVector& ghostcell_dims_pressure,
             const hier::IntVector& ghostcell_dims_density,
             const hier::IntVector& ghostcell_dims_internal_energy,
@@ -677,9 +682,9 @@ class EquationOfStateIdealGas: public EquationOfState
             const double* const rho,
             const double* const p,
             const double& gamma,
-            const hier::IntVector& num_ghosts_sound_speed,
-            const hier::IntVector& num_ghosts_density,
-            const hier::IntVector& num_ghosts_pressure,
+            const hier::IntVector& offset_sound_speed,
+            const hier::IntVector& offset_density,
+            const hier::IntVector& offset_pressure,
             const hier::IntVector& ghostcell_dims_sound_speed,
             const hier::IntVector& ghostcell_dims_density,
             const hier::IntVector& ghostcell_dims_pressure,
@@ -695,10 +700,10 @@ class EquationOfStateIdealGas: public EquationOfState
             const double* const rho,
             const double* const p,
             const double* const gamma,
-            const hier::IntVector& num_ghosts_sound_speed,
-            const hier::IntVector& num_ghosts_density,
-            const hier::IntVector& num_ghosts_pressure,
-            const hier::IntVector& num_ghosts_thermo_properties,
+            const hier::IntVector& offset_sound_speed,
+            const hier::IntVector& offset_density,
+            const hier::IntVector& offset_pressure,
+            const hier::IntVector& offset_thermo_properties,
             const hier::IntVector& ghostcell_dims_sound_speed,
             const hier::IntVector& ghostcell_dims_density,
             const hier::IntVector& ghostcell_dims_pressure,
@@ -715,9 +720,9 @@ class EquationOfStateIdealGas: public EquationOfState
             const double* const rho,
             const double* const p,
             const double& gamma,
-            const hier::IntVector& num_ghosts_internal_energy,
-            const hier::IntVector& num_ghosts_density,
-            const hier::IntVector& num_ghosts_pressure,
+            const hier::IntVector& offset_internal_energy,
+            const hier::IntVector& offset_density,
+            const hier::IntVector& offset_pressure,
             const hier::IntVector& ghostcell_dims_internal_energy,
             const hier::IntVector& ghostcell_dims_density,
             const hier::IntVector& ghostcell_dims_pressure,
@@ -733,10 +738,10 @@ class EquationOfStateIdealGas: public EquationOfState
             const double* const rho,
             const double* const p,
             const double* const gamma,
-            const hier::IntVector& num_ghosts_internal_energy,
-            const hier::IntVector& num_ghosts_density,
-            const hier::IntVector& num_ghosts_pressure,
-            const hier::IntVector& num_ghosts_thermo_properties,
+            const hier::IntVector& offset_internal_energy,
+            const hier::IntVector& offset_density,
+            const hier::IntVector& offset_pressure,
+            const hier::IntVector& offset_thermo_properties,
             const hier::IntVector& ghostcell_dims_internal_energy,
             const hier::IntVector& ghostcell_dims_density,
             const hier::IntVector& ghostcell_dims_pressure,
@@ -753,9 +758,9 @@ class EquationOfStateIdealGas: public EquationOfState
             const double* const rho,
             const double* const p,
             const double& gamma,
-            const hier::IntVector& num_ghosts_enthalpy,
-            const hier::IntVector& num_ghosts_density,
-            const hier::IntVector& num_ghosts_pressure,
+            const hier::IntVector& offset_enthalpy,
+            const hier::IntVector& offset_density,
+            const hier::IntVector& offset_pressure,
             const hier::IntVector& ghostcell_dims_enthalpy,
             const hier::IntVector& ghostcell_dims_density,
             const hier::IntVector& ghostcell_dims_pressure,
@@ -771,10 +776,10 @@ class EquationOfStateIdealGas: public EquationOfState
             const double* const rho,
             const double* const p,
             const double* const gamma,
-            const hier::IntVector& num_ghosts_enthalpy,
-            const hier::IntVector& num_ghosts_density,
-            const hier::IntVector& num_ghosts_pressure,
-            const hier::IntVector& num_ghosts_thermo_properties,
+            const hier::IntVector& offset_enthalpy,
+            const hier::IntVector& offset_density,
+            const hier::IntVector& offset_pressure,
+            const hier::IntVector& offset_thermo_properties,
             const hier::IntVector& ghostcell_dims_enthalpy,
             const hier::IntVector& ghostcell_dims_density,
             const hier::IntVector& ghostcell_dims_pressure,
@@ -792,9 +797,9 @@ class EquationOfStateIdealGas: public EquationOfState
             const double* const p,
             const double& gamma,
             const double& c_v,
-            const hier::IntVector& num_ghosts_temperature,
-            const hier::IntVector& num_ghosts_density,
-            const hier::IntVector& num_ghosts_pressure,
+            const hier::IntVector& offset_temperature,
+            const hier::IntVector& offset_density,
+            const hier::IntVector& offset_pressure,
             const hier::IntVector& ghostcell_dims_temperature,
             const hier::IntVector& ghostcell_dims_density,
             const hier::IntVector& ghostcell_dims_pressure,
@@ -811,10 +816,10 @@ class EquationOfStateIdealGas: public EquationOfState
             const double* const p,
             const double* const gamma,
             const double* const c_v,
-            const hier::IntVector& num_ghosts_temperature,
-            const hier::IntVector& num_ghosts_density,
-            const hier::IntVector& num_ghosts_pressure,
-            const hier::IntVector& num_ghosts_thermo_properties,
+            const hier::IntVector& offset_temperature,
+            const hier::IntVector& offset_density,
+            const hier::IntVector& offset_pressure,
+            const hier::IntVector& offset_thermo_properties,
             const hier::IntVector& ghostcell_dims_temperature,
             const hier::IntVector& ghostcell_dims_density,
             const hier::IntVector& ghostcell_dims_pressure,
@@ -830,8 +835,8 @@ class EquationOfStateIdealGas: public EquationOfState
             double* const epsilon,
             const double* const T,
             const double& c_v,
-            const hier::IntVector& num_ghosts_internal_energy,
-            const hier::IntVector& num_ghosts_temperature,
+            const hier::IntVector& offset_internal_energy,
+            const hier::IntVector& offset_temperature,
             const hier::IntVector& ghostcell_dims_internal_energy,
             const hier::IntVector& ghostcell_dims_temperature,
             const hier::IntVector& domain_lo,
@@ -845,9 +850,9 @@ class EquationOfStateIdealGas: public EquationOfState
             double* const epsilon,
             const double* const T,
             const double* const c_v,
-            const hier::IntVector& num_ghosts_internal_energy,
-            const hier::IntVector& num_ghosts_temperature,
-            const hier::IntVector& num_ghosts_thermo_properties,
+            const hier::IntVector& offset_internal_energy,
+            const hier::IntVector& offset_temperature,
+            const hier::IntVector& offset_thermo_properties,
             const hier::IntVector& ghostcell_dims_internal_energy,
             const hier::IntVector& ghostcell_dims_temperature,
             const hier::IntVector& ghostcell_dims_thermo_properties,
@@ -861,7 +866,7 @@ class EquationOfStateIdealGas: public EquationOfState
         computeIsochoricSpecificHeatCapacity(
             double* const c_v,
             const double& c_v_src,
-            const hier::IntVector& num_ghosts_isochoric_specific_heat_capacity,
+            const hier::IntVector& offset_isochoric_specific_heat_capacity,
             const hier::IntVector& ghostcell_dims_isochoric_specific_heat_capacity,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims) const;
@@ -873,8 +878,8 @@ class EquationOfStateIdealGas: public EquationOfState
         computeIsochoricSpecificHeatCapacity(
             double* const c_v,
             const double* const c_v_src,
-            const hier::IntVector& num_ghosts_isochoric_specific_heat_capacity,
-            const hier::IntVector& num_ghosts_thermo_properties,
+            const hier::IntVector& offset_isochoric_specific_heat_capacity,
+            const hier::IntVector& offset_thermo_properties,
             const hier::IntVector& ghostcell_dims_isochoric_specific_heat_capacity,
             const hier::IntVector& ghostcell_dims_thermo_properties,
             const hier::IntVector& domain_lo,
@@ -887,7 +892,7 @@ class EquationOfStateIdealGas: public EquationOfState
         computeIsobaricSpecificHeatCapacity(
             double* const c_p,
             const double& c_p_src,
-            const hier::IntVector& num_ghosts_isobaric_specific_heat_capacity,
+            const hier::IntVector& offset_isobaric_specific_heat_capacity,
             const hier::IntVector& ghostcell_dims_isobaric_specific_heat_capacity,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims) const;
@@ -899,47 +904,55 @@ class EquationOfStateIdealGas: public EquationOfState
         computeIsobaricSpecificHeatCapacity(
             double* const c_p,
             const double* const c_p_src,
-            const hier::IntVector& num_ghosts_isobaric_specific_heat_capacity,
-            const hier::IntVector& num_ghosts_thermo_properties,
+            const hier::IntVector& offset_isobaric_specific_heat_capacity,
+            const hier::IntVector& offset_thermo_properties,
             const hier::IntVector& ghostcell_dims_isobaric_specific_heat_capacity,
             const hier::IntVector& ghostcell_dims_thermo_properties,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims) const;
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+         * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+         * constant density divided by density).
          */
         void
-        computeIsochoricPartialInternalEnergyPartialPressure(
-            double* const xi,
+        computeGruneisenParameter(
+            double* const Gamma,
             const double& gamma,
-            const hier::IntVector& num_ghosts_partial_internal_energy_partial_pressure,
-            const hier::IntVector& ghostcell_dims_partial_internal_energy_partial_pressure,
+            const hier::IntVector& offset_gruneisen_parameter,
+            const hier::IntVector& ghostcell_dims_gruneisen_parameter,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims) const;
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+         * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+         * constant density divided by density).
          */
         void
-        computeIsochoricPartialInternalEnergyPartialPressure(
-            double* const xi,
+        computeGruneisenParameter(
+            double* const Gamma,
             const double* const gamma,
-            const hier::IntVector& num_ghosts_partial_internal_energy_partial_pressure,
-            const hier::IntVector& num_ghosts_thermo_properties,
-            const hier::IntVector& ghostcell_dims_partial_internal_energy_partial_pressure,
+            const hier::IntVector& offset_gruneisen_parameter,
+            const hier::IntVector& offset_thermo_properties,
+            const hier::IntVector& ghostcell_dims_gruneisen_parameter,
             const hier::IntVector& ghostcell_dims_thermo_properties,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims) const;
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+         * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         void
-        computeIsobaricPartialInternalEnergyPartialDensity(
-            double* const delta,
-            const hier::IntVector& num_ghosts_partial_internal_energy_partial_density,
-            const hier::IntVector& ghostcell_dims_partial_internal_energy_partial_density,
+        computePressureDerivativeWithDensity(
+            double* const Psi,
+            const double* const rho,
+            const double* const p,
+            const hier::IntVector& offset_partial_pressure_partial_density,
+            const hier::IntVector& offset_density,
+            const hier::IntVector& offset_pressure,
+            const hier::IntVector& ghostcell_dims_partial_pressure_partial_density,
+            const hier::IntVector& ghostcell_dims_density,
+            const hier::IntVector& ghostcell_dims_pressure,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims) const;
         
@@ -952,9 +965,9 @@ class EquationOfStateIdealGas: public EquationOfState
             const double* const p,
             const double* const T,
             const double& R,
-            const hier::IntVector& num_ghosts_density,
-            const hier::IntVector& num_ghosts_pressure,
-            const hier::IntVector& num_ghosts_temperature,
+            const hier::IntVector& offset_density,
+            const hier::IntVector& offset_pressure,
+            const hier::IntVector& offset_temperature,
             const hier::IntVector& ghostcell_dims_density,
             const hier::IntVector& ghostcell_dims_pressure,
             const hier::IntVector& ghostcell_dims_temperature,
@@ -970,10 +983,10 @@ class EquationOfStateIdealGas: public EquationOfState
             const double* const p,
             const double* const T,
             const double* const R,
-            const hier::IntVector& num_ghosts_density,
-            const hier::IntVector& num_ghosts_pressure,
-            const hier::IntVector& num_ghosts_temperature,
-            const hier::IntVector& num_ghosts_thermo_properties,
+            const hier::IntVector& offset_density,
+            const hier::IntVector& offset_pressure,
+            const hier::IntVector& offset_temperature,
+            const hier::IntVector& offset_thermo_properties,
             const hier::IntVector& ghostcell_dims_density,
             const hier::IntVector& ghostcell_dims_pressure,
             const hier::IntVector& ghostcell_dims_temperature,

@@ -5,8 +5,11 @@
 
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
 #include "extn/visit_data_writer/ExtendedVisItDataWriter.hpp"
+#include "flow/flow_models/FlowModelBasicUtilities.hpp"
 #include "flow/flow_models/FlowModelBoundaryUtilities.hpp"
+#include "flow/flow_models/FlowModelDiffusiveFluxUtilities.hpp"
 #include "flow/flow_models/FlowModelRiemannSolver.hpp"
+#include "flow/flow_models/FlowModelSourceUtilities.hpp"
 #include "flow/flow_models/FlowModelStatisticsUtilities.hpp"
 #include "util/Directions.hpp"
 #include "util/mixing_rules/equations_of_state/EquationOfStateMixingRulesManager.hpp"
@@ -39,19 +42,17 @@ namespace VAR
                 PRIMITIVE };
 }
 
-namespace AVERAGING
-{
-    enum TYPE { SIMPLE,
-                ROE };
-}
-
 class FlowModelRiemannSolver;
+class FlowModelBasicUtilities;
+class FlowModelDiffusiveFluxUtilities;
+class FlowModelSourceUtilities;
 class FlowModelStatisticsUtilities;
 
 /*
- * The class should at least be able to register, compute and get the following cell data of the single-species/mixture:
- * DENSITY, MOMENTUM, TOTAL_ENERGY, PRESSURE, VELOCITY, SOUND_SPEED, PRIMITIVE_VARIABLES, CONVECTIVE_FLUX_X,
- * CONVECTIVE_FLUX_Y, CONVECTIVE_FLUX_Z, MAX_WAVE_SPEED_X, MAX_WAVE_SPEED_Y, MAX_WAVE_SPEED_Z.
+ * The class should at least be able to provide the following cell data of the single-species/mixture:
+ * DENSITY, MOMENTUM, TOTAL_ENERGY (per unit volume), VELOCITY, INTERNAL_ENERGY (per unit mass), PRESSURE,
+ * SOUND_SPEED, PRIMITIVE_VARIABLES, CONVECTIVE_FLUX_X, CONVECTIVE_FLUX_Y, CONVECTIVE_FLUX_Z,
+ * MAX_WAVE_SPEED_X, MAX_WAVE_SPEED_Y, MAX_WAVE_SPEED_Z.
  */
 class FlowModel:
     public appu::VisDerivedDataStrategy,
@@ -72,14 +73,12 @@ class FlowModel:
                 d_num_eqn(num_eqn),
                 d_num_ghosts(-hier::IntVector::getOne(d_dim)),
                 d_patch(nullptr),
-                d_patch_registered(false),
-                d_interior_box(hier::Box::getEmptyBox(dim)),
-                d_ghost_box(hier::Box::getEmptyBox(dim)),
+                d_interior_box(hier::Box::getEmptyBox(d_dim)),
+                d_ghost_box(hier::Box::getEmptyBox(d_dim)),
                 d_interior_dims(hier::IntVector::getZero(d_dim)),
                 d_ghostcell_dims(hier::IntVector::getZero(d_dim)),
-                d_proj_var_conservative_averaging(AVERAGING::SIMPLE),
-                d_proj_var_primitive_averaging(AVERAGING::SIMPLE),
-                d_global_derived_cell_data_computed(false)
+                d_subdomain_box(hier::Box::getEmptyBox(d_dim)),
+                d_derived_cell_data_computed(false)
         {
             NULL_USE(flow_model_db);
         }
@@ -114,7 +113,7 @@ class FlowModel:
          * Get the number of ghost cells of conservative variables.
          */
         const hier::IntVector&
-        getNumberOfGhostCells()
+        getNumberOfGhostCells() const
         {
             // Check whether a patch is already registered.
             if (!d_patch)
@@ -144,6 +143,33 @@ class FlowModel:
         getFlowModelRiemannSolver() const
         {
             return d_flow_model_riemann_solver;
+        }
+        
+        /*
+         * Return the boost::shared_ptr to the basic utilities object.
+         */
+        const boost::shared_ptr<FlowModelBasicUtilities>&
+        getFlowModelBasicUtilities() const
+        {
+            return d_flow_model_basic_utilities;
+        }
+        
+        /*
+         * Return the boost::shared_ptr to the diffusive flux utilities object.
+         */
+        const boost::shared_ptr<FlowModelDiffusiveFluxUtilities>&
+        getFlowModelDiffusiveFluxUtilities() const
+        {
+            return d_flow_model_diffusive_flux_utilities;
+        }
+        
+        /*
+         * Return the boost::shared_ptr to the source utilities object.
+         */
+        const boost::shared_ptr<FlowModelSourceUtilities>&
+        getFlowModelSourceUtilities() const
+        {
+            return d_flow_model_source_utilities;
         }
         
         /*
@@ -226,212 +252,91 @@ class FlowModel:
          * in the map is ignored.
          */
         virtual void
-        registerDerivedCellVariable(
+        registerDerivedVariables(
             const std::unordered_map<std::string, hier::IntVector>& num_subghosts_of_data) = 0;
         
         /*
-         * Register the required derived variables for transformation between conservative
-         * variables and characteristic variables.
-         */
-        virtual void
-        registerDerivedVariablesForCharacteristicProjectionOfConservativeVariables(
-            const hier::IntVector& num_subghosts,
-            const AVERAGING::TYPE& averaging) = 0;
-        
-        /*
-         * Register the required derived variables for transformation between primitive variables
-         * and characteristic variables.
-         */
-        virtual void
-        registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
-            const hier::IntVector& num_subghosts,
-            const AVERAGING::TYPE& averaging) = 0;
-        
-        /*
-         * Register the required variables for the computation of diffusive flux in the
-         * registered patch.
-         */
-        virtual void
-        registerDiffusiveFlux(
-            const hier::IntVector& num_subghosts);
-        
-        /*
-         * Unregister the registered patch. The registered data context and all global derived
-         * cell data in the patch are dumped.
+         * Unregister the registered patch. The registered data context and the cell data of all derived variables in
+         * the patch are cleared.
          */
         virtual void unregisterPatch() = 0;
         
         /*
-         * Compute global cell data of different registered derived variables with the registered data context.
+         * Check whether a patch is registered or not.
          */
-        void
-        computeGlobalDerivedCellData()
-        {
-            const hier::Box empty_box(d_dim);
-            computeGlobalDerivedCellData(empty_box);
-        }
+        bool hasRegisteredPatch() const;
         
         /*
-         * Compute global cell data of different registered derived variables with the registered data context.
+         * Get registered patch.
          */
-        virtual void
-        computeGlobalDerivedCellData(const hier::Box& domain) = 0;
+        const hier::Patch& getRegisteredPatch() const;
         
         /*
-         * Get the global cell data of one cell variable in the registered patch.
+         * Return boost::shared_ptr to patch data context.
+         */
+        const boost::shared_ptr<hier::VariableContext>& getDataContext() const;
+        
+        /*
+         * Get sub-domain box.
+         */
+        const hier::Box& getSubdomainBox() const;
+        
+        /*
+         * Set sub-domain box.
+         */
+        void setSubdomainBox(const hier::Box& subdomain_box);
+        
+        /*
+         * Allocate memory for cell data of different registered derived variables.
+         */
+        virtual void allocateMemoryForDerivedCellData() = 0;
+        
+        /*
+         * Compute the cell data of different registered derived variables with the registered data context.
+         */
+        virtual void computeDerivedCellData() = 0;
+        
+        /*
+         * Get the cell data of one cell variable in the registered patch.
          */
         virtual boost::shared_ptr<pdat::CellData<double> >
-        getGlobalCellData(const std::string& variable_key) = 0;
+        getCellData(const std::string& variable_key) = 0;
         
         /*
-         * Get the global cell data of different cell variables in the registered patch.
+         * Get the cell data of different cell variables in the registered patch.
          */
         virtual std::vector<boost::shared_ptr<pdat::CellData<double> > >
-        getGlobalCellData(const std::vector<std::string>& variable_keys) = 0;
+        getCellData(const std::vector<std::string>& variable_keys) = 0;
         
         /*
-         * Fill the interior global cell data of conservative variables with zeros.
-         */
-        virtual void
-        fillZeroGlobalCellDataConservativeVariables() = 0;
-        
-        /*
-         * Update the interior global cell data of conservative variables after time advancement.
-         */
-        virtual void
-        updateGlobalCellDataConservativeVariables() = 0;
-        
-        /*
-         * Get the global cell data of the conservative variables in the registered patch.
+         * Get the cell data of species cell variables in the registered patch.
          */
         virtual std::vector<boost::shared_ptr<pdat::CellData<double> > >
-        getGlobalCellDataConservativeVariables() = 0;
+        getSpeciesCellData(const std::string& variable_key) = 0;
         
         /*
-         * Get the global cell data of the primitive variables in the registered patch.
+         * Fill the cell data of conservative variables in the interior box with value zero.
+         */
+        virtual void
+        fillCellDataOfConservativeVariablesWithZero() = 0;
+        
+        /*
+         * Update the cell data of conservative variables in the interior box after time advancement.
+         */
+        virtual void
+        updateCellDataOfConservativeVariables() = 0;
+        
+        /*
+         * Get the cell data of the conservative variables in the registered patch.
          */
         virtual std::vector<boost::shared_ptr<pdat::CellData<double> > >
-        getGlobalCellDataPrimitiveVariables() = 0;
+        getCellDataOfConservativeVariables() = 0;
         
         /*
-         * Get the number of projection variables for transformation between conservative
-         * variables and characteristic variables.
+         * Get the cell data of the primitive variables in the registered patch.
          */
-        virtual int
-        getNumberOfProjectionVariablesForConservativeVariables() const = 0;
-        
-        /*
-         * Get the number of projection variables for transformation between primitive variables
-         * and characteristic variables.
-         */
-        virtual int
-        getNumberOfProjectionVariablesForPrimitiveVariables() const = 0;
-        
-        /*
-         * Compute global side data of the projection variables for transformation between
-         * conservative variables and characteristic variables.
-         */
-        virtual void
-        computeGlobalSideDataProjectionVariablesForConservativeVariables(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
-        
-        /*
-         * Compute global side data of the projection variables for transformation between
-         * primitive variables and characteristic variables.
-         */
-        virtual void
-        computeGlobalSideDataProjectionVariablesForPrimitiveVariables(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
-        
-        /*
-         * Compute global side data of characteristic variables from conservative variables.
-         */
-        virtual void
-        computeGlobalSideDataCharacteristicVariablesFromConservativeVariables(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
-            const int& idx_offset) = 0;
-        
-        /*
-         * Compute global side data of characteristic variables from primitive variables.
-         */
-        virtual void
-        computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
-            const int& idx_offset) = 0;
-        
-        /*
-         * Compute global side data of conservative variables from characteristic variables.
-         */
-        virtual void
-        computeGlobalSideDataConservativeVariablesFromCharacteristicVariables(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
-        
-        /*
-         * Compute global side data of primitive variables from characteristic variables.
-         */
-        virtual void
-        computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
-        
-        /*
-         * Check whether the given side conservative variables are within the bounds.
-         */
-        virtual void
-        checkGlobalSideDataConservativeVariablesBounded(
-            boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables) = 0;
-        
-        /*
-         * Check whether the given side primitive variables are within the bounds.
-         */
-        virtual void
-        checkGlobalSideDataPrimitiveVariablesBounded(
-            boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables) = 0;
-        
-        /*
-         * Convert vector of pointers of conservative cell data to vectors of pointers of primitive cell data.
-         */
-        virtual void
-        convertLocalCellDataPointersConservativeVariablesToPrimitiveVariables(
-            const std::vector<const double*>& conservative_variables,
-            const std::vector<double*>& primitive_variables) = 0;
-        
-        /*
-         * Convert vector of pointers of primitive cell data to vectors of pointers of conservative cell data.
-         */
-        virtual void
-        convertLocalCellDataPointersPrimitiveVariablesToConservativeVariables(
-            const std::vector<const double*>& primitive_variables,
-            const std::vector<double*>& conservative_variables) = 0;
-        
-        /*
-         * Get the variables for the derivatives in the diffusive fluxes.
-         */
-        virtual void
-        getDiffusiveFluxVariablesForDerivative(
-            std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_var_data,
-            std::vector<std::vector<int> >& derivative_var_component_idx,
-            const DIRECTION::TYPE& flux_direction,
-            const DIRECTION::TYPE& derivative_direction);
-        
-        /*
-         * Get the diffusivities in the diffusive flux.
-         */
-        virtual void
-        getDiffusiveFluxDiffusivities(
-            std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& diffusivities_data,
-            std::vector<std::vector<int> >& diffusivities_component_idx,
-            const DIRECTION::TYPE& flux_direction,
-            const DIRECTION::TYPE& derivative_direction);
+        virtual std::vector<boost::shared_ptr<pdat::CellData<double> > >
+        getCellDataOfPrimitiveVariables() = 0;
         
         /*
          * Set the plotting context.
@@ -448,6 +353,24 @@ class FlowModel:
          */
         void
         setupRiemannSolver();
+        
+        /*
+         * Setup the basic utilties object.
+         */
+        void
+        setupBasicUtilities();
+        
+        /*
+         * Setup the diffusive flux utilties object.
+         */
+        void
+        setupDiffusiveFluxUtilities();
+        
+        /*
+         * Setup the source flux utilties object.
+         */
+        void
+        setupSourceUtilities();
         
         /*
          * Setup the statistics utilties object.
@@ -485,15 +408,6 @@ class FlowModel:
         setDataContext(const boost::shared_ptr<hier::VariableContext>& context)
         {
            d_data_context = context;
-        }
-        
-        /*
-         * Return boost::shared_ptr to patch data context.
-         */
-        boost::shared_ptr<hier::VariableContext>
-        getDataContext() const
-        {
-           return d_data_context;
         }
         
         /*
@@ -566,11 +480,6 @@ class FlowModel:
         boost::shared_ptr<hier::VariableContext> d_data_context;
         
         /*
-         * Boolean to determine whether a patch is already registered.
-         */
-        bool d_patch_registered;
-        
-        /*
          * Interior box and box with ghost cells.
          */
         hier::Box d_interior_box;
@@ -583,15 +492,14 @@ class FlowModel:
         hier::IntVector d_ghostcell_dims;
         
         /*
-         * Settings for projection variables.
+         * Sub-domain box to compute the derived cell data.
          */
-        AVERAGING::TYPE d_proj_var_conservative_averaging;
-        AVERAGING::TYPE d_proj_var_primitive_averaging;
+        hier::Box d_subdomain_box;
         
         /*
-         * Whether all or part of global derived cell data is computed.
+         * Whether all derived cell data is computed in full domain or sub-domain.
          */
-        bool d_global_derived_cell_data_computed;
+        bool d_derived_cell_data_computed;
         
         /*
          * boost::shared_ptr to the plotting context.
@@ -602,6 +510,21 @@ class FlowModel:
          * boost::shared_ptr to the Riemann solver object for the flow model.
          */
         boost::shared_ptr<FlowModelRiemannSolver> d_flow_model_riemann_solver;
+        
+        /*
+         * boost::shared_ptr to the basic utilities object for the flow model.
+         */
+        boost::shared_ptr<FlowModelBasicUtilities> d_flow_model_basic_utilities;
+        
+        /*
+         * boost::shared_ptr to the diffusive flux utilities object for the flow model.
+         */
+        boost::shared_ptr<FlowModelDiffusiveFluxUtilities> d_flow_model_diffusive_flux_utilities;
+        
+        /*
+         * boost::shared_ptr to the source utilities object for the flow model.
+         */
+        boost::shared_ptr<FlowModelSourceUtilities> d_flow_model_source_utilities;
         
         /*
          * boost::shared_ptr to the boundary utilities object for the flow model.

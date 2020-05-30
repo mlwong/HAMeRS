@@ -708,16 +708,17 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             num_subghosts_of_data.insert(
                 std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
             
-            d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+            d_flow_model->registerDerivedVariables(num_subghosts_of_data);
             
-            d_flow_model->computeGlobalDerivedCellData();
+            d_flow_model->allocateMemoryForDerivedCellData();
+            
+            d_flow_model->computeDerivedCellData();
             
             /*
              * Get the pointer to density data inside the flow model.
              */
             
-            boost::shared_ptr<pdat::CellData<double> > flow_model_data_density =
-                d_flow_model->getGlobalCellData("DENSITY");
+            boost::shared_ptr<pdat::CellData<double> > flow_model_data_density = d_flow_model->getCellData("DENSITY");
             
             /*
              * Transfer data from flow model to the class variable.
@@ -749,16 +750,18 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             num_subghosts_of_data.insert(
                 std::pair<std::string, hier::IntVector>("TOTAL_ENERGY", hier::IntVector::getZero(d_dim)));
             
-            d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+            d_flow_model->registerDerivedVariables(num_subghosts_of_data);
             
-            d_flow_model->computeGlobalDerivedCellData();
+            d_flow_model->allocateMemoryForDerivedCellData();
+            
+            d_flow_model->computeDerivedCellData();
             
             /*
              * Get the pointer to total energy data inside the flow model.
              */
             
             boost::shared_ptr<pdat::CellData<double> > flow_model_data_total_energy =
-                d_flow_model->getGlobalCellData("TOTAL_ENERGY");
+                d_flow_model->getCellData("TOTAL_ENERGY");
             
             /*
              * Transfer data from flow model to the class variable.
@@ -790,16 +793,17 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             num_subghosts_of_data.insert(
                 std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
             
-            d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+            d_flow_model->registerDerivedVariables(num_subghosts_of_data);
             
-            d_flow_model->computeGlobalDerivedCellData();
+            d_flow_model->allocateMemoryForDerivedCellData();
+            
+            d_flow_model->computeDerivedCellData();
             
             /*
              * Get the pointer to pressure data inside the flow model.
              */
             
-            boost::shared_ptr<pdat::CellData<double> > flow_model_data_pressure =
-                d_flow_model->getGlobalCellData("PRESSURE");
+            boost::shared_ptr<pdat::CellData<double> > flow_model_data_pressure = d_flow_model->getCellData("PRESSURE");
             
             /*
              * Transfer data from flow model to the class variable.
@@ -837,17 +841,18 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             num_subghosts_of_data.insert(
                 std::pair<std::string, hier::IntVector>("VELOCITY", d_num_value_ghosts));
             
-            d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+            d_flow_model->registerDerivedVariables(num_subghosts_of_data);
             
-            d_flow_model->computeGlobalDerivedCellData();
+            d_flow_model->allocateMemoryForDerivedCellData();
+            
+            d_flow_model->computeDerivedCellData();
             
             // Get the cell data.
             boost::shared_ptr<pdat::CellData<double> > dilatation(
                 BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                     patch.getPatchData(d_value_tagger_variable_dilatation, data_context)));
             
-            boost::shared_ptr<pdat::CellData<double> > velocity =
-                d_flow_model->getGlobalCellData("VELOCITY");
+            boost::shared_ptr<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
             
             // Get the dimensions of box that covers the interior of patch.
             const hier::Box interior_box = patch.getBox();
@@ -1086,17 +1091,18 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             num_subghosts_of_data.insert(
                 std::pair<std::string, hier::IntVector>("VELOCITY", d_num_value_ghosts));
             
-            d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+            d_flow_model->registerDerivedVariables(num_subghosts_of_data);
             
-            d_flow_model->computeGlobalDerivedCellData();
+            d_flow_model->allocateMemoryForDerivedCellData();
+            
+            d_flow_model->computeDerivedCellData();
             
             // Get the cell data.
             boost::shared_ptr<pdat::CellData<double> > enstrophy(
                 BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                     patch.getPatchData(d_value_tagger_variable_enstrophy, data_context)));
             
-            boost::shared_ptr<pdat::CellData<double> > velocity =
-                d_flow_model->getGlobalCellData("VELOCITY");
+            boost::shared_ptr<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
             
             // Get the dimensions of box that covers the interior of patch.
             const hier::Box interior_box = patch.getBox();
@@ -1335,16 +1341,18 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             num_subghosts_of_data.insert(
                 std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
             
-            d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+            d_flow_model->registerDerivedVariables(num_subghosts_of_data);
             
-            d_flow_model->computeGlobalDerivedCellData();
+            d_flow_model->allocateMemoryForDerivedCellData();
+            
+            d_flow_model->computeDerivedCellData();
             
             /*
              * Get the pointer to mass fraction data inside the flow model.
              */
             
             boost::shared_ptr<pdat::CellData<double> > flow_model_data_mass_fractions =
-                d_flow_model->getGlobalCellData("MASS_FRACTIONS");
+                d_flow_model->getCellData("MASS_FRACTIONS");
             
             /*
              * Transfer data from flow model to the class variable.

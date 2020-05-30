@@ -116,12 +116,18 @@ class RungeKuttaPatchStrategy:
             const bool initial_time) = 0;
         
         /**
-         * Compute the stable time increment for a patch on the level with the given number. The
-         * boolean flag initial_time is true if the routine is called at the initial simulation
-         * time; otherwise it is false. The double argument dt_time is the simulation time.
+         * Get the number of spectral radiuses.
          */
-        virtual double
-        computeStableDtOnPatch(
+        virtual int
+        getNumberOfSpectralRadiuses() const = 0;
+        
+        /**
+         * Compute the spectral radiuses and local stable time increment for patch using a CFL condition
+         * and return them. The boolean flag initial_time is true if the routine is called at the initial
+         * simulation time; otherwise it is false. The double argument dt_time is the simulation time.
+         */
+        virtual std::vector<double>
+        computeSpectralRadiusesAndStableDtOnPatch(
             hier::Patch& patch,
             const bool initial_time,
             const double dt_time) = 0;

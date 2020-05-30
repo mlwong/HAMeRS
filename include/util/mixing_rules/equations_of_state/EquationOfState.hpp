@@ -1111,27 +1111,29 @@ class EquationOfState
             const hier::Box& domain) const = 0;
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+         * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+         * constant density divided by density).
          */
         virtual double
-        getIsochoricPartialInternalEnergyPartialPressure(
+        getGruneisenParameter(
             const double* const density,
             const double* const pressure,
             const std::vector<const double*>& thermo_properties) const = 0;
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+         * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+         * constant density divided by density).
          */
         void
-        computeIsochoricPartialInternalEnergyPartialPressure(
-            boost::shared_ptr<pdat::CellData<double> >& data_partial_internal_energy_partial_pressure,
+        computeGruneisenParameter(
+            boost::shared_ptr<pdat::CellData<double> >& data_gruneisen_parameter,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const std::vector<const double*>& thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
-            computeIsochoricPartialInternalEnergyPartialPressure(
-                data_partial_internal_energy_partial_pressure,
+            computeGruneisenParameter(
+                data_gruneisen_parameter,
                 data_density,
                 data_pressure,
                 thermo_properties,
@@ -1139,30 +1141,32 @@ class EquationOfState
         }
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+         * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+         * constant density divided by density).
          */
         virtual void
-        computeIsochoricPartialInternalEnergyPartialPressure(
-            boost::shared_ptr<pdat::CellData<double> >& data_partial_internal_energy_partial_pressure,
+        computeGruneisenParameter(
+            boost::shared_ptr<pdat::CellData<double> >& data_gruneisen_parameter,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const std::vector<const double*>& thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+         * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+         * constant density divided by density).
          */
         void
-        computeIsochoricPartialInternalEnergyPartialPressure(
-            boost::shared_ptr<pdat::SideData<double> >& data_partial_internal_energy_partial_pressure,
+        computeGruneisenParameter(
+            boost::shared_ptr<pdat::SideData<double> >& data_gruneisen_parameter,
             const boost::shared_ptr<pdat::SideData<double> >& data_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
             const std::vector<const double*>& thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
-            computeIsochoricPartialInternalEnergyPartialPressure(
-                data_partial_internal_energy_partial_pressure,
+            computeGruneisenParameter(
+                data_gruneisen_parameter,
                 data_density,
                 data_pressure,
                 thermo_properties,
@@ -1171,11 +1175,12 @@ class EquationOfState
         }
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+         * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+         * constant density divided by density).
          */
         virtual void
-        computeIsochoricPartialInternalEnergyPartialPressure(
-            boost::shared_ptr<pdat::SideData<double> >& data_partial_internal_energy_partial_pressure,
+        computeGruneisenParameter(
+            boost::shared_ptr<pdat::SideData<double> >& data_gruneisen_parameter,
             const boost::shared_ptr<pdat::SideData<double> >& data_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
             const std::vector<const double*>& thermo_properties,
@@ -1183,18 +1188,19 @@ class EquationOfState
             const hier::Box& domain) const = 0;
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+         * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+         * constant density divided by density).
          */
         void
-        computeIsochoricPartialInternalEnergyPartialPressure(
-            boost::shared_ptr<pdat::CellData<double> >& data_partial_internal_energy_partial_pressure,
+        computeGruneisenParameter(
+            boost::shared_ptr<pdat::CellData<double> >& data_gruneisen_parameter,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
-            computeIsochoricPartialInternalEnergyPartialPressure(
-                data_partial_internal_energy_partial_pressure,
+            computeGruneisenParameter(
+                data_gruneisen_parameter,
                 data_density,
                 data_pressure,
                 data_thermo_properties,
@@ -1202,30 +1208,32 @@ class EquationOfState
         }
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+         * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+         * constant density divided by density).
          */
         virtual void
-        computeIsochoricPartialInternalEnergyPartialPressure(
-            boost::shared_ptr<pdat::CellData<double> >& data_partial_internal_energy_partial_pressure,
+        computeGruneisenParameter(
+            boost::shared_ptr<pdat::CellData<double> >& data_gruneisen_parameter,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+         * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+         * constant density divided by density).
          */
         void
-        computeIsochoricPartialInternalEnergyPartialPressure(
-            boost::shared_ptr<pdat::SideData<double> >& data_partial_internal_energy_partial_pressure,
+        computeGruneisenParameter(
+            boost::shared_ptr<pdat::SideData<double> >& data_gruneisen_parameter,
             const boost::shared_ptr<pdat::SideData<double> >& data_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
             const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
-            computeIsochoricPartialInternalEnergyPartialPressure(
-                data_partial_internal_energy_partial_pressure,
+            computeGruneisenParameter(
+                data_gruneisen_parameter,
                 data_density,
                 data_pressure,
                 data_thermo_properties,
@@ -1234,11 +1242,12 @@ class EquationOfState
         }
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+         * Compute the Gruneisen parameter (partial derivative of pressure w.r.t. specific internal energy under
+         * constant density divided by density).
          */
         virtual void
-        computeIsochoricPartialInternalEnergyPartialPressure(
-            boost::shared_ptr<pdat::SideData<double> >& data_partial_internal_energy_partial_pressure,
+        computeGruneisenParameter(
+            boost::shared_ptr<pdat::SideData<double> >& data_gruneisen_parameter,
             const boost::shared_ptr<pdat::SideData<double> >& data_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
             const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
@@ -1246,27 +1255,27 @@ class EquationOfState
             const hier::Box& domain) const = 0;
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+         * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         virtual double
-        getIsobaricPartialInternalEnergyPartialDensity(
+        getPressureDerivativeWithDensity(
             const double* const density,
             const double* const pressure,
             const std::vector<const double*>& thermo_properties) const = 0;
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+         * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         void
-        computeIsobaricPartialInternalEnergyPartialDensity(
-            boost::shared_ptr<pdat::CellData<double> >& data_partial_internal_energy_partial_density,
+        computePressureDerivativeWithDensity(
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const std::vector<const double*>& thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
-            computeIsobaricPartialInternalEnergyPartialDensity(
-                data_partial_internal_energy_partial_density,
+            computePressureDerivativeWithDensity(
+                data_partial_pressure_partial_density,
                 data_density,
                 data_pressure,
                 thermo_properties,
@@ -1274,30 +1283,30 @@ class EquationOfState
         }
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+         * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         virtual void
-        computeIsobaricPartialInternalEnergyPartialDensity(
-            boost::shared_ptr<pdat::CellData<double> >& data_partial_internal_energy_partial_density,
+        computePressureDerivativeWithDensity(
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const std::vector<const double*>& thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+         * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         void
-        computeIsobaricPartialInternalEnergyPartialDensity(
-            boost::shared_ptr<pdat::SideData<double> >& data_partial_internal_energy_partial_density,
+        computePressureDerivativeWithDensity(
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
             const std::vector<const double*>& thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
-            computeIsobaricPartialInternalEnergyPartialDensity(
-                data_partial_internal_energy_partial_density,
+            computePressureDerivativeWithDensity(
+                data_partial_pressure_partial_density,
                 data_density,
                 data_pressure,
                 thermo_properties,
@@ -1306,11 +1315,11 @@ class EquationOfState
         }
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+         * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         virtual void
-        computeIsobaricPartialInternalEnergyPartialDensity(
-            boost::shared_ptr<pdat::SideData<double> >& data_partial_internal_energy_partial_density,
+        computePressureDerivativeWithDensity(
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
             const std::vector<const double*>& thermo_properties,
@@ -1318,18 +1327,18 @@ class EquationOfState
             const hier::Box& domain) const = 0;
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+         * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         void
-        computeIsobaricPartialInternalEnergyPartialDensity(
-            boost::shared_ptr<pdat::CellData<double> >& data_partial_internal_energy_partial_density,
+        computePressureDerivativeWithDensity(
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties) const
         {
             const hier::Box empty_box(d_dim);
-            computeIsobaricPartialInternalEnergyPartialDensity(
-                data_partial_internal_energy_partial_density,
+            computePressureDerivativeWithDensity(
+                data_partial_pressure_partial_density,
                 data_density,
                 data_pressure,
                 data_thermo_properties,
@@ -1337,30 +1346,30 @@ class EquationOfState
         }
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+         * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         virtual void
-        computeIsobaricPartialInternalEnergyPartialDensity(
-            boost::shared_ptr<pdat::CellData<double> >& data_partial_internal_energy_partial_density,
+        computePressureDerivativeWithDensity(
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
             const hier::Box& domain) const = 0;
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+         * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         void
-        computeIsobaricPartialInternalEnergyPartialDensity(
-            boost::shared_ptr<pdat::SideData<double> >& data_partial_internal_energy_partial_density,
+        computePressureDerivativeWithDensity(
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
             const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
             int side_normal) const
         {
             const hier::Box empty_box(d_dim);
-            computeIsobaricPartialInternalEnergyPartialDensity(
-                data_partial_internal_energy_partial_density,
+            computePressureDerivativeWithDensity(
+                data_partial_pressure_partial_density,
                 data_density,
                 data_pressure,
                 data_thermo_properties,
@@ -1369,11 +1378,11 @@ class EquationOfState
         }
         
         /*
-         * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+         * Compute the partial derivative of pressure w.r.t. density under constant specific internal energy.
          */
         virtual void
-        computeIsobaricPartialInternalEnergyPartialDensity(
-            boost::shared_ptr<pdat::SideData<double> >& data_partial_internal_energy_partial_density,
+        computePressureDerivativeWithDensity(
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_density,
             const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
             const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,

@@ -616,7 +616,9 @@ NavierStokesBoundaryConditions::readDirichletBoundaryDataEntry(
     }
     
     // Convert the primitive boundary data to conservative boundary data.
-    d_flow_model->convertLocalCellDataPointersPrimitiveVariablesToConservativeVariables(V_ptr, Q_ptr);
+    d_flow_model->setupBasicUtilities();
+    boost::shared_ptr<FlowModelBasicUtilities> basic_utilities = d_flow_model->getFlowModelBasicUtilities();
+    basic_utilities->convertPrimitiveVariablesToConservativeVariables(V_ptr, Q_ptr);
     
     std::vector<boost::shared_ptr<pdat::CellVariable<double> > > conservative_var =
         d_flow_model->getConservativeVariables();
@@ -716,7 +718,7 @@ NavierStokesBoundaryConditions::setPhysicalBoundaryConditions(
     d_flow_model->registerPatchWithDataContext(patch, data_context);
     
     std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_var_data =
-        d_flow_model->getGlobalCellDataConservativeVariables();
+        d_flow_model->getCellDataOfConservativeVariables();
     
     /*
      * Get the boost::shared_ptr to flow model boundary utilities object from d_flow_model.
@@ -1028,7 +1030,7 @@ NavierStokesBoundaryConditions::readPrimitiveDataEntry(
     
     std::vector<double> data_primitive_var;
     
-    std::vector<std::string> primitive_var_names = d_flow_model->getNamesOfPrimitiveVariables();
+    std::vector<std::string> primitive_var_names = d_flow_model->getNamesOfPrimitiveVariables(true);
     
     for (int vi = 0; vi < static_cast<int>(primitive_var_names.size()); vi++)
     {

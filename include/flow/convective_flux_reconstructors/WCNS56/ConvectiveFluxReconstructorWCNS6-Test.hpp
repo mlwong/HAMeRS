@@ -74,11 +74,6 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
         bool d_has_advective_eqn_form;
         
         /*
-         * boost::shared_ptr to the Riemann solver object.
-         */
-        boost::shared_ptr<FlowModelRiemannSolver> d_riemann_solver;
-        
-        /*
          * Timers interspersed throughout the class.
          */
         

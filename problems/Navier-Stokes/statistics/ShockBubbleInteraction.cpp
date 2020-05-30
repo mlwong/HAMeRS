@@ -242,7 +242,7 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -363,25 +363,27 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -459,7 +461,7 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -569,25 +571,27 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -677,7 +681,7 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -788,25 +792,27 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -906,7 +912,7 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -983,7 +989,7 @@ SBIStatisticsUtilities::outputCentroidInXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -1062,25 +1068,27 @@ SBIStatisticsUtilities::outputCentroidInXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -1164,7 +1172,7 @@ SBIStatisticsUtilities::outputCentroidInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -1253,25 +1261,27 @@ SBIStatisticsUtilities::outputCentroidInXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -1365,7 +1375,7 @@ SBIStatisticsUtilities::outputCentroidInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -1454,25 +1464,27 @@ SBIStatisticsUtilities::outputCentroidInXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -1576,7 +1588,7 @@ SBIStatisticsUtilities::outputCentroidInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -1649,7 +1661,7 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -1731,25 +1743,27 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -1801,7 +1815,7 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -1877,25 +1891,27 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -1956,7 +1972,7 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -2032,25 +2048,27 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -2120,7 +2138,7 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -2183,7 +2201,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -2265,25 +2283,27 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -2335,7 +2355,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -2411,25 +2431,27 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -2490,7 +2512,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -2566,25 +2588,27 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -2654,7 +2678,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -2717,7 +2741,7 @@ SBIStatisticsUtilities::outputInterfaceMinInYDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -2806,25 +2830,27 @@ SBIStatisticsUtilities::outputInterfaceMinInYDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -2885,7 +2911,7 @@ SBIStatisticsUtilities::outputInterfaceMinInYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -2961,25 +2987,27 @@ SBIStatisticsUtilities::outputInterfaceMinInYDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -3049,7 +3077,7 @@ SBIStatisticsUtilities::outputInterfaceMinInYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -3112,7 +3140,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInYDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -3201,25 +3229,27 @@ SBIStatisticsUtilities::outputInterfaceMaxInYDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -3280,7 +3310,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -3356,25 +3386,27 @@ SBIStatisticsUtilities::outputInterfaceMaxInYDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -3444,7 +3476,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -3507,7 +3539,7 @@ SBIStatisticsUtilities::outputInterfaceMinInZDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -3603,25 +3635,27 @@ SBIStatisticsUtilities::outputInterfaceMinInZDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -3691,7 +3725,7 @@ SBIStatisticsUtilities::outputInterfaceMinInZDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -3754,7 +3788,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInZDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -3850,25 +3884,27 @@ SBIStatisticsUtilities::outputInterfaceMaxInZDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
                 
@@ -3938,7 +3974,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInZDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -3993,7 +4029,7 @@ SBIStatisticsUtilities::outputCirculation(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -4074,25 +4110,27 @@ SBIStatisticsUtilities::outputCirculation(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to velocity data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                    flow_model_tmp->getCellData("VELOCITY");
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -4216,7 +4254,7 @@ SBIStatisticsUtilities::outputCirculation(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -4294,25 +4332,26 @@ SBIStatisticsUtilities::outputCirculation(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointer to velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                boost::shared_ptr<pdat::CellData<double> > data_velocity = flow_model_tmp->getCellData("VELOCITY");
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -4497,7 +4536,7 @@ SBIStatisticsUtilities::outputCirculation(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -4568,7 +4607,7 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -4638,9 +4677,9 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                  * and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -4653,22 +4692,24 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getGlobalCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getGlobalCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -4808,7 +4849,7 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -4877,9 +4918,9 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                  * and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -4892,22 +4933,24 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getGlobalCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getGlobalCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -5090,7 +5133,7 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -5160,9 +5203,9 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                  * and compute the corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -5175,22 +5218,24 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
-                    d_flow_model_tmp->getGlobalCellData("PRESSURE");
+                    flow_model_tmp->getCellData("PRESSURE");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_temperature =
-                    d_flow_model_tmp->getGlobalCellData("TEMPERATURE");
+                    flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
@@ -5411,7 +5456,7 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -5466,7 +5511,7 @@ SBIStatisticsUtilities::outputEnstrophyIntegrated(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -5547,9 +5592,9 @@ SBIStatisticsUtilities::outputEnstrophyIntegrated(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -5559,19 +5604,18 @@ SBIStatisticsUtilities::outputEnstrophyIntegrated(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
-                
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                boost::shared_ptr<pdat::CellData<double> > data_density = flow_model_tmp->getCellData("DENSITY");
+                boost::shared_ptr<pdat::CellData<double> > data_velocity = flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 
@@ -5707,7 +5751,7 @@ SBIStatisticsUtilities::outputEnstrophyIntegrated(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -5777,9 +5821,9 @@ SBIStatisticsUtilities::outputEnstrophyIntegrated(
                  * corresponding cell data.
                  */
                 
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
                 
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -5789,19 +5833,18 @@ SBIStatisticsUtilities::outputEnstrophyIntegrated(
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
                 
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model_tmp->computeGlobalDerivedCellData();
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
                 
                 /*
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
-                
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                boost::shared_ptr<pdat::CellData<double> > data_density = flow_model_tmp->getCellData("DENSITY");
+                boost::shared_ptr<pdat::CellData<double> > data_velocity = flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 
@@ -6000,7 +6043,7 @@ SBIStatisticsUtilities::outputEnstrophyIntegrated(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model_tmp->unregisterPatch();
+                flow_model_tmp->unregisterPatch();
             }
         }
         
@@ -6067,8 +6110,8 @@ SBIStatisticsUtilities::outputNumberOfCells(
     
     if (d_dim == tbox::Dimension(1))
     {
-        int num_cells_local = 0;
-        int num_cells_global = 0;
+        double num_cells_local = double(0);
+        double num_cells_global = double(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -6093,7 +6136,7 @@ SBIStatisticsUtilities::outputNumberOfCells(
                 
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
-                num_cells_local += interior_dims[0];
+                num_cells_local += double(interior_dims[0]);
             }
         }
         
@@ -6105,7 +6148,7 @@ SBIStatisticsUtilities::outputNumberOfCells(
             &num_cells_local,
             &num_cells_global,
             1,
-            MPI_INT,
+            MPI_DOUBLE,
             MPI_SUM,
             0);
         
@@ -6116,13 +6159,13 @@ SBIStatisticsUtilities::outputNumberOfCells(
         if (mpi.getRank() == 0)
         {
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << double(num_cells_global);
+                  << "\t" << num_cells_global;
         }
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        int num_cells_local = 0;
-        int num_cells_global = 0;
+        double num_cells_local = double(0);
+        double num_cells_global = double(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -6147,7 +6190,7 @@ SBIStatisticsUtilities::outputNumberOfCells(
                 
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
-                num_cells_local += interior_dims[0]*interior_dims[1];
+                num_cells_local += double(interior_dims[0])*double(interior_dims[1]);
             }
         }
         
@@ -6159,7 +6202,7 @@ SBIStatisticsUtilities::outputNumberOfCells(
             &num_cells_local,
             &num_cells_global,
             1,
-            MPI_INT,
+            MPI_DOUBLE,
             MPI_SUM,
             0);
         
@@ -6170,13 +6213,13 @@ SBIStatisticsUtilities::outputNumberOfCells(
         if (mpi.getRank() == 0)
         {
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << double(num_cells_global);
+                  << "\t" << num_cells_global;
         }
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        int num_cells_local = 0;
-        int num_cells_global = 0;
+        double num_cells_local = double(0);
+        double num_cells_global = double(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -6201,7 +6244,7 @@ SBIStatisticsUtilities::outputNumberOfCells(
                 
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
-                num_cells_local += interior_dims[0]*interior_dims[1]*interior_dims[2];
+                num_cells_local += double(interior_dims[0])*double(interior_dims[1])*double(interior_dims[2]);
             }
         }
         
@@ -6213,7 +6256,7 @@ SBIStatisticsUtilities::outputNumberOfCells(
             &num_cells_local,
             &num_cells_global,
             1,
-            MPI_INT,
+            MPI_DOUBLE,
             MPI_SUM,
             0);
         
@@ -6224,7 +6267,7 @@ SBIStatisticsUtilities::outputNumberOfCells(
         if (mpi.getRank() == 0)
         {
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << double(num_cells_global);
+                  << "\t" << num_cells_global;
         }
     }
     
@@ -6268,8 +6311,8 @@ SBIStatisticsUtilities::outputWeightedNumberOfCells(
     
     if (d_dim == tbox::Dimension(1))
     {
-        int weighted_num_cells_local = 0;
-        int weighted_num_cells_global = 0;
+        double weighted_num_cells_local = double(0);
+        double weighted_num_cells_global = double(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -6310,7 +6353,7 @@ SBIStatisticsUtilities::outputWeightedNumberOfCells(
                 
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
-                weighted_num_cells_local += interior_dims[0]*ratioCurrentLevelToCoarestLevel[0];;
+                weighted_num_cells_local += double(interior_dims[0])*double(ratioCurrentLevelToCoarestLevel[0]);
             }
         }
         
@@ -6322,7 +6365,7 @@ SBIStatisticsUtilities::outputWeightedNumberOfCells(
             &weighted_num_cells_local,
             &weighted_num_cells_global,
             1,
-            MPI_INT,
+            MPI_DOUBLE,
             MPI_SUM,
             0);
         
@@ -6333,13 +6376,13 @@ SBIStatisticsUtilities::outputWeightedNumberOfCells(
         if (mpi.getRank() == 0)
         {
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << double(weighted_num_cells_global);
+                  << "\t" << weighted_num_cells_global;
         }
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        int weighted_num_cells_local = 0;
-        int weighted_num_cells_global = 0;
+        double weighted_num_cells_local = double(0);
+        double weighted_num_cells_global = double(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -6380,7 +6423,8 @@ SBIStatisticsUtilities::outputWeightedNumberOfCells(
                 
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
-                weighted_num_cells_local += interior_dims[0]*interior_dims[1]*ratioCurrentLevelToCoarestLevel[0];
+                weighted_num_cells_local += double(interior_dims[0])*double(interior_dims[1])*
+                    double(ratioCurrentLevelToCoarestLevel[0]);
             }
         }
         
@@ -6392,7 +6436,7 @@ SBIStatisticsUtilities::outputWeightedNumberOfCells(
             &weighted_num_cells_local,
             &weighted_num_cells_global,
             1,
-            MPI_INT,
+            MPI_DOUBLE,
             MPI_SUM,
             0);
         
@@ -6403,13 +6447,13 @@ SBIStatisticsUtilities::outputWeightedNumberOfCells(
         if (mpi.getRank() == 0)
         {
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << double(weighted_num_cells_global);
+                  << "\t" << weighted_num_cells_global;
         }
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        int weighted_num_cells_local = 0;
-        int weighted_num_cells_global = 0;
+        double weighted_num_cells_local = double(0);
+        double weighted_num_cells_global = double(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -6450,7 +6494,8 @@ SBIStatisticsUtilities::outputWeightedNumberOfCells(
                 
                 const hier::IntVector interior_dims = patch_box.numberCells();
                 
-                weighted_num_cells_local += interior_dims[0]*interior_dims[1]*interior_dims[2]*ratioCurrentLevelToCoarestLevel[0];
+                weighted_num_cells_local += double(interior_dims[0])*double(interior_dims[1])*double(interior_dims[2])*
+                    double(ratioCurrentLevelToCoarestLevel[0]);
             }
         }
         
@@ -6462,7 +6507,7 @@ SBIStatisticsUtilities::outputWeightedNumberOfCells(
             &weighted_num_cells_local,
             &weighted_num_cells_global,
             1,
-            MPI_INT,
+            MPI_DOUBLE,
             MPI_SUM,
             0);
         
@@ -6473,7 +6518,7 @@ SBIStatisticsUtilities::outputWeightedNumberOfCells(
         if (mpi.getRank() == 0)
         {
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << double(weighted_num_cells_global);
+                  << "\t" << weighted_num_cells_global;
         }
     }
     

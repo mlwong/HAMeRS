@@ -236,7 +236,7 @@ EquationOfMassDiffusivityMixingRulesReid::putToRestart(
 
 
 /*
- * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 void
 EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivities(
@@ -406,7 +406,7 @@ EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivities(
 
 
 /*
- * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 void
 EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
@@ -423,16 +423,6 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
     TBOX_ASSERT(data_mass_diffusivities->getDepth() == d_num_species);
     TBOX_ASSERT(data_mass_fractions->getDepth() == d_num_species ||
                 data_mass_fractions->getDepth() == d_num_species - 1);
-#endif
-    
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = data_mass_diffusivities->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
-    
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_temperature->getBox().numberCells() == interior_dims);
-    TBOX_ASSERT(data_mass_fractions->getBox().numberCells() == interior_dims);
 #endif
     
     if (d_num_species == 1)
@@ -453,54 +443,102 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
         return;
     }
     
-    /*
-     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
-     */
+    // Get the dimensions of the ghost cell boxes.
+    const hier::Box ghost_box_mass_diffusivities = data_mass_diffusivities->getGhostBox();
+    const hier::IntVector ghostcell_dims_mass_diffusivities = ghost_box_mass_diffusivities.numberCells();
     
-    const hier::IntVector num_ghosts_mass_diffusivities = data_mass_diffusivities->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_mass_diffusivities =
-        data_mass_diffusivities->getGhostBox().numberCells();
+    const hier::Box ghost_box_pressure = data_pressure->getGhostBox();
+    const hier::IntVector ghostcell_dims_pressure = ghost_box_pressure.numberCells();
     
-    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_pressure =
-        data_pressure->getGhostBox().numberCells();
+    const hier::Box ghost_box_temperature = data_temperature->getGhostBox();
+    const hier::IntVector ghostcell_dims_temperature = ghost_box_temperature.numberCells();
     
-    const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_temperature =
-        data_temperature->getGhostBox().numberCells();
+    const hier::Box ghost_box_mass_fractions = data_mass_fractions->getGhostBox();
+    const hier::IntVector ghostcell_dims_mass_fractions = ghost_box_mass_fractions.numberCells();
     
-    const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_mass_fractions =
-        data_mass_fractions->getGhostBox().numberCells();
+    // Delcare data containers for binary mass diffusivities and mole fractions.
+    boost::shared_ptr<pdat::CellData<double> > data_binary_mass_diffusivities;
+    boost::shared_ptr<pdat::CellData<double> > data_mole_fractions;
+    boost::shared_ptr<pdat::CellData<double> > data_sum;
     
-    /*
-     * Get the minimum number of ghost cells and the dimensions of the ghost cell box for binary
-     * mass diffusivities and mole fractions.
-     */
-    
-    hier::IntVector num_ghosts_min(d_dim);
-    
-    num_ghosts_min = num_ghosts_mass_diffusivities;
-    num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
-    num_ghosts_min = hier::IntVector::min(num_ghosts_temperature, num_ghosts_min);
-    num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fractions, num_ghosts_min);
-    
-    const hier::IntVector ghostcell_dims_min = interior_dims + num_ghosts_min*2;
+    // Declare data container for last volume fraction.
+    boost::shared_ptr<pdat::CellData<double> > data_mass_fractions_last;
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
+     * Also, get the offsets of all data and dimensions of the ghost cell box for binary
+     * mass diffusivities, mole fractions and last mass fraction and allocate memory.
      */
     
     hier::IntVector domain_lo(d_dim);
     hier::IntVector domain_dims(d_dim);
     
+    hier::IntVector offset_mass_diffusivities(d_dim);
+    hier::IntVector offset_pressure(d_dim);
+    hier::IntVector offset_temperature(d_dim);
+    hier::IntVector offset_mass_fractions(d_dim);
+    hier::IntVector offset_min(d_dim);
+    
+    hier::IntVector ghostcell_dims_min(d_dim);
+    
     if (domain.empty())
     {
+        // Get the numbers of ghost cells.
+        const hier::IntVector num_ghosts_mass_diffusivities = data_mass_diffusivities->getGhostCellWidth();
+        const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+        const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+        const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
+        
+        // Get the dimensions of box that covers the interior of patch.
+        const hier::Box interior_box = data_mass_diffusivities->getBox();
+        const hier::IntVector interior_dims = interior_box.numberCells();
+        
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_pressure->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_temperature->getBox().isSpatiallyEqual(interior_box));
+        TBOX_ASSERT(data_mass_fractions->getBox().isSpatiallyEqual(interior_box));
+#endif
+        
+        /*
+         * Get the minimum number of ghost cells and the dimensions of the ghost cell box for binary
+         * mass diffusivities, mole fractions and last mass fraction.
+         */
+        
+        hier::IntVector num_ghosts_min(d_dim);
+        
+        num_ghosts_min = num_ghosts_mass_diffusivities;
+        num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
+        num_ghosts_min = hier::IntVector::min(num_ghosts_temperature, num_ghosts_min);
+        num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fractions, num_ghosts_min);
+        
         hier::Box ghost_box = interior_box;
         ghost_box.grow(num_ghosts_min);
         
         domain_lo = -num_ghosts_min;
         domain_dims = ghost_box.numberCells();
+        
+        offset_min = num_ghosts_min;
+        offset_mass_diffusivities = num_ghosts_mass_diffusivities;
+        offset_pressure = num_ghosts_pressure;
+        offset_temperature = num_ghosts_temperature;
+        offset_mass_fractions = num_ghosts_mass_fractions;
+        
+        ghostcell_dims_min = interior_dims + num_ghosts_min*2;
+        
+        data_binary_mass_diffusivities = boost::make_shared<pdat::CellData<double> >(
+            interior_box, (d_num_species - 1)*d_num_species/2, num_ghosts_min);
+        
+        data_mole_fractions = boost::make_shared<pdat::CellData<double> >(
+            interior_box, d_num_species, num_ghosts_min);
+        
+        data_sum = boost::make_shared<pdat::CellData<double> >(
+            interior_box, 1, num_ghosts_min);
+        
+        if (data_mass_fractions->getDepth() == d_num_species - 1)
+        {
+            data_mass_fractions_last = boost::make_shared<pdat::CellData<double> >(
+                interior_box, 1, num_ghosts_min);
+        }
     }
     else
     {
@@ -511,31 +549,34 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
         TBOX_ASSERT(data_mass_fractions->getGhostBox().contains(domain));
 #endif
         
-        domain_lo = domain.lower() - interior_box.lower();
+        domain_lo = hier::IntVector::getZero(d_dim);
         domain_dims = domain.numberCells();
+        
+        offset_min = hier::IntVector::getZero(d_dim);
+        offset_mass_diffusivities = domain.lower() - ghost_box_mass_diffusivities.lower();
+        offset_pressure = domain.lower() - ghost_box_pressure.lower();
+        offset_temperature = domain.lower() - ghost_box_temperature.lower();
+        offset_mass_fractions = domain.lower() - ghost_box_mass_fractions.lower();
+        
+        ghostcell_dims_min = domain_dims;
+        
+        data_binary_mass_diffusivities = boost::make_shared<pdat::CellData<double> >(
+            domain, (d_num_species - 1)*d_num_species/2, hier::IntVector::getZero(d_dim));
+        
+        data_mole_fractions = boost::make_shared<pdat::CellData<double> >(
+            domain, d_num_species, hier::IntVector::getZero(d_dim));
+        
+        data_sum = boost::make_shared<pdat::CellData<double> >(
+            domain, 1, hier::IntVector::getZero(d_dim));
+        
+        if (data_mass_fractions->getDepth() == d_num_species - 1)
+        {
+            data_mass_fractions_last = boost::make_shared<pdat::CellData<double> >(
+                domain, 1, hier::IntVector::getZero(d_dim));
+        }
     }
     
-    /*
-     * Delcare data containers for binary mass diffusivities and mole fractions.
-     */
-    
-    boost::shared_ptr<pdat::CellData<double> > data_binary_mass_diffusivities(
-        new pdat::CellData<double>(interior_box, (d_num_species - 1)*d_num_species/2, num_ghosts_min));
-    
-    boost::shared_ptr<pdat::CellData<double> > data_mole_fractions(
-        new pdat::CellData<double>(interior_box, d_num_species, num_ghosts_min));
-    
-    boost::shared_ptr<pdat::CellData<double> > data_sum(
-        new pdat::CellData<double>(interior_box, 1, num_ghosts_min));
-    
-    if (domain.empty())
-    {
-        data_sum->fillAll(double(0));
-    }
-    else
-    {
-        data_sum->fillAll(double(0), domain);
-    }
+    data_sum->fillAll(double(0));
     
     /*
      * Get the pointers to the cell data.
@@ -629,15 +670,15 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                 if (d_dim == tbox::Dimension(1))
                 {
                     /*
-                     * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+                     * Get the local lower index, numbers of cells in each dimension and offsets.
                      */
                     
                     const int domain_lo_0 = domain_lo[0];
                     const int domain_dim_0 = domain_dims[0];
                     
-                    const int num_ghosts_0_min = num_ghosts_min[0];
-                    const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-                    const int num_ghosts_0_temperature = num_ghosts_temperature[0];
+                    const int offset_0_min = offset_min[0];
+                    const int offset_0_pressure = offset_pressure[0];
+                    const int offset_0_temperature = offset_temperature[0];
                     
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
@@ -645,9 +686,9 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx_min = i + num_ghosts_0_min;
-                        const int idx_pressure = i + num_ghosts_0_pressure;
-                        const int idx_temperature = i + num_ghosts_0_temperature;
+                        const int idx_min = i + offset_0_min;
+                        const int idx_pressure = i + offset_0_pressure;
+                        const int idx_temperature = i + offset_0_temperature;
                         
                         const double T_star_ij = T[idx_temperature]/T_epsilon_ij;
                         const double Omega_D_ij = A*pow(T_star_ij, B) + C*exp(D*T_star_ij) + E*exp(F*T_star_ij) +
@@ -660,7 +701,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                 else if (d_dim == tbox::Dimension(2))
                 {
                     /*
-                     * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+                     * Get the local lower indices, numbers of cells in each dimension and offsets.
                      */
                     
                     const int domain_lo_0 = domain_lo[0];
@@ -668,16 +709,16 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                     const int domain_dim_0 = domain_dims[0];
                     const int domain_dim_1 = domain_dims[1];
                     
-                    const int num_ghosts_0_min = num_ghosts_min[0];
-                    const int num_ghosts_1_min = num_ghosts_min[1];
+                    const int offset_0_min = offset_min[0];
+                    const int offset_1_min = offset_min[1];
                     const int ghostcell_dim_0_min = ghostcell_dims_min[0];
                     
-                    const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-                    const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+                    const int offset_0_pressure = offset_pressure[0];
+                    const int offset_1_pressure = offset_pressure[1];
                     const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
                     
-                    const int num_ghosts_0_temperature = num_ghosts_temperature[0];
-                    const int num_ghosts_1_temperature = num_ghosts_temperature[1];
+                    const int offset_0_temperature = offset_temperature[0];
+                    const int offset_1_temperature = offset_temperature[1];
                     const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
                     
                     for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -688,14 +729,14 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_min = (i + num_ghosts_0_min) +
-                                (j + num_ghosts_1_min)*ghostcell_dim_0_min;
+                            const int idx_min = (i + offset_0_min) +
+                                (j + offset_1_min)*ghostcell_dim_0_min;
                             
-                            const int idx_pressure = (i + num_ghosts_0_pressure) +
-                                (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                            const int idx_pressure = (i + offset_0_pressure) +
+                                (j + offset_1_pressure)*ghostcell_dim_0_pressure;
                             
-                            const int idx_temperature = (i + num_ghosts_0_temperature) +
-                                (j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature;
+                            const int idx_temperature = (i + offset_0_temperature) +
+                                (j + offset_1_temperature)*ghostcell_dim_0_temperature;
                             
                             const double T_star_ij = T[idx_temperature]/T_epsilon_ij;
                             const double Omega_D_ij = A*pow(T_star_ij, B) + C*exp(D*T_star_ij) + E*exp(F*T_star_ij) +
@@ -709,7 +750,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                 else if (d_dim == tbox::Dimension(3))
                 {
                     /*
-                     * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+                     * Get the local lower indices, numbers of cells in each dimension and offsets.
                      */
                     
                     const int domain_lo_0 = domain_lo[0];
@@ -719,21 +760,21 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                     const int domain_dim_1 = domain_dims[1];
                     const int domain_dim_2 = domain_dims[2];
                     
-                    const int num_ghosts_0_min = num_ghosts_min[0];
-                    const int num_ghosts_1_min = num_ghosts_min[1];
-                    const int num_ghosts_2_min = num_ghosts_min[2];
+                    const int offset_0_min = offset_min[0];
+                    const int offset_1_min = offset_min[1];
+                    const int offset_2_min = offset_min[2];
                     const int ghostcell_dim_0_min = ghostcell_dims_min[0];
                     const int ghostcell_dim_1_min = ghostcell_dims_min[1];
                     
-                    const int num_ghosts_0_pressure = num_ghosts_pressure[0];
-                    const int num_ghosts_1_pressure = num_ghosts_pressure[1];
-                    const int num_ghosts_2_pressure = num_ghosts_pressure[2];
+                    const int offset_0_pressure = offset_pressure[0];
+                    const int offset_1_pressure = offset_pressure[1];
+                    const int offset_2_pressure = offset_pressure[2];
                     const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
                     const int ghostcell_dim_1_pressure = ghostcell_dims_pressure[1];
                     
-                    const int num_ghosts_0_temperature = num_ghosts_temperature[0];
-                    const int num_ghosts_1_temperature = num_ghosts_temperature[1];
-                    const int num_ghosts_2_temperature = num_ghosts_temperature[2];
+                    const int offset_0_temperature = offset_temperature[0];
+                    const int offset_1_temperature = offset_temperature[1];
+                    const int offset_2_temperature = offset_temperature[2];
                     const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
                     const int ghostcell_dim_1_temperature = ghostcell_dims_temperature[1];
                     
@@ -747,19 +788,19 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
-                                const int idx_min = (i + num_ghosts_0_min) +
-                                    (j + num_ghosts_1_min)*ghostcell_dim_0_min +
-                                    (k + num_ghosts_2_min)*ghostcell_dim_0_min*
+                                const int idx_min = (i + offset_0_min) +
+                                    (j + offset_1_min)*ghostcell_dim_0_min +
+                                    (k + offset_2_min)*ghostcell_dim_0_min*
                                         ghostcell_dim_1_min;
                                 
-                                const int idx_pressure = (i + num_ghosts_0_pressure) +
-                                    (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
-                                    (k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                                const int idx_pressure = (i + offset_0_pressure) +
+                                    (j + offset_1_pressure)*ghostcell_dim_0_pressure +
+                                    (k + offset_2_pressure)*ghostcell_dim_0_pressure*
                                         ghostcell_dim_1_pressure;
                                 
-                                const int idx_temperature = (i + num_ghosts_0_temperature) +
-                                    (j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
-                                    (k + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                                const int idx_temperature = (i + offset_0_temperature) +
+                                    (j + offset_1_temperature)*ghostcell_dim_0_temperature +
+                                    (k + offset_2_temperature)*ghostcell_dim_0_temperature*
                                         ghostcell_dim_1_temperature;
                                 
                                 const double T_star_ij = T[idx_temperature]/T_epsilon_ij;
@@ -813,14 +854,14 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
         if (d_dim == tbox::Dimension(1))
         {
             /*
-             * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+             * Get the local lower index, numbers of cells in each dimension and offsets.
              */
             
             const int domain_lo_0 = domain_lo[0];
             const int domain_dim_0 = domain_dims[0];
             
-            const int num_ghosts_0_min = num_ghosts_min[0];
-            const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+            const int offset_0_min = offset_min[0];
+            const int offset_0_mass_fractions = offset_mass_fractions[0];
             
             for (int si = 0; si < d_num_species; si++)
             {
@@ -832,8 +873,8 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_min = i + num_ghosts_0_min;
-                    const int idx_mass_fractions = i + num_ghosts_0_mass_fractions;
+                    const int idx_min = i + offset_0_min;
+                    const int idx_mass_fractions = i + offset_0_mass_fractions;
                     
                     X[si][idx_min] = Y[si][idx_mass_fractions]/species_molecular_properties[2];
                     X[si][idx_min] = std::max(double(0), X[si][idx_min]);
@@ -844,7 +885,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
         else if (d_dim == tbox::Dimension(2))
         {
             /*
-             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             * Get the local lower indices, numbers of cells in each dimension and offsets.
              */
             
             const int domain_lo_0 = domain_lo[0];
@@ -852,12 +893,12 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
             const int domain_dim_0 = domain_dims[0];
             const int domain_dim_1 = domain_dims[1];
             
-            const int num_ghosts_0_min = num_ghosts_min[0];
-            const int num_ghosts_1_min = num_ghosts_min[1];
+            const int offset_0_min = offset_min[0];
+            const int offset_1_min = offset_min[1];
             const int ghostcell_dim_0_min = ghostcell_dims_min[0];
             
-            const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
-            const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
+            const int offset_0_mass_fractions = offset_mass_fractions[0];
+            const int offset_1_mass_fractions = offset_mass_fractions[1];
             const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
             
             for (int si = 0; si < d_num_species; si++)
@@ -872,11 +913,11 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx_min = (i + num_ghosts_0_min) +
-                            (j + num_ghosts_1_min)*ghostcell_dim_0_min;
+                        const int idx_min = (i + offset_0_min) +
+                            (j + offset_1_min)*ghostcell_dim_0_min;
                         
-                        const int idx_mass_fractions = (i + num_ghosts_0_mass_fractions) +
-                            (j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
+                        const int idx_mass_fractions = (i + offset_0_mass_fractions) +
+                            (j + offset_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                         
                         X[si][idx_min] = Y[si][idx_mass_fractions]/species_molecular_properties[2];
                         X[si][idx_min] = std::max(double(0), X[si][idx_min]);
@@ -888,7 +929,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
         else if (d_dim == tbox::Dimension(3))
         {
             /*
-             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             * Get the local lower indices, numbers of cells in each dimension and offsets.
              */
             
             const int domain_lo_0 = domain_lo[0];
@@ -898,15 +939,15 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
             const int domain_dim_1 = domain_dims[1];
             const int domain_dim_2 = domain_dims[2];
             
-            const int num_ghosts_0_min = num_ghosts_min[0];
-            const int num_ghosts_1_min = num_ghosts_min[1];
-            const int num_ghosts_2_min = num_ghosts_min[2];
+            const int offset_0_min = offset_min[0];
+            const int offset_1_min = offset_min[1];
+            const int offset_2_min = offset_min[2];
             const int ghostcell_dim_0_min = ghostcell_dims_min[0];
             const int ghostcell_dim_1_min = ghostcell_dims_min[1];
             
-            const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
-            const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
-            const int num_ghosts_2_mass_fractions = num_ghosts_mass_fractions[2];
+            const int offset_0_mass_fractions = offset_mass_fractions[0];
+            const int offset_1_mass_fractions = offset_mass_fractions[1];
+            const int offset_2_mass_fractions = offset_mass_fractions[2];
             const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
             const int ghostcell_dim_1_mass_fractions = ghostcell_dims_mass_fractions[1];
             
@@ -924,14 +965,14 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_min = (i + num_ghosts_0_min) +
-                                (j + num_ghosts_1_min)*ghostcell_dim_0_min +
-                                (k + num_ghosts_2_min)*ghostcell_dim_0_min*
+                            const int idx_min = (i + offset_0_min) +
+                                (j + offset_1_min)*ghostcell_dim_0_min +
+                                (k + offset_2_min)*ghostcell_dim_0_min*
                                     ghostcell_dim_1_min;
                             
-                            const int idx_mass_fractions = (i + num_ghosts_0_mass_fractions) +
-                                (j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
-                                (k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                            const int idx_mass_fractions = (i + offset_0_mass_fractions) +
+                                (j + offset_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                (k + offset_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
                                     ghostcell_dim_1_mass_fractions;
                             
                             X[si][idx_min] = Y[si][idx_mass_fractions]/species_molecular_properties[2];
@@ -945,17 +986,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
     }
     else if (data_mass_fractions->getDepth() == d_num_species - 1)
     {
-        boost::shared_ptr<pdat::CellData<double> > data_mass_fractions_last(
-            new pdat::CellData<double>(interior_box, 1, num_ghosts_mass_fractions));
-        
-        if (domain.empty())
-        {
-            data_mass_fractions_last->fillAll(double(1));
-        }
-        else
-        {
-            data_mass_fractions_last->fillAll(double(1), domain);
-        }
+        data_mass_fractions_last->fillAll(double(1));
         
         /*
          * Get the pointers to the cell data of mass fractions.
@@ -990,14 +1021,14 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
         if (d_dim == tbox::Dimension(1))
         {
             /*
-             * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+             * Get the local lower index, numbers of cells in each dimension and offsets.
              */
             
             const int domain_lo_0 = domain_lo[0];
             const int domain_dim_0 = domain_dims[0];
             
-            const int num_ghosts_0_min = num_ghosts_min[0];
-            const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+            const int offset_0_min = offset_min[0];
+            const int offset_0_mass_fractions = offset_mass_fractions[0];
             
             for (int si = 0; si < d_num_species - 1; si++)
             {
@@ -1009,15 +1040,15 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_min = i + num_ghosts_0_min;
-                    const int idx_mass_fractions = i + num_ghosts_0_mass_fractions;
+                    const int idx_min = i + offset_0_min;
+                    const int idx_mass_fractions = i + offset_0_mass_fractions;
                     
                     X[si][idx_min] = Y[si][idx_mass_fractions]/species_molecular_properties[2];
                     X[si][idx_min] = std::max(double(0), X[si][idx_min]);
                     sum[idx_min] += X[si][idx_min];
                     
                     // Compute the mass fraction of the last species.
-                    Y_last[idx_mass_fractions] -= Y[si][idx_mass_fractions];
+                    Y_last[idx_min] -= Y[si][idx_mass_fractions];
                 }
             }
             
@@ -1028,11 +1059,10 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
 #endif
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
-                // Compute the linear indices.
-                const int idx_min = i + num_ghosts_0_min;
-                const int idx_mass_fractions = i + num_ghosts_0_mass_fractions;
+                // Compute the linear index.
+                const int idx_min = i + offset_0_min;
                 
-                X[d_num_species - 1][idx_min] = Y_last[idx_mass_fractions]/species_molecular_properties[2];
+                X[d_num_species - 1][idx_min] = Y_last[idx_min]/species_molecular_properties[2];
                 X[d_num_species - 1][idx_min] = std::max(double(0), X[d_num_species - 1][idx_min]);
                 sum[idx_min] += X[d_num_species - 1][idx_min];
             }
@@ -1040,7 +1070,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
         else if (d_dim == tbox::Dimension(2))
         {
             /*
-             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             * Get the local lower indices, numbers of cells in each dimension and offsets.
              */
             
             const int domain_lo_0 = domain_lo[0];
@@ -1048,12 +1078,12 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
             const int domain_dim_0 = domain_dims[0];
             const int domain_dim_1 = domain_dims[1];
             
-            const int num_ghosts_0_min = num_ghosts_min[0];
-            const int num_ghosts_1_min = num_ghosts_min[1];
+            const int offset_0_min = offset_min[0];
+            const int offset_1_min = offset_min[1];
             const int ghostcell_dim_0_min = ghostcell_dims_min[0];
             
-            const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
-            const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
+            const int offset_0_mass_fractions = offset_mass_fractions[0];
+            const int offset_1_mass_fractions = offset_mass_fractions[1];
             const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
             
             for (int si = 0; si < d_num_species - 1; si++)
@@ -1068,18 +1098,18 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx_min = (i + num_ghosts_0_min) +
-                            (j + num_ghosts_1_min)*ghostcell_dim_0_min;
+                        const int idx_min = (i + offset_0_min) +
+                            (j + offset_1_min)*ghostcell_dim_0_min;
                         
-                        const int idx_mass_fractions = (i + num_ghosts_0_mass_fractions) +
-                            (j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
+                        const int idx_mass_fractions = (i + offset_0_mass_fractions) +
+                            (j + offset_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                         
                         X[si][idx_min] = Y[si][idx_mass_fractions]/species_molecular_properties[2];
                         X[si][idx_min] = std::max(double(0), X[si][idx_min]);
                         sum[idx_min] += X[si][idx_min];
                         
                         // Compute the mass fraction of the last species.
-                        Y_last[idx_mass_fractions] -= Y[si][idx_mass_fractions];
+                        Y_last[idx_min] -= Y[si][idx_mass_fractions];
                     }
                 }
             }
@@ -1093,14 +1123,11 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
 #endif
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
-                    // Compute the linear indices.
-                    const int idx_min = (i + num_ghosts_0_min) +
-                        (j + num_ghosts_1_min)*ghostcell_dim_0_min;
+                    // Compute the linear index.
+                    const int idx_min = (i + offset_0_min) +
+                        (j + offset_1_min)*ghostcell_dim_0_min;
                     
-                    const int idx_mass_fractions = (i + num_ghosts_0_mass_fractions) +
-                        (j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
-                    
-                    X[d_num_species - 1][idx_min] = Y_last[idx_mass_fractions]/species_molecular_properties[2];
+                    X[d_num_species - 1][idx_min] = Y_last[idx_min]/species_molecular_properties[2];
                     X[d_num_species - 1][idx_min] = std::max(double(0), X[d_num_species - 1][idx_min]);
                     sum[idx_min] += X[d_num_species - 1][idx_min];
                 }
@@ -1109,7 +1136,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
         else if (d_dim == tbox::Dimension(3))
         {
             /*
-             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             * Get the local lower indices, numbers of cells in each dimension and offsets.
              */
             
             const int domain_lo_0 = domain_lo[0];
@@ -1119,15 +1146,15 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
             const int domain_dim_1 = domain_dims[1];
             const int domain_dim_2 = domain_dims[2];
             
-            const int num_ghosts_0_min = num_ghosts_min[0];
-            const int num_ghosts_1_min = num_ghosts_min[1];
-            const int num_ghosts_2_min = num_ghosts_min[2];
+            const int offset_0_min = offset_min[0];
+            const int offset_1_min = offset_min[1];
+            const int offset_2_min = offset_min[2];
             const int ghostcell_dim_0_min = ghostcell_dims_min[0];
             const int ghostcell_dim_1_min = ghostcell_dims_min[1];
             
-            const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
-            const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
-            const int num_ghosts_2_mass_fractions = num_ghosts_mass_fractions[2];
+            const int offset_0_mass_fractions = offset_mass_fractions[0];
+            const int offset_1_mass_fractions = offset_mass_fractions[1];
+            const int offset_2_mass_fractions = offset_mass_fractions[2];
             const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
             const int ghostcell_dim_1_mass_fractions = ghostcell_dims_mass_fractions[1];
             
@@ -1145,14 +1172,14 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_min = (i + num_ghosts_0_min) +
-                                (j + num_ghosts_1_min)*ghostcell_dim_0_min +
-                                (k + num_ghosts_2_min)*ghostcell_dim_0_min*
+                            const int idx_min = (i + offset_0_min) +
+                                (j + offset_1_min)*ghostcell_dim_0_min +
+                                (k + offset_2_min)*ghostcell_dim_0_min*
                                     ghostcell_dim_1_min;
                             
-                            const int idx_mass_fractions = (i + num_ghosts_0_mass_fractions) +
-                                (j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
-                                (k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                            const int idx_mass_fractions = (i + offset_0_mass_fractions) +
+                                (j + offset_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                (k + offset_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
                                     ghostcell_dim_1_mass_fractions;
                             
                             X[si][idx_min] = Y[si][idx_mass_fractions]/species_molecular_properties[2];
@@ -1160,7 +1187,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                             sum[idx_min] += X[si][idx_min];
                             
                             // Compute the mass fraction of the last species.
-                            Y_last[idx_mass_fractions] -= Y[si][idx_mass_fractions];
+                            Y_last[idx_min] -= Y[si][idx_mass_fractions];
                         }
                     }
                 }
@@ -1178,17 +1205,12 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx_min = (i + num_ghosts_0_min) +
-                            (j + num_ghosts_1_min)*ghostcell_dim_0_min +
-                            (k + num_ghosts_2_min)*ghostcell_dim_0_min*
+                        const int idx_min = (i + offset_0_min) +
+                            (j + offset_1_min)*ghostcell_dim_0_min +
+                            (k + offset_2_min)*ghostcell_dim_0_min*
                                 ghostcell_dim_1_min;
                         
-                        const int idx_mass_fractions = (i + num_ghosts_0_mass_fractions) +
-                            (j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
-                            (k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
-                                ghostcell_dim_1_mass_fractions;
-                        
-                        X[d_num_species - 1][idx_min] = Y_last[idx_mass_fractions]/species_molecular_properties[2];
+                        X[d_num_species - 1][idx_min] = Y_last[idx_min]/species_molecular_properties[2];
                         X[d_num_species - 1][idx_min] = std::max(double(0), X[d_num_species - 1][idx_min]);
                         sum[idx_min] += X[d_num_species - 1][idx_min];
                     }
@@ -1214,7 +1236,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_min = num_ghosts_min[0];
+        const int offset_0_min = offset_min[0];
         
         for (int si = 0; si < d_num_species; si++)
         {
@@ -1224,7 +1246,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear index.
-                const int idx_min = i + num_ghosts_0_min;
+                const int idx_min = i + offset_0_min;
                 
                 X[si][idx_min] = X[si][idx_min]/sum[idx_min];
             }
@@ -1233,7 +1255,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -1241,8 +1263,8 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_min = num_ghosts_min[0];
-        const int num_ghosts_1_min = num_ghosts_min[1];
+        const int offset_0_min = offset_min[0];
+        const int offset_1_min = offset_min[1];
         const int ghostcell_dim_0_min = ghostcell_dims_min[0];
         
         for (int si = 0; si < d_num_species; si++)
@@ -1255,8 +1277,8 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
-                    const int idx_min = (i + num_ghosts_0_min) +
-                        (j + num_ghosts_1_min)*ghostcell_dim_0_min;
+                    const int idx_min = (i + offset_0_min) +
+                        (j + offset_1_min)*ghostcell_dim_0_min;
                     
                     X[si][idx_min] = X[si][idx_min]/sum[idx_min];
                 }
@@ -1266,7 +1288,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -1276,9 +1298,9 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_min = num_ghosts_min[0];
-        const int num_ghosts_1_min = num_ghosts_min[1];
-        const int num_ghosts_2_min = num_ghosts_min[2];
+        const int offset_0_min = offset_min[0];
+        const int offset_1_min = offset_min[1];
+        const int offset_2_min = offset_min[2];
         const int ghostcell_dim_0_min = ghostcell_dims_min[0];
         const int ghostcell_dim_1_min = ghostcell_dims_min[1];
         
@@ -1294,9 +1316,9 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear index.
-                        const int idx_min = (i + num_ghosts_0_min) +
-                            (j + num_ghosts_1_min)*ghostcell_dim_0_min +
-                            (k + num_ghosts_2_min)*ghostcell_dim_0_min*
+                        const int idx_min = (i + offset_0_min) +
+                            (j + offset_1_min)*ghostcell_dim_0_min +
+                            (k + offset_2_min)*ghostcell_dim_0_min*
                                 ghostcell_dim_1_min;
                         
                         X[si][idx_min] = X[si][idx_min]/sum[idx_min];
@@ -1322,14 +1344,14 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower index, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
         const int domain_dim_0 = domain_dims[0];
         
-        const int num_ghosts_0_mass_diffusivities = num_ghosts_mass_diffusivities[0];
-        const int num_ghosts_0_min = num_ghosts_min[0];
+        const int offset_0_mass_diffusivities = offset_mass_diffusivities[0];
+        const int offset_0_min = offset_min[0];
         
         for (int si = 0; si < d_num_species; si++)
         {
@@ -1357,8 +1379,8 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx_mass_diffusivities = i + num_ghosts_0_mass_diffusivities;
-                        const int idx_min = i + num_ghosts_0_min;
+                        const int idx_mass_diffusivities = i + offset_0_mass_diffusivities;
+                        const int idx_min = i + offset_0_min;
                         
                         D[si][idx_mass_diffusivities] += (X[sj][idx_min] + double(EPSILON))/
                             (D_ij[idx_ij][idx_min] + double(EPSILON));
@@ -1372,8 +1394,8 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx_mass_diffusivities = i + num_ghosts_0_mass_diffusivities;
-                const int idx_min = i + num_ghosts_0_min;
+                const int idx_mass_diffusivities = i + offset_0_mass_diffusivities;
+                const int idx_min = i + offset_0_min;
                 
                 D[si][idx_mass_diffusivities] = (double(1) - X[si][idx_min] + double(EPSILON))/
                     D[si][idx_mass_diffusivities];
@@ -1383,7 +1405,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -1391,12 +1413,12 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
         const int domain_dim_0 = domain_dims[0];
         const int domain_dim_1 = domain_dims[1];
         
-        const int num_ghosts_0_mass_diffusivities = num_ghosts_mass_diffusivities[0];
-        const int num_ghosts_1_mass_diffusivities = num_ghosts_mass_diffusivities[1];
+        const int offset_0_mass_diffusivities = offset_mass_diffusivities[0];
+        const int offset_1_mass_diffusivities = offset_mass_diffusivities[1];
         const int ghostcell_dim_0_mass_diffusivities = ghostcell_dims_mass_diffusivities[0];
         
-        const int num_ghosts_0_min = num_ghosts_min[0];
-        const int num_ghosts_1_min = num_ghosts_min[1];
+        const int offset_0_min = offset_min[0];
+        const int offset_1_min = offset_min[1];
         const int ghostcell_dim_0_min = ghostcell_dims_min[0];
         
         for (int si = 0; si < d_num_species; si++)
@@ -1427,11 +1449,11 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_mass_diffusivities = (i + num_ghosts_0_mass_diffusivities) +
-                                (j + num_ghosts_1_mass_diffusivities)*ghostcell_dim_0_mass_diffusivities;
+                            const int idx_mass_diffusivities = (i + offset_0_mass_diffusivities) +
+                                (j + offset_1_mass_diffusivities)*ghostcell_dim_0_mass_diffusivities;
                             
-                            const int idx_min = (i + num_ghosts_0_min) +
-                                (j + num_ghosts_1_min)*ghostcell_dim_0_min;
+                            const int idx_min = (i + offset_0_min) +
+                                (j + offset_1_min)*ghostcell_dim_0_min;
                             
                             D[si][idx_mass_diffusivities] += (X[sj][idx_min] + double(EPSILON))/
                                 (D_ij[idx_ij][idx_min] + double(EPSILON));
@@ -1448,11 +1470,11 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_mass_diffusivities = (i + num_ghosts_0_mass_diffusivities) +
-                        (j + num_ghosts_1_mass_diffusivities)*ghostcell_dim_0_mass_diffusivities;
+                    const int idx_mass_diffusivities = (i + offset_0_mass_diffusivities) +
+                        (j + offset_1_mass_diffusivities)*ghostcell_dim_0_mass_diffusivities;
                     
-                    const int idx_min = (i + num_ghosts_0_min) +
-                        (j + num_ghosts_1_min)*ghostcell_dim_0_min;
+                    const int idx_min = (i + offset_0_min) +
+                        (j + offset_1_min)*ghostcell_dim_0_min;
                     
                     D[si][idx_mass_diffusivities] = (double(1) - X[si][idx_min] + double(EPSILON))/
                         D[si][idx_mass_diffusivities];
@@ -1463,7 +1485,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         * Get the local lower indices, numbers of cells in each dimension and offsets.
          */
         
         const int domain_lo_0 = domain_lo[0];
@@ -1473,15 +1495,15 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_mass_diffusivities = num_ghosts_mass_diffusivities[0];
-        const int num_ghosts_1_mass_diffusivities = num_ghosts_mass_diffusivities[1];
-        const int num_ghosts_2_mass_diffusivities = num_ghosts_mass_diffusivities[2];
+        const int offset_0_mass_diffusivities = offset_mass_diffusivities[0];
+        const int offset_1_mass_diffusivities = offset_mass_diffusivities[1];
+        const int offset_2_mass_diffusivities = offset_mass_diffusivities[2];
         const int ghostcell_dim_0_mass_diffusivities = ghostcell_dims_mass_diffusivities[0];
         const int ghostcell_dim_1_mass_diffusivities = ghostcell_dims_mass_diffusivities[1];
         
-        const int num_ghosts_0_min = num_ghosts_min[0];
-        const int num_ghosts_1_min = num_ghosts_min[1];
-        const int num_ghosts_2_min = num_ghosts_min[2];
+        const int offset_0_min = offset_min[0];
+        const int offset_1_min = offset_min[1];
+        const int offset_2_min = offset_min[2];
         const int ghostcell_dim_0_min = ghostcell_dims_min[0];
         const int ghostcell_dim_1_min = ghostcell_dims_min[1];
         
@@ -1515,14 +1537,14 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
                                 // Compute the linear indices.
-                                const int idx_mass_diffusivities = (i + num_ghosts_0_mass_diffusivities) +
-                                    (j + num_ghosts_1_mass_diffusivities)*ghostcell_dim_0_mass_diffusivities +
-                                    (k + num_ghosts_2_mass_diffusivities)*ghostcell_dim_0_mass_diffusivities*
+                                const int idx_mass_diffusivities = (i + offset_0_mass_diffusivities) +
+                                    (j + offset_1_mass_diffusivities)*ghostcell_dim_0_mass_diffusivities +
+                                    (k + offset_2_mass_diffusivities)*ghostcell_dim_0_mass_diffusivities*
                                         ghostcell_dim_1_mass_diffusivities;
                                 
-                                const int idx_min = (i + num_ghosts_0_min) +
-                                    (j + num_ghosts_1_min)*ghostcell_dim_0_min +
-                                    (k + num_ghosts_2_min)*ghostcell_dim_0_min*
+                                const int idx_min = (i + offset_0_min) +
+                                    (j + offset_1_min)*ghostcell_dim_0_min +
+                                    (k + offset_2_min)*ghostcell_dim_0_min*
                                         ghostcell_dim_1_min;
                                 
                                 D[si][idx_mass_diffusivities] += (X[sj][idx_min] + double(EPSILON))/
@@ -1543,14 +1565,14 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx_mass_diffusivities = (i + num_ghosts_0_mass_diffusivities) +
-                            (j + num_ghosts_1_mass_diffusivities)*ghostcell_dim_0_mass_diffusivities +
-                            (k + num_ghosts_2_mass_diffusivities)*ghostcell_dim_0_mass_diffusivities*
+                        const int idx_mass_diffusivities = (i + offset_0_mass_diffusivities) +
+                            (j + offset_1_mass_diffusivities)*ghostcell_dim_0_mass_diffusivities +
+                            (k + offset_2_mass_diffusivities)*ghostcell_dim_0_mass_diffusivities*
                                 ghostcell_dim_1_mass_diffusivities;
                         
-                        const int idx_min = (i + num_ghosts_0_min) +
-                            (j + num_ghosts_1_min)*ghostcell_dim_0_min +
-                            (k + num_ghosts_2_min)*ghostcell_dim_0_min*
+                        const int idx_min = (i + offset_0_min) +
+                            (j + offset_1_min)*ghostcell_dim_0_min +
+                            (k + offset_2_min)*ghostcell_dim_0_min*
                                 ghostcell_dim_1_min;
                         
                         D[si][idx_mass_diffusivities] = (double(1) - X[si][idx_min] + double(EPSILON))/

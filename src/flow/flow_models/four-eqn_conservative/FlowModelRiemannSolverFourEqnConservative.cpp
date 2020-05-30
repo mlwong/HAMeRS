@@ -20,8 +20,8 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxFromConservative
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     if (static_cast<int>(conservative_variables_minus.size()) != num_eqn ||
         static_cast<int>(conservative_variables_plus.size()) != num_eqn)
@@ -207,8 +207,8 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxFromPrimitiveVar
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     if (static_cast<int>(primitive_variables_minus.size()) != num_eqn ||
         static_cast<int>(primitive_variables_plus.size()) != num_eqn)
@@ -395,8 +395,8 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityFromC
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     if (static_cast<int>(conservative_variables_minus.size()) != num_eqn ||
         static_cast<int>(conservative_variables_plus.size()) != num_eqn)
@@ -586,8 +586,8 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityFromP
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     if (static_cast<int>(primitive_variables_minus.size()) != num_eqn ||
         static_cast<int>(primitive_variables_plus.size()) != num_eqn)

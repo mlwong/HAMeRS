@@ -67,6 +67,10 @@ HAMeRS has already been successfully tested with HDF5-1.8, Boost-1.60 and SAMRAI
 
 To change the problem that you want to run for an application, e.g. the Euler application, just simply link the corresponding initial conditions cpp symlink (`EulerInitialConditions.cpp` in `src/apps/Euler`) to the actual problem file using `ln -sf <absolute path to .cpp file containing problem's initial conditions> EulerInitialConditions.cpp`. If the problem has special boundary conditions, the user can supply the boundary conditions with `ln -sf <absolute path to .cpp file containing problem's user-coded boundary conditions> EulerSpecialBoundaryConditions.cpp`. There are some initial conditions and boundary conditions files from different example problems in the `problems` folder.
 
+### Are there more tips and tutorials on how to compile and run the code?
+
+Please have a look at the [Wiki page](https://github.com/mlwong/HAMeRS/wiki).
+
 ### Who do I talk to? ###
 
 The code is managed by Man-Long Wong (wongml@stanford.edu) of the [Flow Physics and Aeroacoustics Laboratory](https://fpal.stanford.edu/) (FPAL)  at the [Department of Aeronautics and Astronautics](https://aa.stanford.edu/) of [Stanford University](https://www.stanford.edu/).

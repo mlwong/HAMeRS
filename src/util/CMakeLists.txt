@@ -1,6 +1,7 @@
 # Define a variable utils_source_files containing
 # a list of the source files for the utils library
 set(utils_source_files
+    empty.cpp
 )
 
 # Create a library called utils which includes the 

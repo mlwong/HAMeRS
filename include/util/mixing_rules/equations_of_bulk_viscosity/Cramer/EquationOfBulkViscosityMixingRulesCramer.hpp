@@ -41,7 +41,7 @@ class EquationOfBulkViscosityMixingRulesCramer: public EquationOfBulkViscosityMi
             const boost::shared_ptr<tbox::Database>& restart_db) const;
         
         /*
-         * Compute the bulk viscosity of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the bulk viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         double
         getBulkViscosity(
@@ -50,7 +50,7 @@ class EquationOfBulkViscosityMixingRulesCramer: public EquationOfBulkViscosityMi
             const std::vector<const double*>& mass_fractions) const;
         
         /*
-         * Compute the bulk viscosity of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the bulk viscosity of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeBulkViscosity(
@@ -77,7 +77,7 @@ class EquationOfBulkViscosityMixingRulesCramer: public EquationOfBulkViscosityMi
         computeBulkViscosity(
             boost::shared_ptr<pdat::CellData<double> >& data_bulk_viscosity,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_species_temperatures,
+            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& data_species_temperatures,
             const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
             const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
             const hier::Box& domain) const;

@@ -112,7 +112,7 @@ EquationOfMassDiffusivityMixingRulesConstant::putToRestart(
 
 
 /*
- * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 void
 EquationOfMassDiffusivityMixingRulesConstant::getMassDiffusivities(
@@ -140,7 +140,7 @@ EquationOfMassDiffusivityMixingRulesConstant::getMassDiffusivities(
 
 
 /*
- * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibria assumptions.
+ * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibrium assumptions.
  */
 void
 EquationOfMassDiffusivityMixingRulesConstant::computeMassDiffusivities(

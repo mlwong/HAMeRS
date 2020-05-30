@@ -109,11 +109,20 @@ class Euler:
             const bool initial_time);
         
         /**
-         * Compute the stable time increment for patch using a CFL condition and return the computed
-         * dt.
+         * Get the number of spectral radiuses.
          */
-        double
-        computeStableDtOnPatch(
+        int
+        getNumberOfSpectralRadiuses() const
+        {
+            return d_dim.getValue();
+        }
+        
+        /**
+         * Compute the spectral radiuses and local stable time increment for patch using a CFL condition
+         * and return them.
+         */
+        std::vector<double>
+        computeSpectralRadiusesAndStableDtOnPatch(
             hier::Patch& patch,
             const bool initial_time,
             const double dt_time);

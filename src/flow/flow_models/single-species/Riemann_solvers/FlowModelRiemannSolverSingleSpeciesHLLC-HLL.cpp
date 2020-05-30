@@ -16,14 +16,14 @@ computeLocalConvectiveFluxInXDirectionFromConservativeVariablesHLLC_HLL1D(
     double* p_x_R,
     double* c_x_L,
     double* c_x_R,
-    double u_x_L,
-    double u_x_R,
-    double s_x_minus,
-    double s_x_plus,
-    double s_x_star,
-    double Chi_x_star_LR,
-    const int idx_flux,
-    const int idx)
+    double& u_x_L,
+    double& u_x_R,
+    double& s_x_minus,
+    double& s_x_plus,
+    double& s_x_star,
+    double& Chi_x_star_LR,
+    const int& idx_flux,
+    const int& idx)
 {
     u_x_L = Q_x_L[1][idx]/Q_x_L[0][idx];
     u_x_R = Q_x_R[1][idx]/Q_x_R[0][idx];
@@ -96,14 +96,14 @@ computeLocalConvectiveFluxInXDirectionFromConservativeVariablesHLLC_HLL2D(
     double* p_x_R,
     double* c_x_L,
     double* c_x_R,
-    double u_x_L,
-    double u_x_R,
-    double s_x_minus,
-    double s_x_plus,
-    double s_x_star,
-    double Chi_x_star_LR,
-    const int idx_flux,
-    const int idx)
+    double& u_x_L,
+    double& u_x_R,
+    double& s_x_minus,
+    double& s_x_plus,
+    double& s_x_star,
+    double& Chi_x_star_LR,
+    const int& idx_flux,
+    const int& idx)
 {
     u_x_L = Q_x_L[1][idx]/Q_x_L[0][idx];
     u_x_R = Q_x_R[1][idx]/Q_x_R[0][idx];
@@ -231,14 +231,14 @@ computeLocalConvectiveFluxInXDirectionFromConservativeVariablesHLLC_HLL3D(
     double* p_x_R,
     double* c_x_L,
     double* c_x_R,
-    double u_x_L,
-    double u_x_R,
-    double s_x_minus,
-    double s_x_plus,
-    double s_x_star,
-    double Chi_x_star_LR,
-    const int idx_flux,
-    const int idx)
+    double& u_x_L,
+    double& u_x_R,
+    double& s_x_minus,
+    double& s_x_plus,
+    double& s_x_star,
+    double& Chi_x_star_LR,
+    const int& idx_flux,
+    const int& idx)
 {
     u_x_L = Q_x_L[1][idx]/Q_x_L[0][idx];
     u_x_R = Q_x_R[1][idx]/Q_x_R[0][idx];
@@ -379,14 +379,14 @@ computeLocalConvectiveFluxInYDirectionFromConservativeVariablesHLLC_HLL2D(
     double* p_y_T,
     double* c_y_B,
     double* c_y_T,
-    double v_y_B,
-    double v_y_T,
-    double s_y_minus,
-    double s_y_plus,
-    double s_y_star,
-    double Chi_y_star_BT,
-    const int idx_flux,
-    const int idx)
+    double& v_y_B,
+    double& v_y_T,
+    double& s_y_minus,
+    double& s_y_plus,
+    double& s_y_star,
+    double& Chi_y_star_BT,
+    const int& idx_flux,
+    const int& idx)
 {
     v_y_B = Q_y_B[2][idx]/Q_y_B[0][idx];
     v_y_T = Q_y_T[2][idx]/Q_y_T[0][idx];
@@ -514,14 +514,14 @@ computeLocalConvectiveFluxInYDirectionFromConservativeVariablesHLLC_HLL3D(
     double* p_y_T,
     double* c_y_B,
     double* c_y_T,
-    double v_y_B,
-    double v_y_T,
-    double s_y_minus,
-    double s_y_plus,
-    double s_y_star,
-    double Chi_y_star_BT,
-    const int idx_flux,
-    const int idx)
+    double& v_y_B,
+    double& v_y_T,
+    double& s_y_minus,
+    double& s_y_plus,
+    double& s_y_star,
+    double& Chi_y_star_BT,
+    const int& idx_flux,
+    const int& idx)
 {
     v_y_B = Q_y_B[2][idx]/Q_y_B[0][idx];
     v_y_T = Q_y_T[2][idx]/Q_y_T[0][idx];
@@ -662,14 +662,14 @@ computeLocalConvectiveFluxInZDirectionFromConservativeVariablesHLLC_HLL3D(
     double* p_z_F,
     double* c_z_B,
     double* c_z_F,
-    double w_z_B,
-    double w_z_F,
-    double s_z_minus,
-    double s_z_plus,
-    double s_z_star,
-    double Chi_z_star_BF,
-    const int idx_flux,
-    const int idx)
+    double& w_z_B,
+    double& w_z_F,
+    double& s_z_minus,
+    double& s_z_plus,
+    double& s_z_star,
+    double& Chi_z_star_BF,
+    const int& idx_flux,
+    const int& idx)
 {
     w_z_B = Q_z_B[3][idx]/Q_z_B[0][idx];
     w_z_F = Q_z_F[3][idx]/Q_z_F[0][idx];
@@ -810,12 +810,12 @@ computeLocalConvectiveFluxInXDirectionFromPrimitiveVariablesHLLC_HLL1D(
     double* c_x_R,
     double* epsilon_x_L,
     double* epsilon_x_R,
-    double s_x_minus,
-    double s_x_plus,
-    double s_x_star,
-    double Chi_x_star_LR,
-    const int idx_flux,
-    const int idx)
+    double& s_x_minus,
+    double& s_x_plus,
+    double& s_x_star,
+    double& Chi_x_star_LR,
+    const int& idx_flux,
+    const int& idx)
 {
     const double u_x_average = double(1)/double(2)*(V_x_L[1][idx] + V_x_R[1][idx]);
     const double c_x_average = double(1)/double(2)*(c_x_L[idx] + c_x_R[idx]);
@@ -828,7 +828,7 @@ computeLocalConvectiveFluxInXDirectionFromPrimitiveVariablesHLLC_HLL1D(
     
     s_x_star = (V_x_R[2][idx] - V_x_L[2][idx] + V_x_L[0][idx]*V_x_L[1][idx]*(s_x_L - V_x_L[1][idx]) -
         V_x_R[0][idx]*V_x_R[1][idx]*(s_x_R - V_x_R[1][idx]))/
-            (V_x_L[0][idx]*(s_x_L - V_x_L[1][idx]) - V_x_R[0][idx]*(s_x_R - V_x_R[1][idx]));
+        (V_x_L[0][idx]*(s_x_L - V_x_L[1][idx]) - V_x_R[0][idx]*(s_x_R - V_x_R[1][idx]));
     
     double Q_x_LR[3];
     double Q_x_star_LR[3];
@@ -894,12 +894,12 @@ computeLocalConvectiveFluxInXDirectionFromPrimitiveVariablesHLLC_HLL2D(
     double* c_x_R,
     double* epsilon_x_L,
     double* epsilon_x_R,
-    double s_x_minus,
-    double s_x_plus,
-    double s_x_star,
-    double Chi_x_star_LR,
-    const int idx_flux,
-    const int idx)
+    double& s_x_minus,
+    double& s_x_plus,
+    double& s_x_star,
+    double& Chi_x_star_LR,
+    const int& idx_flux,
+    const int& idx)
 {
     const double u_x_average = double(1)/double(2)*(V_x_L[1][idx] + V_x_R[1][idx]);
     const double c_x_average = double(1)/double(2)*(c_x_L[idx] + c_x_R[idx]);
@@ -912,7 +912,7 @@ computeLocalConvectiveFluxInXDirectionFromPrimitiveVariablesHLLC_HLL2D(
     
     s_x_star = (V_x_R[3][idx] - V_x_L[3][idx] + V_x_L[0][idx]*V_x_L[1][idx]*(s_x_L - V_x_L[1][idx]) -
         V_x_R[0][idx]*V_x_R[1][idx]*(s_x_R - V_x_R[1][idx]))/
-            (V_x_L[0][idx]*(s_x_L - V_x_L[1][idx]) - V_x_R[0][idx]*(s_x_R - V_x_R[1][idx]));
+        (V_x_L[0][idx]*(s_x_L - V_x_L[1][idx]) - V_x_R[0][idx]*(s_x_R - V_x_R[1][idx]));
     
     double Q_x_L[4];
     double Q_x_R[4];
@@ -1035,12 +1035,12 @@ computeLocalConvectiveFluxInXDirectionFromPrimitiveVariablesHLLC_HLL3D(
     double* c_x_R,
     double* epsilon_x_L,
     double* epsilon_x_R,
-    double s_x_minus,
-    double s_x_plus,
-    double s_x_star,
-    double Chi_x_star_LR,
-    const int idx_flux,
-    const int idx)
+    double& s_x_minus,
+    double& s_x_plus,
+    double& s_x_star,
+    double& Chi_x_star_LR,
+    const int& idx_flux,
+    const int& idx)
 {
     const double u_x_average = double(1)/double(2)*(V_x_L[1][idx] + V_x_R[1][idx]);
     const double c_x_average = double(1)/double(2)*(c_x_L[idx] + c_x_R[idx]);
@@ -1053,7 +1053,7 @@ computeLocalConvectiveFluxInXDirectionFromPrimitiveVariablesHLLC_HLL3D(
     
     s_x_star = (V_x_R[4][idx] - V_x_L[4][idx] + V_x_L[0][idx]*V_x_L[1][idx]*(s_x_L - V_x_L[1][idx]) -
         V_x_R[0][idx]*V_x_R[1][idx]*(s_x_R - V_x_R[1][idx]))/
-            (V_x_L[0][idx]*(s_x_L - V_x_L[1][idx]) - V_x_R[0][idx]*(s_x_R - V_x_R[1][idx]));
+        (V_x_L[0][idx]*(s_x_L - V_x_L[1][idx]) - V_x_R[0][idx]*(s_x_R - V_x_R[1][idx]));
     
     double Q_x_L[5];
     double Q_x_R[5];
@@ -1188,12 +1188,12 @@ computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC_HLL2D(
     double* c_y_T,
     double* epsilon_y_B,
     double* epsilon_y_T,
-    double s_y_minus,
-    double s_y_plus,
-    double s_y_star,
-    double Chi_y_star_BT,
-    const int idx_flux,
-    const int idx)
+    double& s_y_minus,
+    double& s_y_plus,
+    double& s_y_star,
+    double& Chi_y_star_BT,
+    const int& idx_flux,
+    const int& idx)
 {
     const double v_y_average = double(1)/double(2)*(V_y_B[2][idx] + V_y_T[2][idx]);
     const double c_y_average = double(1)/double(2)*(c_y_B[idx] + c_y_T[idx]);
@@ -1206,7 +1206,7 @@ computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC_HLL2D(
     
     s_y_star = (V_y_T[3][idx] - V_y_B[3][idx] + V_y_B[0][idx]*V_y_B[2][idx]*(s_y_B - V_y_B[2][idx]) -
         V_y_T[0][idx]*V_y_T[2][idx]*(s_y_T - V_y_T[2][idx]))/
-            (V_y_B[0][idx]*(s_y_B - V_y_B[2][idx]) - V_y_T[0][idx]*(s_y_T - V_y_T[2][idx]));
+        (V_y_B[0][idx]*(s_y_B - V_y_B[2][idx]) - V_y_T[0][idx]*(s_y_T - V_y_T[2][idx]));
     
     double Q_y_B[4];
     double Q_y_T[4];
@@ -1329,12 +1329,12 @@ computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC_HLL3D(
     double* c_y_T,
     double* epsilon_y_B,
     double* epsilon_y_T,
-    double s_y_minus,
-    double s_y_plus,
-    double s_y_star,
-    double Chi_y_star_BT,
-    const int idx_flux,
-    const int idx)
+    double& s_y_minus,
+    double& s_y_plus,
+    double& s_y_star,
+    double& Chi_y_star_BT,
+    const int& idx_flux,
+    const int& idx)
 {
     const double v_y_average = double(1)/double(2)*(V_y_B[2][idx] + V_y_T[2][idx]);
     const double c_y_average = double(1)/double(2)*(c_y_B[idx] + c_y_T[idx]);
@@ -1347,7 +1347,7 @@ computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC_HLL3D(
     
     s_y_star = (V_y_T[4][idx] - V_y_B[4][idx] + V_y_B[0][idx]*V_y_B[2][idx]*(s_y_B - V_y_B[2][idx]) -
         V_y_T[0][idx]*V_y_T[2][idx]*(s_y_T - V_y_T[2][idx]))/
-            (V_y_B[0][idx]*(s_y_B - V_y_B[2][idx]) - V_y_T[0][idx]*(s_y_T - V_y_T[2][idx]));
+        (V_y_B[0][idx]*(s_y_B - V_y_B[2][idx]) - V_y_T[0][idx]*(s_y_T - V_y_T[2][idx]));
     
     double Q_y_B[5];
     double Q_y_T[5];
@@ -1482,12 +1482,12 @@ computeLocalConvectiveFluxInZDirectionFromPrimitiveVariablesHLLC_HLL3D(
     double* c_z_F,
     double* epsilon_z_B,
     double* epsilon_z_F,
-    double s_z_minus,
-    double s_z_plus,
-    double s_z_star,
-    double Chi_z_star_BF,
-    const int idx_flux,
-    const int idx)
+    double& s_z_minus,
+    double& s_z_plus,
+    double& s_z_star,
+    double& Chi_z_star_BF,
+    const int& idx_flux,
+    const int& idx)
 {
     const double w_z_average = double(1)/double(2)*(V_z_B[3][idx] + V_z_F[3][idx]);
     const double c_z_average = double(1)/double(2)*(c_z_B[idx] + c_z_F[idx]);
@@ -1500,7 +1500,7 @@ computeLocalConvectiveFluxInZDirectionFromPrimitiveVariablesHLLC_HLL3D(
     
     s_z_star = (V_z_F[4][idx] - V_z_B[4][idx] + V_z_B[0][idx]*V_z_B[3][idx]*(s_z_B - V_z_B[3][idx]) -
         V_z_F[0][idx]*V_z_F[3][idx]*(s_z_F - V_z_F[3][idx]))/
-            (V_z_B[0][idx]*(s_z_B - V_z_B[3][idx]) - V_z_F[0][idx]*(s_z_F - V_z_F[3][idx]));
+        (V_z_B[0][idx]*(s_z_B - V_z_B[3][idx]) - V_z_F[0][idx]*(s_z_F - V_z_F[3][idx]));
     
     double Q_z_B[5];
     double Q_z_F[5];
@@ -1635,8 +1635,8 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
     const hier::Box& domain,
     bool compute_velocity) const
 {
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     // Get the box that covers the interior of patch.
     const hier::Box interior_box = convective_flux->getBox();
@@ -1655,7 +1655,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
         conservative_variables_L[0]->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -1688,7 +1688,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
      */
     
     const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules =
-        d_flow_model_tmp->getEquationOfStateMixingRules();
+        flow_model_tmp->getEquationOfStateMixingRules();
     
     const int num_thermo_properties = equation_of_state_mixing_rules->
         getNumberOfSpeciesThermodynamicProperties();
@@ -1825,7 +1825,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 double(1)/double(2)*Q_x_R[1][idx]*Q_x_R[1][idx]/Q_x_R[0][idx])/Q_x_R[0][idx];
         }
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computePressure(
                 pressure_x_L,
                 conservative_variables_L[0],
@@ -1834,7 +1834,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computePressure(
                 pressure_x_R,
                 conservative_variables_R[0],
@@ -1843,7 +1843,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
                 sound_speed_x_L,
                 conservative_variables_L[0],
@@ -1852,7 +1852,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
                 sound_speed_x_R,
                 conservative_variables_R[0],
@@ -1980,7 +1980,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 
                 epsilon_x_L[idx] = (Q_x_L[3][idx] -
                     double(1)/double(2)*(Q_x_L[1][idx]*Q_x_L[1][idx] + Q_x_L[2][idx]*Q_x_L[2][idx])/
-                        Q_x_L[0][idx])/Q_x_L[0][idx];
+                    Q_x_L[0][idx])/Q_x_L[0][idx];
             }
         }
         
@@ -1997,11 +1997,11 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 
                 epsilon_x_R[idx] = (Q_x_R[3][idx] -
                     double(1)/double(2)*(Q_x_R[1][idx]*Q_x_R[1][idx] + Q_x_R[2][idx]*Q_x_R[2][idx])/
-                        Q_x_R[0][idx])/Q_x_R[0][idx];
+                    Q_x_R[0][idx])/Q_x_R[0][idx];
             }
         }
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computePressure(
                 pressure_x_L,
                 conservative_variables_L[0],
@@ -2010,7 +2010,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computePressure(
                 pressure_x_R,
                 conservative_variables_R[0],
@@ -2019,7 +2019,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
                 sound_speed_x_L,
                 conservative_variables_L[0],
@@ -2028,7 +2028,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
                 sound_speed_x_R,
                 conservative_variables_R[0],
@@ -2184,7 +2184,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                     
                     epsilon_x_L[idx] = (Q_x_L[4][idx] -
                         double(1)/double(2)*(Q_x_L[1][idx]*Q_x_L[1][idx] + Q_x_L[2][idx]*Q_x_L[2][idx] +
-                            Q_x_L[3][idx]*Q_x_L[3][idx])/Q_x_L[0][idx])/Q_x_L[0][idx];
+                        Q_x_L[3][idx]*Q_x_L[3][idx])/Q_x_L[0][idx])/Q_x_L[0][idx];
                 }
             }
         }
@@ -2206,12 +2206,12 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                     
                     epsilon_x_R[idx] = (Q_x_R[4][idx] -
                         double(1)/double(2)*(Q_x_R[1][idx]*Q_x_R[1][idx] + Q_x_R[2][idx]*Q_x_R[2][idx] +
-                            Q_x_R[3][idx]*Q_x_R[3][idx])/Q_x_R[0][idx])/Q_x_R[0][idx];
+                        Q_x_R[3][idx]*Q_x_R[3][idx])/Q_x_R[0][idx])/Q_x_R[0][idx];
                 }
             }
         }
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computePressure(
                 pressure_x_L,
                 conservative_variables_L[0],
@@ -2220,7 +2220,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computePressure(
                 pressure_x_R,
                 conservative_variables_R[0],
@@ -2229,7 +2229,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
                 sound_speed_x_L,
                 conservative_variables_L[0],
@@ -2238,7 +2238,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
                 sound_speed_x_R,
                 conservative_variables_R[0],
@@ -2382,8 +2382,8 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
     const hier::Box& domain,
     bool compute_velocity) const
 {
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     // Get the box that covers the interior of patch.
     const hier::Box interior_box = convective_flux->getBox();
@@ -2402,7 +2402,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
         conservative_variables_B[0]->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -2435,7 +2435,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
      */
     
     const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules =
-        d_flow_model_tmp->getEquationOfStateMixingRules();
+        flow_model_tmp->getEquationOfStateMixingRules();
     
     const int num_thermo_properties = equation_of_state_mixing_rules->
         getNumberOfSpeciesThermodynamicProperties();
@@ -2576,7 +2576,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
                 
                 epsilon_y_B[idx] = (Q_y_B[3][idx] -
                     double(1)/double(2)*(Q_y_B[1][idx]*Q_y_B[1][idx] + Q_y_B[2][idx]*Q_y_B[2][idx])/
-                        Q_y_B[0][idx])/Q_y_B[0][idx];
+                    Q_y_B[0][idx])/Q_y_B[0][idx];
             }
         }
         
@@ -2593,11 +2593,11 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
                 
                 epsilon_y_T[idx] = (Q_y_T[3][idx] -
                     double(1)/double(2)*(Q_y_T[1][idx]*Q_y_T[1][idx] + Q_y_T[2][idx]*Q_y_T[2][idx])/
-                        Q_y_T[0][idx])/Q_y_T[0][idx];
+                    Q_y_T[0][idx])/Q_y_T[0][idx];
             }
         }
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computePressure(
                 pressure_y_B,
                 conservative_variables_B[0],
@@ -2606,7 +2606,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computePressure(
                 pressure_y_T,
                 conservative_variables_T[0],
@@ -2615,7 +2615,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
                 sound_speed_y_B,
                 conservative_variables_B[0],
@@ -2624,7 +2624,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
                 sound_speed_y_T,
                 conservative_variables_T[0],
@@ -2780,7 +2780,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
                     
                     epsilon_y_B[idx] = (Q_y_B[4][idx] -
                         double(1)/double(2)*(Q_y_B[1][idx]*Q_y_B[1][idx] + Q_y_B[2][idx]*Q_y_B[2][idx] +
-                            Q_y_B[3][idx]*Q_y_B[3][idx])/Q_y_B[0][idx])/Q_y_B[0][idx];
+                        Q_y_B[3][idx]*Q_y_B[3][idx])/Q_y_B[0][idx])/Q_y_B[0][idx];
                 }
             }
         }
@@ -2802,12 +2802,12 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
                     
                     epsilon_y_T[idx] = (Q_y_T[4][idx] -
                         double(1)/double(2)*(Q_y_T[1][idx]*Q_y_T[1][idx] + Q_y_T[2][idx]*Q_y_T[2][idx] +
-                            Q_y_T[3][idx]*Q_y_T[3][idx])/Q_y_T[0][idx])/Q_y_T[0][idx];
+                        Q_y_T[3][idx]*Q_y_T[3][idx])/Q_y_T[0][idx])/Q_y_T[0][idx];
                 }
             }
         }
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computePressure(
                 pressure_y_B,
                 conservative_variables_B[0],
@@ -2816,7 +2816,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computePressure(
                 pressure_y_T,
                 conservative_variables_T[0],
@@ -2825,7 +2825,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
                 sound_speed_y_B,
                 conservative_variables_B[0],
@@ -2834,7 +2834,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
                 sound_speed_y_T,
                 conservative_variables_T[0],
@@ -2978,8 +2978,8 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
     const hier::Box& domain,
     bool compute_velocity) const
 {
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     // Get the box that covers the interior of patch.
     const hier::Box interior_box = convective_flux->getBox();
@@ -2998,7 +2998,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
         conservative_variables_B[0]->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -3031,7 +3031,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
      */
     
     const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules =
-        d_flow_model_tmp->getEquationOfStateMixingRules();
+        flow_model_tmp->getEquationOfStateMixingRules();
     
     const int num_thermo_properties = equation_of_state_mixing_rules->
         getNumberOfSpeciesThermodynamicProperties();
@@ -3190,7 +3190,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
                     
                     epsilon_z_B[idx] = (Q_z_B[4][idx] -
                         double(1)/double(2)*(Q_z_B[1][idx]*Q_z_B[1][idx] + Q_z_B[2][idx]*Q_z_B[2][idx] +
-                            Q_z_B[3][idx]*Q_z_B[3][idx])/Q_z_B[0][idx])/Q_z_B[0][idx];
+                        Q_z_B[3][idx]*Q_z_B[3][idx])/Q_z_B[0][idx])/Q_z_B[0][idx];
                 }
             }
         }
@@ -3212,12 +3212,12 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
                     
                     epsilon_z_F[idx] = (Q_z_F[4][idx] -
                         double(1)/double(2)*(Q_z_F[1][idx]*Q_z_F[1][idx] + Q_z_F[2][idx]*Q_z_F[2][idx] +
-                            Q_z_F[3][idx]*Q_z_F[3][idx])/Q_z_F[0][idx])/Q_z_F[0][idx];
+                        Q_z_F[3][idx]*Q_z_F[3][idx])/Q_z_F[0][idx])/Q_z_F[0][idx];
                 }
             }
         }
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computePressure(
                 pressure_z_B,
                 conservative_variables_B[0],
@@ -3226,7 +3226,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
                 2,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computePressure(
                 pressure_z_F,
                 conservative_variables_F[0],
@@ -3235,7 +3235,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
                 2,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
                 sound_speed_z_B,
                 conservative_variables_B[0],
@@ -3244,7 +3244,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
                 2,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
                 sound_speed_z_F,
                 conservative_variables_F[0],
@@ -3388,8 +3388,8 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
     const hier::Box& domain,
     bool compute_velocity) const
 {
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     // Get the box that covers the interior of patch.
     const hier::Box interior_box = convective_flux->getBox();
@@ -3408,7 +3408,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
         primitive_variables_L[0]->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -3441,7 +3441,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
      */
     
     const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules =
-        d_flow_model_tmp->getEquationOfStateMixingRules();
+        flow_model_tmp->getEquationOfStateMixingRules();
     
     const int num_thermo_properties = equation_of_state_mixing_rules->
         getNumberOfSpeciesThermodynamicProperties();
@@ -3536,7 +3536,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
         const int num_ghosts_0_convective_flux = num_ghosts_convective_flux[0];
         const int num_ghosts_0_primitive_variables = num_ghosts_primitive_variables[0];
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
                 sound_speed_x_L,
                 primitive_variables_L[0],
@@ -3545,7 +3545,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
                 sound_speed_x_R,
                 primitive_variables_R[0],
@@ -3554,7 +3554,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeInternalEnergy(
                 internal_energy_x_L,
                 primitive_variables_L[0],
@@ -3563,7 +3563,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeInternalEnergy(
                 internal_energy_x_R,
                 primitive_variables_R[0],
@@ -3670,7 +3670,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
         const int num_ghosts_1_primitive_variables = num_ghosts_primitive_variables[1];
         const int ghostcell_dim_0_primitive_variables = ghostcell_dims_primitive_variables[0] + 1;
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
                 sound_speed_x_L,
                 primitive_variables_L[0],
@@ -3679,7 +3679,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
                 sound_speed_x_R,
                 primitive_variables_R[0],
@@ -3688,7 +3688,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeInternalEnergy(
                 internal_energy_x_L,
                 primitive_variables_L[0],
@@ -3697,7 +3697,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeInternalEnergy(
                 internal_energy_x_R,
                 primitive_variables_R[0],
@@ -3828,7 +3828,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
         const int ghostcell_dim_0_primitive_variables = ghostcell_dims_primitive_variables[0] + 1;
         const int ghostcell_dim_1_primitive_variables = ghostcell_dims_primitive_variables[1];
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
                 sound_speed_x_L,
                 primitive_variables_L[0],
@@ -3837,7 +3837,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
                 sound_speed_x_R,
                 primitive_variables_R[0],
@@ -3846,7 +3846,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeInternalEnergy(
                 internal_energy_x_L,
                 primitive_variables_L[0],
@@ -3855,7 +3855,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeInternalEnergy(
                 internal_energy_x_R,
                 primitive_variables_R[0],
@@ -3995,8 +3995,8 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
     const hier::Box& domain,
     bool compute_velocity) const
 {
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     // Get the box that covers the interior of patch.
     const hier::Box interior_box = convective_flux->getBox();
@@ -4015,7 +4015,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
         primitive_variables_B[0]->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -4048,7 +4048,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
      */
     
     const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules =
-        d_flow_model_tmp->getEquationOfStateMixingRules();
+        flow_model_tmp->getEquationOfStateMixingRules();
     
     const int num_thermo_properties = equation_of_state_mixing_rules->
         getNumberOfSpeciesThermodynamicProperties();
@@ -4158,7 +4158,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
         const int num_ghosts_1_primitive_variables = num_ghosts_primitive_variables[1];
         const int ghostcell_dim_0_primitive_variables = ghostcell_dims_primitive_variables[0];
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
                 sound_speed_y_B,
                 primitive_variables_B[0],
@@ -4167,7 +4167,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
                 sound_speed_y_T,
                 primitive_variables_T[0],
@@ -4176,7 +4176,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeInternalEnergy(
                 internal_energy_y_B,
                 primitive_variables_B[0],
@@ -4185,7 +4185,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeInternalEnergy(
                 internal_energy_y_T,
                 primitive_variables_T[0],
@@ -4316,7 +4316,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
         const int ghostcell_dim_0_primitive_variables = ghostcell_dims_primitive_variables[0];
         const int ghostcell_dim_1_primitive_variables = ghostcell_dims_primitive_variables[1] + 1;
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
                 sound_speed_y_B,
                 primitive_variables_B[0],
@@ -4325,7 +4325,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
                 sound_speed_y_T,
                 primitive_variables_T[0],
@@ -4334,7 +4334,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeInternalEnergy(
                 internal_energy_y_B,
                 primitive_variables_B[0],
@@ -4343,7 +4343,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeInternalEnergy(
                 internal_energy_y_T,
                 primitive_variables_T[0],
@@ -4483,8 +4483,8 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
     const hier::Box& domain,
     bool compute_velocity) const
 {
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     // Get the box that covers the interior of patch.
     const hier::Box interior_box = convective_flux->getBox();
@@ -4503,7 +4503,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
         primitive_variables_B[0]->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -4536,7 +4536,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
      */
     
     const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules =
-        d_flow_model_tmp->getEquationOfStateMixingRules();
+        flow_model_tmp->getEquationOfStateMixingRules();
     
     const int num_thermo_properties = equation_of_state_mixing_rules->
         getNumberOfSpeciesThermodynamicProperties();
@@ -4660,7 +4660,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
         const int ghostcell_dim_0_primitive_variables = ghostcell_dims_primitive_variables[0];
         const int ghostcell_dim_1_primitive_variables = ghostcell_dims_primitive_variables[1];
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
                 sound_speed_z_B,
                 primitive_variables_B[0],
@@ -4669,7 +4669,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
                 2,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
                 sound_speed_z_F,
                 primitive_variables_F[0],
@@ -4678,7 +4678,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
                 2,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeInternalEnergy(
                 internal_energy_z_B,
                 primitive_variables_B[0],
@@ -4687,7 +4687,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
                 2,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
+        flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeInternalEnergy(
                 internal_energy_z_F,
                 primitive_variables_F[0],
@@ -4812,4 +4812,3 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
         }
     }
 }
-

@@ -51,7 +51,7 @@ class EquationOfStateMixingRules
             const boost::shared_ptr<tbox::Database>& restart_db) const = 0;
         
         /*
-         * Compute the pressure of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the pressure of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual double
         getPressure(
@@ -60,7 +60,7 @@ class EquationOfStateMixingRules
             const std::vector<const double*>& mass_fractions) const = 0;
         
         /*
-         * Compute the pressure of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the pressure of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computePressure(
@@ -79,7 +79,7 @@ class EquationOfStateMixingRules
         }
         
         /*
-         * Compute the pressure of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the pressure of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual void
         computePressure(
@@ -90,7 +90,7 @@ class EquationOfStateMixingRules
             const hier::Box& domain) const = 0;
         
         /*
-         * Compute the pressure of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the pressure of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computePressure(
@@ -111,7 +111,7 @@ class EquationOfStateMixingRules
         }
         
         /*
-         * Compute the pressure of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the pressure of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual void
         computePressure(
@@ -202,158 +202,7 @@ class EquationOfStateMixingRules
             const hier::Box& domain) const = 0;
         
         /*
-         * Compute the sound speed of the mixture with isothermal and isobaric equilibria assumptions.
-         */
-        virtual double
-        getSoundSpeed(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& mass_fractions) const = 0;
-        
-        /*
-         * Compute the sound speed of the mixture with isothermal and isobaric equilibria assumptions.
-         */
-        void
-        computeSoundSpeed(
-            boost::shared_ptr<pdat::CellData<double> >& data_sound_speed,
-            const boost::shared_ptr<pdat::CellData<double> >& data_density,
-            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions) const
-        {
-            const hier::Box empty_box(d_dim);
-            computeSoundSpeed(
-                data_sound_speed,
-                data_density,
-                data_pressure,
-                data_mass_fractions,
-                empty_box);
-        }
-        
-        /*
-         * Compute the sound speed of the mixture with isothermal and isobaric equilibria assumptions.
-         */
-        virtual void
-        computeSoundSpeed(
-            boost::shared_ptr<pdat::CellData<double> >& data_sound_speed,
-            const boost::shared_ptr<pdat::CellData<double> >& data_density,
-            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
-            const hier::Box& domain) const = 0;
-        
-        /*
-         * Compute the sound speed of the mixture with isothermal and isobaric equilibria assumptions.
-         */
-        void
-        computeSoundSpeed(
-            boost::shared_ptr<pdat::SideData<double> >& data_sound_speed,
-            const boost::shared_ptr<pdat::SideData<double> >& data_density,
-            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
-            int side_normal) const
-        {
-            const hier::Box empty_box(d_dim);
-            computeSoundSpeed(
-                data_sound_speed,
-                data_density,
-                data_pressure,
-                data_mass_fractions,
-                side_normal,
-                empty_box);
-        }
-        
-        /*
-         * Compute the sound speed of the mixture with isothermal and isobaric equilibria assumptions.
-         */
-        virtual void
-        computeSoundSpeed(
-            boost::shared_ptr<pdat::SideData<double> >& data_sound_speed,
-            const boost::shared_ptr<pdat::SideData<double> >& data_density,
-            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
-            int side_normal,
-            const hier::Box& domain) const = 0;
-        
-        /*
-         * Compute the sound speed of the mixture with isobaric equilibrium assumption.
-         */
-        virtual double
-        getSoundSpeed(
-            const double* const density,
-            const double* const pressure,
-            const std::vector<const double*>& mass_fractions,
-            const std::vector<const double*>& volume_fractions) const = 0;
-        
-        /*
-         * Compute the sound speed of the mixture with isobaric equilibrium assumption.
-         */
-        void
-        computeSoundSpeed(
-            boost::shared_ptr<pdat::CellData<double> >& data_sound_speed,
-            const boost::shared_ptr<pdat::CellData<double> >& data_density,
-            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
-            const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions) const
-        {
-            const hier::Box empty_box(d_dim);
-            computeSoundSpeed(
-                data_sound_speed,
-                data_density,
-                data_pressure,
-                data_mass_fractions,
-                data_volume_fractions,
-                empty_box);
-        }
-        
-        /*
-         * Compute the sound speed of the mixture with isobaric equilibrium assumption.
-         */
-        virtual void
-        computeSoundSpeed(
-            boost::shared_ptr<pdat::CellData<double> >& data_sound_speed,
-            const boost::shared_ptr<pdat::CellData<double> >& data_density,
-            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
-            const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
-            const hier::Box& domain) const = 0;
-        
-        /*
-         * Compute the sound speed of the mixture with isobaric equilibrium assumption.
-         */
-        void
-        computeSoundSpeed(
-            boost::shared_ptr<pdat::SideData<double> >& data_sound_speed,
-            const boost::shared_ptr<pdat::SideData<double> >& data_density,
-            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
-            const boost::shared_ptr<pdat::SideData<double> >& data_volume_fractions,
-            int side_normal) const
-        {
-            const hier::Box empty_box(d_dim);
-            computeSoundSpeed(
-                data_sound_speed,
-                data_density,
-                data_pressure,
-                data_mass_fractions,
-                data_volume_fractions,
-                side_normal,
-                empty_box);
-        }
-        
-        /*
-         * Compute the sound speed of the mixture with isobaric equilibrium assumption.
-         */
-        virtual void
-        computeSoundSpeed(
-            boost::shared_ptr<pdat::SideData<double> >& data_sound_speed,
-            const boost::shared_ptr<pdat::SideData<double> >& data_density,
-            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
-            const boost::shared_ptr<pdat::SideData<double> >& data_volume_fractions,
-            int side_normal,
-            const hier::Box& domain) const = 0;
-        
-        /*
-         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual double
         getInternalEnergy(
@@ -362,7 +211,7 @@ class EquationOfStateMixingRules
             const std::vector<const double*>& mass_fractions) const = 0;
         
         /*
-         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeInternalEnergy(
@@ -381,7 +230,7 @@ class EquationOfStateMixingRules
         }
         
         /*
-         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual void
         computeInternalEnergy(
@@ -392,7 +241,7 @@ class EquationOfStateMixingRules
             const hier::Box& domain) const = 0;
         
         /*
-         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeInternalEnergy(
@@ -413,7 +262,7 @@ class EquationOfStateMixingRules
         }
         
         /*
-         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual void
         computeInternalEnergy(
@@ -504,7 +353,7 @@ class EquationOfStateMixingRules
             const hier::Box& domain) const = 0;
         
         /*
-         * Compute the temperature of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the temperature of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual double
         getTemperature(
@@ -513,7 +362,7 @@ class EquationOfStateMixingRules
             const std::vector<const double*>& mass_fractions) const = 0;
         
         /*
-         * Compute the temperature of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the temperature of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeTemperature(
@@ -532,7 +381,7 @@ class EquationOfStateMixingRules
         } 
         
         /*
-         * Compute the temperature of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the temperature of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual void
         computeTemperature(
@@ -543,7 +392,7 @@ class EquationOfStateMixingRules
             const hier::Box& domain) const = 0;
         
         /*
-         * Compute the temperature of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the temperature of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeTemperature(
@@ -564,7 +413,7 @@ class EquationOfStateMixingRules
         } 
         
         /*
-         * Compute the temperature of the mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the temperature of the mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual void
         computeTemperature(
@@ -577,7 +426,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the specific internal energy of the mixture from temperature with isothermal
-         * and isobaric equilibria assumptions.
+         * and isobaric equilibrium assumptions.
          */
         virtual double
         getInternalEnergyFromTemperature(
@@ -587,7 +436,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the specific internal energy of the mixture from temperature with isothermal
-         * and isobaric equilibria assumptions.
+         * and isobaric equilibrium assumptions.
          */
         void
         computeInternalEnergyFromTemperature(
@@ -607,7 +456,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the specific internal energy of the mixture from temperature with isothermal
-         * and isobaric equilibria assumptions.
+         * and isobaric equilibrium assumptions.
          */
         virtual void
         computeInternalEnergyFromTemperature(
@@ -619,7 +468,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the specific internal energy of the mixture from temperature with isothermal
-         * and isobaric equilibria assumptions.
+         * and isobaric equilibrium assumptions.
          */
         void
         computeInternalEnergyFromTemperature(
@@ -641,7 +490,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the specific internal energy of the mixture from temperature with isothermal
-         * and isobaric equilibria assumptions.
+         * and isobaric equilibrium assumptions.
          */
         virtual void
         computeInternalEnergyFromTemperature(
@@ -654,7 +503,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         virtual double
         getIsochoricSpecificHeatCapacity(
@@ -664,7 +513,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         void
         computeIsochoricSpecificHeatCapacity(
@@ -684,7 +533,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         virtual void
         computeIsochoricSpecificHeatCapacity(
@@ -696,7 +545,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         void
         computeIsochoricSpecificHeatCapacity(
@@ -718,7 +567,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         virtual void
         computeIsochoricSpecificHeatCapacity(
@@ -731,7 +580,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         virtual double
         getIsobaricSpecificHeatCapacity(
@@ -741,7 +590,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         void
         computeIsobaricSpecificHeatCapacity(
@@ -761,7 +610,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         virtual void
         computeIsobaricSpecificHeatCapacity(
@@ -773,7 +622,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         void
         computeIsobaricSpecificHeatCapacity(
@@ -795,7 +644,7 @@ class EquationOfStateMixingRules
         
         /*
          * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric
-         * equilibria assumptions.
+         * equilibrium assumptions.
          */
         virtual void
         computeIsobaricSpecificHeatCapacity(
@@ -807,7 +656,423 @@ class EquationOfStateMixingRules
             const hier::Box& domain) const = 0;
         
         /*
-         * Compute the density of mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the Gruneisen parameter of the mixture with isothermal and isobaric equilibrium assumptions
+         * (partial derivative of pressure w.r.t. specific internal energy under constant partial densities
+         * divided by mixture density).
+         */
+        virtual double
+        getGruneisenParameter(
+            const double* const density,
+            const double* const pressure,
+            const std::vector<const double*>& mass_fractions) const = 0;
+        
+        /*
+         * Compute the Gruneisen parameter of the mixture with isothermal and isobaric equilibrium assumptions
+         * (partial derivative of pressure w.r.t. specific internal energy under constant partial densities
+         * divided by mixture density).
+         */
+        void
+        computeGruneisenParameter(
+            boost::shared_ptr<pdat::CellData<double> >& data_gruneisen_parameter,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeGruneisenParameter(
+                data_gruneisen_parameter,
+                data_density,
+                data_pressure,
+                data_mass_fractions,
+                empty_box);
+        }
+        
+        /*
+         * Compute the Gruneisen parameter of the mixture with isothermal and isobaric equilibrium assumptions
+         * (partial derivative of pressure w.r.t. specific internal energy under constant partial densities
+         * divided by mixture density).
+         */
+        virtual void
+        computeGruneisenParameter(
+            boost::shared_ptr<pdat::CellData<double> >& data_gruneisen_parameter,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the Gruneisen parameter of the mixture with isothermal and isobaric equilibrium assumptions
+         * (partial derivative of pressure w.r.t. specific internal energy under constant partial densities
+         * divided by mixture density).
+         */
+        void
+        computeGruneisenParameter(
+            boost::shared_ptr<pdat::SideData<double> >& data_gruneisen_parameter,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeGruneisenParameter(
+                data_gruneisen_parameter,
+                data_density,
+                data_pressure,
+                data_mass_fractions,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the Gruneisen parameter of the mixture with isothermal and isobaric equilibrium assumptions
+         * (partial derivative of pressure w.r.t. specific internal energy under constant partial densities
+         * divided by mixture density).
+         */
+        virtual void
+        computeGruneisenParameter(
+            boost::shared_ptr<pdat::SideData<double> >& data_gruneisen_parameter,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            int side_normal,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the Gruneisen parameter of the mixture with isobaric equilibrium assumption
+         * (partial derivative of pressure w.r.t. specific internal energy under constant partial densities
+         * and volume fractions divided by mixture density).
+         */
+        virtual double
+        getGruneisenParameter(
+            const double* const density,
+            const double* const pressure,
+            const std::vector<const double*>& mass_fractions,
+            const std::vector<const double*>& volume_fractions) const = 0;
+        
+        /*
+         * Compute the Gruneisen parameter of the mixture with isobaric equilibrium assumption
+         * (partial derivative of pressure w.r.t. specific internal energy under constant partial densities
+         * and volume fractions divided by mixture density).
+         */
+        void
+        computeGruneisenParameter(
+            boost::shared_ptr<pdat::CellData<double> >& data_gruneisen_parameter,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeGruneisenParameter(
+                data_gruneisen_parameter,
+                data_density,
+                data_pressure,
+                data_mass_fractions,
+                data_volume_fractions,
+                empty_box);
+        }
+        
+        /*
+         * Compute the Gruneisen parameter of the mixture with isobaric equilibrium assumption
+         * (partial derivative of pressure w.r.t. specific internal energy under constant partial densities
+         * and volume fractions divided by mixture density).
+         */
+        virtual void
+        computeGruneisenParameter(
+            boost::shared_ptr<pdat::CellData<double> >& data_gruneisen_parameter,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the Gruneisen parameter of the mixture with isobaric equilibrium assumption
+         * (partial derivative of pressure w.r.t. specific internal energy under constant partial densities
+         * and volume fractions divided by mixture density).
+         */
+        void
+        computeGruneisenParameter(
+            boost::shared_ptr<pdat::SideData<double> >& data_gruneisen_parameter,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            const boost::shared_ptr<pdat::SideData<double> >& data_volume_fractions,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeGruneisenParameter(
+                data_gruneisen_parameter,
+                data_density,
+                data_pressure,
+                data_mass_fractions,
+                data_volume_fractions,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the Gruneisen parameter of the mixture with isobaric equilibrium assumption
+         * (partial derivative of pressure w.r.t. specific internal energy under constant partial densities
+         * and volume fractions divided by mixture density).
+         */
+        virtual void
+        computeGruneisenParameter(
+            boost::shared_ptr<pdat::SideData<double> >& data_gruneisen_parameter,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            const boost::shared_ptr<pdat::SideData<double> >& data_volume_fractions,
+            int side_normal,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the mixture partial derivative of pressure w.r.t. partial densities under constant specific
+         * internal energy with isothermal and isobaric equilibrium assumptions.
+         */
+        virtual std::vector<double>
+        getPressureDerivativeWithPartialDensities(
+            const double* const density,
+            const double* const pressure,
+            const std::vector<const double*>& mass_fractions) const = 0;
+        
+        /*
+         * Compute the mixture partial derivative of pressure w.r.t. partial densities under constant specific
+         * internal energy with isothermal and isobaric equilibrium assumptions.
+         */
+        void
+        computePressureDerivativeWithPartialDensities(
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_partial_densities,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions) const
+        {
+            const hier::Box empty_box(d_dim);
+            computePressureDerivativeWithPartialDensities(
+                data_partial_pressure_partial_partial_densities,
+                data_density,
+                data_pressure,
+                data_mass_fractions,
+                empty_box);
+        }
+        
+        /*
+         * Compute the mixture partial derivative of pressure w.r.t. partial densities under constant specific
+         * internal energy with isothermal and isobaric equilibrium assumptions.
+         */
+        virtual void
+        computePressureDerivativeWithPartialDensities(
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_partial_densities,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the mixture partial derivative of pressure w.r.t. partial densities under constant specific
+         * internal energy with isothermal and isobaric equilibrium assumptions.
+         */
+        void
+        computePressureDerivativeWithPartialDensities(
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_partial_densities,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computePressureDerivativeWithPartialDensities(
+                data_partial_pressure_partial_partial_densities,
+                data_density,
+                data_pressure,
+                data_mass_fractions,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the mixture partial derivative of pressure w.r.t. partial densities under constant specific
+         * internal energy with isothermal and isobaric equilibrium assumptions.
+         */
+        virtual void
+        computePressureDerivativeWithPartialDensities(
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_partial_densities,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            int side_normal,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the mixture partial derivative of pressure w.r.t. partial densities under constant specific
+         * internal energy and volume fractions with isobaric equilibrium assumption.
+         */
+        virtual std::vector<double>
+        getPressureDerivativeWithPartialDensities(
+            const double* const density,
+            const double* const pressure,
+            const std::vector<const double*>& mass_fractions,
+            const std::vector<const double*>& volume_fractions) const = 0;
+        
+        /*
+         * Compute the mixture partial derivative of pressure w.r.t. partial densities under constant specific
+         * internal energy and volume fractions with isobaric equilibrium assumption.
+         */
+        void
+        computePressureDerivativeWithPartialDensities(
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_partial_densities,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions) const
+        {
+            const hier::Box empty_box(d_dim);
+            computePressureDerivativeWithPartialDensities(
+                data_partial_pressure_partial_partial_densities,
+                data_density,
+                data_pressure,
+                data_mass_fractions,
+                data_volume_fractions,
+                empty_box);
+        }
+        
+        /*
+         * Compute the mixture partial derivative of pressure w.r.t. partial densities under constant specific
+         * internal energy and volume fractions with isobaric equilibrium assumption.
+         */
+        virtual void
+        computePressureDerivativeWithPartialDensities(
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_partial_densities,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the mixture partial derivative of pressure w.r.t. partial densities under constant specific
+         * internal energy and volume fractions with isobaric equilibrium assumption.
+         */
+        void
+        computePressureDerivativeWithPartialDensities(
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_partial_densities,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            const boost::shared_ptr<pdat::SideData<double> >& data_volume_fractions,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computePressureDerivativeWithPartialDensities(
+                data_partial_pressure_partial_partial_densities,
+                data_density,
+                data_pressure,
+                data_mass_fractions,
+                data_volume_fractions,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the mixture partial derivative of pressure w.r.t. partial densities under constant specific
+         * internal energy and volume fractions with isobaric equilibrium assumption.
+         */
+        virtual void
+        computePressureDerivativeWithPartialDensities(
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_partial_densities,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            const boost::shared_ptr<pdat::SideData<double> >& data_volume_fractions,
+            int side_normal,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the mixture partial derivative of pressure w.r.t. volume fractions under constant specific
+         * internal energy and partial densities with isobaric equilibrium assumption.
+         */
+        virtual std::vector<double>
+        getPressureDerivativeWithVolumeFractions(
+            const double* const density,
+            const double* const pressure,
+            const std::vector<const double*>& mass_fractions,
+            const std::vector<const double*>& volume_fractions) const = 0;
+        
+        /*
+         * Compute the mixture partial derivative of pressure w.r.t. volume fractions under constant specific
+         * internal energy and partial densities with isobaric equilibrium assumption.
+         */
+        void
+        computePressureDerivativeWithVolumeFractions(
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_volume_fractions,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions) const
+        {
+            const hier::Box empty_box(d_dim);
+            computePressureDerivativeWithVolumeFractions(
+                data_partial_pressure_partial_volume_fractions,
+                data_density,
+                data_pressure,
+                data_mass_fractions,
+                data_volume_fractions,
+                empty_box);
+        }
+        
+        /*
+         * Compute the mixture partial derivative of pressure w.r.t. volume fractions under constant specific
+         * internal energy and partial densities with isobaric equilibrium assumption.
+         */
+        virtual void
+        computePressureDerivativeWithVolumeFractions(
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_volume_fractions,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the mixture partial derivative of pressure w.r.t. volume fractions under constant specific
+         * internal energy and partial densities with isobaric equilibrium assumption.
+         */
+        void
+        computePressureDerivativeWithVolumeFractions(
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_volume_fractions,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            const boost::shared_ptr<pdat::SideData<double> >& data_volume_fractions,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computePressureDerivativeWithVolumeFractions(
+                data_partial_pressure_partial_volume_fractions,
+                data_density,
+                data_pressure,
+                data_mass_fractions,
+                data_volume_fractions,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the mixture partial derivative of pressure w.r.t. volume fractions under constant specific
+         * internal energy and partial densities with isobaric equilibrium assumption.
+         */
+        virtual void
+        computePressureDerivativeWithVolumeFractions(
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_volume_fractions,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            const boost::shared_ptr<pdat::SideData<double> >& data_volume_fractions,
+            int side_normal,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the density of mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual double
         getMixtureDensity(
@@ -816,7 +1081,7 @@ class EquationOfStateMixingRules
             const std::vector<const double*>& mass_fractions) const = 0;
         
         /*
-         * Compute the density of mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the density of mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeMixtureDensity(
@@ -835,7 +1100,7 @@ class EquationOfStateMixingRules
         }
         
         /*
-         * Compute the density of mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the density of mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual void
         computeMixtureDensity(
@@ -846,7 +1111,7 @@ class EquationOfStateMixingRules
             const hier::Box& domain) const = 0;
         
         /*
-         * Compute the density of mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the density of mixture with isothermal and isobaric equilibrium assumptions.
          */
         void
         computeMixtureDensity(
@@ -867,7 +1132,7 @@ class EquationOfStateMixingRules
         }
         
         /*
-         * Compute the density of mixture with isothermal and isobaric equilibria assumptions.
+         * Compute the density of mixture with isothermal and isobaric equilibrium assumptions.
          */
         virtual void
         computeMixtureDensity(

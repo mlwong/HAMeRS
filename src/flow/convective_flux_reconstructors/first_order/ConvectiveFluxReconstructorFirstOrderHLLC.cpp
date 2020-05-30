@@ -80,7 +80,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
     NULL_USE(RK_step_number);
     
     d_flow_model->setupRiemannSolver();
-    d_riemann_solver = d_flow_model->getFlowModelRiemannSolver();
+    boost::shared_ptr<FlowModelRiemannSolver> riemann_solver = d_flow_model->getFlowModelRiemannSolver();
     
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
@@ -151,7 +151,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
          */
         
         std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
-            d_flow_model->getGlobalCellDataConservativeVariables();
+            d_flow_model->getCellDataOfConservativeVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
         num_subghosts_conservative_var.reserve(d_num_eqn);
@@ -236,7 +236,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
         
         if (d_has_advective_eqn_form)
         {
-            d_riemann_solver->computeConvectiveFluxAndVelocityFromConservativeVariables(
+            riemann_solver->computeConvectiveFluxAndVelocityFromConservativeVariables(
                 convective_flux,
                 velocity_intercell,
                 conservative_variables_minus,
@@ -246,7 +246,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
         }
         else
         {
-            d_riemann_solver->computeConvectiveFluxFromConservativeVariables(
+            riemann_solver->computeConvectiveFluxFromConservativeVariables(
                 convective_flux,
                 conservative_variables_minus,
                 conservative_variables_plus,
@@ -330,7 +330,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
          */
         
         std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
-            d_flow_model->getGlobalCellDataConservativeVariables();
+            d_flow_model->getCellDataOfConservativeVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
         num_subghosts_conservative_var.reserve(d_num_eqn);
@@ -425,7 +425,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
         
         if (d_has_advective_eqn_form)
         {
-            d_riemann_solver->computeConvectiveFluxAndVelocityFromConservativeVariables(
+            riemann_solver->computeConvectiveFluxAndVelocityFromConservativeVariables(
                 convective_flux,
                 velocity_intercell,
                 conservative_variables_minus,
@@ -435,7 +435,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
         }
         else
         {
-            d_riemann_solver->computeConvectiveFluxFromConservativeVariables(
+            riemann_solver->computeConvectiveFluxFromConservativeVariables(
                 convective_flux,
                 conservative_variables_minus,
                 conservative_variables_plus,
@@ -499,7 +499,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
         
         if (d_has_advective_eqn_form)
         {
-            d_riemann_solver->computeConvectiveFluxAndVelocityFromConservativeVariables(
+            riemann_solver->computeConvectiveFluxAndVelocityFromConservativeVariables(
                 convective_flux,
                 velocity_intercell,
                 conservative_variables_minus,
@@ -509,7 +509,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
         }
         else
         {
-            d_riemann_solver->computeConvectiveFluxFromConservativeVariables(
+            riemann_solver->computeConvectiveFluxFromConservativeVariables(
                 convective_flux,
                 conservative_variables_minus,
                 conservative_variables_plus,
@@ -618,7 +618,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
          */
         
         std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
-            d_flow_model->getGlobalCellDataConservativeVariables();
+            d_flow_model->getCellDataOfConservativeVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
         num_subghosts_conservative_var.reserve(d_num_eqn);
@@ -723,7 +723,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
         
         if (d_has_advective_eqn_form)
         {
-            d_riemann_solver->computeConvectiveFluxAndVelocityFromConservativeVariables(
+            riemann_solver->computeConvectiveFluxAndVelocityFromConservativeVariables(
                 convective_flux,
                 velocity_intercell,
                 conservative_variables_minus,
@@ -733,7 +733,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
         }
         else
         {
-            d_riemann_solver->computeConvectiveFluxFromConservativeVariables(
+            riemann_solver->computeConvectiveFluxFromConservativeVariables(
                 convective_flux,
                 conservative_variables_minus,
                 conservative_variables_plus,
@@ -812,7 +812,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
         
         if (d_has_advective_eqn_form)
         {
-            d_riemann_solver->computeConvectiveFluxAndVelocityFromConservativeVariables(
+            riemann_solver->computeConvectiveFluxAndVelocityFromConservativeVariables(
                 convective_flux,
                 velocity_intercell,
                 conservative_variables_minus,
@@ -822,7 +822,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
         }
         else
         {
-            d_riemann_solver->computeConvectiveFluxFromConservativeVariables(
+            riemann_solver->computeConvectiveFluxFromConservativeVariables(
                 convective_flux,
                 conservative_variables_minus,
                 conservative_variables_plus,
@@ -900,7 +900,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
         
         if (d_has_advective_eqn_form)
         {
-            d_riemann_solver->computeConvectiveFluxAndVelocityFromConservativeVariables(
+            riemann_solver->computeConvectiveFluxAndVelocityFromConservativeVariables(
                 convective_flux,
                 velocity_intercell,
                 conservative_variables_minus,
@@ -910,7 +910,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
         }
         else
         {
-            d_riemann_solver->computeConvectiveFluxFromConservativeVariables(
+            riemann_solver->computeConvectiveFluxFromConservativeVariables(
                 convective_flux,
                 conservative_variables_minus,
                 conservative_variables_plus,
