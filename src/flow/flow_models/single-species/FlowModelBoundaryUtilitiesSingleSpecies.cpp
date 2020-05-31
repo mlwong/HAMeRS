@@ -210,6 +210,231 @@ FlowModelBoundaryUtilitiesSingleSpecies::getFromInput3d(
 
 
 /*
+ * Function that returns the integer edge boundary location
+ * corresponding to the given node location and node boundary
+ * condition.
+ *
+ * If the node boundary condition type or node location are unknown,
+ * or the boundary condition type is inconsistent with the node location,
+ * an error code (-1) is returned.
+ */
+int
+FlowModelBoundaryUtilitiesSingleSpecies::getEdgeLocationForNodeBdry(
+    int node_loc,
+    int node_btype)
+{
+    int ret_edge = -1;
+    
+    switch (node_btype)
+    {
+        case BDRY_COND::FLOW_MODEL::XADIABATIC_NO_SLIP:
+        case BDRY_COND::FLOW_MODEL::XISOTHERMAL_NO_SLIP:
+        {
+            if (node_loc == NODE_BDRY_LOC_2D::XLO_YLO ||
+                node_loc == NODE_BDRY_LOC_2D::XLO_YHI)
+            {
+                ret_edge = BDRY_LOC::XLO;
+            }
+            else if (node_loc == NODE_BDRY_LOC_2D::XHI_YLO ||
+                     node_loc == NODE_BDRY_LOC_2D::XHI_YHI)
+            {
+                ret_edge = BDRY_LOC::XHI;
+            }
+            break;
+        }
+        case BDRY_COND::FLOW_MODEL::YADIABATIC_NO_SLIP:
+        case BDRY_COND::FLOW_MODEL::YISOTHERMAL_NO_SLIP:
+        {
+            if (node_loc == NODE_BDRY_LOC_2D::XLO_YLO ||
+                node_loc == NODE_BDRY_LOC_2D::XHI_YLO)
+            {
+                ret_edge = BDRY_LOC::YLO;
+            }
+            else if (node_loc == NODE_BDRY_LOC_2D::XLO_YHI ||
+                     node_loc == NODE_BDRY_LOC_2D::XHI_YHI)
+            {
+                ret_edge = BDRY_LOC::YHI;
+            }
+            break;
+        }
+        default:
+        {
+        }
+    }
+    
+    return ret_edge;
+}
+
+
+/*
+ * Function that returns the integer face boundary location
+ * corresponding to the given edge location and edge boundary
+ * condition.
+ *
+ * If the edge boundary condition type or edge location are unknown,
+ * or the boundary condition type is inconsistent with the edge location,
+ * an error code (-1) is returned.
+ */
+int
+FlowModelBoundaryUtilitiesSingleSpecies::getFaceLocationForEdgeBdry(
+    int edge_loc,
+    int edge_btype)
+{
+    int ret_face = -1;
+    
+    switch (edge_btype)
+    {
+        case BDRY_COND::FLOW_MODEL::XADIABATIC_NO_SLIP:
+        case BDRY_COND::FLOW_MODEL::XISOTHERMAL_NO_SLIP:
+        {
+            if (edge_loc == EDGE_BDRY_LOC_3D::XLO_ZLO ||
+                edge_loc == EDGE_BDRY_LOC_3D::XLO_ZHI ||
+                edge_loc == EDGE_BDRY_LOC_3D::XLO_YLO ||
+                edge_loc == EDGE_BDRY_LOC_3D::XLO_YHI)
+            {
+                ret_face = BDRY_LOC::XLO;
+            }
+            else if (edge_loc == EDGE_BDRY_LOC_3D::XHI_ZLO ||
+                     edge_loc == EDGE_BDRY_LOC_3D::XHI_ZHI ||
+                     edge_loc == EDGE_BDRY_LOC_3D::XHI_YLO ||
+                     edge_loc == EDGE_BDRY_LOC_3D::XHI_YHI)
+            {
+                ret_face = BDRY_LOC::XHI;
+            }
+            break;
+        }
+        case BDRY_COND::FLOW_MODEL::YADIABATIC_NO_SLIP:
+        case BDRY_COND::FLOW_MODEL::YISOTHERMAL_NO_SLIP:
+        {
+            if (edge_loc == EDGE_BDRY_LOC_3D::YLO_ZLO ||
+                edge_loc == EDGE_BDRY_LOC_3D::YLO_ZHI ||
+                edge_loc == EDGE_BDRY_LOC_3D::XLO_YLO ||
+                edge_loc == EDGE_BDRY_LOC_3D::XHI_YLO)
+            {
+                ret_face = BDRY_LOC::YLO;
+            }
+            else if (edge_loc == EDGE_BDRY_LOC_3D::YHI_ZLO ||
+                     edge_loc == EDGE_BDRY_LOC_3D::YHI_ZHI ||
+                     edge_loc == EDGE_BDRY_LOC_3D::XLO_YHI ||
+                     edge_loc == EDGE_BDRY_LOC_3D::XHI_YHI)
+            {
+                ret_face = BDRY_LOC::YHI;
+            }
+            break;
+        }
+        case BDRY_COND::FLOW_MODEL::ZADIABATIC_NO_SLIP:
+        case BDRY_COND::FLOW_MODEL::ZISOTHERMAL_NO_SLIP:
+        {
+           if (edge_loc == EDGE_BDRY_LOC_3D::YLO_ZLO ||
+               edge_loc == EDGE_BDRY_LOC_3D::YHI_ZLO ||
+               edge_loc == EDGE_BDRY_LOC_3D::XLO_ZLO ||
+               edge_loc == EDGE_BDRY_LOC_3D::XHI_ZLO)
+            {
+                ret_face = BDRY_LOC::ZLO;
+            }
+            else if (edge_loc == EDGE_BDRY_LOC_3D::YLO_ZHI ||
+                     edge_loc == EDGE_BDRY_LOC_3D::YHI_ZHI ||
+                     edge_loc == EDGE_BDRY_LOC_3D::XLO_ZHI ||
+                     edge_loc == EDGE_BDRY_LOC_3D::XHI_ZHI)
+            {
+                ret_face = BDRY_LOC::ZHI;
+            }
+            break;
+        }
+        default:
+        {
+        }
+    }
+    
+    return ret_face;
+}
+
+
+/*
+ * Function that returns the integer face boundary location
+ * corresponding to the given node location and node boundary
+ * condition.
+ *
+ * If the node boundary condition type or node location are unknown,
+ * or the boundary condition type is inconsistent with the node location,
+ * an error code (-1) is returned.
+ */
+int
+FlowModelBoundaryUtilitiesSingleSpecies::getFaceLocationForNodeBdry(
+    int node_loc,
+    int node_btype)
+{
+    int ret_face = -1;
+    
+    switch (node_btype)
+    {
+        case BDRY_COND::FLOW_MODEL::XADIABATIC_NO_SLIP:
+        case BDRY_COND::FLOW_MODEL::XISOTHERMAL_NO_SLIP:
+        {
+            if (node_loc == NODE_BDRY_LOC_3D::XLO_YLO_ZLO ||
+                node_loc == NODE_BDRY_LOC_3D::XLO_YHI_ZLO ||
+                node_loc == NODE_BDRY_LOC_3D::XLO_YLO_ZHI ||
+                node_loc == NODE_BDRY_LOC_3D::XLO_YHI_ZHI)
+            {
+                ret_face = BDRY_LOC::XLO;
+            }
+            else if (node_loc == NODE_BDRY_LOC_3D::XHI_YLO_ZLO ||
+                     node_loc == NODE_BDRY_LOC_3D::XHI_YHI_ZLO ||
+                     node_loc == NODE_BDRY_LOC_3D::XHI_YLO_ZHI ||
+                     node_loc == NODE_BDRY_LOC_3D::XHI_YHI_ZHI)
+            {
+                ret_face = BDRY_LOC::XHI;
+            }
+            break;
+        }
+        case BDRY_COND::FLOW_MODEL::YADIABATIC_NO_SLIP:
+        case BDRY_COND::FLOW_MODEL::YISOTHERMAL_NO_SLIP:
+        {
+            if (node_loc == NODE_BDRY_LOC_3D::XLO_YLO_ZLO ||
+                node_loc == NODE_BDRY_LOC_3D::XHI_YLO_ZLO ||
+                node_loc == NODE_BDRY_LOC_3D::XLO_YLO_ZHI ||
+                node_loc == NODE_BDRY_LOC_3D::XHI_YLO_ZHI)
+            {
+                ret_face = BDRY_LOC::YLO;
+            }
+            else if (node_loc == NODE_BDRY_LOC_3D::XLO_YHI_ZLO ||
+                     node_loc == NODE_BDRY_LOC_3D::XHI_YHI_ZLO ||
+                     node_loc == NODE_BDRY_LOC_3D::XLO_YHI_ZHI ||
+                     node_loc == NODE_BDRY_LOC_3D::XHI_YHI_ZHI)
+            {
+                ret_face = BDRY_LOC::YHI;
+            }
+            break;
+        }
+        case BDRY_COND::FLOW_MODEL::ZADIABATIC_NO_SLIP:
+        case BDRY_COND::FLOW_MODEL::ZISOTHERMAL_NO_SLIP:
+        {
+            if (node_loc == NODE_BDRY_LOC_3D::XLO_YLO_ZLO ||
+                node_loc == NODE_BDRY_LOC_3D::XHI_YLO_ZLO ||
+                node_loc == NODE_BDRY_LOC_3D::XLO_YHI_ZLO ||
+                node_loc == NODE_BDRY_LOC_3D::XHI_YHI_ZLO)
+            {
+                ret_face = BDRY_LOC::ZLO;
+            }
+            else if (node_loc == NODE_BDRY_LOC_3D::XLO_YLO_ZHI ||
+                     node_loc == NODE_BDRY_LOC_3D::XHI_YLO_ZHI ||
+                     node_loc == NODE_BDRY_LOC_3D::XLO_YHI_ZHI ||
+                     node_loc == NODE_BDRY_LOC_3D::XHI_YHI_ZHI)
+            {
+                ret_face = BDRY_LOC::ZHI;
+            }
+            break;
+        }
+        default:
+        {
+        }
+    }
+    
+    return ret_face;
+}
+
+
+/*
  * Function to fill 1d node boundary values for a patch.
  * Node locations that have boundary conditions identified are removed from the container.
  */

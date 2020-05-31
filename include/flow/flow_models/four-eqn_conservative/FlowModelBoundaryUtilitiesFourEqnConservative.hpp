@@ -57,6 +57,48 @@ class FlowModelBoundaryUtilitiesFourEqnConservative: public FlowModelBoundaryUti
             const hier::IntVector& periodic);
         
         /*
+         * Function that returns the integer edge boundary location
+         * corresponding to the given node location and node boundary
+         * condition.
+         *
+         * If the node boundary condition type or node location are unknown,
+         * or the boundary condition type is inconsistent with the node location,
+         * an error code (-1) is returned.
+         */
+        int
+        getEdgeLocationForNodeBdry(
+            int node_loc,
+            int node_btype);
+        
+        /*
+         * Function that returns the integer face boundary location
+         * corresponding to the given edge location and edge boundary
+         * condition.
+         *
+         * If the edge boundary condition type or edge location are unknown,
+         * or the boundary condition type is inconsistent with the edge location,
+         * an error code (-1) is returned.
+         */
+        int
+        getFaceLocationForEdgeBdry(
+            int edge_loc,
+            int edge_btype);
+        
+        /*
+         * Function that returns the integer face boundary location
+         * corresponding to the given node location and node boundary
+         * condition.
+         *
+         * If the node boundary condition type or node location are unknown,
+         * or the boundary condition type is inconsistent with the node location,
+         * an error code (-1) is returned.
+         */
+        int
+        getFaceLocationForNodeBdry(
+            int node_loc,
+            int node_btype);
+        
+        /*
          * Function to fill 1d node boundary values for a patch.
          * Node locations that have boundary conditions identified are removed from the container.
          */

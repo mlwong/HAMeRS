@@ -575,7 +575,7 @@ int main(int argc, char *argv[])
     boost::shared_ptr<mesh::LoadBalanceStrategy> load_balancer0;
     
     const std::string partitioner_type =
-        main_db->getStringWithDefault("partitioner_type", "TreeLoadBalancer");
+        main_db->getStringWithDefault("partitioner_type", "CascadePartitioner");
     
     if (partitioner_type == "TreeLoadBalancer")
     {

@@ -180,6 +180,9 @@ EulerBoundaryConditions::EulerBoundaryConditions(
     }
     else if (d_dim == tbox::Dimension(2))
     {
+        const boost::shared_ptr<FlowModelBoundaryUtilities> flow_model_boundary_utilities =
+            d_flow_model->getFlowModelBoundaryUtilities();
+        
         for (int i = 0; i < NUM_2D_EDGES; i++)
         {
             d_scalar_bdry_edge_conds[i] = d_master_bdry_edge_conds[i];
@@ -208,13 +211,33 @@ EulerBoundaryConditions::EulerBoundaryConditions(
             if (d_master_bdry_node_conds[i] != BOGUS_BDRY_DATA)
             {
                 d_node_bdry_edge[i] =
-                    BasicCartesianBoundaryUtilities2::getEdgeLocationForNodeBdry(
+                    flow_model_boundary_utilities->getEdgeLocationForNodeBdry(
                         i, d_master_bdry_node_conds[i]);
+                
+                if (d_node_bdry_edge[i] == -1)
+                {
+                    d_node_bdry_edge[i] =
+                        BasicCartesianBoundaryUtilities2::getEdgeLocationForNodeBdry(
+                            i, d_master_bdry_node_conds[i]);
+                }
+                
+                if (d_node_bdry_edge[i] == -1)
+                {
+                    TBOX_ERROR("EulerBoundaryConditions::EulerBoundaryConditions()\n"
+                        << "Node boundary condition type = '"
+                        << d_master_bdry_node_conds[i] << "' and \n"
+                        << "node location = '" << i
+                        << "' passed are inconsistent."
+                        << std::endl);
+                }
             }
         }
     }
     else if (d_dim == tbox::Dimension(3))
     {
+        const boost::shared_ptr<FlowModelBoundaryUtilities> flow_model_boundary_utilities =
+            d_flow_model->getFlowModelBoundaryUtilities();
+        
         for (int i = 0; i < NUM_3D_FACES; i++)
         {
             d_scalar_bdry_face_conds[i] = d_master_bdry_face_conds[i];
@@ -247,8 +270,25 @@ EulerBoundaryConditions::EulerBoundaryConditions(
             if (d_master_bdry_edge_conds[i] != BOGUS_BDRY_DATA)
             {
                 d_edge_bdry_face[i] =
-                    BasicCartesianBoundaryUtilities3::getFaceLocationForEdgeBdry(
+                    flow_model_boundary_utilities->getFaceLocationForEdgeBdry(
                         i, d_master_bdry_edge_conds[i]);
+                
+                if (d_edge_bdry_face[i] == -1)
+                {
+                    d_edge_bdry_face[i] =
+                        BasicCartesianBoundaryUtilities3::getFaceLocationForEdgeBdry(
+                            i, d_master_bdry_edge_conds[i]);
+                }
+                
+                if (d_edge_bdry_face[i] == -1)
+                {
+                    TBOX_ERROR("EulerBoundaryConditions::EulerBoundaryConditions()\n"
+                        << "Edge boundary condition type = '"
+                        << d_master_bdry_edge_conds[i] << "' and \n"
+                        << "edge location = '" << i
+                        << "' passed are inconsistent."
+                        << std::endl);
+                }
             }
         }
         
@@ -273,8 +313,24 @@ EulerBoundaryConditions::EulerBoundaryConditions(
             if (d_master_bdry_node_conds[i] != BOGUS_BDRY_DATA)
             {
                 d_node_bdry_face[i] =
-                    BasicCartesianBoundaryUtilities3::getFaceLocationForNodeBdry(
+                    flow_model_boundary_utilities->getFaceLocationForNodeBdry(
                         i, d_master_bdry_node_conds[i]);
+                
+                if (d_node_bdry_face[i] == -1)
+                {
+                    d_node_bdry_face[i] =
+                        BasicCartesianBoundaryUtilities3::getFaceLocationForNodeBdry(
+                            i, d_master_bdry_node_conds[i]);
+                }
+                
+                if (d_node_bdry_face[i] == -1)
+                {
+                    TBOX_ERROR("EulerBoundaryConditions::EulerBoundaryConditions()\n"
+                        << "Node boundary condition type = '"
+                        << d_master_bdry_node_conds[i] << "' and \n"
+                        << "node location = '" << i
+                        << "' passed are inconsistent." << std::endl);
+                }
             }
         }
     }
