@@ -160,7 +160,6 @@ FlowModelBoundaryUtilitiesFiveEqnAllaire::fill1dNodeBoundaryData(
     const std::vector<std::vector<double> >& bdry_node_values,
     const hier::IntVector& ghost_width_to_fill)
 {
-
 }
 
 
@@ -177,7 +176,6 @@ FlowModelBoundaryUtilitiesFiveEqnAllaire::fill2dEdgeBoundaryData(
     const std::vector<std::vector<double> >& bdry_edge_values,
     const hier::IntVector& ghost_width_to_fill)
 {
-    
 }
 
 
@@ -194,7 +192,6 @@ FlowModelBoundaryUtilitiesFiveEqnAllaire::fill2dNodeBoundaryData(
     const std::vector<std::vector<double> >& bdry_edge_values,
     const hier::IntVector& ghost_width_to_fill)
 {
-    
 }
 
 
@@ -211,7 +208,6 @@ FlowModelBoundaryUtilitiesFiveEqnAllaire::fill3dFaceBoundaryData(
     const std::vector<std::vector<double> >& bdry_face_values,
     const hier::IntVector& ghost_width_to_fill)
 {
-    
 }
 
 
@@ -228,7 +224,6 @@ FlowModelBoundaryUtilitiesFiveEqnAllaire::fill3dEdgeBoundaryData(
     const std::vector<std::vector<double> >& bdry_face_values,
     const hier::IntVector& ghost_width_to_fill)
 {
-    
 }
 
 
@@ -245,7 +240,6 @@ FlowModelBoundaryUtilitiesFiveEqnAllaire::fill3dNodeBoundaryData(
     const std::vector<std::vector<double> >& bdry_face_values,
     const hier::IntVector& ghost_width_to_fill)
 {
-    
 }
 
 
@@ -256,7 +250,6 @@ FlowModelBoundaryUtilitiesFiveEqnAllaire::read1dBdryNodes(
     std::vector<int>& node_conds,
     const hier::IntVector& periodic)
 {
-    
 }
 
 
@@ -267,7 +260,6 @@ FlowModelBoundaryUtilitiesFiveEqnAllaire::read2dBdryEdges(
     std::vector<int>& edge_conds,
     const hier::IntVector& periodic)
 {
-    
 }
 
 
@@ -279,7 +271,6 @@ FlowModelBoundaryUtilitiesFiveEqnAllaire::read2dBdryNodes(
     std::vector<int>& node_conds,
     const hier::IntVector& periodic)
 {
-    
 }
 
 
@@ -290,7 +281,6 @@ FlowModelBoundaryUtilitiesFiveEqnAllaire::read3dBdryFaces(
     std::vector<int>& face_conds,
     const hier::IntVector& periodic)
 {
-    
 }
 
 
@@ -302,7 +292,6 @@ FlowModelBoundaryUtilitiesFiveEqnAllaire::read3dBdryEdges(
     std::vector<int>& edge_conds,
     const hier::IntVector& periodic)
 {
-    
 }
 
 
@@ -314,5 +303,4 @@ FlowModelBoundaryUtilitiesFiveEqnAllaire::read3dBdryNodes(
     std::vector<int>& node_conds,
     const hier::IntVector& periodic)
 {
-    
 }
