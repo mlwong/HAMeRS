@@ -3,6 +3,12 @@
 
 #include "util/filters/Filter.hpp"
 
+/*
+ * This class is the implementation of the truncated Gaussian filter by Cook, Andrew W.,
+ * "Artificial fluid properties for large-eddy simulation of compressible turbulent mixing.",
+ * Physics of fluids 19.5 (2007): 055103.
+ * The cutoff of the low-pass filter is around 4 Delta, which is the grid spaceing.
+ */
 class FilterTruncatedGaussian: public Filter
 {
     public:
@@ -19,14 +25,16 @@ class FilterTruncatedGaussian: public Filter
         applyFilter(
             boost::shared_ptr<pdat::CellData<double> >& filtered_cell_data,
             const boost::shared_ptr<pdat::CellData<double> >& cell_data,
-            const int depth = 0)
+            const int depth_filtered_cell_data = 0,
+            const int depth_cell_data = 0)
         {
             const hier::Box empty_box(d_dim);
             applyFilter(
                 filtered_cell_data,
                 cell_data,
                 empty_box,
-                depth);
+                depth_filtered_cell_data,
+                depth_cell_data);
         }
         
         /*
@@ -37,7 +45,14 @@ class FilterTruncatedGaussian: public Filter
             boost::shared_ptr<pdat::CellData<double> >& filtered_cell_data,
             const boost::shared_ptr<pdat::CellData<double> >& cell_data,
             const hier::Box& domain,
-            const int depth = 0);
+            const int depth_filtered_cell_data = 0,
+            const int depth_cell_data = 0);
+        
+    private:
+        /*
+         * Coefficients for truncated Gaussian filter.
+         */
+        const double a_G, b_G, c_G, d_G, e_G;
         
 };
 
