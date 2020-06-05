@@ -441,10 +441,8 @@ FilterTruncatedGaussian::applyFilter(
                         c_G*(f[idx_cell_data_z_BB]   + f[idx_cell_data_z_FF]) +
                         d_G*(f[idx_cell_data_z_BBB]  + f[idx_cell_data_z_FFF]) +
                         e_G*(f[idx_cell_data_z_BBBB] + f[idx_cell_data_z_FFFF]);
-                    
                 }
             }
         }
     }
-    
 }
