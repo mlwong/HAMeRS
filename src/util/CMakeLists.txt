@@ -12,7 +12,7 @@ set(utils_source_files
 add_library(utils ${utils_source_files})
 
 TARGET_LINK_LIBRARIES(utils
-  mixing_rules basic_boundary_conditions
+  filters mixing_rules basic_boundary_conditions
   SAMRAI_appu SAMRAI_geom SAMRAI_solv SAMRAI_algs SAMRAI_mesh
   SAMRAI_math SAMRAI_pdat SAMRAI_xfer SAMRAI_hier SAMRAI_tbox
   ${HDF5_C_LIBRARIES} gfortran)
