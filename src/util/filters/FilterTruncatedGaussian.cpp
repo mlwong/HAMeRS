@@ -29,9 +29,9 @@ void
 FilterTruncatedGaussian::applyFilter(
     boost::shared_ptr<pdat::CellData<double> >& filtered_cell_data,
     const boost::shared_ptr<pdat::CellData<double> >& cell_data,
-    const hier::Box& domain,
     const int depth_filtered_cell_data,
-    const int depth_cell_data)
+    const int depth_cell_data,
+    const hier::Box& domain)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(filtered_cell_data);

@@ -42,8 +42,8 @@ class Filter
         applyFilter(
             boost::shared_ptr<pdat::CellData<double> >& filtered_cell_data,
             const boost::shared_ptr<pdat::CellData<double> >& cell_data,
-            const int depth_filtered_cell_data = 0,
-            const int depth_cell_data = 0) = 0;
+            const int depth_filtered_cell_data,
+            const int depth_cell_data) = 0;
         
         /*
          * Apply filter to the given cell data.
@@ -52,9 +52,9 @@ class Filter
         applyFilter(
             boost::shared_ptr<pdat::CellData<double> >& filtered_cell_data,
             const boost::shared_ptr<pdat::CellData<double> >& cell_data,
-            const hier::Box& domain,
-            const int depth_filtered_cell_data = 0,
-            const int depth_cell_data = 0) = 0;
+            const int depth_filtered_cell_data,
+            const int depth_cell_data,
+            const hier::Box& domain) = 0;
         
     protected:
         /*
