@@ -246,6 +246,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeVariables(
                 data_total_energy_unfiltered,
                 0,
                 0);
+            
+            /*
+             * Unregister the patch and data of all registered derived cell variables in the flow model.
+             */
+            
+            d_flow_model_tmp->unregisterPatch();
         }
     }
 }
@@ -651,6 +657,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::resetConservativeVariablesToUnf
             data_partial_density->copy(*data_partial_density_unfiltered);
             data_momentum->copy(*data_momentum_unfiltered);
             data_total_energy->copy(*data_total_energy_unfiltered);
+            
+            /*
+             * Unregister the patch and data of all registered derived cell variables in the flow model.
+             */
+            
+            d_flow_model_tmp->unregisterPatch();
         }
     }
 }

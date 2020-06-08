@@ -2363,6 +2363,11 @@ RungeKuttaLevelIntegrator::registerVariable(
         d_coarsen_rich_extrap_final.reset(new xfer::CoarsenAlgorithm(dim));
     }
     
+    if (!d_fill_statistics)
+    {
+        d_fill_statistics.reset(new xfer::RefineAlgorithm());
+    }
+    
     hier::VariableDatabase* variable_db = hier::VariableDatabase::getDatabase();
     
     const hier::IntVector& zero_ghosts(hier::IntVector::getZero(dim));
@@ -2746,10 +2751,13 @@ RungeKuttaLevelIntegrator::registerVariable(
              */
             
             boost::shared_ptr<hier::RefineOperator> refine_op; // NO_REFINE
-            d_fill_statistics->registerRefine(
-                scr_id, scr_id, scr_id, refine_op);
-          
-          break;
+            if (ghosts > hier::IntVector::getZero(ghosts.getDim()))
+            {
+                d_fill_statistics->registerRefine(
+                    scr_id, scr_id, scr_id, refine_op);
+            }
+            
+            break;
         }
         default:
         {
