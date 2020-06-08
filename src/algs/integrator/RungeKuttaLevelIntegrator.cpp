@@ -2730,7 +2730,7 @@ RungeKuttaLevelIntegrator::registerVariable(
                 d_intermediate_source_var_data[sn].setFlag(intermediate_id[sn]);
             }
             
-            break;            
+            break;
         }
         case TEMPORARY:
         {
@@ -2740,6 +2740,14 @@ RungeKuttaLevelIntegrator::registerVariable(
                 ghosts);
             
             d_temp_var_scratch_data.setFlag(scr_id);
+            
+            /*
+             * Set boundary fill schedules for scratch data when data statistics are outputted.
+             */
+            
+            boost::shared_ptr<hier::RefineOperator> refine_op; // NO_REFINE
+            d_fill_statistics->registerRefine(
+                scr_id, scr_id, scr_id, refine_op);
           
           break;
         }
@@ -3506,6 +3514,29 @@ RungeKuttaLevelIntegrator::outputDataStatistics(
     {
         d_bdry_sched_advance[li]->fillData(statistics_data_time);
     }
+    
+    // Filter conservative variables if necessary.
+    
+    d_patch_strategy->computeStatisticsVariables(hierarchy);
+    
+    // Exchange halo values of filtered variables if necessary.
+    
+    for (int li = 0; li < num_levels; li++)
+    {
+        boost::shared_ptr<hier::PatchLevel> patch_level(
+            hierarchy->getPatchLevel(li));
+        
+        boost::shared_ptr<xfer::RefineSchedule> fill_schedule = 
+            d_fill_statistics->createSchedule(
+                patch_level,
+                d_patch_strategy);
+        
+        fill_schedule->fillData(statistics_data_time);
+    }
+    
+    // Set conservative variables as the filtered valued if necessary.
+    // Then, compute and output statistics.
+    // Reset conservative variables as the pre-filtered values if necessary.
     
     d_patch_strategy->outputDataStatistics(hierarchy, statistics_data_time);
     

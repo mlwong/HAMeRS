@@ -349,6 +349,18 @@ RungeKuttaPatchStrategy::tagCellsOnPatchRichardsonExtrapolation(
       << "\nthis method." << std::endl);
 }
 
+
+/**
+ * Compute variables for computing the statistics of data.
+ */
+void
+RungeKuttaPatchStrategy::computeStatisticsVariables(
+   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy)
+{
+   NULL_USE(patch_hierarchy);
+}
+
+
 /**
  * Output the statistics of data.
  */
@@ -358,6 +370,7 @@ RungeKuttaPatchStrategy::outputDataStatistics(
    const double output_time)
 {
    NULL_USE(patch_hierarchy);
+   NULL_USE(output_time);
 }
 
 

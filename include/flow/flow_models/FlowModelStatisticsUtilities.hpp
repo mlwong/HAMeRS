@@ -61,6 +61,30 @@ class FlowModelStatisticsUtilities
         }
         
         /*
+         * Register the variables required for computing statistics.
+         */
+        virtual void
+        registerVariables(
+            RungeKuttaLevelIntegrator* integrator,
+            const hier::IntVector& num_ghosts)
+        {
+            NULL_USE(integrator);
+            NULL_USE(num_ghosts);
+        }
+        
+        /*
+         * Compute the variables required for computing statistics.
+         */
+        virtual void
+        computeVariables(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context)
+        {
+            NULL_USE(patch_hierarchy);
+            NULL_USE(data_context);
+        }
+        
+        /*
          * Output names of statistical quantities to output to a file.
          */
         virtual void
