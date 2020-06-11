@@ -596,15 +596,17 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_momentum_unfiltered;
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_total_energy_unfiltered;
         
-        // static boost::shared_ptr<pdat::CellVariable<double> > s_variable_partial_density_filtered;
-        // static boost::shared_ptr<pdat::CellVariable<double> > s_variable_momentum_filtered;
-        // static boost::shared_ptr<pdat::CellVariable<double> > s_variable_total_energy_filtered;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_partial_density_filtered;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_momentum_filtered;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_total_energy_filtered;
         
         /*
-         * boost::shared_ptr to filter.
+         * boost::shared_ptr to filters.
          */
         
-        boost::shared_ptr<FilterTruncatedGaussian> d_filter;
+        boost::shared_ptr<FilterTruncatedGaussian> d_filter_x;
+        boost::shared_ptr<FilterTruncatedGaussian> d_filter_y;
+        boost::shared_ptr<FilterTruncatedGaussian> d_filter_z;
         
         /*
          * boost::shared_ptr to EquationOfStateMixingRules.

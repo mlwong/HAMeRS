@@ -3,6 +3,8 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "util/Directions.hpp"
+
 #include "SAMRAI/hier/Box.h"
 #include "SAMRAI/hier/IntVector.h"
 #include "SAMRAI/pdat/CellData.h"
@@ -18,11 +20,8 @@ class Filter
     public:
         Filter(
             const std::string& object_name,
-            const tbox::Dimension& dim):
-                d_object_name(object_name),
-                d_dim(dim),
-                d_num_filter_ghosts(hier::IntVector::getZero(d_dim))
-        {}
+            const tbox::Dimension& dim,
+            const DIRECTION::TYPE& direction);
         
         virtual ~Filter() {}
         
@@ -66,6 +65,11 @@ class Filter
          * Problem dimension.
          */
         const tbox::Dimension d_dim;
+        
+        /*
+         * The direction to apply derivative.
+         */
+        const DIRECTION::TYPE d_direction;
         
         /*
          * Number of ghost cells needed by the filter.

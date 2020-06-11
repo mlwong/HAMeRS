@@ -14,7 +14,8 @@ class FilterTruncatedGaussian: public Filter
     public:
         FilterTruncatedGaussian(
             const std::string& object_name,
-            const tbox::Dimension& dim);
+            const tbox::Dimension& dim,
+            const DIRECTION::TYPE& direction);
         
         ~FilterTruncatedGaussian() {}
         

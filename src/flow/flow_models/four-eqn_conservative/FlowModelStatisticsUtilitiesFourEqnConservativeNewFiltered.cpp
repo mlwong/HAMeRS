@@ -8,9 +8,9 @@ boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourE
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_momentum_unfiltered;
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_total_energy_unfiltered;
 
-// boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_partial_density_filtered;
-// boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_momentum_filtered;
-// boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_total_energy_filtered;
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_partial_density_filtered;
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_momentum_filtered;
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_total_energy_filtered;
 
 FlowModelStatisticsUtilitiesFourEqnConservative::FlowModelStatisticsUtilitiesFourEqnConservative(
     const std::string& object_name,
@@ -48,21 +48,30 @@ FlowModelStatisticsUtilitiesFourEqnConservative::FlowModelStatisticsUtilitiesFou
     s_variable_total_energy_unfiltered = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "total energy unfiltered", 1));
     
-    // s_variable_partial_density_filtered = boost::shared_ptr<pdat::CellVariable<double> > (
-    //     new pdat::CellVariable<double>(d_dim, "partial density filtered", d_num_species));
+    s_variable_partial_density_filtered = boost::shared_ptr<pdat::CellVariable<double> > (
+        new pdat::CellVariable<double>(d_dim, "partial density filtered", d_num_species));
     
-    // s_variable_momentum_filtered = boost::shared_ptr<pdat::CellVariable<double> > (
-    //     new pdat::CellVariable<double>(d_dim, "momentum filtered", d_dim.getValue()));
+    s_variable_momentum_filtered = boost::shared_ptr<pdat::CellVariable<double> > (
+        new pdat::CellVariable<double>(d_dim, "momentum filtered", d_dim.getValue()));
     
-    // s_variable_total_energy_filtered = boost::shared_ptr<pdat::CellVariable<double> > (
-    //     new pdat::CellVariable<double>(d_dim, "total energy filtered", 1));
+    s_variable_total_energy_filtered = boost::shared_ptr<pdat::CellVariable<double> > (
+        new pdat::CellVariable<double>(d_dim, "total energy filtered", 1));
     
     /*
-     * Initialize the filter.
+     * Initialize the filters.
      */
     
-    d_filter = boost::shared_ptr<FilterTruncatedGaussian> (
-        new FilterTruncatedGaussian("d_filter", d_dim));
+    d_filter_x = boost::shared_ptr<FilterTruncatedGaussian> (
+        new FilterTruncatedGaussian("d_filter_x", d_dim, DIRECTION::X_DIRECTION));
+    
+    d_filter_y = boost::shared_ptr<FilterTruncatedGaussian> (
+        new FilterTruncatedGaussian("d_filter_y", d_dim, DIRECTION::Y_DIRECTION));
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        d_filter_z = boost::shared_ptr<FilterTruncatedGaussian> (
+            new FilterTruncatedGaussian("d_filter_z", d_dim, DIRECTION::Z_DIRECTION));
+    }
 }
 
 
@@ -109,32 +118,32 @@ FlowModelStatisticsUtilitiesFourEqnConservative::registerVariables(
         "NO_COARSEN",
         "NO_REFINE");
     
-    // integrator->registerVariable(
-    //     s_variable_partial_density_filtered,
-    //     num_ghosts,
-    //     num_ghosts,
-    //     RungeKuttaLevelIntegrator::TEMPORARY,
-    //     d_grid_geometry,
-    //     "NO_COARSEN",
-    //     "NO_REFINE");
+    integrator->registerVariable(
+        s_variable_partial_density_filtered,
+        num_ghosts,
+        num_ghosts,
+        RungeKuttaLevelIntegrator::TEMPORARY,
+        d_grid_geometry,
+        "NO_COARSEN",
+        "NO_REFINE");
     
-    // integrator->registerVariable(
-    //     s_variable_momentum_filtered,
-    //     num_ghosts,
-    //     num_ghosts,
-    //     RungeKuttaLevelIntegrator::TEMPORARY,
-    //     d_grid_geometry,
-    //     "NO_COARSEN",
-    //     "NO_REFINE");
+    integrator->registerVariable(
+        s_variable_momentum_filtered,
+        num_ghosts,
+        num_ghosts,
+        RungeKuttaLevelIntegrator::TEMPORARY,
+        d_grid_geometry,
+        "NO_COARSEN",
+        "NO_REFINE");
     
-    // integrator->registerVariable(
-    //     s_variable_total_energy_filtered,
-    //     num_ghosts,
-    //     num_ghosts,
-    //     RungeKuttaLevelIntegrator::TEMPORARY,
-    //     d_grid_geometry,
-    //     "NO_COARSEN",
-    //     "NO_REFINE");
+    integrator->registerVariable(
+        s_variable_total_energy_filtered,
+        num_ghosts,
+        num_ghosts,
+        RungeKuttaLevelIntegrator::TEMPORARY,
+        d_grid_geometry,
+        "NO_COARSEN",
+        "NO_REFINE");
 }
 
 
@@ -199,21 +208,21 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeVariables(
             
             boost::shared_ptr<pdat::CellData<double> > data_total_energy_unfiltered(
                 BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch->getPatchData(s_variable_momentum_unfiltered, data_context)));
+                    patch->getPatchData(s_variable_total_energy_unfiltered, data_context)));
             
-            // // Get the data containers of filtered conservative variables.
+            // Get the data containers of filtered conservative variables.
             
-            // boost::shared_ptr<pdat::CellData<double> > data_partial_density_filtered(
-            //     BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            //         patch->getPatchData(s_variable_partial_density_filtered, data_context)));
+            boost::shared_ptr<pdat::CellData<double> > data_partial_density_filtered(
+                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    patch->getPatchData(s_variable_partial_density_filtered, data_context)));
             
-            // boost::shared_ptr<pdat::CellData<double> > data_momentum_filtered(
-            //     BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            //         patch->getPatchData(s_variable_momentum_filtered, data_context)));
+            boost::shared_ptr<pdat::CellData<double> > data_momentum_filtered(
+                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    patch->getPatchData(s_variable_momentum_filtered, data_context)));
             
-            // boost::shared_ptr<pdat::CellData<double> > data_total_energy_filtered(
-            //     BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            //         patch->getPatchData(s_variable_momentum_filtered, data_context)));
+            boost::shared_ptr<pdat::CellData<double> > data_total_energy_filtered(
+                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    patch->getPatchData(s_variable_total_energy_filtered, data_context)));
             
             // Copy data to unfiltered variables.
             
@@ -221,11 +230,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeVariables(
             data_momentum_unfiltered->copy(*data_momentum);
             data_total_energy_unfiltered->copy(*data_total_energy);
             
-            // Apply filter to conservative variables.
+            // Apply filter in x-direction to conservative variables.
             
             for (int si = 0; si < d_num_species; si++)
             {
-                d_filter->applyFilter(
+                d_filter_x->applyFilter(
                     data_partial_density,
                     data_partial_density_unfiltered,
                     si,
@@ -234,18 +243,81 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeVariables(
             
             for (int di = 0; di < d_dim.getValue(); di++)
             {
-                d_filter->applyFilter(
+                d_filter_x->applyFilter(
                     data_momentum,
                     data_momentum_unfiltered,
                     di,
                     di);
             }
             
-            d_filter->applyFilter(
+            d_filter_x->applyFilter(
                 data_total_energy,
                 data_total_energy_unfiltered,
                 0,
                 0);
+            
+            // Apply filter in y-direction to conservative variables.
+            
+            data_partial_density_filtered->copy(*data_partial_density);
+            data_momentum_filtered->copy(*data_momentum);
+            data_total_energy_filtered->copy(*data_total_energy);
+            
+            for (int si = 0; si < d_num_species; si++)
+            {
+                d_filter_y->applyFilter(
+                    data_partial_density,
+                    data_partial_density_filtered,
+                    si,
+                    si);
+            }
+            
+            for (int di = 0; di < d_dim.getValue(); di++)
+            {
+                d_filter_y->applyFilter(
+                    data_momentum,
+                    data_momentum_filtered,
+                    di,
+                    di);
+            }
+            
+            d_filter_y->applyFilter(
+                data_total_energy,
+                data_total_energy_filtered,
+                0,
+                0);
+            
+            if (d_dim == tbox::Dimension(3))
+            {
+                // Apply filter in z-direction to conservative variables.
+                
+                data_partial_density_filtered->copy(*data_partial_density);
+                data_momentum_filtered->copy(*data_momentum);
+                data_total_energy_filtered->copy(*data_total_energy);
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    d_filter_z->applyFilter(
+                        data_partial_density,
+                        data_partial_density_filtered,
+                        si,
+                        si);
+                }
+                
+                for (int di = 0; di < d_dim.getValue(); di++)
+                {
+                    d_filter_z->applyFilter(
+                        data_momentum,
+                        data_momentum_filtered,
+                        di,
+                        di);
+                }
+                
+                d_filter_z->applyFilter(
+                    data_total_energy,
+                    data_total_energy_filtered,
+                    0,
+                    0);
+            }
             
             /*
              * Unregister the patch and data of all registered derived cell variables in the flow model.
@@ -636,7 +708,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::resetConservativeVariablesToUnf
             
             boost::shared_ptr<pdat::CellData<double> > data_total_energy_unfiltered(
                 BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch->getPatchData(s_variable_momentum_unfiltered, data_context)));
+                    patch->getPatchData(s_variable_total_energy_unfiltered, data_context)));
             
             // // Get the data containers of filtered conservative variables.
             
@@ -650,7 +722,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::resetConservativeVariablesToUnf
             
             // boost::shared_ptr<pdat::CellData<double> > data_total_energy_filtered(
             //     BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            //         patch->getPatchData(s_variable_momentum_filtered, data_context)));
+            //         patch->getPatchData(s_variable_total_energy_filtered, data_context)));
             
             // Reset conservative variables to unfiltered value.
             
