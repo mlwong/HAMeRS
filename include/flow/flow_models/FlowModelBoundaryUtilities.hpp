@@ -24,14 +24,18 @@ namespace BDRY_COND
     {
         enum TYPE
         {
-            ADIABATIC_NO_SLIP   = 10,
-            ISOTHERMAL_NO_SLIP  = 11,
-            XADIABATIC_NO_SLIP  = 100,
-            YADIABATIC_NO_SLIP  = 101,
-            ZADIABATIC_NO_SLIP  = 102,
-            XISOTHERMAL_NO_SLIP = 110,
-            YISOTHERMAL_NO_SLIP = 111,
-            ZISOTHERMAL_NO_SLIP = 112
+            ADIABATIC_NO_SLIP      = 10,
+            ISOTHERMAL_NO_SLIP     = 11,
+            XADIABATIC_NO_SLIP     = 100,
+            YADIABATIC_NO_SLIP     = 101,
+            ZADIABATIC_NO_SLIP     = 102,
+            XISOTHERMAL_NO_SLIP    = 110,
+            YISOTHERMAL_NO_SLIP    = 111,
+            ZISOTHERMAL_NO_SLIP    = 112,
+            NONREFLECTING_OUTFLOW  = 20,
+            XNONREFLECTING_OUTFLOW = 200,
+            YNONREFLECTING_OUTFLOW = 201,
+            ZNONREFLECTING_OUTFLOW = 202,
         };
     }
 }
