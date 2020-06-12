@@ -710,6 +710,8 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             
             d_flow_model->registerDerivedVariables(num_subghosts_of_data);
             
+            d_flow_model->allocateMemoryForDerivedCellData();
+            
             d_flow_model->computeDerivedCellData();
             
             /*
@@ -749,6 +751,8 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 std::pair<std::string, hier::IntVector>("TOTAL_ENERGY", hier::IntVector::getZero(d_dim)));
             
             d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+            
+            d_flow_model->allocateMemoryForDerivedCellData();
             
             d_flow_model->computeDerivedCellData();
             
@@ -790,6 +794,8 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
             
             d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+            
+            d_flow_model->allocateMemoryForDerivedCellData();
             
             d_flow_model->computeDerivedCellData();
             
@@ -836,6 +842,8 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 std::pair<std::string, hier::IntVector>("VELOCITY", d_num_value_ghosts));
             
             d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+            
+            d_flow_model->allocateMemoryForDerivedCellData();
             
             d_flow_model->computeDerivedCellData();
             
@@ -1085,6 +1093,8 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             
             d_flow_model->registerDerivedVariables(num_subghosts_of_data);
             
+            d_flow_model->allocateMemoryForDerivedCellData();
+            
             d_flow_model->computeDerivedCellData();
             
             // Get the cell data.
@@ -1332,6 +1342,8 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
             
             d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+            
+            d_flow_model->allocateMemoryForDerivedCellData();
             
             d_flow_model->computeDerivedCellData();
             

@@ -165,14 +165,6 @@ PatchHierarchy
 
 GriddingAlgorithm{}
 
-RungeKuttaLevelIntegrator
-{
-    cfl                      = 0.4e0 // Max cfl factor used in problem
-    cfl_init                 = 0.4e0 // Initial cfl factor
-    lag_dt_computation       = FALSE
-    use_ghosts_to_compute_dt = TRUE
-}
-
 RungeKuttaLevelIntegrator{
    cfl                       = 0.5e0   // max cfl factor used in problem
    cfl_init                  = 0.5e0   // initial cfl factor

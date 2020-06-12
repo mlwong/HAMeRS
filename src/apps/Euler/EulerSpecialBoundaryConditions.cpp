@@ -1,1 +1,1 @@
-/home/wongml/Codes/HAMeRS_development/problems/Euler/boundary_conditions/DoubleMachReflection2D.cpp
+EulerSpecialBoundaryConditionsDefault.cpp

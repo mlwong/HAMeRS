@@ -67,10 +67,16 @@ BasicCartesianBoundaryUtilities2::getFromInput(
     TBOX_ASSERT(bdry_strategy != 0);
     TBOX_ASSERT(static_cast<int>(edge_locs.size()) <= NUM_2D_EDGES);
     TBOX_ASSERT(static_cast<int>(node_locs.size()) <= NUM_2D_NODES);
-    TBOX_ASSERT(*min_element(edge_locs.begin(), edge_locs.end()) >= 0);
-    TBOX_ASSERT(*max_element(edge_locs.begin(), edge_locs.end()) < NUM_2D_EDGES);
-    TBOX_ASSERT(*min_element(node_locs.begin(), node_locs.end()) >= 0);
-    TBOX_ASSERT(*max_element(node_locs.begin(), node_locs.end()) < NUM_2D_NODES);
+    if (static_cast<int>(edge_locs.size()) > 0)
+    {
+        TBOX_ASSERT(*min_element(edge_locs.begin(), edge_locs.end()) >= 0);
+        TBOX_ASSERT(*max_element(edge_locs.begin(), edge_locs.end()) < NUM_2D_EDGES);
+    }
+    if (static_cast<int>(node_locs.size()) > 0)
+    {
+        TBOX_ASSERT(*min_element(node_locs.begin(), node_locs.end()) >= 0);
+        TBOX_ASSERT(*max_element(node_locs.begin(), node_locs.end()) < NUM_2D_NODES);
+    }
     TBOX_ASSERT(static_cast<int>(edge_conds.size()) == NUM_2D_EDGES);
     TBOX_ASSERT(static_cast<int>(node_conds.size()) == NUM_2D_NODES);
     
@@ -81,19 +87,25 @@ BasicCartesianBoundaryUtilities2::getFromInput(
             << std::endl);
     }
     
-    read2dBdryEdges(
-        bdry_strategy,
-        input_db,
-        edge_locs,
-        edge_conds,
-        periodic);
+    if (static_cast<int>(edge_locs.size()) > 0)
+    {
+        read2dBdryEdges(
+            bdry_strategy,
+            input_db,
+            edge_locs,
+            edge_conds,
+            periodic);
+    }
     
-    read2dBdryNodes(
-        input_db,
-        node_locs,
-        edge_conds,
-        node_conds,
-        periodic);
+    if (static_cast<int>(node_locs.size()) > 0)
+    {
+        read2dBdryNodes(
+            input_db,
+            node_locs,
+            edge_conds,
+            node_conds,
+            periodic);
+    }
 }
 
 
@@ -740,8 +752,8 @@ BasicCartesianBoundaryUtilities2::fillNodeBoundaryData(
  * condition.
  *
  * If the node boundary condition type or node location are unknown,
- * or the boundary condition type is inconsistent with the node location
- * an error results.
+ * or the boundary condition type is inconsistent with the node location,
+ * an error code (-1) is returned.
  */
 int
 BasicCartesianBoundaryUtilities2::getEdgeLocationForNodeBdry(
@@ -790,23 +802,23 @@ BasicCartesianBoundaryUtilities2::getEdgeLocationForNodeBdry(
         }
         default:
         {
-            TBOX_ERROR("BasicCartesianBoundaryUtilities2::getEdgeLocationForNodeBdry()\n"
-                << "Unknown node boundary condition type = '"
-                << node_btype
-                << "' passed."
-                << std::endl);
+            // TBOX_ERROR("BasicCartesianBoundaryUtilities2::getEdgeLocationForNodeBdry()\n"
+            //     << "Unknown node boundary condition type = '"
+            //     << node_btype
+            //     << "' passed."
+            //     << std::endl);
         }
     }
     
-    if (ret_edge == -1)
-    {
-        TBOX_ERROR("BasicCartesianBoundaryUtilities2::getEdgeLocationForNodeBdry()\n"
-            << "Node boundary condition type = '"
-            << node_btype << "' and \n"
-            << "node location = '" << node_loc
-            << "' passed are inconsistent."
-            << std::endl);
-    }
+    // if (ret_edge == -1)
+    // {
+    //     TBOX_ERROR("BasicCartesianBoundaryUtilities2::getEdgeLocationForNodeBdry()\n"
+    //         << "Node boundary condition type = '"
+    //         << node_btype << "' and \n"
+    //         << "node location = '" << node_loc
+    //         << "' passed are inconsistent."
+    //         << std::endl);
+    // }
     
     return ret_edge;
 }

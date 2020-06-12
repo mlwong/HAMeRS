@@ -106,7 +106,7 @@ class EquationOfShearViscosityMixingRules
         computeShearViscosity(
             boost::shared_ptr<pdat::CellData<double> >& data_shear_viscosity,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_species_temperatures,
+            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& data_species_temperatures,
             const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
             const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions) const
         {
@@ -128,7 +128,7 @@ class EquationOfShearViscosityMixingRules
         computeShearViscosity(
             boost::shared_ptr<pdat::CellData<double> >& data_shear_viscosity,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_species_temperatures,
+            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& data_species_temperatures,
             const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
             const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
             const hier::Box& domain) const = 0;

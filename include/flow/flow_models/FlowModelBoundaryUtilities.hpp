@@ -100,7 +100,67 @@ class FlowModelBoundaryUtilities
             const hier::IntVector& periodic) = 0;
         
         /*
-         * Virtual unction to fill 1d node boundary values for a patch.
+         * Function that returns the integer edge boundary location
+         * corresponding to the given node location and node boundary
+         * condition.
+         *
+         * If the node boundary condition type or node location are unknown,
+         * or the boundary condition type is inconsistent with the node location,
+         * an error code (-1) is returned.
+         */
+        virtual int
+        getEdgeLocationForNodeBdry(
+            int node_loc,
+            int node_btype)
+        {
+            NULL_USE(node_loc);
+            NULL_USE(node_btype);
+            
+            return -1;
+        }
+        
+        /*
+         * Function that returns the integer face boundary location
+         * corresponding to the given edge location and edge boundary
+         * condition.
+         *
+         * If the edge boundary condition type or edge location are unknown,
+         * or the boundary condition type is inconsistent with the edge location,
+         * an error code (-1) is returned.
+         */
+        virtual int
+        getFaceLocationForEdgeBdry(
+            int edge_loc,
+            int edge_btype)
+        {
+            NULL_USE(edge_loc);
+            NULL_USE(edge_btype);
+            
+            return -1;
+        }
+        
+        /*
+         * Function that returns the integer face boundary location
+         * corresponding to the given node location and node boundary
+         * condition.
+         *
+         * If the node boundary condition type or node location are unknown,
+         * or the boundary condition type is inconsistent with the node location,
+         * an error code (-1) is returned.
+         */
+        virtual int
+        getFaceLocationForNodeBdry(
+            int node_loc,
+            int node_btype)
+        {
+            NULL_USE(node_loc);
+            NULL_USE(node_btype);
+            
+            return -1;
+        }
+        
+        /*
+         * Virtual function to fill 1d node boundary values for a patch.
          * Node locations that have boundary conditions identified are removed from the container.
          */
         virtual void

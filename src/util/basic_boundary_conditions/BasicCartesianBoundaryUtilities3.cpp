@@ -73,12 +73,21 @@ BasicCartesianBoundaryUtilities3::getFromInput(
     TBOX_ASSERT(static_cast<int>(face_locs.size()) <= NUM_3D_FACES);
     TBOX_ASSERT(static_cast<int>(edge_locs.size()) <= NUM_3D_EDGES);
     TBOX_ASSERT(static_cast<int>(node_locs.size()) <= NUM_3D_NODES);
-    TBOX_ASSERT(*min_element(face_locs.begin(), face_locs.end()) >= 0);
-    TBOX_ASSERT(*max_element(face_locs.begin(), face_locs.end()) < NUM_3D_FACES);
-    TBOX_ASSERT(*min_element(edge_locs.begin(), edge_locs.end()) >= 0);
-    TBOX_ASSERT(*max_element(edge_locs.begin(), edge_locs.end()) < NUM_3D_EDGES);
-    TBOX_ASSERT(*min_element(node_locs.begin(), node_locs.end()) >= 0);
-    TBOX_ASSERT(*max_element(node_locs.begin(), node_locs.end()) < NUM_3D_NODES);
+    if (static_cast<int>(face_locs.size()) > 0)
+    {
+        TBOX_ASSERT(*min_element(face_locs.begin(), face_locs.end()) >= 0);
+        TBOX_ASSERT(*max_element(face_locs.begin(), face_locs.end()) < NUM_3D_FACES);
+    }
+    if (static_cast<int>(edge_locs.size()) > 0)
+    {
+        TBOX_ASSERT(*min_element(edge_locs.begin(), edge_locs.end()) >= 0);
+        TBOX_ASSERT(*max_element(edge_locs.begin(), edge_locs.end()) < NUM_3D_EDGES);
+    }
+    if (static_cast<int>(node_locs.size()) > 0)
+    {
+        TBOX_ASSERT(*min_element(node_locs.begin(), node_locs.end()) >= 0);
+        TBOX_ASSERT(*max_element(node_locs.begin(), node_locs.end()) < NUM_3D_NODES);
+    }
     TBOX_ASSERT(static_cast<int>(face_conds.size()) == NUM_3D_FACES);
     TBOX_ASSERT(static_cast<int>(edge_conds.size()) == NUM_3D_EDGES);
     TBOX_ASSERT(static_cast<int>(node_conds.size()) == NUM_3D_NODES);
@@ -90,26 +99,35 @@ BasicCartesianBoundaryUtilities3::getFromInput(
             << std::endl);
     }
     
-    read3dBdryFaces(
-        bdry_strategy,
-        input_db,
-        face_locs,
-        face_conds,
-        periodic);
+    if (static_cast<int>(face_locs.size()) > 0)
+    {
+        read3dBdryFaces(
+            bdry_strategy,
+            input_db,
+            face_locs,
+            face_conds,
+            periodic);
+    }
     
-    read3dBdryEdges(
-        input_db,
-        edge_locs,
-        face_conds,
-        edge_conds,
-        periodic);
+    if (static_cast<int>(edge_locs.size()) > 0)
+    {
+        read3dBdryEdges(
+            input_db,
+            edge_locs,
+            face_conds,
+            edge_conds,
+            periodic);
+    }
     
-    read3dBdryNodes(
-        input_db,
-        node_locs,
-        face_conds,
-        node_conds,
-        periodic);
+    if (static_cast<int>(node_locs.size()) > 0)
+    {
+        read3dBdryNodes(
+            input_db,
+            node_locs,
+            face_conds,
+            node_conds,
+            periodic);
+    }
 }
 
 
@@ -1649,8 +1667,8 @@ BasicCartesianBoundaryUtilities3::fillNodeBoundaryData(
  * condition.
  *
  * If the edge boundary condition type or edge location are unknown,
- * or the boundary condition type is inconsistent with the edge location
- * an error results.
+ * or the boundary condition type is inconsistent with the edge location,
+ * an error code (-1) is returned.
  */
 int
 BasicCartesianBoundaryUtilities3::getFaceLocationForEdgeBdry(
@@ -1729,23 +1747,23 @@ BasicCartesianBoundaryUtilities3::getFaceLocationForEdgeBdry(
         }
         default:
         {
-            TBOX_ERROR("BasicCartesianBoundaryUtilities3::getFaceLocationForEdgeBdry()\n"
-                << "Unknown edge boundary condition type = '"
-                << edge_btype
-                << "' passed."
-                << std::endl);
+            // TBOX_ERROR("BasicCartesianBoundaryUtilities3::getFaceLocationForEdgeBdry()\n"
+            //     << "Unknown edge boundary condition type = '"
+            //     << edge_btype
+            //     << "' passed."
+            //     << std::endl);
         }
     }
     
-    if (ret_face == -1)
-    {
-        TBOX_ERROR("BasicCartesianBoundaryUtilities3::getFaceLocationForEdgeBdry()\n"
-            << "Edge boundary condition type = '"
-            << edge_btype << "' and \n"
-            << "edge location = '" << edge_loc
-            << "' passed are inconsistent."
-            << std::endl);
-    }
+    // if (ret_face == -1)
+    // {
+    //     TBOX_ERROR("BasicCartesianBoundaryUtilities3::getFaceLocationForEdgeBdry()\n"
+    //         << "Edge boundary condition type = '"
+    //         << edge_btype << "' and \n"
+    //         << "edge location = '" << edge_loc
+    //         << "' passed are inconsistent."
+    //         << std::endl);
+    // }
     
     return ret_face;
 }
@@ -1757,8 +1775,8 @@ BasicCartesianBoundaryUtilities3::getFaceLocationForEdgeBdry(
  * condition.
  *
  * If the node boundary condition type or node location are unknown,
- * or the boundary condition type is inconsistent with the node location
- * an error results.
+ * or the boundary condition type is inconsistent with the node location,
+ * an error code (-1) is returned.
  */
 int
 BasicCartesianBoundaryUtilities3::getFaceLocationForNodeBdry(
@@ -1837,21 +1855,21 @@ BasicCartesianBoundaryUtilities3::getFaceLocationForNodeBdry(
         }
         default:
         {
-            TBOX_ERROR("BasicCartesianBoundaryUtilities3::getFaceLocationForNodeBdry()\n"
-                << "Unknown node boundary condition type = '"
-                << node_btype << "' passed."
-                << std::endl);
+            // TBOX_ERROR("BasicCartesianBoundaryUtilities3::getFaceLocationForNodeBdry()\n"
+            //     << "Unknown node boundary condition type = '"
+            //     << node_btype << "' passed."
+            //     << std::endl);
         }
     }
     
-    if (ret_face == -1)
-    {
-        TBOX_ERROR("BasicCartesianBoundaryUtilities3::getFaceLocationForNodeBdry()\n"
-            << "Node boundary condition type = '"
-            << node_btype << "' and \n"
-            << "node location = '" << node_loc
-            << "' passed are inconsistent." << std::endl);
-    }
+    // if (ret_face == -1)
+    // {
+    //     TBOX_ERROR("BasicCartesianBoundaryUtilities3::getFaceLocationForNodeBdry()\n"
+    //         << "Node boundary condition type = '"
+    //         << node_btype << "' and \n"
+    //         << "node location = '" << node_loc
+    //         << "' passed are inconsistent." << std::endl);
+    // }
     
     return ret_face;
 }

@@ -2445,8 +2445,8 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
     const hier::Box& domain,
     bool compute_velocity) const
 {
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     // Get the box that covers the interior of patch.
     const hier::Box interior_box = convective_flux->getBox();
@@ -2465,7 +2465,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
         conservative_variables_L[0]->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -2498,7 +2498,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
      */
     
     const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules =
-        d_flow_model_tmp->getEquationOfStateMixingRules();
+        flow_model_tmp->getEquationOfStateMixingRules();
     
     /*
      * Get the pointers to the side data of convective flux and conservative variables.
@@ -2784,7 +2784,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
             }
         }
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressure(
                 pressure_x_L,
                 density_x_L,
@@ -2794,7 +2794,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressure(
                 pressure_x_R,
                 density_x_R,
@@ -2808,7 +2808,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
          * Compute the sound speed field.
          */
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeGruneisenParameter(
                 gruneisen_parameter_x_L,
                 density_x_L,
@@ -2818,7 +2818,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeGruneisenParameter(
                 gruneisen_parameter_x_R,
                 density_x_R,
@@ -2828,7 +2828,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressureDerivativeWithPartialDensities(
                 partial_pressure_partial_partial_densities_x_L,
                 density_x_L,
@@ -2838,7 +2838,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressureDerivativeWithPartialDensities(
                 partial_pressure_partial_partial_densities_x_R,
                 density_x_R,
@@ -3153,7 +3153,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
             }
         }
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressure(
                 pressure_x_L,
                 density_x_L,
@@ -3163,7 +3163,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressure(
                 pressure_x_R,
                 density_x_R,
@@ -3177,7 +3177,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
          * Compute the sound speed field.
          */
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeGruneisenParameter(
                 gruneisen_parameter_x_L,
                 density_x_L,
@@ -3187,7 +3187,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeGruneisenParameter(
                 gruneisen_parameter_x_R,
                 density_x_R,
@@ -3197,7 +3197,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressureDerivativeWithPartialDensities(
                 partial_pressure_partial_partial_densities_x_L,
                 density_x_L,
@@ -3207,7 +3207,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressureDerivativeWithPartialDensities(
                 partial_pressure_partial_partial_densities_x_R,
                 density_x_R,
@@ -3600,7 +3600,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
             }
         }
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressure(
                 pressure_x_L,
                 density_x_L,
@@ -3610,7 +3610,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressure(
                 pressure_x_R,
                 density_x_R,
@@ -3624,7 +3624,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
          * Compute the sound speed field.
          */
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeGruneisenParameter(
                 gruneisen_parameter_x_L,
                 density_x_L,
@@ -3634,7 +3634,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeGruneisenParameter(
                 gruneisen_parameter_x_R,
                 density_x_R,
@@ -3644,7 +3644,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressureDerivativeWithPartialDensities(
                 partial_pressure_partial_partial_densities_x_L,
                 density_x_L,
@@ -3654,7 +3654,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressureDerivativeWithPartialDensities(
                 partial_pressure_partial_partial_densities_x_R,
                 density_x_R,
@@ -3873,8 +3873,8 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
     const hier::Box& domain,
     bool compute_velocity) const
 {
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     // Get the box that covers the interior of patch.
     const hier::Box interior_box = convective_flux->getBox();
@@ -3893,7 +3893,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
         conservative_variables_B[0]->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -3926,7 +3926,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
      */
     
     const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules =
-        d_flow_model_tmp->getEquationOfStateMixingRules();
+        flow_model_tmp->getEquationOfStateMixingRules();
     
     /*
      * Get the pointers to the side data of convective flux and conservative variables.
@@ -4261,7 +4261,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
             }
         }
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressure(
                 pressure_y_B,
                 density_y_B,
@@ -4271,7 +4271,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressure(
                 pressure_y_T,
                 density_y_T,
@@ -4285,7 +4285,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
          * Compute the sound speed field.
          */
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeGruneisenParameter(
                 gruneisen_parameter_y_B,
                 density_y_B,
@@ -4295,7 +4295,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeGruneisenParameter(
                 gruneisen_parameter_y_T,
                 density_y_T,
@@ -4305,7 +4305,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressureDerivativeWithPartialDensities(
                 partial_pressure_partial_partial_densities_y_B,
                 density_y_B,
@@ -4315,7 +4315,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressureDerivativeWithPartialDensities(
                 partial_pressure_partial_partial_densities_y_T,
                 density_y_T,
@@ -4708,7 +4708,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
             }
         }
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressure(
                 pressure_y_B,
                 density_y_B,
@@ -4718,7 +4718,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressure(
                 pressure_y_T,
                 density_y_T,
@@ -4732,7 +4732,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
          * Compute the sound speed field.
          */
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeGruneisenParameter(
                 gruneisen_parameter_y_B,
                 density_y_B,
@@ -4742,7 +4742,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeGruneisenParameter(
                 gruneisen_parameter_y_T,
                 density_y_T,
@@ -4752,7 +4752,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressureDerivativeWithPartialDensities(
                 partial_pressure_partial_partial_densities_y_B,
                 density_y_B,
@@ -4762,7 +4762,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressureDerivativeWithPartialDensities(
                 partial_pressure_partial_partial_densities_y_T,
                 density_y_T,
@@ -4981,8 +4981,8 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
     const hier::Box& domain,
     bool compute_velocity) const
 {
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     // Get the box that covers the interior of patch.
     const hier::Box interior_box = convective_flux->getBox();
@@ -5001,7 +5001,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
         conservative_variables_B[0]->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -5034,7 +5034,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
      */
     
     const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules =
-        d_flow_model_tmp->getEquationOfStateMixingRules();
+        flow_model_tmp->getEquationOfStateMixingRules();
     
     /*
      * Get the pointers to the side data of convective flux and conservative variables.
@@ -5425,7 +5425,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
             }
         }
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressure(
                 pressure_z_B,
                 density_z_B,
@@ -5435,7 +5435,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
                 2,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressure(
                 pressure_z_F,
                 density_z_F,
@@ -5449,7 +5449,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
          * Compute the sound speed field.
          */
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeGruneisenParameter(
                 gruneisen_parameter_z_B,
                 density_z_B,
@@ -5459,7 +5459,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
                 2,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeGruneisenParameter(
                 gruneisen_parameter_z_F,
                 density_z_F,
@@ -5469,7 +5469,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
                 2,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressureDerivativeWithPartialDensities(
                 partial_pressure_partial_partial_densities_z_B,
                 density_z_B,
@@ -5479,7 +5479,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
                 2,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressureDerivativeWithPartialDensities(
                 partial_pressure_partial_partial_densities_z_F,
                 density_z_F,
@@ -5698,8 +5698,8 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
     const hier::Box& domain,
     bool compute_velocity) const
 {
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     // Get the box that covers the interior of patch.
     const hier::Box interior_box = convective_flux->getBox();
@@ -5718,7 +5718,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
         primitive_variables_L[0]->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -5751,7 +5751,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
      */
     
     const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules =
-        d_flow_model_tmp->getEquationOfStateMixingRules();
+        flow_model_tmp->getEquationOfStateMixingRules();
     
     /*
      * Get the pointers to the side data of convective flux and primitive variables.
@@ -5997,7 +5997,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
          * Compute the sound speed field.
          */
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeGruneisenParameter(
                 gruneisen_parameter_x_L,
                 density_x_L,
@@ -6007,7 +6007,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeGruneisenParameter(
                 gruneisen_parameter_x_R,
                 density_x_R,
@@ -6017,7 +6017,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressureDerivativeWithPartialDensities(
                 partial_pressure_partial_partial_densities_x_L,
                 density_x_L,
@@ -6027,7 +6027,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressureDerivativeWithPartialDensities(
                 partial_pressure_partial_partial_densities_x_R,
                 density_x_R,
@@ -6076,7 +6076,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
             c_x_R[idx] = sqrt(c_x_R[idx]);
         }
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeInternalEnergy(
                 internal_energy_x_L,
                 density_x_L,
@@ -6086,7 +6086,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeInternalEnergy(
                 internal_energy_x_R,
                 density_x_R,
@@ -6322,7 +6322,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
          * Compute the sound speed field.
          */
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeGruneisenParameter(
                 gruneisen_parameter_x_L,
                 density_x_L,
@@ -6332,7 +6332,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeGruneisenParameter(
                 gruneisen_parameter_x_R,
                 density_x_R,
@@ -6342,7 +6342,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressureDerivativeWithPartialDensities(
                 partial_pressure_partial_partial_densities_x_L,
                 density_x_L,
@@ -6352,7 +6352,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressureDerivativeWithPartialDensities(
                 partial_pressure_partial_partial_densities_x_R,
                 density_x_R,
@@ -6413,7 +6413,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
             }
         }
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeInternalEnergy(
                 internal_energy_x_L,
                 density_x_L,
@@ -6423,7 +6423,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeInternalEnergy(
                 internal_energy_x_R,
                 density_x_R,
@@ -6713,7 +6713,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
          * Compute the sound speed field.
          */
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeGruneisenParameter(
                 gruneisen_parameter_x_L,
                 density_x_L,
@@ -6723,7 +6723,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeGruneisenParameter(
                 gruneisen_parameter_x_R,
                 density_x_R,
@@ -6733,7 +6733,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressureDerivativeWithPartialDensities(
                 partial_pressure_partial_partial_densities_x_L,
                 density_x_L,
@@ -6743,7 +6743,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressureDerivativeWithPartialDensities(
                 partial_pressure_partial_partial_densities_x_R,
                 density_x_R,
@@ -6819,7 +6819,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
             }
         }
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeInternalEnergy(
                 internal_energy_x_L,
                 density_x_L,
@@ -6829,7 +6829,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 0,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeInternalEnergy(
                 internal_energy_x_R,
                 density_x_R,
@@ -6978,8 +6978,8 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
     const hier::Box& domain,
     bool compute_velocity) const
 {
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     // Get the box that covers the interior of patch.
     const hier::Box interior_box = convective_flux->getBox();
@@ -6998,7 +6998,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
         primitive_variables_B[0]->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -7031,7 +7031,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
      */
     
     const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules =
-        d_flow_model_tmp->getEquationOfStateMixingRules();
+        flow_model_tmp->getEquationOfStateMixingRules();
     
     /*
      * Get the pointers to the side data of convective flux and primitive variables.
@@ -7316,7 +7316,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
          * Compute the sound speed field.
          */
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeGruneisenParameter(
                 gruneisen_parameter_y_B,
                 density_y_B,
@@ -7326,7 +7326,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeGruneisenParameter(
                 gruneisen_parameter_y_T,
                 density_y_T,
@@ -7336,7 +7336,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressureDerivativeWithPartialDensities(
                 partial_pressure_partial_partial_densities_y_B,
                 density_y_B,
@@ -7346,7 +7346,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressureDerivativeWithPartialDensities(
                 partial_pressure_partial_partial_densities_y_T,
                 density_y_T,
@@ -7407,7 +7407,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
             }
         }
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeInternalEnergy(
                 internal_energy_y_B,
                 density_y_B,
@@ -7417,7 +7417,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeInternalEnergy(
                 internal_energy_y_T,
                 density_y_T,
@@ -7707,7 +7707,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
          * Compute the sound speed field.
          */
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeGruneisenParameter(
                 gruneisen_parameter_y_B,
                 density_y_B,
@@ -7717,7 +7717,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeGruneisenParameter(
                 gruneisen_parameter_y_T,
                 density_y_T,
@@ -7727,7 +7727,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressureDerivativeWithPartialDensities(
                 partial_pressure_partial_partial_densities_y_B,
                 density_y_B,
@@ -7737,7 +7737,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressureDerivativeWithPartialDensities(
                 partial_pressure_partial_partial_densities_y_T,
                 density_y_T,
@@ -7813,7 +7813,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
             }
         }
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeInternalEnergy(
                 internal_energy_y_B,
                 density_y_B,
@@ -7823,7 +7823,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
                 1,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeInternalEnergy(
                 internal_energy_y_T,
                 density_y_T,
@@ -7972,8 +7972,8 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
     const hier::Box& domain,
     bool compute_velocity) const
 {
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
+    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     // Get the box that covers the interior of patch.
     const hier::Box interior_box = convective_flux->getBox();
@@ -7992,7 +7992,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
         primitive_variables_B[0]->getGhostBox().numberCells();
     
     /*
-     * Get the local lower indices and number of cells in each direction of the domain.
+     * Get the local lower index and number of cells in each direction of the domain.
      */
     
     hier::IntVector domain_lo(d_dim);
@@ -8025,7 +8025,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
      */
     
     const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules =
-        d_flow_model_tmp->getEquationOfStateMixingRules();
+        flow_model_tmp->getEquationOfStateMixingRules();
     
     /*
      * Get the pointers to the side data of convective flux and primitive variables.
@@ -8354,7 +8354,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
          * Compute the sound speed field.
          */
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeGruneisenParameter(
                 gruneisen_parameter_z_B,
                 density_z_B,
@@ -8364,7 +8364,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
                 2,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeGruneisenParameter(
                 gruneisen_parameter_z_F,
                 density_z_F,
@@ -8374,7 +8374,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
                 2,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressureDerivativeWithPartialDensities(
                 partial_pressure_partial_partial_densities_z_B,
                 density_z_B,
@@ -8384,7 +8384,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
                 2,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computePressureDerivativeWithPartialDensities(
                 partial_pressure_partial_partial_densities_z_F,
                 density_z_F,
@@ -8460,7 +8460,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
             }
         }
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeInternalEnergy(
                 internal_energy_z_B,
                 density_z_B,
@@ -8470,7 +8470,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
                 2,
                 domain);
         
-        d_flow_model_tmp->getEquationOfStateMixingRules()->
+        flow_model_tmp->getEquationOfStateMixingRules()->
             computeInternalEnergy(
                 internal_energy_z_F,
                 density_z_F,

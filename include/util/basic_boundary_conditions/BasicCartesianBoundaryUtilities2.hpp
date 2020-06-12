@@ -244,8 +244,8 @@ struct BasicCartesianBoundaryUtilities2
          * condition.
          *
          * If the node boundary condition type or node location are unknown,
-         * or the boundary condition type is inconsistent with the node location
-         * an error results.
+         * or the boundary condition type is inconsistent with the node location,
+         * an error code (-1) is returned.
          *
          * @return Integer edge location for node location and boundary condition
          *         type.

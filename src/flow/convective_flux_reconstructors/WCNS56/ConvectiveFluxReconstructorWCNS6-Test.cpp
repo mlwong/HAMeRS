@@ -469,7 +469,10 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
     NULL_USE(RK_step_number);
     
     d_flow_model->setupRiemannSolver();
-    d_riemann_solver = d_flow_model->getFlowModelRiemannSolver();
+    d_flow_model->setupBasicUtilities();
+    
+    boost::shared_ptr<FlowModelRiemannSolver> riemann_solver = d_flow_model->getFlowModelRiemannSolver();
+    boost::shared_ptr<FlowModelBasicUtilities> basic_utilities = d_flow_model->getFlowModelBasicUtilities();
     
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
@@ -571,9 +574,11 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         
         d_flow_model->registerDerivedVariables(num_subghosts_of_data);
         
-        d_flow_model->registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
+        basic_utilities->registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
             d_num_conv_ghosts,
             AVERAGING::SIMPLE);
+        
+        d_flow_model->allocateMemoryForDerivedCellData();
         
         d_flow_model->computeDerivedCellData();
         
@@ -693,7 +698,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
          * Initialize temporary data containers for WENO interpolation.
          */
         
-        int num_projection_var = d_flow_model->getNumberOfProjectionVariablesForPrimitiveVariables();
+        const int num_projection_var = basic_utilities->getNumberOfProjectionVariablesForPrimitiveVariables();
         projection_variables.reserve(num_projection_var);
         
         for (int vi = 0; vi < num_projection_var; vi++)
@@ -747,7 +752,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         
         t_characteristic_decomposition->start();
         
-        d_flow_model->computeSideDataOfProjectionVariablesForPrimitiveVariables(
+        basic_utilities->computeSideDataOfProjectionVariablesForPrimitiveVariables(
             projection_variables);
         
         t_characteristic_decomposition->stop();
@@ -760,7 +765,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         
         for (int m = 0; m < 6; m++)
         {
-            d_flow_model->computeSideDataOfCharacteristicVariablesFromPrimitiveVariables(
+            basic_utilities->computeSideDataOfCharacteristicVariablesFromPrimitiveVariables(
                 characteristic_variables[m],
                 primitive_variables,
                 projection_variables,
@@ -788,12 +793,12 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         
         t_characteristic_decomposition->start();
         
-        d_flow_model->computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
+        basic_utilities->computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
             primitive_variables_minus,
             characteristic_variables_minus,
             projection_variables);
         
-        d_flow_model->computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
+        basic_utilities->computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
             primitive_variables_plus,
             characteristic_variables_plus,
             projection_variables);
@@ -816,11 +821,11 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
          * Check whether the interpolated side primitive variables are within the bounds.
          */
         
-        d_flow_model->checkSideDataOfPrimitiveVariablesBounded(
+        basic_utilities->checkSideDataOfPrimitiveVariablesBounded(
             bounded_flag_minus,
             primitive_variables_minus);
         
-        d_flow_model->checkSideDataOfPrimitiveVariablesBounded(
+        basic_utilities->checkSideDataOfPrimitiveVariablesBounded(
             bounded_flag_plus,
             primitive_variables_plus);
         
@@ -868,7 +873,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         
         if (d_has_advective_eqn_form)
         {
-            d_riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
+            riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
                 convective_flux_midpoint,
                 velocity_midpoint,
                 primitive_variables_minus,
@@ -878,7 +883,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         }
         else
         {
-            d_riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
+            riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
                 convective_flux_midpoint,
                 primitive_variables_minus,
                 primitive_variables_plus,
@@ -1007,9 +1012,11 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         
         d_flow_model->registerDerivedVariables(num_subghosts_of_data);
         
-        d_flow_model->registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
+        basic_utilities->registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
             d_num_conv_ghosts,
             AVERAGING::SIMPLE);
+        
+        d_flow_model->allocateMemoryForDerivedCellData();
         
         d_flow_model->computeDerivedCellData();
         
@@ -1264,7 +1271,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
          * Initialize temporary data containers for WENO interpolation.
          */
         
-        int num_projection_var = d_flow_model->getNumberOfProjectionVariablesForPrimitiveVariables();
+        const int num_projection_var = basic_utilities->getNumberOfProjectionVariablesForPrimitiveVariables();
         projection_variables.reserve(num_projection_var);
         
         for (int vi = 0; vi < num_projection_var; vi++)
@@ -1318,7 +1325,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         
         t_characteristic_decomposition->start();
         
-        d_flow_model->computeSideDataOfProjectionVariablesForPrimitiveVariables(
+        basic_utilities->computeSideDataOfProjectionVariablesForPrimitiveVariables(
             projection_variables);
         
         t_characteristic_decomposition->stop();
@@ -1331,7 +1338,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         
         for (int m = 0; m < 6; m++)
         {
-            d_flow_model->computeSideDataOfCharacteristicVariablesFromPrimitiveVariables(
+            basic_utilities->computeSideDataOfCharacteristicVariablesFromPrimitiveVariables(
                 characteristic_variables[m],
                 primitive_variables,
                 projection_variables,
@@ -1359,12 +1366,12 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         
         t_characteristic_decomposition->start();
         
-        d_flow_model->computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
+        basic_utilities->computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
             primitive_variables_minus,
             characteristic_variables_minus,
             projection_variables);
         
-        d_flow_model->computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
+        basic_utilities->computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
             primitive_variables_plus,
             characteristic_variables_plus,
             projection_variables);
@@ -1387,11 +1394,11 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
          * Check whether the interpolated side primitive variables are within the bounds.
          */
         
-        d_flow_model->checkSideDataOfPrimitiveVariablesBounded(
+        basic_utilities->checkSideDataOfPrimitiveVariablesBounded(
             bounded_flag_minus,
             primitive_variables_minus);
         
-        d_flow_model->checkSideDataOfPrimitiveVariablesBounded(
+        basic_utilities->checkSideDataOfPrimitiveVariablesBounded(
             bounded_flag_plus,
             primitive_variables_plus);
         
@@ -1495,7 +1502,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         
         if (d_has_advective_eqn_form)
         {
-            d_riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
+            riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
                 convective_flux_midpoint_HLLC,
                 velocity_midpoint,
                 primitive_variables_minus,
@@ -1505,7 +1512,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         }
         else
         {
-            d_riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
+            riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
                 convective_flux_midpoint_HLLC,
                 primitive_variables_minus,
                 primitive_variables_plus,
@@ -1513,7 +1520,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
                 RIEMANN_SOLVER::HLLC);
         }
         
-        d_riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
+        riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
             convective_flux_midpoint_HLLC_HLL,
             primitive_variables_minus,
             primitive_variables_plus,
@@ -1580,7 +1587,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         
         if (d_has_advective_eqn_form)
         {
-            d_riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
+            riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
                 convective_flux_midpoint_HLLC,
                 velocity_midpoint,
                 primitive_variables_minus,
@@ -1590,7 +1597,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         }
         else
         {
-            d_riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
+            riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
                 convective_flux_midpoint_HLLC,
                 primitive_variables_minus,
                 primitive_variables_plus,
@@ -1598,7 +1605,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
                 RIEMANN_SOLVER::HLLC);
         }
         
-        d_riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
+        riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
             convective_flux_midpoint_HLLC_HLL,
             primitive_variables_minus,
             primitive_variables_plus,
@@ -1877,9 +1884,11 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         
         d_flow_model->registerDerivedVariables(num_subghosts_of_data);
         
-        d_flow_model->registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
+        basic_utilities->registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
             d_num_conv_ghosts,
             AVERAGING::SIMPLE);
+        
+        d_flow_model->allocateMemoryForDerivedCellData();
         
         d_flow_model->computeDerivedCellData();
         
@@ -2226,7 +2235,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
          * Initialize temporary data containers for WENO interpolation.
          */
         
-        int num_projection_var = d_flow_model->getNumberOfProjectionVariablesForPrimitiveVariables();
+        const int num_projection_var = basic_utilities->getNumberOfProjectionVariablesForPrimitiveVariables();
         projection_variables.reserve(num_projection_var);
         
         for (int vi = 0; vi < num_projection_var; vi++)
@@ -2280,7 +2289,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         
         t_characteristic_decomposition->start();
         
-        d_flow_model->computeSideDataOfProjectionVariablesForPrimitiveVariables(
+        basic_utilities->computeSideDataOfProjectionVariablesForPrimitiveVariables(
             projection_variables);
         
         t_characteristic_decomposition->stop();
@@ -2293,7 +2302,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         
         for (int m = 0; m < 6; m++)
         {
-            d_flow_model->computeSideDataOfCharacteristicVariablesFromPrimitiveVariables(
+            basic_utilities->computeSideDataOfCharacteristicVariablesFromPrimitiveVariables(
                 characteristic_variables[m],
                 primitive_variables,
                 projection_variables,
@@ -2321,12 +2330,12 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         
         t_characteristic_decomposition->start();
         
-        d_flow_model->computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
+        basic_utilities->computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
             primitive_variables_minus,
             characteristic_variables_minus,
             projection_variables);
         
-        d_flow_model->computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
+        basic_utilities->computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
             primitive_variables_plus,
             characteristic_variables_plus,
             projection_variables);
@@ -2349,11 +2358,11 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
          * Check whether the interpolated side primitive variables are within the bounds.
          */
         
-        d_flow_model->checkSideDataOfPrimitiveVariablesBounded(
+        basic_utilities->checkSideDataOfPrimitiveVariablesBounded(
             bounded_flag_minus,
             primitive_variables_minus);
         
-        d_flow_model->checkSideDataOfPrimitiveVariablesBounded(
+        basic_utilities->checkSideDataOfPrimitiveVariablesBounded(
             bounded_flag_plus,
             primitive_variables_plus);
         
@@ -2536,7 +2545,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         
         if (d_has_advective_eqn_form)
         {
-            d_riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
+            riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
                 convective_flux_midpoint_HLLC,
                 velocity_midpoint,
                 primitive_variables_minus,
@@ -2546,7 +2555,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         }
         else
         {
-            d_riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
+            riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
                 convective_flux_midpoint_HLLC,
                 primitive_variables_minus,
                 primitive_variables_plus,
@@ -2554,7 +2563,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
                 RIEMANN_SOLVER::HLLC);
         }
         
-        d_riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
+        riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
             convective_flux_midpoint_HLLC_HLL,
             primitive_variables_minus,
             primitive_variables_plus,
@@ -2635,7 +2644,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         
         if (d_has_advective_eqn_form)
         {
-            d_riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
+            riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
                 convective_flux_midpoint_HLLC,
                 velocity_midpoint,
                 primitive_variables_minus,
@@ -2645,7 +2654,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         }
         else
         {
-            d_riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
+            riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
                 convective_flux_midpoint_HLLC,
                 primitive_variables_minus,
                 primitive_variables_plus,
@@ -2653,7 +2662,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
                 RIEMANN_SOLVER::HLLC);
         }
         
-        d_riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
+        riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
             convective_flux_midpoint_HLLC_HLL,
             primitive_variables_minus,
             primitive_variables_plus,
@@ -2734,7 +2743,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         
         if (d_has_advective_eqn_form)
         {
-            d_riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
+            riemann_solver->computeConvectiveFluxAndVelocityFromPrimitiveVariables(
                 convective_flux_midpoint_HLLC,
                 velocity_midpoint,
                 primitive_variables_minus,
@@ -2744,7 +2753,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
         }
         else
         {
-            d_riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
+            riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
                 convective_flux_midpoint_HLLC,
                 primitive_variables_minus,
                 primitive_variables_plus,
@@ -2752,7 +2761,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
                 RIEMANN_SOLVER::HLLC);
         }
         
-        d_riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
+        riemann_solver->computeConvectiveFluxFromPrimitiveVariables(
             convective_flux_midpoint_HLLC_HLL,
             primitive_variables_minus,
             primitive_variables_plus,

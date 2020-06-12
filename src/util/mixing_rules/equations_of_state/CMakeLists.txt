@@ -5,6 +5,8 @@ set(equations_of_state_source_files
     ./EquationOfStateMixingRules.cpp
     ./ideal_gas/EquationOfStateIdealGas.cpp
     ./ideal_gas/EquationOfStateMixingRulesIdealGas.cpp
+    ./stiffened_gas/EquationOfStateStiffenedGas.cpp
+    ./stiffened_gas/EquationOfStateMixingRulesStiffenedGas.cpp
 )
 
 # Create a library called equations_of_state which includes the 

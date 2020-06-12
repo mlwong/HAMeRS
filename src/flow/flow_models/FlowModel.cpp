@@ -1,61 +1,91 @@
 #include "flow/flow_models/FlowModel.hpp"
 
 /*
- * Register the required variables for the computation of diffusive fluxes in the registered patch.
+ * Check whether a patch is registered or not.
  */
-void
-FlowModel::registerDiffusiveFluxes(const hier::IntVector& num_subghosts)
+bool
+FlowModel::hasRegisteredPatch() const
 {
-    NULL_USE(num_subghosts);
+    if (d_patch == nullptr)
+    {
+        return false;
+    }
     
-    TBOX_ERROR(d_object_name
-        << ": FlowModel::registerDiffusiveFluxes()\n"
-        << "Function is not yet implemented!"
-        << std::endl);
+    return true;
 }
 
 
 /*
- * Get the variables for the derivatives in the diffusive fluxes.
+ * Get registered patch.
  */
-void
-FlowModel::getDiffusiveFluxVariablesForDerivative(
-    std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_var_data,
-    std::vector<std::vector<int> >& derivative_var_component_idx,
-    const DIRECTION::TYPE& flux_direction,
-    const DIRECTION::TYPE& derivative_direction)
+const hier::Patch&
+FlowModel::getRegisteredPatch() const
 {
-    NULL_USE(derivative_var_data);
-    NULL_USE(derivative_var_component_idx);
-    NULL_USE(flux_direction);
-    NULL_USE(derivative_direction);
-    
-    TBOX_ERROR(d_object_name
-        << ": FlowModel::getDiffusiveFluxVariablesForDerivativesAtNodes()\n"
-        << "Function is not yet implemented!"
+    if (d_patch == nullptr)
+    {
+        TBOX_ERROR(d_object_name
+        << ": FlowModel::getRegisteredPatch()\n"
+        << "Patch is not yet registered!"
         << std::endl);
+    }
+    
+    return *d_patch;
 }
 
 
 /*
- * Get the diffusivities in the diffusive flux.
+ * Return boost::shared_ptr to patch data context.
+ */
+const boost::shared_ptr<hier::VariableContext>&
+FlowModel::getDataContext() const
+{
+    if (d_patch == nullptr)
+    {
+        TBOX_ERROR(d_object_name
+        << ": FlowModel::getDataContext()\n"
+        << "Patch is not yet registered!"
+        << std::endl);
+    }
+    
+   return d_data_context;
+}
+
+
+/*
+ * Get sub-domain box.
+ */
+const hier::Box&
+FlowModel::getSubdomainBox() const
+{
+    if (d_patch == nullptr)
+    {
+        TBOX_ERROR(d_object_name
+        << ": FlowModel::getSubdomainBox()\n"
+        << "Patch is not yet registered!"
+        << std::endl);
+    }
+    
+    return d_subdomain_box;
+}
+
+
+/*
+ * Set sub-domain box.
  */
 void
-FlowModel::getDiffusiveFluxDiffusivities(
-    std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& diffusivities_data,
-    std::vector<std::vector<int> >& diffusivities_component_idx,
-    const DIRECTION::TYPE& flux_direction,
-    const DIRECTION::TYPE& derivative_direction)
+FlowModel::setSubdomainBox(const hier::Box& subdomain_box)
 {
-    NULL_USE(diffusivities_data);
-    NULL_USE(diffusivities_component_idx);
-    NULL_USE(flux_direction);
-    NULL_USE(derivative_direction);
-    
-    TBOX_ERROR(d_object_name
-        << ": FlowModel::getDiffusiveFluxDiffusivities()\n"
-        << "Function is not yet implemented!"
+    if (d_patch == nullptr)
+    {
+        TBOX_ERROR(d_object_name
+        << ": FlowModel::getSubdomainBox()\n"
+        << "Patch is not yet registered!"
         << std::endl);
+    }
+    
+    TBOX_ASSERT(d_ghost_box.contains(subdomain_box));
+    
+    d_subdomain_box = subdomain_box;
 }
 
 
@@ -66,6 +96,36 @@ void
 FlowModel::setupRiemannSolver()
 {
     d_flow_model_riemann_solver->setFlowModel(shared_from_this());
+}
+
+
+/*
+ * Setup the basic utilties object.
+ */
+void
+FlowModel::setupBasicUtilities()
+{
+    d_flow_model_basic_utilities->setFlowModel(shared_from_this());
+}
+
+
+/*
+ * Setup the diffusive flux utilties object.
+ */
+void
+FlowModel::setupDiffusiveFluxUtilities()
+{
+    d_flow_model_diffusive_flux_utilities->setFlowModel(shared_from_this());
+}
+
+
+/*
+ * Setup the source utilties object.
+ */
+void
+FlowModel::setupSourceUtilities()
+{
+    d_flow_model_source_utilities->setFlowModel(shared_from_this());
 }
 
 

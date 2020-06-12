@@ -647,9 +647,9 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
         void
         computeIsochoricSpecificHeatCapacity(
             double* const c_v,
-            const std::vector<const double*> Y,
-            const hier::IntVector& num_ghosts_isochoric_specific_heat_capacity,
-            const hier::IntVector& num_ghosts_mass_fractions,
+            const std::vector<const double*>& Y,
+            const hier::IntVector& offset_isochoric_specific_heat_capacity,
+            const hier::IntVector& offset_mass_fractions,
             const hier::IntVector& ghostcell_dims_isochoric_specific_heat_capacity,
             const hier::IntVector& ghostcell_dims_mass_fractions,
             const hier::IntVector& domain_lo,
@@ -663,10 +663,12 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
         computeIsochoricSpecificHeatCapacity(
             double* const c_v,
             double* const Y_last,
-            const std::vector<const double*> Y,
-            const hier::IntVector& num_ghosts_isochoric_specific_heat_capacity,
-            const hier::IntVector& num_ghosts_mass_fractions,
+            const std::vector<const double*>& Y,
+            const hier::IntVector& offset_isochoric_specific_heat_capacity,
+            const hier::IntVector& offset_mass_fractions_last,
+            const hier::IntVector& offset_mass_fractions,
             const hier::IntVector& ghostcell_dims_isochoric_specific_heat_capacity,
+            const hier::IntVector& ghostcell_dims_mass_fractions_last,
             const hier::IntVector& ghostcell_dims_mass_fractions,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims) const;
@@ -678,9 +680,9 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
         void
         computeIsobaricSpecificHeatCapacity(
             double* const c_p,
-            const std::vector<const double*> Y,
-            const hier::IntVector& num_ghosts_isobaric_specific_heat_capacity,
-            const hier::IntVector& num_ghosts_mass_fractions,
+            const std::vector<const double*>& Y,
+            const hier::IntVector& offset_isobaric_specific_heat_capacity,
+            const hier::IntVector& offset_mass_fractions,
             const hier::IntVector& ghostcell_dims_isobaric_specific_heat_capacity,
             const hier::IntVector& ghostcell_dims_mass_fractions,
             const hier::IntVector& domain_lo,
@@ -694,10 +696,12 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
         computeIsobaricSpecificHeatCapacity(
             double* const c_p,
             double* const Y_last,
-            const std::vector<const double*> Y,
-            const hier::IntVector& num_ghosts_isobaric_specific_heat_capacity,
-            const hier::IntVector& num_ghosts_mass_fractions,
+            const std::vector<const double*>& Y,
+            const hier::IntVector& offset_isobaric_specific_heat_capacity,
+            const hier::IntVector& offset_mass_fractions_last,
+            const hier::IntVector& offset_mass_fractions,
             const hier::IntVector& ghostcell_dims_isobaric_specific_heat_capacity,
+            const hier::IntVector& ghostcell_dims_mass_fractions_last,
             const hier::IntVector& ghostcell_dims_mass_fractions,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims) const;
@@ -708,13 +712,13 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computePressureDerivativeWithPartialDensities(
-            std::vector<double*> Psi,
+            std::vector<double*>& Psi,
             const double* const epsilon,
             const double* const gamma,
             const double* const c_v,
-            const hier::IntVector& num_ghosts_partial_pressure_partial_partial_densities,
-            const hier::IntVector& num_ghosts_internal_energy,
-            const hier::IntVector& num_ghosts_mixture_thermo_properties,
+            const hier::IntVector& offset_partial_pressure_partial_partial_densities,
+            const hier::IntVector& offset_internal_energy,
+            const hier::IntVector& offset_mixture_thermo_properties,
             const hier::IntVector& ghostcell_dims_partial_pressure_partial_partial_densities,
             const hier::IntVector& ghostcell_dims_internal_energy,
             const hier::IntVector& ghostcell_dims_mixture_thermo_properties,
@@ -727,12 +731,12 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computePressureDerivativeWithPartialDensities(
-            std::vector<double*> Psi,
+            std::vector<double*>& Psi,
             const double* const rho,
             const double* const p,
-            const hier::IntVector& num_ghosts_partial_pressure_partial_partial_densities,
-            const hier::IntVector& num_ghosts_density,
-            const hier::IntVector& num_ghosts_pressure,
+            const hier::IntVector& offset_partial_pressure_partial_partial_densities,
+            const hier::IntVector& offset_density,
+            const hier::IntVector& offset_pressure,
             const hier::IntVector& ghostcell_dims_partial_pressure_partial_partial_densities,
             const hier::IntVector& ghostcell_dims_density,
             const hier::IntVector& ghostcell_dims_pressure,
@@ -745,12 +749,12 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computePressureDerivativeWithVolumeFractions(
-            std::vector<double*> M,
+            std::vector<double*>& M,
             const double* const p,
             const double* const gamma,
-            const hier::IntVector& num_ghosts_partial_pressure_partial_volume_fractions,
-            const hier::IntVector& num_ghosts_pressure,
-            const hier::IntVector& num_ghosts_mixture_thermo_properties,
+            const hier::IntVector& offset_partial_pressure_partial_volume_fractions,
+            const hier::IntVector& offset_pressure,
+            const hier::IntVector& offset_mixture_thermo_properties,
             const hier::IntVector& ghostcell_dims_partial_pressure_partial_volume_fractions,
             const hier::IntVector& ghostcell_dims_pressure,
             const hier::IntVector& ghostcell_dims_mixture_thermo_properties,
@@ -766,9 +770,9 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             double* const R,
             double* const c_p,
             double* const c_v,
-            const std::vector<const double*> Y,
-            const hier::IntVector& num_ghosts_mixture_thermo_properties,
-            const hier::IntVector& num_ghosts_mass_fractions,
+            const std::vector<const double*>& Y,
+            const hier::IntVector& offset_mixture_thermo_properties,
+            const hier::IntVector& offset_mass_fractions,
             const hier::IntVector& ghostcell_dims_mixture_thermo_properties,
             const hier::IntVector& ghostcell_dims_mass_fractions,
             const hier::IntVector& domain_lo,
@@ -784,10 +788,12 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             double* const c_p,
             double* const c_v,
             double* const Y_last,
-            const std::vector<const double*> Y,
-            const hier::IntVector& num_ghosts_mixture_thermo_properties,
-            const hier::IntVector& num_ghosts_mass_fractions,
+            const std::vector<const double*>& Y,
+            const hier::IntVector& offset_mixture_thermo_properties,
+            const hier::IntVector& offset_mass_fractions_last,
+            const hier::IntVector& offset_mass_fractions,
             const hier::IntVector& ghostcell_dims_mixture_thermo_properties,
+            const hier::IntVector& ghostcell_dims_mass_fractions_last,
             const hier::IntVector& ghostcell_dims_mass_fractions,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims) const;
@@ -796,11 +802,11 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          * Compute the thermodynamic properties of the mixture with volume fractions.
          */
         void
-        getMixtureThermodynamicPropertiesWithVolumeFractions(
+        computeMixtureThermodynamicPropertiesWithVolumeFractions(
             double* const gamma,
-            const std::vector<const double*> Z,
-            const hier::IntVector& num_ghosts_mixture_thermo_properties,
-            const hier::IntVector& num_ghosts_volume_fractions,
+            const std::vector<const double*>& Z,
+            const hier::IntVector& offset_mixture_thermo_properties,
+            const hier::IntVector& offset_volume_fractions,
             const hier::IntVector& ghostcell_dims_mixture_thermo_properties,
             const hier::IntVector& ghostcell_dims_volume_fractions,
             const hier::IntVector& domain_lo,
@@ -810,13 +816,15 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          * Compute the thermodynamic properties of the mixture with volume fractions.
          */
         void
-        getMixtureThermodynamicPropertiesWithVolumeFractions(
+        computeMixtureThermodynamicPropertiesWithVolumeFractions(
             double* const gamma,
             double* const Z_last,
-            const std::vector<const double*> Z,
-            const hier::IntVector& num_ghosts_mixture_thermo_properties,
-            const hier::IntVector& num_ghosts_volume_fractions,
+            const std::vector<const double*>& Z,
+            const hier::IntVector& offset_mixture_thermo_properties,
+            const hier::IntVector& offset_volume_fractions_last,
+            const hier::IntVector& offset_volume_fractions,
             const hier::IntVector& ghostcell_dims_mixture_thermo_properties,
+            const hier::IntVector& ghostcell_dims_volume_fractions_last,
             const hier::IntVector& ghostcell_dims_volume_fractions,
             const hier::IntVector& domain_lo,
             const hier::IntVector& domain_dims) const;

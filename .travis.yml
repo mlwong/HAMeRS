@@ -34,4 +34,4 @@ install:
   - cmake ..
   - make
 
-script: ./src/exec/test
+script: ./src/test/test_mixing_rules
