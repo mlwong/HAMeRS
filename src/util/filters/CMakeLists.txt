@@ -1,6 +1,7 @@
 # Define a variable filters_source_files containing
 # a list of the source files for the filters library
 set(filters_source_files
+    Filter.cpp
     FilterTruncatedGaussian.cpp
     )
 

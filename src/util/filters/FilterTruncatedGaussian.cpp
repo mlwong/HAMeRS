@@ -4,10 +4,12 @@
 
 FilterTruncatedGaussian::FilterTruncatedGaussian(
     const std::string& object_name,
-    const tbox::Dimension& dim):
+    const tbox::Dimension& dim,
+    const DIRECTION::TYPE& direction):
         Filter(
             object_name,
-            dim),
+            dim,
+            direction),
         a_G(double(3565)/double( 10368)),
         b_G(double(3091)/double( 12960)),
         c_G(double(1997)/double( 25920)),
@@ -19,7 +21,27 @@ FilterTruncatedGaussian::FilterTruncatedGaussian(
     TBOX_ASSERT(fabs(sum_coeffs - double(1)) < DBL_EPSILON);
 #endif
     
-    d_num_filter_ghosts = hier::IntVector::getOne(d_dim)*4;
+    switch (direction)
+    {
+        case (DIRECTION::X_DIRECTION):
+        {
+            d_num_filter_ghosts[0] = 4;
+            
+            break;
+        }
+        case (DIRECTION::Y_DIRECTION):
+        {
+            d_num_filter_ghosts[1] = 4;
+            
+            break;
+        }
+        case (DIRECTION::Z_DIRECTION):
+        {
+            d_num_filter_ghosts[2] = 4;
+            
+            break;
+        }
+    }
 }
 
 /*
@@ -29,9 +51,9 @@ void
 FilterTruncatedGaussian::applyFilter(
     boost::shared_ptr<pdat::CellData<double> >& filtered_cell_data,
     const boost::shared_ptr<pdat::CellData<double> >& cell_data,
-    const hier::Box& domain,
     const int depth_filtered_cell_data,
-    const int depth_cell_data)
+    const int depth_cell_data,
+    const hier::Box& domain)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(filtered_cell_data);
@@ -118,143 +140,373 @@ FilterTruncatedGaussian::applyFilter(
     double* f_filtered = filtered_cell_data->getPointer(depth_filtered_cell_data);
     double* f = cell_data->getPointer(depth_cell_data);
     
-    if (d_dim == tbox::Dimension(1))
+    if (d_direction == DIRECTION::X_DIRECTION)
     {
-        /*
-         * Get the local lower index, numbers of cells in each dimension and offsets.
-         */
-        
-        const int domain_lo_0 = domain_lo[0];
-        const int domain_dim_0 = domain_dims[0];
-        
-        const int offset_0_cell_data = offset_cell_data[0];
-        const int offset_0_filtered_cell_data = offset_filtered_cell_data[0];
-        
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
-        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+        if (d_dim == tbox::Dimension(1))
         {
-            // Compute the linear indices.
-            const int idx = i + offset_0_filtered_cell_data;
+            /*
+             * Get the local lower index, numbers of cells in each dimension and offsets.
+             */
             
-            const int idx_cell_data        = i     + offset_0_cell_data;
-            const int idx_cell_data_x_LLLL = i - 4 + offset_0_cell_data;
-            const int idx_cell_data_x_LLL  = i - 3 + offset_0_cell_data;
-            const int idx_cell_data_x_LL   = i - 2 + offset_0_cell_data;
-            const int idx_cell_data_x_L    = i - 1 + offset_0_cell_data;
-            const int idx_cell_data_x_R    = i + 1 + offset_0_cell_data;
-            const int idx_cell_data_x_RR   = i + 2 + offset_0_cell_data;
-            const int idx_cell_data_x_RRR  = i + 3 + offset_0_cell_data;
-            const int idx_cell_data_x_RRRR = i + 4 + offset_0_cell_data;
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_dim_0 = domain_dims[0];
             
-            // Filter in the x-direction.
-            f_filtered[idx] = a_G*f[idx_cell_data] + 
-                b_G*(f[idx_cell_data_x_L] + f[idx_cell_data_x_R]) +
-                c_G*(f[idx_cell_data_x_LL] + f[idx_cell_data_x_RR]) +
-                d_G*(f[idx_cell_data_x_LLL] + f[idx_cell_data_x_RRR]) +
-                e_G*(f[idx_cell_data_x_LLLL] + f[idx_cell_data_x_RRRR]);
-        }
-    }
-    else if (d_dim == tbox::Dimension(2))
-    {
-        /*
-         * Get the local lower indices, numbers of cells in each dimension and offsets.
-         */
-        
-        const int domain_lo_0 = domain_lo[0];
-        const int domain_lo_1 = domain_lo[1];
-        const int domain_dim_0 = domain_dims[0];
-        const int domain_dim_1 = domain_dims[1];
-        
-        const int offset_0_cell_data = offset_cell_data[0];
-        const int offset_1_cell_data = offset_cell_data[1];
-        const int ghostcell_dim_0_cell_data = ghostcell_dims_cell_data[0];
-        
-        const int offset_0_filtered_cell_data = offset_filtered_cell_data[0];
-        const int offset_1_filtered_cell_data = offset_filtered_cell_data[1];
-        const int ghostcell_dim_0_filtered_cell_data = ghostcell_dims_filtered_cell_data[0];
-        
-        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
-        {
+            const int offset_0_cell_data = offset_cell_data[0];
+            const int offset_0_filtered_cell_data = offset_filtered_cell_data[0];
+            
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
 #endif
             for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
-            {        
+            {
                 // Compute the linear indices.
-                const int idx = (i + offset_0_filtered_cell_data) +
-                    (j + offset_1_filtered_cell_data)*ghostcell_dim_0_filtered_cell_data;
+                const int idx = i + offset_0_filtered_cell_data;
                 
-                const int idx_cell_data = (i + offset_0_cell_data) +
-                    (j + offset_1_cell_data)*ghostcell_dim_0_cell_data;
-                
-                const int idx_cell_data_x_LLLL = (i - 4 + offset_0_cell_data) +
-                    (j + offset_1_cell_data)*ghostcell_dim_0_cell_data;
-                
-                const int idx_cell_data_x_LLL = (i - 3 + offset_0_cell_data) +
-                    (j + offset_1_cell_data)*ghostcell_dim_0_cell_data;
-                
-                const int idx_cell_data_x_LL = (i - 2 + offset_0_cell_data) +
-                    (j + offset_1_cell_data)*ghostcell_dim_0_cell_data;
-                
-                const int idx_cell_data_x_L = (i - 1 + offset_0_cell_data) +
-                    (j + offset_1_cell_data)*ghostcell_dim_0_cell_data;
-                
-                const int idx_cell_data_x_R = (i + 1 + offset_0_cell_data) +
-                    (j + offset_1_cell_data)*ghostcell_dim_0_cell_data;
-                
-                const int idx_cell_data_x_RR = (i + 2 + offset_0_cell_data) +
-                    (j + offset_1_cell_data)*ghostcell_dim_0_cell_data;
-                
-                const int idx_cell_data_x_RRR = (i + 3 + offset_0_cell_data) +
-                    (j + offset_1_cell_data)*ghostcell_dim_0_cell_data;
-                
-                const int idx_cell_data_x_RRRR = (i + 4 + offset_0_cell_data) +
-                    (j + offset_1_cell_data)*ghostcell_dim_0_cell_data;
+                const int idx_cell_data        = i     + offset_0_cell_data;
+                const int idx_cell_data_x_LLLL = i - 4 + offset_0_cell_data;
+                const int idx_cell_data_x_LLL  = i - 3 + offset_0_cell_data;
+                const int idx_cell_data_x_LL   = i - 2 + offset_0_cell_data;
+                const int idx_cell_data_x_L    = i - 1 + offset_0_cell_data;
+                const int idx_cell_data_x_R    = i + 1 + offset_0_cell_data;
+                const int idx_cell_data_x_RR   = i + 2 + offset_0_cell_data;
+                const int idx_cell_data_x_RRR  = i + 3 + offset_0_cell_data;
+                const int idx_cell_data_x_RRRR = i + 4 + offset_0_cell_data;
                 
                 // Filter in the x-direction.
                 f_filtered[idx] = a_G*f[idx_cell_data] + 
-                    b_G*(f[idx_cell_data_x_L]    + f[idx_cell_data_x_R]) +
-                    c_G*(f[idx_cell_data_x_LL]   + f[idx_cell_data_x_RR]) +
-                    d_G*(f[idx_cell_data_x_LLL]  + f[idx_cell_data_x_RRR]) +
+                    b_G*(f[idx_cell_data_x_L] + f[idx_cell_data_x_R]) +
+                    c_G*(f[idx_cell_data_x_LL] + f[idx_cell_data_x_RR]) +
+                    d_G*(f[idx_cell_data_x_LLL] + f[idx_cell_data_x_RRR]) +
                     e_G*(f[idx_cell_data_x_LLLL] + f[idx_cell_data_x_RRRR]);
-                
-                // Compute the linear indices.
-                const int idx_cell_data_y_BBBB = (i + offset_0_cell_data) +
-                    (j - 4 + offset_1_cell_data)*ghostcell_dim_0_cell_data;
-                
-                const int idx_cell_data_y_BBB = (i + offset_0_cell_data) +
-                    (j - 3 + offset_1_cell_data)*ghostcell_dim_0_cell_data;
-                
-                const int idx_cell_data_y_BB = (i + offset_0_cell_data) +
-                    (j - 2 + offset_1_cell_data)*ghostcell_dim_0_cell_data;
-                
-                const int idx_cell_data_y_B = (i + offset_0_cell_data) +
-                    (j - 1 + offset_1_cell_data)*ghostcell_dim_0_cell_data;
-                
-                const int idx_cell_data_y_T = (i + offset_0_cell_data) +
-                    (j + 1 + offset_1_cell_data)*ghostcell_dim_0_cell_data;
-                
-                const int idx_cell_data_y_TT = (i + offset_0_cell_data) +
-                    (j + 2 + offset_1_cell_data)*ghostcell_dim_0_cell_data;
-                
-                const int idx_cell_data_y_TTT = (i + offset_0_cell_data) +
-                    (j + 3 + offset_1_cell_data)*ghostcell_dim_0_cell_data;
-                
-                const int idx_cell_data_y_TTTT = (i + offset_0_cell_data) +
-                    (j + 4 + offset_1_cell_data)*ghostcell_dim_0_cell_data;
-                
-                // Filter in the y-direction.
-                f_filtered[idx] = a_G*f[idx_cell_data] + 
-                    b_G*(f[idx_cell_data_y_B]    + f[idx_cell_data_y_T]) +
-                    c_G*(f[idx_cell_data_y_BB]   + f[idx_cell_data_y_TT]) +
-                    d_G*(f[idx_cell_data_y_BBB]  + f[idx_cell_data_y_TTT]) +
-                    e_G*(f[idx_cell_data_y_BBBB] + f[idx_cell_data_y_TTTT]);
+            }
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and offsets.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            
+            const int offset_0_cell_data = offset_cell_data[0];
+            const int offset_1_cell_data = offset_cell_data[1];
+            const int ghostcell_dim_0_cell_data = ghostcell_dims_cell_data[0];
+            
+            const int offset_0_filtered_cell_data = offset_filtered_cell_data[0];
+            const int offset_1_filtered_cell_data = offset_filtered_cell_data[1];
+            const int ghostcell_dim_0_filtered_cell_data = ghostcell_dims_filtered_cell_data[0];
+            
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {        
+                    // Compute the linear indices.
+                    const int idx = (i + offset_0_filtered_cell_data) +
+                        (j + offset_1_filtered_cell_data)*ghostcell_dim_0_filtered_cell_data;
+                    
+                    const int idx_cell_data = (i + offset_0_cell_data) +
+                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data;
+                    
+                    const int idx_cell_data_x_LLLL = (i - 4 + offset_0_cell_data) +
+                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data;
+                    
+                    const int idx_cell_data_x_LLL = (i - 3 + offset_0_cell_data) +
+                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data;
+                    
+                    const int idx_cell_data_x_LL = (i - 2 + offset_0_cell_data) +
+                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data;
+                    
+                    const int idx_cell_data_x_L = (i - 1 + offset_0_cell_data) +
+                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data;
+                    
+                    const int idx_cell_data_x_R = (i + 1 + offset_0_cell_data) +
+                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data;
+                    
+                    const int idx_cell_data_x_RR = (i + 2 + offset_0_cell_data) +
+                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data;
+                    
+                    const int idx_cell_data_x_RRR = (i + 3 + offset_0_cell_data) +
+                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data;
+                    
+                    const int idx_cell_data_x_RRRR = (i + 4 + offset_0_cell_data) +
+                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data;
+                    
+                    // Filter in the x-direction.
+                    f_filtered[idx] = a_G*f[idx_cell_data] + 
+                        b_G*(f[idx_cell_data_x_L]    + f[idx_cell_data_x_R]) +
+                        c_G*(f[idx_cell_data_x_LL]   + f[idx_cell_data_x_RR]) +
+                        d_G*(f[idx_cell_data_x_LLL]  + f[idx_cell_data_x_RRR]) +
+                        e_G*(f[idx_cell_data_x_LLLL] + f[idx_cell_data_x_RRRR]);
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and offsets.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_lo_2 = domain_lo[2];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            const int domain_dim_2 = domain_dims[2];
+            
+            const int offset_0_cell_data = offset_cell_data[0];
+            const int offset_1_cell_data = offset_cell_data[1];
+            const int offset_2_cell_data = offset_cell_data[2];
+            const int ghostcell_dim_0_cell_data = ghostcell_dims_cell_data[0];
+            const int ghostcell_dim_1_cell_data = ghostcell_dims_cell_data[1];
+            
+            const int offset_0_filtered_cell_data = offset_filtered_cell_data[0];
+            const int offset_1_filtered_cell_data = offset_filtered_cell_data[1];
+            const int offset_2_filtered_cell_data = offset_filtered_cell_data[2];
+            const int ghostcell_dim_0_filtered_cell_data = ghostcell_dims_filtered_cell_data[0];
+            const int ghostcell_dim_1_filtered_cell_data = ghostcell_dims_filtered_cell_data[1];
+            
+            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+            {
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx = (i + offset_0_filtered_cell_data) +
+                            (j + offset_1_filtered_cell_data)*ghostcell_dim_0_filtered_cell_data +
+                            (k + offset_2_filtered_cell_data)*ghostcell_dim_0_filtered_cell_data*
+                                ghostcell_dim_1_filtered_cell_data;
+                        
+                        const int idx_cell_data = (i + offset_0_cell_data) +
+                            (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                            (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
+                                ghostcell_dim_1_cell_data;
+                        
+                        const int idx_cell_data_x_LLLL = (i - 4 + offset_0_cell_data) +
+                            (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                            (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
+                                ghostcell_dim_1_cell_data;
+                        
+                        const int idx_cell_data_x_LLL = (i - 3 + offset_0_cell_data) +
+                            (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                            (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
+                                ghostcell_dim_1_cell_data;
+                        
+                        const int idx_cell_data_x_LL = (i - 2 + offset_0_cell_data) +
+                            (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                            (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
+                                ghostcell_dim_1_cell_data;
+                        
+                        const int idx_cell_data_x_L = (i - 1 + offset_0_cell_data) +
+                            (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                            (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
+                                ghostcell_dim_1_cell_data;
+                        
+                        const int idx_cell_data_x_R = (i + 1 + offset_0_cell_data) +
+                            (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                            (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
+                                ghostcell_dim_1_cell_data;
+                        
+                        const int idx_cell_data_x_RR = (i + 2 + offset_0_cell_data) +
+                            (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                            (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
+                                ghostcell_dim_1_cell_data;
+                        
+                        const int idx_cell_data_x_RRR = (i + 3 + offset_0_cell_data) +
+                            (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                            (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
+                                ghostcell_dim_1_cell_data;
+                        
+                        const int idx_cell_data_x_RRRR = (i + 4 + offset_0_cell_data) +
+                            (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                            (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
+                                ghostcell_dim_1_cell_data;
+                        
+                        // Filter in the x-direction.
+                        f_filtered[idx] = a_G*f[idx_cell_data] + 
+                            b_G*(f[idx_cell_data_x_L]    + f[idx_cell_data_x_R]) +
+                            c_G*(f[idx_cell_data_x_LL]   + f[idx_cell_data_x_RR]) +
+                            d_G*(f[idx_cell_data_x_LLL]  + f[idx_cell_data_x_RRR]) +
+                            e_G*(f[idx_cell_data_x_LLLL] + f[idx_cell_data_x_RRRR]);
+                    }
+                }
             }
         }
     }
-    else if (d_dim == tbox::Dimension(3))
+    else if (d_direction == DIRECTION::Y_DIRECTION)
+    {
+        if (d_dim == tbox::Dimension(2))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and offsets.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            
+            const int offset_0_cell_data = offset_cell_data[0];
+            const int offset_1_cell_data = offset_cell_data[1];
+            const int ghostcell_dim_0_cell_data = ghostcell_dims_cell_data[0];
+            
+            const int offset_0_filtered_cell_data = offset_filtered_cell_data[0];
+            const int offset_1_filtered_cell_data = offset_filtered_cell_data[1];
+            const int ghostcell_dim_0_filtered_cell_data = ghostcell_dims_filtered_cell_data[0];
+            
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {        
+                    // Compute the linear indices.
+                    const int idx = (i + offset_0_filtered_cell_data) +
+                        (j + offset_1_filtered_cell_data)*ghostcell_dim_0_filtered_cell_data;
+                    
+                    const int idx_cell_data = (i + offset_0_cell_data) +
+                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data;
+                    
+                    const int idx_cell_data_y_BBBB = (i + offset_0_cell_data) +
+                        (j - 4 + offset_1_cell_data)*ghostcell_dim_0_cell_data;
+                    
+                    const int idx_cell_data_y_BBB = (i + offset_0_cell_data) +
+                        (j - 3 + offset_1_cell_data)*ghostcell_dim_0_cell_data;
+                    
+                    const int idx_cell_data_y_BB = (i + offset_0_cell_data) +
+                        (j - 2 + offset_1_cell_data)*ghostcell_dim_0_cell_data;
+                    
+                    const int idx_cell_data_y_B = (i + offset_0_cell_data) +
+                        (j - 1 + offset_1_cell_data)*ghostcell_dim_0_cell_data;
+                    
+                    const int idx_cell_data_y_T = (i + offset_0_cell_data) +
+                        (j + 1 + offset_1_cell_data)*ghostcell_dim_0_cell_data;
+                    
+                    const int idx_cell_data_y_TT = (i + offset_0_cell_data) +
+                        (j + 2 + offset_1_cell_data)*ghostcell_dim_0_cell_data;
+                    
+                    const int idx_cell_data_y_TTT = (i + offset_0_cell_data) +
+                        (j + 3 + offset_1_cell_data)*ghostcell_dim_0_cell_data;
+                    
+                    const int idx_cell_data_y_TTTT = (i + offset_0_cell_data) +
+                        (j + 4 + offset_1_cell_data)*ghostcell_dim_0_cell_data;
+                    
+                    // Filter in the y-direction.
+                    f_filtered[idx] = a_G*f[idx_cell_data] + 
+                        b_G*(f[idx_cell_data_y_B]    + f[idx_cell_data_y_T]) +
+                        c_G*(f[idx_cell_data_y_BB]   + f[idx_cell_data_y_TT]) +
+                        d_G*(f[idx_cell_data_y_BBB]  + f[idx_cell_data_y_TTT]) +
+                        e_G*(f[idx_cell_data_y_BBBB] + f[idx_cell_data_y_TTTT]);
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and offsets.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_lo_2 = domain_lo[2];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            const int domain_dim_2 = domain_dims[2];
+            
+            const int offset_0_cell_data = offset_cell_data[0];
+            const int offset_1_cell_data = offset_cell_data[1];
+            const int offset_2_cell_data = offset_cell_data[2];
+            const int ghostcell_dim_0_cell_data = ghostcell_dims_cell_data[0];
+            const int ghostcell_dim_1_cell_data = ghostcell_dims_cell_data[1];
+            
+            const int offset_0_filtered_cell_data = offset_filtered_cell_data[0];
+            const int offset_1_filtered_cell_data = offset_filtered_cell_data[1];
+            const int offset_2_filtered_cell_data = offset_filtered_cell_data[2];
+            const int ghostcell_dim_0_filtered_cell_data = ghostcell_dims_filtered_cell_data[0];
+            const int ghostcell_dim_1_filtered_cell_data = ghostcell_dims_filtered_cell_data[1];
+            
+            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+            {
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx = (i + offset_0_filtered_cell_data) +
+                            (j + offset_1_filtered_cell_data)*ghostcell_dim_0_filtered_cell_data +
+                            (k + offset_2_filtered_cell_data)*ghostcell_dim_0_filtered_cell_data*
+                                ghostcell_dim_1_filtered_cell_data;
+                        
+                        const int idx_cell_data = (i + offset_0_cell_data) +
+                            (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                            (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
+                                ghostcell_dim_1_cell_data;
+                        
+                        const int idx_cell_data_y_BBBB = (i + offset_0_cell_data) +
+                            (j - 4 + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                            (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
+                                ghostcell_dim_1_cell_data;
+                        
+                        const int idx_cell_data_y_BBB = (i + offset_0_cell_data) +
+                            (j - 3 + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                            (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
+                                ghostcell_dim_1_cell_data;
+                        
+                        const int idx_cell_data_y_BB = (i + offset_0_cell_data) +
+                            (j - 2 + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                            (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
+                                ghostcell_dim_1_cell_data;
+                        
+                        const int idx_cell_data_y_B = (i + offset_0_cell_data) +
+                            (j - 1 + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                            (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
+                                ghostcell_dim_1_cell_data;
+                        
+                        const int idx_cell_data_y_T = (i + offset_0_cell_data) +
+                            (j + 1 + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                            (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
+                                ghostcell_dim_1_cell_data;
+                        
+                        const int idx_cell_data_y_TT = (i + offset_0_cell_data) +
+                            (j + 2 + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                            (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
+                                ghostcell_dim_1_cell_data;
+                        
+                        const int idx_cell_data_y_TTT = (i + offset_0_cell_data) +
+                            (j + 3 + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                            (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
+                                ghostcell_dim_1_cell_data;
+                        
+                        const int idx_cell_data_y_TTTT = (i + offset_0_cell_data) +
+                            (j + 4 + offset_1_cell_data)*ghostcell_dim_0_cell_data +
+                            (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
+                                ghostcell_dim_1_cell_data;
+                        
+                        // Filter in the y-direction.
+                        f_filtered[idx] = a_G*f[idx_cell_data] + 
+                            b_G*(f[idx_cell_data_y_B]    + f[idx_cell_data_y_T]) +
+                            c_G*(f[idx_cell_data_y_BB]   + f[idx_cell_data_y_TT]) +
+                            d_G*(f[idx_cell_data_y_BBB]  + f[idx_cell_data_y_TTT]) +
+                            e_G*(f[idx_cell_data_y_BBBB] + f[idx_cell_data_y_TTTT]);
+                    }
+                }
+            }
+        }
+    }
+    else if (d_direction == DIRECTION::Z_DIRECTION)
     {
         /*
          * Get the local lower indices, numbers of cells in each dimension and offsets.
@@ -299,102 +551,6 @@ FilterTruncatedGaussian::applyFilter(
                         (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
                             ghostcell_dim_1_cell_data;
                     
-                    const int idx_cell_data_x_LLLL = (i - 4 + offset_0_cell_data) +
-                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
-                        (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
-                            ghostcell_dim_1_cell_data;
-                    
-                    const int idx_cell_data_x_LLL = (i - 3 + offset_0_cell_data) +
-                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
-                        (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
-                            ghostcell_dim_1_cell_data;
-                    
-                    const int idx_cell_data_x_LL = (i - 2 + offset_0_cell_data) +
-                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
-                        (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
-                            ghostcell_dim_1_cell_data;
-                    
-                    const int idx_cell_data_x_L = (i - 1 + offset_0_cell_data) +
-                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
-                        (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
-                            ghostcell_dim_1_cell_data;
-                    
-                    const int idx_cell_data_x_R = (i + 1 + offset_0_cell_data) +
-                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
-                        (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
-                            ghostcell_dim_1_cell_data;
-                    
-                    const int idx_cell_data_x_RR = (i + 2 + offset_0_cell_data) +
-                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
-                        (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
-                            ghostcell_dim_1_cell_data;
-                    
-                    const int idx_cell_data_x_RRR = (i + 3 + offset_0_cell_data) +
-                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
-                        (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
-                            ghostcell_dim_1_cell_data;
-                    
-                    const int idx_cell_data_x_RRRR = (i + 4 + offset_0_cell_data) +
-                        (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
-                        (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
-                            ghostcell_dim_1_cell_data;
-                    
-                    // Filter in the x-direction.
-                    f_filtered[idx] = a_G*f[idx_cell_data] + 
-                        b_G*(f[idx_cell_data_x_L]    + f[idx_cell_data_x_R]) +
-                        c_G*(f[idx_cell_data_x_LL]   + f[idx_cell_data_x_RR]) +
-                        d_G*(f[idx_cell_data_x_LLL]  + f[idx_cell_data_x_RRR]) +
-                        e_G*(f[idx_cell_data_x_LLLL] + f[idx_cell_data_x_RRRR]);
-                    
-                    // Compute the linear indices.
-                    const int idx_cell_data_y_BBBB = (i + offset_0_cell_data) +
-                        (j - 4 + offset_1_cell_data)*ghostcell_dim_0_cell_data +
-                        (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
-                            ghostcell_dim_1_cell_data;
-                    
-                    const int idx_cell_data_y_BBB = (i + offset_0_cell_data) +
-                        (j - 3 + offset_1_cell_data)*ghostcell_dim_0_cell_data +
-                        (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
-                            ghostcell_dim_1_cell_data;
-                    
-                    const int idx_cell_data_y_BB = (i + offset_0_cell_data) +
-                        (j - 2 + offset_1_cell_data)*ghostcell_dim_0_cell_data +
-                        (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
-                            ghostcell_dim_1_cell_data;
-                    
-                    const int idx_cell_data_y_B = (i + offset_0_cell_data) +
-                        (j - 1 + offset_1_cell_data)*ghostcell_dim_0_cell_data +
-                        (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
-                            ghostcell_dim_1_cell_data;
-                    
-                    const int idx_cell_data_y_T = (i + offset_0_cell_data) +
-                        (j + 1 + offset_1_cell_data)*ghostcell_dim_0_cell_data +
-                        (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
-                            ghostcell_dim_1_cell_data;
-                    
-                    const int idx_cell_data_y_TT = (i + offset_0_cell_data) +
-                        (j + 2 + offset_1_cell_data)*ghostcell_dim_0_cell_data +
-                        (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
-                            ghostcell_dim_1_cell_data;
-                    
-                    const int idx_cell_data_y_TTT = (i + offset_0_cell_data) +
-                        (j + 3 + offset_1_cell_data)*ghostcell_dim_0_cell_data +
-                        (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
-                            ghostcell_dim_1_cell_data;
-                    
-                    const int idx_cell_data_y_TTTT = (i + offset_0_cell_data) +
-                        (j + 4 + offset_1_cell_data)*ghostcell_dim_0_cell_data +
-                        (k + offset_2_cell_data)*ghostcell_dim_0_cell_data*
-                            ghostcell_dim_1_cell_data;
-                    
-                    // Filter in the y-direction.
-                    f_filtered[idx] = a_G*f[idx_cell_data] + 
-                        b_G*(f[idx_cell_data_y_B]    + f[idx_cell_data_y_T]) +
-                        c_G*(f[idx_cell_data_y_BB]   + f[idx_cell_data_y_TT]) +
-                        d_G*(f[idx_cell_data_y_BBB]  + f[idx_cell_data_y_TTT]) +
-                        e_G*(f[idx_cell_data_y_BBBB] + f[idx_cell_data_y_TTTT]);
-                    
-                    // Compute the linear indices.
                     const int idx_cell_data_z_BBBB = (i + offset_0_cell_data) +
                         (j + offset_1_cell_data)*ghostcell_dim_0_cell_data +
                         (k - 4 + offset_2_cell_data)*ghostcell_dim_0_cell_data*
