@@ -648,7 +648,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill1dNodeBoundaryData(
                         
                         Q[0][idx_cell_rho] = Q[0][idx_cell_pivot_rho];
                         Q[1][idx_cell_mom] = -Q[1][idx_cell_pivot_mom] +
-                            2.0*Q[0][idx_cell_pivot_rho]*d_bdry_node_adiabatic_no_slip_vel[node_loc];
+                            double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_node_adiabatic_no_slip_vel[node_loc];
                         
                         /*
                          * Set the values for total internal energy.
@@ -745,7 +745,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill1dNodeBoundaryData(
                                 &p_pivot,
                                 thermo_properties_ptr);
                         
-                        double T = -T_pivot + 2.0*d_bdry_node_isothermal_no_slip_T[node_loc];
+                        double T = -T_pivot + double(2)*d_bdry_node_isothermal_no_slip_T[node_loc];
                         
                         double rho = d_equation_of_state_mixing_rules->getEquationOfState()->
                             getDensity(
@@ -754,7 +754,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill1dNodeBoundaryData(
                                 thermo_properties_ptr);
                         
                         double u = -Q[1][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                            2.0*d_bdry_node_isothermal_no_slip_vel[node_loc];
+                            double(2)*d_bdry_node_isothermal_no_slip_vel[node_loc];
                         
                         Q[0][idx_cell_rho] = rho;
                         Q[1][idx_cell_mom] = rho*u;
@@ -1034,9 +1034,9 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                             
                             Q[0][idx_cell_rho] = Q[0][idx_cell_pivot_rho];
                             Q[1][idx_cell_mom] = -Q[1][idx_cell_pivot_mom] +
-                                2.0*Q[0][idx_cell_pivot_rho]*d_bdry_edge_adiabatic_no_slip_vel[edge_loc*2];
+                                double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_edge_adiabatic_no_slip_vel[edge_loc*2];
                             Q[2][idx_cell_mom] = -Q[2][idx_cell_pivot_mom] +
-                                2.0*Q[0][idx_cell_pivot_rho]*d_bdry_edge_adiabatic_no_slip_vel[edge_loc*2 + 1];
+                                double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_edge_adiabatic_no_slip_vel[edge_loc*2 + 1];
                             
                             /*
                              * Set the values for total internal energy.
@@ -1193,7 +1193,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                     &p_pivot,
                                     thermo_properties_ptr);
                             
-                            double T = -T_pivot + 2.0*d_bdry_edge_isothermal_no_slip_T[edge_loc];
+                            double T = -T_pivot + double(2)*d_bdry_edge_isothermal_no_slip_T[edge_loc];
                             
                             double rho = d_equation_of_state_mixing_rules->getEquationOfState()->
                                 getDensity(
@@ -1202,9 +1202,9 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                     thermo_properties_ptr);
                             
                             double u = -Q[1][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                2.0*d_bdry_edge_isothermal_no_slip_vel[edge_loc*2];
+                                double(2)*d_bdry_edge_isothermal_no_slip_vel[edge_loc*2];
                             double v = -Q[2][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                2.0*d_bdry_edge_isothermal_no_slip_vel[edge_loc*2 + 1];
+                                double(2)*d_bdry_edge_isothermal_no_slip_vel[edge_loc*2 + 1];
                             
                             Q[0][idx_cell_rho] = rho;
                             Q[1][idx_cell_mom] = rho*u;
@@ -1230,9 +1230,16 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                 }
                 else if (bdry_edge_conds[edge_loc] == BDRY_COND::FLOW_MODEL::NONREFLECTING_OUTFLOW)
                 {
+                    // Follow the method in
+                    // Motheau, Emmanuel, Ann Almgren, and John B. Bell.
+                    // "Navier–stokes characteristic boundary conditions using ghost cells."
+                    // AIAA Journal (2017): 3399-3408.
+                    
                     if (edge_loc == BDRY_LOC::XLO)
                     {
-                        TBOX_ERROR("Non-reflecting BC is not implemented at left boundary");
+                        TBOX_ERROR(d_object_name
+                            << ": FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData()\n"
+                            << "Non-reflecting outflow BC is not implemented at the left boundary yet!");
                     }
                     else if (edge_loc == BDRY_LOC::XHI)
                     {
@@ -1240,7 +1247,9 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                         TBOX_ASSERT(fill_box_lo_idx[0] == interior_box_hi_idx[0] + 1);
                         if (num_ghosts_to_fill > 4)
                         {
-                            TBOX_ERROR("Non-reflecting BC doesn't support more than four ghost cells!");
+                            TBOX_ERROR(d_object_name
+                                << ": FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData()\n"
+                                << "Non-reflecting outflow BC doesn't support more than four ghost cells yet!");
                         }
                         
                         for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
@@ -1249,133 +1258,198 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                             const double* const dx = patch_geom->getDx();
                             
                             // Compute one-sided derivatives in x-direction.
-                            const int idx_cell_rho_L = (interior_box_hi_idx[0] + num_subghosts_conservative_var[0][0]) +
+                            const int idx_cell_rho_x_L = (interior_box_hi_idx[0] + num_subghosts_conservative_var[0][0]) +
                                 (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
                             
-                            const int idx_cell_rho_LL = (interior_box_hi_idx[0] - 1 + num_subghosts_conservative_var[0][0]) +
+                            const int idx_cell_rho_x_LL = (interior_box_hi_idx[0] - 1 + num_subghosts_conservative_var[0][0]) +
                                 (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
                             
-                            const int idx_cell_rho_LLL = (interior_box_hi_idx[0] - 2 + num_subghosts_conservative_var[0][0]) +
+                            const int idx_cell_rho_x_LLL = (interior_box_hi_idx[0] - 2 + num_subghosts_conservative_var[0][0]) +
                                 (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
                             
-                            const int idx_cell_mom_L = (interior_box_hi_idx[0] + num_subghosts_conservative_var[1][0]) +
+                            const int idx_cell_mom_x_L = (interior_box_hi_idx[0] + num_subghosts_conservative_var[1][0]) +
                                 (j + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
                             
-                            const int idx_cell_mom_LL = (interior_box_hi_idx[0] - 1 + num_subghosts_conservative_var[1][0]) +
+                            const int idx_cell_mom_x_LL = (interior_box_hi_idx[0] - 1 + num_subghosts_conservative_var[1][0]) +
                                 (j + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
                             
-                            const int idx_cell_mom_LLL = (interior_box_hi_idx[0] - 2 + num_subghosts_conservative_var[1][0]) +
+                            const int idx_cell_mom_x_LLL = (interior_box_hi_idx[0] - 2 + num_subghosts_conservative_var[1][0]) +
                                 (j + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
                             
-                            const int idx_cell_E_L = (interior_box_hi_idx[0] + num_subghosts_conservative_var[2][0]) +
+                            const int idx_cell_E_x_L = (interior_box_hi_idx[0] + num_subghosts_conservative_var[2][0]) +
                                 (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
                             
-                            const int idx_cell_E_LL = (interior_box_hi_idx[0] - 1 + num_subghosts_conservative_var[2][0]) +
+                            const int idx_cell_E_x_LL = (interior_box_hi_idx[0] - 1 + num_subghosts_conservative_var[2][0]) +
                                 (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
                             
-                            const int idx_cell_E_LLL = (interior_box_hi_idx[0] - 2 + num_subghosts_conservative_var[2][0]) +
+                            const int idx_cell_E_x_LLL = (interior_box_hi_idx[0] - 2 + num_subghosts_conservative_var[2][0]) +
                                 (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
                             
-                            const double& rho_L   = Q[0][idx_cell_rho_L];
-                            const double& rho_LL  = Q[0][idx_cell_rho_LL];
-                            const double& rho_LLL = Q[0][idx_cell_rho_LLL];
+                            const double& rho_x_L   = Q[0][idx_cell_rho_x_L];
+                            const double& rho_x_LL  = Q[0][idx_cell_rho_x_LL];
+                            const double& rho_x_LLL = Q[0][idx_cell_rho_x_LLL];
                             
-                            const double u_L   = Q[1][idx_cell_mom_L]/rho_L;
-                            const double u_LL  = Q[1][idx_cell_mom_LL]/rho_LL;
-                            const double u_LLL = Q[1][idx_cell_mom_LLL]/rho_LLL;
+                            const double u_x_L   = Q[1][idx_cell_mom_x_L]/rho_x_L;
+                            const double u_x_LL  = Q[1][idx_cell_mom_x_LL]/rho_x_LL;
+                            const double u_x_LLL = Q[1][idx_cell_mom_x_LLL]/rho_x_LLL;
                             
-                            const double v_L   = Q[2][idx_cell_mom_L]/rho_L;
-                            const double v_LL  = Q[2][idx_cell_mom_LL]/rho_LL;
-                            const double v_LLL = Q[2][idx_cell_mom_LLL]/rho_LLL;
+                            const double v_x_L   = Q[2][idx_cell_mom_x_L]/rho_x_L;
+                            const double v_x_LL  = Q[2][idx_cell_mom_x_LL]/rho_x_LL;
+                            const double v_x_LLL = Q[2][idx_cell_mom_x_LLL]/rho_x_LLL;
                             
-                            const double epsilon_L = Q[3][idx_cell_E_L]/rho_L -
-                                0.5*(u_L*u_L + v_L*v_L);
+                            const double half = double(1)/double(2);
+                            const double epsilon_x_L   = Q[3][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L);
+                            const double epsilon_x_LL  = Q[3][idx_cell_E_x_LL]/rho_x_LL - half*(u_x_LL*u_x_LL + v_x_LL*v_x_LL);
+                            const double epsilon_x_LLL = Q[3][idx_cell_E_x_LLL]/rho_x_LLL - half*(u_x_LLL*u_x_LLL + v_x_LLL*v_x_LLL);
                             
-                            const double epsilon_LL = Q[3][idx_cell_E_LL]/rho_LL -
-                                0.5*(u_LL*u_LL + v_LL*v_LL);
-                            
-                            const double epsilon_LLL = Q[3][idx_cell_E_LLL]/rho_LLL -
-                                0.5*(u_LLL*u_LLL + v_LLL*v_LLL);
-                            
-                            const double p_L = d_equation_of_state_mixing_rules->getEquationOfState()->
+                            const double p_x_L = d_equation_of_state_mixing_rules->getEquationOfState()->
                                 getPressure(
-                                    &rho_L,
-                                    &epsilon_L,
+                                    &rho_x_L,
+                                    &epsilon_x_L,
                                     thermo_properties_ptr);
                             
-                            const double p_LL = d_equation_of_state_mixing_rules->getEquationOfState()->
+                            const double p_x_LL = d_equation_of_state_mixing_rules->getEquationOfState()->
                                 getPressure(
-                                    &rho_LL,
-                                    &epsilon_LL,
+                                    &rho_x_LL,
+                                    &epsilon_x_LL,
                                     thermo_properties_ptr);
                             
-                            const double p_LLL = d_equation_of_state_mixing_rules->getEquationOfState()->
+                            const double p_x_LLL = d_equation_of_state_mixing_rules->getEquationOfState()->
                                 getPressure(
-                                    &rho_LLL,
-                                    &epsilon_LLL,
+                                    &rho_x_LLL,
+                                    &epsilon_x_LLL,
                                     thermo_properties_ptr);
                             
-                            const double drho_dx = (rho_LLL - 4.0*rho_LL + 3.0*rho_L)/(2.0*dx[0]);
-                            const double du_dx   = (u_LLL - 4.0*u_LL + 3.0*u_L)/(2.0*dx[0]);
-                            const double dv_dx   = (v_LLL - 4.0*v_LL + 3.0*v_L)/(2.0*dx[0]);
-                            const double dp_dx   = (p_LLL - 4.0*p_LL + 3.0*p_L)/(2.0*dx[0]);
+                            const double drho_dx = (rho_x_LLL - double(4)*rho_x_LL + double(3)*rho_x_L)/(double(2)*dx[0]);
+                            const double du_dx   = (u_x_LLL - double(4)*u_x_LL + double(3)*u_x_L)/(double(2)*dx[0]);
+                            const double dv_dx   = (v_x_LLL - double(4)*v_x_LL + double(3)*v_x_L)/(double(2)*dx[0]);
+                            const double dp_dx   = (p_x_LLL - double(4)*p_x_LL + double(3)*p_x_L)/(double(2)*dx[0]);
                             
                             // Compute derivatives in y-direction.
-                            const int idx_cell_rho_y_B = (interior_box_hi_idx[0] + num_subghosts_conservative_var[0][0]) +
-                                (j - 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
                             
-                            const int idx_cell_rho_y_T = (interior_box_hi_idx[0] + num_subghosts_conservative_var[0][0]) +
-                                (j + 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
+                            double du_dy = double(0);
+                            double dv_dy = double(0);
+                            double dp_dy = double(0);
                             
-                            const int idx_cell_mom_y_B = (interior_box_hi_idx[0] + num_subghosts_conservative_var[1][0]) +
-                                (j - 1 + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
-                            
-                            const int idx_cell_mom_y_T = (interior_box_hi_idx[0] + num_subghosts_conservative_var[1][0]) +
-                                (j + 1 + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
-                            
-                            const int idx_cell_E_y_B = (interior_box_hi_idx[0] + num_subghosts_conservative_var[2][0]) +
-                                (j - 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
-                            
-                            const int idx_cell_E_y_T = (interior_box_hi_idx[0] + num_subghosts_conservative_var[2][0]) +
-                                (j + 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
-                            
-                            const double u_y_B = Q[1][idx_cell_mom_y_B]/Q[0][idx_cell_rho_y_B];
-                            const double u_y_T = Q[1][idx_cell_mom_y_T]/Q[0][idx_cell_rho_y_T];
-                            
-                            const double v_y_B = Q[2][idx_cell_mom_y_B]/Q[0][idx_cell_rho_y_B];
-                            const double v_y_T = Q[2][idx_cell_mom_y_T]/Q[0][idx_cell_rho_y_T];
-                            
-                            const double epsilon_y_B = Q[3][idx_cell_E_y_B]/Q[0][idx_cell_rho_y_B] -
-                                0.5*(u_y_B*u_y_B + v_y_B*v_y_B);
-                            
-                            const double epsilon_y_T = Q[3][idx_cell_E_y_T]/Q[0][idx_cell_rho_y_T] -
-                                0.5*(u_y_T*u_y_T + v_y_T*v_y_T);
-                            
-                            const double p_y_B = d_equation_of_state_mixing_rules->getEquationOfState()->
-                                getPressure(
-                                    &Q[0][idx_cell_rho_y_B],
-                                    &epsilon_y_B,
-                                    thermo_properties_ptr);
-
-                            const double p_y_T = d_equation_of_state_mixing_rules->getEquationOfState()->
-                                getPressure(
-                                    &Q[0][idx_cell_rho_y_T],
-                                    &epsilon_y_T,
-                                    thermo_properties_ptr);
-                            
-                            const double du_dy = (u_y_T - u_y_B)/(2.0*dx[1]);
-                            const double dv_dy = (v_y_T - v_y_B)/(2.0*dx[1]);
-                            const double dp_dy = (p_y_T - p_y_B)/(2.0*dx[1]);
+                            if ((patch_geom->getTouchesRegularBoundary(1, 0)) &&
+                                (j == interior_box_lo_idx[1]))
+                            {
+                                // Patch is touching bottom physical boundary.
+                                
+                                const int idx_cell_rho_y_T = (interior_box_hi_idx[0] + num_subghosts_conservative_var[0][0]) +
+                                    (j + 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
+                                
+                                const int idx_cell_mom_y_T = (interior_box_hi_idx[0] + num_subghosts_conservative_var[1][0]) +
+                                    (j + 1 + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
+                                
+                                const int idx_cell_E_y_T = (interior_box_hi_idx[0] + num_subghosts_conservative_var[2][0]) +
+                                    (j + 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
+                                
+                                const double& rho_y_T = Q[0][idx_cell_rho_y_T];
+                                const double u_y_T = Q[1][idx_cell_mom_y_T]/rho_y_T;
+                                const double v_y_T = Q[2][idx_cell_mom_y_T]/rho_y_T;
+                                const double epsilon_y_T = Q[3][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T);
+                                
+                                const double p_y_T = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                    getPressure(
+                                        &rho_y_T,
+                                        &epsilon_y_T,
+                                        thermo_properties_ptr);
+                                
+                                // One-sided derivatives.
+                                du_dy = (u_y_T - u_x_L)/(dx[1]);
+                                dv_dy = (v_y_T - v_x_L)/(dx[1]);
+                                dp_dy = (p_y_T - p_x_L)/(dx[1]);
+                            }
+                            else if ((patch_geom->getTouchesRegularBoundary(1, 1)) &&
+                                     (j == interior_box_hi_idx[1]))
+                            {
+                                // Patch is touching top physical boundary.
+                                
+                                const int idx_cell_rho_y_B = (interior_box_hi_idx[0] + num_subghosts_conservative_var[0][0]) +
+                                    (j - 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
+                                
+                                const int idx_cell_mom_y_B = (interior_box_hi_idx[0] + num_subghosts_conservative_var[1][0]) +
+                                    (j - 1 + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
+                                
+                                const int idx_cell_E_y_B = (interior_box_hi_idx[0] + num_subghosts_conservative_var[2][0]) +
+                                    (j - 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
+                                
+                                const double& rho_y_B = Q[0][idx_cell_rho_y_B];
+                                const double u_y_B = Q[1][idx_cell_mom_y_B]/rho_y_B;
+                                const double v_y_B = Q[2][idx_cell_mom_y_B]/rho_y_B;
+                                const double epsilon_y_B = Q[3][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B);
+                                
+                                const double p_y_B = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                    getPressure(
+                                        &rho_y_B,
+                                        &epsilon_y_B,
+                                        thermo_properties_ptr);
+                                
+                                // One-sided derivatives.
+                                du_dy = (u_x_L - u_y_B)/(dx[1]);
+                                dv_dy = (v_x_L - v_y_B)/(dx[1]);
+                                dp_dy = (p_x_L - p_y_B)/(dx[1]);
+                            }
+                            else
+                            {
+                                const int idx_cell_rho_y_B = (interior_box_hi_idx[0] + num_subghosts_conservative_var[0][0]) +
+                                    (j - 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
+                                
+                                const int idx_cell_rho_y_T = (interior_box_hi_idx[0] + num_subghosts_conservative_var[0][0]) +
+                                    (j + 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
+                                
+                                const int idx_cell_mom_y_B = (interior_box_hi_idx[0] + num_subghosts_conservative_var[1][0]) +
+                                    (j - 1 + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
+                                
+                                const int idx_cell_mom_y_T = (interior_box_hi_idx[0] + num_subghosts_conservative_var[1][0]) +
+                                    (j + 1 + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
+                                
+                                const int idx_cell_E_y_B = (interior_box_hi_idx[0] + num_subghosts_conservative_var[2][0]) +
+                                    (j - 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
+                                
+                                const int idx_cell_E_y_T = (interior_box_hi_idx[0] + num_subghosts_conservative_var[2][0]) +
+                                    (j + 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
+                                
+                                const double& rho_y_B = Q[0][idx_cell_rho_y_B];
+                                const double& rho_y_T = Q[0][idx_cell_rho_y_T];
+                                
+                                const double u_y_B = Q[1][idx_cell_mom_y_B]/rho_y_B;
+                                const double u_y_T = Q[1][idx_cell_mom_y_T]/rho_y_T;
+                                
+                                const double v_y_B = Q[2][idx_cell_mom_y_B]/rho_y_B;
+                                const double v_y_T = Q[2][idx_cell_mom_y_T]/rho_y_T;
+                                
+                                const double epsilon_y_B = Q[3][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B);
+                                const double epsilon_y_T = Q[3][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T);
+                                
+                                const double p_y_B = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                    getPressure(
+                                        &rho_y_B,
+                                        &epsilon_y_B,
+                                        thermo_properties_ptr);
+                                
+                                const double p_y_T = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                    getPressure(
+                                        &rho_y_T,
+                                        &epsilon_y_T,
+                                        thermo_properties_ptr);
+                                
+                                // Central derivatives.
+                                du_dy = (u_y_T - u_y_B)/(double(2)*dx[1]);
+                                dv_dy = (v_y_T - v_y_B)/(double(2)*dx[1]);
+                                dp_dy = (p_y_T - p_y_B)/(double(2)*dx[1]);
+                            }
                             
                             // Compute wave speed (u - c) at the boundary.
                             
-                            const double c_L = d_equation_of_state_mixing_rules->getEquationOfState()->
+                            const double c_x_L = d_equation_of_state_mixing_rules->getEquationOfState()->
                                 getSoundSpeed(
-                                    &rho_L,
-                                    &p_L,
+                                    &rho_x_L,
+                                    &p_x_L,
                                     thermo_properties_ptr);
                             
-                            const double lambda_1 = u_L - c_L;
+                            const double lambda_1 = u_x_L - c_x_L;
                             
                             // Compute vector Lambda^(-1) * L.
                             
@@ -1386,27 +1460,27 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                             const double& beta        = d_bdry_edge_nonreflecting_outflow_beta[edge_loc];
                             const double& length_char = d_bdry_edge_nonreflecting_outflow_length_char[edge_loc];
                             
-                            const double T_1 = v_L*(dp_dy - Q[0][idx_cell_rho_L]*c_L*du_dy) + Q[0][idx_cell_rho_L]*c_L*c_L*dv_dy;
+                            const double T_1 = v_x_L*(dp_dy - rho_x_L*c_x_L*du_dy) + rho_x_L*c_x_L*c_x_L*dv_dy;
                             
-                            const double M_sq = (u_L*u_L + v_L*v_L)/(c_L*c_L);
-                            const double K = sigma*c_L*(1.0 - M_sq)/length_char;
+                            const double M_sq = (u_x_L*u_x_L + v_x_L*v_x_L)/(c_x_L*c_x_L);
+                            const double K = sigma*c_x_L*(double(1) - M_sq)/length_char;
                             
-                            Lambda_inv_L[0] = (1.0/lambda_1)*(K*(p_L - p_t) - (1.0 - beta)*T_1);
-                            Lambda_inv_L[1] = c_L*c_L*drho_dx - dp_dx;
+                            Lambda_inv_L[0] = (double(1)/lambda_1)*(K*(p_x_L - p_t) - (double(1) - beta)*T_1);
+                            Lambda_inv_L[1] = c_x_L*c_x_L*drho_dx - dp_dx;
                             Lambda_inv_L[2] = dv_dx;
-                            Lambda_inv_L[3] = dp_dx + Q[0][idx_cell_rho_L]*c_L*du_dx;
+                            Lambda_inv_L[3] = dp_dx + rho_x_L*c_x_L*du_dx;
                             
                             // Compute dV_dx.
                             
-                            const double c_sq_inv = 1.0/(c_L*c_L);
-                            const double rho_c_inv = 1.0/(Q[0][idx_cell_rho_L]*c_L);
+                            const double c_sq_inv  = double(1)/(c_x_L*c_x_L);
+                            const double rho_c_inv = double(1)/(rho_x_L*c_x_L);
                             
                             double dV_dx[4];
                             
-                            dV_dx[0] = 0.5*c_sq_inv*(Lambda_inv_L[0] + Lambda_inv_L[3]) + c_sq_inv*Lambda_inv_L[1];
-                            dV_dx[1] = 0.5*rho_c_inv*(-Lambda_inv_L[0] + Lambda_inv_L[3]);
+                            dV_dx[0] = half*c_sq_inv*(Lambda_inv_L[0] + Lambda_inv_L[3]) + c_sq_inv*Lambda_inv_L[1];
+                            dV_dx[1] = half*rho_c_inv*(-Lambda_inv_L[0] + Lambda_inv_L[3]);
                             dV_dx[2] = Lambda_inv_L[2];
-                            dV_dx[3] = 0.5*(Lambda_inv_L[0] + Lambda_inv_L[3]);
+                            dV_dx[3] = half*(Lambda_inv_L[0] + Lambda_inv_L[3]);
                             
                             double V_ghost[4*num_ghosts_to_fill];
                             
@@ -1426,31 +1500,60 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                 
                                 if (i == 0)
                                 {
-                                    V_ghost[i*4 + 0] = rho_LL + 2.0*dx[0]*dV_dx[0];
-                                    V_ghost[i*4 + 1] = u_LL   + 2.0*dx[0]*dV_dx[1];
-                                    V_ghost[i*4 + 2] = v_LL   + 2.0*dx[0]*dV_dx[2];
-                                    V_ghost[i*4 + 3] = p_LL   + 2.0*dx[0]*dV_dx[3];
+                                    V_ghost[i*4 + 0] = rho_x_LL + double(2)*dx[0]*dV_dx[0];
+                                    V_ghost[i*4 + 1] = u_x_LL   + double(2)*dx[0]*dV_dx[1];
+                                    V_ghost[i*4 + 2] = v_x_LL   + double(2)*dx[0]*dV_dx[2];
+                                    V_ghost[i*4 + 3] = p_x_LL   + double(2)*dx[0]*dV_dx[3];
                                 }
                                 else if (i == 1)
                                 {
-                                    V_ghost[i*4 + 0] = -2.0*rho_LL - 3.0*rho_L + 6.0*V_ghost[(i - 1)*4 + 0] - 6.0*dx[0]*dV_dx[0];
-                                    V_ghost[i*4 + 1] = -2.0*u_LL   - 3.0*u_L   + 6.0*V_ghost[(i - 1)*4 + 1] - 6.0*dx[0]*dV_dx[1];
-                                    V_ghost[i*4 + 2] = -2.0*v_LL   - 3.0*v_L   + 6.0*V_ghost[(i - 1)*4 + 2] - 6.0*dx[0]*dV_dx[2];
-                                    V_ghost[i*4 + 3] = -2.0*p_LL   - 3.0*p_L   + 6.0*V_ghost[(i - 1)*4 + 3] - 6.0*dx[0]*dV_dx[3];
+                                    V_ghost[i*4 + 0] = -double(2)*rho_x_LL - double(3)*rho_x_L +
+                                        double(6)*V_ghost[(i - 1)*4 + 0] - double(6)*dx[0]*dV_dx[0];
+                                    
+                                    V_ghost[i*4 + 1] = -double(2)*u_x_LL - double(3)*u_x_L +
+                                        double(6)*V_ghost[(i - 1)*4 + 1] - double(6)*dx[0]*dV_dx[1];
+                                    
+                                    V_ghost[i*4 + 2] = -double(2)*v_x_LL - double(3)*v_x_L +
+                                        double(6)*V_ghost[(i - 1)*4 + 2] - double(6)*dx[0]*dV_dx[2];
+                                    
+                                    V_ghost[i*4 + 3] = -double(2)*p_x_LL - double(3)*p_x_L +
+                                        double(6)*V_ghost[(i - 1)*4 + 3] - double(6)*dx[0]*dV_dx[3];
                                 }
                                 else if (i == 2)
                                 {
-                                    V_ghost[i*4 + 0] = 3.0*rho_LL + 10.0*rho_L - 18.0*V_ghost[(i - 2)*4 + 0] + 6.0*V_ghost[(i - 1)*4 + 0] + 12.0*dx[0]*dV_dx[0];
-                                    V_ghost[i*4 + 1] = 3.0*u_LL   + 10.0*u_L   - 18.0*V_ghost[(i - 2)*4 + 1] + 6.0*V_ghost[(i - 1)*4 + 1] + 12.0*dx[0]*dV_dx[1];
-                                    V_ghost[i*4 + 2] = 3.0*v_LL   + 10.0*v_L   - 18.0*V_ghost[(i - 2)*4 + 2] + 6.0*V_ghost[(i - 1)*4 + 2] + 12.0*dx[0]*dV_dx[2];
-                                    V_ghost[i*4 + 3] = 3.0*p_LL   + 10.0*p_L   - 18.0*V_ghost[(i - 2)*4 + 3] + 6.0*V_ghost[(i - 1)*4 + 3] + 12.0*dx[0]*dV_dx[3];
+                                    V_ghost[i*4 + 0] = double(3)*rho_x_LL + double(10)*rho_x_L -
+                                        double(18)*V_ghost[(i - 2)*4 + 0] + double(6)*V_ghost[(i - 1)*4 + 0] +
+                                        double(12)*dx[0]*dV_dx[0];
+                                    
+                                    V_ghost[i*4 + 1] = double(3)*u_x_LL + double(10)*u_x_L -
+                                        double(18)*V_ghost[(i - 2)*4 + 1] + double(6)*V_ghost[(i - 1)*4 + 1] +
+                                        double(12)*dx[0]*dV_dx[1];
+                                    
+                                    V_ghost[i*4 + 2] = double(3)*v_x_LL + double(10)*v_x_L -
+                                        double(18)*V_ghost[(i - 2)*4 + 2] + double(6)*V_ghost[(i - 1)*4 + 2] +
+                                        double(12)*dx[0]*dV_dx[2];
+                                    
+                                    V_ghost[i*4 + 3] = double(3)*p_x_LL + double(10)*p_x_L -
+                                        double(18)*V_ghost[(i - 2)*4 + 3] + double(6)*V_ghost[(i - 1)*4 + 3] +
+                                        double(12)*dx[0]*dV_dx[3];
                                 }
                                 else if (i == 3)
                                 {
-                                    V_ghost[i*4 + 0] = -4.0*rho_LL - 65.0/3.0*rho_L + 40.0*V_ghost[(i - 3)*4 + 0] - 20.0*V_ghost[(i - 2)*4 + 0] + 20.0/3.0*V_ghost[(i - 1)*4 + 0] + 20.0*dx[0]*dV_dx[0];
-                                    V_ghost[i*4 + 1] = -4.0*u_LL   - 65.0/3.0*u_L   + 40.0*V_ghost[(i - 3)*4 + 1] - 20.0*V_ghost[(i - 2)*4 + 1] + 20.0/3.0*V_ghost[(i - 1)*4 + 1] + 20.0*dx[0]*dV_dx[1];
-                                    V_ghost[i*4 + 2] = -4.0*v_LL   - 65.0/3.0*v_L   + 40.0*V_ghost[(i - 3)*4 + 2] - 20.0*V_ghost[(i - 2)*4 + 2] + 20.0/3.0*V_ghost[(i - 1)*4 + 2] + 20.0*dx[0]*dV_dx[2];
-                                    V_ghost[i*4 + 3] = -4.0*p_LL   - 65.0/3.0*p_L   + 40.0*V_ghost[(i - 3)*4 + 3] - 20.0*V_ghost[(i - 2)*4 + 3] + 20.0/3.0*V_ghost[(i - 1)*4 + 3] + 20.0*dx[0]*dV_dx[3];
+                                    V_ghost[i*4 + 0] = -double(4)*rho_x_LL - double(65)/double(3)*rho_x_L +
+                                        double(40)*V_ghost[(i - 3)*4 + 0] - double(20)*V_ghost[(i - 2)*4 + 0] +
+                                        double(20)/double(3)*V_ghost[(i - 1)*4 + 0] + double(20)*dx[0]*dV_dx[0];
+                                    
+                                    V_ghost[i*4 + 1] = -double(4)*u_x_LL - double(65)/double(3)*u_x_L +
+                                        double(40)*V_ghost[(i - 3)*4 + 1] - double(20)*V_ghost[(i - 2)*4 + 1] +
+                                        double(20)/double(3)*V_ghost[(i - 1)*4 + 1] + double(20)*dx[0]*dV_dx[1];
+                                    
+                                    V_ghost[i*4 + 2] = -double(4)*v_x_LL - double(65)/double(3)*v_x_L +
+                                        double(40)*V_ghost[(i - 3)*4 + 2] - double(20)*V_ghost[(i - 2)*4 + 2] +
+                                        double(20)/double(3)*V_ghost[(i - 1)*4 + 2] + double(20)*dx[0]*dV_dx[2];
+                                    
+                                    V_ghost[i*4 + 3] = -double(4)*p_x_LL - double(65)/double(3)*p_x_L +
+                                        double(40)*V_ghost[(i - 3)*4 + 3] - double(20)*V_ghost[(i - 2)*4 + 3] +
+                                        double(20)/double(3)*V_ghost[(i - 1)*4 + 3] + double(20)*dx[0]*dV_dx[3];
                                 }
                                 
                                 Q[0][idx_cell_rho] = V_ghost[i*4 + 0];
@@ -1464,7 +1567,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                         thermo_properties_ptr);
                                 
                                 const double E = V_ghost[i*4 + 0]*epsilon +
-                                    0.5*(Q[1][idx_cell_mom]*Q[1][idx_cell_mom] + Q[2][idx_cell_mom]*Q[2][idx_cell_mom])/
+                                    half*(Q[1][idx_cell_mom]*Q[1][idx_cell_mom] + Q[2][idx_cell_mom]*Q[2][idx_cell_mom])/
                                         V_ghost[i*4 + 0];
                                 
                                 Q[3][idx_cell_E] = E;
@@ -1473,11 +1576,15 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                     }
                     else if (edge_loc == BDRY_LOC::YLO)
                     {
-                        TBOX_ERROR("Non-reflecting BC is not implemented at bottom boundary!");
+                        TBOX_ERROR(d_object_name
+                            << ": FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData()\n"
+                            << "Non-reflecting outflow BC is not implemented at the bottom boundary yet!");
                     }
                     else if (edge_loc == BDRY_LOC::YHI)
                     {
-                        TBOX_ERROR("Non-reflecting BC is not implemented at top boundary!");
+                        TBOX_ERROR(d_object_name
+                            << ": FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData()\n"
+                            << "Non-reflecting outflow BC is not implemented at the top boundary yet!");
                     }
                     
                     // Remove edge locations that have boundary conditions identified.
@@ -1746,9 +1853,9 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dNodeBoundaryData(
                             
                             Q[0][idx_cell_rho] = Q[0][idx_cell_pivot_rho];
                             Q[1][idx_cell_mom] = -Q[1][idx_cell_pivot_mom] +
-                                2.0*Q[0][idx_cell_pivot_rho]*d_bdry_edge_adiabatic_no_slip_vel[edge_loc_0*2];
+                                double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_edge_adiabatic_no_slip_vel[edge_loc_0*2];
                             Q[2][idx_cell_mom] = -Q[2][idx_cell_pivot_mom] +
-                                2.0*Q[0][idx_cell_pivot_rho]*d_bdry_edge_adiabatic_no_slip_vel[edge_loc_0*2 + 1];
+                                double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_edge_adiabatic_no_slip_vel[edge_loc_0*2 + 1];
                             
                             /*
                              * Set the values for total internal energy.
@@ -1854,9 +1961,9 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dNodeBoundaryData(
                             
                             Q[0][idx_cell_rho] = Q[0][idx_cell_pivot_rho];
                             Q[1][idx_cell_mom] = -Q[1][idx_cell_pivot_mom] +
-                                2.0*Q[0][idx_cell_pivot_rho]*d_bdry_edge_adiabatic_no_slip_vel[edge_loc_1*2];
+                                double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_edge_adiabatic_no_slip_vel[edge_loc_1*2];
                             Q[2][idx_cell_mom] = -Q[2][idx_cell_pivot_mom] +
-                                2.0*Q[0][idx_cell_pivot_rho]*d_bdry_edge_adiabatic_no_slip_vel[edge_loc_1*2 + 1];
+                                double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_edge_adiabatic_no_slip_vel[edge_loc_1*2 + 1];
                             
                             /*
                              * Set the values for total internal energy.
@@ -1979,7 +2086,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dNodeBoundaryData(
                                     &p_pivot,
                                     thermo_properties_ptr);
                             
-                            double T = -T_pivot + 2.0*d_bdry_edge_isothermal_no_slip_T[edge_loc_0];
+                            double T = -T_pivot + double(2)*d_bdry_edge_isothermal_no_slip_T[edge_loc_0];
                             
                             double rho = d_equation_of_state_mixing_rules->getEquationOfState()->
                                 getDensity(
@@ -1988,9 +2095,9 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dNodeBoundaryData(
                                     thermo_properties_ptr);
                             
                             double u = -Q[1][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                2.0*d_bdry_edge_isothermal_no_slip_vel[edge_loc_0*2];
+                                double(2)*d_bdry_edge_isothermal_no_slip_vel[edge_loc_0*2];
                             double v = -Q[2][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                2.0*d_bdry_edge_isothermal_no_slip_vel[edge_loc_0*2 + 1];
+                                double(2)*d_bdry_edge_isothermal_no_slip_vel[edge_loc_0*2 + 1];
                             
                             Q[0][idx_cell_rho] = rho;
                             Q[1][idx_cell_mom] = rho*u;
@@ -2094,7 +2201,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dNodeBoundaryData(
                                     &p_pivot,
                                     thermo_properties_ptr);
                             
-                            double T = -T_pivot + 2.0*d_bdry_edge_isothermal_no_slip_T[edge_loc_1];
+                            double T = -T_pivot + double(2)*d_bdry_edge_isothermal_no_slip_T[edge_loc_1];
                             
                             double rho = d_equation_of_state_mixing_rules->getEquationOfState()->
                                 getDensity(
@@ -2103,9 +2210,9 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dNodeBoundaryData(
                                     thermo_properties_ptr);
                             
                             double u = -Q[1][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                2.0*d_bdry_edge_isothermal_no_slip_vel[edge_loc_1*2];
+                                double(2)*d_bdry_edge_isothermal_no_slip_vel[edge_loc_1*2];
                             double v = -Q[2][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                2.0*d_bdry_edge_isothermal_no_slip_vel[edge_loc_1*2 + 1];
+                                double(2)*d_bdry_edge_isothermal_no_slip_vel[edge_loc_1*2 + 1];
                             
                             Q[0][idx_cell_rho] = rho;
                             Q[1][idx_cell_mom] = rho*u;
@@ -2487,11 +2594,11 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                 
                                 Q[0][idx_cell_rho] = Q[0][idx_cell_pivot_rho];
                                 Q[1][idx_cell_mom] = -Q[1][idx_cell_pivot_mom] +
-                                    2.0*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc*3];
+                                    double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc*3];
                                 Q[2][idx_cell_mom] = -Q[2][idx_cell_pivot_mom] +
-                                    2.0*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc*3 + 1];
+                                    double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc*3 + 1];
                                 Q[3][idx_cell_mom] = -Q[3][idx_cell_pivot_mom] +
-                                    2.0*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc*3 + 2];
+                                    double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc*3 + 2];
                                 
                                 /*
                                  * Set the values for total internal energy.
@@ -2751,7 +2858,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                         &p_pivot,
                                         thermo_properties_ptr);
                                 
-                                double T = -T_pivot + 2.0*d_bdry_face_isothermal_no_slip_T[face_loc];
+                                double T = -T_pivot + double(2)*d_bdry_face_isothermal_no_slip_T[face_loc];
                                 
                                 double rho = d_equation_of_state_mixing_rules->getEquationOfState()->
                                     getDensity(
@@ -2760,11 +2867,11 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                         thermo_properties_ptr);
                                 
                                 double u = -Q[1][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                    2.0*d_bdry_face_isothermal_no_slip_vel[face_loc*3];
+                                    double(2)*d_bdry_face_isothermal_no_slip_vel[face_loc*3];
                                 double v = -Q[2][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                    2.0*d_bdry_face_isothermal_no_slip_vel[face_loc*3 + 1];
+                                    double(2)*d_bdry_face_isothermal_no_slip_vel[face_loc*3 + 1];
                                 double w = -Q[3][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                    2.0*d_bdry_face_isothermal_no_slip_vel[face_loc*3 + 2];
+                                    double(2)*d_bdry_face_isothermal_no_slip_vel[face_loc*3 + 2];
                                 
                                 Q[0][idx_cell_rho] = rho;
                                 Q[1][idx_cell_mom] = rho*u;
@@ -3140,11 +3247,11 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dEdgeBoundaryData(
                                 
                                 Q[0][idx_cell_rho] = Q[0][idx_cell_pivot_rho];
                                 Q[1][idx_cell_mom] = -Q[1][idx_cell_pivot_mom] +
-                                    2.0*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_0*3];
+                                    double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_0*3];
                                 Q[2][idx_cell_mom] = -Q[2][idx_cell_pivot_mom] +
-                                    2.0*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_0*3 + 1];
+                                    double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_0*3 + 1];
                                 Q[3][idx_cell_mom] = -Q[3][idx_cell_pivot_mom] +
-                                    2.0*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_0*3 + 2];
+                                    double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_0*3 + 2];
                                 
                                 /*
                                  * Set the values for total internal energy.
@@ -3282,11 +3389,11 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dEdgeBoundaryData(
                                 
                                 Q[0][idx_cell_rho] = Q[0][idx_cell_pivot_rho];
                                 Q[1][idx_cell_mom] = -Q[1][idx_cell_pivot_mom] +
-                                    2.0*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_1*3];
+                                    double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_1*3];
                                 Q[2][idx_cell_mom] = -Q[2][idx_cell_pivot_mom] +
-                                    2.0*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_1*3 + 1];
+                                    double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_1*3 + 1];
                                 Q[3][idx_cell_mom] = -Q[3][idx_cell_pivot_mom] +
-                                    2.0*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_1*3 + 2];
+                                    double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_1*3 + 2];
                                 
                                 /*
                                  * Set the values for total internal energy.
@@ -3424,11 +3531,11 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dEdgeBoundaryData(
                                 
                                 Q[0][idx_cell_rho] = Q[0][idx_cell_pivot_rho];
                                 Q[1][idx_cell_mom] = -Q[1][idx_cell_pivot_mom] +
-                                    2.0*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_2*3];
+                                    double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_2*3];
                                 Q[2][idx_cell_mom] = -Q[2][idx_cell_pivot_mom] +
-                                    2.0*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_2*3 + 1];
+                                    double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_2*3 + 1];
                                 Q[3][idx_cell_mom] = -Q[3][idx_cell_pivot_mom] +
-                                    2.0*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_2*3 + 2];
+                                    double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_2*3 + 2];
                                 
                                 /*
                                  * Set the values for total internal energy.
@@ -3584,7 +3691,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dEdgeBoundaryData(
                                         &p_pivot,
                                         thermo_properties_ptr);
                                 
-                                double T = -T_pivot + 2.0*d_bdry_face_isothermal_no_slip_T[face_loc_0];
+                                double T = -T_pivot + double(2)*d_bdry_face_isothermal_no_slip_T[face_loc_0];
                                 
                                 double rho = d_equation_of_state_mixing_rules->getEquationOfState()->
                                     getDensity(
@@ -3593,11 +3700,11 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dEdgeBoundaryData(
                                         thermo_properties_ptr);
                                 
                                 double u = -Q[1][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_0*3];
+                                    double(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_0*3];
                                 double v = -Q[2][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_0*3 + 1];
+                                    double(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_0*3 + 1];
                                 double w = -Q[3][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_0*3 + 2];
+                                    double(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_0*3 + 2];
                                 
                                 Q[0][idx_cell_rho] = rho;
                                 Q[1][idx_cell_mom] = rho*u;
@@ -3733,7 +3840,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dEdgeBoundaryData(
                                         &p_pivot,
                                         thermo_properties_ptr);
                                 
-                                double T = -T_pivot + 2.0*d_bdry_face_isothermal_no_slip_T[face_loc_1];
+                                double T = -T_pivot + double(2)*d_bdry_face_isothermal_no_slip_T[face_loc_1];
                                 
                                 double rho = d_equation_of_state_mixing_rules->getEquationOfState()->
                                     getDensity(
@@ -3742,11 +3849,11 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dEdgeBoundaryData(
                                         thermo_properties_ptr);
                                 
                                 double u = -Q[1][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_1*3];
+                                    double(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_1*3];
                                 double v = -Q[2][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_1*3 + 1];
+                                    double(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_1*3 + 1];
                                 double w = -Q[3][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_1*3 + 2];
+                                    double(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_1*3 + 2];
                                 
                                 Q[0][idx_cell_rho] = rho;
                                 Q[1][idx_cell_mom] = rho*u;
@@ -3882,7 +3989,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dEdgeBoundaryData(
                                         &p_pivot,
                                         thermo_properties_ptr);
                                 
-                                double T = -T_pivot + 2.0*d_bdry_face_isothermal_no_slip_T[face_loc_2];
+                                double T = -T_pivot + double(2)*d_bdry_face_isothermal_no_slip_T[face_loc_2];
                                 
                                 double rho = d_equation_of_state_mixing_rules->getEquationOfState()->
                                     getDensity(
@@ -3891,11 +3998,11 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dEdgeBoundaryData(
                                         thermo_properties_ptr);
                                 
                                 double u = -Q[1][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_2*3];
+                                    double(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_2*3];
                                 double v = -Q[2][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_2*3 + 1];
+                                    double(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_2*3 + 1];
                                 double w = -Q[3][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_2*3 + 2];
+                                    double(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_2*3 + 2];
                                 
                                 Q[0][idx_cell_rho] = rho;
                                 Q[1][idx_cell_mom] = rho*u;
@@ -4251,11 +4358,11 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dNodeBoundaryData(
                                 
                                 Q[0][idx_cell_rho] = Q[0][idx_cell_pivot_rho];
                                 Q[1][idx_cell_mom] = -Q[1][idx_cell_pivot_mom] +
-                                    2.0*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_0*3];
+                                    double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_0*3];
                                 Q[2][idx_cell_mom] = -Q[2][idx_cell_pivot_mom] +
-                                    2.0*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_0*3 + 1];
+                                    double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_0*3 + 1];
                                 Q[3][idx_cell_mom] = -Q[3][idx_cell_pivot_mom] +
-                                    2.0*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_0*3 + 2];
+                                    double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_0*3 + 2];
                                 
                                 /*
                                  * Set the values for total internal energy.
@@ -4393,11 +4500,11 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dNodeBoundaryData(
                                 
                                 Q[0][idx_cell_rho] = Q[0][idx_cell_pivot_rho];
                                 Q[1][idx_cell_mom] = -Q[1][idx_cell_pivot_mom] +
-                                    2.0*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_1*3];
+                                    double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_1*3];
                                 Q[2][idx_cell_mom] = -Q[2][idx_cell_pivot_mom] +
-                                    2.0*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_1*3 + 1];
+                                    double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_1*3 + 1];
                                 Q[3][idx_cell_mom] = -Q[3][idx_cell_pivot_mom] +
-                                    2.0*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_1*3 + 2];
+                                    double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_1*3 + 2];
                                 
                                 /*
                                  * Set the values for total internal energy.
@@ -4535,11 +4642,11 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dNodeBoundaryData(
                                 
                                 Q[0][idx_cell_rho] = Q[0][idx_cell_pivot_rho];
                                 Q[1][idx_cell_mom] = -Q[1][idx_cell_pivot_mom] +
-                                    2.0*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_2*3];
+                                    double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_2*3];
                                 Q[2][idx_cell_mom] = -Q[2][idx_cell_pivot_mom] +
-                                    2.0*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_2*3 + 1];
+                                    double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_2*3 + 1];
                                 Q[3][idx_cell_mom] = -Q[3][idx_cell_pivot_mom] +
-                                    2.0*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_2*3 + 2];
+                                    double(2)*Q[0][idx_cell_pivot_rho]*d_bdry_face_adiabatic_no_slip_vel[face_loc_2*3 + 2];
                                 
                                 /*
                                  * Set the values for total internal energy.
@@ -4695,7 +4802,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dNodeBoundaryData(
                                         &p_pivot,
                                         thermo_properties_ptr);
                                 
-                                double T = -T_pivot + 2.0*d_bdry_face_isothermal_no_slip_T[face_loc_0];
+                                double T = -T_pivot + double(2)*d_bdry_face_isothermal_no_slip_T[face_loc_0];
                                 
                                 double rho = d_equation_of_state_mixing_rules->getEquationOfState()->
                                     getDensity(
@@ -4704,11 +4811,11 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dNodeBoundaryData(
                                         thermo_properties_ptr);
                                 
                                 double u = -Q[1][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_0*3];
+                                    double(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_0*3];
                                 double v = -Q[2][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_0*3 + 1];
+                                    double(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_0*3 + 1];
                                 double w = -Q[3][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_0*3 + 2];
+                                    double(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_0*3 + 2];
                                 
                                 Q[0][idx_cell_rho] = rho;
                                 Q[1][idx_cell_mom] = rho*u;
@@ -4844,7 +4951,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dNodeBoundaryData(
                                         &p_pivot,
                                         thermo_properties_ptr);
                                 
-                                double T = -T_pivot + 2.0*d_bdry_face_isothermal_no_slip_T[face_loc_1];
+                                double T = -T_pivot + double(2)*d_bdry_face_isothermal_no_slip_T[face_loc_1];
                                 
                                 double rho = d_equation_of_state_mixing_rules->getEquationOfState()->
                                     getDensity(
@@ -4853,11 +4960,11 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dNodeBoundaryData(
                                         thermo_properties_ptr);
                                 
                                 double u = -Q[1][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_1*3];
+                                    double(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_1*3];
                                 double v = -Q[2][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_1*3 + 1];
+                                    double(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_1*3 + 1];
                                 double w = -Q[3][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_1*3 + 2];
+                                    double(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_1*3 + 2];
                                 
                                 Q[0][idx_cell_rho] = rho;
                                 Q[1][idx_cell_mom] = rho*u;
@@ -4993,7 +5100,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dNodeBoundaryData(
                                         &p_pivot,
                                         thermo_properties_ptr);
                                 
-                                double T = -T_pivot + 2.0*d_bdry_face_isothermal_no_slip_T[face_loc_2];
+                                double T = -T_pivot + double(2)*d_bdry_face_isothermal_no_slip_T[face_loc_2];
                                 
                                 double rho = d_equation_of_state_mixing_rules->getEquationOfState()->
                                     getDensity(
@@ -5002,11 +5109,11 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dNodeBoundaryData(
                                         thermo_properties_ptr);
                                 
                                 double u = -Q[1][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_2*3];
+                                    double(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_2*3];
                                 double v = -Q[2][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_2*3 + 1];
+                                    double(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_2*3 + 1];
                                 double w = -Q[3][idx_cell_pivot_mom]/Q[0][idx_cell_pivot_rho] +
-                                    2.0*d_bdry_edge_isothermal_no_slip_vel[face_loc_2*3 + 2];
+                                    double(2)*d_bdry_edge_isothermal_no_slip_vel[face_loc_2*3 + 2];
                                 
                                 Q[0][idx_cell_rho] = rho;
                                 Q[1][idx_cell_mom] = rho*u;
@@ -6233,7 +6340,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::readIsothermalNoSlip(
     TBOX_ASSERT(db);
     TBOX_ASSERT(!db_name.empty());
     
-    double data_T = 0.0;
+    double data_T = double(0);
     std::vector<double> data_vel;
     
     if (db->keyExists("temperature"))
@@ -6323,10 +6430,10 @@ FlowModelBoundaryUtilitiesSingleSpecies::readNonreflectingOutflow(
     TBOX_ASSERT(db);
     TBOX_ASSERT(!db_name.empty());
     
-    double p_t = 0.0;
+    double p_t = double(0);
     double sigma = 0.25;
-    double beta = 0.0;
-    double length_char = 0.0;
+    double beta = double(0);
+    double length_char = double(0);
     
     if (db->keyExists("pressure_target"))
     {
