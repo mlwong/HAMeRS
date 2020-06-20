@@ -776,7 +776,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         }
         else if (statistical_quantity_key == "rR11_budget_filtered")
         {
-            outputBudgetReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
+            outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
                 "rR11_budget_filtered.dat",
                 patch_hierarchy,
                 data_context,
