@@ -41,6 +41,14 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
+         * Filter the variables required for computing statistics.
+         */
+        void
+        filterVariables(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
          * Output names of statistical quantities to output to a file.
          */
         void
@@ -58,6 +66,14 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const double output_time);
         
     private:
+        /*
+         * Set conservative variables to unfiltered value.
+         */
+        void
+        setConservativeVariablesToUnfilteredValues(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+            
         /*
          * Reset conservative variables to unfiltered value.
          */
@@ -87,16 +103,6 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const double output_time) const;
         
         /*
-         * Output averaged temperature with inhomogeneous x-direction to a file.
-         */
-        void
-        outputAveragedTemperatureWithInhomogeneousXDirection(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time) const;
-        
-        /*
          * Output averaged velocity component in x-direction with inhomogeneous x-direction to a file.
          */
         void
@@ -111,26 +117,6 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
          */
         void
         outputFavreAveragedVelocityXWithInhomogeneousXDirection(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time) const;
-        
-        /*
-         * Output averaged mass fraction (first species) with inhomogeneous x-direction to a file.
-         */
-        void
-        outputAveragedMassFractionWithInhomogeneousXDirection(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time) const;
-        
-        /*
-         * Output averaged mole fraction (first species) with inhomogeneous x-direction to a file.
-         */
-        void
-        outputAveragedMoleFractionWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
@@ -588,6 +574,141 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context) const;
         
+        /**************************************************************************************************
+         * For budgets on filtered variables.
+         *************************************************************************************************/
+         
+        /*
+         * Compute shear stress with only x direction as inhomogeneous direction.
+         */
+        void
+        computeShearStress(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Filter pressure.
+         */
+        void
+        filterPressure(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Filter shear stress.
+         */
+        void
+        filterShearStress(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Filter convective stress.
+         */
+        void
+        filterConvectiveStress(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute SFS stress.
+         */
+        void
+        computeStressSFS(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute Favre-filtered velocity.
+         */
+        void
+        computeFavreFilteredVelocity(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        // Helper functions.
+        
+        /*
+         * Compute averaged value with only x direction as inhomogeneous direction.
+         */
+        std::vector<double> getAveragedQuantityWithInhomogeneousXDirection(
+            boost::shared_ptr<pdat::CellVariable<double> >& variable_quantity,
+            const int component_idx,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute averaged value (on product of variables) with only x direction as inhomogeneous direction.
+         */
+        std::vector<double> getAveragedQuantityWithInhomogeneousXDirection(
+            std::vector<boost::shared_ptr<pdat::CellVariable<double> > >& variable_quantities,
+            const std::vector<int>& component_indices,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute averaged derivative of value with only x direction as inhomogeneous direction.
+         */
+        std::vector<double> getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+            boost::shared_ptr<pdat::CellVariable<double> >& variable_quantity,
+            const int component_idx,
+            const int derivative_direction,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute averaged derivative of value (on product of variables) with only x direction as inhomogeneous direction.
+         */
+        std::vector<double> getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+            std::vector<boost::shared_ptr<pdat::CellVariable<double> > >& variable_quantities,
+            const std::vector<int>& component_indices,
+            const int derivative_direction,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute correlation with only x direction as inhomogeneous direction.
+         */
+        std::vector<double> getQuantityCorrelationWithInhomogeneousXDirection(
+            std::vector<boost::shared_ptr<pdat::CellVariable<double> > >& variable_quantities,
+            const std::vector<int>& component_indices,
+            const std::vector<std::vector<double> >& averaged_quantities,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute correlation with only x direction as inhomogeneous direction.
+         */
+        std::vector<double> getQuantityCorrelationWithInhomogeneousXDirection(
+            std::vector<boost::shared_ptr<pdat::CellVariable<double> > >& variable_quantities,
+            const std::vector<int>& component_indices,
+            const std::vector<bool>& use_reciprocal,
+            const std::vector<std::vector<double> >& averaged_quantities,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute correlation with only x direction as inhomogeneous direction.
+         */
+        std::vector<double> getQuantityCorrelationWithInhomogeneousXDirection(
+            std::vector<boost::shared_ptr<pdat::CellVariable<double> > >& variable_quantities,
+            const std::vector<int>& component_indices,
+            const std::vector<bool>& use_reciprocal,
+            const std::vector<int>& derivative_directions,
+            const std::vector<std::vector<double> >& averaged_quantities,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Output budget of Reynolds normal stress in x-direction with inhomogeneous x-direction to a file.
+         */
+        void
+        outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
         /*
          * boost::shared_ptr to registered variables.
          */
@@ -599,6 +720,16 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_partial_density_filtered;
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_momentum_filtered;
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_total_energy_filtered;
+        
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_shear_stress_unfiltered;
+        
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_pressure_filtered;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_shear_stress_filtered;
+        
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_convective_stress_filtered;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_SFS_stress;
+        
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_velocity_Favre_filtered;
         
         /*
          * boost::shared_ptr to filters.

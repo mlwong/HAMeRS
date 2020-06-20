@@ -276,6 +276,7 @@ RungeKuttaLevelIntegrator::RungeKuttaLevelIntegrator(
     d_current(hier::VariableDatabase::getDatabase()->getContext("CURRENT")),
     d_new(hier::VariableDatabase::getDatabase()->getContext("NEW")),
     d_plot_context(d_current),
+    d_stats_tmp(hier::VariableDatabase::getDatabase()->getContext("STATS_TMP")),
     d_have_flux_on_level_zero(false),
     d_distinguish_mpi_reduction_costs(false)
 {
@@ -2316,7 +2317,11 @@ RungeKuttaLevelIntegrator::resetDataToPreadvanceState(
  * TEMPORARY:
  *             One factory is needed: SCRATCH.
  *             SCRATCH index is added to d_temp_var_scratch_data.
- *             
+ *
+ * STATISTICS:
+ *             Two factories is needed: SCRATCH, STATS_TMP.
+ *             SCRATCH index is added to d_stats_var_scratch_data.
+ *
  **************************************************************************************************
  */
 void
@@ -2746,16 +2751,42 @@ RungeKuttaLevelIntegrator::registerVariable(
             
             d_temp_var_scratch_data.setFlag(scr_id);
             
+            // /*
+            //  * Set boundary fill schedules for scratch data when data statistics are outputted.
+            //  */
+            
+            // boost::shared_ptr<hier::RefineOperator> refine_op; // NO_REFINE
+            // if (ghosts > hier::IntVector::getZero(ghosts.getDim()))
+            // {
+            //     d_fill_statistics->registerRefine(
+            //         scr_id, scr_id, scr_id, refine_op);
+            // }
+            
+            break;
+        }
+        case STATISTICS:
+        {
+            int scr_id = variable_db->registerVariableAndContext(
+                var,
+                d_scratch,
+                ghosts);
+            
+            int stats_tmp_id = variable_db->registerVariableAndContext(
+                var,
+                d_stats_tmp,
+                ghosts);
+            
+            d_stats_var_scratch_data.setFlag(scr_id);
+            
             /*
              * Set boundary fill schedules for scratch data when data statistics are outputted.
              */
             
-            boost::shared_ptr<hier::RefineOperator> refine_op; // NO_REFINE
-            if (ghosts > hier::IntVector::getZero(ghosts.getDim()))
-            {
-                d_fill_statistics->registerRefine(
-                    scr_id, scr_id, scr_id, refine_op);
-            }
+            boost::shared_ptr<hier::RefineOperator> refine_op(
+                transfer_geom->lookupRefineOperator(var, refine_name));
+            
+            d_fill_statistics->registerRefine(
+                scr_id, scr_id, stats_tmp_id, refine_op);
             
             break;
         }
@@ -3513,7 +3544,8 @@ RungeKuttaLevelIntegrator::outputDataStatistics(
             hierarchy->getPatchLevel(li));
         
         patch_level->allocatePatchData(d_saved_var_scratch_data, statistics_data_time);
-        patch_level->allocatePatchData(d_temp_var_scratch_data, statistics_data_time);
+        // patch_level->allocatePatchData(d_temp_var_scratch_data, statistics_data_time);
+        patch_level->allocatePatchData(d_stats_var_scratch_data, statistics_data_time);
     }
     
     d_patch_strategy->setDataContext(d_scratch);
@@ -3523,21 +3555,62 @@ RungeKuttaLevelIntegrator::outputDataStatistics(
         d_bdry_sched_advance[li]->fillData(statistics_data_time);
     }
     
-    // Filter conservative variables if necessary.
+    // Compute variables if necessary.
     
     d_patch_strategy->computeStatisticsVariables(hierarchy);
     
-    // Exchange halo values of filtered variables if necessary.
+    // Exchange halo values of variables if necessary.
     
     for (int li = 0; li < num_levels; li++)
     {
         boost::shared_ptr<hier::PatchLevel> patch_level(
             hierarchy->getPatchLevel(li));
         
-        boost::shared_ptr<xfer::RefineSchedule> fill_schedule = 
-            d_fill_statistics->createSchedule(
+        boost::shared_ptr<xfer::RefineSchedule> fill_schedule;
+        
+        if (li > 0)
+        {
+            fill_schedule = d_fill_statistics->createSchedule(
+                patch_level,
+                li - 1,
+                hierarchy);
+        }
+        else
+        {
+            fill_schedule = d_fill_statistics->createSchedule(
                 patch_level,
                 d_patch_strategy);
+        }
+        
+        fill_schedule->fillData(statistics_data_time);
+    }
+    
+    // Filter variables if necessary.
+    
+    d_patch_strategy->filterStatisticsVariables(hierarchy);
+    
+    // Exchange halo values of variables if necessary.
+    
+    for (int li = 0; li < num_levels; li++)
+    {
+        boost::shared_ptr<hier::PatchLevel> patch_level(
+            hierarchy->getPatchLevel(li));
+        
+        boost::shared_ptr<xfer::RefineSchedule> fill_schedule;
+        
+        if (li > 0)
+        {
+            fill_schedule = d_fill_statistics->createSchedule(
+                patch_level,
+                li - 1,
+                hierarchy);
+        }
+        else
+        {
+            fill_schedule = d_fill_statistics->createSchedule(
+                patch_level,
+                d_patch_strategy);
+        }
         
         fill_schedule->fillData(statistics_data_time);
     }
@@ -3553,7 +3626,8 @@ RungeKuttaLevelIntegrator::outputDataStatistics(
         boost::shared_ptr<hier::PatchLevel> patch_level(
             hierarchy->getPatchLevel(li));
         
-        patch_level->deallocatePatchData(d_temp_var_scratch_data);
+        patch_level->deallocatePatchData(d_stats_var_scratch_data);
+        // patch_level->deallocatePatchData(d_temp_var_scratch_data);
         patch_level->deallocatePatchData(d_saved_var_scratch_data);
     }
     

@@ -559,13 +559,19 @@ class RungeKuttaPatchStrategy:
            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy);
         
         /**
+         * Filter variables for computing the statistics of data.
+         */
+        virtual void
+        filterStatisticsVariables(
+           const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy);
+        
+        /**
          * Output the statistics of data.
          */
         virtual void
         outputDataStatistics(
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const double output_time);
-        
         
         /**
          * Return pointer to patch data context.

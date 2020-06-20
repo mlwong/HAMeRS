@@ -362,6 +362,17 @@ RungeKuttaPatchStrategy::computeStatisticsVariables(
 
 
 /**
+ * Filter variables for computing the statistics of data.
+ */
+void
+RungeKuttaPatchStrategy::filterStatisticsVariables(
+   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy)
+{
+   NULL_USE(patch_hierarchy);
+}
+
+
+/**
  * Output the statistics of data.
  */
 void

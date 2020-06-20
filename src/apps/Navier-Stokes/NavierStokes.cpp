@@ -3363,6 +3363,24 @@ NavierStokes::computeStatisticsVariables(
 
 
 /**
+ * Filter variables for computing the statistics of data.
+ */
+void
+NavierStokes::filterStatisticsVariables(
+   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy)
+{
+    d_flow_model->setupStatisticsUtilities();
+    
+    boost::shared_ptr<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
+        d_flow_model->getFlowModelStatisticsUtilities();
+    
+    flow_model_statistics_utilities->filterVariables(
+        patch_hierarchy,
+        getDataContext());
+}
+
+
+/**
  * Output the statistics of data.
  */
 void

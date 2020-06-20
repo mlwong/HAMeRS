@@ -85,6 +85,18 @@ class FlowModelStatisticsUtilities
         }
         
         /*
+         * Filter the variables required for computing statistics.
+         */
+        virtual void
+        filterVariables(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context)
+        {
+            NULL_USE(patch_hierarchy);
+            NULL_USE(data_context);
+        }
+        
+        /*
          * Output names of statistical quantities to output to a file.
          */
         virtual void
