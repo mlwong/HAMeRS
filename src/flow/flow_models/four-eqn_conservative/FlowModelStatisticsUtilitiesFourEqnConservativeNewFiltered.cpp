@@ -135,6 +135,25 @@ FlowModelStatisticsUtilitiesFourEqnConservative::FlowModelStatisticsUtilitiesFou
      * Initialize the filters.
      */
     
+    // d_filter_x = boost::shared_ptr<FilterNone> (
+    //     new FilterNone("d_filter_x", d_dim, DIRECTION::X_DIRECTION));
+    
+    // if (d_dim == tbox::Dimension(2))
+    // {
+    //     d_filter_y = boost::shared_ptr<FilterNone> (
+    //         new FilterNone("d_filter_y", d_dim, DIRECTION::Y_DIRECTION));
+    // }
+    
+    // if (d_dim == tbox::Dimension(3))
+    // {
+    //     d_filter_z = boost::shared_ptr<FilterNone> (
+    //         new FilterNone("d_filter_z", d_dim, DIRECTION::Z_DIRECTION));
+    // }
+    
+    /*
+     * Initialize the filters.
+     */
+    
     d_filter_x = boost::shared_ptr<FilterTruncatedGaussian> (
         new FilterTruncatedGaussian("d_filter_x", d_dim, DIRECTION::X_DIRECTION));
     
@@ -286,6 +305,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeVariables(
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
 {
+    tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::computeVariables: start" << std::endl;
+    
     if (d_flow_model.expired())
     {
         TBOX_ERROR(d_object_name
@@ -297,6 +318,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeVariables(
     computeShearStress(
         patch_hierarchy,
         data_context);
+    
+    tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::computeVariables: end" << std::endl;
 }
 
 
@@ -308,6 +331,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::filterVariables(
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
 {
+    tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::filterVariables: start" << std::endl;
+    
     if (d_flow_model.expired())
     {
         TBOX_ERROR(d_object_name
@@ -498,6 +523,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::filterVariables(
             d_flow_model_tmp->unregisterPatch();
         }
     }
+    
+    tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::filterVariables: end" << std::endl;
 }
 
 
@@ -30017,6 +30044,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetFilteredReynoldsNor
     const boost::shared_ptr<hier::VariableContext>& data_context,
     const double output_time) const
 {
+    tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::"
+        << "outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection: start" << std::endl;
+    
     const int finest_level_dim_0 = getRefinedDomainNumberOfPointsX(patch_hierarchy);
     
     const double dx = getRefinedDomainGridSpacingX(patch_hierarchy);
@@ -30155,6 +30185,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetFilteredReynoldsNor
      * Compute term II.
      */
     
+    tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::"
+        << "outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection: Compute term II" << std::endl;
+    
     std::vector<double> drho_u_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
         "MOMENTUM",
         0,
@@ -30203,6 +30236,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetFilteredReynoldsNor
      * Compute term II in moving frame of mixing layer.
      */
     
+    tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::"
+        << "outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection: Compute term II in MF" << std::endl;
+    
     std::vector<double> rho_a1_R11(rho_R11);
     
     for (int i = 0; i < finest_level_dim_0; i++)
@@ -30217,6 +30253,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetFilteredReynoldsNor
     /*
      * Compute term III(1).
      */
+    
+    tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::"
+        << "outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection: Compute term III(1)" << std::endl;
     
     std::vector<double> dp_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
         s_variable_pressure_filtered,
@@ -30236,6 +30275,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetFilteredReynoldsNor
      * Compute term III(2).
      */
     
+    tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::"
+        << "outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection: Compute term III(2)" << std::endl;
+    
     std::vector<double> dtau_11_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
         s_variable_shear_stress_filtered,
         0,
@@ -30253,6 +30295,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetFilteredReynoldsNor
     /*
      * Compute term III(3).
      */
+    
+    tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::"
+        << "outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection: Compute term III(3)" << std::endl;
     
     std::vector<double> dtau_SFS_11_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
         s_variable_SFS_stress,
@@ -30272,6 +30317,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetFilteredReynoldsNor
      * Compute term III(4).
      */
     
+    tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::"
+        << "outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection: Compute term III(4)" << std::endl;
+    
     std::vector<double> du_tilde_dx(finest_level_dim_0, double(0));
     
     for (int i = 0; i < finest_level_dim_0; i++)
@@ -30289,6 +30337,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetFilteredReynoldsNor
     /*
      * Compute term IV(1).
      */
+    
+    tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::"
+        << "outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection: Compute term IV(1)" << std::endl;
     
     // quantity_names.push_back("MOMENTUM");
     variable_quantities.push_back(s_variable_momentum_filtered);
@@ -30345,6 +30396,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetFilteredReynoldsNor
      * Compute term IV(2).
      */
     
+    tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::"
+        << "outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection: Compute term IV(2)" << std::endl;
+    
     std::vector<double> du_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
         "VELOCITY",
         0,
@@ -30381,6 +30435,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetFilteredReynoldsNor
     /*
      * Compute term IV(3).
      */
+    
+    tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::"
+        << "outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection: Compute term IV(3)" << std::endl;
     
     std::vector<double> tau11_mean = getAveragedQuantityWithInhomogeneousXDirection(
         s_variable_shear_stress_filtered,
@@ -30453,6 +30510,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetFilteredReynoldsNor
      * Compute term IV(4).
      */
     
+    tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::"
+        << "outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection: Compute term IV(4)" << std::endl;
+    
     std::vector<double> tau_SFS_11_mean = getAveragedQuantityWithInhomogeneousXDirection(
         s_variable_SFS_stress,
         0,
@@ -30524,6 +30584,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetFilteredReynoldsNor
      * Compute term V.
      */
     
+    tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::"
+        << "outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection: Compute term V" << std::endl;
+    
     variable_quantities.push_back(s_variable_pressure_filtered);
     component_indices.push_back(0);
     use_reciprocal.push_back(false);
@@ -30559,6 +30622,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetFilteredReynoldsNor
     /*
      * Compute term VI(1).
      */
+    
+    tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::"
+        << "outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection: Compute term VI(1)" << std::endl;
     
     variable_quantities.push_back(s_variable_velocity_Favre_filtered);
     component_indices.push_back(0);
@@ -30695,6 +30761,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetFilteredReynoldsNor
      * Compute term VI(2).
      */
     
+    tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::"
+        << "outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection: Compute term VI(2)" << std::endl;
+    
     variable_quantities.push_back(s_variable_velocity_Favre_filtered);
     component_indices.push_back(0);
     use_reciprocal.push_back(false);
@@ -30830,6 +30899,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetFilteredReynoldsNor
      * Output budget.
      */
     
+    tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::"
+        << "outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection: Output budget" << std::endl;
+    
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     if (mpi.getRank() == 0)
@@ -30881,4 +30953,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetFilteredReynoldsNor
         
         f_output.close();
     }
+    
+    tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::"
+        << "outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection: end" << std::endl;
 }

@@ -2,6 +2,7 @@
 #define FLOW_MODEL_STATISTICS_UTILITIES_FOUR_EQN_CONSERVATIVE_HPP
 
 #include "flow/flow_models/FlowModelStatisticsUtilities.hpp"
+#include "util/filters/FilterNone.hpp"
 #include "util/filters/FilterTruncatedGaussian.hpp"
 #include "util/mixing_rules/equations_of_bulk_viscosity/EquationOfBulkViscosityMixingRulesManager.hpp"
 #include "util/mixing_rules/equations_of_mass_diffusivity/EquationOfMassDiffusivityMixingRulesManager.hpp"
@@ -735,9 +736,9 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
          * boost::shared_ptr to filters.
          */
         
-        boost::shared_ptr<FilterTruncatedGaussian> d_filter_x;
-        boost::shared_ptr<FilterTruncatedGaussian> d_filter_y;
-        boost::shared_ptr<FilterTruncatedGaussian> d_filter_z;
+        boost::shared_ptr<Filter> d_filter_x;
+        boost::shared_ptr<Filter> d_filter_y;
+        boost::shared_ptr<Filter> d_filter_z;
         
         /*
          * boost::shared_ptr to EquationOfStateMixingRules.

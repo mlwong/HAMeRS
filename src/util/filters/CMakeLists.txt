@@ -2,6 +2,7 @@
 # a list of the source files for the filters library
 set(filters_source_files
     Filter.cpp
+    FilterNone.cpp
     FilterTruncatedGaussian.cpp
     )
 
