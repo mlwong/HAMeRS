@@ -138,7 +138,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::FlowModelStatisticsUtilitiesFou
     // d_filter_x = boost::shared_ptr<FilterNone> (
     //     new FilterNone("d_filter_x", d_dim, DIRECTION::X_DIRECTION));
     
-    // if (d_dim == tbox::Dimension(2))
+    // if ((d_dim == tbox::Dimension(2)) || (d_dim == tbox::Dimension(3)))
     // {
     //     d_filter_y = boost::shared_ptr<FilterNone> (
     //         new FilterNone("d_filter_y", d_dim, DIRECTION::Y_DIRECTION));
@@ -157,7 +157,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::FlowModelStatisticsUtilitiesFou
     d_filter_x = boost::shared_ptr<FilterTruncatedGaussian> (
         new FilterTruncatedGaussian("d_filter_x", d_dim, DIRECTION::X_DIRECTION));
     
-    if (d_dim == tbox::Dimension(2))
+    if ((d_dim == tbox::Dimension(2)) || (d_dim == tbox::Dimension(3)))
     {
         d_filter_y = boost::shared_ptr<FilterTruncatedGaussian> (
             new FilterTruncatedGaussian("d_filter_y", d_dim, DIRECTION::Y_DIRECTION));
@@ -446,7 +446,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::filterVariables(
                 0,
                 0);
             
-            if (d_dim == tbox::Dimension(2))
+            if ((d_dim == tbox::Dimension(2)) || (d_dim == tbox::Dimension(3)))
             {
                 // Apply filter in y-direction to conservative variables.
                 
@@ -24253,7 +24253,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::filterPressure(
                 0,
                 0);
             
-            if (d_dim == tbox::Dimension(2))
+            if ((d_dim == tbox::Dimension(2)) || (d_dim == tbox::Dimension(3)))
             {
                 // Apply filter in y-direction.
                 
