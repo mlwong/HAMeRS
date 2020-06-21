@@ -30965,14 +30965,14 @@ outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
  */
 void
 FlowModelStatisticsUtilitiesFourEqnConservative::
-outputBudgetFilterReynoldsNormalStressInYDirectionWithInhomogeneousXDirection(
+outputBudgetFilteredReynoldsNormalStressInYDirectionWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context,
     const double output_time) const
 {
     tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::"
-        << "outputBudgetFilterReynoldsNormalStressInYDirectionWithInhomogeneousXDirection: start" << std::endl;
+        << "outputBudgetFilteredReynoldsNormalStressInYDirectionWithInhomogeneousXDirection: start" << std::endl;
     
     const int finest_level_dim_0 = getRefinedDomainNumberOfPointsX(patch_hierarchy);
     
@@ -31769,14 +31769,14 @@ outputBudgetFilterReynoldsNormalStressInYDirectionWithInhomogeneousXDirection(
  */
 void
 FlowModelStatisticsUtilitiesFourEqnConservative::
-outputBudgetFilterReynoldsNormalStressInZDirectionWithInhomogeneousXDirection(
+outputBudgetFilteredReynoldsNormalStressInZDirectionWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context,
     const double output_time) const
 {
     tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::"
-        << "outputBudgetFilterReynoldsNormalStressInZDirectionWithInhomogeneousXDirection: start" << std::endl;
+        << "outputBudgetFilteredReynoldsNormalStressInZDirectionWithInhomogeneousXDirection: start" << std::endl;
     
     const int finest_level_dim_0 = getRefinedDomainNumberOfPointsX(patch_hierarchy);
     

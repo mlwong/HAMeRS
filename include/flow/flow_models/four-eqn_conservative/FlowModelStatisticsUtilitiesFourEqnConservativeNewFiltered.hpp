@@ -714,7 +714,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
          * Output budget of Reynolds normal stress in y-direction with inhomogeneous x-direction to a file.
          */
         void
-        outputBudgetFilterReynoldsNormalStressInYDirectionWithInhomogeneousXDirection(
+        outputBudgetFilteredReynoldsNormalStressInYDirectionWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
@@ -724,7 +724,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
          * Output budget of Reynolds normal stress in z-direction with inhomogeneous x-direction to a file.
          */
         void
-        outputBudgetFilterReynoldsNormalStressInZDirectionWithInhomogeneousXDirection(
+        outputBudgetFilteredReynoldsNormalStressInZDirectionWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context,
