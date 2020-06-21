@@ -30723,7 +30723,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetFilteredReynoldsNor
         derivative_directions.push_back(-1);
         averaged_quantities.push_back(tau13_mean);
         
-        std::vector<double> tau_13_p_du_dz_p =
+        tau_13_p_du_dz_p =
             getQuantityCorrelationWithInhomogeneousXDirection(
                 variable_quantities,
                 component_indices,
@@ -30825,7 +30825,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetFilteredReynoldsNor
             derivative_directions,
             averaged_quantities,
             patch_hierarchy,
-            data_context) ;
+            data_context);
     
     variable_quantities.clear();
     component_indices.clear();
@@ -30861,7 +30861,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputBudgetFilteredReynoldsNor
         derivative_directions.push_back(-1);
         averaged_quantities.push_back(tau_SFS_13_mean);
         
-        std::vector<double> tau_SFS_13_p_du_dz_p =
+        tau_SFS_13_p_du_dz_p =
             getQuantityCorrelationWithInhomogeneousXDirection(
                 variable_quantities,
                 component_indices,
