@@ -578,12 +578,28 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
         /**************************************************************************************************
          * For budgets on filtered variables.
          *************************************************************************************************/
-         
+        
+        /*
+         * Compute pressure with only x direction as inhomogeneous direction.
+         */
+        void
+        computePressure(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
         /*
          * Compute shear stress with only x direction as inhomogeneous direction.
          */
         void
         computeShearStress(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute convective stress with only x direction as inhomogeneous direction.
+         */
+        void
+        computeConvectiveStress(
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
@@ -742,7 +758,9 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_momentum_filtered;
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_total_energy_filtered;
         
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_pressure_unfiltered;
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_shear_stress_unfiltered;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_convective_stress_unfiltered;
         
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_pressure_filtered;
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_shear_stress_filtered;
@@ -751,6 +769,11 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_SFS_stress;
         
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_velocity_Favre_filtered;
+        
+        bool d_pressure_filtered;
+        bool d_shear_stress_filtered;
+        bool d_convective_stress_filtered;
+        bool d_conservative_variables_filtered;
         
         /*
          * boost::shared_ptr to filters.

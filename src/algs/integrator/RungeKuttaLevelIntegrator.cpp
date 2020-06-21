@@ -3587,32 +3587,37 @@ RungeKuttaLevelIntegrator::outputDataStatistics(
     
     // Filter variables if necessary.
     
-    d_patch_strategy->filterStatisticsVariables(hierarchy);
+    const int num_filtering = 2;
     
-    // Exchange halo values of variables if necessary.
-    
-    for (int li = 0; li < num_levels; li++)
+    for (int count = 0; count < num_filtering; count++)
     {
-        boost::shared_ptr<hier::PatchLevel> patch_level(
-            hierarchy->getPatchLevel(li));
+        d_patch_strategy->filterStatisticsVariables(hierarchy);
         
-        boost::shared_ptr<xfer::RefineSchedule> fill_schedule;
+        // Exchange halo values of variables if necessary.
         
-        if (li > 0)
+        for (int li = 0; li < num_levels; li++)
         {
-            fill_schedule = d_fill_statistics->createSchedule(
-                patch_level,
-                li - 1,
-                hierarchy);
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                hierarchy->getPatchLevel(li));
+            
+            boost::shared_ptr<xfer::RefineSchedule> fill_schedule;
+            
+            if (li > 0)
+            {
+                fill_schedule = d_fill_statistics->createSchedule(
+                    patch_level,
+                    li - 1,
+                    hierarchy);
+            }
+            else
+            {
+                fill_schedule = d_fill_statistics->createSchedule(
+                    patch_level,
+                    d_patch_strategy);
+            }
+            
+            fill_schedule->fillData(statistics_data_time);
         }
-        else
-        {
-            fill_schedule = d_fill_statistics->createSchedule(
-                patch_level,
-                d_patch_strategy);
-        }
-        
-        fill_schedule->fillData(statistics_data_time);
     }
     
     // Set conservative variables as the filtered valued if necessary.

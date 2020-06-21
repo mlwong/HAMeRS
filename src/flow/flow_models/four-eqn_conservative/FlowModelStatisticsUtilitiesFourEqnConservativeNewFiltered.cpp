@@ -12,7 +12,9 @@ boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourE
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_momentum_filtered;
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_total_energy_filtered;
 
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_pressure_unfiltered;
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_shear_stress_unfiltered;
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_convective_stress_unfiltered;
 
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_pressure_filtered;
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_shear_stress_filtered;
@@ -39,6 +41,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::FlowModelStatisticsUtilitiesFou
             grid_geometry,
             num_species,
             flow_model_db),
+        d_pressure_filtered(false),
+        d_shear_stress_filtered(false),
+        d_convective_stress_filtered(false),
+        d_conservative_variables_filtered(false),
         d_equation_of_state_mixing_rules(equation_of_state_mixing_rules),
         d_equation_of_mass_diffusivity_mixing_rules(equation_of_mass_diffusivity_mixing_rules),
         d_equation_of_shear_viscosity_mixing_rules(equation_of_shear_viscosity_mixing_rules),
@@ -68,6 +74,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::FlowModelStatisticsUtilitiesFou
         new pdat::CellVariable<double>(d_dim, "total energy filtered", 1));
     
     
+    s_variable_pressure_unfiltered = boost::shared_ptr<pdat::CellVariable<double> > (
+        new pdat::CellVariable<double>(d_dim, "pressure unfiltered", 1));
+    
     if (d_dim == tbox::Dimension(1))
     {
         s_variable_shear_stress_unfiltered = boost::shared_ptr<pdat::CellVariable<double> > (
@@ -82,6 +91,22 @@ FlowModelStatisticsUtilitiesFourEqnConservative::FlowModelStatisticsUtilitiesFou
     {
         s_variable_shear_stress_unfiltered = boost::shared_ptr<pdat::CellVariable<double> > (
             new pdat::CellVariable<double>(d_dim, "shear stress unfiltered", 6));
+    }
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        s_variable_convective_stress_unfiltered = boost::shared_ptr<pdat::CellVariable<double> > (
+            new pdat::CellVariable<double>(d_dim, "convective stress unfiltered", 1));
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        s_variable_convective_stress_unfiltered = boost::shared_ptr<pdat::CellVariable<double> > (
+            new pdat::CellVariable<double>(d_dim, "convective stress unfiltered", 3));
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        s_variable_convective_stress_unfiltered = boost::shared_ptr<pdat::CellVariable<double> > (
+            new pdat::CellVariable<double>(d_dim, "convective stress unfiltered", 6));
     }
     
     s_variable_pressure_filtered = boost::shared_ptr<pdat::CellVariable<double> > (
@@ -242,6 +267,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::registerVariables(
         "CONSERVATIVE_LINEAR_REFINE");
     
     integrator->registerVariable(
+        s_variable_pressure_unfiltered,
+        num_ghosts,
+        num_ghosts,
+        RungeKuttaLevelIntegrator::STATISTICS,
+        d_grid_geometry,
+        "NO_COARSEN",
+        "NO_REFINE");
+    
+    integrator->registerVariable(
         s_variable_shear_stress_unfiltered,
         num_ghosts,
         num_ghosts,
@@ -249,6 +283,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::registerVariables(
         d_grid_geometry,
         "CONSERVATIVE_COARSEN",
         "CONSERVATIVE_LINEAR_REFINE");
+    
+    integrator->registerVariable(
+        s_variable_convective_stress_unfiltered,
+        num_ghosts,
+        num_ghosts,
+        RungeKuttaLevelIntegrator::STATISTICS,
+        d_grid_geometry,
+        "NO_COARSEN",
+        "NO_REFINE");
     
     integrator->registerVariable(
         s_variable_pressure_filtered,
@@ -315,9 +358,17 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeVariables(
             << std::endl);
     }
     
+    // computePressure(
+    //     patch_hierarchy,
+    //     data_context);
+    
     computeShearStress(
         patch_hierarchy,
         data_context);
+    
+    // computeConvectiveStress(
+    //     patch_hierarchy,
+    //     data_context);
     
     tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::computeVariables: end" << std::endl;
 }
@@ -339,6 +390,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::filterVariables(
             << ": "
             << "The object is not setup yet!"
             << std::endl);
+    }
+    
+    if (!d_pressure_filtered)
+    {
+        computePressure(
+            patch_hierarchy,
+            data_context);
+    }
+    
+    if (!d_convective_stress_filtered)
+    {
+        computeConvectiveStress(
+            patch_hierarchy,
+            data_context);
     }
     
     filterPressure(
@@ -386,20 +451,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::filterVariables(
             boost::shared_ptr<pdat::CellData<double> > data_total_energy =
                 d_flow_model_tmp->getGlobalCellData("TOTAL_ENERGY");
             
-            // Get the data containers of unfiltered conservative variables.
-            
-            boost::shared_ptr<pdat::CellData<double> > data_partial_density_unfiltered(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch->getPatchData(s_variable_partial_density_unfiltered, data_context)));
-            
-            boost::shared_ptr<pdat::CellData<double> > data_momentum_unfiltered(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch->getPatchData(s_variable_momentum_unfiltered, data_context)));
-            
-            boost::shared_ptr<pdat::CellData<double> > data_total_energy_unfiltered(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch->getPatchData(s_variable_total_energy_unfiltered, data_context)));
-            
             // Get the data containers of filtered conservative variables.
             
             boost::shared_ptr<pdat::CellData<double> > data_partial_density_filtered(
@@ -414,11 +465,32 @@ FlowModelStatisticsUtilitiesFourEqnConservative::filterVariables(
                 BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                     patch->getPatchData(s_variable_total_energy_filtered, data_context)));
             
-            // Copy data to unfiltered variables.
+            // Copy data to unfiltered variables for temporary storage.
             
-            data_partial_density_unfiltered->copy(*data_partial_density);
-            data_momentum_unfiltered->copy(*data_momentum);
-            data_total_energy_unfiltered->copy(*data_total_energy);
+            if (!d_conservative_variables_filtered)
+            {
+                // Get the data containers of unfiltered conservative variables.
+                
+                boost::shared_ptr<pdat::CellData<double> > data_partial_density_unfiltered(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch->getPatchData(s_variable_partial_density_unfiltered, data_context)));
+                
+                boost::shared_ptr<pdat::CellData<double> > data_momentum_unfiltered(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch->getPatchData(s_variable_momentum_unfiltered, data_context)));
+                
+                boost::shared_ptr<pdat::CellData<double> > data_total_energy_unfiltered(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch->getPatchData(s_variable_total_energy_unfiltered, data_context)));
+                
+                data_partial_density_unfiltered->copy(*data_partial_density);
+                data_momentum_unfiltered->copy(*data_momentum);
+                data_total_energy_unfiltered->copy(*data_total_energy);
+                
+                data_partial_density_filtered->copy(*data_partial_density);
+                data_momentum_filtered->copy(*data_momentum);
+                data_total_energy_filtered->copy(*data_total_energy);
+            }
             
             // Apply filter in x-direction to conservative variables.
             
@@ -426,7 +498,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::filterVariables(
             {
                 d_filter_x->applyFilter(
                     data_partial_density,
-                    data_partial_density_unfiltered,
+                    data_partial_density_filtered,
                     si,
                     si);
             }
@@ -435,14 +507,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::filterVariables(
             {
                 d_filter_x->applyFilter(
                     data_momentum,
-                    data_momentum_unfiltered,
+                    data_momentum_filtered,
                     di,
                     di);
             }
             
             d_filter_x->applyFilter(
                 data_total_energy,
-                data_total_energy_unfiltered,
+                data_total_energy_filtered,
                 0,
                 0);
             
@@ -523,6 +595,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::filterVariables(
             d_flow_model_tmp->unregisterPatch();
         }
     }
+    
+    d_conservative_variables_filtered = true;
     
     tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::filterVariables: end" << std::endl;
 }
@@ -839,6 +913,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
     resetConservativeVariablesToUnfilteredValues(
         patch_hierarchy,
         data_context);
+    
+    d_pressure_filtered = false;
+    d_shear_stress_filtered = false;
+    d_convective_stress_filtered = false;
+    d_conservative_variables_filtered = false;
 }
 
 
@@ -23436,6 +23515,69 @@ getQuantityCorrelationWithDerivativeOfShearStressComponentWithInhomogeneousXDire
 
 
 /*
+ * Compute pressure with only x direction as inhomogeneous direction.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::computePressure(
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context)
+{
+    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    for (int li = 0; li < num_levels; li++)
+    {
+        /*
+         * Get the current patch level.
+         */
+        
+        boost::shared_ptr<hier::PatchLevel> patch_level(
+            patch_hierarchy->getPatchLevel(li));
+        
+        for (hier::PatchLevel::iterator ip(patch_level->begin());
+             ip != patch_level->end();
+             ip++)
+        {
+            const boost::shared_ptr<hier::Patch> patch = *ip;
+            
+            // Get the unfiltered pressure cell data.
+            
+            boost::shared_ptr<pdat::CellData<double> > data_pressure_unfiltered(
+                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    patch->getPatchData(s_variable_pressure_unfiltered, data_context)));
+            
+            // Get the unfiltered pressure cell data.
+            
+            d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+            
+            hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+            
+            std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+            
+            num_subghosts_of_data.insert(
+                std::pair<std::string, hier::IntVector>("PRESSURE", num_ghosts));
+            
+            d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+            
+            d_flow_model_tmp->computeGlobalDerivedCellData();
+            
+            boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                d_flow_model_tmp->getGlobalCellData("PRESSURE");
+            
+            data_pressure_unfiltered->copy(*data_pressure);
+            
+            /*
+             * Unregister the patch and data of all registered derived cell variables in the flow model.
+             */
+            
+            d_flow_model_tmp->unregisterPatch();
+        }
+    }
+}
+
+
+/*
  * Compute shear stress with only x direction as inhomogeneous direction.
  */
 void 
@@ -24195,6 +24337,387 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeShearStress(
 
 
 /*
+ * Compute convective stress with only x direction as inhomogeneous direction.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::computeConvectiveStress(
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context)
+{
+    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                // Get the unfiltered convective stress cell data.
+                boost::shared_ptr<pdat::CellData<double> > data_convective_stress(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch->getPatchData(s_variable_convective_stress_unfiltered, data_context)));
+                
+                // Get the pointer to convective stress data.
+                double* F_conv_11 = data_convective_stress->getPointer(0);
+                
+                // Get the number of ghost cells of the convective stress cell data.
+                const hier::IntVector num_ghosts_convective_stress = data_convective_stress->getGhostCellWidth();
+                const int num_ghosts_0_convective_stress = num_ghosts_convective_stress[0];
+                
+                // Get the box that covers the interior of patch.
+                const hier::Box interior_box = data_convective_stress->getBox();
+                const hier::IntVector interior_dims = interior_box.numberCells();
+                
+                const int interior_dim_0 = interior_dims[0];
+                
+                /*
+                 * Register the patch and the quantity in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("DENSITY", num_ghosts));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
+                
+                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                
+                d_flow_model_tmp->computeGlobalDerivedCellData();
+                
+                /*
+                 * Get the pointers to data inside the flow model.
+                 */
+                
+                boost::shared_ptr<pdat::CellData<double> > data_density =
+                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                
+                double* rho = data_density->getPointer(0);
+                double* u   = data_velocity->getPointer(0);
+                
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                
+                for (int i = -num_ghosts_0_convective_stress; i < interior_dim_0 + num_ghosts_0_convective_stress; i++)
+                {
+                    /*
+                     * Compute the convective stress.
+                     */
+                        
+                    // Compute the linear indices.
+                    const int idx_convective_stress = i + num_ghosts_0_convective_stress;
+                    const int idx_density    = i + num_ghosts_0_density;
+                    const int idx_velocity   = i + num_ghosts_0_velocity;
+                    
+                    F_conv_11[idx_convective_stress] = rho[idx_density]*u[idx_velocity]*u[idx_velocity];
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                // Get the unfiltered convective stress cell data.
+                boost::shared_ptr<pdat::CellData<double> > data_convective_stress(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch->getPatchData(s_variable_convective_stress_unfiltered, data_context)));
+                
+                // Get the pointer to convective stress data.
+                double* F_conv_11 = data_convective_stress->getPointer(0);
+                double* F_conv_12 = data_convective_stress->getPointer(1);
+                double* F_conv_22 = data_convective_stress->getPointer(2);
+                
+                // Get the number of ghost cells of the convective stress cell data.
+                const hier::IntVector num_ghosts_convective_stress = data_convective_stress->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_convective_stress = data_convective_stress->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_convective_stress = num_ghosts_convective_stress[0];
+                const int num_ghosts_1_convective_stress = num_ghosts_convective_stress[1];
+                const int ghostcell_dim_0_convective_stress = ghostcell_dims_convective_stress[0];
+                
+                // Get the box that covers the interior of patch.
+                const hier::Box interior_box = data_convective_stress->getBox();
+                const hier::IntVector interior_dims = interior_box.numberCells();
+                
+                const int interior_dim_0 = interior_dims[0];
+                const int interior_dim_1 = interior_dims[1];
+                
+                /*
+                 * Register the patch and the quantity in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("DENSITY", num_ghosts));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
+                
+                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                
+                d_flow_model_tmp->computeGlobalDerivedCellData();
+                
+                /*
+                 * Get the pointers to data inside the flow model.
+                 */
+                
+                boost::shared_ptr<pdat::CellData<double> > data_density =
+                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                
+                double* rho = data_density->getPointer(0);
+                double* u   = data_velocity->getPointer(0);
+                double* v   = data_velocity->getPointer(1);
+                
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                
+                for (int j = -num_ghosts_1_convective_stress; j < interior_dim_1 + num_ghosts_1_convective_stress; j++)
+                {
+                    for (int i = -num_ghosts_0_convective_stress; i < interior_dim_0 + num_ghosts_0_convective_stress; i++)
+                    {
+                        /*
+                         * Compute the convective stress.
+                         */
+                            
+                        // Compute the linear indices.
+                        const int idx_convective_stress = i + num_ghosts_0_convective_stress +
+                            (j + num_ghosts_1_convective_stress)*ghostcell_dim_0_convective_stress;
+                        
+                        const int idx_density = i + num_ghosts_0_density +
+                            (j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                        
+                        const int idx_velocity = i + num_ghosts_0_velocity +
+                            (j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                        
+                        F_conv_11[idx_convective_stress] = rho[idx_density]*u[idx_velocity]*u[idx_velocity];
+                        F_conv_12[idx_convective_stress] = rho[idx_density]*u[idx_velocity]*v[idx_velocity];
+                        F_conv_22[idx_convective_stress] = rho[idx_density]*v[idx_velocity]*v[idx_velocity];
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                // Get the unfiltered convective stress cell data.
+                boost::shared_ptr<pdat::CellData<double> > data_convective_stress(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch->getPatchData(s_variable_convective_stress_unfiltered, data_context)));
+                
+                // Get the pointers to convective stress data.
+                double* F_conv_11 = data_convective_stress->getPointer(0);
+                double* F_conv_12 = data_convective_stress->getPointer(1);
+                double* F_conv_13 = data_convective_stress->getPointer(2);
+                double* F_conv_22 = data_convective_stress->getPointer(3);
+                double* F_conv_23 = data_convective_stress->getPointer(4);
+                double* F_conv_33 = data_convective_stress->getPointer(5);
+                
+                // Get the number of ghost cells of the convective stress cell data.
+                const hier::IntVector num_ghosts_convective_stress = data_convective_stress->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_convective_stress = data_convective_stress->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_convective_stress = num_ghosts_convective_stress[0];
+                const int num_ghosts_1_convective_stress = num_ghosts_convective_stress[1];
+                const int num_ghosts_2_convective_stress = num_ghosts_convective_stress[2];
+                const int ghostcell_dim_0_convective_stress = ghostcell_dims_convective_stress[0];
+                const int ghostcell_dim_1_convective_stress = ghostcell_dims_convective_stress[1];
+                
+                // Get the box that covers the interior of patch.
+                const hier::Box interior_box = data_convective_stress->getBox();
+                const hier::IntVector interior_dims = interior_box.numberCells();
+                
+                const int interior_dim_0 = interior_dims[0];
+                const int interior_dim_1 = interior_dims[1];
+                const int interior_dim_2 = interior_dims[2];
+                
+                /*
+                 * Register the patch and the quantity in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("DENSITY", num_ghosts));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
+                
+                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                
+                d_flow_model_tmp->computeGlobalDerivedCellData();
+                
+                /*
+                 * Get the pointers to data inside the flow model.
+                 */
+                
+                boost::shared_ptr<pdat::CellData<double> > data_density =
+                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                
+                double* rho = data_density->getPointer(0);
+                double* u   = data_velocity->getPointer(0);
+                double* v   = data_velocity->getPointer(1);
+                double* w   = data_velocity->getPointer(2);
+                
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int num_ghosts_2_density = num_ghosts_density[2];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                const int ghostcell_dim_1_density = ghostcell_dims_density[1];
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int num_ghosts_2_velocity = num_ghosts_velocity[2];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+                
+                for (int k = -num_ghosts_2_convective_stress; k < interior_dim_2 + num_ghosts_2_convective_stress; k++)
+                {
+                    for (int j = -num_ghosts_1_convective_stress; j < interior_dim_1 + num_ghosts_1_convective_stress; j++)
+                    {
+                        for (int i = -num_ghosts_0_convective_stress; i < interior_dim_0 + num_ghosts_0_convective_stress; i++)
+                        {
+                            /*
+                             * Compute the convective stress.
+                             */
+                                
+                            // Compute the linear indices.
+                            const int idx_convective_stress = (i + num_ghosts_0_convective_stress) +
+                                (j + num_ghosts_1_convective_stress)*ghostcell_dim_0_convective_stress +
+                                (k + num_ghosts_2_convective_stress)*ghostcell_dim_0_convective_stress*
+                                    ghostcell_dim_1_convective_stress;
+                            
+                            const int idx_density = (i + num_ghosts_0_density) +
+                                (j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                                (k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                                    ghostcell_dim_1_density;
+                            
+                            const int idx_velocity = (i + num_ghosts_0_velocity) +
+                                (j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                (k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                    ghostcell_dim_1_velocity;
+                            
+                            F_conv_11[idx_convective_stress] = rho[idx_density]*u[idx_velocity]*u[idx_velocity];
+                            F_conv_12[idx_convective_stress] = rho[idx_density]*u[idx_velocity]*v[idx_velocity];
+                            F_conv_13[idx_convective_stress] = rho[idx_density]*u[idx_velocity]*w[idx_velocity];
+                            F_conv_22[idx_convective_stress] = rho[idx_density]*v[idx_velocity]*v[idx_velocity];
+                            F_conv_23[idx_convective_stress] = rho[idx_density]*v[idx_velocity]*w[idx_velocity];
+                            F_conv_33[idx_convective_stress] = rho[idx_density]*w[idx_velocity]*w[idx_velocity];
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+    }
+}
+
+
+/*
  * Filter pressure.
  */
 void 
@@ -24202,8 +24725,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::filterPressure(
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
 {
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
     for (int li = 0; li < num_levels; li++)
@@ -24221,29 +24742,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::filterPressure(
         {
             const boost::shared_ptr<hier::Patch> patch = *ip;
             
-            // Get the filtered pressure cell data.
+            // Get the unfiltered and filtered pressure cell data.
+            
+            boost::shared_ptr<pdat::CellData<double> > data_pressure_unfiltered(
+                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    patch->getPatchData(s_variable_pressure_unfiltered, data_context)));
             
             boost::shared_ptr<pdat::CellData<double> > data_pressure_filtered(
                 BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                     patch->getPatchData(s_variable_pressure_filtered, data_context)));
             
-            // Get the unfiltered pressure cell data.
-            
-            d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
-            
-            hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
-            
-            std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
-            
-            num_subghosts_of_data.insert(
-                std::pair<std::string, hier::IntVector>("PRESSURE", num_ghosts));
-            
-            d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
-            
-            d_flow_model_tmp->computeGlobalDerivedCellData();
-            
-            boost::shared_ptr<pdat::CellData<double> > data_pressure_unfiltered =
-                d_flow_model_tmp->getGlobalCellData("PRESSURE");
+            if (d_pressure_filtered)
+            {
+                data_pressure_unfiltered->copy(*data_pressure_filtered);
+            }
             
             // Apply filter in x-direction.
             
@@ -24278,14 +24790,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::filterPressure(
                     0,
                     0);
             }
-            
-            /*
-             * Unregister the patch and data of all registered derived cell variables in the flow model.
-             */
-            
-            d_flow_model_tmp->unregisterPatch();
         }
     }
+    
+    d_pressure_filtered = true;
 }
 
 
@@ -24314,15 +24822,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::filterShearStress(
         {
             const boost::shared_ptr<hier::Patch> patch = *ip;
             
-            // Get the filtered and unfiltered shear stress cell data.
+            // Get the unfiltered and filtered shear stress cell data.
+            
+            boost::shared_ptr<pdat::CellData<double> > data_shear_stress_unfiltered(
+                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    patch->getPatchData(s_variable_shear_stress_unfiltered, data_context)));
             
             boost::shared_ptr<pdat::CellData<double> > data_shear_stress_filtered(
                 BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                     patch->getPatchData(s_variable_shear_stress_filtered, data_context)));
             
-            boost::shared_ptr<pdat::CellData<double> > data_shear_stress_unfiltered(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch->getPatchData(s_variable_shear_stress_unfiltered, data_context)));
+            if (d_shear_stress_filtered)
+            {
+                data_shear_stress_unfiltered->copy(*data_shear_stress_filtered);
+            }
             
             if (d_dim == tbox::Dimension(1))
             {
@@ -24404,6 +24917,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::filterShearStress(
             }
         }
     }
+    
+    d_shear_stress_filtered = true;
 }
 
 
@@ -24415,463 +24930,120 @@ FlowModelStatisticsUtilitiesFourEqnConservative::filterConvectiveStress(
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
 {
-    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
-    
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    if (d_dim == tbox::Dimension(1))
+    for (int li = 0; li < num_levels; li++)
     {
-        for (int li = 0; li < num_levels; li++)
+        /*
+         * Get the current patch level.
+         */
+        
+        boost::shared_ptr<hier::PatchLevel> patch_level(
+            patch_hierarchy->getPatchLevel(li));
+        
+        for (hier::PatchLevel::iterator ip(patch_level->begin());
+             ip != patch_level->end();
+             ip++)
         {
-            /*
-             * Get the current patch level.
-             */
+            const boost::shared_ptr<hier::Patch> patch = *ip;
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
-                patch_hierarchy->getPatchLevel(li));
+            // Get the unfiltered and filtered convective stress cell data.
             
-            for (hier::PatchLevel::iterator ip(patch_level->begin());
-                 ip != patch_level->end();
-                 ip++)
+            boost::shared_ptr<pdat::CellData<double> > data_convective_stress_unfiltered(
+                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    patch->getPatchData(s_variable_convective_stress_unfiltered, data_context)));
+            
+            boost::shared_ptr<pdat::CellData<double> > data_convective_stress_filtered(
+                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    patch->getPatchData(s_variable_convective_stress_filtered, data_context)));
+            
+            if (d_convective_stress_filtered)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
-                
-                // Get the SFS stress cell data.
-                
-                boost::shared_ptr<pdat::CellData<double> > data_SFS_stress(
-                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                        patch->getPatchData(s_variable_SFS_stress, data_context)));
-                
-                // Get the pointer to SFS stress data.
-                double* tau_SFS_11 = data_SFS_stress->getPointer(0);
-                
-                // Get the number of ghost cells of the SFS stress cell data.
-                const hier::IntVector num_ghosts_SFS_stress = data_SFS_stress->getGhostCellWidth();
-                const int num_ghosts_0_SFS_stress = num_ghosts_SFS_stress[0];
-                
-                // Get the box that covers the interior of patch.
-                const hier::Box interior_box = data_SFS_stress->getBox();
-                const hier::IntVector interior_dims = interior_box.numberCells();
-                
-                const int interior_dim_0 = interior_dims[0];
-                
-                /*
-                 * Register the patch and the quantity in the flow model and compute the
-                 * corresponding cell data.
-                 */
-                
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
-                
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
-                
-                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
-                
-                num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("DENSITY", num_ghosts));
-                
-                num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
-                
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
-                
-                d_flow_model_tmp->computeGlobalDerivedCellData();
-                
-                /*
-                 * Get the pointers to data inside the flow model.
-                 */
-                
-                boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
-                
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
-                
-                double* rho = data_density->getPointer(0);
-                double* u   = data_velocity->getPointer(0);
-                
-                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
-                
-                const int num_ghosts_0_density = num_ghosts_density[0];
-                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
-                
-                for (int i = -num_ghosts_0_SFS_stress; i < interior_dim_0 + num_ghosts_0_SFS_stress; i++)
-                {
-                    /*
-                     * Compute the convective stress.
-                     */
-                        
-                    // Compute the linear indices.
-                    const int idx_SFS_stress = i + num_ghosts_0_SFS_stress;
-                    const int idx_density    = i + num_ghosts_0_density;
-                    const int idx_velocity   = i + num_ghosts_0_velocity;
-                    
-                    tau_SFS_11[idx_SFS_stress] = rho[idx_density]*u[idx_velocity]*u[idx_velocity];
-                }
-                
-                /*
-                 * Unregister the patch and data of all registered derived cell variables in the flow model.
-                 */
-                
-                d_flow_model_tmp->unregisterPatch();
-                
-                boost::shared_ptr<pdat::CellData<double> > data_convective_stress_filtered(
-                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                        patch->getPatchData(s_variable_convective_stress_filtered, data_context)));
-                
+                data_convective_stress_unfiltered->copy(*data_convective_stress_filtered);
+            }
+            
+            if (d_dim == tbox::Dimension(1))
+            {
                 for (int di = 0; di < 1; di++)
                 {
                     // Apply filter in x-direction.
                     
                     d_filter_x->applyFilter(
                         data_convective_stress_filtered,
-                        data_SFS_stress,
+                        data_convective_stress_unfiltered,
                         di,
                         di);
                 }
             }
-        }
-    }
-    else if (d_dim == tbox::Dimension(2))
-    {
-        for (int li = 0; li < num_levels; li++)
-        {
-            /*
-             * Get the current patch level.
-             */
-            
-            boost::shared_ptr<hier::PatchLevel> patch_level(
-                patch_hierarchy->getPatchLevel(li));
-            
-            for (hier::PatchLevel::iterator ip(patch_level->begin());
-                 ip != patch_level->end();
-                 ip++)
+            else if (d_dim == tbox::Dimension(2))
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
-                
-                // Get the SFS stress cell data.
-                
-                boost::shared_ptr<pdat::CellData<double> > data_SFS_stress(
-                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                        patch->getPatchData(s_variable_SFS_stress, data_context)));
-                
-                // Get the pointers to SFS stress data.
-                double* tau_SFS_11 = data_SFS_stress->getPointer(0);
-                double* tau_SFS_12 = data_SFS_stress->getPointer(1);
-                double* tau_SFS_22 = data_SFS_stress->getPointer(2);
-                
-                // Get the number of ghost cells of the SFS stress cell data.
-                const hier::IntVector num_ghosts_SFS_stress = data_SFS_stress->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_SFS_stress = data_SFS_stress->getGhostBox().numberCells();
-                
-                const int num_ghosts_0_SFS_stress = num_ghosts_SFS_stress[0];
-                const int num_ghosts_1_SFS_stress = num_ghosts_SFS_stress[1];
-                const int ghostcell_dim_0_SFS_stress = ghostcell_dims_SFS_stress[0];
-                
-                // Get the box that covers the interior of patch.
-                const hier::Box interior_box = data_SFS_stress->getBox();
-                const hier::IntVector interior_dims = interior_box.numberCells();
-                
-                const int interior_dim_0 = interior_dims[0];
-                const int interior_dim_1 = interior_dims[1];
-                
-                /*
-                 * Register the patch and the quantity in the flow model and compute the
-                 * corresponding cell data.
-                 */
-                
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
-                
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
-                
-                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
-                
-                num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("DENSITY", num_ghosts));
-                
-                num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
-                
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
-                
-                d_flow_model_tmp->computeGlobalDerivedCellData();
-                
-                /*
-                 * Get the pointers to data inside the flow model.
-                 */
-                
-                boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
-                
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
-                
-                double* rho = data_density->getPointer(0);
-                double* u   = data_velocity->getPointer(0);
-                double* v   = data_velocity->getPointer(1);
-                
-                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
-                
-                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
-                
-                const int num_ghosts_0_density = num_ghosts_density[0];
-                const int num_ghosts_1_density = num_ghosts_density[1];
-                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
-                
-                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
-                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
-                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
-                
-                for (int j = -num_ghosts_1_SFS_stress; j < interior_dim_1 + num_ghosts_1_SFS_stress; j++)
-                {
-                    for (int i = -num_ghosts_0_SFS_stress; i < interior_dim_0 + num_ghosts_0_SFS_stress; i++)
-                    {
-                        /*
-                         * Compute the convective stress.
-                         */
-                            
-                        // Compute the linear indices.
-                        const int idx_SFS_stress = i + num_ghosts_0_SFS_stress +
-                            (j + num_ghosts_1_SFS_stress)*ghostcell_dim_0_SFS_stress;
-                        
-                        const int idx_density = i + num_ghosts_0_density +
-                            (j + num_ghosts_1_density)*ghostcell_dim_0_density;
-                        
-                        const int idx_velocity = i + num_ghosts_0_velocity +
-                            (j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
-                        
-                        tau_SFS_11[idx_SFS_stress] = rho[idx_density]*u[idx_velocity]*u[idx_velocity];
-                        tau_SFS_12[idx_SFS_stress] = rho[idx_density]*u[idx_velocity]*v[idx_velocity];
-                        tau_SFS_22[idx_SFS_stress] = rho[idx_density]*v[idx_velocity]*v[idx_velocity];
-                    }
-                }
-                
-                /*
-                 * Unregister the patch and data of all registered derived cell variables in the flow model.
-                 */
-                
-                d_flow_model_tmp->unregisterPatch();
-                
-                boost::shared_ptr<pdat::CellData<double> > data_convective_stress_filtered(
-                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                        patch->getPatchData(s_variable_convective_stress_filtered, data_context)));
-                
                 for (int di = 0; di < 3; di++)
                 {
                     // Apply filter in x-direction.
                     
                     d_filter_x->applyFilter(
                         data_convective_stress_filtered,
-                        data_SFS_stress,
+                        data_convective_stress_unfiltered,
                         di,
                         di);
                 }
                 
                 // Apply filter in y-direction.
                 
-                data_SFS_stress->copy(*data_convective_stress_filtered);
+                data_convective_stress_unfiltered->copy(*data_convective_stress_filtered);
                 
                 for (int di = 0; di < 3; di++)
                 {
                     d_filter_y->applyFilter(
                         data_convective_stress_filtered,
-                        data_SFS_stress,
+                        data_convective_stress_unfiltered,
                         di,
                         di);
                 }
             }
-        }
-    }
-    else if (d_dim == tbox::Dimension(3))
-    {
-        for (int li = 0; li < num_levels; li++)
-        {
-            /*
-             * Get the current patch level.
-             */
-            
-            boost::shared_ptr<hier::PatchLevel> patch_level(
-                patch_hierarchy->getPatchLevel(li));
-            
-            for (hier::PatchLevel::iterator ip(patch_level->begin());
-                 ip != patch_level->end();
-                 ip++)
+            else if (d_dim == tbox::Dimension(3))
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
-                
-                // Get the SFS stress cell data.
-                
-                boost::shared_ptr<pdat::CellData<double> > data_SFS_stress(
-                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                        patch->getPatchData(s_variable_SFS_stress, data_context)));
-                
-                // Get the pointers to SFS stress data.
-                double* tau_SFS_11 = data_SFS_stress->getPointer(0);
-                double* tau_SFS_12 = data_SFS_stress->getPointer(1);
-                double* tau_SFS_13 = data_SFS_stress->getPointer(2);
-                double* tau_SFS_22 = data_SFS_stress->getPointer(3);
-                double* tau_SFS_23 = data_SFS_stress->getPointer(4);
-                double* tau_SFS_33 = data_SFS_stress->getPointer(5);
-                
-                // Get the number of ghost cells of the SFS stress cell data.
-                const hier::IntVector num_ghosts_SFS_stress = data_SFS_stress->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_SFS_stress = data_SFS_stress->getGhostBox().numberCells();
-                
-                const int num_ghosts_0_SFS_stress = num_ghosts_SFS_stress[0];
-                const int num_ghosts_1_SFS_stress = num_ghosts_SFS_stress[1];
-                const int num_ghosts_2_SFS_stress = num_ghosts_SFS_stress[2];
-                const int ghostcell_dim_0_SFS_stress = ghostcell_dims_SFS_stress[0];
-                const int ghostcell_dim_1_SFS_stress = ghostcell_dims_SFS_stress[1];
-                
-                // Get the box that covers the interior of patch.
-                const hier::Box interior_box = data_SFS_stress->getBox();
-                const hier::IntVector interior_dims = interior_box.numberCells();
-                
-                const int interior_dim_0 = interior_dims[0];
-                const int interior_dim_1 = interior_dims[1];
-                const int interior_dim_2 = interior_dims[2];
-                
-                /*
-                 * Register the patch and the quantity in the flow model and compute the
-                 * corresponding cell data.
-                 */
-                
-                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
-                
-                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
-                
-                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
-                
-                num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("DENSITY", num_ghosts));
-                
-                num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
-                
-                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
-                
-                d_flow_model_tmp->computeGlobalDerivedCellData();
-                
-                /*
-                 * Get the pointers to data inside the flow model.
-                 */
-                
-                boost::shared_ptr<pdat::CellData<double> > data_density =
-                    d_flow_model_tmp->getGlobalCellData("DENSITY");
-                
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
-                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
-                
-                double* rho = data_density->getPointer(0);
-                double* u   = data_velocity->getPointer(0);
-                double* v   = data_velocity->getPointer(1);
-                double* w   = data_velocity->getPointer(2);
-                
-                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
-                
-                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
-                
-                const int num_ghosts_0_density = num_ghosts_density[0];
-                const int num_ghosts_1_density = num_ghosts_density[1];
-                const int num_ghosts_2_density = num_ghosts_density[2];
-                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
-                const int ghostcell_dim_1_density = ghostcell_dims_density[1];
-                
-                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
-                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
-                const int num_ghosts_2_velocity = num_ghosts_velocity[2];
-                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
-                const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
-                
-                for (int k = -num_ghosts_2_SFS_stress; k < interior_dim_2 + num_ghosts_2_SFS_stress; k++)
-                {
-                    for (int j = -num_ghosts_1_SFS_stress; j < interior_dim_1 + num_ghosts_1_SFS_stress; j++)
-                    {
-                        for (int i = -num_ghosts_0_SFS_stress; i < interior_dim_0 + num_ghosts_0_SFS_stress; i++)
-                        {
-                            /*
-                             * Compute the convective stress.
-                             */
-                                
-                            // Compute the linear indices.
-                            const int idx_SFS_stress = (i + num_ghosts_0_SFS_stress) +
-                                (j + num_ghosts_1_SFS_stress)*ghostcell_dim_0_SFS_stress +
-                                (k + num_ghosts_2_SFS_stress)*ghostcell_dim_0_SFS_stress*
-                                    ghostcell_dim_1_SFS_stress;
-                            
-                            const int idx_density = (i + num_ghosts_0_density) +
-                                (j + num_ghosts_1_density)*ghostcell_dim_0_density +
-                                (k + num_ghosts_2_density)*ghostcell_dim_0_density*
-                                    ghostcell_dim_1_density;
-                            
-                            const int idx_velocity = (i + num_ghosts_0_velocity) +
-                                (j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
-                                (k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
-                                    ghostcell_dim_1_velocity;
-                            
-                            tau_SFS_11[idx_SFS_stress] = rho[idx_density]*u[idx_velocity]*u[idx_velocity];
-                            tau_SFS_12[idx_SFS_stress] = rho[idx_density]*u[idx_velocity]*v[idx_velocity];
-                            tau_SFS_13[idx_SFS_stress] = rho[idx_density]*u[idx_velocity]*w[idx_velocity];
-                            tau_SFS_22[idx_SFS_stress] = rho[idx_density]*v[idx_velocity]*v[idx_velocity];
-                            tau_SFS_23[idx_SFS_stress] = rho[idx_density]*v[idx_velocity]*w[idx_velocity];
-                            tau_SFS_33[idx_SFS_stress] = rho[idx_density]*w[idx_velocity]*w[idx_velocity];
-                        }
-                    }
-                }
-                
-                /*
-                 * Unregister the patch and data of all registered derived cell variables in the flow model.
-                 */
-                
-                d_flow_model_tmp->unregisterPatch();
-                
-                boost::shared_ptr<pdat::CellData<double> > data_convective_stress_filtered(
-                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                        patch->getPatchData(s_variable_convective_stress_filtered, data_context)));
-                
                 for (int di = 0; di < 6; di++)
                 {
                     // Apply filter in x-direction.
                     
                     d_filter_x->applyFilter(
                         data_convective_stress_filtered,
-                        data_SFS_stress,
+                        data_convective_stress_unfiltered,
                         di,
                         di);
                 }
                 
                 // Apply filter in y-direction.
                 
-                data_SFS_stress->copy(*data_convective_stress_filtered);
+                data_convective_stress_unfiltered->copy(*data_convective_stress_filtered);
                 
                 for (int di = 0; di < 6; di++)
                 {
                     d_filter_y->applyFilter(
                         data_convective_stress_filtered,
-                        data_SFS_stress,
+                        data_convective_stress_unfiltered,
                         di,
                         di);
                 }
                 
                 // Apply filter in z-direction.
                 
-                data_SFS_stress->copy(*data_convective_stress_filtered);
+                data_convective_stress_unfiltered->copy(*data_convective_stress_filtered);
                 
                 for (int di = 0; di < 6; di++)
                 {
                     d_filter_z->applyFilter(
                         data_convective_stress_filtered,
-                        data_SFS_stress,
+                        data_convective_stress_unfiltered,
                         di,
                         di);
                 }
             }
         }
     }
+    
+    d_convective_stress_filtered = true;
 }
 
 
