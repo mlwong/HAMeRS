@@ -809,18 +809,18 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 data_context,
                 output_time);
         }
-        else if (statistical_quantity_key == "rR22_budget")
+        else if (statistical_quantity_key == "rR22_budget_filtered")
         {
-            outputBudgetReynoldsNormalStressInYDirectionWithInhomogeneousXDirection(
-                "rR22_budget.dat",
+            outputBudgetFilteredReynoldsNormalStressInYDirectionWithInhomogeneousXDirection(
+                "rR22_budget_filtered.dat",
                 patch_hierarchy,
                 data_context,
                 output_time);
         }
-        else if (statistical_quantity_key == "rR33_budget")
+        else if (statistical_quantity_key == "rR33_budget_filtered")
         {
-            outputBudgetReynoldsNormalStressInZDirectionWithInhomogeneousXDirection(
-                "rR33_budget.dat",
+            outputBudgetFilteredReynoldsNormalStressInZDirectionWithInhomogeneousXDirection(
+                "rR33_budget_filtered.dat",
                 patch_hierarchy,
                 data_context,
                 output_time);
