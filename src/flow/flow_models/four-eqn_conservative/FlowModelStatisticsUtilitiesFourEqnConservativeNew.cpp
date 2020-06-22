@@ -4807,7 +4807,7 @@ outputBudgetReynoldsNormalStressInZDirectionWithInhomogeneousXDirection(
             false,
             2,
             dw_dz_mean,
-            4,
+            5,
             tau33_mean,
             patch_hierarchy,
             data_context);
