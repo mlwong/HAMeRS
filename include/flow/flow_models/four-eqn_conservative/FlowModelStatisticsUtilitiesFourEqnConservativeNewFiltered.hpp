@@ -643,6 +643,14 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
+        /*
+         * Compute Favre-filtered specific volume.
+         */
+        void
+        computeFavreFilteredSpecificVolume(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
         // Helper functions.
         
         /*
@@ -717,6 +725,26 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::VariableContext>& data_context) const;
         
         /*
+         * Output budget of turbulent mass flux in x-direction with inhomogeneous x-direction to a file.
+         */
+        void
+        outputBudgetFilteredTurbMassFluxXWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output budget of density specific volume covariance with inhomogeneous x-direction to a file.
+         */
+        void
+        outputBudgetFilteredDensitySpecificVolumeCovarianceWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
          * Output budget of Reynolds normal stress in x-direction with inhomogeneous x-direction to a file.
          */
         void
@@ -769,6 +797,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_SFS_stress;
         
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_velocity_Favre_filtered;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_specific_volume_Favre_filtered;
         
         bool d_pressure_filtered;
         bool d_shear_stress_filtered;
