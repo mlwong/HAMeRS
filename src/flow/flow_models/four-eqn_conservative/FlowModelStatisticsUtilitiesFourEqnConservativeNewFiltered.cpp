@@ -30973,20 +30973,20 @@ outputBudgetFilteredTurbMassFluxXWithInhomogeneousXDirection(
      * Compute term VI(1).
      */
     
-    quantity_names.push_back("DENSITY");
+    variable_quantities.push_back(s_variable_specific_volume_Favre_filtered);
     component_indices.push_back(0);
-    use_reciprocal.push_back(true);
+    use_reciprocal.push_back(false);
     derivative_directions.push_back(-1);
     averaged_quantities.push_back(rho_inv_mean);
     
-    quantity_names.push_back("PRESSURE");
+    variable_quantities.push_back(s_variable_pressure_filtered);
     component_indices.push_back(0);
     use_reciprocal.push_back(false);
     derivative_directions.push_back(0);
     averaged_quantities.push_back(dp_dx_mean);
     
     std::vector<double> rho_rho_inv_p_dp_dx_p = getQuantityCorrelationWithInhomogeneousXDirection(
-        quantity_names,
+        variable_quantities,
         component_indices,
         use_reciprocal,
         derivative_directions,
@@ -30994,7 +30994,7 @@ outputBudgetFilteredTurbMassFluxXWithInhomogeneousXDirection(
         patch_hierarchy,
         data_context);
     
-    quantity_names.clear();
+    variable_quantities.clear();
     component_indices.clear();
     use_reciprocal.clear();
     derivative_directions.clear();

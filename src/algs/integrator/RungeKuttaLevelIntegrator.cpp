@@ -3587,7 +3587,7 @@ RungeKuttaLevelIntegrator::outputDataStatistics(
     
     // Filter variables if necessary.
     
-    const int num_filtering = 4;
+    const int num_filtering = 1;
     
     for (int count = 0; count < num_filtering; count++)
     {
