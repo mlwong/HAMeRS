@@ -286,7 +286,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::registerVariables(
         RungeKuttaLevelIntegrator::STATISTICS,
         d_grid_geometry,
         "CONSERVATIVE_COARSEN",
-        "CONSERVATIVE_LINEAR_REFINE");
+        "LINEAR_REFINE");
     
     integrator->registerVariable(
         s_variable_convective_stress_unfiltered,
@@ -304,7 +304,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::registerVariables(
         RungeKuttaLevelIntegrator::STATISTICS,
         d_grid_geometry,
         "CONSERVATIVE_COARSEN",
-        "CONSERVATIVE_LINEAR_REFINE");
+        "LINEAR_REFINE");
     
     integrator->registerVariable(
         s_variable_shear_stress_filtered,
@@ -313,7 +313,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::registerVariables(
         RungeKuttaLevelIntegrator::STATISTICS,
         d_grid_geometry,
         "CONSERVATIVE_COARSEN",
-        "CONSERVATIVE_LINEAR_REFINE");
+        "LINEAR_REFINE");
     
     integrator->registerVariable(
         s_variable_convective_stress_filtered,
@@ -322,7 +322,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::registerVariables(
         RungeKuttaLevelIntegrator::STATISTICS,
         d_grid_geometry,
         "CONSERVATIVE_COARSEN",
-        "CONSERVATIVE_LINEAR_REFINE");
+        "LINEAR_REFINE");
     
     integrator->registerVariable(
         s_variable_SFS_stress,
@@ -331,7 +331,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::registerVariables(
         RungeKuttaLevelIntegrator::STATISTICS,
         d_grid_geometry,
         "NO_COARSEN",
-        "NO_REFINE");
+        "LINEAR_REFINE");
     
     integrator->registerVariable(
         s_variable_velocity_Favre_filtered,
