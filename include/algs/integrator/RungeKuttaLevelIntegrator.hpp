@@ -1142,6 +1142,12 @@ class RungeKuttaLevelIntegrator:
         boost::shared_ptr<xfer::RefineAlgorithm> d_fill_statistics;
         
         /*
+         * Coarsen algorithms for statistics data.
+         */
+        
+        boost::shared_ptr<xfer::CoarsenAlgorithm> d_coarsen_statistics;
+        
+        /*
          * Number of levels of time-dependent data that must be maintained on each patch level. This
          * value is used to coordinate the needs of the time integration and the regridding process
          * with the patch data types and descriptor indices.
