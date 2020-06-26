@@ -32961,32 +32961,32 @@ outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
     variable_quantities.clear();
     component_indices.clear();
     
-    std::vector<double> drho_u_u_dx_mean(finest_level_dim_0, double(0));
+    // std::vector<double> drho_u_u_dx_mean(finest_level_dim_0, double(0));
     
-    for (int i = 0; i < finest_level_dim_0; i++)
-    {
-        drho_u_u_dx_mean[i] = double(2)*drho_u_u_dx_mean_1[i] - drho_u_u_dx_mean_2[i];
-    }
+    // for (int i = 0; i < finest_level_dim_0; i++)
+    // {
+    //     drho_u_u_dx_mean[i] = double(2)*drho_u_u_dx_mean_1[i] - drho_u_u_dx_mean_2[i];
+    // }
     
     // Old implementation.
-    // // quantity_names.push_back("MOMENTUM");
-    // variable_quantities.push_back(s_variable_momentum_filtered);
-    // component_indices.push_back(0);
+    // quantity_names.push_back("MOMENTUM");
+    variable_quantities.push_back(s_variable_momentum_filtered);
+    component_indices.push_back(0);
     
-    // // quantity_names.push_back("VELOCITY");
-    // variable_quantities.push_back(s_variable_velocity_Favre_filtered);
-    // component_indices.push_back(0);
+    // quantity_names.push_back("VELOCITY");
+    variable_quantities.push_back(s_variable_velocity_Favre_filtered);
+    component_indices.push_back(0);
     
-    // std::vector<double> drho_u_u_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
-    //     variable_quantities,
-    //     component_indices,
-    //     0,
-    //     patch_hierarchy,
-    //     data_context);
+    std::vector<double> drho_u_u_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        variable_quantities,
+        component_indices,
+        0,
+        patch_hierarchy,
+        data_context);
     
-    // // quantity_names.clear();
-    // variable_quantities.clear();
-    // component_indices.clear();
+    // quantity_names.clear();
+    variable_quantities.clear();
+    component_indices.clear();
     
     std::vector<double> d_rho_u_tilde_R11_dx(finest_level_dim_0, double(0));
     
