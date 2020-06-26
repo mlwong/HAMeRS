@@ -32903,7 +32903,6 @@ outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
     std::vector<double> drho_u_dx_mean = getAveragedQuantityWithInhomogeneousXDirection(
         s_variable_derivatives_filtered,
         1,
-        0,
         patch_hierarchy,
         data_context);
     
@@ -32917,7 +32916,6 @@ outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
     
     std::vector<double> drho_dx_mean = getAveragedQuantityWithInhomogeneousXDirection(
         s_variable_derivatives_filtered,
-        0,
         0,
         patch_hierarchy,
         data_context);
