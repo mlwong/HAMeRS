@@ -32181,28 +32181,16 @@ outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
     variable_quantities.clear();
     component_indices.clear();
     
-    // Old implementation.
-    // std::vector<double> d_rho_u_tilde_R11_dx(finest_level_dim_0, double(0));
-    
-    // for (int i = 0; i < finest_level_dim_0; i++)
-    // {
-    //     const double dR_11_tilde_dx = -(rho_R11[i]/(rho_mean[i]*rho_mean[i]))*drho_dx_mean[i] + 
-    //         double(1)/rho_mean[i]*(drho_u_u_dx_mean[i] - double(2)*u_tilde[i]*drho_u_dx_mean[i] + 
-    //         u_tilde[i]*u_tilde[i]*drho_dx_mean[i]);
-    //     
-    //     d_rho_u_tilde_R11_dx[i] = rho_u_mean[i]*dR_11_tilde_dx + R11[i]*drho_u_dx_mean[i];
-    // }
-    
-    std::vector<double> rho_u_tilde_R11(rho_R11);
+    std::vector<double> d_rho_u_tilde_R11_dx(finest_level_dim_0, double(0));
     
     for (int i = 0; i < finest_level_dim_0; i++)
     {
-        rho_u_tilde_R11[i] *= u_tilde[i];
+        const double dR_11_tilde_dx = -(rho_R11[i]/(rho_mean[i]*rho_mean[i]))*drho_dx_mean[i] + 
+            double(1)/rho_mean[i]*(drho_u_u_dx_mean[i] - double(2)*u_tilde[i]*drho_u_dx_mean[i] + 
+            u_tilde[i]*u_tilde[i]*drho_dx_mean[i]);
+        
+        d_rho_u_tilde_R11_dx[i] = rho_u_mean[i]*dR_11_tilde_dx + R11[i]*drho_u_dx_mean[i];
     }
-    
-    std::vector<double> d_rho_u_tilde_R11_dx = computeDerivativeOfVector1D(
-        rho_u_tilde_R11,
-        dx);
     
     /*
      * Compute term II in moving frame of mixing layer.
@@ -33162,27 +33150,16 @@ outputBudgetFilteredReynoldsNormalStressInYDirectionWithInhomogeneousXDirection(
     variable_quantities.clear();
     component_indices.clear();
     
-    // std::vector<double> d_rho_u_tilde_R22_dx(finest_level_dim_0, double(0));
-    
-    // for (int i = 0; i < finest_level_dim_0; i++)
-    // {
-    //     const double dR_22_tilde_dx = -(rho_R22[i]/(rho_mean[i]*rho_mean[i]))*drho_dx_mean[i] + 
-    //         double(1)/rho_mean[i]*(drho_v_v_dx_mean[i] - double(2)*v_tilde[i]*drho_v_dx_mean[i] + 
-    //         v_tilde[i]*v_tilde[i]*drho_dx_mean[i]);
-    //     
-    //     d_rho_u_tilde_R22_dx[i] = rho_u_mean[i]*dR_22_tilde_dx + R22[i]*drho_u_dx_mean[i];
-    // }
-    
-    std::vector<double> rho_u_tilde_R22(rho_R22);
+    std::vector<double> d_rho_u_tilde_R22_dx(finest_level_dim_0, double(0));
     
     for (int i = 0; i < finest_level_dim_0; i++)
     {
-        rho_u_tilde_R22[i] *= u_tilde[i];
+        const double dR_22_tilde_dx = -(rho_R22[i]/(rho_mean[i]*rho_mean[i]))*drho_dx_mean[i] + 
+            double(1)/rho_mean[i]*(drho_v_v_dx_mean[i] - double(2)*v_tilde[i]*drho_v_dx_mean[i] + 
+            v_tilde[i]*v_tilde[i]*drho_dx_mean[i]);
+        
+        d_rho_u_tilde_R22_dx[i] = rho_u_mean[i]*dR_22_tilde_dx + R22[i]*drho_u_dx_mean[i];
     }
-    
-    std::vector<double> d_rho_u_tilde_R22_dx = computeDerivativeOfVector1D(
-        rho_u_tilde_R22,
-        dx);
     
     /*
      * Compute term II in moving frame of mixing layer.
@@ -34025,28 +34002,16 @@ outputBudgetFilteredReynoldsNormalStressInZDirectionWithInhomogeneousXDirection(
     variable_quantities.clear();
     component_indices.clear();
     
-    // Old implementation.
-    // std::vector<double> d_rho_u_tilde_R33_dx(finest_level_dim_0, double(0));
-    
-    // for (int i = 0; i < finest_level_dim_0; i++)
-    // {
-    //     const double dR_33_tilde_dx = -(rho_R33[i]/(rho_mean[i]*rho_mean[i]))*drho_dx_mean[i] + 
-    //         double(1)/rho_mean[i]*(drho_w_w_dx_mean[i] - double(2)*w_tilde[i]*drho_w_dx_mean[i] + 
-    //         w_tilde[i]*w_tilde[i]*drho_dx_mean[i]);
-    //     
-    //     d_rho_u_tilde_R33_dx[i] = rho_u_mean[i]*dR_33_tilde_dx + R33[i]*drho_u_dx_mean[i];
-    // }
-    
-    std::vector<double> rho_u_tilde_R33(rho_R33);
+    std::vector<double> d_rho_u_tilde_R33_dx(finest_level_dim_0, double(0));
     
     for (int i = 0; i < finest_level_dim_0; i++)
     {
-        rho_u_tilde_R33[i] *= u_tilde[i];
+        const double dR_33_tilde_dx = -(rho_R33[i]/(rho_mean[i]*rho_mean[i]))*drho_dx_mean[i] + 
+            double(1)/rho_mean[i]*(drho_w_w_dx_mean[i] - double(2)*w_tilde[i]*drho_w_dx_mean[i] + 
+            w_tilde[i]*w_tilde[i]*drho_dx_mean[i]);
+        
+        d_rho_u_tilde_R33_dx[i] = rho_u_mean[i]*dR_33_tilde_dx + R33[i]*drho_u_dx_mean[i];
     }
-    
-    std::vector<double> d_rho_u_tilde_R33_dx = computeDerivativeOfVector1D(
-        rho_u_tilde_R33,
-        dx);
     
     /*
      * Compute term II in moving frame of mixing layer.
