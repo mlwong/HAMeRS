@@ -15,12 +15,15 @@ boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourE
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_pressure_unfiltered;
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_shear_stress_unfiltered;
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_convective_stress_unfiltered;
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_derivatives_unfiltered;
 
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_pressure_filtered;
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_shear_stress_filtered;
 
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_convective_stress_filtered;
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_SFS_stress;
+
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_derivatives_filtered;
 
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_velocity_Favre_filtered;
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelStatisticsUtilitiesFourEqnConservative::s_variable_specific_volume_Favre_filtered;
@@ -45,6 +48,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::FlowModelStatisticsUtilitiesFou
         d_pressure_filtered(false),
         d_shear_stress_filtered(false),
         d_convective_stress_filtered(false),
+        d_derivatives_filtered(false),
         d_conservative_variables_filtered(false),
         d_equation_of_state_mixing_rules(equation_of_state_mixing_rules),
         d_equation_of_mass_diffusivity_mixing_rules(equation_of_mass_diffusivity_mixing_rules),
@@ -110,6 +114,22 @@ FlowModelStatisticsUtilitiesFourEqnConservative::FlowModelStatisticsUtilitiesFou
             new pdat::CellVariable<double>(d_dim, "convective stress unfiltered", 6));
     }
     
+    if (d_dim == tbox::Dimension(1))
+    {
+        s_variable_derivatives_unfiltered = boost::shared_ptr<pdat::CellVariable<double> > (
+            new pdat::CellVariable<double>(d_dim, "derivatives unfiltered", 2));
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        s_variable_derivatives_unfiltered = boost::shared_ptr<pdat::CellVariable<double> > (
+            new pdat::CellVariable<double>(d_dim, "derivatives unfiltered", 3));
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        s_variable_derivatives_unfiltered = boost::shared_ptr<pdat::CellVariable<double> > (
+            new pdat::CellVariable<double>(d_dim, "derivatives unfiltered", 4));
+    }
+    
     s_variable_pressure_filtered = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "pressure filtered", 1));
     
@@ -152,6 +172,22 @@ FlowModelStatisticsUtilitiesFourEqnConservative::FlowModelStatisticsUtilitiesFou
         
         s_variable_SFS_stress = boost::shared_ptr<pdat::CellVariable<double> > (
             new pdat::CellVariable<double>(d_dim, "SFS stress", 6));
+    }
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        s_variable_derivatives_filtered = boost::shared_ptr<pdat::CellVariable<double> > (
+            new pdat::CellVariable<double>(d_dim, "derivatives filtered", 2));
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        s_variable_derivatives_filtered = boost::shared_ptr<pdat::CellVariable<double> > (
+            new pdat::CellVariable<double>(d_dim, "derivatives filtered", 3));
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        s_variable_derivatives_filtered = boost::shared_ptr<pdat::CellVariable<double> > (
+            new pdat::CellVariable<double>(d_dim, "derivatives filtered", 4));
     }
     
     s_variable_velocity_Favre_filtered = boost::shared_ptr<pdat::CellVariable<double> > (
@@ -298,6 +334,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::registerVariables(
         "NO_REFINE");
     
     integrator->registerVariable(
+        s_variable_derivatives_unfiltered,
+        num_ghosts,
+        num_ghosts,
+        RungeKuttaLevelIntegrator::STATISTICS,
+        d_grid_geometry,
+        "CONSERVATIVE_COARSEN",
+        "CONSERVATIVE_LINEAR_REFINE");
+    
+    integrator->registerVariable(
         s_variable_pressure_filtered,
         num_ghosts,
         num_ghosts,
@@ -332,6 +377,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::registerVariables(
         d_grid_geometry,
         "NO_COARSEN",
         "LINEAR_REFINE");
+    
+    integrator->registerVariable(
+        s_variable_derivatives_filtered,
+        num_ghosts,
+        num_ghosts,
+        RungeKuttaLevelIntegrator::STATISTICS,
+        d_grid_geometry,
+        "CONSERVATIVE_COARSEN",
+        "CONSERVATIVE_LINEAR_REFINE");
     
     integrator->registerVariable(
         s_variable_velocity_Favre_filtered,
@@ -382,6 +436,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeVariables(
     // computeConvectiveStress(
     //     patch_hierarchy,
     //     data_context);
+    
+    computeDerivatives(
+        patch_hierarchy,
+        data_context);
     
     tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::computeVariables: end" << std::endl;
 }
@@ -436,6 +494,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::filterVariables(
         data_context);
     
     filterConvectiveStress(
+        level,
+        patch_hierarchy,
+        data_context);
+    
+    filterDerivatives(
         level,
         patch_hierarchy,
         data_context);
@@ -24742,6 +24805,551 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeConvectiveStress(
 
 
 /*
+ * Compute derivatives with only x direction as inhomogeneous direction.
+ */
+void 
+FlowModelStatisticsUtilitiesFourEqnConservative::computeDerivatives(
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context)
+{
+    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                // Get the derivatives cell data.
+                
+                boost::shared_ptr<pdat::CellData<double> > data_derivatives(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch->getPatchData(s_variable_derivatives_unfiltered, data_context)));
+                
+                // Get the pointers to derivatives data.
+                double* drho_dx = data_derivatives->getPointer(0);
+                double* drhou_dx = data_derivatives->getPointer(1);
+                
+                // Get the number of ghost cells of the derivatives cell data.
+                const hier::IntVector num_ghosts_derivatives = data_derivatives->getGhostCellWidth();
+                const int num_ghosts_0_derivatives = num_ghosts_derivatives[0];
+                
+                // Get the box that covers the interior of patch.
+                const hier::Box interior_box = data_derivatives->getBox();
+                const hier::IntVector interior_dims = interior_box.numberCells();
+                
+                const int interior_dim_0 = interior_dims[0];
+                
+                /*
+                 * Register the patch and the quantity in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                
+                // HARD CODE TO BE SIXTH ORDER CENTRAL SCHEME FOR DIFFERENTIATION.
+                TBOX_ASSERT(num_ghosts >= hier::IntVector::getOne(d_dim)*3);
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("DENSITY", num_ghosts));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOMENTUM", num_ghosts));
+                
+                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                
+                d_flow_model_tmp->computeGlobalDerivedCellData();
+                
+                /*
+                 * Get the pointers to data inside the flow model.
+                 */
+                
+                boost::shared_ptr<pdat::CellData<double> > data_density =
+                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_momentum =
+                    d_flow_model_tmp->getGlobalCellData("MOMENTUM");
+                
+                double* rho  = data_density->getPointer(0);
+                double* rhou = data_momentum->getPointer(0);
+                
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector num_ghosts_momentum = data_momentum->getGhostCellWidth();
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_0_momentum = num_ghosts_momentum[0];
+                
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    /*
+                     * Compute the derivatives.
+                     */
+                    
+                    // Compute the linear index of derivatives.
+                    const int idx_derivatives = i + num_ghosts_0_derivatives;
+                    
+                    // Compute the linear indices of density and momentum.
+                    // const int idx_density = i + num_ghosts_0_density;
+                    // const int idx_momentum = i + num_ghosts_0_momentum;
+                    
+                    const int idx_density_x_LLL = (i - 3) + num_ghosts_0_density;
+                    const int idx_density_x_LL  = (i - 2) + num_ghosts_0_density;
+                    const int idx_density_x_L   = (i - 1) + num_ghosts_0_density;
+                    const int idx_density_x_R   = (i + 1) + num_ghosts_0_density;
+                    const int idx_density_x_RR  = (i + 2) + num_ghosts_0_density;
+                    const int idx_density_x_RRR = (i + 3) + num_ghosts_0_density;
+                    
+                    const int idx_momentum_x_LLL = (i - 3) + num_ghosts_0_momentum;
+                    const int idx_momentum_x_LL  = (i - 2) + num_ghosts_0_momentum;
+                    const int idx_momentum_x_L   = (i - 1) + num_ghosts_0_momentum;
+                    const int idx_momentum_x_R   = (i + 1) + num_ghosts_0_momentum;
+                    const int idx_momentum_x_RR  = (i + 2) + num_ghosts_0_momentum;
+                    const int idx_momentum_x_RRR = (i + 3) + num_ghosts_0_momentum;
+                    
+                    drho_dx[idx_derivatives] = (double(1)/double(60)*(rho[idx_density_x_RRR] - rho[idx_density_x_LLL])
+                        - double(3)/double(20)*(rho[idx_density_x_RR] - rho[idx_density_x_LL])
+                        + double(3)/double(4)*(rho[idx_density_x_R] - rho[idx_density_x_L]))/dx[0];
+                    
+                    drhou_dx[idx_derivatives] = (double(1)/double(60)*(rhou[idx_momentum_x_RRR] - rhou[idx_momentum_x_LLL])
+                        - double(3)/double(20)*(rhou[idx_momentum_x_RR] - rhou[idx_momentum_x_LL])
+                        + double(3)/double(4)*(rhou[idx_momentum_x_R] - rhou[idx_momentum_x_L]))/dx[0];
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                // Get the derivatives cell data.
+                
+                boost::shared_ptr<pdat::CellData<double> > data_derivatives(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch->getPatchData(s_variable_derivatives_unfiltered, data_context)));
+                
+                // Get the pointers to derivatives data.
+                double* drho_dx = data_derivatives->getPointer(0);
+                double* drhou_dx = data_derivatives->getPointer(1);
+                double* drhov_dx = data_derivatives->getPointer(2);
+                
+                // Get the number of ghost cells of the derivatives cell data.
+                const hier::IntVector num_ghosts_derivatives = data_derivatives->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_derivatives = data_derivatives->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_derivatives = num_ghosts_derivatives[0];
+                const int num_ghosts_1_derivatives = num_ghosts_derivatives[1];
+                const int ghostcell_dim_0_derivatives = ghostcell_dims_derivatives[0];
+                
+                // Get the box that covers the interior of patch.
+                const hier::Box interior_box = data_derivatives->getBox();
+                const hier::IntVector interior_dims = interior_box.numberCells();
+                
+                const int interior_dim_0 = interior_dims[0];
+                const int interior_dim_1 = interior_dims[1];
+                
+                /*
+                 * Register the patch and the quantity in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                
+                // HARD CODE TO BE SIXTH ORDER CENTRAL SCHEME FOR DIFFERENTIATION.
+                TBOX_ASSERT(num_ghosts >= hier::IntVector::getOne(d_dim)*3);
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("DENSITY", num_ghosts));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOMENTUM", num_ghosts));
+                
+                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                
+                d_flow_model_tmp->computeGlobalDerivedCellData();
+                
+                /*
+                 * Get the pointers to data inside the flow model.
+                 */
+                
+                boost::shared_ptr<pdat::CellData<double> > data_density =
+                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_momentum =
+                    d_flow_model_tmp->getGlobalCellData("MOMENTUM");
+                
+                double* rho = data_density->getPointer(0);
+                double* rhou = data_momentum->getPointer(0);
+                double* rhov = data_momentum->getPointer(1);
+                
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_momentum = data_momentum->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_momentum = data_momentum->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                
+                const int num_ghosts_0_momentum = num_ghosts_momentum[0];
+                const int num_ghosts_1_momentum = num_ghosts_momentum[1];
+                const int ghostcell_dim_0_momentum = ghostcell_dims_momentum[0];
+                
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        /*
+                         * Compute the derivatives.
+                         */
+                            
+                        // Compute the linear indices.
+                        const int idx_derivatives = i + num_ghosts_0_derivatives +
+                            (j + num_ghosts_1_derivatives)*ghostcell_dim_0_derivatives;
+                        
+                        // const int idx_density = (i + num_ghosts_0_density) +
+                        //     (j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                        
+                        // const int idx_momentum = (i + num_ghosts_0_momentum) +
+                        //     (j + num_ghosts_1_momentum)*ghostcell_dim_0_momentum;
+                        
+                        const int idx_density_x_LLL = ((i - 3) + num_ghosts_0_density) +
+                            (j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                        
+                        const int idx_density_x_LL  = ((i - 2) + num_ghosts_0_density) +
+                            (j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                        
+                        const int idx_density_x_L   = ((i - 1) + num_ghosts_0_density) +
+                            (j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                        
+                        const int idx_density_x_R   = ((i + 1) + num_ghosts_0_density) +
+                            (j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                        
+                        const int idx_density_x_RR  = ((i + 2) + num_ghosts_0_density) +
+                            (j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                        
+                        const int idx_density_x_RRR = ((i + 3) + num_ghosts_0_density) +
+                            (j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                        
+                        const int idx_momentum_x_LLL = ((i - 3) + num_ghosts_0_momentum) +
+                            (j + num_ghosts_1_momentum)*ghostcell_dim_0_momentum;
+                        
+                        const int idx_momentum_x_LL  = ((i - 2) + num_ghosts_0_momentum) +
+                            (j + num_ghosts_1_momentum)*ghostcell_dim_0_momentum;
+                        
+                        const int idx_momentum_x_L   = ((i - 1) + num_ghosts_0_momentum) +
+                            (j + num_ghosts_1_momentum)*ghostcell_dim_0_momentum;
+                        
+                        const int idx_momentum_x_R   = ((i + 1) + num_ghosts_0_momentum) +
+                            (j + num_ghosts_1_momentum)*ghostcell_dim_0_momentum;
+                        
+                        const int idx_momentum_x_RR  = ((i + 2) + num_ghosts_0_momentum) +
+                            (j + num_ghosts_1_momentum)*ghostcell_dim_0_momentum;
+                        
+                        const int idx_momentum_x_RRR = ((i + 3) + num_ghosts_0_momentum) +
+                            (j + num_ghosts_1_momentum)*ghostcell_dim_0_momentum;
+                        
+                        drho_dx[idx_derivatives] = (double(1)/double(60)*(rho[idx_density_x_RRR] - rho[idx_density_x_LLL])
+                            - double(3)/double(20)*(rho[idx_density_x_RR] - rho[idx_density_x_LL])
+                            + double(3)/double(4)*(rho[idx_density_x_R] - rho[idx_density_x_L]))/dx[0];
+                        
+                        drhou_dx[idx_derivatives] = (double(1)/double(60)*(rhou[idx_momentum_x_RRR] - rhou[idx_momentum_x_LLL])
+                            - double(3)/double(20)*(rhou[idx_momentum_x_RR] - rhou[idx_momentum_x_LL])
+                            + double(3)/double(4)*(rhou[idx_momentum_x_R] - rhou[idx_momentum_x_L]))/dx[0];
+                        
+                        drhov_dx[idx_derivatives] = (double(1)/double(60)*(rhov[idx_momentum_x_RRR] - rhov[idx_momentum_x_LLL])
+                            - double(3)/double(20)*(rhov[idx_momentum_x_RR] - rhov[idx_momentum_x_LL])
+                            + double(3)/double(4)*(rhov[idx_momentum_x_R] - rhov[idx_momentum_x_L]))/dx[0];
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                // Get the derivatives cell data.
+                
+                boost::shared_ptr<pdat::CellData<double> > data_derivatives(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch->getPatchData(s_variable_derivatives_unfiltered, data_context)));
+                
+                // Get the pointers to derivatives data.
+                double* drho_dx = data_derivatives->getPointer(0);
+                double* drhou_dx = data_derivatives->getPointer(1);
+                double* drhov_dx = data_derivatives->getPointer(2);
+                double* drhow_dx = data_derivatives->getPointer(3);
+                
+                // Get the number of ghost cells of the derivatives cell data.
+                const hier::IntVector num_ghosts_derivatives = data_derivatives->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_derivatives = data_derivatives->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_derivatives = num_ghosts_derivatives[0];
+                const int num_ghosts_1_derivatives = num_ghosts_derivatives[1];
+                const int num_ghosts_2_derivatives = num_ghosts_derivatives[2];
+                const int ghostcell_dim_0_derivatives = ghostcell_dims_derivatives[0];
+                const int ghostcell_dim_1_derivatives = ghostcell_dims_derivatives[1];
+                
+                // Get the box that covers the interior of patch.
+                const hier::Box interior_box = data_derivatives->getBox();
+                const hier::IntVector interior_dims = interior_box.numberCells();
+                
+                const int interior_dim_0 = interior_dims[0];
+                const int interior_dim_1 = interior_dims[1];
+                const int interior_dim_2 = interior_dims[2];
+                
+                /*
+                 * Register the patch and the quantity in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                
+                // HARD CODE TO BE SIXTH ORDER CENTRAL SCHEME FOR DIFFERENTIATION.
+                TBOX_ASSERT(num_ghosts >= hier::IntVector::getOne(d_dim)*3);
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("DENSITY", num_ghosts));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MOMENTUM", num_ghosts));
+                
+                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                
+                d_flow_model_tmp->computeGlobalDerivedCellData();
+                
+                /*
+                 * Get the pointers to data inside the flow model.
+                 */
+                
+                boost::shared_ptr<pdat::CellData<double> > data_density =
+                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_momentum =
+                    d_flow_model_tmp->getGlobalCellData("MOMENTUM");
+                
+                double* rho = data_density->getPointer(0);
+                double* rhou = data_momentum->getPointer(0);
+                double* rhov = data_momentum->getPointer(1);
+                double* rhow = data_momentum->getPointer(2);
+                
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_momentum = data_momentum->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_momentum = data_momentum->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int num_ghosts_2_density = num_ghosts_density[2];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                const int ghostcell_dim_1_density = ghostcell_dims_density[1];
+                
+                const int num_ghosts_0_momentum = num_ghosts_momentum[0];
+                const int num_ghosts_1_momentum = num_ghosts_momentum[1];
+                const int num_ghosts_2_momentum = num_ghosts_momentum[2];
+                const int ghostcell_dim_0_momentum = ghostcell_dims_momentum[0];
+                const int ghostcell_dim_1_momentum = ghostcell_dims_momentum[1];
+                
+                for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            /*
+                             * Compute the derivatives.
+                             */
+                                
+                            // Compute the linear indices.
+                            const int idx_derivatives = (i + num_ghosts_0_derivatives) +
+                                (j + num_ghosts_1_derivatives)*ghostcell_dim_0_derivatives +
+                                (k + num_ghosts_2_derivatives)*ghostcell_dim_0_derivatives*
+                                    ghostcell_dim_1_derivatives;
+                            
+                            // const int idx_density = (i + num_ghosts_0_density) +
+                            //     (j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                            //     (k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                            //         ghostcell_dim_1_density;
+                            
+                            // const int idx_momentum = (i + num_ghosts_0_momentum) +
+                            //     (j + num_ghosts_1_momentum)*ghostcell_dim_0_momentum +
+                            //     (k + num_ghosts_2_momentum)*ghostcell_dim_0_momentum*
+                            //         ghostcell_dim_1_momentum;
+                            
+                            const int idx_density_x_LLL = ((i - 3) + num_ghosts_0_density) +
+                                (j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                                (k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                                    ghostcell_dim_1_density;
+                            
+                            const int idx_density_x_LL  = ((i - 2) + num_ghosts_0_density) +
+                                (j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                                (k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                                    ghostcell_dim_1_density;
+                            
+                            const int idx_density_x_L   = ((i - 1) + num_ghosts_0_density) +
+                                (j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                                (k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                                    ghostcell_dim_1_density;
+                            
+                            const int idx_density_x_R   = ((i + 1) + num_ghosts_0_density) +
+                                (j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                                (k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                                    ghostcell_dim_1_density;
+                            
+                            const int idx_density_x_RR  = ((i + 2) + num_ghosts_0_density) +
+                                (j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                                (k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                                    ghostcell_dim_1_density;
+                            
+                            const int idx_density_x_RRR = ((i + 3) + num_ghosts_0_density) +
+                                (j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                                (k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                                    ghostcell_dim_1_density;
+                            
+                            const int idx_momentum_x_LLL = ((i - 3) + num_ghosts_0_momentum) +
+                                (j + num_ghosts_1_momentum)*ghostcell_dim_0_momentum +
+                                (k + num_ghosts_2_momentum)*ghostcell_dim_0_momentum*
+                                    ghostcell_dim_1_momentum;
+                            
+                            const int idx_momentum_x_LL  = ((i - 2) + num_ghosts_0_momentum) +
+                                (j + num_ghosts_1_momentum)*ghostcell_dim_0_momentum +
+                                (k + num_ghosts_2_momentum)*ghostcell_dim_0_momentum*
+                                    ghostcell_dim_1_momentum;
+                            
+                            const int idx_momentum_x_L   = ((i - 1) + num_ghosts_0_momentum) +
+                                (j + num_ghosts_1_momentum)*ghostcell_dim_0_momentum +
+                                (k + num_ghosts_2_momentum)*ghostcell_dim_0_momentum*
+                                    ghostcell_dim_1_momentum;
+                            
+                            const int idx_momentum_x_R   = ((i + 1) + num_ghosts_0_momentum) +
+                                (j + num_ghosts_1_momentum)*ghostcell_dim_0_momentum +
+                                (k + num_ghosts_2_momentum)*ghostcell_dim_0_momentum*
+                                    ghostcell_dim_1_momentum;
+                            
+                            const int idx_momentum_x_RR  = ((i + 2) + num_ghosts_0_momentum) +
+                                (j + num_ghosts_1_momentum)*ghostcell_dim_0_momentum +
+                                (k + num_ghosts_2_momentum)*ghostcell_dim_0_momentum*
+                                    ghostcell_dim_1_momentum;
+                            
+                            const int idx_momentum_x_RRR = ((i + 3) + num_ghosts_0_momentum) +
+                                (j + num_ghosts_1_momentum)*ghostcell_dim_0_momentum +
+                                (k + num_ghosts_2_momentum)*ghostcell_dim_0_momentum*
+                                    ghostcell_dim_1_momentum;
+                            
+                            drho_dx[idx_derivatives] = (double(1)/double(60)*(rho[idx_density_x_RRR] - rho[idx_density_x_LLL])
+                                - double(3)/double(20)*(rho[idx_density_x_RR] - rho[idx_density_x_LL])
+                                + double(3)/double(4)*(rho[idx_density_x_R] - rho[idx_density_x_L]))/dx[0];
+                            
+                            drhou_dx[idx_derivatives] = (double(1)/double(60)*(rhou[idx_momentum_x_RRR] - rhou[idx_momentum_x_LLL])
+                                - double(3)/double(20)*(rhou[idx_momentum_x_RR] - rhou[idx_momentum_x_LL])
+                                + double(3)/double(4)*(rhou[idx_momentum_x_R] - rhou[idx_momentum_x_L]))/dx[0];
+                            
+                            drhov_dx[idx_derivatives] = (double(1)/double(60)*(rhov[idx_momentum_x_RRR] - rhov[idx_momentum_x_LLL])
+                                - double(3)/double(20)*(rhov[idx_momentum_x_RR] - rhov[idx_momentum_x_LL])
+                                + double(3)/double(4)*(rhov[idx_momentum_x_R] - rhov[idx_momentum_x_L]))/dx[0];
+                            
+                            drhow_dx[idx_derivatives] = (double(1)/double(60)*(rhow[idx_momentum_x_RRR] - rhow[idx_momentum_x_LLL])
+                                - double(3)/double(20)*(rhow[idx_momentum_x_RR] - rhow[idx_momentum_x_LL])
+                                + double(3)/double(4)*(rhow[idx_momentum_x_R] - rhow[idx_momentum_x_L]))/dx[0];
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+    }
+}
+
+
+/*
  * Filter pressure.
  */
 void 
@@ -25076,6 +25684,134 @@ FlowModelStatisticsUtilitiesFourEqnConservative::filterConvectiveStress(
     if (level == 0)
     {
         d_convective_stress_filtered = true;
+    }
+}
+
+
+/*
+ * Filter derivatives.
+ */
+void 
+FlowModelStatisticsUtilitiesFourEqnConservative::filterDerivatives(
+    const int level,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context)
+{
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    TBOX_ASSERT(level < num_levels);
+    
+    /*
+     * Get the patch level.
+     */
+    
+    boost::shared_ptr<hier::PatchLevel> patch_level(
+        patch_hierarchy->getPatchLevel(level));
+    
+    for (hier::PatchLevel::iterator ip(patch_level->begin());
+         ip != patch_level->end();
+         ip++)
+    {
+        const boost::shared_ptr<hier::Patch> patch = *ip;
+        
+        // Get the unfiltered and filtered derivatives cell data.
+        
+        boost::shared_ptr<pdat::CellData<double> > data_derivatives_unfiltered(
+            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                patch->getPatchData(s_variable_derivatives_unfiltered, data_context)));
+        
+        boost::shared_ptr<pdat::CellData<double> > data_derivatives_filtered(
+            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                patch->getPatchData(s_variable_derivatives_filtered, data_context)));
+        
+        if (d_derivatives_filtered)
+        {
+            data_derivatives_unfiltered->copy(*data_derivatives_filtered);
+        }
+        
+        if (d_dim == tbox::Dimension(1))
+        {
+            for (int di = 0; di < 2; di++)
+            {
+                // Apply filter in x-direction.
+                
+                d_filter_x->applyFilter(
+                    data_derivatives_filtered,
+                    data_derivatives_unfiltered,
+                    di,
+                    di);
+            }
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            // Apply filter in x-direction.
+            
+            for (int di = 0; di < 3; di++)
+            {
+                d_filter_x->applyFilter(
+                    data_derivatives_filtered,
+                    data_derivatives_unfiltered,
+                    di,
+                    di);
+            }
+            
+            // Apply filter in y-direction.
+            
+            data_derivatives_unfiltered->copy(*data_derivatives_filtered);
+            
+            for (int di = 0; di < 3; di++)
+            {
+                d_filter_y->applyFilter(
+                    data_derivatives_filtered,
+                    data_derivatives_unfiltered,
+                    di,
+                    di);
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            // Apply filter in x-direction.
+            
+            for (int di = 0; di < 4; di++)
+            {
+                d_filter_x->applyFilter(
+                    data_derivatives_filtered,
+                    data_derivatives_unfiltered,
+                    di,
+                    di);
+            }
+            
+            // Apply filter in y-direction.
+            
+            data_derivatives_unfiltered->copy(*data_derivatives_filtered);
+            
+            for (int di = 0; di < 4; di++)
+            {
+                d_filter_y->applyFilter(
+                    data_derivatives_filtered,
+                    data_derivatives_unfiltered,
+                    di,
+                    di);
+            }
+            
+            // Apply filter in z-direction.
+            
+            data_derivatives_unfiltered->copy(*data_derivatives_filtered);
+            
+            for (int di = 0; di < 4; di++)
+            {
+                d_filter_z->applyFilter(
+                    data_derivatives_filtered,
+                    data_derivatives_unfiltered,
+                    di,
+                    di);
+            }
+        }
+    }
+    
+    if (level == 0)
+    {
+        d_derivatives_filtered = true;
     }
 }
 
@@ -32165,37 +32901,94 @@ outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
         << "outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection: Compute term II" << std::endl;
     
     std::vector<double> drho_u_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
-        "MOMENTUM",
-        0,
+        s_variable_derivatives_filtered,
+        1,
         0,
         patch_hierarchy,
         data_context);
+    
+    // Old implementation.
+    // std::vector<double> drho_u_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+    //     "MOMENTUM",
+    //     0,
+    //     0,
+    //     patch_hierarchy,
+    //     data_context);
     
     std::vector<double> drho_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
-        "DENSITY",
+        s_variable_derivatives_filtered,
         0,
         0,
         patch_hierarchy,
         data_context);
     
-    // quantity_names.push_back("MOMENTUM");
-    variable_quantities.push_back(s_variable_momentum_filtered);
-    component_indices.push_back(0);
+    // Old implementation.
+    // std::vector<double> drho_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+    //     "DENSITY",
+    //     0,
+    //     0,
+    //     patch_hierarchy,
+    //     data_context);
     
-    // quantity_names.push_back("VELOCITY");
     variable_quantities.push_back(s_variable_velocity_Favre_filtered);
     component_indices.push_back(0);
     
-    std::vector<double> drho_u_u_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+    variable_quantities.push_back(s_variable_derivatives_filtered);
+    component_indices.push_back(1);
+    
+    std::vector<double> drho_u_u_dx_mean_1 = getAveragedQuantityWithInhomogeneousXDirection(
         variable_quantities,
         component_indices,
-        0,
         patch_hierarchy,
         data_context);
     
-    // quantity_names.clear();
     variable_quantities.clear();
     component_indices.clear();
+    
+    variable_quantities.push_back(s_variable_velocity_Favre_filtered);
+    component_indices.push_back(0);
+    
+    variable_quantities.push_back(s_variable_velocity_Favre_filtered);
+    component_indices.push_back(0);
+    
+    variable_quantities.push_back(s_variable_derivatives_filtered);
+    component_indices.push_back(0);
+    
+    std::vector<double> drho_u_u_dx_mean_2 = getAveragedQuantityWithInhomogeneousXDirection(
+        variable_quantities,
+        component_indices,
+        patch_hierarchy,
+        data_context);
+    
+    variable_quantities.clear();
+    component_indices.clear();
+    
+    std::vector<double> drho_u_u_dx_mean(finest_level_dim_0, double(0));
+    
+    for (int i = 0; i < finest_level_dim_0; i++)
+    {
+        drho_u_u_dx_mean[i] = double(2)*drho_u_u_dx_mean_1[i] - drho_u_u_dx_mean_2[i];
+    }
+    
+    // Old implementation.
+    // // quantity_names.push_back("MOMENTUM");
+    // variable_quantities.push_back(s_variable_momentum_filtered);
+    // component_indices.push_back(0);
+    
+    // // quantity_names.push_back("VELOCITY");
+    // variable_quantities.push_back(s_variable_velocity_Favre_filtered);
+    // component_indices.push_back(0);
+    
+    // std::vector<double> drho_u_u_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+    //     variable_quantities,
+    //     component_indices,
+    //     0,
+    //     patch_hierarchy,
+    //     data_context);
+    
+    // // quantity_names.clear();
+    // variable_quantities.clear();
+    // component_indices.clear();
     
     std::vector<double> d_rho_u_tilde_R11_dx(finest_level_dim_0, double(0));
     

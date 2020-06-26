@@ -605,6 +605,14 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
+         * Compute derivatives with only x direction as inhomogeneous direction.
+         */
+        void
+        computeDerivatives(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
          * Filter pressure.
          */
         void
@@ -627,6 +635,15 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
          */
         void
         filterConvectiveStress(
+            const int level,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Filter derivatives.
+         */
+        void
+        filterDerivatives(
             const int level,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
@@ -793,6 +810,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_pressure_unfiltered;
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_shear_stress_unfiltered;
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_convective_stress_unfiltered;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_derivatives_unfiltered;
         
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_pressure_filtered;
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_shear_stress_filtered;
@@ -800,12 +818,15 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_convective_stress_filtered;
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_SFS_stress;
         
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_derivatives_filtered;
+        
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_velocity_Favre_filtered;
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_specific_volume_Favre_filtered;
         
         bool d_pressure_filtered;
         bool d_shear_stress_filtered;
         bool d_convective_stress_filtered;
+        bool d_derivatives_filtered;
         bool d_conservative_variables_filtered;
         
         /*
