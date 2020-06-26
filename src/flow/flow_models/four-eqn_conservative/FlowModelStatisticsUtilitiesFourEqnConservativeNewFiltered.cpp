@@ -32914,19 +32914,19 @@ outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
     //     patch_hierarchy,
     //     data_context);
     
-    std::vector<double> drho_dx_mean = getAveragedQuantityWithInhomogeneousXDirection(
-        s_variable_derivatives_filtered,
-        0,
-        patch_hierarchy,
-        data_context);
-    
-    // Old implementation.
-    // std::vector<double> drho_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
-    //     "DENSITY",
-    //     0,
+    // std::vector<double> drho_dx_mean = getAveragedQuantityWithInhomogeneousXDirection(
+    //     s_variable_derivatives_filtered,
     //     0,
     //     patch_hierarchy,
     //     data_context);
+    
+    // Old implementation.
+    std::vector<double> drho_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        0,
+        patch_hierarchy,
+        data_context);
     
     variable_quantities.push_back(s_variable_velocity_Favre_filtered);
     component_indices.push_back(0);
