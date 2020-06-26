@@ -2371,7 +2371,6 @@ RungeKuttaLevelIntegrator::registerVariable(
     if (!d_fill_statistics)
     {
         d_fill_statistics.reset(new xfer::RefineAlgorithm());
-        d_coarsen_statistics.reset(new xfer::CoarsenAlgorithm(dim));
     }
     
     hier::VariableDatabase* variable_db = hier::VariableDatabase::getDatabase();
@@ -2788,16 +2787,6 @@ RungeKuttaLevelIntegrator::registerVariable(
             
             d_fill_statistics->registerRefine(
                 scr_id, scr_id, stats_tmp_id, refine_op);
-            
-            /*
-             * The coarsen algorithm will coarsen statistics data on finer level to statistics data
-             * on coarser.
-             */
-             
-            boost::shared_ptr<hier::CoarsenOperator> coarsen_op(
-                transfer_geom->lookupCoarsenOperator(var, coarsen_name));
-            
-            d_coarsen_statistics->registerCoarsen(scr_id, scr_id, coarsen_op);
             
             break;
         }
@@ -3566,29 +3555,12 @@ RungeKuttaLevelIntegrator::outputDataStatistics(
         d_bdry_sched_advance[li]->fillData(statistics_data_time);
     }
     
-    /*
-     * Compute variables if necessary.
-     */
+    // Compute variables if necessary.
     
     d_patch_strategy->computeStatisticsVariables(hierarchy);
     
-    // Coarsen data from finer levels to coarser levers.
-    for (int li = num_levels - 1; li > 0; li--)
-    {
-        boost::shared_ptr<hier::PatchLevel> coarse_level(
-            hierarchy->getPatchLevel(li - 1));
-        
-        boost::shared_ptr<hier::PatchLevel> fine_level(
-            hierarchy->getPatchLevel(li));
-        
-        boost::shared_ptr<xfer::CoarsenSchedule> coarsen_schedule = d_coarsen_statistics->createSchedule(
-            coarse_level,
-            fine_level);
-        
-        coarsen_schedule->coarsenData();
-    }
-    
     // Exchange halo values of variables if necessary.
+    
     for (int li = 0; li < num_levels; li++)
     {
         boost::shared_ptr<hier::PatchLevel> patch_level(
@@ -3613,9 +3585,7 @@ RungeKuttaLevelIntegrator::outputDataStatistics(
         fill_schedule->fillData(statistics_data_time);
     }
     
-    /*
-     *  Filter variables if necessary.
-     */
+    // Filter variables if necessary.
     
     const int num_filtering = 1;
     
@@ -3623,23 +3593,8 @@ RungeKuttaLevelIntegrator::outputDataStatistics(
     {
         d_patch_strategy->filterStatisticsVariables(hierarchy);
         
-        // Coarsen data from finer levels to coarser levers.
-        for (int li = num_levels - 1; li > 0; li--)
-        {
-            boost::shared_ptr<hier::PatchLevel> coarse_level(
-                hierarchy->getPatchLevel(li - 1));
-            
-            boost::shared_ptr<hier::PatchLevel> fine_level(
-                hierarchy->getPatchLevel(li));
-            
-            boost::shared_ptr<xfer::CoarsenSchedule> coarsen_schedule = d_coarsen_statistics->createSchedule(
-                coarse_level,
-                fine_level);
-            
-            coarsen_schedule->coarsenData();
-        }
-        
         // Exchange halo values of variables if necessary.
+        
         for (int li = 0; li < num_levels; li++)
         {
             boost::shared_ptr<hier::PatchLevel> patch_level(
