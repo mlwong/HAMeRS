@@ -32900,7 +32900,7 @@ outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
     tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::"
         << "outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection: Compute term II" << std::endl;
     
-    std::vector<double> drho_u_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+    std::vector<double> drho_u_dx_mean = getAveragedQuantityWithInhomogeneousXDirection(
         s_variable_derivatives_filtered,
         1,
         0,
@@ -32915,7 +32915,7 @@ outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
     //     patch_hierarchy,
     //     data_context);
     
-    std::vector<double> drho_dx_mean = getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+    std::vector<double> drho_dx_mean = getAveragedQuantityWithInhomogeneousXDirection(
         s_variable_derivatives_filtered,
         0,
         0,
