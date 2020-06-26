@@ -3621,11 +3621,11 @@ RungeKuttaLevelIntegrator::outputDataStatistics(
     
     for (int count = 0; count < num_filtering; count++)
     {
-        d_patch_strategy->filterStatisticsVariables(hierarchy);
-        
-        // Coarsen data from finer levels to coarser levers.
+        // Filter data and coarsen data from finer levels to coarser levers.
         for (int li = num_levels - 1; li > 0; li--)
         {
+            d_patch_strategy->filterStatisticsVariables(li, hierarchy);
+        
             boost::shared_ptr<hier::PatchLevel> coarse_level(
                 hierarchy->getPatchLevel(li - 1));
             
@@ -3638,6 +3638,8 @@ RungeKuttaLevelIntegrator::outputDataStatistics(
             
             coarsen_schedule->coarsenData();
         }
+        
+        d_patch_strategy->filterStatisticsVariables(0, hierarchy);
         
         // Exchange halo values of variables if necessary.
         for (int li = 0; li < num_levels; li++)

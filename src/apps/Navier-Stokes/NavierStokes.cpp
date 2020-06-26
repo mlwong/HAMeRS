@@ -3367,7 +3367,8 @@ NavierStokes::computeStatisticsVariables(
  */
 void
 NavierStokes::filterStatisticsVariables(
-   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy)
+    const int level,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy)
 {
     d_flow_model->setupStatisticsUtilities();
     
@@ -3375,6 +3376,7 @@ NavierStokes::filterStatisticsVariables(
         d_flow_model->getFlowModelStatisticsUtilities();
     
     flow_model_statistics_utilities->filterVariables(
+        level,
         patch_hierarchy,
         getDataContext());
 }

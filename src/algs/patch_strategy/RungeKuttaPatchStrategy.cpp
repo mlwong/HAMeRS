@@ -366,8 +366,10 @@ RungeKuttaPatchStrategy::computeStatisticsVariables(
  */
 void
 RungeKuttaPatchStrategy::filterStatisticsVariables(
+   const int level,
    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy)
 {
+   NULL_USE(level);
    NULL_USE(patch_hierarchy);
 }
 

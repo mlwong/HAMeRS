@@ -46,6 +46,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
          */
         void
         filterVariables(
+            const int level,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
@@ -68,10 +69,10 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
         
     private:
         /*
-         * Set conservative variables to unfiltered value.
+         * Set conservative variables to filtered value.
          */
         void
-        setConservativeVariablesToUnfilteredValues(
+        setConservativeVariablesToFilteredValues(
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
             
@@ -608,6 +609,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
          */
         void
         filterPressure(
+            const int level,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
@@ -616,6 +618,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
          */
         void
         filterShearStress(
+            const int level,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
@@ -624,6 +627,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
          */
         void
         filterConvectiveStress(
+            const int level,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         

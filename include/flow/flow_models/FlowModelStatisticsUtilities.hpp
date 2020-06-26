@@ -89,9 +89,11 @@ class FlowModelStatisticsUtilities
          */
         virtual void
         filterVariables(
+            const int level,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context)
         {
+            NULL_USE(level);
             NULL_USE(patch_hierarchy);
             NULL_USE(data_context);
         }

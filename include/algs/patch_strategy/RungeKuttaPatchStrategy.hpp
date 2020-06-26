@@ -556,14 +556,15 @@ class RungeKuttaPatchStrategy:
          */
         virtual void
         computeStatisticsVariables(
-           const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy);
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy);
         
         /**
          * Filter variables for computing the statistics of data.
          */
         virtual void
         filterStatisticsVariables(
-           const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy);
+            const int level,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy);
         
         /**
          * Output the statistics of data.

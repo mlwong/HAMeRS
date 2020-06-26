@@ -392,6 +392,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeVariables(
  */
 void
 FlowModelStatisticsUtilitiesFourEqnConservative::filterVariables(
+    const int level,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
 {
@@ -405,111 +406,147 @@ FlowModelStatisticsUtilitiesFourEqnConservative::filterVariables(
             << std::endl);
     }
     
-    if (!d_pressure_filtered)
-    {
-        computePressure(
-            patch_hierarchy,
-            data_context);
-    }
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    if (!d_convective_stress_filtered)
+    if (level == num_levels - 1)
     {
-        computeConvectiveStress(
-            patch_hierarchy,
-            data_context);
+        if (!d_pressure_filtered)
+        {
+            computePressure(
+                patch_hierarchy,
+                data_context);
+        }
+        
+        if (!d_convective_stress_filtered)
+        {
+            computeConvectiveStress(
+                patch_hierarchy,
+                data_context);
+        }
     }
     
     filterPressure(
+        level,
         patch_hierarchy,
         data_context);
     
     filterShearStress(
+        level,
         patch_hierarchy,
         data_context);
     
     filterConvectiveStress(
+        level,
         patch_hierarchy,
         data_context);
     
     // Get the flow model.
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
     
-    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    /*
+     * Get the patch level.
+     */
     
-    for (int li = 0; li < num_levels; li++)
+    boost::shared_ptr<hier::PatchLevel> patch_level(
+        patch_hierarchy->getPatchLevel(level));
+    
+    for (hier::PatchLevel::iterator ip(patch_level->begin());
+         ip != patch_level->end();
+         ip++)
     {
-        /*
-         * Get the current patch level.
-         */
+        const boost::shared_ptr<hier::Patch> patch = *ip;
         
-        boost::shared_ptr<hier::PatchLevel> patch_level(
-            patch_hierarchy->getPatchLevel(li));
+        d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
         
-        for (hier::PatchLevel::iterator ip(patch_level->begin());
-             ip != patch_level->end();
-             ip++)
+        // Get the conservative variables stored in flow model.
+        
+        boost::shared_ptr<pdat::CellData<double> > data_partial_density =
+            d_flow_model_tmp->getGlobalCellData("PARTIAL_DENSITY");
+        
+        boost::shared_ptr<pdat::CellData<double> > data_momentum =
+            d_flow_model_tmp->getGlobalCellData("MOMENTUM");
+        
+        boost::shared_ptr<pdat::CellData<double> > data_total_energy =
+            d_flow_model_tmp->getGlobalCellData("TOTAL_ENERGY");
+        
+        // Get the data containers of filtered conservative variables.
+        
+        boost::shared_ptr<pdat::CellData<double> > data_partial_density_filtered(
+            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                patch->getPatchData(s_variable_partial_density_filtered, data_context)));
+        
+        boost::shared_ptr<pdat::CellData<double> > data_momentum_filtered(
+            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                patch->getPatchData(s_variable_momentum_filtered, data_context)));
+        
+        boost::shared_ptr<pdat::CellData<double> > data_total_energy_filtered(
+            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                patch->getPatchData(s_variable_total_energy_filtered, data_context)));
+        
+        // Copy data to unfiltered variables for temporary storage.
+        
+        if (!d_conservative_variables_filtered)
         {
-            const boost::shared_ptr<hier::Patch> patch = *ip;
+            // Get the data containers of unfiltered conservative variables.
             
-            d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
-            
-            // Get the conservative variables stored in flow model.
-            
-            boost::shared_ptr<pdat::CellData<double> > data_partial_density =
-                d_flow_model_tmp->getGlobalCellData("PARTIAL_DENSITY");
-            
-            boost::shared_ptr<pdat::CellData<double> > data_momentum =
-                d_flow_model_tmp->getGlobalCellData("MOMENTUM");
-            
-            boost::shared_ptr<pdat::CellData<double> > data_total_energy =
-                d_flow_model_tmp->getGlobalCellData("TOTAL_ENERGY");
-            
-            // Get the data containers of filtered conservative variables.
-            
-            boost::shared_ptr<pdat::CellData<double> > data_partial_density_filtered(
+            boost::shared_ptr<pdat::CellData<double> > data_partial_density_unfiltered(
                 BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch->getPatchData(s_variable_partial_density_filtered, data_context)));
+                    patch->getPatchData(s_variable_partial_density_unfiltered, data_context)));
             
-            boost::shared_ptr<pdat::CellData<double> > data_momentum_filtered(
+            boost::shared_ptr<pdat::CellData<double> > data_momentum_unfiltered(
                 BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch->getPatchData(s_variable_momentum_filtered, data_context)));
+                    patch->getPatchData(s_variable_momentum_unfiltered, data_context)));
             
-            boost::shared_ptr<pdat::CellData<double> > data_total_energy_filtered(
+            boost::shared_ptr<pdat::CellData<double> > data_total_energy_unfiltered(
                 BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch->getPatchData(s_variable_total_energy_filtered, data_context)));
+                    patch->getPatchData(s_variable_total_energy_unfiltered, data_context)));
             
-            // Copy data to unfiltered variables for temporary storage.
+            data_partial_density_unfiltered->copy(*data_partial_density);
+            data_momentum_unfiltered->copy(*data_momentum);
+            data_total_energy_unfiltered->copy(*data_total_energy);
             
-            if (!d_conservative_variables_filtered)
-            {
-                // Get the data containers of unfiltered conservative variables.
-                
-                boost::shared_ptr<pdat::CellData<double> > data_partial_density_unfiltered(
-                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                        patch->getPatchData(s_variable_partial_density_unfiltered, data_context)));
-                
-                boost::shared_ptr<pdat::CellData<double> > data_momentum_unfiltered(
-                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                        patch->getPatchData(s_variable_momentum_unfiltered, data_context)));
-                
-                boost::shared_ptr<pdat::CellData<double> > data_total_energy_unfiltered(
-                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                        patch->getPatchData(s_variable_total_energy_unfiltered, data_context)));
-                
-                data_partial_density_unfiltered->copy(*data_partial_density);
-                data_momentum_unfiltered->copy(*data_momentum);
-                data_total_energy_unfiltered->copy(*data_total_energy);
-                
-                data_partial_density_filtered->copy(*data_partial_density);
-                data_momentum_filtered->copy(*data_momentum);
-                data_total_energy_filtered->copy(*data_total_energy);
-            }
+            data_partial_density_filtered->copy(*data_partial_density);
+            data_momentum_filtered->copy(*data_momentum);
+            data_total_energy_filtered->copy(*data_total_energy);
+        }
+        
+        // Apply filter in x-direction to conservative variables.
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            d_filter_x->applyFilter(
+                data_partial_density,
+                data_partial_density_filtered,
+                si,
+                si);
+        }
+        
+        for (int di = 0; di < d_dim.getValue(); di++)
+        {
+            d_filter_x->applyFilter(
+                data_momentum,
+                data_momentum_filtered,
+                di,
+                di);
+        }
+        
+        d_filter_x->applyFilter(
+            data_total_energy,
+            data_total_energy_filtered,
+            0,
+            0);
+        
+        if ((d_dim == tbox::Dimension(2)) || (d_dim == tbox::Dimension(3)))
+        {
+            // Apply filter in y-direction to conservative variables.
             
-            // Apply filter in x-direction to conservative variables.
+            data_partial_density_filtered->copy(*data_partial_density);
+            data_momentum_filtered->copy(*data_momentum);
+            data_total_energy_filtered->copy(*data_total_energy);
             
             for (int si = 0; si < d_num_species; si++)
             {
-                d_filter_x->applyFilter(
+                d_filter_y->applyFilter(
                     data_partial_density,
                     data_partial_density_filtered,
                     si,
@@ -518,98 +555,68 @@ FlowModelStatisticsUtilitiesFourEqnConservative::filterVariables(
             
             for (int di = 0; di < d_dim.getValue(); di++)
             {
-                d_filter_x->applyFilter(
+                d_filter_y->applyFilter(
                     data_momentum,
                     data_momentum_filtered,
                     di,
                     di);
             }
             
-            d_filter_x->applyFilter(
+            d_filter_y->applyFilter(
                 data_total_energy,
                 data_total_energy_filtered,
                 0,
                 0);
-            
-            if ((d_dim == tbox::Dimension(2)) || (d_dim == tbox::Dimension(3)))
-            {
-                // Apply filter in y-direction to conservative variables.
-                
-                data_partial_density_filtered->copy(*data_partial_density);
-                data_momentum_filtered->copy(*data_momentum);
-                data_total_energy_filtered->copy(*data_total_energy);
-                
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    d_filter_y->applyFilter(
-                        data_partial_density,
-                        data_partial_density_filtered,
-                        si,
-                        si);
-                }
-                
-                for (int di = 0; di < d_dim.getValue(); di++)
-                {
-                    d_filter_y->applyFilter(
-                        data_momentum,
-                        data_momentum_filtered,
-                        di,
-                        di);
-                }
-                
-                d_filter_y->applyFilter(
-                    data_total_energy,
-                    data_total_energy_filtered,
-                    0,
-                    0);
-            }
-            
-            if (d_dim == tbox::Dimension(3))
-            {
-                // Apply filter in z-direction to conservative variables.
-                
-                data_partial_density_filtered->copy(*data_partial_density);
-                data_momentum_filtered->copy(*data_momentum);
-                data_total_energy_filtered->copy(*data_total_energy);
-                
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    d_filter_z->applyFilter(
-                        data_partial_density,
-                        data_partial_density_filtered,
-                        si,
-                        si);
-                }
-                
-                for (int di = 0; di < d_dim.getValue(); di++)
-                {
-                    d_filter_z->applyFilter(
-                        data_momentum,
-                        data_momentum_filtered,
-                        di,
-                        di);
-                }
-                
-                d_filter_z->applyFilter(
-                    data_total_energy,
-                    data_total_energy_filtered,
-                    0,
-                    0);
-            }
+        }
+        
+        if (d_dim == tbox::Dimension(3))
+        {
+            // Apply filter in z-direction to conservative variables.
             
             data_partial_density_filtered->copy(*data_partial_density);
             data_momentum_filtered->copy(*data_momentum);
             data_total_energy_filtered->copy(*data_total_energy);
-                
-            /*
-             * Unregister the patch and data of all registered derived cell variables in the flow model.
-             */
             
-            d_flow_model_tmp->unregisterPatch();
+            for (int si = 0; si < d_num_species; si++)
+            {
+                d_filter_z->applyFilter(
+                    data_partial_density,
+                    data_partial_density_filtered,
+                    si,
+                    si);
+            }
+            
+            for (int di = 0; di < d_dim.getValue(); di++)
+            {
+                d_filter_z->applyFilter(
+                    data_momentum,
+                    data_momentum_filtered,
+                    di,
+                    di);
+            }
+            
+            d_filter_z->applyFilter(
+                data_total_energy,
+                data_total_energy_filtered,
+                0,
+                0);
         }
+        
+        data_partial_density_filtered->copy(*data_partial_density);
+        data_momentum_filtered->copy(*data_momentum);
+        data_total_energy_filtered->copy(*data_total_energy);
+            
+        /*
+         * Unregister the patch and data of all registered derived cell variables in the flow model.
+         */
+        
+        d_flow_model_tmp->unregisterPatch();
     }
     
-    d_conservative_variables_filtered = true;
+    if (level == 0)
+    {
+        d_conservative_variables_filtered = true;
+    }
     
     tbox::pout << "FlowModelStatisticsUtilitiesFourEqnConservative::filterVariables: end" << std::endl;
 }
@@ -671,7 +678,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
             << std::endl);
     }
     
-    setConservativeVariablesToUnfilteredValues(
+    setConservativeVariablesToFilteredValues(
         patch_hierarchy,
         data_context);
     
@@ -939,10 +946,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
 
 
 /*
- * Set conservative variables to unfiltered value.
+ * Set conservative variables to filtered value.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::setConservativeVariablesToUnfilteredValues(
+FlowModelStatisticsUtilitiesFourEqnConservative::setConservativeVariablesToFilteredValues(
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
 {
@@ -24739,78 +24746,81 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeConvectiveStress(
  */
 void 
 FlowModelStatisticsUtilitiesFourEqnConservative::filterPressure(
+    const int level,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
 {
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    for (int li = 0; li < num_levels; li++)
+    TBOX_ASSERT(level < num_levels);
+    
+    /*
+     * Get the patch level.
+     */
+    
+    boost::shared_ptr<hier::PatchLevel> patch_level(
+        patch_hierarchy->getPatchLevel(level));
+    
+    for (hier::PatchLevel::iterator ip(patch_level->begin());
+         ip != patch_level->end();
+         ip++)
     {
-        /*
-         * Get the current patch level.
-         */
+        const boost::shared_ptr<hier::Patch> patch = *ip;
         
-        boost::shared_ptr<hier::PatchLevel> patch_level(
-            patch_hierarchy->getPatchLevel(li));
+        // Get the unfiltered and filtered pressure cell data.
         
-        for (hier::PatchLevel::iterator ip(patch_level->begin());
-             ip != patch_level->end();
-             ip++)
+        boost::shared_ptr<pdat::CellData<double> > data_pressure_unfiltered(
+            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                patch->getPatchData(s_variable_pressure_unfiltered, data_context)));
+        
+        boost::shared_ptr<pdat::CellData<double> > data_pressure_filtered(
+            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                patch->getPatchData(s_variable_pressure_filtered, data_context)));
+        
+        if (d_pressure_filtered)
         {
-            const boost::shared_ptr<hier::Patch> patch = *ip;
+            data_pressure_unfiltered->copy(*data_pressure_filtered);
+        }
+        
+        // Apply filter in x-direction.
+        
+        d_filter_x->applyFilter(
+            data_pressure_filtered,
+            data_pressure_unfiltered,
+            0,
+            0);
+        
+        if ((d_dim == tbox::Dimension(2)) || (d_dim == tbox::Dimension(3)))
+        {
+            // Apply filter in y-direction.
             
-            // Get the unfiltered and filtered pressure cell data.
+            data_pressure_unfiltered->copy(*data_pressure_filtered);
             
-            boost::shared_ptr<pdat::CellData<double> > data_pressure_unfiltered(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch->getPatchData(s_variable_pressure_unfiltered, data_context)));
-            
-            boost::shared_ptr<pdat::CellData<double> > data_pressure_filtered(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch->getPatchData(s_variable_pressure_filtered, data_context)));
-            
-            if (d_pressure_filtered)
-            {
-                data_pressure_unfiltered->copy(*data_pressure_filtered);
-            }
-            
-            // Apply filter in x-direction.
-            
-            d_filter_x->applyFilter(
+            d_filter_y->applyFilter(
                 data_pressure_filtered,
                 data_pressure_unfiltered,
                 0,
                 0);
+        }
+        
+        if (d_dim == tbox::Dimension(3))
+        {
+            // Apply filter in z-direction.
             
-            if ((d_dim == tbox::Dimension(2)) || (d_dim == tbox::Dimension(3)))
-            {
-                // Apply filter in y-direction.
-                
-                data_pressure_unfiltered->copy(*data_pressure_filtered);
-                
-                d_filter_y->applyFilter(
-                    data_pressure_filtered,
-                    data_pressure_unfiltered,
-                    0,
-                    0);
-            }
+            data_pressure_unfiltered->copy(*data_pressure_filtered);
             
-            if (d_dim == tbox::Dimension(3))
-            {
-                // Apply filter in z-direction.
-                
-                data_pressure_unfiltered->copy(*data_pressure_filtered);
-                
-                d_filter_z->applyFilter(
-                    data_pressure_filtered,
-                    data_pressure_unfiltered,
-                    0,
-                    0);
-            }
+            d_filter_z->applyFilter(
+                data_pressure_filtered,
+                data_pressure_unfiltered,
+                0,
+                0);
         }
     }
     
-    d_pressure_filtered = true;
+    if (level == 0)
+    {
+        d_pressure_filtered = true;
+    }
 }
 
 
@@ -24819,123 +24829,126 @@ FlowModelStatisticsUtilitiesFourEqnConservative::filterPressure(
  */
 void 
 FlowModelStatisticsUtilitiesFourEqnConservative::filterShearStress(
+    const int level,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
 {
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    for (int li = 0; li < num_levels; li++)
+    TBOX_ASSERT(level < num_levels);
+    
+    /*
+     * Get the patch level.
+     */
+    
+    boost::shared_ptr<hier::PatchLevel> patch_level(
+        patch_hierarchy->getPatchLevel(level));
+    
+    for (hier::PatchLevel::iterator ip(patch_level->begin());
+         ip != patch_level->end();
+         ip++)
     {
-        /*
-         * Get the current patch level.
-         */
+        const boost::shared_ptr<hier::Patch> patch = *ip;
         
-        boost::shared_ptr<hier::PatchLevel> patch_level(
-            patch_hierarchy->getPatchLevel(li));
+        // Get the unfiltered and filtered shear stress cell data.
         
-        for (hier::PatchLevel::iterator ip(patch_level->begin());
-             ip != patch_level->end();
-             ip++)
+        boost::shared_ptr<pdat::CellData<double> > data_shear_stress_unfiltered(
+            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                patch->getPatchData(s_variable_shear_stress_unfiltered, data_context)));
+        
+        boost::shared_ptr<pdat::CellData<double> > data_shear_stress_filtered(
+            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                patch->getPatchData(s_variable_shear_stress_filtered, data_context)));
+        
+        if (d_shear_stress_filtered)
         {
-            const boost::shared_ptr<hier::Patch> patch = *ip;
-            
-            // Get the unfiltered and filtered shear stress cell data.
-            
-            boost::shared_ptr<pdat::CellData<double> > data_shear_stress_unfiltered(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch->getPatchData(s_variable_shear_stress_unfiltered, data_context)));
-            
-            boost::shared_ptr<pdat::CellData<double> > data_shear_stress_filtered(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch->getPatchData(s_variable_shear_stress_filtered, data_context)));
-            
-            if (d_shear_stress_filtered)
-            {
-                data_shear_stress_unfiltered->copy(*data_shear_stress_filtered);
-            }
-            
-            if (d_dim == tbox::Dimension(1))
-            {
-                for (int di = 0; di < 1; di++)
-                {
-                    // Apply filter in x-direction.
-                    
-                    d_filter_x->applyFilter(
-                        data_shear_stress_filtered,
-                        data_shear_stress_unfiltered,
-                        di,
-                        di);
-                }
-            }
-            else if (d_dim == tbox::Dimension(2))
+            data_shear_stress_unfiltered->copy(*data_shear_stress_filtered);
+        }
+        
+        if (d_dim == tbox::Dimension(1))
+        {
+            for (int di = 0; di < 1; di++)
             {
                 // Apply filter in x-direction.
                 
-                for (int di = 0; di < 3; di++)
-                {
-                    d_filter_x->applyFilter(
-                        data_shear_stress_filtered,
-                        data_shear_stress_unfiltered,
-                        di,
-                        di);
-                }
-                
-                // Apply filter in y-direction.
-                
-                data_shear_stress_unfiltered->copy(*data_shear_stress_filtered);
-                
-                for (int di = 0; di < 3; di++)
-                {
-                    d_filter_y->applyFilter(
-                        data_shear_stress_filtered,
-                        data_shear_stress_unfiltered,
-                        di,
-                        di);
-                }
+                d_filter_x->applyFilter(
+                    data_shear_stress_filtered,
+                    data_shear_stress_unfiltered,
+                    di,
+                    di);
             }
-            else if (d_dim == tbox::Dimension(3))
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            // Apply filter in x-direction.
+            
+            for (int di = 0; di < 3; di++)
             {
-                // Apply filter in x-direction.
-                
-                for (int di = 0; di < 6; di++)
-                {
-                    d_filter_x->applyFilter(
-                        data_shear_stress_filtered,
-                        data_shear_stress_unfiltered,
-                        di,
-                        di);
-                }
-                
-                // Apply filter in y-direction.
-                
-                data_shear_stress_unfiltered->copy(*data_shear_stress_filtered);
-                
-                for (int di = 0; di < 6; di++)
-                {
-                    d_filter_y->applyFilter(
-                        data_shear_stress_filtered,
-                        data_shear_stress_unfiltered,
-                        di,
-                        di);
-                }
-                
-                // Apply filter in z-direction.
-                
-                data_shear_stress_unfiltered->copy(*data_shear_stress_filtered);
-                
-                for (int di = 0; di < 6; di++)
-                {
-                    d_filter_z->applyFilter(
-                        data_shear_stress_filtered,
-                        data_shear_stress_unfiltered,
-                        di,
-                        di);
-                }
+                d_filter_x->applyFilter(
+                    data_shear_stress_filtered,
+                    data_shear_stress_unfiltered,
+                    di,
+                    di);
+            }
+            
+            // Apply filter in y-direction.
+            
+            data_shear_stress_unfiltered->copy(*data_shear_stress_filtered);
+            
+            for (int di = 0; di < 3; di++)
+            {
+                d_filter_y->applyFilter(
+                    data_shear_stress_filtered,
+                    data_shear_stress_unfiltered,
+                    di,
+                    di);
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            // Apply filter in x-direction.
+            
+            for (int di = 0; di < 6; di++)
+            {
+                d_filter_x->applyFilter(
+                    data_shear_stress_filtered,
+                    data_shear_stress_unfiltered,
+                    di,
+                    di);
+            }
+            
+            // Apply filter in y-direction.
+            
+            data_shear_stress_unfiltered->copy(*data_shear_stress_filtered);
+            
+            for (int di = 0; di < 6; di++)
+            {
+                d_filter_y->applyFilter(
+                    data_shear_stress_filtered,
+                    data_shear_stress_unfiltered,
+                    di,
+                    di);
+            }
+            
+            // Apply filter in z-direction.
+            
+            data_shear_stress_unfiltered->copy(*data_shear_stress_filtered);
+            
+            for (int di = 0; di < 6; di++)
+            {
+                d_filter_z->applyFilter(
+                    data_shear_stress_filtered,
+                    data_shear_stress_unfiltered,
+                    di,
+                    di);
             }
         }
     }
     
-    d_shear_stress_filtered = true;
+    if (level == 0)
+    {
+        d_shear_stress_filtered = true;
+    }
 }
 
 
@@ -24944,123 +24957,126 @@ FlowModelStatisticsUtilitiesFourEqnConservative::filterShearStress(
  */
 void
 FlowModelStatisticsUtilitiesFourEqnConservative::filterConvectiveStress(
+    const int level,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
 {
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    for (int li = 0; li < num_levels; li++)
+    TBOX_ASSERT(level < num_levels);
+    
+    /*
+     * Get the patch level.
+     */
+    
+    boost::shared_ptr<hier::PatchLevel> patch_level(
+        patch_hierarchy->getPatchLevel(level));
+    
+    for (hier::PatchLevel::iterator ip(patch_level->begin());
+         ip != patch_level->end();
+         ip++)
     {
-        /*
-         * Get the current patch level.
-         */
+        const boost::shared_ptr<hier::Patch> patch = *ip;
         
-        boost::shared_ptr<hier::PatchLevel> patch_level(
-            patch_hierarchy->getPatchLevel(li));
+        // Get the unfiltered and filtered convective stress cell data.
         
-        for (hier::PatchLevel::iterator ip(patch_level->begin());
-             ip != patch_level->end();
-             ip++)
+        boost::shared_ptr<pdat::CellData<double> > data_convective_stress_unfiltered(
+            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                patch->getPatchData(s_variable_convective_stress_unfiltered, data_context)));
+        
+        boost::shared_ptr<pdat::CellData<double> > data_convective_stress_filtered(
+            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                patch->getPatchData(s_variable_convective_stress_filtered, data_context)));
+        
+        if (d_convective_stress_filtered)
         {
-            const boost::shared_ptr<hier::Patch> patch = *ip;
-            
-            // Get the unfiltered and filtered convective stress cell data.
-            
-            boost::shared_ptr<pdat::CellData<double> > data_convective_stress_unfiltered(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch->getPatchData(s_variable_convective_stress_unfiltered, data_context)));
-            
-            boost::shared_ptr<pdat::CellData<double> > data_convective_stress_filtered(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch->getPatchData(s_variable_convective_stress_filtered, data_context)));
-            
-            if (d_convective_stress_filtered)
+            data_convective_stress_unfiltered->copy(*data_convective_stress_filtered);
+        }
+        
+        if (d_dim == tbox::Dimension(1))
+        {
+            for (int di = 0; di < 1; di++)
             {
-                data_convective_stress_unfiltered->copy(*data_convective_stress_filtered);
+                // Apply filter in x-direction.
+                
+                d_filter_x->applyFilter(
+                    data_convective_stress_filtered,
+                    data_convective_stress_unfiltered,
+                    di,
+                    di);
+            }
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            for (int di = 0; di < 3; di++)
+            {
+                // Apply filter in x-direction.
+                
+                d_filter_x->applyFilter(
+                    data_convective_stress_filtered,
+                    data_convective_stress_unfiltered,
+                    di,
+                    di);
             }
             
-            if (d_dim == tbox::Dimension(1))
+            // Apply filter in y-direction.
+            
+            data_convective_stress_unfiltered->copy(*data_convective_stress_filtered);
+            
+            for (int di = 0; di < 3; di++)
             {
-                for (int di = 0; di < 1; di++)
-                {
-                    // Apply filter in x-direction.
-                    
-                    d_filter_x->applyFilter(
-                        data_convective_stress_filtered,
-                        data_convective_stress_unfiltered,
-                        di,
-                        di);
-                }
+                d_filter_y->applyFilter(
+                    data_convective_stress_filtered,
+                    data_convective_stress_unfiltered,
+                    di,
+                    di);
             }
-            else if (d_dim == tbox::Dimension(2))
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            for (int di = 0; di < 6; di++)
             {
-                for (int di = 0; di < 3; di++)
-                {
-                    // Apply filter in x-direction.
-                    
-                    d_filter_x->applyFilter(
-                        data_convective_stress_filtered,
-                        data_convective_stress_unfiltered,
-                        di,
-                        di);
-                }
+                // Apply filter in x-direction.
                 
-                // Apply filter in y-direction.
-                
-                data_convective_stress_unfiltered->copy(*data_convective_stress_filtered);
-                
-                for (int di = 0; di < 3; di++)
-                {
-                    d_filter_y->applyFilter(
-                        data_convective_stress_filtered,
-                        data_convective_stress_unfiltered,
-                        di,
-                        di);
-                }
+                d_filter_x->applyFilter(
+                    data_convective_stress_filtered,
+                    data_convective_stress_unfiltered,
+                    di,
+                    di);
             }
-            else if (d_dim == tbox::Dimension(3))
+            
+            // Apply filter in y-direction.
+            
+            data_convective_stress_unfiltered->copy(*data_convective_stress_filtered);
+            
+            for (int di = 0; di < 6; di++)
             {
-                for (int di = 0; di < 6; di++)
-                {
-                    // Apply filter in x-direction.
-                    
-                    d_filter_x->applyFilter(
-                        data_convective_stress_filtered,
-                        data_convective_stress_unfiltered,
-                        di,
-                        di);
-                }
-                
-                // Apply filter in y-direction.
-                
-                data_convective_stress_unfiltered->copy(*data_convective_stress_filtered);
-                
-                for (int di = 0; di < 6; di++)
-                {
-                    d_filter_y->applyFilter(
-                        data_convective_stress_filtered,
-                        data_convective_stress_unfiltered,
-                        di,
-                        di);
-                }
-                
-                // Apply filter in z-direction.
-                
-                data_convective_stress_unfiltered->copy(*data_convective_stress_filtered);
-                
-                for (int di = 0; di < 6; di++)
-                {
-                    d_filter_z->applyFilter(
-                        data_convective_stress_filtered,
-                        data_convective_stress_unfiltered,
-                        di,
-                        di);
-                }
+                d_filter_y->applyFilter(
+                    data_convective_stress_filtered,
+                    data_convective_stress_unfiltered,
+                    di,
+                    di);
+            }
+            
+            // Apply filter in z-direction.
+            
+            data_convective_stress_unfiltered->copy(*data_convective_stress_filtered);
+            
+            for (int di = 0; di < 6; di++)
+            {
+                d_filter_z->applyFilter(
+                    data_convective_stress_filtered,
+                    data_convective_stress_unfiltered,
+                    di,
+                    di);
             }
         }
     }
     
-    d_convective_stress_filtered = true;
+    if (level == 0)
+    {
+        d_convective_stress_filtered = true;
+    }
 }
 
 
