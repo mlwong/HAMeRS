@@ -1,5 +1,4 @@
 #include "flow/flow_models/single-species/FlowModelBoundaryUtilitiesSingleSpecies.hpp"
-
 #include "util/basic_boundary_conditions/CartesianBoundaryDefines.hpp"
 
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
@@ -1237,10 +1236,357 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                     
                     if (edge_loc == BDRY_LOC::XLO)
                     {
-                        TBOX_ERROR(d_object_name
-                            << ": FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData()\n"
-                            << "Non-reflecting outflow BC is not implemented at the left boundary yet!");
+                        //////////////////////////////////////////////////////////////////////////////////
+                        //
+                        // Denis 06/22/2020
+                        //
+                        //////////////////////////////////////////////////////////////////////////////////
+                        
+                        // number of ghostcells START
+                        const int num_ghosts_to_fill = fill_box_hi_idx[0] - fill_box_lo_idx[0] + 1;
+                        TBOX_ASSERT(fill_box_lo_idx[0] == interior_box_lo_idx[0] - 1);
+                        if (num_ghosts_to_fill > 4)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData()\n"
+                                << "Non-reflecting outflow BC doesn't support more than four ghost cells yet!");
+                        }
+                        // number of ghostcells END
+
+                        // compute derivatives in x-direction START
+                        
+                        for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                        {
+                            // Get the grid spacing.
+                            const double* const dx = patch_geom->getDx();
+                            
+                            // Set index for x-direction STARTI
+                            const int idx_cell_rho_x_R = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
+                                (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
+                            
+                            const int idx_cell_rho_x_RR = (interior_box_lo_idx[0] + 1 + num_subghosts_conservative_var[0][0]) +
+                                (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
+                            
+                            const int idx_cell_rho_x_RRR = (interior_box_lo_idx[0] + 2 + num_subghosts_conservative_var[0][0]) +
+                                (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
+                            
+                            const int idx_cell_mom_x_R = (interior_box_lo_idx[0] + num_subghosts_conservative_var[1][0]) +
+                                (j + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
+                            
+                            const int idx_cell_mom_x_RR = (interior_box_lo_idx[0] + 1 + num_subghosts_conservative_var[1][0]) +
+                                (j + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
+                            
+                            const int idx_cell_mom_x_RRR = (interior_box_lo_idx[0] + 2 + num_subghosts_conservative_var[1][0]) +
+                                (j + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
+                            
+                            const int idx_cell_E_x_R = (interior_box_lo_idx[0] + num_subghosts_conservative_var[2][0]) +
+                                (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
+                            
+                            const int idx_cell_E_x_RR = (interior_box_lo_idx[0] + 1 + num_subghosts_conservative_var[2][0]) +
+                                (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
+                            
+                            const int idx_cell_E_x_RRR = (interior_box_lo_idx[0] + 2 + num_subghosts_conservative_var[2][0]) +
+                                (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
+                            // Set index for x-direction END
+
+                            // Set variables START
+                            
+                            const double& rho_x_R   = Q[0][idx_cell_rho_x_R];
+                            const double& rho_x_RR  = Q[0][idx_cell_rho_x_RR];
+                            const double& rho_x_RRR = Q[0][idx_cell_rho_x_RRR];
+                            
+                            const double u_x_R   = Q[1][idx_cell_mom_x_R]/rho_x_R;
+                            const double u_x_RR  = Q[1][idx_cell_mom_x_RR]/rho_x_RR;
+                            const double u_x_RRR = Q[1][idx_cell_mom_x_RRR]/rho_x_RRR;
+                            
+                            const double v_x_R   = Q[2][idx_cell_mom_x_R]/rho_x_R;
+                            const double v_x_RR  = Q[2][idx_cell_mom_x_RR]/rho_x_RR;
+                            const double v_x_RRR = Q[2][idx_cell_mom_x_RRR]/rho_x_RRR;
+                            
+                            const double half = double(1)/double(2);
+                            const double epsilon_x_R   = Q[3][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R);
+                            const double epsilon_x_RR  = Q[3][idx_cell_E_x_RR]/rho_x_RR - half*(u_x_RR*u_x_RR + v_x_RR*v_x_RR);
+                            const double epsilon_x_RRR = Q[3][idx_cell_E_x_RRR]/rho_x_RRR - half*(u_x_RRR*u_x_RRR + v_x_RRR*v_x_RRR);
+                            
+                            const double p_x_R = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                getPressure(
+                                    &rho_x_R,
+                                    &epsilon_x_R,
+                                    thermo_properties_ptr);
+                            
+                            const double p_x_RR = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                getPressure(
+                                    &rho_x_RR,
+                                    &epsilon_x_RR,
+                                    thermo_properties_ptr);
+                            
+                            const double p_x_RRR = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                getPressure(
+                                    &rho_x_RRR,
+                                    &epsilon_x_RRR,
+                                    thermo_properties_ptr);
+
+                            // Set variables END
+                            // Compute derivatives at x-direction START
+                            const double drho_dx = -(rho_x_RRR - double(4)*rho_x_RR + double(3)*rho_x_R)/(double(2)*dx[0]);
+                            const double du_dx   = -(u_x_RRR - double(4)*u_x_RR + double(3)*u_x_R)/(double(2)*dx[0]);
+                            const double dv_dx   = -(v_x_RRR - double(4)*v_x_RR + double(3)*v_x_R)/(double(2)*dx[0]);
+                            const double dp_dx   = -(p_x_RRR - double(4)*p_x_RR + double(3)*p_x_R)/(double(2)*dx[0]);
+                            // Compute derivatives at x-direction END
+                            
+                            
+                            // Compute derivatives in y-direction START
+                            
+                            double du_dy = double(0);
+                            double dv_dy = double(0);
+                            double dp_dy = double(0);
+                            
+                            if ((patch_geom->getTouchesRegularBoundary(1, 0)) &&
+                                (j == interior_box_lo_idx[1]))
+                            {
+                                // Patch is touching bottom physical boundary.
+                                
+                                const int idx_cell_rho_y_T = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
+                                    (j + 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
+                                
+                                const int idx_cell_mom_y_T = (interior_box_lo_idx[0] + num_subghosts_conservative_var[1][0]) +
+                                    (j + 1 + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
+                                
+                                const int idx_cell_E_y_T = (interior_box_lo_idx[0] + num_subghosts_conservative_var[2][0]) +
+                                    (j + 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
+                                
+                                const double& rho_y_T = Q[0][idx_cell_rho_y_T];
+                                const double u_y_T = Q[1][idx_cell_mom_y_T]/rho_y_T;
+                                const double v_y_T = Q[2][idx_cell_mom_y_T]/rho_y_T;
+                                const double epsilon_y_T = Q[3][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T);
+                                
+                                const double p_y_T = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                    getPressure(
+                                        &rho_y_T,
+                                        &epsilon_y_T,
+                                        thermo_properties_ptr);
+                                
+                                // One-sided derivatives.
+                                du_dy = (u_y_T - u_x_R)/(dx[1]);
+                                dv_dy = (v_y_T - v_x_R)/(dx[1]);
+                                dp_dy = (p_y_T - p_x_R)/(dx[1]);
+                            }
+                            else if ((patch_geom->getTouchesRegularBoundary(1, 1)) &&
+                                     (j == interior_box_hi_idx[1]))
+                            {
+                                // Patch is touching top physical boundary.
+                                
+                                const int idx_cell_rho_y_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
+                                    (j - 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
+                                
+                                const int idx_cell_mom_y_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[1][0]) +
+                                    (j - 1 + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
+                                
+                                const int idx_cell_E_y_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[2][0]) +
+                                    (j - 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
+                                
+                                const double& rho_y_B = Q[0][idx_cell_rho_y_B];
+                                const double u_y_B = Q[1][idx_cell_mom_y_B]/rho_y_B;
+                                const double v_y_B = Q[2][idx_cell_mom_y_B]/rho_y_B;
+                                const double epsilon_y_B = Q[3][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B);
+                                
+                                const double p_y_B = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                    getPressure(
+                                        &rho_y_B,
+                                        &epsilon_y_B,
+                                        thermo_properties_ptr);
+                                
+                                // One-sided derivatives.
+                                du_dy = (u_x_R - u_y_B)/(dx[1]);
+                                dv_dy = (v_x_R - v_y_B)/(dx[1]);
+                                dp_dy = (p_x_R - p_y_B)/(dx[1]);
+                            }
+                            else
+                            {
+                                const int idx_cell_rho_y_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
+                                    (j - 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
+                                
+                                const int idx_cell_rho_y_T = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
+                                    (j + 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
+                                
+                                const int idx_cell_mom_y_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[1][0]) +
+                                    (j - 1 + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
+                                
+                                const int idx_cell_mom_y_T = (interior_box_lo_idx[0] + num_subghosts_conservative_var[1][0]) +
+                                    (j + 1 + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
+                                
+                                const int idx_cell_E_y_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[2][0]) +
+                                    (j - 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
+                                
+                                const int idx_cell_E_y_T = (interior_box_lo_idx[0] + num_subghosts_conservative_var[2][0]) +
+                                    (j + 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
+                                
+                                const double& rho_y_B = Q[0][idx_cell_rho_y_B];
+                                const double& rho_y_T = Q[0][idx_cell_rho_y_T];
+                                
+                                const double u_y_B = Q[1][idx_cell_mom_y_B]/rho_y_B;
+                                const double u_y_T = Q[1][idx_cell_mom_y_T]/rho_y_T;
+                                
+                                const double v_y_B = Q[2][idx_cell_mom_y_B]/rho_y_B;
+                                const double v_y_T = Q[2][idx_cell_mom_y_T]/rho_y_T;
+                                
+                                const double epsilon_y_B = Q[3][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B);
+                                const double epsilon_y_T = Q[3][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T);
+                                
+                                const double p_y_B = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                    getPressure(
+                                        &rho_y_B,
+                                        &epsilon_y_B,
+                                        thermo_properties_ptr);
+                                
+                                const double p_y_T = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                    getPressure(
+                                        &rho_y_T,
+                                        &epsilon_y_T,
+                                        thermo_properties_ptr);
+                                
+                                // Central derivatives.
+                                du_dy = (u_y_T - u_y_B)/(double(2)*dx[1]);
+                                dv_dy = (v_y_T - v_y_B)/(double(2)*dx[1]);
+                                dp_dy = (p_y_T - p_y_B)/(double(2)*dx[1]);
+                            }
+                            const double c_x_R = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                getSoundSpeed(
+                                    &rho_x_R,
+                                    &p_x_R,
+                                    thermo_properties_ptr);
+                            
+                            const double lambda_4 = u_x_R + c_x_R;
+                            
+                            // Compute vector Lambda^(-1) * L.
+                            
+                            double Lambda_inv_L[4];
+                            
+                            const double& p_t         = d_bdry_edge_nonreflecting_outflow_p_t[edge_loc];
+                            const double& sigma       = d_bdry_edge_nonreflecting_outflow_sigma[edge_loc];
+                            const double& beta        = d_bdry_edge_nonreflecting_outflow_beta[edge_loc];
+                            const double& length_char = d_bdry_edge_nonreflecting_outflow_length_char[edge_loc];
+                            
+                            const double T_4 = v_x_R*(dp_dy + rho_x_R*c_x_R*du_dy) + rho_x_R*c_x_R*c_x_R*dv_dy;
+                            
+                            const double M_sq = (u_x_R*u_x_R + v_x_R*v_x_R)/(c_x_R*c_x_R);
+                            const double K = sigma*c_x_R*(double(1) - M_sq)/length_char;
+                            
+                            Lambda_inv_L[0] = dp_dx - rho_x_R*c_x_R*du_dx;
+                            Lambda_inv_L[1] = c_x_R*c_x_R*drho_dx - dp_dx;
+                            Lambda_inv_L[2] = dv_dx;
+                            Lambda_inv_L[3] = (double(1)/lambda_4)*(K*(p_x_R + p_t) - (double(1) - beta)*T_4);
+                            
+                            // Compute dV_dx.
+                            
+                            const double c_sq_inv  = double(1)/(c_x_R*c_x_R);
+                            const double rho_c_inv = double(1)/(rho_x_R*c_x_R);
+                            
+                            double dV_dx[4];
+                            
+                            dV_dx[0] = half*c_sq_inv*(Lambda_inv_L[0] + Lambda_inv_L[3]) + c_sq_inv*Lambda_inv_L[1];
+                            dV_dx[1] = half*rho_c_inv*(-Lambda_inv_L[0] + Lambda_inv_L[3]);
+                            dV_dx[2] = Lambda_inv_L[2];
+                            dV_dx[3] = half*(Lambda_inv_L[0] + Lambda_inv_L[3]);
+                            
+                            double V_ghost[4*num_ghosts_to_fill];
+                            
+                            for (int i = num_ghosts_to_fill - 1; i >= 0; i--)
+                            {
+                                const int idx_cell_rho = (i + fill_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
+                                    (j + num_subghosts_conservative_var[0][1])*
+                                        subghostcell_dims_conservative_var[0][0];
+                                
+                                const int idx_cell_mom = (i + fill_box_lo_idx[0] + num_subghosts_conservative_var[1][0]) +
+                                    (j + num_subghosts_conservative_var[1][1])*
+                                        subghostcell_dims_conservative_var[1][0];
+                                
+                                const int idx_cell_E = (i + fill_box_lo_idx[0] + num_subghosts_conservative_var[2][0]) +
+                                    (j + num_subghosts_conservative_var[2][1])*
+                                        subghostcell_dims_conservative_var[2][0];
+                                
+                                if (i == num_ghosts_to_fill - 1)
+                                {
+                                    V_ghost[i*4 + 0] = rho_x_RR - double(2)*dx[0]*dV_dx[0];
+                                    V_ghost[i*4 + 1] = u_x_RR   - double(2)*dx[0]*dV_dx[1];
+                                    V_ghost[i*4 + 2] = v_x_RR   - double(2)*dx[0]*dV_dx[2];
+                                    V_ghost[i*4 + 3] = p_x_RR   - double(2)*dx[0]*dV_dx[3];
+                                }
+                                else if (i == num_ghosts_to_fill - 2)
+                                {
+                                    V_ghost[i*4 + 0] = -double(2)*rho_x_RR - double(3)*rho_x_R +
+                                        double(6)*V_ghost[(i + 1)*4 + 0] + double(6)*dx[0]*dV_dx[0];
+                                    
+                                    V_ghost[i*4 + 1] = -double(2)*u_x_RR - double(3)*u_x_R +
+                                        double(6)*V_ghost[(i + 1)*4 + 1] + double(6)*dx[0]*dV_dx[1];
+                                    
+                                    V_ghost[i*4 + 2] = -double(2)*v_x_RR - double(3)*v_x_R +
+                                        double(6)*V_ghost[(i + 1)*4 + 2] + double(6)*dx[0]*dV_dx[2];
+                                    
+                                    V_ghost[i*4 + 3] = -double(2)*p_x_RR - double(3)*p_x_R +
+                                        double(6)*V_ghost[(i + 1)*4 + 3] + double(6)*dx[0]*dV_dx[3];
+                                }
+                                else if (i == num_ghosts_to_fill - 3)
+                                {
+                                    V_ghost[i*4 + 0] = double(3)*rho_x_RR + double(10)*rho_x_R -
+                                        double(18)*V_ghost[(i + 2)*4 + 0] + double(6)*V_ghost[(i + 1)*4 + 0] -
+                                        double(12)*dx[0]*dV_dx[0];
+                                    
+                                    V_ghost[i*4 + 1] = double(3)*u_x_RR + double(10)*u_x_R -
+                                        double(18)*V_ghost[(i + 2)*4 + 1] + double(6)*V_ghost[(i + 1)*4 + 1] -
+                                        double(12)*dx[0]*dV_dx[1];
+                                    
+                                    V_ghost[i*4 + 2] = double(3)*v_x_RR + double(10)*v_x_R -
+                                        double(18)*V_ghost[(i + 2)*4 + 2] + double(6)*V_ghost[(i + 1)*4 + 2] -
+                                        double(12)*dx[0]*dV_dx[2];
+                                    
+                                    V_ghost[i*4 + 3] = double(3)*p_x_RR + double(10)*p_x_R -
+                                        double(18)*V_ghost[(i + 2)*4 + 3] + double(6)*V_ghost[(i + 1)*4 + 3] -
+                                        double(12)*dx[0]*dV_dx[3];
+                                }
+                                else if (i == num_ghosts_to_fill - 4)  
+                                {
+                                    V_ghost[i*4 + 0] = -double(4)*rho_x_RR - double(65)/double(3)*rho_x_R +
+                                        double(40)*V_ghost[(i + 3)*4 + 0] - double(20)*V_ghost[(i + 2)*4 + 0] +
+                                        double(20)/double(3)*V_ghost[(i + 1)*4 + 0] - double(20)*dx[0]*dV_dx[0];
+                                    
+                                    V_ghost[i*4 + 1] = -double(4)*u_x_RR - double(65)/double(3)*u_x_R +
+                                        double(40)*V_ghost[(i + 3)*4 + 1] - double(20)*V_ghost[(i + 2)*4 + 1] +
+                                        double(20)/double(3)*V_ghost[(i + 1)*4 + 1] - double(20)*dx[0]*dV_dx[1];
+                                    
+                                    V_ghost[i*4 + 2] = -double(4)*v_x_RR - double(65)/double(3)*v_x_R +
+                                        double(40)*V_ghost[(i + 3)*4 + 2] - double(20)*V_ghost[(i + 2)*4 + 2] +
+                                        double(20)/double(3)*V_ghost[(i + 1)*4 + 2] - double(20)*dx[0]*dV_dx[2];
+                                    
+                                    V_ghost[i*4 + 3] = -double(4)*p_x_RR - double(65)/double(3)*p_x_R +
+                                        double(40)*V_ghost[(i + 3)*4 + 3] - double(20)*V_ghost[(i + 2)*4 + 3] +
+                                        double(20)/double(3)*V_ghost[(i + 1)*4 + 3] - double(20)*dx[0]*dV_dx[3];
+                                }
+                                
+                                Q[0][idx_cell_rho] = V_ghost[i*4 + 0];
+                                Q[1][idx_cell_mom] = V_ghost[i*4 + 0]*V_ghost[i*4 + 1];
+                                Q[2][idx_cell_mom] = V_ghost[i*4 + 0]*V_ghost[i*4 + 2];
+                                
+                                const double epsilon = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                    getInternalEnergy(
+                                        &V_ghost[i*4 + 0],
+                                        &V_ghost[i*4 + 3],
+                                        thermo_properties_ptr);
+                                
+                                const double E = V_ghost[i*4 + 0]*epsilon +
+                                    half*(Q[1][idx_cell_mom]*Q[1][idx_cell_mom] + Q[2][idx_cell_mom]*Q[2][idx_cell_mom])/
+                                        V_ghost[i*4 + 0];
+                                
+                                Q[3][idx_cell_E] = E;
+                            }
+                        }
                     }
+                    /////////////////////////////////////////////////////////////////////////////////////
+                    //
+                    // Denis 06/22/2020
+                    //
+                    /////////////////////////////////////////////////////////////////////////////////////
+                    
                     else if (edge_loc == BDRY_LOC::XHI)
                     {
                         const int num_ghosts_to_fill = fill_box_hi_idx[0] - fill_box_lo_idx[0] + 1;
