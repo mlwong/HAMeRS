@@ -1,4 +1,5 @@
 #include "flow/flow_models/single-species/FlowModelBoundaryUtilitiesSingleSpecies.hpp"
+
 #include "util/basic_boundary_conditions/CartesianBoundaryDefines.hpp"
 
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
@@ -419,6 +420,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::getFaceLocationForNodeBdry(
             {
                 ret_face = BDRY_LOC::YHI;
             }
+            
             break;
         }
         case BDRY_COND::FLOW_MODEL::ZADIABATIC_NO_SLIP:
@@ -1244,7 +1246,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                         
                         // number of ghostcells START
                         const int num_ghosts_to_fill = fill_box_hi_idx[0] - fill_box_lo_idx[0] + 1;
-                        TBOX_ASSERT(fill_box_lo_idx[0] == interior_box_lo_idx[0] - 1);
+                        TBOX_ASSERT(fill_box_hi_idx[0] == interior_box_lo_idx[0] - 1);
                         if (num_ghosts_to_fill > 4)
                         {
                             TBOX_ERROR(d_object_name
@@ -1450,6 +1452,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                 dv_dy = (v_y_T - v_y_B)/(double(2)*dx[1]);
                                 dp_dy = (p_y_T - p_y_B)/(double(2)*dx[1]);
                             }
+                            
                             const double c_x_R = d_equation_of_state_mixing_rules->getEquationOfState()->
                                 getSoundSpeed(
                                     &rho_x_R,
@@ -1475,7 +1478,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                             Lambda_inv_L[0] = dp_dx - rho_x_R*c_x_R*du_dx;
                             Lambda_inv_L[1] = c_x_R*c_x_R*drho_dx - dp_dx;
                             Lambda_inv_L[2] = dv_dx;
-                            Lambda_inv_L[3] = (double(1)/lambda_4)*(K*(p_x_R + p_t) - (double(1) - beta)*T_4);
+                            Lambda_inv_L[3] = (double(1)/lambda_4)*(K*(p_x_R - p_t) - (double(1) - beta)*T_4);
                             
                             // Compute dV_dx.
                             
