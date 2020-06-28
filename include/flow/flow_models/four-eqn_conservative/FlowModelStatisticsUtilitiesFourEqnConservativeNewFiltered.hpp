@@ -85,6 +85,46 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
+         * Output averaged density derivative with inhomogeneous x-direction to a file.
+         */
+        void
+        outputAveragedDenistyDerivativeWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output averaged x-momentum with inhomogeneous x-direction to a file.
+         */
+        void
+        outputAveragedXMomentumDerivativeWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output averaged y-momentum with inhomogeneous x-direction to a file.
+         */
+        void
+        outputAveragedYMomentumDerivativeWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output averaged z-momentum with inhomogeneous x-direction to a file.
+         */
+        void
+        outputAveragedZMomentumDerivativeWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
          * Output averaged density with inhomogeneous x-direction to a file.
          */
         void
@@ -672,6 +712,14 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
+        /*
+         * Compute filtered density.
+         */
+        void
+        computeFilteredDensity(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
         // Helper functions.
         
         /*
@@ -822,6 +870,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
         
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_velocity_Favre_filtered;
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_specific_volume_Favre_filtered;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_density_filtered;
         
         bool d_pressure_filtered;
         bool d_shear_stress_filtered;
