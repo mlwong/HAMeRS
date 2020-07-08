@@ -85,46 +85,6 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
-         * Output averaged density derivative with inhomogeneous x-direction to a file.
-         */
-        void
-        outputAveragedDenistyDerivativeWithInhomogeneousXDirection(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time) const;
-        
-        /*
-         * Output averaged x-momentum with inhomogeneous x-direction to a file.
-         */
-        void
-        outputAveragedXMomentumDerivativeWithInhomogeneousXDirection(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time) const;
-        
-        /*
-         * Output averaged y-momentum with inhomogeneous x-direction to a file.
-         */
-        void
-        outputAveragedYMomentumDerivativeWithInhomogeneousXDirection(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time) const;
-        
-        /*
-         * Output averaged z-momentum with inhomogeneous x-direction to a file.
-         */
-        void
-        outputAveragedZMomentumDerivativeWithInhomogeneousXDirection(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time) const;
-        
-        /*
          * Output averaged density with inhomogeneous x-direction to a file.
          */
         void
@@ -348,61 +308,6 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
         
         
         /**
-         ** Function to compute budgets.
-         **/
-        
-        /*
-         * Output budget of turbulent mass flux in x-direction with inhomogeneous x-direction to a file.
-         */
-        void
-        outputBudgetTurbMassFluxXWithInhomogeneousXDirection(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time) const;
-        
-        /*
-         * Output budget of density specific volume covariance with inhomogeneous x-direction to a file.
-         */
-        void
-        outputBudgetDensitySpecificVolumeCovarianceWithInhomogeneousXDirection(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time) const;
-        
-        /*
-         * Output budget of Reynolds normal stress in x-direction with inhomogeneous x-direction to a file.
-         */
-        void
-        outputBudgetReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time) const;
-        
-        /*
-         * Output budget of Reynolds normal stress in y-direction with inhomogeneous x-direction to a file.
-         */
-        void
-        outputBudgetReynoldsNormalStressInYDirectionWithInhomogeneousXDirection(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time) const;
-        
-        /*
-         * Output budget of Reynolds normal stress in z-direction with inhomogeneous x-direction to a file.
-         */
-        void
-        outputBudgetReynoldsNormalStressInZDirectionWithInhomogeneousXDirection(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context,
-            const double output_time) const;
-        
-        
-        /**
          ** Helper functions.
          **/
         
@@ -426,7 +331,6 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
         std::vector<double> computeDerivativeOfVector1D(
             const std::vector<double> quantity_vector,
             const double dx) const;
-        
         
         
         /*
@@ -488,39 +392,6 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context) const;
         
-        
-        
-        /*
-         * Compute averaged shear stress component with only x direction as inhomogeneous direction.
-         * component_idx:
-         * 0: tau_11
-         * 1: tau_12
-         * 2: tau_13
-         * 3: tau_22
-         * 4: tau_23
-         * 5: tau_33
-         */
-        std::vector<double> getAveragedShearStressComponentWithInhomogeneousXDirection(
-            const int component_idx,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context) const;
-        
-        /*
-         * Compute averaged derivative of shear stress component with only x direction as inhomogeneous direction.
-         * component_idx:
-         * 0: tau_11
-         * 1: tau_12
-         * 2: tau_13
-         * 3: tau_22
-         * 4: tau_23
-         * 5: tau_33
-         */
-        std::vector<double> getAveragedDerivativeOfShearStressComponentWithInhomogeneousXDirection(
-            const int component_idx,
-            const int derivative_direction,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context) const;
-        
         /*
          * Compute averaged value (on product of variables) with only x direction as inhomogeneous direction.
          */
@@ -573,49 +444,6 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context) const;
         
-        /*
-         * Compute correlation with shear stress component with only x direction as inhomogeneous direction.
-         * shear_stress_component_idx:
-         * 0: tau_11
-         * 1: tau_12
-         * 2: tau_13
-         * 3: tau_22
-         * 4: tau_23
-         * 5: tau_33
-         */
-        std::vector<double> getQuantityCorrelationWithShearStressComponentWithInhomogeneousXDirection(
-            const std::string quantity_name,
-            const int component_idx,
-            const bool use_reciprocal,
-            const int derivative_direction,
-            const std::vector<double>& averaged_quantity,
-            const int shear_stress_component_idx,
-            const std::vector<double>& averaged_shear_stress_component,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context) const;
-        
-        /*
-         * Compute correlation with derivative of shear stress component with only x direction as inhomogeneous direction.
-         * shear_stress_component_idx:
-         * 0: tau_11
-         * 1: tau_12
-         * 2: tau_13
-         * 3: tau_22
-         * 4: tau_23
-         * 5: tau_33
-         */
-        std::vector<double> getQuantityCorrelationWithDerivativeOfShearStressComponentWithInhomogeneousXDirection(
-            const std::string quantity_name,
-            const int component_idx,
-            const bool use_reciprocal,
-            const int derivative_direction,
-            const std::vector<double>& averaged_quantity,
-            const int shear_stress_component_idx,
-            const int shear_stress_derivative_direction,
-            const std::vector<double>& averaged_shear_stress_component,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context) const;
-        
         /**************************************************************************************************
          * For budgets on filtered variables.
          *************************************************************************************************/
@@ -645,14 +473,6 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
-         * Compute derivatives with only x direction as inhomogeneous direction.
-         */
-        void
-        computeDerivatives(
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
-        
-        /*
          * Filter pressure.
          */
         void
@@ -675,15 +495,6 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
          */
         void
         filterConvectiveStress(
-            const int level,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
-        
-        /*
-         * Filter derivatives.
-         */
-        void
-        filterDerivatives(
             const int level,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
@@ -858,15 +669,12 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_pressure_unfiltered;
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_shear_stress_unfiltered;
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_convective_stress_unfiltered;
-        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_derivatives_unfiltered;
         
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_pressure_filtered;
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_shear_stress_filtered;
         
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_convective_stress_filtered;
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_SFS_stress;
-        
-        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_derivatives_filtered;
         
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_velocity_Favre_filtered;
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_specific_volume_Favre_filtered;

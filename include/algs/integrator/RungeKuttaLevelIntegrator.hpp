@@ -1069,6 +1069,12 @@ class RungeKuttaLevelIntegrator:
         std::vector<std::vector<double> > d_gamma;
         
         /*
+         * Number of times of filtering before computing statistics.
+         */
+        
+        int d_num_filtering;
+        
+        /*
          * Boolean flags for indicating whether face or side data types are used for fluxes (choice
          * is determined by numerical routines in Runge-Kutta patch model).
          */
