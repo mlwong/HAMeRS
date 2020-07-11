@@ -19018,14 +19018,14 @@ outputBudgetFilteredTurbMassFluxXWithInhomogeneousXDirection(
     {
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            rho_rho_inv_p_dtau_SFS_ij_dx_p[i] = -rho_mean[i]*(rho_inv_p_dtau_SFS_11_dx_p[i] + rho_inv_p_dtau_SFS_12_dy_p[i]);
+            rho_rho_inv_p_dtau_SFS_ij_dx_p[i] = rho_mean[i]*(rho_inv_p_dtau_SFS_11_dx_p[i] + rho_inv_p_dtau_SFS_12_dy_p[i]);
         }
     }
     else if (d_dim == tbox::Dimension(3))
     {
         for (int i = 0; i < finest_level_dim_0; i++)
         {
-            rho_rho_inv_p_dtau_SFS_ij_dx_p[i] = -rho_mean[i]*(rho_inv_p_dtau_SFS_11_dx_p[i] + rho_inv_p_dtau_SFS_12_dy_p[i] +
+            rho_rho_inv_p_dtau_SFS_ij_dx_p[i] = rho_mean[i]*(rho_inv_p_dtau_SFS_11_dx_p[i] + rho_inv_p_dtau_SFS_12_dy_p[i] +
                 rho_inv_p_dtau_SFS_13_dz_p[i]);
         }
     }
