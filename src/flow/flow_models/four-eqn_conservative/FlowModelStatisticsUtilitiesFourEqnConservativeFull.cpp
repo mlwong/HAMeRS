@@ -479,6 +479,59 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             {
                 f_out << "\t" << "WEIGHTED_NUM_CELLS   ";
             }
+            // Maxima in mixing layer.
+            else if (statistical_quantity_key == "a1_HOMO_YZ_MAX")
+            {
+                f_out << "\t" << "a1_HOMO_YZ_MAX       ";
+            }
+            else if (statistical_quantity_key == "ra1_HOMO_YZ_MAX")
+            {
+                f_out << "\t" << "ra1_HOMO_YZ_MAX      ";
+            }
+            else if (statistical_quantity_key == "b_HOMO_YZ_MAX")
+            {
+                f_out << "\t" << "b_HOMO_YZ_MAX        ";
+            }
+            else if (statistical_quantity_key == "rb_HOMO_YZ_MAX")
+            {
+                f_out << "\t" << "rb_HOMO_YZ_MAX       ";
+            }
+            else if (statistical_quantity_key == "R11_HOMO_YZ_MAX")
+            {
+                f_out << "\t" << "R11_HOMO_YZ_MAX      ";
+            }
+            else if (statistical_quantity_key == "rR11_HOMO_YZ_MAX")
+            {
+                f_out << "\t" << "rR11_HOMO_YZ_MAX     ";
+            }
+            else if (statistical_quantity_key == "R22_HOMO_YZ_MAX")
+            {
+                f_out << "\t" << "R22_HOMO_YZ_MAX      ";
+            }
+            else if (statistical_quantity_key == "rR22_HOMO_YZ_MAX")
+            {
+                f_out << "\t" << "rR22_HOMO_YZ_MAX     ";
+            }
+            else if (statistical_quantity_key == "R33_HOMO_YZ_MAX")
+            {
+                f_out << "\t" << "R33_HOMO_YZ_MAX      ";
+            }
+            else if (statistical_quantity_key == "rR33_HOMO_YZ_MAX")
+            {
+                f_out << "\t" << "rR33_HOMO_YZ_MAX     ";
+            }
+            else if (statistical_quantity_key == "TKE_HOMO_YZ_MAX")
+            {
+                f_out << "\t" << "TKE_HOMO_YZ_MAX      ";
+            }
+            else if (statistical_quantity_key == "ENSTR_HOMO_YZ_MAX")
+            {
+                f_out << "\t" << "ENSTR_HOMO_YZ_MAX    ";
+            }
+            else if (statistical_quantity_key == "SCA_D_HOMO_YZ_MAX")
+            {
+                f_out << "\t" << "SCA_D_HOMO_YZ_MAX    ";
+            }
         }
         
         f_out.close();
@@ -1342,21 +1395,21 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 patch_hierarchy,
                 data_context);
         }
-        else if (statistical_quantity_key == "TKE_HOMO_YZ_IN_ML_X")
+        else if (statistical_quantity_key == "TKE_HOMO_YZ_MAX")
         {
             outputTKEMaxInMixingLayerWithHomogeneityInYZPlane(
                 stat_dump_filename,
                 patch_hierarchy,
                 data_context);
         }
-        else if (statistical_quantity_key == "ENSTR_HOMO_YZ_IN_ML_X")
+        else if (statistical_quantity_key == "ENSTR_HOMO_YZ_MAX")
         {
             outputEnstrophyMaxInMixingLayerWithHomogeneityInYZPlane(
                 stat_dump_filename,
                 patch_hierarchy,
                 data_context);
         }
-        else if (statistical_quantity_key == "SCA_D_HOMO_YZ_IN_ML_X")
+        else if (statistical_quantity_key == "SCA_D_HOMO_YZ_MAX")
         {
             outputScalarDissipationMaxInMixingLayerWithHomogeneityInYZPlane(
                 stat_dump_filename,
