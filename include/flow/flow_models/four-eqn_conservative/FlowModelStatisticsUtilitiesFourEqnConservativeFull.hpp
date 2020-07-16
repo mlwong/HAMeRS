@@ -764,6 +764,15 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
+         * Output velocity associated with turbulent mass flux in x-direction integrated with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputTurbulentMassFluxVelocityInXDirectionIntegratedWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
          * Output turbulent mass flux in x-direction integrated with assumed homogeneity in yz-plane to a file.
          */
         void
@@ -773,41 +782,31 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
-         * Output turbulent mass flux in x-direction multiplied by density integrated with assumed homogeneity in
-         * yz-plane to a file.
-         */
-        void
-        outputTurbulentMassFluxInXDirectionMultipliedByDensityIntegratedWithHomogeneityInYZPlane(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
-        
-        /*
-         * Output mean turbulent mass flux in x-direction inside mixing layer with assumed homogeneity
+         * Output mean velocity associated with turbulent mass flux inside mixing layer with assumed homogeneity
          * in y-direction to a file.
          */
         void
-        outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+        outputTurbulentMassFluxVelocityInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
-         * Output mean turbulent mass flux in x-direction inside mixing layer with assumed homogeneity
+         * Output mean velocity associated with turbulent mass flux in x-direction inside mixing layer with assumed homogeneity
          * in yz-plane to a file.
          */
         void
-        outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+        outputTurbulentMassFluxVelocityInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
-         * Output mean turbulent mass flux in x-direction multiplied by density inside mixing layer with assumed
+         * Output mean turbulent mass flux in x-direction inside mixing layer with assumed
          * homogeneity in yz-plane to a file.
          */
         void
-        outputTurbulentMassFluxInXDirectionMultipliedByDensityMeanInMixingLayerWithHomogeneityInYZPlane(
+        outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
@@ -1086,6 +1085,137 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
          */
         void
         outputWeightedNumberOfCells(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        // Maxima in mixing layer.
+        
+        /*
+         * Output maximum velocity associated with turbulent mass flux in x-direction inside mixing layer with assumed homogeneity in
+         * yz-plane to a file.
+         */
+        void
+        outputTurbulentMassFluxVelocityInXDirectionMaxInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output maximum turbulent mass flux in x-direction inside mixing layer with assumed homogeneity in
+         * yz-plane to a file.
+         */
+        void
+        outputTurbulentMassFluxInXDirectionMaxInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        
+        /*
+         * Output maximum density specific volume covariance inside mixing layer with assumed homogeneity
+         * in yz-plane to a file.
+         */
+        void
+        outputDensitySpecificVolumeCovarianceMaxInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output maximum density specific volume covariance multiplied by density inside mixing layer with assumed
+         * homogeneity in yz-plane to a file.
+         */
+        void
+        outputDensitySpecificVolumeCovarianceMultipliedByDensityMaxInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output maximum Reynolds normal stress component in x-direction inside mixing layer with
+         * assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputReynoldsNormalStressInXDirectionMaxInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output maximum Reynolds normal stress component in x-direction multiplied by density inside
+         * mixing layer with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputReynoldsNormalStressInXDirectionMultipliedByDensityMaxInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output maximum Reynolds normal stress component in y-direction inside mixing layer with
+         * assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputReynoldsNormalStressInYDirectionMaxInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output maximum Reynolds normal stress component in y-direction multiplied by density inside
+         * mixing layer with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputReynoldsNormalStressInYDirectionMultipliedByDensityMaxInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output maximum Reynolds normal stress component in z-direction inside mixing layer with
+         * assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputReynoldsNormalStressInZDirectionMaxInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output maximum Reynolds normal stress component in z-direction multiplied by density inside
+         * mixing layer with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputReynoldsNormalStressInZDirectionMultipliedByDensityMaxInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output maximum TKE inside mixing layer with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputTKEMaxInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output maximum enstrophy inside mixing layer with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputEnstrophyMaxInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output maximum scalar dissipation rate of first species inside mixing layer with assumed homogeneity
+         * in yz-plane to a file.
+         */
+        void
+        outputScalarDissipationMaxInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
