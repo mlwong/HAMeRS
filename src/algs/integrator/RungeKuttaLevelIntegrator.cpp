@@ -3675,8 +3675,8 @@ RungeKuttaLevelIntegrator::outputDataStatistics(
         boost::shared_ptr<hier::PatchLevel> patch_level(
             hierarchy->getPatchLevel(li));
         
-        patch_level->deallocatePatchData(d_temp_var_scratch_data);
-        // patch_level->deallocatePatchData(d_saved_var_scratch_data);
+        patch_level->deallocatePatchData(d_stats_var_scratch_data);
+        // patch_level->deallocatePatchData(d_temp_var_scratch_data);
         patch_level->deallocatePatchData(d_saved_var_scratch_data);
     }
     
