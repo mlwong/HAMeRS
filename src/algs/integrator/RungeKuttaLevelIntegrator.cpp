@@ -276,6 +276,7 @@ RungeKuttaLevelIntegrator::RungeKuttaLevelIntegrator(
     d_current(hier::VariableDatabase::getDatabase()->getContext("CURRENT")),
     d_new(hier::VariableDatabase::getDatabase()->getContext("NEW")),
     d_plot_context(d_current),
+    d_stats_tmp(hier::VariableDatabase::getDatabase()->getContext("STATS_TMP")),
     d_have_flux_on_level_zero(false),
     d_distinguish_mpi_reduction_costs(false)
 {
@@ -2378,7 +2379,11 @@ RungeKuttaLevelIntegrator::resetDataToPreadvanceState(
  * TEMPORARY:
  *             One factory is needed: SCRATCH.
  *             SCRATCH index is added to d_temp_var_scratch_data.
- *             
+ *
+ * STATISTICS:
+ *             Two factories is needed: SCRATCH, STATS_TMP.
+ *             SCRATCH index is added to d_stats_var_scratch_data.
+ *
  **************************************************************************************************
  */
 void
@@ -2423,6 +2428,12 @@ RungeKuttaLevelIntegrator::registerVariable(
         
         d_coarsen_rich_extrap_init.reset(new xfer::CoarsenAlgorithm(dim));
         d_coarsen_rich_extrap_final.reset(new xfer::CoarsenAlgorithm(dim));
+    }
+    
+    if (!d_fill_statistics)
+    {
+        d_fill_statistics.reset(new xfer::RefineAlgorithm());
+        d_coarsen_statistics.reset(new xfer::CoarsenAlgorithm(dim));
     }
     
     hier::VariableDatabase* variable_db = hier::VariableDatabase::getDatabase();
@@ -2792,7 +2803,7 @@ RungeKuttaLevelIntegrator::registerVariable(
                 d_intermediate_source_var_data[sn].setFlag(intermediate_id[sn]);
             }
             
-            break;            
+            break;
         }
         case TEMPORARY:
         {
@@ -2804,6 +2815,42 @@ RungeKuttaLevelIntegrator::registerVariable(
             d_temp_var_scratch_data.setFlag(scr_id);
           
           break;
+        }
+        case STATISTICS:
+        {
+            int scr_id = variable_db->registerVariableAndContext(
+                var,
+                d_scratch,
+                ghosts);
+            
+            int stats_tmp_id = variable_db->registerVariableAndContext(
+                var,
+                d_stats_tmp,
+                ghosts);
+            
+            d_stats_var_scratch_data.setFlag(scr_id);
+            
+            /*
+             * Set boundary fill schedules for scratch data when data statistics are outputted.
+             */
+            
+            boost::shared_ptr<hier::RefineOperator> refine_op(
+                transfer_geom->lookupRefineOperator(var, refine_name));
+            
+            d_fill_statistics->registerRefine(
+                scr_id, scr_id, stats_tmp_id, refine_op);
+            
+            /*
+             * The coarsen algorithm will coarsen statistics data on finer level to statistics data
+             * on coarser level.
+             */
+            
+            boost::shared_ptr<hier::CoarsenOperator> coarsen_op(
+                transfer_geom->lookupCoarsenOperator(var, coarsen_name));
+            
+            d_coarsen_statistics->registerCoarsen(scr_id, scr_id, coarsen_op);
+            
+            break;
         }
         default:
         {
@@ -3559,7 +3606,8 @@ RungeKuttaLevelIntegrator::outputDataStatistics(
             hierarchy->getPatchLevel(li));
         
         patch_level->allocatePatchData(d_saved_var_scratch_data, statistics_data_time);
-        patch_level->allocatePatchData(d_temp_var_scratch_data, statistics_data_time);
+        // patch_level->allocatePatchData(d_temp_var_scratch_data, statistics_data_time);
+        patch_level->allocatePatchData(d_stats_var_scratch_data, statistics_data_time);
     }
     
     d_patch_strategy->setDataContext(d_scratch);
@@ -3569,6 +3617,108 @@ RungeKuttaLevelIntegrator::outputDataStatistics(
         d_bdry_sched_advance[li]->fillData(statistics_data_time);
     }
     
+    /*
+     * Compute variables if necessary.
+     */
+    
+    d_patch_strategy->computeStatisticsVariables(hierarchy);
+    
+    // Coarsen data from finer levels to coarser levers.
+    for (int li = num_levels - 1; li > 0; li--)
+    {
+        boost::shared_ptr<hier::PatchLevel> coarse_level(
+            hierarchy->getPatchLevel(li - 1));
+        
+        boost::shared_ptr<hier::PatchLevel> fine_level(
+            hierarchy->getPatchLevel(li));
+        
+        boost::shared_ptr<xfer::CoarsenSchedule> coarsen_schedule = d_coarsen_statistics->createSchedule(
+            coarse_level,
+            fine_level);
+        
+        coarsen_schedule->coarsenData();
+    }
+    
+    // Exchange halo values of variables if necessary.
+    for (int li = 0; li < num_levels; li++)
+    {
+        boost::shared_ptr<hier::PatchLevel> patch_level(
+            hierarchy->getPatchLevel(li));
+        
+        boost::shared_ptr<xfer::RefineSchedule> fill_schedule;
+
+        if (li > 0)
+        {
+            fill_schedule = d_fill_statistics->createSchedule(
+                patch_level,
+                li - 1,
+                hierarchy);
+        }
+        else
+        {
+            fill_schedule = d_fill_statistics->createSchedule(
+                patch_level,
+                d_patch_strategy);
+        }
+        
+        fill_schedule->fillData(statistics_data_time);
+    }
+    
+    /*
+     *  Filter variables if necessary.
+     */
+    
+    for (int count = 0; count < d_num_filtering_stats; count++)
+    {
+        // Filter data and coarsen data from finer levels to coarser levers.
+        for (int li = num_levels - 1; li > 0; li--)
+        {
+            d_patch_strategy->filterStatisticsVariables(li, hierarchy);
+            
+            boost::shared_ptr<hier::PatchLevel> coarse_level(
+                hierarchy->getPatchLevel(li - 1));
+            
+            boost::shared_ptr<hier::PatchLevel> fine_level(
+                hierarchy->getPatchLevel(li));
+            
+            boost::shared_ptr<xfer::CoarsenSchedule> coarsen_schedule = d_coarsen_statistics->createSchedule(
+                coarse_level,
+                fine_level);
+            
+            coarsen_schedule->coarsenData();
+        }
+        d_patch_strategy->filterStatisticsVariables(0, hierarchy);
+        
+        // Exchange halo values of variables if necessary.
+        for (int li = 0; li < num_levels; li++)
+        {
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                hierarchy->getPatchLevel(li));
+            
+            boost::shared_ptr<xfer::RefineSchedule> fill_schedule;
+            
+            if (li > 0)
+            {
+                fill_schedule = d_fill_statistics->createSchedule(
+                    patch_level,
+                    li - 1,
+                    hierarchy);
+            }
+            else
+            {
+                fill_schedule = d_fill_statistics->createSchedule(
+                    patch_level,
+                    d_patch_strategy);
+            }
+            
+            fill_schedule->fillData(statistics_data_time);
+        }
+    }
+    
+
+    // Set conservative variables as the filtered valued if necessary.
+    // Then, compute and output statistics.
+    // Reset conservative variables as the pre-filtered values if necessary.
     d_patch_strategy->outputDataStatistics(hierarchy, statistics_data_time);
     
     for (int li = 0; li < num_levels; li++)
@@ -3576,7 +3726,8 @@ RungeKuttaLevelIntegrator::outputDataStatistics(
         boost::shared_ptr<hier::PatchLevel> patch_level(
             hierarchy->getPatchLevel(li));
         
-        patch_level->deallocatePatchData(d_temp_var_scratch_data);
+        patch_level->deallocatePatchData(d_stats_var_scratch_data);
+        // patch_level->deallocatePatchData(d_temp_var_scratch_data);
         patch_level->deallocatePatchData(d_saved_var_scratch_data);
     }
     
@@ -3787,6 +3938,8 @@ RungeKuttaLevelIntegrator::getFromInput(
                 input_db->getBoolWithDefault("DEV_distinguish_mpi_reduction_costs",
                     d_distinguish_mpi_reduction_costs);
         }
+        
+        d_num_filtering_stats = input_db->getIntegerWithDefault("num_filtering_stats", 0); 
     }
 }
 

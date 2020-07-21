@@ -460,6 +460,19 @@ NavierStokes::registerModelVariables(
     }
     
     /*
+     * Register the temporary variables used in statistics utilities.
+     */
+    
+    d_flow_model->setupStatisticsUtilities();
+    
+    boost::shared_ptr<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
+        d_flow_model->getFlowModelStatisticsUtilities();
+    
+    flow_model_statistics_utilities->registerVariables(
+        integrator,
+        num_ghosts);
+    
+    /*
      * Set the plotting context.
      */
     setPlotContext(integrator->getPlotContext());
@@ -3458,6 +3471,44 @@ NavierStokes::printDataStatistics(
 
 
 /**
+ * Compute variables for computing the statistics of data.
+ */
+void
+NavierStokes::computeStatisticsVariables(
+   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy)
+{
+    d_flow_model->setupStatisticsUtilities();
+    
+    boost::shared_ptr<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
+        d_flow_model->getFlowModelStatisticsUtilities();
+    
+    flow_model_statistics_utilities->computeVariables(
+        patch_hierarchy,
+        getDataContext());
+}
+
+
+/**
+ * Filter variables for computing the statistics of data.
+ */
+void
+NavierStokes::filterStatisticsVariables(
+    const int level,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy)
+{
+    d_flow_model->setupStatisticsUtilities();
+    
+     boost::shared_ptr<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
+        d_flow_model->getFlowModelStatisticsUtilities();
+    
+    flow_model_statistics_utilities->filterVariables(
+        level,
+        patch_hierarchy,
+        getDataContext());
+}
+
+
+/**
  * Output the statistics of data.
  */
 void
@@ -3485,6 +3536,8 @@ NavierStokes::outputDataStatistics(
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10) << output_time;
             f_out.close();
         }
+        
+        d_flow_model->setupStatisticsUtilities();
         
         boost::shared_ptr<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
             d_flow_model->getFlowModelStatisticsUtilities();
