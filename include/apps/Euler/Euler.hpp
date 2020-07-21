@@ -418,6 +418,13 @@ class Euler:
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /**
+         * Compute variables for computing the statistics of data.
+         */
+        void
+        computeStatisticsVariables(
+           const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy);
+        
+        /**
          * Output the statistics of data.
          */
         void
@@ -434,7 +441,7 @@ class Euler:
         {
             d_plot_context = plot_context;
         }
-
+        
     private:
         /*
          * These private member functions read data from input and restart. When beginning a run

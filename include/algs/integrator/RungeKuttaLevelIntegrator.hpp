@@ -183,7 +183,8 @@ class RungeKuttaLevelIntegrator:
                            NO_FILL     = 2,
                            FLUX        = 3,
                            SOURCE      = 4,
-                           TEMPORARY   = 5};
+                           TEMPORARY   = 5,
+                           STATISTICS = 6};
         
         /**
          * Constructor for RungeKuttaLevelIntegrator initializes integration parameters to default
@@ -1066,6 +1067,11 @@ class RungeKuttaLevelIntegrator:
         std::vector<std::vector<double> > d_gamma;
         
         /*
+         * Number of times of filtering before computing statistics.
+         */
+        int d_num_filtering;
+        
+        /*
          * Boolean flags for indicating whether face or side data types are used for fluxes (choice
          * is determined by numerical routines in Runge-Kutta patch model).
          */
@@ -1134,6 +1140,16 @@ class RungeKuttaLevelIntegrator:
         boost::shared_ptr<xfer::RefineAlgorithm> d_fill_new_level;
         
         /*
+         * Set boundary fill schedules for scratch data when data statistics are outputted.
+         */
+        boost::shared_ptr<xfer::RefineAlgorithm> d_fill_statistics;
+
+        /*
+         * Coarsen algorithms for statistics data.
+         */
+        boost::shared_ptr<xfer::CoarsenAlgorithm> d_coarsen_statistics;
+        
+        /*
          * Number of levels of time-dependent data that must be maintained on each patch level. This
          * value is used to coordinate the needs of the time integration and the regridding process
          * with the patch data types and descriptor indices.
@@ -1152,6 +1168,7 @@ class RungeKuttaLevelIntegrator:
         boost::shared_ptr<hier::VariableContext> d_new;
         boost::shared_ptr<hier::VariableContext> d_old;
         boost::shared_ptr<hier::VariableContext> d_plot_context;
+        boost::shared_ptr<hier::VariableContext> d_stats_tmp;
         std::vector<boost::shared_ptr<hier::VariableContext> > d_intermediate;
         
         std::list<boost::shared_ptr<hier::Variable> > d_all_variables;
@@ -1224,6 +1241,11 @@ class RungeKuttaLevelIntegrator:
          * time levels of data are used.
          */
         hier::ComponentSelector d_old_time_dep_data;
+        
+        /*
+         * SCRATCH descriptor indices for STATISTICS variables.
+         */
+        hier::ComponentSelector d_stats_var_scratch_data;
         
         /*
          * Option to distinguish tbox::MPI reduction costs from load imbalances when doing performance
