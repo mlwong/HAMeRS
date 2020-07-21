@@ -2842,7 +2842,7 @@ RungeKuttaLevelIntegrator::registerVariable(
             
             /*
              * The coarsen algorithm will coarsen statistics data on finer level to statistics data
-             * on coarser.
+             * on coarser level.
              */
             
             boost::shared_ptr<hier::CoarsenOperator> coarsen_op(
