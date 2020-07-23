@@ -19762,6 +19762,9 @@ outputBudgetFilteredDensitySpecificVolumeCovarianceWithInhomogeneousXDirection(
         // Term II in moving frame of mixing layer.
         f_output.write((char*)&d_rho_a1_b_dx[0], sizeof(double)*d_rho_a1_b_dx.size());
         
+        // Mean density profile.
+        f_output.write((char*)&rho_mean[0], sizeof(double)*rho_mean.size());
+        
         f_output.close();
     }
     
