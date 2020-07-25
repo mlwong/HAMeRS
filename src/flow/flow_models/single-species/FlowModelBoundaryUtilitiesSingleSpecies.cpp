@@ -1932,8 +1932,8 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                         //////////////////////////////////////////////////////////////////////////////////
                         
                         // number of ghostcells START
-                        const int num_ghosts_to_fill = fill_box_hi_idx[0] - fill_box_lo_idx[0] + 1;
-                        TBOX_ASSERT(fill_box_hi_idx[0] == interior_box_lo_idx[0] - 1);
+                        const int num_ghosts_to_fill = fill_box_hi_idx[1] - fill_box_lo_idx[1] + 1;
+                        TBOX_ASSERT(fill_box_hi_idx[1] == interior_box_lo_idx[1] - 1);
                         if (num_ghosts_to_fill > 4)
                         {
                             TBOX_ERROR(d_object_name
@@ -2031,7 +2031,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                             if ((patch_geom->getTouchesRegularBoundary(0, 0)) &&
                                 (i == interior_box_lo_idx[0]))
                             {
-                                // Patch is touching bottom physical boundary.
+                                // Patch is touching left physical boundary.
                                 
                                 const int idx_cell_rho_x_R = (i + 1 + num_subghosts_conservative_var[0][0]) +
                                     (interior_box_lo_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
@@ -2061,7 +2061,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                             else if ((patch_geom->getTouchesRegularBoundary(0, 1)) &&
                                      (i == interior_box_hi_idx[0]))
                             {
-                                // Patch is touching top physical boundary.
+                                // Patch is touching right physical boundary.
                                 
                                 const int idx_cell_rho_x_L = (i - 1 + num_subghosts_conservative_var[0][0]) +
                                     (interior_box_lo_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
@@ -2138,6 +2138,8 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                 dp_dx = (p_x_R - p_x_L)/(double(2)*dx[0]);
                             }
                             
+                            // Compute wave speed (v + c) at the boundary.
+                            
                             const double c_y_T = d_equation_of_state_mixing_rules->getEquationOfState()->
                                 getSoundSpeed(
                                     &rho_y_T,
@@ -2161,8 +2163,8 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                             const double K = sigma*c_y_T*(double(1) - M_sq)/length_char;
                             
                             Lambda_inv_L[0] = dp_dy - rho_y_T*c_y_T*dv_dy;
-                            Lambda_inv_L[1] = c_y_T*c_y_T*drho_dy - dp_dy;
-                            Lambda_inv_L[2] = du_dy;
+                            Lambda_inv_L[1] = du_dy;
+                            Lambda_inv_L[2] = c_y_T*c_y_T*drho_dy - dp_dy;
                             Lambda_inv_L[3] = (double(1)/lambda_4)*(K*(p_y_T - p_t) - (double(1) - beta)*T_4);
                             
                             // Compute dV_dy.
@@ -2172,9 +2174,9 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                             
                             double dV_dy[4];
                             
-                            dV_dy[0] = half*c_sq_inv*(Lambda_inv_L[0] + Lambda_inv_L[3]) + c_sq_inv*Lambda_inv_L[1];
-                            dV_dy[1] = half*rho_c_inv*(-Lambda_inv_L[0] + Lambda_inv_L[3]);
-                            dV_dy[2] = Lambda_inv_L[2];
+                            dV_dy[0] = half*c_sq_inv*(Lambda_inv_L[0] + Lambda_inv_L[3]) + c_sq_inv*Lambda_inv_L[2];
+                            dV_dy[1] = Lambda_inv_L[1];
+                            dV_dy[2] = half*rho_c_inv*(-Lambda_inv_L[0] + Lambda_inv_L[3]);
                             dV_dy[3] = half*(Lambda_inv_L[0] + Lambda_inv_L[3]);
                             
                             double V_ghost[4*num_ghosts_to_fill];
@@ -2271,8 +2273,8 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                     }
                     else if (edge_loc == BDRY_LOC::YHI)
                     {
-                        const int num_ghosts_to_fill = fill_box_hi_idx[0] - fill_box_lo_idx[0] + 1;
-                        TBOX_ASSERT(fill_box_lo_idx[0] == interior_box_hi_idx[0] + 1);
+                        const int num_ghosts_to_fill = fill_box_hi_idx[1] - fill_box_lo_idx[1] + 1;
+                        TBOX_ASSERT(fill_box_lo_idx[1] == interior_box_hi_idx[1] + 1);
                         if (num_ghosts_to_fill > 4)
                         {
                             TBOX_ERROR(d_object_name
@@ -2494,8 +2496,8 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                             const double K = sigma*c_y_B*(double(1) - M_sq)/length_char;
                             
                             Lambda_inv_L[0] = (double(1)/lambda_1)*(K*(p_y_B - p_t) - (double(1) - beta)*T_1);
-                            Lambda_inv_L[1] = c_y_B*c_y_B*drho_dy - dp_dy;
-                            Lambda_inv_L[2] = du_dy;
+                            Lambda_inv_L[1] = du_dy;
+                            Lambda_inv_L[2] = c_y_B*c_y_B*drho_dy - dp_dy;
                             Lambda_inv_L[3] = dp_dy + rho_y_B*c_y_B*dv_dy;
                             
                             // Compute dV_dy.
@@ -2505,9 +2507,9 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                             
                             double dV_dy[4];
                             
-                            dV_dy[0] = half*c_sq_inv*(Lambda_inv_L[0] + Lambda_inv_L[3]) + c_sq_inv*Lambda_inv_L[1];
-                            dV_dy[1] = half*rho_c_inv*(-Lambda_inv_L[0] + Lambda_inv_L[3]);
-                            dV_dy[2] = Lambda_inv_L[2];
+                            dV_dy[0] = half*c_sq_inv*(Lambda_inv_L[0] + Lambda_inv_L[3]) + c_sq_inv*Lambda_inv_L[2];
+                            dV_dy[1] = Lambda_inv_L[1];
+                            dV_dy[2] = half*rho_c_inv*(-Lambda_inv_L[0] + Lambda_inv_L[3]);
                             dV_dy[3] = half*(Lambda_inv_L[0] + Lambda_inv_L[3]);
                             
                             double V_ghost[4*num_ghosts_to_fill];
