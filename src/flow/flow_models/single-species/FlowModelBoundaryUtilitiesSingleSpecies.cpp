@@ -1343,10 +1343,12 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                             double dv_dy = double(0);
                             double dp_dy = double(0);
                             
-                            if ((patch_geom->getTouchesRegularBoundary(1, 0)) &&
-                                (j == interior_box_lo_idx[1]))
+                            if (((patch_geom->getTouchesRegularBoundary(1, 0)) && (j == interior_box_lo_idx[1])) ||
+                                ((j + num_subghosts_conservative_var[0][1] == 0) ||
+                                 (j + num_subghosts_conservative_var[1][1] == 0) ||
+                                 (j + num_subghosts_conservative_var[2][1] == 0)))
                             {
-                                // Patch is touching bottom physical boundary.
+                                // Patch is touching bottom physical or periodic boundary.
                                 
                                 const int idx_cell_rho_y_T = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
                                     (j + 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
@@ -1373,10 +1375,12 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                 dv_dy = (v_y_T - v_x_R)/(dx[1]);
                                 dp_dy = (p_y_T - p_x_R)/(dx[1]);
                             }
-                            else if ((patch_geom->getTouchesRegularBoundary(1, 1)) &&
-                                     (j == interior_box_hi_idx[1]))
+                            else if (((patch_geom->getTouchesRegularBoundary(1, 1)) && (j == interior_box_hi_idx[1])) ||
+                                     ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
+                                      (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
+                                      (j + num_subghosts_conservative_var[2][1] + 1 == subghostcell_dims_conservative_var[2][1])))
                             {
-                                // Patch is touching top physical boundary.
+                                // Patch is touching top physical or periodic boundary.
                                 
                                 const int idx_cell_rho_y_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
                                     (j - 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
@@ -1680,10 +1684,12 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                             double dv_dy = double(0);
                             double dp_dy = double(0);
                             
-                            if ((patch_geom->getTouchesRegularBoundary(1, 0)) &&
-                                (j == interior_box_lo_idx[1]))
+                            if (((patch_geom->getTouchesRegularBoundary(1, 0)) && (j == interior_box_lo_idx[1])) ||
+                                ((j + num_subghosts_conservative_var[0][1] == 0) ||
+                                 (j + num_subghosts_conservative_var[1][1] == 0) ||
+                                 (j + num_subghosts_conservative_var[2][1] == 0)))
                             {
-                                // Patch is touching bottom physical boundary.
+                                // Patch is touching bottom physical or periodic boundary.
                                 
                                 const int idx_cell_rho_y_T = (interior_box_hi_idx[0] + num_subghosts_conservative_var[0][0]) +
                                     (j + 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
@@ -1710,10 +1716,12 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                 dv_dy = (v_y_T - v_x_L)/(dx[1]);
                                 dp_dy = (p_y_T - p_x_L)/(dx[1]);
                             }
-                            else if ((patch_geom->getTouchesRegularBoundary(1, 1)) &&
-                                     (j == interior_box_hi_idx[1]))
+                            else if (((patch_geom->getTouchesRegularBoundary(1, 1)) && (j == interior_box_hi_idx[1])) ||
+                                     ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
+                                      (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
+                                      (j + num_subghosts_conservative_var[2][1] + 1 == subghostcell_dims_conservative_var[2][1])))
                             {
-                                // Patch is touching top physical boundary.
+                                // Patch is touching top physical or periodic boundary.
                                 
                                 const int idx_cell_rho_y_B = (interior_box_hi_idx[0] + num_subghosts_conservative_var[0][0]) +
                                     (j - 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
@@ -2028,10 +2036,12 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                             double dv_dx = double(0);
                             double dp_dx = double(0);
                             
-                            if ((patch_geom->getTouchesRegularBoundary(0, 0)) &&
-                                (i == interior_box_lo_idx[0]))
+                            if (((patch_geom->getTouchesRegularBoundary(0, 0)) && (i == interior_box_lo_idx[0])) ||
+                                ((i + num_subghosts_conservative_var[0][0] == 0) ||
+                                 (i + num_subghosts_conservative_var[1][0] == 0) ||
+                                 (i + num_subghosts_conservative_var[2][0] == 0)))
                             {
-                                // Patch is touching left physical boundary.
+                                // Patch is touching left physical or periodic boundary.
                                 
                                 const int idx_cell_rho_x_R = (i + 1 + num_subghosts_conservative_var[0][0]) +
                                     (interior_box_lo_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
@@ -2058,10 +2068,12 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                 dv_dx = (v_x_R - v_y_T)/(dx[0]);
                                 dp_dx = (p_x_R - p_y_T)/(dx[0]);
                             }
-                            else if ((patch_geom->getTouchesRegularBoundary(0, 1)) &&
-                                     (i == interior_box_hi_idx[0]))
+                            else if (((patch_geom->getTouchesRegularBoundary(0, 1)) && (i == interior_box_hi_idx[0])) ||
+                                     ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
+                                      (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
+                                      (i + num_subghosts_conservative_var[2][0] + 1 == subghostcell_dims_conservative_var[2][0])))
                             {
-                                // Patch is touching right physical boundary.
+                                // Patch is touching right physical or periodic boundary.
                                 
                                 const int idx_cell_rho_x_L = (i - 1 + num_subghosts_conservative_var[0][0]) +
                                     (interior_box_lo_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
@@ -2361,10 +2373,12 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                             double dv_dx = double(0);
                             double dp_dx = double(0);
                             
-                            if ((patch_geom->getTouchesRegularBoundary(0, 0)) &&
-                                (i == interior_box_lo_idx[0]))
+                            if (((patch_geom->getTouchesRegularBoundary(0, 0)) && (i == interior_box_lo_idx[0])) ||
+                                ((i + num_subghosts_conservative_var[0][0] == 0) ||
+                                 (i + num_subghosts_conservative_var[1][0] == 0) ||
+                                 (i + num_subghosts_conservative_var[2][0] == 0)))
                             {
-                                // Patch is touching bottom physical boundary.
+                                // Patch is touching left physical or periodic boundary.
                                 
                                 const int idx_cell_rho_x_R = (i + 1 + num_subghosts_conservative_var[0][0]) +
                                     (interior_box_hi_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
@@ -2391,10 +2405,12 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                 dv_dx = (v_x_R - v_y_B)/(dx[0]);
                                 dp_dx = (p_x_R - p_y_B)/(dx[0]);
                             }
-                            else if ((patch_geom->getTouchesRegularBoundary(0, 1)) &&
-                                     (i == interior_box_hi_idx[0]))
+                            else if (((patch_geom->getTouchesRegularBoundary(0, 1)) && (i == interior_box_hi_idx[0])) ||
+                                     ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
+                                      (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
+                                      (i + num_subghosts_conservative_var[2][0] + 1 == subghostcell_dims_conservative_var[2][0])))
                             {
-                                // Patch is touching top physical boundary.
+                                // Patch is touching right physical or periodic boundary.
                                 
                                 const int idx_cell_rho_x_L = (i - 1 + num_subghosts_conservative_var[0][0]) +
                                     (interior_box_hi_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
@@ -3923,10 +3939,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                     // "Navier–stokes characteristic boundary conditions using ghost cells."
                     // AIAA Journal (2017): 3399-3408.
                     
-                    if (face_loc == BDRY_LOC::XHI)
-                    {
-                    }
-                    else if (face_loc == BDRY_LOC::XLO)
+                    if (face_loc == BDRY_LOC::XLO)
                     {
                         const int num_ghosts_to_fill = fill_box_hi_idx[0] - fill_box_lo_idx[0] + 1;
                         TBOX_ASSERT(fill_box_hi_idx[0] == interior_box_lo_idx[0] - 1);
@@ -3992,7 +4005,6 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                 // Set index for x-direction END
                                 // Set variables START
                                 
-std::cout << "hi 1" << std::endl;
                                 const double& rho_x_R   = Q[0][idx_cell_rho_x_R];
                                 const double& rho_x_RR  = Q[0][idx_cell_rho_x_RR];
                                 const double& rho_x_RRR = Q[0][idx_cell_rho_x_RRR];
@@ -4041,7 +4053,6 @@ std::cout << "hi 1" << std::endl;
                                 const double dp_dx   = -(p_x_RRR - double(4)*p_x_RR + double(3)*p_x_R)/(double(2)*dx[0]);
                                 // Compute derivatives at x-direction END
                                 
-std::cout << "hi 2" << std::endl;
                                 // Compute derivatives in y-direction START
                                 
                                 double du_dy = double(0);
@@ -4056,11 +4067,12 @@ std::cout << "hi 2" << std::endl;
                                 double dw_dz = double(0);
                                 double dp_dz = double(0);
                                 
-                                if ((patch_geom->getTouchesRegularBoundary(1, 0)) &&
-                                    (j == interior_box_lo_idx[1]))
+                                if (((patch_geom->getTouchesRegularBoundary(1, 0)) && (j == interior_box_lo_idx[1])) ||
+                                    ((j + num_subghosts_conservative_var[0][1] == 0) ||
+                                     (j + num_subghosts_conservative_var[1][1] == 0) ||
+                                     (j + num_subghosts_conservative_var[2][1] == 0)))
                                 {
-std::cout << "hi 21" << std::endl;
-                                    // Patch is touching bottom physical boundary.
+                                    // Patch is touching bottom physical or periodic boundary.
                                     
                                     const int idx_cell_rho_y_T = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
                                         (j + 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -4077,7 +4089,6 @@ std::cout << "hi 21" << std::endl;
                                         (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
                                     
-std::cout << "hi 22" << std::endl;
                                     const double& rho_y_T = Q[0][idx_cell_rho_y_T];
                                     const double u_y_T = Q[1][idx_cell_mom_y_T]/rho_y_T;
                                     const double v_y_T = Q[2][idx_cell_mom_y_T]/rho_y_T;
@@ -4090,19 +4101,18 @@ std::cout << "hi 22" << std::endl;
                                             &epsilon_y_T,
                                             thermo_properties_ptr);
                                     
-std::cout << "hi 23" << std::endl;
                                     // One-sided derivatives.
                                     du_dy = (u_y_T - u_x_R)/(dx[1]);
                                     dv_dy = (v_y_T - v_x_R)/(dx[1]);
                                     // dw_dy = (w_y_T - w_x_R)/(dx[1]);
                                     dp_dy = (p_y_T - p_x_R)/(dx[1]);
-std::cout << "hi 24" << std::endl;
                                 }
-                                else if ((patch_geom->getTouchesRegularBoundary(1, 1)) &&
-                                         (j == interior_box_hi_idx[1]))
+                                else if (((patch_geom->getTouchesRegularBoundary(1, 1)) && (j == interior_box_hi_idx[1])) ||
+                                         ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
+                                          (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
+                                          (j + num_subghosts_conservative_var[2][1] + 1 == subghostcell_dims_conservative_var[2][1])))
                                 {
-std::cout << "hi 25" << std::endl;
-                                    // Patch is touching top physical boundary.
+                                    // Patch is touching top physical or periodic boundary.
                                     
                                     const int idx_cell_rho_y_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
                                         (j - 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -4119,31 +4129,26 @@ std::cout << "hi 25" << std::endl;
                                         (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
                                     
-std::cout << "hi 26" << std::endl;
                                     const double& rho_y_B = Q[0][idx_cell_rho_y_B];
                                     const double u_y_B = Q[1][idx_cell_mom_y_B]/rho_y_B;
                                     const double v_y_B = Q[2][idx_cell_mom_y_B]/rho_y_B;
                                     const double w_y_B = Q[3][idx_cell_mom_y_B]/rho_y_B;
                                     const double epsilon_y_B = Q[4][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B);
                                     
-std::cout << "hi 27" << std::endl;
                                     const double p_y_B = d_equation_of_state_mixing_rules->getEquationOfState()->
                                         getPressure(
                                             &rho_y_B,
                                             &epsilon_y_B,
                                             thermo_properties_ptr);
                                     
-std::cout << "hi 28" << std::endl;
                                     // One-sided derivatives.
                                     du_dy = (u_x_R - u_y_B)/(dx[1]);
                                     dv_dy = (v_x_R - v_y_B)/(dx[1]);
                                     // dw_dy = (w_x_R - w_y_B)/(dx[1]);
                                     dp_dy = (p_x_R - p_y_B)/(dx[1]);
-std::cout << "hi 29" << std::endl;
                                 }
                                 else
                                 {
-std::cout << "hi 291" << std::endl;
                                     const int idx_cell_rho_y_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
                                         (j - 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
                                         (k + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
@@ -4153,7 +4158,7 @@ std::cout << "hi 291" << std::endl;
                                         (j + 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
                                         (k + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
                                             subghostcell_dims_conservative_var[0][1];
-std::cout << "hi 2911" << std::endl;                                 
+                                    
                                     const int idx_cell_mom_y_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[1][0]) +
                                         (j - 1 + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0] +
                                         (k + num_subghosts_conservative_var[1][2])*subghostcell_dims_conservative_var[1][0]*
@@ -4174,24 +4179,21 @@ std::cout << "hi 2911" << std::endl;
                                         (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
                                     
-std::cout << "hi 292" << std::endl;
                                     const double& rho_y_B = Q[0][idx_cell_rho_y_B];
                                     const double& rho_y_T = Q[0][idx_cell_rho_y_T];
-std::cout << "hi 2921" << std::endl;
-std::cout << "j: " << j << ", k: " << k << std::endl;
+                                    
                                     const double u_y_B = Q[1][idx_cell_mom_y_B]/rho_y_B;
                                     const double u_y_T = Q[1][idx_cell_mom_y_T]/rho_y_T;
-std::cout << "hi 2922" << std::endl;                                
+                                    
                                     const double v_y_B = Q[2][idx_cell_mom_y_B]/rho_y_B;
                                     const double v_y_T = Q[2][idx_cell_mom_y_T]/rho_y_T;
-std::cout << "hi 2923" << std::endl;                         
+                                    
                                     const double w_y_B = Q[3][idx_cell_mom_y_B]/rho_y_B;
                                     const double w_y_T = Q[3][idx_cell_mom_y_T]/rho_y_T;
-std::cout << "hi 2924" << std::endl;
+                                    
                                     const double epsilon_y_B = Q[4][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B);
                                     const double epsilon_y_T = Q[4][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T + w_y_T*w_y_T);
                                     
-std::cout << "hi 293" << std::endl;
                                     const double p_y_B = d_equation_of_state_mixing_rules->getEquationOfState()->
                                         getPressure(
                                             &rho_y_B,
@@ -4204,20 +4206,19 @@ std::cout << "hi 293" << std::endl;
                                             &epsilon_y_T,
                                             thermo_properties_ptr);
                                     
-std::cout << "hi 294" << std::endl;
                                     // Central derivatives.
                                     du_dy = (u_y_T - u_y_B)/(double(2)*dx[1]);
                                     dv_dy = (v_y_T - v_y_B)/(double(2)*dx[1]);
                                     // dw_dy = (w_y_T - w_y_B)/(double(2)*dx[1]);
                                     dp_dy = (p_y_T - p_y_B)/(double(2)*dx[1]);
-std::cout << "hi 295" << std::endl;
                                 }
                                 
-std::cout << "hi 3" << std::endl;
-                                if ((patch_geom->getTouchesRegularBoundary(2, 0)) &&
-                                    (k == interior_box_lo_idx[2]))
+                                if (((patch_geom->getTouchesRegularBoundary(2, 0)) && (k == interior_box_lo_idx[2])) ||
+                                    ((k + num_subghosts_conservative_var[0][2] + 1 == 0) ||
+                                     (k + num_subghosts_conservative_var[1][2] + 1 == 0) ||
+                                     (k + num_subghosts_conservative_var[2][2] + 1 == 0)))
                                 {
-                                    // Patch is touching back physical boundary.
+                                    // Patch is touching back physical or periodic boundary.
                                     
                                     const int idx_cell_rho_z_F = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
                                         (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -4252,10 +4253,12 @@ std::cout << "hi 3" << std::endl;
                                     dw_dz = (w_z_F - w_x_R)/(dx[2]);
                                     dp_dz = (p_z_F - p_x_R)/(dx[2]);
                                 }
-                                else if ((patch_geom->getTouchesRegularBoundary(2, 1)) &&
-                                         (k == interior_box_hi_idx[2]))
+                                else if (((patch_geom->getTouchesRegularBoundary(2, 1)) && (k == interior_box_hi_idx[2])) ||
+                                         ((k + num_subghosts_conservative_var[0][2] + 1 == subghostcell_dims_conservative_var[0][2]) ||
+                                          (k + num_subghosts_conservative_var[1][2] + 1 == subghostcell_dims_conservative_var[1][2]) ||
+                                          (k + num_subghosts_conservative_var[2][2] + 1 == subghostcell_dims_conservative_var[2][2])))
                                 {
-                                    // Patch is touching front physical boundary.
+                                    // Patch is touching front physical or periodic boundary.
                                     
                                     const int idx_cell_rho_z_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
                                         (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -4356,7 +4359,6 @@ std::cout << "hi 3" << std::endl;
                                     dp_dz = (p_z_F - p_z_B)/(double(2)*dx[2]);
                                 }
                                 
-std::cout << "hi 4" << std::endl;
                                 const double c_x_R = d_equation_of_state_mixing_rules->getEquationOfState()->
                                     getSoundSpeed(
                                         &rho_x_R,
@@ -4401,7 +4403,6 @@ std::cout << "hi 4" << std::endl;
                                 
                                 double V_ghost[5*num_ghosts_to_fill];
                                 
-std::cout << "hi 5" << std::endl;
                                 for (int i = num_ghosts_to_fill - 1; i >= 0; i--)
                                 {
                                     const int idx_cell_rho = (i + fill_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
@@ -4505,10 +4506,12 @@ std::cout << "hi 5" << std::endl;
                                            Q[1][idx_cell_mom]*Q[1][idx_cell_mom])/V_ghost[i*5 + 0];
                                     
                                     Q[4][idx_cell_E] = E;
-std::cout << "hi 6" << std::endl;
                                 }
                             }
                         }
+                    }
+                    else if (face_loc == BDRY_LOC::XHI)
+                    {
                     }
                     else if (face_loc == BDRY_LOC::YLO)
                     {
