@@ -3923,10 +3923,13 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                     // "Navier–stokes characteristic boundary conditions using ghost cells."
                     // AIAA Journal (2017): 3399-3408.
                     
-                    if (face_loc == BDRY_LOC::XLO)
+                    if (face_loc == BDRY_LOC::XHI)
+                    {
+                    }
+                    else if (face_loc == BDRY_LOC::XLO)
                     {
                         const int num_ghosts_to_fill = fill_box_hi_idx[0] - fill_box_lo_idx[0] + 1;
-                        TBOX_ASSERT(fill_box_lo_idx[0] == interior_box_hi_idx[0] + 1);
+                        TBOX_ASSERT(fill_box_hi_idx[0] == interior_box_lo_idx[0] - 1);
                         if (num_ghosts_to_fill > 4)
                         {
                             TBOX_ERROR(d_object_name
@@ -3989,6 +3992,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                 // Set index for x-direction END
                                 // Set variables START
                                 
+std::cout << "hi 1" << std::endl;
                                 const double& rho_x_R   = Q[0][idx_cell_rho_x_R];
                                 const double& rho_x_RR  = Q[0][idx_cell_rho_x_RR];
                                 const double& rho_x_RRR = Q[0][idx_cell_rho_x_RRR];
@@ -4037,7 +4041,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                 const double dp_dx   = -(p_x_RRR - double(4)*p_x_RR + double(3)*p_x_R)/(double(2)*dx[0]);
                                 // Compute derivatives at x-direction END
                                 
-                                
+std::cout << "hi 2" << std::endl;
                                 // Compute derivatives in y-direction START
                                 
                                 double du_dy = double(0);
@@ -4055,6 +4059,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                 if ((patch_geom->getTouchesRegularBoundary(1, 0)) &&
                                     (j == interior_box_lo_idx[1]))
                                 {
+std::cout << "hi 21" << std::endl;
                                     // Patch is touching bottom physical boundary.
                                     
                                     const int idx_cell_rho_y_T = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
@@ -4072,6 +4077,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                         (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
                                     
+std::cout << "hi 22" << std::endl;
                                     const double& rho_y_T = Q[0][idx_cell_rho_y_T];
                                     const double u_y_T = Q[1][idx_cell_mom_y_T]/rho_y_T;
                                     const double v_y_T = Q[2][idx_cell_mom_y_T]/rho_y_T;
@@ -4084,15 +4090,18 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                             &epsilon_y_T,
                                             thermo_properties_ptr);
                                     
+std::cout << "hi 23" << std::endl;
                                     // One-sided derivatives.
                                     du_dy = (u_y_T - u_x_R)/(dx[1]);
                                     dv_dy = (v_y_T - v_x_R)/(dx[1]);
                                     // dw_dy = (w_y_T - w_x_R)/(dx[1]);
                                     dp_dy = (p_y_T - p_x_R)/(dx[1]);
+std::cout << "hi 24" << std::endl;
                                 }
                                 else if ((patch_geom->getTouchesRegularBoundary(1, 1)) &&
                                          (j == interior_box_hi_idx[1]))
                                 {
+std::cout << "hi 25" << std::endl;
                                     // Patch is touching top physical boundary.
                                     
                                     const int idx_cell_rho_y_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
@@ -4110,71 +4119,79 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                         (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
                                     
+std::cout << "hi 26" << std::endl;
                                     const double& rho_y_B = Q[0][idx_cell_rho_y_B];
                                     const double u_y_B = Q[1][idx_cell_mom_y_B]/rho_y_B;
                                     const double v_y_B = Q[2][idx_cell_mom_y_B]/rho_y_B;
                                     const double w_y_B = Q[3][idx_cell_mom_y_B]/rho_y_B;
                                     const double epsilon_y_B = Q[4][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B);
                                     
+std::cout << "hi 27" << std::endl;
                                     const double p_y_B = d_equation_of_state_mixing_rules->getEquationOfState()->
                                         getPressure(
                                             &rho_y_B,
                                             &epsilon_y_B,
                                             thermo_properties_ptr);
                                     
+std::cout << "hi 28" << std::endl;
                                     // One-sided derivatives.
                                     du_dy = (u_x_R - u_y_B)/(dx[1]);
                                     dv_dy = (v_x_R - v_y_B)/(dx[1]);
                                     // dw_dy = (w_x_R - w_y_B)/(dx[1]);
                                     dp_dy = (p_x_R - p_y_B)/(dx[1]);
+std::cout << "hi 29" << std::endl;
                                 }
                                 else
                                 {
+std::cout << "hi 291" << std::endl;
                                     const int idx_cell_rho_y_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
                                         (j - 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
-                                        (k + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0]*
+                                        (k + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
                                             subghostcell_dims_conservative_var[0][1];
                                     
                                     const int idx_cell_rho_y_T = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
                                         (j + 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
-                                        (k + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0]*
+                                        (k + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
                                             subghostcell_dims_conservative_var[0][1];
-                                    
+std::cout << "hi 2911" << std::endl;                                 
                                     const int idx_cell_mom_y_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[1][0]) +
                                         (j - 1 + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0] +
-                                        (k + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0]*
+                                        (k + num_subghosts_conservative_var[1][2])*subghostcell_dims_conservative_var[1][0]*
                                             subghostcell_dims_conservative_var[1][1];
                                     
                                     const int idx_cell_mom_y_T = (interior_box_lo_idx[0] + num_subghosts_conservative_var[1][0]) +
                                         (j + 1 + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0] +
-                                        (k + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0]*
+                                        (k + num_subghosts_conservative_var[1][2])*subghostcell_dims_conservative_var[1][0]*
                                             subghostcell_dims_conservative_var[1][1];
                                     
                                     const int idx_cell_E_y_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[2][0]) +
                                         (j - 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
-                                        (k + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0]*
+                                        (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
                                     
                                     const int idx_cell_E_y_T = (interior_box_lo_idx[0] + num_subghosts_conservative_var[2][0]) +
                                         (j + 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
-                                        (k + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0]*
+                                        (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
                                     
+std::cout << "hi 292" << std::endl;
                                     const double& rho_y_B = Q[0][idx_cell_rho_y_B];
                                     const double& rho_y_T = Q[0][idx_cell_rho_y_T];
-                                    
+std::cout << "hi 2921" << std::endl;
+std::cout << "j: " << j << ", k: " << k << std::endl;
                                     const double u_y_B = Q[1][idx_cell_mom_y_B]/rho_y_B;
                                     const double u_y_T = Q[1][idx_cell_mom_y_T]/rho_y_T;
-                                    
+std::cout << "hi 2922" << std::endl;                                
                                     const double v_y_B = Q[2][idx_cell_mom_y_B]/rho_y_B;
                                     const double v_y_T = Q[2][idx_cell_mom_y_T]/rho_y_T;
-                                    
+std::cout << "hi 2923" << std::endl;                         
                                     const double w_y_B = Q[3][idx_cell_mom_y_B]/rho_y_B;
                                     const double w_y_T = Q[3][idx_cell_mom_y_T]/rho_y_T;
-                                    
+std::cout << "hi 2924" << std::endl;
                                     const double epsilon_y_B = Q[4][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B);
                                     const double epsilon_y_T = Q[4][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T + w_y_T*w_y_T);
                                     
+std::cout << "hi 293" << std::endl;
                                     const double p_y_B = d_equation_of_state_mixing_rules->getEquationOfState()->
                                         getPressure(
                                             &rho_y_B,
@@ -4187,13 +4204,16 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                             &epsilon_y_T,
                                             thermo_properties_ptr);
                                     
+std::cout << "hi 294" << std::endl;
                                     // Central derivatives.
                                     du_dy = (u_y_T - u_y_B)/(double(2)*dx[1]);
                                     dv_dy = (v_y_T - v_y_B)/(double(2)*dx[1]);
                                     // dw_dy = (w_y_T - w_y_B)/(double(2)*dx[1]);
                                     dp_dy = (p_y_T - p_y_B)/(double(2)*dx[1]);
+std::cout << "hi 295" << std::endl;
                                 }
                                 
+std::cout << "hi 3" << std::endl;
                                 if ((patch_geom->getTouchesRegularBoundary(2, 0)) &&
                                     (k == interior_box_lo_idx[2]))
                                 {
@@ -4274,32 +4294,32 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                 {
                                     const int idx_cell_rho_z_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
                                         (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
-                                        (k - 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0]*
+                                        (k - 1 + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
                                             subghostcell_dims_conservative_var[0][1];
                                     
                                     const int idx_cell_rho_z_F = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
                                         (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
-                                        (k + 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0]*
+                                        (k + 1 + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
                                             subghostcell_dims_conservative_var[0][1];
                                     
                                     const int idx_cell_mom_z_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[1][0]) +
                                         (j + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0] +
-                                        (k - 1 + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0]*
+                                        (k - 1 + num_subghosts_conservative_var[1][2])*subghostcell_dims_conservative_var[1][0]*
                                             subghostcell_dims_conservative_var[1][1];
                                     
                                     const int idx_cell_mom_z_F = (interior_box_lo_idx[0] + num_subghosts_conservative_var[1][0]) +
                                         (j + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0] +
-                                        (k + 1 + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0]*
+                                        (k + 1 + num_subghosts_conservative_var[1][2])*subghostcell_dims_conservative_var[1][0]*
                                             subghostcell_dims_conservative_var[1][1];
                                     
                                     const int idx_cell_E_z_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[2][0]) +
                                         (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
-                                        (k - 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0]*
+                                        (k - 1 + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
                                     
                                     const int idx_cell_E_z_F = (interior_box_lo_idx[0] + num_subghosts_conservative_var[2][0]) +
                                         (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
-                                        (k + 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0]*
+                                        (k + 1 + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
                                     
                                     const double& rho_z_B = Q[0][idx_cell_rho_z_B];
@@ -4336,6 +4356,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                     dp_dz = (p_z_F - p_z_B)/(double(2)*dx[2]);
                                 }
                                 
+std::cout << "hi 4" << std::endl;
                                 const double c_x_R = d_equation_of_state_mixing_rules->getEquationOfState()->
                                     getSoundSpeed(
                                         &rho_x_R,
@@ -4380,6 +4401,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                 
                                 double V_ghost[5*num_ghosts_to_fill];
                                 
+std::cout << "hi 5" << std::endl;
                                 for (int i = num_ghosts_to_fill - 1; i >= 0; i--)
                                 {
                                     const int idx_cell_rho = (i + fill_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
@@ -4483,12 +4505,10 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                            Q[1][idx_cell_mom]*Q[1][idx_cell_mom])/V_ghost[i*5 + 0];
                                     
                                     Q[4][idx_cell_E] = E;
+std::cout << "hi 6" << std::endl;
                                 }
                             }
                         }
-                    }
-                    else if (face_loc == BDRY_LOC::XHI)
-                    {
                     }
                     else if (face_loc == BDRY_LOC::YLO)
                     {
@@ -4502,6 +4522,10 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                     else if (face_loc == BDRY_LOC::ZHI)
                     {
                     }
+                    
+                    // Remove face locations that have boundary conditions identified.
+                    bdry_face_locs.erase(std::remove(bdry_face_locs.begin(), bdry_face_locs.end(), face_loc),
+                        bdry_face_locs.end());
                 }
             }
         }
@@ -7243,6 +7267,17 @@ FlowModelBoundaryUtilitiesSingleSpecies::read3dBdryFaces(
                     face_conds[s] = BDRY_COND::FLOW_MODEL::ISOTHERMAL_NO_SLIP;
                     
                     readIsothermalNoSlip(
+                        bdry_loc_db,
+                        bdry_loc_str,
+                        s);
+                    
+                    face_locs[fi] = BOGUS_BDRY_LOC;
+                }
+                else if (bdry_cond_str == "NONREFLECTING_OUTFLOW")
+                {
+                    face_conds[s] = BDRY_COND::FLOW_MODEL::NONREFLECTING_OUTFLOW;
+                    
+                    readNonreflectingOutflow(
                         bdry_loc_db,
                         bdry_loc_str,
                         s);
