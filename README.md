@@ -44,7 +44,7 @@ mpirun -np <number of processors> src/exec/main <input filename>
 
 ### What libraries do I need? ###
 
-HAMeRS relies on [HDF5](https://support.hdfgroup.org/HDF5/), [Boost](https://www.boost.org/) and [SAMRAI](https://computation.llnl.gov/projects/samrai). Before installing HAMeRS, it is required to set up the environmental variables for [CMake](https://cmake.org/) to look for the locations of the libraries.
+HAMeRS relies on [HDF5](https://support.hdfgroup.org/HDF5/), [Boost](https://www.boost.org/) and [SAMRAI](https://computation.llnl.gov/projects/samrai). Before installing HAMeRS, it is required to set up the environment variables for [CMake](https://cmake.org/) to look for the locations of the libraries.
 
 To set up HDF5:
 ```
