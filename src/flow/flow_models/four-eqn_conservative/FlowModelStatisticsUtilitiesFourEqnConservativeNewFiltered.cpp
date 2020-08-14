@@ -20657,6 +20657,9 @@ outputBudgetFilteredReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
         // Term II in moving frame of mixing layer.
         f_output.write((char*)&d_rho_a1_R11_dx[0], sizeof(double)*d_rho_a1_R11_dx.size());
         
+        // SFS stress profile.
+        f_output.write((char*)&tau_SFS_11_mean[0], sizeof(double)*tau_SFS_11_mean.size());
+        
         f_output.close();
     }
     
@@ -21512,6 +21515,9 @@ outputBudgetFilteredReynoldsNormalStressInYDirectionWithInhomogeneousXDirection(
         // Term II in moving frame of mixing layer.
         f_output.write((char*)&d_rho_a1_R22_dx[0], sizeof(double)*d_rho_a1_R22_dx.size());
         
+        // SFS stress profile.
+        f_output.write((char*)&tau_SFS_22_mean[0], sizeof(double)*tau_SFS_22_mean.size());
+        
         f_output.close();
     }
 }
@@ -22278,6 +22284,9 @@ outputBudgetFilteredReynoldsNormalStressInZDirectionWithInhomogeneousXDirection(
         
         // Term II in moving frame of mixing layer.
         f_output.write((char*)&d_rho_a1_R33_dx[0], sizeof(double)*d_rho_a1_R33_dx.size());
+        
+        // SFS stress profile.
+        f_output.write((char*)&tau_SFS_33_mean[0], sizeof(double)*tau_SFS_33_mean.size());
         
         f_output.close();
     }
