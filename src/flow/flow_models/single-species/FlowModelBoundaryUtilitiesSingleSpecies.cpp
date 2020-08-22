@@ -4623,11 +4623,11 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                 
                                 // Set variables END
                                 // Compute derivatives at y-direction START
-                                const double drho_dy = -(rho_y_BBB - double(4)*rho_y_BB + double(3)*rho_y_B)/(double(2)*dx[1]);
-                                const double du_dy   = -(u_y_BBB - double(4)*u_y_BB + double(3)*u_y_B)/(double(2)*dx[1]);
-                                const double dv_dy   = -(v_y_BBB - double(4)*v_y_BB + double(3)*v_y_B)/(double(2)*dx[1]);
-                                const double dw_dy   = -(w_y_BBB - double(4)*w_y_BB + double(3)*w_y_B)/(double(2)*dx[1]);
-                                const double dp_dy   = -(p_y_BBB - double(4)*p_y_BB + double(3)*p_y_B)/(double(2)*dx[1]);
+                                const double drho_dy = (rho_y_BBB - double(4)*rho_y_BB + double(3)*rho_y_B)/(double(2)*dx[1]);
+                                const double du_dy   = (u_y_BBB - double(4)*u_y_BB + double(3)*u_y_B)/(double(2)*dx[1]);
+                                const double dv_dy   = (v_y_BBB - double(4)*v_y_BB + double(3)*v_y_B)/(double(2)*dx[1]);
+                                const double dw_dy   = (w_y_BBB - double(4)*w_y_BB + double(3)*w_y_B)/(double(2)*dx[1]);
+                                const double dp_dy   = (p_y_BBB - double(4)*p_y_BB + double(3)*p_y_B)/(double(2)*dx[1]);
                                 // Compute derivatives at y-direction END
                                 
                                 // Compute derivatives in x-direction START
@@ -5066,10 +5066,12 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                             double(40)*V_ghost[(j - 3)*5 + 4] - double(20)*V_ghost[(j - 2)*5 + 4] +
                                             double(20)/double(3)*V_ghost[(j - 1)*5 + 4] + double(20)*dx[1]*dV_dy[4];
                                     }
+                                    
                                     Q[0][idx_cell_rho] = V_ghost[j*5 + 0];
                                     Q[1][idx_cell_mom] = V_ghost[j*5 + 0]*V_ghost[j*5 + 1];
                                     Q[2][idx_cell_mom] = V_ghost[j*5 + 0]*V_ghost[j*5 + 2];
                                     Q[3][idx_cell_mom] = V_ghost[j*5 + 0]*V_ghost[j*5 + 3];
+                                    
                                     const double epsilon = d_equation_of_state_mixing_rules->getEquationOfState()->
                                         getInternalEnergy(
                                             &V_ghost[j*5 + 0],
