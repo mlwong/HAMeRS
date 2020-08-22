@@ -4518,6 +4518,572 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                     }
                     else if (face_loc == BDRY_LOC::YHI)
                     {
+                        const int num_ghosts_to_fill = fill_box_hi_idx[1] - fill_box_lo_idx[1] + 1;
+                        TBOX_ASSERT(fill_box_lo_idx[1] == interior_box_hi_idx[1] + 1);
+                        if (num_ghosts_to_fill > 4)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData()\n"
+                                << "Non-reflecting outflow BC doesn't support more than four ghost cells yet!");
+                        }
+                        
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                        {
+                            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+                            {
+                                // Get the grid spacing.
+                                const double* const dx = patch_geom->getDx();
+                                
+                                // Set index for x-direction STARTI
+                                const int idx_cell_rho_y_B = (i + num_subghosts_conservative_var[0][0]) +
+                                    (interior_box_hi_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
+                                    (k + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
+                                        subghostcell_dims_conservative_var[0][1];
+                                
+                                const int idx_cell_rho_y_BB = (i + num_subghosts_conservative_var[0][0]) +
+                                    (interior_box_hi_idx[1] - 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
+                                    (k + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
+                                        subghostcell_dims_conservative_var[0][1];
+                                
+                                const int idx_cell_rho_y_BBB = (i + num_subghosts_conservative_var[0][0]) +
+                                    (interior_box_hi_idx[1] - 2 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
+                                    (k + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
+                                        subghostcell_dims_conservative_var[0][1];
+                                
+                                const int idx_cell_mom_y_B = (i + num_subghosts_conservative_var[1][0]) +
+                                    ( interior_box_hi_idx[1] + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0] +
+                                    (k + num_subghosts_conservative_var[1][2])*subghostcell_dims_conservative_var[1][0]*
+                                        subghostcell_dims_conservative_var[1][1];
+                                
+                                const int idx_cell_mom_y_BB = (i + num_subghosts_conservative_var[1][0]) +
+                                    (interior_box_hi_idx[1] - 1 + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0] +
+                                    (k + num_subghosts_conservative_var[1][2])*subghostcell_dims_conservative_var[1][0]*
+                                        subghostcell_dims_conservative_var[1][1];
+                                
+                                const int idx_cell_mom_y_BBB = (i + num_subghosts_conservative_var[1][0]) +
+                                    (interior_box_hi_idx[1] - 2 + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0] +
+                                    (k + num_subghosts_conservative_var[1][2])*subghostcell_dims_conservative_var[1][0]*
+                                        subghostcell_dims_conservative_var[1][1];
+                                
+                                const int idx_cell_E_y_B = (i + num_subghosts_conservative_var[2][0]) +
+                                    (interior_box_hi_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
+                                    (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
+                                        subghostcell_dims_conservative_var[2][1];
+                                
+                                const int idx_cell_E_y_BB = (i + num_subghosts_conservative_var[2][0]) +
+                                    (interior_box_hi_idx[1] - 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
+                                    (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
+                                        subghostcell_dims_conservative_var[2][1];
+                                
+                                const int idx_cell_E_y_BBB = (i + num_subghosts_conservative_var[2][0]) +
+                                    (interior_box_hi_idx[1] - 2 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
+                                    (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
+                                        subghostcell_dims_conservative_var[2][1];
+                                // Set index for x-direction END
+                                // Set variables START
+                                
+                                const double& rho_y_B   = Q[0][idx_cell_rho_y_B];
+                                const double& rho_y_BB  = Q[0][idx_cell_rho_y_BB];
+                                const double& rho_y_BBB = Q[0][idx_cell_rho_y_BBB];
+                                
+                                const double u_y_B   = Q[1][idx_cell_mom_y_B]/rho_y_B;
+                                const double u_y_BB  = Q[1][idx_cell_mom_y_BB]/rho_y_BB;
+                                const double u_y_BBB = Q[1][idx_cell_mom_y_BBB]/rho_y_BBB;
+                                
+                                const double v_y_B   = Q[2][idx_cell_mom_y_B]/rho_y_B;
+                                const double v_y_BB  = Q[2][idx_cell_mom_y_BB]/rho_y_BB;
+                                const double v_y_BBB = Q[2][idx_cell_mom_y_BBB]/rho_y_BBB;
+                                
+                                const double w_y_B   = Q[3][idx_cell_mom_y_B]/rho_y_B;
+                                const double w_y_BB  = Q[3][idx_cell_mom_y_BB]/rho_y_BB;
+                                const double w_y_BBB = Q[3][idx_cell_mom_y_BBB]/rho_y_BBB;
+                                
+                                const double half = double(1)/double(2);
+                                const double epsilon_y_B   = Q[4][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B);
+                                const double epsilon_y_BB  = Q[4][idx_cell_E_y_BB]/rho_y_BB - half*(u_y_BB*u_y_BB + v_y_BB*v_y_BB + w_y_BB*w_y_BB);
+                                const double epsilon_y_BBB = Q[4][idx_cell_E_y_BBB]/rho_y_BBB - half*(u_y_BBB*u_y_BBB + v_y_BBB*v_y_BBB + w_y_BBB*w_y_BBB);
+                                
+                                const double p_y_B = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                    getPressure(
+                                        &rho_y_B,
+                                        &epsilon_y_B,
+                                        thermo_properties_ptr);
+                                
+                                const double p_y_BB = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                    getPressure(
+                                        &rho_y_BB,
+                                        &epsilon_y_BB,
+                                        thermo_properties_ptr);
+                                
+                                const double p_y_BBB = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                    getPressure(
+                                        &rho_y_BBB,
+                                        &epsilon_y_BBB,
+                                        thermo_properties_ptr);
+                                
+                                // Set variables END
+                                // Compute derivatives at y-direction START
+                                const double drho_dy = -(rho_y_BBB - double(4)*rho_y_BB + double(3)*rho_y_B)/(double(2)*dx[1]);
+                                const double du_dy   = -(u_y_BBB - double(4)*u_y_BB + double(3)*u_y_B)/(double(2)*dx[1]);
+                                const double dv_dy   = -(v_y_BBB - double(4)*v_y_BB + double(3)*v_y_B)/(double(2)*dx[1]);
+                                const double dw_dy   = -(w_y_BBB - double(4)*w_y_BB + double(3)*w_y_B)/(double(2)*dx[1]);
+                                const double dp_dy   = -(p_y_BBB - double(4)*p_y_BB + double(3)*p_y_B)/(double(2)*dx[1]);
+                                // Compute derivatives at y-direction END
+                                
+                                // Compute derivatives in x-direction START
+                                
+                                double du_dx = double(0);
+                                double dv_dx = double(0);
+                                // double dw_dx = double(0);
+                                double dp_dx = double(0);
+                                
+                                // Compute derivatives in z-direction START
+                                
+                                // double du_dz = double(0);
+                                double dv_dz = double(0);
+                                double dw_dz = double(0);
+                                double dp_dz = double(0);
+                                
+                                if (((patch_geom->getTouchesRegularBoundary(0, 0)) && (i == interior_box_lo_idx[0])) ||
+                                    ((i + num_subghosts_conservative_var[0][0] == 0) ||
+                                     (i + num_subghosts_conservative_var[1][0] == 0) ||
+                                     (i + num_subghosts_conservative_var[2][0] == 0)))
+                                {
+                                    // Patch is touching left physical or periodic boundary.
+                                    
+                                    const int idx_cell_rho_x_R = (i + 1 + num_subghosts_conservative_var[0][0]) +
+                                        (interior_box_hi_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
+                                        (k + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
+                                            subghostcell_dims_conservative_var[0][1];
+                                    
+                                    const int idx_cell_mom_x_R = (i + 1 + num_subghosts_conservative_var[1][0]) +
+                                        (interior_box_hi_idx[1] + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0] +
+                                        (k + num_subghosts_conservative_var[1][2])*subghostcell_dims_conservative_var[1][0]*
+                                            subghostcell_dims_conservative_var[1][1];
+                                    
+                                    const int idx_cell_E_x_R = (i + 1 + num_subghosts_conservative_var[2][0]) +
+                                        (interior_box_hi_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
+                                        (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
+                                            subghostcell_dims_conservative_var[2][1];
+                                    
+                                    const double& rho_x_R = Q[0][idx_cell_rho_x_R];
+                                    const double u_x_R = Q[1][idx_cell_mom_x_R]/rho_x_R;
+                                    const double v_x_R = Q[2][idx_cell_mom_x_R]/rho_x_R;
+                                    const double w_x_R = Q[3][idx_cell_mom_x_R]/rho_x_R;
+                                    const double epsilon_x_R = Q[4][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R + w_x_R*w_x_R);
+                                    
+                                    const double p_x_R = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                        getPressure(
+                                            &rho_x_R,
+                                            &epsilon_x_R,
+                                            thermo_properties_ptr);
+                                    
+                                    // One-sided derivatives.
+                                    du_dx = (u_x_R - u_y_B)/(dx[0]);
+                                    dv_dx = (v_x_R - v_y_B)/(dx[0]);
+                                    // dw_dx = (w_x_R - w_y_B)/(dx[0]);
+                                    dp_dx = (p_x_R - p_y_B)/(dx[0]);
+                                }
+                                else if (((patch_geom->getTouchesRegularBoundary(0, 1)) && (i == interior_box_hi_idx[0])) ||
+                                         ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
+                                          (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
+                                          (i + num_subghosts_conservative_var[2][0] + 1 == subghostcell_dims_conservative_var[2][0])))
+                                {
+                                    // Patch is touching right physical or periodic boundary.
+                                    
+                                    const int idx_cell_rho_x_L = (i - 1 + num_subghosts_conservative_var[0][0]) +
+                                        (interior_box_hi_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
+                                        (k + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
+                                            subghostcell_dims_conservative_var[0][1];
+                                    
+                                    const int idx_cell_mom_x_L = (i - 1 + num_subghosts_conservative_var[1][0]) +
+                                        (interior_box_hi_idx[1] + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0] +
+                                        (k + num_subghosts_conservative_var[1][2])*subghostcell_dims_conservative_var[1][0]*
+                                            subghostcell_dims_conservative_var[1][1];
+                                    
+                                    const int idx_cell_E_x_L = (i - 1 + num_subghosts_conservative_var[2][0]) +
+                                        (interior_box_hi_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
+                                        (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
+                                            subghostcell_dims_conservative_var[2][1];
+                                    
+                                    const double& rho_x_L = Q[0][idx_cell_rho_x_L];
+                                    const double u_x_L = Q[1][idx_cell_mom_x_L]/rho_x_L;
+                                    const double v_x_L = Q[2][idx_cell_mom_x_L]/rho_x_L;
+                                    const double w_x_L = Q[3][idx_cell_mom_x_L]/rho_x_L;
+                                    const double epsilon_x_L = Q[4][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L + w_x_L*w_x_L);
+                                    
+                                    const double p_x_L = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                        getPressure(
+                                            &rho_x_L,
+                                            &epsilon_x_L,
+                                            thermo_properties_ptr);
+                                    
+                                    // One-sided derivatives.
+                                    du_dx = (u_y_B - u_x_L)/(dx[0]);
+                                    dv_dx = (v_y_B - v_x_L)/(dx[0]);
+                                    // dw_dx = (w_y_B - w_x_L)/(dx[0]);
+                                    dp_dx = (p_y_B - p_x_L)/(dx[0]);
+                                }
+                                else
+                                {
+                                    const int idx_cell_rho_x_L = (i - 1 + num_subghosts_conservative_var[0][0]) +
+                                        (interior_box_hi_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
+                                        (k + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
+                                            subghostcell_dims_conservative_var[0][1];
+                                    
+                                    const int idx_cell_rho_x_R = (i + 1 + num_subghosts_conservative_var[0][0]) +
+                                        (interior_box_hi_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
+                                        (k + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
+                                            subghostcell_dims_conservative_var[0][1];
+                                    
+                                    const int idx_cell_mom_x_L = (i - 1 + num_subghosts_conservative_var[1][0]) +
+                                        (interior_box_hi_idx[1] + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0] +
+                                        (k + num_subghosts_conservative_var[1][2])*subghostcell_dims_conservative_var[1][0]*
+                                            subghostcell_dims_conservative_var[1][1];
+                                    
+                                    const int idx_cell_mom_x_R = (i + 1 + num_subghosts_conservative_var[1][0]) +
+                                        (interior_box_hi_idx[1] + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0] +
+                                        (k + num_subghosts_conservative_var[1][2])*subghostcell_dims_conservative_var[1][0]*
+                                            subghostcell_dims_conservative_var[1][1];
+                                    
+                                    const int idx_cell_E_x_L = (i - 1 + num_subghosts_conservative_var[2][0]) +
+                                        (interior_box_hi_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
+                                        (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
+                                            subghostcell_dims_conservative_var[2][1];
+                                    
+                                    const int idx_cell_E_x_R = (i + 1 + num_subghosts_conservative_var[2][0]) +
+                                        (interior_box_hi_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
+                                        (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
+                                            subghostcell_dims_conservative_var[2][1];
+                                    
+                                    const double& rho_x_L = Q[0][idx_cell_rho_x_L];
+                                    const double& rho_x_R = Q[0][idx_cell_rho_x_R];
+                                    
+                                    const double u_x_L = Q[1][idx_cell_mom_x_L]/rho_x_L;
+                                    const double u_x_R = Q[1][idx_cell_mom_x_R]/rho_x_R;
+                                    
+                                    const double v_x_L = Q[2][idx_cell_mom_x_L]/rho_x_L;
+                                    const double v_x_R = Q[2][idx_cell_mom_x_R]/rho_x_R;
+                                    
+                                    const double w_x_L = Q[3][idx_cell_mom_x_L]/rho_x_L;
+                                    const double w_x_R = Q[3][idx_cell_mom_x_R]/rho_x_R;
+                                    
+                                    const double epsilon_x_L = Q[4][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L + w_x_L*w_x_L);
+                                    const double epsilon_x_R = Q[4][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R + w_x_R*w_x_R);
+                                    
+                                    const double p_x_L = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                        getPressure(
+                                            &rho_x_L,
+                                            &epsilon_x_L,
+                                            thermo_properties_ptr);
+                                    
+                                    const double p_x_R = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                        getPressure(
+                                            &rho_x_R,
+                                            &epsilon_x_R,
+                                            thermo_properties_ptr);
+                                    
+                                    // Central derivatives.
+                                    du_dx = (u_x_R - u_x_L)/(double(2)*dx[0]);
+                                    dv_dx = (v_x_R - v_x_L)/(double(2)*dx[0]);
+                                    // dw_dx = (w_x_R - w_x_L)/(double(2)*dx[0]);
+                                    dp_dx = (p_x_R - p_x_L)/(double(2)*dx[0]);
+                                }
+                                
+                                if (((patch_geom->getTouchesRegularBoundary(2, 0)) && (k == interior_box_lo_idx[2])) ||
+                                    ((k + num_subghosts_conservative_var[0][2] == 0) ||
+                                     (k + num_subghosts_conservative_var[1][2] == 0) ||
+                                     (k + num_subghosts_conservative_var[2][2] == 0)))
+                                {
+                                    // Patch is touching back physical or periodic boundary.
+                                    
+                                    const int idx_cell_rho_z_F = (i + num_subghosts_conservative_var[0][0]) +
+                                        (interior_box_hi_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
+                                        (k + 1 + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
+                                            subghostcell_dims_conservative_var[0][1];
+                                    
+                                    const int idx_cell_mom_z_F = (i + num_subghosts_conservative_var[1][0]) +
+                                        (interior_box_hi_idx[1] + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0] +
+                                        (k + 1 + num_subghosts_conservative_var[1][2])*subghostcell_dims_conservative_var[1][0]*
+                                            subghostcell_dims_conservative_var[1][1];
+                                    
+                                    const int idx_cell_E_z_F = (i + num_subghosts_conservative_var[2][0]) +
+                                        (interior_box_hi_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
+                                        (k + 1 + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
+                                            subghostcell_dims_conservative_var[2][1];
+                                    
+                                    const double& rho_z_F = Q[0][idx_cell_rho_z_F];
+                                    const double u_z_F = Q[1][idx_cell_mom_z_F]/rho_z_F;
+                                    const double v_z_F = Q[2][idx_cell_mom_z_F]/rho_z_F;
+                                    const double w_z_F = Q[3][idx_cell_mom_z_F]/rho_z_F;
+                                    const double epsilon_z_F = Q[4][idx_cell_E_z_F]/rho_z_F - half*(u_z_F*u_z_F + v_z_F*v_z_F + w_z_F*w_z_F);
+                                    
+                                    const double p_z_F = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                        getPressure(
+                                            &rho_z_F,
+                                            &epsilon_z_F,
+                                            thermo_properties_ptr);
+                                    
+                                    // One-sided derivatives.
+                                    // du_dz = (u_z_F - u_y_B)/(dx[2]);
+                                    dv_dz = (v_z_F - v_y_B)/(dx[2]);
+                                    dw_dz = (w_z_F - w_y_B)/(dx[2]);
+                                    dp_dz = (p_z_F - p_y_B)/(dx[2]);
+                                }
+                                else if (((patch_geom->getTouchesRegularBoundary(2, 1)) && (k == interior_box_hi_idx[2])) ||
+                                         ((k + num_subghosts_conservative_var[0][2] + 1 == subghostcell_dims_conservative_var[0][2]) ||
+                                          (k + num_subghosts_conservative_var[1][2] + 1 == subghostcell_dims_conservative_var[1][2]) ||
+                                          (k + num_subghosts_conservative_var[2][2] + 1 == subghostcell_dims_conservative_var[2][2])))
+                                {
+                                    // Patch is touching front physical or periodic boundary.
+                                    
+                                    const int idx_cell_rho_z_B = (i + num_subghosts_conservative_var[0][0]) +
+                                        (interior_box_hi_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
+                                        (k - 1 + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
+                                            subghostcell_dims_conservative_var[0][1];
+                                    
+                                    const int idx_cell_mom_z_B = (i + num_subghosts_conservative_var[1][0]) +
+                                        (interior_box_hi_idx[1] + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0] +
+                                        (k - 1 + num_subghosts_conservative_var[1][2])*subghostcell_dims_conservative_var[1][0]*
+                                            subghostcell_dims_conservative_var[1][1];
+                                    
+                                    const int idx_cell_E_z_B = (i + num_subghosts_conservative_var[2][0]) +
+                                        (interior_box_hi_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
+                                        (k - 1 + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
+                                            subghostcell_dims_conservative_var[2][1];
+                                    
+                                    const double& rho_z_B = Q[0][idx_cell_rho_z_B];
+                                    const double u_z_B = Q[1][idx_cell_mom_z_B]/rho_z_B;
+                                    const double v_z_B = Q[2][idx_cell_mom_z_B]/rho_z_B;
+                                    const double w_z_B = Q[3][idx_cell_mom_z_B]/rho_z_B;
+                                    const double epsilon_z_B = Q[4][idx_cell_E_z_B]/rho_z_B - half*(u_z_B*u_z_B + v_z_B*v_z_B + w_z_B*w_z_B);
+                                    
+                                    const double p_z_B = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                        getPressure(
+                                            &rho_z_B,
+                                            &epsilon_z_B,
+                                            thermo_properties_ptr);
+                                    
+                                    // One-sided derivatives.
+                                    // du_dz = (u_y_B - u_z_B)/(dx[2]);
+                                    dv_dz = (v_y_B - v_z_B)/(dx[2]);
+                                    dw_dz = (w_y_B - w_z_B)/(dx[2]);
+                                    dp_dz = (p_y_B - p_z_B)/(dx[2]);
+                                }
+                                else
+                                {
+                                    const int idx_cell_rho_z_B = (i + num_subghosts_conservative_var[0][0]) +
+                                        (interior_box_lo_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
+                                        (k - 1 + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
+                                            subghostcell_dims_conservative_var[0][1];
+                                    
+                                    const int idx_cell_rho_z_F = (i + num_subghosts_conservative_var[0][0]) +
+                                        (interior_box_lo_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
+                                        (k + 1 + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
+                                            subghostcell_dims_conservative_var[0][1];
+                                    
+                                    const int idx_cell_mom_z_B = (i + num_subghosts_conservative_var[1][0]) +
+                                        (interior_box_lo_idx[1] + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0] +
+                                        (k - 1 + num_subghosts_conservative_var[1][2])*subghostcell_dims_conservative_var[1][0]*
+                                            subghostcell_dims_conservative_var[1][1];
+                                    
+                                    const int idx_cell_mom_z_F = (i + num_subghosts_conservative_var[1][0]) +
+                                        (interior_box_lo_idx[1] + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0] +
+                                        (k + 1 + num_subghosts_conservative_var[1][2])*subghostcell_dims_conservative_var[1][0]*
+                                            subghostcell_dims_conservative_var[1][1];
+                                    
+                                    const int idx_cell_E_z_B = (i + num_subghosts_conservative_var[2][0]) +
+                                        (interior_box_lo_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
+                                        (k - 1 + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
+                                            subghostcell_dims_conservative_var[2][1];
+                                    
+                                    const int idx_cell_E_z_F = (i + num_subghosts_conservative_var[2][0]) +
+                                        (interior_box_lo_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
+                                        (k + 1 + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
+                                            subghostcell_dims_conservative_var[2][1];
+                                    
+                                    const double& rho_z_B = Q[0][idx_cell_rho_z_B];
+                                    const double& rho_z_F = Q[0][idx_cell_rho_z_F];
+                                    
+                                    const double u_z_B = Q[1][idx_cell_mom_z_B]/rho_z_B;
+                                    const double u_z_F = Q[1][idx_cell_mom_z_F]/rho_z_F;
+                                    
+                                    const double v_z_B = Q[2][idx_cell_mom_z_B]/rho_z_B;
+                                    const double v_z_F = Q[2][idx_cell_mom_z_F]/rho_z_F;
+                                    
+                                    const double w_z_B = Q[3][idx_cell_mom_z_B]/rho_z_B;
+                                    const double w_z_F = Q[3][idx_cell_mom_z_F]/rho_z_F;
+                                    
+                                    const double epsilon_z_B = Q[4][idx_cell_E_z_B]/rho_z_B - half*(u_z_B*u_z_B + v_z_B*v_z_B + w_z_B*w_z_B);
+                                    const double epsilon_z_F = Q[4][idx_cell_E_z_F]/rho_z_F - half*(u_z_F*u_z_F + v_z_F*v_z_F + w_z_F*w_z_F);
+                                    
+                                    const double p_z_B = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                        getPressure(
+                                            &rho_z_B,
+                                            &epsilon_z_B,
+                                            thermo_properties_ptr);
+                                    
+                                    const double p_z_F = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                        getPressure(
+                                            &rho_z_F,
+                                            &epsilon_z_F,
+                                            thermo_properties_ptr);
+                                    
+                                    // Central derivatives.
+                                    // du_dz = (u_z_F - u_z_B)/(double(2)*dx[2]);
+                                    dv_dz = (v_z_F - v_z_B)/(double(2)*dx[2]);
+                                    dw_dz = (w_z_F - w_z_B)/(double(2)*dx[2]);
+                                    dp_dz = (p_z_F - p_z_B)/(double(2)*dx[2]);
+                                }
+                                
+                                const double c_y_B = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                    getSoundSpeed(
+                                        &rho_y_B,
+                                        &p_y_B,
+                                        thermo_properties_ptr);
+                                
+                                const double lambda_1 = v_y_B - c_y_B;
+                                
+                                // Compute vector Lambda^(-1) * L.
+                                
+                                double Lambda_inv_L[5];
+                                
+                                const double& p_t         = d_bdry_face_nonreflecting_outflow_p_t[face_loc];
+                                const double& sigma       = d_bdry_face_nonreflecting_outflow_sigma[face_loc];
+                                const double& beta        = d_bdry_face_nonreflecting_outflow_beta[face_loc];
+                                const double& length_char = d_bdry_face_nonreflecting_outflow_length_char[face_loc];
+                                
+                                const double T_1 = u_y_B*(dp_dx - rho_y_B*c_y_B*dv_dx) + rho_y_B*c_y_B*c_y_B*du_dx +
+                                    w_y_B*(dp_dz - rho_y_B*c_y_B*dv_dz) + rho_y_B*c_y_B*c_y_B*dw_dz;
+                                
+                                const double M_sq = (u_y_B*u_y_B + v_y_B*v_y_B + w_y_B*w_y_B)/(c_y_B*c_y_B);
+                                const double K = sigma*c_y_B*(double(1) - M_sq)/length_char;
+                                
+                                Lambda_inv_L[0] = (double(1)/lambda_1)*(K*(p_y_B - p_t) - (double(1) - beta)*T_1);
+                                Lambda_inv_L[1] = du_dy;
+                                Lambda_inv_L[2] = c_y_B*c_y_B*drho_dy - dp_dy;
+                                Lambda_inv_L[3] = dw_dy;
+                                Lambda_inv_L[4] = dp_dy + rho_y_B*c_y_B*dv_dy;
+                                
+                                // Compute dV_dy.
+                                
+                                const double c_sq_inv  = double(1)/(c_y_B*c_y_B);
+                                const double rho_c_inv = double(1)/(rho_y_B*c_y_B);
+                                
+                                double dV_dy[5];
+                                
+                                dV_dy[0] = half*c_sq_inv*(Lambda_inv_L[0] + Lambda_inv_L[4]) + c_sq_inv*Lambda_inv_L[2];
+                                dV_dy[1] = Lambda_inv_L[1];
+                                dV_dy[2] = half*rho_c_inv*(-Lambda_inv_L[0] + Lambda_inv_L[4]);
+                                dV_dy[3] = Lambda_inv_L[3];
+                                dV_dy[4] = half*(Lambda_inv_L[0] + Lambda_inv_L[4]);
+                                
+                                double V_ghost[5*num_ghosts_to_fill];
+                                
+                                for (int j = 0; j < num_ghosts_to_fill; j++)
+                                {
+                                    const int idx_cell_rho = (i + num_subghosts_conservative_var[0][0]) +
+                                        (j + fill_box_lo_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
+                                        (k + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
+                                            subghostcell_dims_conservative_var[0][1];
+                                    
+                                    const int idx_cell_mom = (i + num_subghosts_conservative_var[1][0]) +
+                                        (j + fill_box_lo_idx[1] + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0] +
+                                        (k + num_subghosts_conservative_var[1][2])*subghostcell_dims_conservative_var[1][0]*
+                                            subghostcell_dims_conservative_var[1][1];
+                                    
+                                    const int idx_cell_E = (i + num_subghosts_conservative_var[2][0]) +
+                                        (j + fill_box_lo_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
+                                        (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
+                                            subghostcell_dims_conservative_var[2][1];
+                                    
+                                    if (j == 0)
+                                    {
+                                        V_ghost[j*5 + 0] = rho_y_BB + double(2)*dx[1]*dV_dy[0];
+                                        V_ghost[j*5 + 1] = u_y_BB   + double(2)*dx[1]*dV_dy[1];
+                                        V_ghost[j*5 + 2] = v_y_BB   + double(2)*dx[1]*dV_dy[2];
+                                        V_ghost[j*5 + 3] = w_y_BB   + double(2)*dx[1]*dV_dy[3];
+                                        V_ghost[j*5 + 4] = p_y_BB   + double(2)*dx[1]*dV_dy[4];
+                                    }
+                                    else if (j == 1)
+                                    {
+                                        V_ghost[j*5 + 0] = -double(2)*rho_y_BB - double(3)*rho_y_B +
+                                            double(6)*V_ghost[(j - 1)*5 + 0] - double(6)*dx[1]*dV_dy[0];
+                                        
+                                        V_ghost[j*5 + 1] = -double(2)*u_y_BB - double(3)*u_y_B +
+                                            double(6)*V_ghost[(j - 1)*5 + 1] - double(6)*dx[1]*dV_dy[1];
+                                        
+                                        V_ghost[j*5 + 2] = -double(2)*v_y_BB - double(3)*v_y_B +
+                                            double(6)*V_ghost[(j - 1)*5 + 2] - double(6)*dx[1]*dV_dy[2];
+                                        
+                                        V_ghost[j*5 + 3] = -double(2)*w_y_BB - double(3)*w_y_B +
+                                            double(6)*V_ghost[(j - 1)*5 + 3] - double(6)*dx[1]*dV_dy[3];
+                                        
+                                        V_ghost[j*5 + 4] = -double(2)*p_y_BB - double(3)*p_y_B +
+                                            double(6)*V_ghost[(j - 1)*5 + 4] - double(6)*dx[1]*dV_dy[4];
+                                    }
+                                    else if (j == 2)
+                                    {
+                                        V_ghost[j*5 + 0] = double(3)*rho_y_BB + double(10)*rho_y_B -
+                                            double(18)*V_ghost[(j - 2)*5 + 0] + double(6)*V_ghost[(j - 1)*5 + 0] +
+                                            double(12)*dx[1]*dV_dy[0];
+                                        
+                                        V_ghost[j*5 + 1] = double(3)*u_y_BB + double(10)*u_y_B -
+                                            double(18)*V_ghost[(j - 2)*5 + 1] + double(6)*V_ghost[(j - 1)*5 + 1] +
+                                            double(12)*dx[1]*dV_dy[1];
+                                        
+                                        V_ghost[j*5 + 2] = double(3)*v_y_BB + double(10)*v_y_B -
+                                            double(18)*V_ghost[(j - 2)*5 + 2] + double(6)*V_ghost[(j - 1)*5 + 2] +
+                                            double(12)*dx[1]*dV_dy[2];
+                                        
+                                        V_ghost[j*5 + 3] = double(3)*w_y_BB + double(10)*w_y_B -
+                                            double(18)*V_ghost[(j - 2)*5 + 3] + double(6)*V_ghost[(j - 1)*5 + 3] +
+                                            double(12)*dx[1]*dV_dy[3];
+                                        
+                                        V_ghost[j*5 + 4] = double(3)*p_y_BB + double(10)*p_y_B -
+                                            double(18)*V_ghost[(j - 2)*5 + 4] + double(6)*V_ghost[(j - 1)*5 + 4] +
+                                            double(12)*dx[1]*dV_dy[4];
+                                    }
+                                    else if (j == 3)  
+                                    {
+                                        V_ghost[j*5 + 0] = -double(4)*rho_y_BB - double(65)/double(3)*rho_y_B +
+                                            double(40)*V_ghost[(j - 3)*5 + 0] - double(20)*V_ghost[(j - 2)*5 + 0] +
+                                            double(20)/double(3)*V_ghost[(j - 1)*5 + 0] + double(20)*dx[1]*dV_dy[0];
+                                        
+                                        V_ghost[j*5 + 1] = -double(4)*u_y_BB - double(65)/double(3)*u_y_B +
+                                            double(40)*V_ghost[(j - 3)*5 + 1] - double(20)*V_ghost[(j - 2)*5 + 1] +
+                                            double(20)/double(3)*V_ghost[(j - 1)*5 + 1] + double(20)*dx[1]*dV_dy[1];
+                                        
+                                        V_ghost[j*5 + 2] = -double(4)*v_y_BB - double(65)/double(3)*v_y_B +
+                                            double(40)*V_ghost[(j - 3)*5 + 2] - double(20)*V_ghost[(j - 2)*5 + 2] +
+                                            double(20)/double(3)*V_ghost[(j - 1)*5 + 2] + double(20)*dx[1]*dV_dy[2];
+                                        
+                                        V_ghost[j*5 + 3] = -double(4)*w_y_BB - double(65)/double(3)*w_y_B +
+                                            double(40)*V_ghost[(j - 3)*5 + 3] - double(20)*V_ghost[(j - 2)*5 + 3] +
+                                            double(20)/double(3)*V_ghost[(j - 1)*5 + 3] + double(20)*dx[1]*dV_dy[3];
+                                        
+                                        V_ghost[j*5 + 4] = -double(4)*p_y_BB - double(65)/double(3)*p_y_B +
+                                            double(40)*V_ghost[(j - 3)*5 + 4] - double(20)*V_ghost[(j - 2)*5 + 4] +
+                                            double(20)/double(3)*V_ghost[(j - 1)*5 + 4] + double(20)*dx[1]*dV_dy[4];
+                                    }
+                                    Q[0][idx_cell_rho] = V_ghost[j*5 + 0];
+                                    Q[1][idx_cell_mom] = V_ghost[j*5 + 0]*V_ghost[j*5 + 1];
+                                    Q[2][idx_cell_mom] = V_ghost[j*5 + 0]*V_ghost[j*5 + 2];
+                                    Q[3][idx_cell_mom] = V_ghost[j*5 + 0]*V_ghost[j*5 + 3];
+                                    const double epsilon = d_equation_of_state_mixing_rules->getEquationOfState()->
+                                        getInternalEnergy(
+                                            &V_ghost[j*5 + 0],
+                                            &V_ghost[j*5 + 4],
+                                            thermo_properties_ptr);
+                                    
+                                    const double E = V_ghost[j*5 + 0]*epsilon +
+                                        half*(Q[1][idx_cell_mom]*Q[1][idx_cell_mom] + Q[2][idx_cell_mom]*Q[2][idx_cell_mom] +
+                                           Q[3][idx_cell_mom]*Q[3][idx_cell_mom])/V_ghost[j*5 + 0];
+                                    
+                                    Q[4][idx_cell_E] = E;
+                                }
+                            }
+                        }
                     }
                     else if (face_loc == BDRY_LOC::ZLO)
                     {
