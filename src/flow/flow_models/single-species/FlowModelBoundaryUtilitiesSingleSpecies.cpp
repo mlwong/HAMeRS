@@ -4214,9 +4214,9 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                 }
                                 
                                 if (((patch_geom->getTouchesRegularBoundary(2, 0)) && (k == interior_box_lo_idx[2])) ||
-                                    ((k + num_subghosts_conservative_var[0][2] + 1 == 0) ||
-                                     (k + num_subghosts_conservative_var[1][2] + 1 == 0) ||
-                                     (k + num_subghosts_conservative_var[2][2] + 1 == 0)))
+                                    ((k + num_subghosts_conservative_var[0][2] == 0) ||
+                                     (k + num_subghosts_conservative_var[1][2] == 0) ||
+                                     (k + num_subghosts_conservative_var[2][2] == 0)))
                                 {
                                     // Patch is touching back physical or periodic boundary.
                                     
@@ -4503,7 +4503,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                     
                                     const double E = V_ghost[i*5 + 0]*epsilon +
                                         half*(Q[1][idx_cell_mom]*Q[1][idx_cell_mom] + Q[2][idx_cell_mom]*Q[2][idx_cell_mom] +
-                                           Q[1][idx_cell_mom]*Q[1][idx_cell_mom])/V_ghost[i*5 + 0];
+                                           Q[3][idx_cell_mom]*Q[3][idx_cell_mom])/V_ghost[i*5 + 0];
                                     
                                     Q[4][idx_cell_E] = E;
                                 }
