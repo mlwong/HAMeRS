@@ -44,7 +44,7 @@ mpirun -np <number of processors> src/exec/main <input filename>
 
 ### What libraries do I need? ###
 
-HAMeRS relies on [HDF5](https://support.hdfgroup.org/HDF5/), [Boost](https://www.boost.org/) and [SAMRAI](https://computation.llnl.gov/projects/samrai). Before installing HAMeRS, it is required to set up the environmental variables for [CMake](https://cmake.org/) to look for the locations of the libraries.
+HAMeRS relies on [HDF5](https://support.hdfgroup.org/HDF5/), [Boost](https://www.boost.org/) and [SAMRAI](https://computation.llnl.gov/projects/samrai). Before installing HAMeRS, it is required to set up the environment variables for [CMake](https://cmake.org/) to look for the locations of the libraries.
 
 To set up HDF5:
 ```
@@ -77,3 +77,12 @@ The code is managed by Man-Long Wong (wongml@stanford.edu) of the [Flow Physics 
 
 ### Copyright ###
 HAMeRS is licensed under a GNU Lesser General Public License v3.0.
+
+If you find this work useful please consider citing the author's dissertation:
+
+    @phdthesis{wong2019thesis,
+    title={High-order shock-capturing methods for study of shock-induced turbulent mixing with adaptive mesh refinement simulations},
+    author={Wong, Man Long},
+    year={2019},
+    school={Stanford University}
+    }

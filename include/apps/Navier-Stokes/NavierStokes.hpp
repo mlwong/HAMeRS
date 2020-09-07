@@ -430,6 +430,21 @@ class NavierStokes:
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy) const;
         
         /**
+         * Compute variables for computing the statistics of data.
+         */
+        void
+        computeStatisticsVariables(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy);
+        
+        /**
+         * Filter variables for computing the statistics of data.
+         */
+        void
+        filterStatisticsVariables(
+            const int level,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy);
+        
+        /**
          * Output the statistics of data.
          */
         void
@@ -446,7 +461,7 @@ class NavierStokes:
         {
             d_plot_context = plot_context;
         }
-
+        
     private:
         /*
          * These private member functions read data from input and restart. When beginning a run
