@@ -78,7 +78,7 @@ The code is managed by Man-Long Wong (wongml@stanford.edu) of the [Flow Physics 
 ### Copyright ###
 HAMeRS is licensed under a GNU Lesser General Public License v3.0.
 
-If you find this work useful please consider citing the author's dissertation:
+If you find this work useful, please consider citing the author's dissertation:
 
     @phdthesis{wong2019thesis,
     title={High-order shock-capturing methods for study of shock-induced turbulent mixing with adaptive mesh refinement simulations},
