@@ -34,6 +34,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::FlowModelBoundaryUtilitiesFourEqn
         
         d_bdry_node_isothermal_no_slip_T.resize(NUM_1D_NODES);
         d_bdry_node_isothermal_no_slip_vel.resize(NUM_1D_NODES);
+        
+        d_bdry_node_nonreflecting_outflow_p_t.resize(NUM_1D_NODES);
+        d_bdry_node_nonreflecting_outflow_sigma.resize(NUM_1D_NODES);
+        d_bdry_node_nonreflecting_outflow_beta.resize(NUM_1D_NODES);
+        d_bdry_node_nonreflecting_outflow_length_char.resize(NUM_1D_NODES);
     }
     else if (d_dim == tbox::Dimension(2))
     {
@@ -41,6 +46,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::FlowModelBoundaryUtilitiesFourEqn
         
         d_bdry_edge_isothermal_no_slip_T.resize(NUM_2D_EDGES);
         d_bdry_edge_isothermal_no_slip_vel.resize(NUM_2D_EDGES*2);
+        
+        d_bdry_edge_nonreflecting_outflow_p_t.resize(NUM_2D_EDGES);
+        d_bdry_edge_nonreflecting_outflow_sigma.resize(NUM_2D_EDGES);
+        d_bdry_edge_nonreflecting_outflow_beta.resize(NUM_2D_EDGES);
+        d_bdry_edge_nonreflecting_outflow_length_char.resize(NUM_2D_EDGES);
     }
     else if (d_dim == tbox::Dimension(3))
     {
@@ -48,8 +58,13 @@ FlowModelBoundaryUtilitiesFourEqnConservative::FlowModelBoundaryUtilitiesFourEqn
         
         d_bdry_face_isothermal_no_slip_T.resize(NUM_3D_FACES);
         d_bdry_face_isothermal_no_slip_vel.resize(NUM_3D_FACES*3);
+        
+        d_bdry_face_nonreflecting_outflow_p_t.resize(NUM_3D_FACES);
+        d_bdry_face_nonreflecting_outflow_sigma.resize(NUM_3D_FACES);
+        d_bdry_face_nonreflecting_outflow_beta.resize(NUM_3D_FACES);
+        d_bdry_face_nonreflecting_outflow_length_char.resize(NUM_3D_FACES);
     }
-}    
+}
 
 
 /*
@@ -915,7 +930,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
             fill_box_hi_idx = fill_box_hi_idx - interior_box.lower();
             
             if ((bdry_edge_conds[edge_loc] == BDRY_COND::FLOW_MODEL::ADIABATIC_NO_SLIP) ||
-                (bdry_edge_conds[edge_loc] == BDRY_COND::FLOW_MODEL::ISOTHERMAL_NO_SLIP))
+                (bdry_edge_conds[edge_loc] == BDRY_COND::FLOW_MODEL::ISOTHERMAL_NO_SLIP) ||
+                (bdry_edge_conds[edge_loc] == BDRY_COND::FLOW_MODEL::NONREFLECTING_OUTFLOW))
             {
                 /*
                  * Get the pointers to the conservative variables.
@@ -1314,6 +1330,630 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                     }
                     
                     // Remove edge locations that have boundary conditions identified.
+                    bdry_edge_locs.erase(std::remove(bdry_edge_locs.begin(), bdry_edge_locs.end(), edge_loc),
+                        bdry_edge_locs.end());
+                }
+                else if (bdry_edge_conds[edge_loc] == BDRY_COND::FLOW_MODEL::NONREFLECTING_OUTFLOW)
+                {
+                    // Follow the method in
+                    // Motheau, Emmanuel, Ann Almgren, and John B. Bell.
+                    // "Navier–stokes characteristic boundary conditions using ghost cells."
+                    // AIAA Journal (2017): 3399-3408.
+                    
+                    if (edge_loc == BDRY_LOC::XLO)
+                    {
+                        // number of ghostcells START
+                        const int num_ghosts_to_fill = fill_box_hi_idx[0] - fill_box_lo_idx[0] + 1;
+                        TBOX_ASSERT(fill_box_hi_idx[0] == interior_box_lo_idx[0] - 1);
+                        if (num_ghosts_to_fill > 4)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData()\n"
+                                << "Non-reflecting outflow BC doesn't support more than four ghost cells yet!");
+                        }
+                        // number of ghostcells END
+                         
+                        // compute derivatives in x-direction START
+
+                        for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                        {
+                            // Get the grid spacing.
+                            const double* const dx = patch_geom->getDx();
+                            
+                            // Set index for x-direction STARTI
+                            const int idx_cell_rho_Y_x_R = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
+                                (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
+                            
+                            const int idx_cell_rho_Y_x_RR = (interior_box_lo_idx[0] + 1 + num_subghosts_conservative_var[0][0]) +
+                                (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
+                            
+                            const int idx_cell_rho_Y_x_RRR = (interior_box_lo_idx[0] + 2 + num_subghosts_conservative_var[0][0]) +
+                                (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
+                            
+                            const int idx_cell_mom_x_R = (interior_box_lo_idx[0] + num_subghosts_conservative_var[1][0]) +
+                                (j + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
+                            
+                            const int idx_cell_mom_x_RR = (interior_box_lo_idx[0] + 1 + num_subghosts_conservative_var[1][0]) +
+                                (j + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
+                            
+                            const int idx_cell_mom_x_RRR = (interior_box_lo_idx[0] + 2 + num_subghosts_conservative_var[1][0]) +
+                                (j + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
+                            
+                            const int idx_cell_E_x_R = (interior_box_lo_idx[0] + num_subghosts_conservative_var[2][0]) +
+                                (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
+                            
+                            const int idx_cell_E_x_RR = (interior_box_lo_idx[0] + 1 + num_subghosts_conservative_var[2][0]) +
+                                (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
+                            
+                            const int idx_cell_E_x_RRR = (interior_box_lo_idx[0] + 2 + num_subghosts_conservative_var[2][0]) +
+                                (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
+                            
+                            // Set index for x-direction END
+                            
+                            std::vector<double> rho_Y_x_R;
+                            std::vector<double> rho_Y_x_RR;
+                            std::vector<double> rho_Y_x_RRR;
+                            rho_Y_x_R.reserve(d_num_species);
+                            rho_Y_x_RR.reserve(d_num_species);
+                            rho_Y_x_RRR.reserve(d_num_species);
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                rho_Y_x_R.push_back(Q[si][idx_cell_rho_Y_x_R]);
+                                rho_Y_x_RR.push_back(Q[si][idx_cell_rho_Y_x_RR]);
+                                rho_Y_x_RRR.push_back(Q[si][idx_cell_rho_Y_x_RRR]);
+                            }
+                            
+                            /*
+                             * Compute the mixture density.
+                             */
+                            
+                            double rho_x_R   = double(0);
+                            double rho_x_RR  = double(0);
+                            double rho_x_RRR = double(0);
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                rho_x_R   += Q[si][idx_cell_rho_Y_x_R];
+                                rho_x_RR  += Q[si][idx_cell_rho_Y_x_RR];
+                                rho_x_RRR += Q[si][idx_cell_rho_Y_x_RRR];
+                            }
+                            
+                            /*
+                             * Compute the mass fractions.
+                             */
+                            
+                            std::vector<double> Y_x_R;
+                            std::vector<double> Y_x_RR;
+                            std::vector<double> Y_x_RRR;
+                            Y_x_R.reserve(d_num_species);
+                            Y_x_RR.reserve(d_num_species);
+                            Y_x_RRR.reserve(d_num_species);
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                Y_x_R.push_back(Q[si][idx_cell_rho_Y_x_R]/rho_x_R);
+                                Y_x_RR.push_back(Q[si][idx_cell_rho_Y_x_RR]/rho_x_RR);
+                                Y_x_RRR.push_back(Q[si][idx_cell_rho_Y_x_RRR]/rho_x_RRR);
+                            }
+                            
+                            /*
+                             * Get the pointers to the mass fractions.
+                             */
+                            
+                            std::vector<const double*> Y_x_R_ptr;
+                            std::vector<const double*> Y_x_RR_ptr;
+                            std::vector<const double*> Y_x_RRR_ptr;
+                            Y_x_R_ptr.reserve(d_num_species);
+                            Y_x_RR_ptr.reserve(d_num_species);
+                            Y_x_RRR_ptr.reserve(d_num_species);
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                Y_x_R_ptr.push_back(&Y_x_R[si]);
+                                Y_x_RR_ptr.push_back(&Y_x_RR[si]);
+                                Y_x_RRR_ptr.push_back(&Y_x_RRR[si]);
+                            }
+                           
+                            // Set variables START
+                            
+                            const double u_x_R   = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
+                            const double u_x_RR  = Q[d_num_species][idx_cell_mom_x_RR]/rho_x_RR;
+                            const double u_x_RRR = Q[d_num_species][idx_cell_mom_x_RRR]/rho_x_RRR;
+                            
+                            const double v_x_R   = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
+                            const double v_x_RR  = Q[d_num_species + 1][idx_cell_mom_x_RR]/rho_x_RR;
+                            const double v_x_RRR = Q[d_num_species + 1][idx_cell_mom_x_RRR]/rho_x_RRR;
+                            
+                            const double half = double(1)/double(2);
+                            const double epsilon_x_R   = Q[d_num_species + 2][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R);
+                            const double epsilon_x_RR  = Q[d_num_species + 2][idx_cell_E_x_RR]/rho_x_RR - half*(u_x_RR*u_x_RR + v_x_RR*v_x_RR);
+                            const double epsilon_x_RRR = Q[d_num_species + 2][idx_cell_E_x_RRR]/rho_x_RRR - half*(u_x_RRR*u_x_RRR + v_x_RRR*v_x_RRR);
+                            
+                            double p_x_R = d_equation_of_state_mixing_rules->
+                                getPressure(
+                                    &rho_x_R,
+                                    &epsilon_x_R,
+                                    Y_x_R_ptr);
+                            
+                            double p_x_RR = d_equation_of_state_mixing_rules->
+                                getPressure(
+                                    &rho_x_RR,
+                                    &epsilon_x_RR,
+                                    Y_x_RR_ptr);
+                            
+                            double p_x_RRR = d_equation_of_state_mixing_rules->
+                                getPressure(
+                                    &rho_x_RRR,
+                                    &epsilon_x_RRR,
+                                    Y_x_RRR_ptr);
+                            
+                            
+                            // Set variables END
+                            // Compute derivatives at x-direction START
+                            std::vector<double> drho_Y_dx;
+                            drho_Y_dx.reserve(d_num_species);
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                drho_Y_dx[si] = -(Q[si][idx_cell_rho_Y_x_RRR] - double(4)*Q[si][idx_cell_rho_Y_x_RR] +
+                                    double(3)*Q[si][idx_cell_rho_Y_x_R])/(double(2)*dx[0]);
+                            }
+                            const double du_dx = -(u_x_RRR - double(4)*u_x_RR + double(3)*u_x_R)/(double(2)*dx[0]);
+                            const double dv_dx = -(v_x_RRR - double(4)*v_x_RR + double(3)*v_x_R)/(double(2)*dx[0]);
+                            const double dp_dx = -(p_x_RRR - double(4)*p_x_RR + double(3)*p_x_R)/(double(2)*dx[0]);
+                            // Compute derivatives at x-direction END
+                            
+                            
+                            // Compute derivatives in y-direction START
+                            
+                            double du_dy = double(0);
+                            double dv_dy = double(0);
+                            double dp_dy = double(0);
+
+                            if (((patch_geom->getTouchesRegularBoundary(1, 0)) && (j == interior_box_lo_idx[1])) ||
+                                ((j + num_subghosts_conservative_var[0][1] == 0) ||
+                                 (j + num_subghosts_conservative_var[1][1] == 0) ||
+                                 (j + num_subghosts_conservative_var[2][1] == 0)))
+                            {
+                                // Patch is touching bottom physical or periodic boundary.
+                                
+                                const int idx_cell_rho_Y_y_T = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
+                                    (j + 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
+                                
+                                const int idx_cell_mom_y_T = (interior_box_lo_idx[0] + num_subghosts_conservative_var[1][0]) +
+                                    (j + 1 + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
+                                
+                                const int idx_cell_E_y_T = (interior_box_lo_idx[0] + num_subghosts_conservative_var[2][0]) +
+                                    (j + 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
+                                
+                                /*
+                                 * Compute the mixture density.
+                                 */
+                            
+                                double rho_y_T = double(0);
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    rho_y_T += Q[si][idx_cell_rho_Y_y_T];
+                                }
+                                
+                                /*
+                                 * Compute the mass fractions.
+                                 */
+                                
+                                std::vector<double> Y_y_T;
+                                Y_y_T.reserve(d_num_species);
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_y_T.push_back(Q[si][idx_cell_rho_Y_y_T]/rho_y_T);
+                                }
+                                
+                                /*
+                                 * Get the pointers to the mass fractions.
+                                 */
+                                
+                                std::vector<const double*> Y_y_T_ptr;
+                                Y_y_T_ptr.reserve(d_num_species);
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_y_T_ptr.push_back(&Y_y_T[si]);
+                                }
+                                
+                                const double u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
+                                const double v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
+                                const double epsilon_y_T = Q[d_num_species + 2][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T);
+                                
+                                double p_y_T = d_equation_of_state_mixing_rules->
+                                    getPressure(
+                                        &rho_y_T,
+                                        &epsilon_y_T,
+                                        Y_y_T_ptr);
+                                
+                                // One-sided derivatives.
+                                du_dy = (u_y_T - u_x_R)/(dx[1]);
+                                dv_dy = (v_y_T - v_x_R)/(dx[1]);
+                                dp_dy = (p_y_T - p_x_R)/(dx[1]);
+                            }
+                            else if (((patch_geom->getTouchesRegularBoundary(1, 1)) && (j == interior_box_hi_idx[1])) ||
+                                     ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
+                                      (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
+                                      (j + num_subghosts_conservative_var[2][1] + 1 == subghostcell_dims_conservative_var[2][1])))
+                            {
+                                // Patch is touching top physical or periodic boundary.
+                                
+                                const int idx_cell_rho_Y_y_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
+                                    (j - 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
+                                
+                                const int idx_cell_mom_y_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[1][0]) +
+                                    (j - 1 + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
+                                
+                                const int idx_cell_E_y_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[2][0]) +
+                                    (j - 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
+                                
+                                /*
+                                 * Compute the mixture density.
+                                 */
+                            
+                                double rho_y_B = double(0);
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    rho_y_B += Q[si][idx_cell_rho_Y_y_B];
+                                }
+                                
+                                /*
+                                 * Compute the mass fractions.
+                                 */
+                                
+                                std::vector<double> Y_y_B;
+                                Y_y_B.reserve(d_num_species);
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_y_B.push_back(Q[si][idx_cell_rho_Y_y_B]/rho_y_B);
+                                }
+                                
+                                /*
+                                 * Get the pointers to the mass fractions.
+                                 */
+                                
+                                std::vector<const double*> Y_y_B_ptr;
+                                Y_y_B_ptr.reserve(d_num_species);
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_y_B_ptr.push_back(&Y_y_B[si]);
+                                }
+                                
+                                const double u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
+                                const double v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
+                                const double epsilon_y_B = Q[d_num_species + 2][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B);
+                                
+                                double p_y_B = d_equation_of_state_mixing_rules->
+                                    getPressure(
+                                        &rho_y_B,
+                                        &epsilon_y_B,
+                                        Y_y_B_ptr);
+                                
+                                // One-sided derivatives.
+                                du_dy = (u_x_R - u_y_B)/(dx[1]);
+                                dv_dy = (v_x_R - v_y_B)/(dx[1]);
+                                dp_dy = (p_x_R - p_y_B)/(dx[1]);
+                            }
+                            else
+                            {
+                                const int idx_cell_rho_Y_y_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
+                                    (j - 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
+                                
+                                const int idx_cell_rho_Y_y_T = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
+                                    (j + 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
+                                
+                                const int idx_cell_mom_y_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[1][0]) +
+                                    (j - 1 + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
+                                
+                                const int idx_cell_mom_y_T = (interior_box_lo_idx[0] + num_subghosts_conservative_var[1][0]) +
+                                    (j + 1 + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
+                                
+                                const int idx_cell_E_y_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[2][0]) +
+                                    (j - 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
+                                
+                                const int idx_cell_E_y_T = (interior_box_lo_idx[0] + num_subghosts_conservative_var[2][0]) +
+                                    (j + 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
+                                
+                                /*
+                                 * Compute the mixture density.
+                                 */
+                            
+                                double rho_y_B = double(0);
+                                double rho_y_T = double(0);
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    rho_y_B += Q[si][idx_cell_rho_Y_y_B];
+                                    rho_y_T += Q[si][idx_cell_rho_Y_y_T];
+                                }
+                                
+                                /*
+                                 * Compute the mass fractions.
+                                 */
+                                
+                                std::vector<double> Y_y_B;
+                                std::vector<double> Y_y_T;
+                                Y_y_B.reserve(d_num_species);
+                                Y_y_T.reserve(d_num_species);
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_y_B.push_back(Q[si][idx_cell_rho_Y_y_B]/rho_y_B);
+                                    Y_y_T.push_back(Q[si][idx_cell_rho_Y_y_T]/rho_y_T);
+                                }
+                                
+                                /*
+                                 * Get the pointers to the mass fractions.
+                                 */
+                                
+                                std::vector<const double*> Y_y_B_ptr;
+                                std::vector<const double*> Y_y_T_ptr;
+                                Y_y_B_ptr.reserve(d_num_species);
+                                Y_y_T_ptr.reserve(d_num_species);
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_y_B_ptr.push_back(&Y_y_B[si]);
+                                    Y_y_T_ptr.push_back(&Y_y_T[si]);
+                                }
+                                
+                                const double u_y_B = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
+                                const double u_y_T = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
+                                
+                                const double v_y_B = Q[d_num_species + 1][idx_cell_mom_y_B]/rho_y_B;
+                                const double v_y_T = Q[d_num_species + 1][idx_cell_mom_y_T]/rho_y_T;
+                                
+                                const double epsilon_y_B = Q[d_num_species + 2][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B);
+                                const double epsilon_y_T = Q[d_num_species + 2][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_B*v_y_T);
+                                
+                                double p_y_B = d_equation_of_state_mixing_rules->
+                                    getPressure(
+                                        &rho_y_B,
+                                        &epsilon_y_B,
+                                        Y_y_B_ptr);
+                                
+                                double p_y_T = d_equation_of_state_mixing_rules->
+                                    getPressure(
+                                        &rho_y_T,
+                                        &epsilon_y_T,
+                                        Y_y_T_ptr);
+                                
+                                // Central derivatives.
+                                du_dy = (u_y_T - u_y_B)/(double(2)*dx[1]);
+                                dv_dy = (v_y_T - v_y_B)/(double(2)*dx[1]);
+                                dp_dy = (p_y_T - p_y_B)/(double(2)*dx[1]);
+                            }
+                            
+                            // Compute sound speed.
+                            
+                            const double Gamma_x_R = d_equation_of_state_mixing_rules->getGruneisenParameter(
+                                &rho_x_R,
+                                &p_x_R,
+                                Y_x_R_ptr);
+                            
+                            const std::vector<double> Psi_x_R = d_equation_of_state_mixing_rules->
+                                getPressureDerivativeWithPartialDensities(
+                                        &rho_x_R,
+                                        &p_x_R,
+                                        Y_x_R_ptr);
+                            
+                            double c_x_R = Gamma_x_R*p_x_R/rho_x_R;
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                c_x_R += Y_x_R[si]*Psi_x_R[si];
+                            }
+                            c_x_R = sqrt(c_x_R);
+                            
+                            const double lambda_last = u_x_R + c_x_R;
+
+                            // Compute vector Lambda^(-1) * L.
+                            
+                            double Lambda_inv_L[d_num_species + 3];
+                            
+                            const double& p_t         = d_bdry_edge_nonreflecting_outflow_p_t[edge_loc];
+                            const double& sigma       = d_bdry_edge_nonreflecting_outflow_sigma[edge_loc];
+                            const double& beta        = d_bdry_edge_nonreflecting_outflow_beta[edge_loc];
+                            const double& length_char = d_bdry_edge_nonreflecting_outflow_length_char[edge_loc];
+                            
+                            const double T_last = v_x_R*(dp_dy + rho_x_R*c_x_R*du_dy) + rho_x_R*c_x_R*c_x_R*dv_dy;
+                            
+                            const double M_sq = (u_x_R*u_x_R + v_x_R*v_x_R)/(c_x_R*c_x_R);
+                            const double K = sigma*c_x_R*(double(1) - M_sq)/length_char;
+                            
+                            Lambda_inv_L[0] = dp_dx - rho_x_R*c_x_R*du_dx;
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                Lambda_inv_L[si + 1] = c_x_R*c_x_R*drho_Y_dx[si] - Y_x_R[si]*dp_dx;
+                            }
+                            Lambda_inv_L[d_num_species + 1] = dv_dx;
+                            Lambda_inv_L[d_num_species + 2] = (double(1)/lambda_last)*(K*(p_x_R - p_t) - (double(1) - beta)*T_last);
+                            
+                            // Compute dV_dx.
+                            
+                            const double c_sq_inv  = double(1)/(c_x_R*c_x_R);
+                            const double rho_c_inv = double(1)/(rho_x_R*c_x_R);
+                            
+                            double dV_dx[d_num_species + 3];
+                            
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                dV_dx[si] = half*c_sq_inv*Y_x_R[si]*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 2]) +
+                                    c_sq_inv*Lambda_inv_L[si + 1];
+                            }
+                            dV_dx[d_num_species]     = half*rho_c_inv*(-Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 2]);
+                            dV_dx[d_num_species + 1] = Lambda_inv_L[d_num_species + 1];
+                            dV_dx[d_num_species + 2] = half*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 2]);
+                            
+                            double V_ghost[(d_num_species + 3)*num_ghosts_to_fill];
+                            
+                            for (int i = num_ghosts_to_fill - 1; i >= 0; i--)
+                            {
+                                const int idx_cell_rho_Y = (i + fill_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
+                                    (j + num_subghosts_conservative_var[0][1])*
+                                        subghostcell_dims_conservative_var[0][0];
+                                
+                                const int idx_cell_mom = (i + fill_box_lo_idx[0] + num_subghosts_conservative_var[1][0]) +
+                                    (j + num_subghosts_conservative_var[1][1])*
+                                        subghostcell_dims_conservative_var[1][0];
+                                
+                                const int idx_cell_E = (i + fill_box_lo_idx[0] + num_subghosts_conservative_var[2][0]) +
+                                    (j + num_subghosts_conservative_var[2][1])*
+                                        subghostcell_dims_conservative_var[2][0];
+                                
+                                if (i == num_ghosts_to_fill - 1)
+                                {
+                                    for (int si = 0; si < d_num_species; si ++)
+                                    {
+                                        V_ghost[i*(d_num_species + 3) + si] = rho_Y_x_RR[si] - double(2)*dx[0]*dV_dx[si];
+                                    }
+                                    V_ghost[i*(d_num_species + 3) + d_num_species]     = u_x_RR - double(2)*dx[0]*dV_dx[d_num_species];
+                                    V_ghost[i*(d_num_species + 3) + d_num_species + 1] = v_x_RR - double(2)*dx[0]*dV_dx[d_num_species + 1];
+                                    V_ghost[i*(d_num_species + 3) + d_num_species + 2] = p_x_RR - double(2)*dx[0]*dV_dx[d_num_species + 2];
+                                }
+                                else if (i == num_ghosts_to_fill - 2)
+                                {
+                                    for (int si = 0; si < d_num_species; si ++)
+                                    {
+                                        V_ghost[i*(d_num_species + 3) + si] = -double(2)*rho_Y_x_RR[si] - double(3)*rho_Y_x_R[si] +
+                                        double(6)*V_ghost[(i + 1)*(d_num_species + 3) + si] + double(6)*dx[0]*dV_dx[si];
+                                    }
+                                    
+                                    V_ghost[i*(d_num_species + 3) + d_num_species] = -double(2)*u_x_RR - double(3)*u_x_R +
+                                        double(6)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species] +
+                                        double(6)*dx[0]*dV_dx[d_num_species];
+                                    
+                                    V_ghost[i*(d_num_species + 3) + d_num_species + 1] = -double(2)*v_x_RR - double(3)*v_x_R +
+                                        double(6)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(6)*dx[0]*dV_dx[d_num_species + 1];
+                                    
+                                    V_ghost[i*(d_num_species + 3) + d_num_species + 2] = -double(2)*p_x_RR - double(3)*p_x_R +
+                                        double(6)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(6)*dx[0]*dV_dx[d_num_species + 2];
+                                }
+                                else if (i == num_ghosts_to_fill - 3)
+                                {
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        V_ghost[i*(d_num_species + 3) + si] = double(3)*rho_Y_x_RR[si] + double(10)*rho_Y_x_R[si] -
+                                            double(18)*V_ghost[(i + 2)*(d_num_species + 3) + si] +
+                                            double(6)*V_ghost[(i + 1)*(d_num_species + 3) + si] -
+                                            double(12)*dx[0]*dV_dx[si];
+                                    
+                                    }
+                                    
+                                    V_ghost[i*(d_num_species + 3) + d_num_species] = double(3)*u_x_RR + double(10)*u_x_R -
+                                        double(18)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species] +
+                                        double(6)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species] -
+                                        double(12)*dx[0]*dV_dx[d_num_species];
+                                    
+                                    V_ghost[i*(d_num_species + 3) + d_num_species + 1] = double(3)*v_x_RR + double(10)*v_x_R -
+                                        double(18)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(6)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 1] -
+                                        double(12)*dx[0]*dV_dx[d_num_species + 1];
+                                    
+                                    V_ghost[i*(d_num_species + 3) + d_num_species + 2] = double(3)*p_x_RR + double(10)*p_x_R -
+                                        double(18)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(6)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 2] -
+                                        double(12)*dx[0]*dV_dx[d_num_species + 2];
+                                }
+                                else if (i == num_ghosts_to_fill - 4)  
+                                {
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        V_ghost[i*(d_num_species + 3) + si] = -double(4)*rho_Y_x_RR[si] -
+                                            double(65)/double(3)*rho_Y_x_R[si] +
+                                            double(40)*V_ghost[(i + 3)*(d_num_species + 3) + si] -
+                                            double(20)*V_ghost[(i + 2)*(d_num_species + 3) + si] +
+                                            double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 3) + si] -
+                                            double(20)*dx[0]*dV_dx[si];
+                                    }
+                                    
+                                    V_ghost[i*(d_num_species + 3) + d_num_species] = -double(4)*u_x_RR -
+                                        double(65)/double(3)*u_x_R +
+                                        double(40)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species] -
+                                        double(20)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species] +
+                                        double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species] -
+                                        double(20)*dx[0]*dV_dx[d_num_species];
+                                    
+                                    V_ghost[i*(d_num_species + 3) + 2] = -double(4)*v_x_RR -
+                                        double(65)/double(3)*v_x_R +
+                                        double(40)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species + 1] -
+                                        double(20)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 1] -
+                                        double(20)*dx[0]*dV_dx[d_num_species + 1];
+                                    
+                                    V_ghost[i*(d_num_species + 3) + 3] = -double(4)*p_x_RR -
+                                        double(65)/double(3)*p_x_R +
+                                        double(40)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species + 2] -
+                                        double(20)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 2] -
+                                        double(20)*dx[0]*dV_dx[d_num_species + 2];
+                                }
+
+                                /*
+                                 * Compute the mixture density.
+                                 */
+                            
+                                double rho_ghost = double(0);
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    rho_ghost += V_ghost[i*(d_num_species + 3) + si];
+                                }
+                                
+                                /*
+                                 * Compute the mass fractions.
+                                 */
+                                
+                                std::vector<double> Y_ghost;
+                                Y_ghost.reserve(d_num_species);
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_ghost.push_back(V_ghost[i*(d_num_species + 3) + si]/rho_ghost);
+                                }
+                                
+                                /*
+                                 * Get the pointers to the mass fractions.
+                                 */
+                                
+                                std::vector<const double*> Y_ghost_ptr;
+                                Y_ghost_ptr.reserve(d_num_species);
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_ghost_ptr.push_back(&Y_ghost[si]);
+                                }
+                                
+                                for(int si=0; si < d_num_species; si++)
+                                {
+                                    Q[si][idx_cell_rho_Y] = V_ghost[i*(d_num_species + 3) + si];
+                                }
+                                
+                                Q[d_num_species][idx_cell_mom]     = rho_ghost*V_ghost[i*(d_num_species + 3) + d_num_species];
+                                Q[d_num_species + 1][idx_cell_mom] = rho_ghost*V_ghost[i*(d_num_species + 3) + d_num_species + 1];
+                                
+                                const double epsilon = d_equation_of_state_mixing_rules->
+                                    getInternalEnergy(
+                                        &rho_ghost,
+                                        &V_ghost[i*(d_num_species + 3) + d_num_species + 2],
+                                        Y_ghost_ptr);
+                                
+                                const double E = rho_ghost*epsilon +
+                                    half*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
+                                        Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom])/
+                                        rho_ghost;
+                                
+                                Q[d_num_species + 2][idx_cell_E] = E;
+                            }
+                        }
+                    }
+                    else if (edge_loc == BDRY_LOC::XHI)
+                    {
+                        TBOX_ERROR("Non-reflecting BC is not implemented at right boundary!");
+                    }
+                    else if (edge_loc == BDRY_LOC::YLO)
+                    {
+                        TBOX_ERROR("Non-reflecting BC is not implemented at bottom boundary!");
+                    }
+                    else if (edge_loc == BDRY_LOC::YHI)
+                    {
+                        TBOX_ERROR("Non-reflecting BC is not implemented at top boundary!");
+                    }
+                    
+                    // Remove edge locations that have boundary conditions identified.                    
                     bdry_edge_locs.erase(std::remove(bdry_edge_locs.begin(), bdry_edge_locs.end(), edge_loc),
                         bdry_edge_locs.end());
                 }
@@ -2207,7 +2847,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
             fill_box_hi_idx = fill_box_hi_idx - interior_box.lower();
             
             if ((bdry_face_conds[face_loc] == BDRY_COND::FLOW_MODEL::ADIABATIC_NO_SLIP) ||
-                (bdry_face_conds[face_loc] == BDRY_COND::FLOW_MODEL::ISOTHERMAL_NO_SLIP))
+                (bdry_face_conds[face_loc] == BDRY_COND::FLOW_MODEL::ISOTHERMAL_NO_SLIP) ||
+                (bdry_face_conds[face_loc] == BDRY_COND::FLOW_MODEL::NONREFLECTING_OUTFLOW))
             {
                 /*
                  * Get the pointers to the conservative variables.
@@ -2813,6 +3454,42 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 Q[d_num_species + 3][idx_cell_E] = E;
                             }
                         }
+                    }
+                    
+                    // Remove face locations that have boundary conditions identified.
+                    bdry_face_locs.erase(std::remove(bdry_face_locs.begin(), bdry_face_locs.end(), face_loc),
+                        bdry_face_locs.end());
+                }
+                else if (bdry_face_conds[face_loc] == BDRY_COND::FLOW_MODEL::NONREFLECTING_OUTFLOW)
+                {
+                    // Follow the method in
+                    // Motheau, Emmanuel, Ann Almgren, and John B. Bell.
+                    // "Navier–stokes characteristic boundary conditions using ghost cells."
+                    // AIAA Journal (2017): 3399-3408.
+                    
+                    if (face_loc == BDRY_LOC::XLO)
+                    {
+                        TBOX_ERROR("Non-reflecting BC is not implemented at left boundary!");
+                    }
+                    else if (face_loc == BDRY_LOC::XHI)
+                    {
+                        TBOX_ERROR("Non-reflecting BC is not implemented at right boundary!");
+                    }
+                    else if (face_loc == BDRY_LOC::YLO)
+                    {
+                        TBOX_ERROR("Non-reflecting BC is not implemented at bottom boundary!");
+                    }
+                    else if (face_loc == BDRY_LOC::YHI)
+                    {
+                        TBOX_ERROR("Non-reflecting BC is not implemented at top boundary!");
+                    }
+                    else if (face_loc == BDRY_LOC::ZLO)
+                    {
+                        TBOX_ERROR("Non-reflecting BC is not implemented at back boundary!");   
+                    }
+                    else if (face_loc == BDRY_LOC::ZHI)
+                    {
+                        TBOX_ERROR("Non-reflecting BC is not implemented at front boundary!");
                     }
                     
                     // Remove face locations that have boundary conditions identified.
@@ -5671,6 +6348,17 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read2dBdryEdges(
                     
                     edge_locs[ei] = BOGUS_BDRY_LOC;
                 }
+                else if (bdry_cond_str == "NONREFLECTING_OUTFLOW")
+                {
+                    edge_conds[s] = BDRY_COND::FLOW_MODEL::NONREFLECTING_OUTFLOW;
+                    
+                    readNonreflectingOutflow(
+                        bdry_loc_db,
+                        bdry_loc_str,
+                        s);
+                    
+                    edge_locs[ei] = BOGUS_BDRY_LOC;
+                }
             } // if (need_data_read)
        } // for (int ei = 0 ...
     } // if (num_per_dirs < 2)
@@ -6747,5 +7435,90 @@ FlowModelBoundaryUtilitiesFourEqnConservative::readIsothermalNoSlip(
         d_bdry_face_isothermal_no_slip_vel[bdry_location_index*3] = data_vel[0];
         d_bdry_face_isothermal_no_slip_vel[bdry_location_index*3 + 1] = data_vel[1];
         d_bdry_face_isothermal_no_slip_vel[bdry_location_index*3 + 2] = data_vel[2];
+    }
+}
+
+
+void
+FlowModelBoundaryUtilitiesFourEqnConservative::readNonreflectingOutflow(
+    const boost::shared_ptr<tbox::Database>& db,
+    std::string& db_name,
+    int bdry_location_index)
+{
+    TBOX_ASSERT(db);
+    TBOX_ASSERT(!db_name.empty());
+
+    double p_t = 0.0;
+    double sigma = 0.25;
+    double beta = 0.0;
+    double length_char = 0.0;
+
+    if (db->keyExists("pressure_target"))
+    {
+        p_t = db->getDouble("pressure_target");
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBoundaryUtilitiesFourEqnConservative::readNonreflectingOutflow()\n"
+            << "'pressure_target' entry missing from '"
+            << db_name
+            << "' input database."
+            << std::endl);
+    }
+
+    if (db->keyExists("sigma"))
+    {
+        sigma = db->getDouble("sigma");
+    }
+
+    if (db->keyExists("beta"))
+    {
+        beta = db->getDouble("beta");
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBoundaryUtilitiesFourEqnConservative::readNonreflectingOutflow()\n"
+            << "'beta' entry missing from '"
+            << db_name
+            << "' input database."
+            << std::endl);
+    }
+
+    if (db->keyExists("length_char"))
+    {
+        length_char = db->getDouble("length_char");
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelBoundaryUtilitiesFourEqnConservative::readNonreflectingOutflow()\n"
+            << "'length_char' entry missing from '"
+            << db_name
+            << "' input database."
+            << std::endl);
+    }
+
+    if (d_dim == tbox::Dimension(1))
+    {
+        d_bdry_node_nonreflecting_outflow_p_t[bdry_location_index]         = p_t;
+        d_bdry_node_nonreflecting_outflow_sigma[bdry_location_index]       = sigma;
+        d_bdry_node_nonreflecting_outflow_beta[bdry_location_index]        = beta;
+        d_bdry_node_nonreflecting_outflow_length_char[bdry_location_index] = length_char;
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        d_bdry_edge_nonreflecting_outflow_p_t[bdry_location_index]         = p_t;
+        d_bdry_edge_nonreflecting_outflow_sigma[bdry_location_index]       = sigma;
+        d_bdry_edge_nonreflecting_outflow_beta[bdry_location_index]        = beta;
+        d_bdry_edge_nonreflecting_outflow_length_char[bdry_location_index] = length_char;
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        d_bdry_face_nonreflecting_outflow_p_t[bdry_location_index]         = p_t;
+        d_bdry_face_nonreflecting_outflow_sigma[bdry_location_index]       = sigma;
+        d_bdry_face_nonreflecting_outflow_beta[bdry_location_index]        = beta;
+        d_bdry_face_nonreflecting_outflow_length_char[bdry_location_index] = length_char;
     }
 }

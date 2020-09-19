@@ -234,6 +234,12 @@ class FlowModelBoundaryUtilitiesFourEqnConservative: public FlowModelBoundaryUti
             std::string& db_name,
             int bdry_location_index);
         
+        void
+        readNonreflectingOutflow(
+            const boost::shared_ptr<tbox::Database>& db,
+            std::string& db_name,
+            int bdry_location_index);
+        
         /*
          * Vectors of node (1D), edge (2D) or face (3D) boundary values for ADIABATIC_NO_SLIP case.
          */
@@ -251,6 +257,21 @@ class FlowModelBoundaryUtilitiesFourEqnConservative: public FlowModelBoundaryUti
         std::vector<double> d_bdry_edge_isothermal_no_slip_vel;
         std::vector<double> d_bdry_face_isothermal_no_slip_vel;
         
+        /*
+         * Vectors of node (1D), edge (2D) or face (3D) boundary values for NONREFLECTING_OUTFLOW case.
+         */
+         std::vector<double> d_bdry_node_nonreflecting_outflow_p_t;
+         std::vector<double> d_bdry_edge_nonreflecting_outflow_p_t;
+         std::vector<double> d_bdry_face_nonreflecting_outflow_p_t;
+         std::vector<double> d_bdry_node_nonreflecting_outflow_sigma;
+         std::vector<double> d_bdry_edge_nonreflecting_outflow_sigma;
+         std::vector<double> d_bdry_face_nonreflecting_outflow_sigma;
+         std::vector<double> d_bdry_node_nonreflecting_outflow_beta;
+         std::vector<double> d_bdry_edge_nonreflecting_outflow_beta;
+         std::vector<double> d_bdry_face_nonreflecting_outflow_beta;
+         std::vector<double> d_bdry_node_nonreflecting_outflow_length_char;
+         std::vector<double> d_bdry_edge_nonreflecting_outflow_length_char;
+         std::vector<double> d_bdry_face_nonreflecting_outflow_length_char;
 };
 
 #endif /* FLOW_MODEL_BOUNDARY_UTILITIES_FOUR_EQN_CONSERVATIVE_HPP */
