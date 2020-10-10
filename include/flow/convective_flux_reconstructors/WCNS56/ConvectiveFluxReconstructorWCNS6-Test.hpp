@@ -7,8 +7,6 @@
 
 #include "SAMRAI/pdat/SideVariable.h"
 
-#include "boost/multi_array.hpp"
-
 class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
 {
     public:

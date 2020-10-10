@@ -1,7 +1,6 @@
 #include "flow/refinement_taggers/ValueTagger.hpp"
 
 #include <algorithm>
-#include "boost/lexical_cast.hpp"
 
 // #define HAMERS_PLOTTING_VALUE_TAGGER
 
@@ -392,7 +391,7 @@ ValueTagger::registerValueTaggerVariables(
                 d_value_tagger_variable_mass_fractions.push_back(
                     boost::make_shared<pdat::CellVariable<double> >(
                         d_dim,
-                        "Value tagger mass fraction "  + boost::lexical_cast<std::string>(si),
+                        "Value tagger mass fraction " + std::to_string(si),
                         1));
             }
             

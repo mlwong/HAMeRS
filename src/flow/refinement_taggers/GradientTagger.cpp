@@ -1,7 +1,5 @@
 #include "flow/refinement_taggers/GradientTagger.hpp"
 
-#include "boost/lexical_cast.hpp"
-
 // #define HAMERS_PLOTTING_GRADIENT_TAGGER
 
 #define EPSILON HAMERS_EPSILON

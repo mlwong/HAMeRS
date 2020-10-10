@@ -5,8 +5,6 @@
 #include "util/derivatives/DerivativeFirstOrder.hpp"
 #include "util/Directions.hpp"
 
-#include "boost/multi_array.hpp"
-
 class ConvectiveFluxReconstructorWCNS56: public ConvectiveFluxReconstructor
 {
     public:

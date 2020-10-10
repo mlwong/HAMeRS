@@ -1,7 +1,6 @@
 #include "flow/refinement_taggers/MultiresolutionTagger.hpp"
 
 #include <algorithm>
-#include "boost/lexical_cast.hpp"
 
 // #define HAMERS_PLOTTING_MULTIRESOLUTION_TAGGER
 
@@ -498,7 +497,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                             boost::make_shared<pdat::CellVariable<double> >(
                                 d_dim,
                                 "Harten wavelet coefficient of density at level " +
-                                    boost::lexical_cast<std::string>(li),
+                                    std::to_string(li),
                                 1));
                         
                         if (d_Harten_wavelet_uses_global_tol[vi])
@@ -512,7 +511,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                 boost::make_shared<pdat::CellVariable<double> >(
                                     d_dim,
                                     "Harten local mean of density at level " +
-                                        boost::lexical_cast<std::string>(li),
+                                        std::to_string(li),
                                     1));
                         }
                     }
@@ -535,7 +534,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                             boost::make_shared<pdat::CellVariable<double> >(
                                 d_dim,
                                 "Harten wavelet coefficient of total energy at level " +
-                                    boost::lexical_cast<std::string>(li),
+                                    std::to_string(li),
                                 1));
                         
                         if (d_Harten_wavelet_uses_global_tol[vi])
@@ -549,7 +548,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                 boost::make_shared<pdat::CellVariable<double> >(
                                     d_dim,
                                     "Harten local mean of total energy at level " +
-                                        boost::lexical_cast<std::string>(li),
+                                        std::to_string(li),
                                     1));
                         }
                     }
@@ -572,7 +571,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                             boost::make_shared<pdat::CellVariable<double> >(
                                 d_dim,
                                 "Harten wavelet coefficient of pressure at level " +
-                                    boost::lexical_cast<std::string>(li),
+                                    std::to_string(li),
                                 1));
                         
                         if (d_Harten_wavelet_uses_global_tol[vi])
@@ -586,7 +585,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                 boost::make_shared<pdat::CellVariable<double> >(
                                     d_dim,
                                     "Harten local mean of pressure at level " +
-                                        boost::lexical_cast<std::string>(li),
+                                        std::to_string(li),
                                     1));
                         }
                     }
@@ -774,7 +773,7 @@ MultiresolutionTagger::registerPlotQuantities(
                     {
                         visit_writer->registerPlotQuantity(
                             "Harten wavelet coefficient of density at level " +
-                                boost::lexical_cast<std::string>(li),
+                                std::to_string(li),
                             "SCALAR",
                             vardb->mapVariableAndContextToIndex(
                                d_Harten_wavelet_coeffs_density[li],
@@ -797,7 +796,7 @@ MultiresolutionTagger::registerPlotQuantities(
                     {
                         visit_writer->registerPlotQuantity(
                             "Harten wavelet coefficient of total energy at level " +
-                                boost::lexical_cast<std::string>(li),
+                                std::to_string(li),
                             "SCALAR",
                             vardb->mapVariableAndContextToIndex(
                                d_Harten_wavelet_coeffs_total_energy[li],
@@ -820,7 +819,7 @@ MultiresolutionTagger::registerPlotQuantities(
                     {
                         visit_writer->registerPlotQuantity(
                             "Harten wavelet coefficient of pressure at level " +
-                                boost::lexical_cast<std::string>(li),
+                                std::to_string(li),
                             "SCALAR",
                             vardb->mapVariableAndContextToIndex(
                                d_Harten_wavelet_coeffs_pressure[li],

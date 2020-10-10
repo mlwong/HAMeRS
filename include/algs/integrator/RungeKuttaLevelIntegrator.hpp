@@ -41,7 +41,6 @@
 #endif
 
 #include "boost/shared_ptr.hpp"
-#include "boost/multi_array.hpp"
 #include <iostream>
 #include <list>
 #include <string>
