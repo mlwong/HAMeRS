@@ -3,12 +3,13 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "flow/flow_models/FlowModel.hpp"
 #include "util/derivatives/DerivativeFirstOrder.hpp"
 
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 
-#include "boost/weak_ptr.hpp"
 #include <string>
 
 class FlowModel;

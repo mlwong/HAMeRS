@@ -3,6 +3,8 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "flow/flow_models/FlowModel.hpp"
 
 #include "util/Directions.hpp"
@@ -11,7 +13,6 @@
 #include "SAMRAI/pdat/CellData.h"
 #include "SAMRAI/pdat/SideData.h"
 
-#include "boost/weak_ptr.hpp"
 #include <string>
 #include <unordered_map>
 

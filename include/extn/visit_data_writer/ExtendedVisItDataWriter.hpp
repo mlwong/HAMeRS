@@ -18,6 +18,8 @@
  */
 #ifdef HAVE_HDF5
 
+#include "HAMeRS_memory.hpp"
+
 #include "SAMRAI/appu/VisDerivedDataStrategy.h"
 #include "SAMRAI/appu/VisMaterialsDataStrategy.h"
 #include "SAMRAI/hier/PatchData.h"
@@ -29,7 +31,6 @@
 #include "SAMRAI/tbox/Database.h"
 #include "SAMRAI/tbox/SAMRAI_MPI.h"
 
-#include "boost/shared_ptr.hpp"
 #include <string>
 #include <list>
 #include <vector>

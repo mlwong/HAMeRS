@@ -1,5 +1,7 @@
 // Headers for application-specific algorithm/data structure object
 
+#include "HAMeRS_memory.hpp"
+
 #include "algs/integrator/ExtendedTagAndInitialize.hpp"
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
 #include "apps/Euler/Euler.hpp"
@@ -41,7 +43,6 @@
 #include "SAMRAI/mesh/TreeLoadBalancer.h"
 #include "SAMRAI/mesh/CascadePartitioner.h"
 
-#include "boost/shared_ptr.hpp"
 #include <cmath>
 #include <fstream>
 #include <stdio.h>

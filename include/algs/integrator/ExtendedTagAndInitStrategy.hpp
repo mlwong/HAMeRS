@@ -14,10 +14,10 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "SAMRAI/hier/PatchHierarchy.h"
 #include "SAMRAI/hier/PatchLevel.h"
-
-#include "boost/shared_ptr.hpp"
 
 using namespace SAMRAI;
 

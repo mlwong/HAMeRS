@@ -3,6 +3,8 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
 #include "algs/patch_strategy/RungeKuttaPatchStrategy.hpp"
 #include "apps/Navier-Stokes/NavierStokesBoundaryConditions.hpp"
@@ -32,7 +34,6 @@
 #include "SAMRAI/tbox/MessageStream.h"
 #include "SAMRAI/tbox/Serializable.h"
 
-#include "boost/shared_ptr.hpp"
 #include <string>
 #include <vector>
 

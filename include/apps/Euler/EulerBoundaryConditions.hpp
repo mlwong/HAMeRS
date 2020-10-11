@@ -3,13 +3,14 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "flow/flow_models/FlowModels.hpp"
 #include "apps/Euler/EulerSpecialBoundaryConditions.hpp"
 #include "util/basic_boundary_conditions/BasicBoundaryConditions.hpp"
 #include "util/basic_boundary_conditions/BoundaryUtilityStrategy.hpp"
 #include "util/basic_boundary_conditions/CartesianBoundaryDefines.hpp"
 
-#include "boost/shared_ptr.hpp"
 #include <map>
 #include <string>
 #include <vector>

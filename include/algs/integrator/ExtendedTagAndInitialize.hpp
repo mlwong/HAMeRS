@@ -15,12 +15,13 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.hpp"
 #include "algs/integrator/ExtendedTagAndInitStrategy.hpp"
 
 #include "SAMRAI/mesh/TagAndInitializeStrategy.h"
 
-#include "boost/shared_ptr.hpp"
 #include <vector>
 
 using namespace SAMRAI;

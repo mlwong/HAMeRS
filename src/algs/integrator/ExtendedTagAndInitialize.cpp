@@ -12,6 +12,8 @@
 
 #include "algs/integrator/ExtendedTagAndInitialize.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "SAMRAI/hier/Box.h"
 #include "SAMRAI/hier/BoxContainer.h"
 #include "SAMRAI/hier/OverlapConnectorAlgorithm.h"
@@ -21,8 +23,6 @@
 #include "SAMRAI/tbox/MathUtilities.h"
 #include "SAMRAI/tbox/Utilities.h"
 
-#include "boost/shared_ptr.hpp"
-#include "boost/make_shared.hpp"
 #include <stdio.h>
 
 /*

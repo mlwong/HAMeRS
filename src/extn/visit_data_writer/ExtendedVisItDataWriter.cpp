@@ -9,6 +9,8 @@
 
 #ifdef HAVE_HDF5
 
+#include "HAMeRS_memory.hpp"
+
 #include "SAMRAI/tbox/TimerManager.h"
 #include "SAMRAI/hier/BoxLevelConnectorUtils.h"
 #include "SAMRAI/hier/PatchLevel.h"
@@ -18,7 +20,6 @@
 #include "SAMRAI/pdat/NodeDataFactory.h"
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 
-#include "boost/make_shared.hpp"
 #include <cstring>
 #include <ctime>
 #include <vector>

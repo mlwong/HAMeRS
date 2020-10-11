@@ -7,11 +7,11 @@
  ************************************************************************/
 #include "extn/patch_hierarchies/ExtendedFlattenedHierarchy.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "SAMRAI/hier/Connector.h"
 #include "SAMRAI/hier/HierarchyNeighbors.h"
 #include "SAMRAI/hier/RealBoxConstIterator.h"
-
-#include "boost/make_shared.hpp"
 
 /*
  ***************************************************************************

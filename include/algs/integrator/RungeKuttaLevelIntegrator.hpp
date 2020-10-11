@@ -16,6 +16,8 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "algs/integrator/ExtendedTagAndInitialize.hpp"
 #include "algs/patch_strategy/RungeKuttaPatchStrategy.hpp"
 
@@ -40,7 +42,6 @@
 #include "SAMRAI/tbox/Statistician.h"
 #endif
 
-#include "boost/shared_ptr.hpp"
 #include <iostream>
 #include <list>
 #include <string>

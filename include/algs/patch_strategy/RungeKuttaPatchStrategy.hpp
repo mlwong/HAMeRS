@@ -16,6 +16,8 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "SAMRAI/hier/IntVector.h"
 #include "SAMRAI/hier/PatchData.h"
 #include "SAMRAI/hier/PatchLevel.h"
@@ -24,8 +26,6 @@
 #include "SAMRAI/mesh/GriddingAlgorithm.h"
 #include "SAMRAI/xfer/CoarsenPatchStrategy.h"
 #include "SAMRAI/xfer/RefinePatchStrategy.h"
-
-#include "boost/shared_ptr.hpp"
 
 class RungeKuttaLevelIntegrator;
 

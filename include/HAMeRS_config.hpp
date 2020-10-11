@@ -4,13 +4,13 @@
 #include "SAMRAI/SAMRAI_config.h"
 
 /* Enable SIMD */
-#cmakedefine HAMERS_ENABLE_SIMD
+/* #undef HAMERS_ENABLE_SIMD */
 
 /* Enable assertion checking */
-#cmakedefine HAMERS_DEBUG_CHECK_ASSERTIONS
+#define HAMERS_DEBUG_CHECK_ASSERTIONS
 
 /* Enable HAMeRS developer assertion checking */
-#cmakedefine HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+#define HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
 
 /* Define epsilon to prevent divisoin by zero */
 #define HAMERS_EPSILON 1.0e-40

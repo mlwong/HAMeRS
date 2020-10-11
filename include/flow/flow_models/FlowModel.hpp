@@ -3,6 +3,8 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
 #include "extn/visit_data_writer/ExtendedVisItDataWriter.hpp"
 #include "flow/flow_models/FlowModelBasicUtilities.hpp"
@@ -22,8 +24,6 @@
 #include "SAMRAI/pdat/CellVariable.h"
 #include "SAMRAI/pdat/SideData.h"
 
-#include "boost/enable_shared_from_this.hpp"
-#include "boost/shared_ptr.hpp"
 #include <string>
 #include <unordered_map>
 #include <vector>

@@ -14,6 +14,8 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "util/basic_boundary_conditions/BoundaryUtilityStrategy.hpp"
 
 #include "SAMRAI/pdat/CellData.h"
@@ -23,7 +25,6 @@
 #include "SAMRAI/hier/Patch.h"
 #include "SAMRAI/tbox/Database.h"
 
-#include "boost/shared_ptr.hpp"
 #include <string>
 #include <vector>
 
