@@ -170,7 +170,7 @@ struct BasicCartesianBoundaryUtilities3
         static void
         getFromInput(
             BoundaryUtilityStrategy* bdry_strategy,
-            const boost::shared_ptr<tbox::Database>& input_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db,
             const std::vector<int>& face_locs,
             const std::vector<int>& edge_locs,
             const std::vector<int>& node_locs,
@@ -209,7 +209,7 @@ struct BasicCartesianBoundaryUtilities3
         static void
         fillFaceBoundaryData(
             const std::string& var_name,
-            const boost::shared_ptr<pdat::CellData<double> >& var_data,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& var_data,
             const hier::Patch& patch,
             const std::vector<int>& bdry_face_locs,
             const std::vector<int>& bdry_face_conds,
@@ -246,7 +246,7 @@ struct BasicCartesianBoundaryUtilities3
         static void
         fillEdgeBoundaryData(
             const std::string& var_name,
-            const boost::shared_ptr<pdat::CellData<double> >& var_data,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& var_data,
             const hier::Patch& patch,
             const std::vector<int>& bdry_edge_locs,
             const std::vector<int>& bdry_edge_conds,
@@ -283,7 +283,7 @@ struct BasicCartesianBoundaryUtilities3
         static void
         fillNodeBoundaryData(
             const std::string& var_name,
-            const boost::shared_ptr<pdat::CellData<double> >& var_data,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& var_data,
             const hier::Patch& patch,
             const std::vector<int>& bdry_node_locs,
             const std::vector<int>& bdry_node_conds,
@@ -366,14 +366,14 @@ struct BasicCartesianBoundaryUtilities3
         static void
         read3dBdryFaces(
             BoundaryUtilityStrategy* bdry_strategy,
-            const boost::shared_ptr<tbox::Database>& input_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db,
             const std::vector<int>& face_locs,
             std::vector<int>& face_conds,
             const hier::IntVector& periodic);
         
         static void
         read3dBdryEdges(
-            const boost::shared_ptr<tbox::Database>& input_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db,
             const std::vector<int>& edge_locs,
             const std::vector<int>& face_conds,
             std::vector<int>& edge_conds,
@@ -381,7 +381,7 @@ struct BasicCartesianBoundaryUtilities3
         
         static void
         read3dBdryNodes(
-            const boost::shared_ptr<tbox::Database>& input_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db,
             const std::vector<int>& node_locs,
             const std::vector<int>& face_conds,
             std::vector<int>& node_conds,

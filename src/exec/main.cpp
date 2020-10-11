@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
      * Create input database and parse all data in input file.
      */
     
-    boost::shared_ptr<tbox::InputDatabase> input_db(new tbox::InputDatabase("input_db"));
+    HAMERS_SHARED_PTR<tbox::InputDatabase> input_db(new tbox::InputDatabase("input_db"));
     tbox::InputManager::getManager()->parseInputFile(input_filename, input_db);
     
     /*
@@ -219,7 +219,7 @@ int main(int argc, char *argv[])
     
     if (input_db->keyExists("GlobalInputs"))
     {
-        boost::shared_ptr<tbox::Database> global_db(input_db->getDatabase("GlobalInputs"));
+        HAMERS_SHARED_PTR<tbox::Database> global_db(input_db->getDatabase("GlobalInputs"));
         
         if (global_db->keyExists("call_abort_in_serial_instead_of_exit"))
         {
@@ -235,7 +235,7 @@ int main(int argc, char *argv[])
      * restart interval is non-zero, create a restart database.
      */
     
-    boost::shared_ptr<tbox::Database> main_db(input_db->getDatabase("Main"));
+    HAMERS_SHARED_PTR<tbox::Database> main_db(input_db->getDatabase("Main"));
     
     const tbox::Dimension dim(static_cast<unsigned short>(main_db->getInteger("dim")));
     
@@ -427,7 +427,7 @@ int main(int argc, char *argv[])
      * If SILO is present then use SILO as the file storage format
      * for this example, otherwise it will default to HDF5.
      */
-    boost::shared_ptr<tbox::SiloDatabaseFactory> silo_database_factory(
+    HAMERS_SHARED_PTR<tbox::SiloDatabaseFactory> silo_database_factory(
         new tbox::SiloDatabaseFactory());
     restart_manager->setDatabaseFactory(silo_database_factory);
 #endif
@@ -459,13 +459,13 @@ int main(int argc, char *argv[])
      * and the roles they play in this application, see comments at top of file.
      */
        
-    boost::shared_ptr<geom::CartesianGridGeometry> grid_geometry(
+    HAMERS_SHARED_PTR<geom::CartesianGridGeometry> grid_geometry(
         new geom::CartesianGridGeometry(
             dim,
             "Cartesian grid geometry",
             input_db->getDatabase("CartesianGeometry")));
     
-    boost::shared_ptr<hier::PatchHierarchy> patch_hierarchy(
+    HAMERS_SHARED_PTR<hier::PatchHierarchy> patch_hierarchy(
         new hier::PatchHierarchy(
             "PatchHierarchy",
             grid_geometry,
@@ -495,7 +495,7 @@ int main(int argc, char *argv[])
     Euler* Euler_app = nullptr;
     NavierStokes* Navier_Stokes_app = nullptr;
     
-    boost::shared_ptr<RungeKuttaLevelIntegrator> RK_level_integrator;
+    HAMERS_SHARED_PTR<RungeKuttaLevelIntegrator> RK_level_integrator;
     
     switch (app_label)
     {
@@ -536,7 +536,7 @@ int main(int argc, char *argv[])
         }
     }
     
-    boost::shared_ptr<ExtendedTagAndInitialize> error_detector(
+    HAMERS_SHARED_PTR<ExtendedTagAndInitialize> error_detector(
         new ExtendedTagAndInitialize(
             "ExtendedTagAndInitialize",
             RK_level_integrator.get(),
@@ -549,22 +549,22 @@ int main(int argc, char *argv[])
     const std::string clustering_type =
         main_db->getStringWithDefault("clustering_type", "BergerRigoutsos");
     
-    boost::shared_ptr<mesh::BoxGeneratorStrategy> box_generator;
+    HAMERS_SHARED_PTR<mesh::BoxGeneratorStrategy> box_generator;
     
     if (clustering_type == "BergerRigoutsos")
     {
-        boost::shared_ptr<tbox::Database> abr_db(
-            input_db->getDatabaseWithDefault("BergerRigoutsos", boost::shared_ptr<tbox::Database>()));
+        HAMERS_SHARED_PTR<tbox::Database> abr_db(
+            input_db->getDatabaseWithDefault("BergerRigoutsos", HAMERS_SHARED_PTR<tbox::Database>()));
         
-        boost::shared_ptr<mesh::BoxGeneratorStrategy> berger_rigoutsos(new mesh::BergerRigoutsos(dim, abr_db));
+        HAMERS_SHARED_PTR<mesh::BoxGeneratorStrategy> berger_rigoutsos(new mesh::BergerRigoutsos(dim, abr_db));
         box_generator = berger_rigoutsos;
     }
     else if (clustering_type == "TileClustering")
     {
-        boost::shared_ptr<tbox::Database> tc_db(
-            input_db->getDatabaseWithDefault("TileClustering", boost::shared_ptr<tbox::Database>()));
+        HAMERS_SHARED_PTR<tbox::Database> tc_db(
+            input_db->getDatabaseWithDefault("TileClustering", HAMERS_SHARED_PTR<tbox::Database>()));
         
-        boost::shared_ptr<mesh::BoxGeneratorStrategy> tile_clustering(new mesh::TileClustering(dim, tc_db));
+        HAMERS_SHARED_PTR<mesh::BoxGeneratorStrategy> tile_clustering(new mesh::TileClustering(dim, tc_db));
         box_generator = tile_clustering;
     }
     
@@ -572,29 +572,29 @@ int main(int argc, char *argv[])
      * Set up the load balancers.
      */
     
-    boost::shared_ptr<mesh::LoadBalanceStrategy> load_balancer;
-    boost::shared_ptr<mesh::LoadBalanceStrategy> load_balancer0;
+    HAMERS_SHARED_PTR<mesh::LoadBalanceStrategy> load_balancer;
+    HAMERS_SHARED_PTR<mesh::LoadBalanceStrategy> load_balancer0;
     
     const std::string partitioner_type =
         main_db->getStringWithDefault("partitioner_type", "CascadePartitioner");
     
     if (partitioner_type == "TreeLoadBalancer")
     {
-        boost::shared_ptr<mesh::TreeLoadBalancer> tree_load_balancer(
+        HAMERS_SHARED_PTR<mesh::TreeLoadBalancer> tree_load_balancer(
             new mesh::TreeLoadBalancer(
                 dim,
                 "mesh::TreeLoadBalancer",
-                input_db->getDatabaseWithDefault("TreeLoadBalancer", boost::shared_ptr<tbox::Database>()),
-                boost::shared_ptr<tbox::RankTreeStrategy>(new tbox::BalancedDepthFirstTree)));
+                input_db->getDatabaseWithDefault("TreeLoadBalancer", HAMERS_SHARED_PTR<tbox::Database>()),
+                HAMERS_SHARED_PTR<tbox::RankTreeStrategy>(new tbox::BalancedDepthFirstTree)));
         
         tree_load_balancer->setSAMRAI_MPI(tbox::SAMRAI_MPI::getSAMRAIWorld());
         
-        boost::shared_ptr<mesh::TreeLoadBalancer> tree_load_balancer0(
+        HAMERS_SHARED_PTR<mesh::TreeLoadBalancer> tree_load_balancer0(
             new mesh::TreeLoadBalancer(
                 dim,
                 "mesh::TreeLoadBalancer0",
-                input_db->getDatabaseWithDefault("TreeLoadBalancer", boost::shared_ptr<tbox::Database>()),
-                boost::shared_ptr<tbox::RankTreeStrategy>(new tbox::BalancedDepthFirstTree)));
+                input_db->getDatabaseWithDefault("TreeLoadBalancer", HAMERS_SHARED_PTR<tbox::Database>()),
+                HAMERS_SHARED_PTR<tbox::RankTreeStrategy>(new tbox::BalancedDepthFirstTree)));
         
         tree_load_balancer0->setSAMRAI_MPI(tbox::SAMRAI_MPI::getSAMRAIWorld());
         
@@ -603,19 +603,19 @@ int main(int argc, char *argv[])
     }
     else if (partitioner_type == "CascadePartitioner")
     {
-        boost::shared_ptr<mesh::CascadePartitioner> cascade_partitioner(
+        HAMERS_SHARED_PTR<mesh::CascadePartitioner> cascade_partitioner(
             new mesh::CascadePartitioner(
                 dim,
                 "mesh::CascadePartitioner",
-                input_db->getDatabaseWithDefault("CascadePartitioner", boost::shared_ptr<tbox::Database>())));
+                input_db->getDatabaseWithDefault("CascadePartitioner", HAMERS_SHARED_PTR<tbox::Database>())));
         
         cascade_partitioner->setSAMRAI_MPI(tbox::SAMRAI_MPI::getSAMRAIWorld());
         
-        boost::shared_ptr<mesh::CascadePartitioner> cascade_partitioner0(
+        HAMERS_SHARED_PTR<mesh::CascadePartitioner> cascade_partitioner0(
             new mesh::CascadePartitioner(
                 dim,
                 "mesh::CascadePartitioner0",
-                input_db->getDatabaseWithDefault("CascadePartitioner", boost::shared_ptr<tbox::Database>())));
+                input_db->getDatabaseWithDefault("CascadePartitioner", HAMERS_SHARED_PTR<tbox::Database>())));
         
         cascade_partitioner0->setSAMRAI_MPI(tbox::SAMRAI_MPI::getSAMRAIWorld());
         
@@ -624,11 +624,11 @@ int main(int argc, char *argv[])
     }
     else if (partitioner_type == "ChopAndPackLoadBalancer")
     {
-        boost::shared_ptr<mesh::ChopAndPackLoadBalancer> cap_load_balancer(
+        HAMERS_SHARED_PTR<mesh::ChopAndPackLoadBalancer> cap_load_balancer(
             new mesh::ChopAndPackLoadBalancer(
                 dim,
                 "mesh::ChopAndPackLoadBalancer",
-                input_db->getDatabaseWithDefault("ChopAndPackLoadBalancer", boost::shared_ptr<tbox::Database>())));
+                input_db->getDatabaseWithDefault("ChopAndPackLoadBalancer", HAMERS_SHARED_PTR<tbox::Database>())));
         
         load_balancer = cap_load_balancer;
         
@@ -637,18 +637,18 @@ int main(int argc, char *argv[])
          * Work around by using the CascadePartitioner for L0.
          */
         
-        boost::shared_ptr<mesh::CascadePartitioner> cascade_partitioner0(
+        HAMERS_SHARED_PTR<mesh::CascadePartitioner> cascade_partitioner0(
             new mesh::CascadePartitioner(
                 dim,
                 "mesh::CascadePartitioner0",
-                input_db->getDatabaseWithDefault("CascadePartitioner", boost::shared_ptr<tbox::Database>())));
+                input_db->getDatabaseWithDefault("CascadePartitioner", HAMERS_SHARED_PTR<tbox::Database>())));
         
         cascade_partitioner0->setSAMRAI_MPI(tbox::SAMRAI_MPI::getSAMRAIWorld());
         
         load_balancer0 = cascade_partitioner0;
     }
     
-    boost::shared_ptr<mesh::GriddingAlgorithm> gridding_algorithm(
+    HAMERS_SHARED_PTR<mesh::GriddingAlgorithm> gridding_algorithm(
         new mesh::GriddingAlgorithm(
             patch_hierarchy,
             "GriddingAlgorithm",
@@ -658,7 +658,7 @@ int main(int argc, char *argv[])
             load_balancer,
             load_balancer0));
     
-    boost::shared_ptr<algs::TimeRefinementIntegrator> time_integrator(
+    HAMERS_SHARED_PTR<algs::TimeRefinementIntegrator> time_integrator(
         new algs::TimeRefinementIntegrator(
             "TimeRefinementIntegrator",
             input_db->getDatabase("TimeRefinementIntegrator"),
@@ -673,7 +673,7 @@ int main(int argc, char *argv[])
      * is not necessary.
      */
 #ifdef HAVE_HDF5
-    boost::shared_ptr<ExtendedVisItDataWriter> visit_data_writer;
+    HAMERS_SHARED_PTR<ExtendedVisItDataWriter> visit_data_writer;
     
     switch (app_label)
     {
@@ -753,13 +753,13 @@ int main(int argc, char *argv[])
     /*
      * Create timers for measuring I/O.
      */
-    boost::shared_ptr<tbox::Timer> t_write_viz(
+    HAMERS_SHARED_PTR<tbox::Timer> t_write_viz(
         tbox::TimerManager::getManager()->getTimer("apps::main::write_viz"));
     
-    boost::shared_ptr<tbox::Timer> t_write_stat(
+    HAMERS_SHARED_PTR<tbox::Timer> t_write_stat(
         tbox::TimerManager::getManager()->getTimer("apps::main::write_stat"));
     
-    boost::shared_ptr<tbox::Timer> t_write_restart(
+    HAMERS_SHARED_PTR<tbox::Timer> t_write_restart(
         tbox::TimerManager::getManager()->getTimer(
             "apps::main::write_restart"));
     

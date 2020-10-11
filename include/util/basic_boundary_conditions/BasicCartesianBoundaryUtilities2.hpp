@@ -158,7 +158,7 @@ struct BasicCartesianBoundaryUtilities2
         static void
         getFromInput(
             BoundaryUtilityStrategy* bdry_strategy,
-            const boost::shared_ptr<tbox::Database>& input_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db,
             const std::vector<int>& edge_locs,
             const std::vector<int>& node_locs,
             std::vector<int>& edge_conds,
@@ -195,7 +195,7 @@ struct BasicCartesianBoundaryUtilities2
         static void
         fillEdgeBoundaryData(
             const std::string& var_name,
-            const boost::shared_ptr<pdat::CellData<double> >& var_data,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& var_data,
             const hier::Patch& patch,
             const std::vector<int>& bdry_edge_locs,
             const std::vector<int>& bdry_edge_conds,
@@ -232,7 +232,7 @@ struct BasicCartesianBoundaryUtilities2
         static void
         fillNodeBoundaryData(
             const std::string& var_name,
-            const boost::shared_ptr<pdat::CellData<double> >& var_data,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& var_data,
             const hier::Patch& patch,
             const std::vector<int>& bdry_node_locs,
             const std::vector<int>& bdry_node_conds,
@@ -272,14 +272,14 @@ struct BasicCartesianBoundaryUtilities2
         static void
         read2dBdryEdges(
             BoundaryUtilityStrategy* bdry_strategy,
-            const boost::shared_ptr<tbox::Database>& input_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db,
             const std::vector<int>& edge_locs,
             std::vector<int>& edge_conds,
             const hier::IntVector& periodic);
         
         static void
         read2dBdryNodes(
-            const boost::shared_ptr<tbox::Database>& input_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db,
             const std::vector<int>& node_locs,
             const std::vector<int>& edge_conds,
             std::vector<int>& node_conds,

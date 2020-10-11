@@ -52,8 +52,8 @@ EquationOfStateMixingRules::getMixtureMolecularWeight(
  */
 void
 EquationOfStateMixingRules::computeMixtureMolecularWeight(
-    boost::shared_ptr<pdat::CellData<double> >& data_mixture_molecular_weight,
-    const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mixture_molecular_weight,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -155,8 +155,8 @@ EquationOfStateMixingRules::computeMixtureMolecularWeight(
  */
 void
 EquationOfStateMixingRules::computeMixtureMolecularWeight(
-    boost::shared_ptr<pdat::SideData<double> >& data_mixture_molecular_weight,
-    const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mixture_molecular_weight,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -301,8 +301,8 @@ EquationOfStateMixingRules::getMixtureDensity(
  */
 void
 EquationOfStateMixingRules::computeMixtureDensity(
-    boost::shared_ptr<pdat::CellData<double> >& data_mixture_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_partial_densities,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mixture_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_densities,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -404,8 +404,8 @@ EquationOfStateMixingRules::computeMixtureDensity(
  */
 void
 EquationOfStateMixingRules::computeMixtureDensity(
-    boost::shared_ptr<pdat::SideData<double> >& data_mixture_density,
-    const boost::shared_ptr<pdat::SideData<double> >& data_partial_densities,
+    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mixture_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_densities,
     int side_normal,
     const hier::Box& domain) const
 {

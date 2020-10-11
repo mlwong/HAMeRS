@@ -20,10 +20,10 @@ class DiffusiveFluxReconstructorManager
         DiffusiveFluxReconstructorManager(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_eqn,
-            const boost::shared_ptr<FlowModel>& flow_model,
-            const boost::shared_ptr<tbox::Database>& diffusive_flux_reconstructor_db,
+            const HAMERS_SHARED_PTR<FlowModel>& flow_model,
+            const HAMERS_SHARED_PTR<tbox::Database>& diffusive_flux_reconstructor_db,
             const std::string& diffusive_flux_reconstructor_str);
         
         /*
@@ -38,7 +38,7 @@ class DiffusiveFluxReconstructorManager
         /*
          * Get the diffusive flux reconstructor.
          */
-        boost::shared_ptr<DiffusiveFluxReconstructor>
+        HAMERS_SHARED_PTR<DiffusiveFluxReconstructor>
         getDiffusiveFluxReconstructor() const
         {
             return d_diff_flux_reconstructor;
@@ -62,9 +62,9 @@ class DiffusiveFluxReconstructorManager
         DIFFUSIVE_FLUX_RECONSTRUCTOR::TYPE d_diffusive_flux_reconstructor_type;
         
         /*
-         * boost::shared_ptr to the diffusive flux reconstructor.
+         * HAMERS_SHARED_PTR to the diffusive flux reconstructor.
          */
-        boost::shared_ptr<DiffusiveFluxReconstructor> d_diff_flux_reconstructor;
+        HAMERS_SHARED_PTR<DiffusiveFluxReconstructor> d_diff_flux_reconstructor;
         
 };
 

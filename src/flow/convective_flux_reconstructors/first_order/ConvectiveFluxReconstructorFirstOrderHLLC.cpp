@@ -5,10 +5,10 @@
 ConvectiveFluxReconstructorFirstOrderHLLC::ConvectiveFluxReconstructorFirstOrderHLLC(
     const std::string& object_name,
     const tbox::Dimension& dim,
-    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+    const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_eqn,
-    const boost::shared_ptr<FlowModel>& flow_model,
-    const boost::shared_ptr<tbox::Database>& convective_flux_reconstructor_db):
+    const HAMERS_SHARED_PTR<FlowModel>& flow_model,
+    const HAMERS_SHARED_PTR<tbox::Database>& convective_flux_reconstructor_db):
         ConvectiveFluxReconstructor(
             object_name,
             dim,
@@ -57,7 +57,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::printClassData(
  */
 void
 ConvectiveFluxReconstructorFirstOrderHLLC::putToRestart(
-   const boost::shared_ptr<tbox::Database>& restart_db) const
+   const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
     restart_db->putString("d_shock_capturing_scheme", "FIRST_ORDER_HLLC");
 }
@@ -69,9 +69,9 @@ ConvectiveFluxReconstructorFirstOrderHLLC::putToRestart(
 void
 ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch(
     hier::Patch& patch,
-    const boost::shared_ptr<pdat::SideVariable<double> >& variable_convective_flux,
-    const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
-    const boost::shared_ptr<hier::VariableContext>& data_context,
+    const HAMERS_SHARED_PTR<pdat::SideVariable<double> >& variable_convective_flux,
+    const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double time,
     const double dt,
     const int RK_step_number)
@@ -80,7 +80,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
     NULL_USE(RK_step_number);
     
     d_flow_model->setupRiemannSolver();
-    boost::shared_ptr<FlowModelRiemannSolver> riemann_solver = d_flow_model->getFlowModelRiemannSolver();
+    HAMERS_SHARED_PTR<FlowModelRiemannSolver> riemann_solver = d_flow_model->getFlowModelRiemannSolver();
     
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
@@ -93,20 +93,20 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
     const hier::IntVector conv_ghostcell_dims = conv_ghost_box.numberCells();
     
     // Get the grid spacing.
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     
     const double* const dx = patch_geom->getDx();
     
     // Get the side data of convective flux.
-    boost::shared_ptr<pdat::SideData<double> > convective_flux(
-        BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux(
+        HAMERS_SHARED_PTR_CAST<pdat::SideData<double>, hier::PatchData>(
             patch.getPatchData(variable_convective_flux, data_context)));
     
     // Get the cell data of source.
-    boost::shared_ptr<pdat::CellData<double> > source(
-        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<double> > source(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
             patch.getPatchData(variable_source, data_context)));
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -118,7 +118,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
 #endif
     
     // Allocate temporary patch data.
-    boost::shared_ptr<pdat::SideData<double> > velocity_intercell;
+    HAMERS_SHARED_PTR<pdat::SideData<double> > velocity_intercell;
     
     if (d_has_advective_eqn_form)
     {
@@ -150,7 +150,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables =
             d_flow_model->getCellDataOfConservativeVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
@@ -186,8 +186,8 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
          * Declare temporary data containers for computing the fluxes at cell edges.
          */
         
-        std::vector<boost::shared_ptr<pdat::SideData<double> > > conservative_variables_minus;
-        std::vector<boost::shared_ptr<pdat::SideData<double> > > conservative_variables_plus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > conservative_variables_minus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > conservative_variables_plus;
         
         conservative_variables_minus.reserve(d_num_eqn);
         conservative_variables_plus.reserve(d_num_eqn);
@@ -329,7 +329,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables =
             d_flow_model->getCellDataOfConservativeVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
@@ -365,8 +365,8 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
          * Declare temporary data containers for computing the fluxes at cell edges.
          */
         
-        std::vector<boost::shared_ptr<pdat::SideData<double> > > conservative_variables_minus;
-        std::vector<boost::shared_ptr<pdat::SideData<double> > > conservative_variables_plus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > conservative_variables_minus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > conservative_variables_plus;
         
         conservative_variables_minus.reserve(d_num_eqn);
         conservative_variables_plus.reserve(d_num_eqn);
@@ -617,7 +617,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables =
             d_flow_model->getCellDataOfConservativeVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
@@ -653,8 +653,8 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
          * Declare temporary data containers for computing the fluxes at cell edges.
          */
         
-        std::vector<boost::shared_ptr<pdat::SideData<double> > > conservative_variables_minus;
-        std::vector<boost::shared_ptr<pdat::SideData<double> > > conservative_variables_plus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > conservative_variables_minus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > conservative_variables_plus;
         
         conservative_variables_minus.reserve(d_num_eqn);
         conservative_variables_plus.reserve(d_num_eqn);

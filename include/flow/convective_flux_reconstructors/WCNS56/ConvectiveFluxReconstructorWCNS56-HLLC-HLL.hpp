@@ -11,10 +11,10 @@ class ConvectiveFluxReconstructorWCNS56: public ConvectiveFluxReconstructor
         ConvectiveFluxReconstructorWCNS56(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_eqn,
-            const boost::shared_ptr<FlowModel>& flow_model,
-            const boost::shared_ptr<tbox::Database>& convective_flux_reconstructor_db);
+            const HAMERS_SHARED_PTR<FlowModel>& flow_model,
+            const HAMERS_SHARED_PTR<tbox::Database>& convective_flux_reconstructor_db);
         
         virtual ~ConvectiveFluxReconstructorWCNS56() {}
         
@@ -30,7 +30,7 @@ class ConvectiveFluxReconstructorWCNS56: public ConvectiveFluxReconstructor
          */
         virtual void
         putToRestart(
-            const boost::shared_ptr<tbox::Database>& restart_db) const = 0;
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const = 0;
         
         /*
          * Compute the convective flux and source due to splitting of convective term on a patch.
@@ -38,9 +38,9 @@ class ConvectiveFluxReconstructorWCNS56: public ConvectiveFluxReconstructor
         void
         computeConvectiveFluxAndSourceOnPatch(
             hier::Patch& patch,
-            const boost::shared_ptr<pdat::SideVariable<double> >& variable_convective_flux,
-            const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
-            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const HAMERS_SHARED_PTR<pdat::SideVariable<double> >& variable_convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double time,
             const double dt,
             const int RK_step_number);
@@ -51,9 +51,9 @@ class ConvectiveFluxReconstructorWCNS56: public ConvectiveFluxReconstructor
          */
         virtual void
         performWENOInterpolation(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_minus,
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_plus,
-            const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables) = 0;
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& variables_minus,
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& variables_plus,
+            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& variables) = 0;
         
         /*
          * Forms of equations.

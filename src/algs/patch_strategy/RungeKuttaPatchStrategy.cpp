@@ -37,7 +37,7 @@ RungeKuttaPatchStrategy::~RungeKuttaPatchStrategy()
 
 void
 RungeKuttaPatchStrategy::preprocessTagCellsValueDetector(
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const int level_number,
     const double regrid_time,
     const bool initial_error,
@@ -59,7 +59,7 @@ RungeKuttaPatchStrategy::preprocessTagCellsValueDetector(
 
 void
 RungeKuttaPatchStrategy::postprocessTagCellsValueDetector(
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const int level_number,
     const double regrid_time,
     const bool initial_error,
@@ -107,7 +107,7 @@ RungeKuttaPatchStrategy::tagCellsOnPatchValueDetector(
 
 void
 RungeKuttaPatchStrategy::preprocessTagCellsGradientDetector(
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const int level_number,
     const double regrid_time,
     const bool initial_error,
@@ -129,7 +129,7 @@ RungeKuttaPatchStrategy::preprocessTagCellsGradientDetector(
 
 void
 RungeKuttaPatchStrategy::postprocessTagCellsGradientDetector(
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const int level_number,
     const double regrid_time,
     const bool initial_error,
@@ -177,7 +177,7 @@ RungeKuttaPatchStrategy::tagCellsOnPatchGradientDetector(
 
 void
 RungeKuttaPatchStrategy::preprocessTagCellsMultiresolutionDetector(
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const int level_number,
     const double regrid_time,
     const bool initial_error,
@@ -199,7 +199,7 @@ RungeKuttaPatchStrategy::preprocessTagCellsMultiresolutionDetector(
 
 void
 RungeKuttaPatchStrategy::postprocessTagCellsMultiresolutionDetector(
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const int level_number,
     const double regrid_time,
     const bool initial_error,
@@ -247,7 +247,7 @@ RungeKuttaPatchStrategy::tagCellsOnPatchMultiresolutionDetector(
 
 void
 RungeKuttaPatchStrategy::preprocessTagCellsIntegralDetector(
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const int level_number,
     const double regrid_time,
     const bool initial_error,
@@ -269,7 +269,7 @@ RungeKuttaPatchStrategy::preprocessTagCellsIntegralDetector(
 
 void
 RungeKuttaPatchStrategy::postprocessTagCellsIntegralDetector(
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const int level_number,
     const double regrid_time,
     const bool initial_error,
@@ -319,8 +319,8 @@ void
 RungeKuttaPatchStrategy::tagCellsOnPatchRichardsonExtrapolation(
     hier::Patch& patch,
     const int error_level_number,
-    const boost::shared_ptr<hier::VariableContext>& coarsened_fine,
-    const boost::shared_ptr<hier::VariableContext>& advanced_coarse,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& coarsened_fine,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& advanced_coarse,
     const double regrid_time,
     const double deltat,
     const int error_coarsen_ratio,
@@ -355,7 +355,7 @@ RungeKuttaPatchStrategy::tagCellsOnPatchRichardsonExtrapolation(
  */
 void
 RungeKuttaPatchStrategy::computeStatisticsVariables(
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy)
 {
     NULL_USE(patch_hierarchy);
 }
@@ -367,7 +367,7 @@ RungeKuttaPatchStrategy::computeStatisticsVariables(
 void
 RungeKuttaPatchStrategy::filterStatisticsVariables(
     const int level,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy)
 {
     NULL_USE(level);
     NULL_USE(patch_hierarchy);
@@ -379,7 +379,7 @@ RungeKuttaPatchStrategy::filterStatisticsVariables(
  */
 void
 RungeKuttaPatchStrategy::outputDataStatistics(
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const double output_time)
 {
     NULL_USE(patch_hierarchy);
@@ -399,7 +399,7 @@ RungeKuttaPatchStrategy::setupLoadBalancer(
 
 void
 RungeKuttaPatchStrategy::preprocessAdvanceLevelState(
-    const boost::shared_ptr<hier::PatchLevel>& level,
+    const HAMERS_SHARED_PTR<hier::PatchLevel>& level,
     double current_time,
     double dt,
     bool first_step,
@@ -417,7 +417,7 @@ RungeKuttaPatchStrategy::preprocessAdvanceLevelState(
 
 void
 RungeKuttaPatchStrategy::postprocessAdvanceLevelState(
-    const boost::shared_ptr<hier::PatchLevel>& level,
+    const HAMERS_SHARED_PTR<hier::PatchLevel>& level,
     double current_time,
     double dt,
     bool first_step,

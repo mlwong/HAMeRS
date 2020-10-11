@@ -20,7 +20,7 @@ class EquationOfBulkViscosityMixingRules
             const tbox::Dimension& dim,
             const int& num_species,
             const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
-            const boost::shared_ptr<tbox::Database>& equation_of_bulk_viscosity_mixing_rules_db):
+            const HAMERS_SHARED_PTR<tbox::Database>& equation_of_bulk_viscosity_mixing_rules_db):
                 d_object_name(object_name),
                 d_dim(dim),
                 d_num_species(num_species),
@@ -31,9 +31,9 @@ class EquationOfBulkViscosityMixingRules
         virtual ~EquationOfBulkViscosityMixingRules() {}
         
         /*
-         * Return the boost::shared_ptr to the equation of bulk viscosity.
+         * Return the HAMERS_SHARED_PTR to the equation of bulk viscosity.
          */
-        virtual const boost::shared_ptr<EquationOfBulkViscosity>&
+        virtual const HAMERS_SHARED_PTR<EquationOfBulkViscosity>&
         getEquationOfBulkViscosity(const int species_index = 0) const = 0;
         
         /*
@@ -48,7 +48,7 @@ class EquationOfBulkViscosityMixingRules
          */
         virtual void
         putToRestart(
-            const boost::shared_ptr<tbox::Database>& restart_db) const = 0;
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const = 0;
         
         /*
          * Compute the bulk viscosity of the mixture with isothermal and isobaric equilibrium assumptions
@@ -64,10 +64,10 @@ class EquationOfBulkViscosityMixingRules
          */
         void
         computeBulkViscosity(
-            boost::shared_ptr<pdat::CellData<double> >& data_bulk_viscosity,
-            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions) const
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_bulk_viscosity,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions) const
         {
             const hier::Box empty_box(d_dim);
             computeBulkViscosity(
@@ -83,10 +83,10 @@ class EquationOfBulkViscosityMixingRules
          */
         virtual void
         computeBulkViscosity(
-            boost::shared_ptr<pdat::CellData<double> >& data_bulk_viscosity,
-            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_bulk_viscosity,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
             const hier::Box& domain) const = 0;
         
         /*
@@ -104,11 +104,11 @@ class EquationOfBulkViscosityMixingRules
          */
         void
         computeBulkViscosity(
-            boost::shared_ptr<pdat::CellData<double> >& data_bulk_viscosity,
-            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& data_species_temperatures,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
-            const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions) const
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_bulk_viscosity,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_species_temperatures,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions) const
         {
             const hier::Box empty_box(d_dim);
             computeBulkViscosity(
@@ -125,11 +125,11 @@ class EquationOfBulkViscosityMixingRules
          */
         virtual void
         computeBulkViscosity(
-            boost::shared_ptr<pdat::CellData<double> >& data_bulk_viscosity,
-            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& data_species_temperatures,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
-            const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_bulk_viscosity,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_species_temperatures,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions,
             const hier::Box& domain) const = 0;
         
         /*
@@ -168,9 +168,9 @@ class EquationOfBulkViscosityMixingRules
         const MIXING_CLOSURE_MODEL::TYPE d_mixing_closure_model;
         
         /*
-         * boost::shared_ptr to the database of equation of bulk viscosity mixing rules.
+         * HAMERS_SHARED_PTR to the database of equation of bulk viscosity mixing rules.
          */
-        const boost::shared_ptr<tbox::Database> d_equation_of_bulk_viscosity_mixing_rules_db;
+        const HAMERS_SHARED_PTR<tbox::Database> d_equation_of_bulk_viscosity_mixing_rules_db;
         
 };
     

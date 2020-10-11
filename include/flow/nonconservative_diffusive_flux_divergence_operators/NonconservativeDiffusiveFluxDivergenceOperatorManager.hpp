@@ -20,10 +20,10 @@ class NonconservativeDiffusiveFluxDivergenceOperatorManager
         NonconservativeDiffusiveFluxDivergenceOperatorManager(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_eqn,
-            const boost::shared_ptr<FlowModel>& flow_model,
-            const boost::shared_ptr<tbox::Database>& nonconservative_diffusive_flux_divergence_operator_db,
+            const HAMERS_SHARED_PTR<FlowModel>& flow_model,
+            const HAMERS_SHARED_PTR<tbox::Database>& nonconservative_diffusive_flux_divergence_operator_db,
             const std::string& nonconservative_diffusive_flux_divergence_operator_str);
         
         /*
@@ -38,7 +38,7 @@ class NonconservativeDiffusiveFluxDivergenceOperatorManager
         /*
          * Get the non-conservative diffusive flux divergence operator.
          */
-        boost::shared_ptr<NonconservativeDiffusiveFluxDivergenceOperator>
+        HAMERS_SHARED_PTR<NonconservativeDiffusiveFluxDivergenceOperator>
         getNonconservativeDiffusiveFluxDivergenceOperator() const
         {
             return d_noncons_diff_flux_div_op;
@@ -62,9 +62,9 @@ class NonconservativeDiffusiveFluxDivergenceOperatorManager
         NONCONSERVATIVE_DIFFUSIVE_FLUX_DIVERGENCE_OPERATOR::TYPE d_nonconservative_diffusive_flux_divergence_operator_type;
         
         /*
-         * boost::shared_ptr to the diffusive flux divergence operator.
+         * HAMERS_SHARED_PTR to the diffusive flux divergence operator.
          */
-        boost::shared_ptr<NonconservativeDiffusiveFluxDivergenceOperator> d_noncons_diff_flux_div_op;
+        HAMERS_SHARED_PTR<NonconservativeDiffusiveFluxDivergenceOperator> d_noncons_diff_flux_div_op;
         
 };
 

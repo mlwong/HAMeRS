@@ -9,10 +9,10 @@ class FlowModelSourceUtilitiesFiveEqnAllaire: public FlowModelSourceUtilities
         FlowModelSourceUtilitiesFiveEqnAllaire(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
-            const boost::shared_ptr<tbox::Database>& flow_model_db,
-            const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules);
+            const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db,
+            const HAMERS_SHARED_PTR<EquationOfStateMixingRules> equation_of_state_mixing_rules);
         
         ~FlowModelSourceUtilitiesFiveEqnAllaire() {}
         
@@ -52,7 +52,7 @@ class FlowModelSourceUtilitiesFiveEqnAllaire: public FlowModelSourceUtilities
          */
         void
         computeSourceTermsOnPatch(
-            const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
+            const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
             const double time,
             const double dt,
             const int RK_step_number);
@@ -68,7 +68,7 @@ class FlowModelSourceUtilitiesFiveEqnAllaire: public FlowModelSourceUtilities
          */
         void
         putToRestart(
-            const boost::shared_ptr<tbox::Database>& restart_db) const;
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
         
     private:
         /*
@@ -118,9 +118,9 @@ class FlowModelSourceUtilitiesFiveEqnAllaire: public FlowModelSourceUtilities
         hier::IntVector d_subghostcell_dims_gruneisen_parameter;
         
         /*
-         * boost::shared_ptr to derived cell data related to this class.
+         * HAMERS_SHARED_PTR to derived cell data related to this class.
          */
-        boost::shared_ptr<pdat::CellData<double> > d_data_gruneisen_parameter;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_gruneisen_parameter;
         
         /*
          * Whether derived cell data related to this class is computed.
@@ -128,9 +128,9 @@ class FlowModelSourceUtilitiesFiveEqnAllaire: public FlowModelSourceUtilities
         bool d_cell_data_computed_gruneisen_parameter;
         
         /*
-         * boost::shared_ptr to EquationOfStateMixingRules.
+         * HAMERS_SHARED_PTR to EquationOfStateMixingRules.
          */
-        const boost::shared_ptr<EquationOfStateMixingRules>
+        const HAMERS_SHARED_PTR<EquationOfStateMixingRules>
             d_equation_of_state_mixing_rules;
         
 };

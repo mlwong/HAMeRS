@@ -9,7 +9,7 @@ EquationOfMassDiffusivityMixingRulesReid::EquationOfMassDiffusivityMixingRulesRe
     const tbox::Dimension& dim,
     const int& num_species,
     const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
-    const boost::shared_ptr<tbox::Database>& equation_of_mass_diffusivity_mixing_rules_db):
+    const HAMERS_SHARED_PTR<tbox::Database>& equation_of_mass_diffusivity_mixing_rules_db):
         EquationOfMassDiffusivityMixingRules(
             object_name,
             dim,
@@ -227,7 +227,7 @@ EquationOfMassDiffusivityMixingRulesReid::printClassData(
  */
 void
 EquationOfMassDiffusivityMixingRulesReid::putToRestart(
-    const boost::shared_ptr<tbox::Database>& restart_db) const
+    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
     restart_db->putDoubleVector("d_species_epsilon_by_k", d_species_epsilon_by_k);
     restart_db->putDoubleVector("d_species_sigma", d_species_sigma);
@@ -410,10 +410,10 @@ EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivities(
  */
 void
 EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
-    boost::shared_ptr<pdat::CellData<double> >& data_mass_diffusivities,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
-    const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_diffusivities,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -457,12 +457,12 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
     const hier::IntVector ghostcell_dims_mass_fractions = ghost_box_mass_fractions.numberCells();
     
     // Delcare data containers for binary mass diffusivities and mole fractions.
-    boost::shared_ptr<pdat::CellData<double> > data_binary_mass_diffusivities;
-    boost::shared_ptr<pdat::CellData<double> > data_mole_fractions;
-    boost::shared_ptr<pdat::CellData<double> > data_sum;
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_binary_mass_diffusivities;
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_mole_fractions;
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_sum;
     
     // Declare data container for last volume fraction.
-    boost::shared_ptr<pdat::CellData<double> > data_mass_fractions_last;
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions_last;
     
     /*
      * Get the local lower index and number of cells in each direction of the domain.

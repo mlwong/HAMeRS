@@ -40,8 +40,8 @@ class Filter
          */
         virtual void
         applyFilter(
-            boost::shared_ptr<pdat::CellData<double> >& filtered_cell_data,
-            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& filtered_cell_data,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
             const int depth_filtered_cell_data,
             const int depth_cell_data) = 0;
         
@@ -50,8 +50,8 @@ class Filter
          */
         virtual void
         applyFilter(
-            boost::shared_ptr<pdat::CellData<double> >& filtered_cell_data,
-            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& filtered_cell_data,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
             const int depth_filtered_cell_data,
             const int depth_cell_data,
             const hier::Box& domain) = 0;

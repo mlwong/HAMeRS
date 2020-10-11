@@ -12,11 +12,11 @@ class FlowModelDiffusiveFluxUtilitiesSingleSpecies: public FlowModelDiffusiveFlu
         FlowModelDiffusiveFluxUtilitiesSingleSpecies(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
-            const boost::shared_ptr<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
-            const boost::shared_ptr<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules,
-            const boost::shared_ptr<EquationOfThermalConductivityMixingRules> equation_of_thermal_conductivity_mixing_rules);
+            const HAMERS_SHARED_PTR<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
+            const HAMERS_SHARED_PTR<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules,
+            const HAMERS_SHARED_PTR<EquationOfThermalConductivityMixingRules> equation_of_thermal_conductivity_mixing_rules);
         
         ~FlowModelDiffusiveFluxUtilitiesSingleSpecies() {}
         
@@ -55,13 +55,13 @@ class FlowModelDiffusiveFluxUtilitiesSingleSpecies: public FlowModelDiffusiveFlu
         /*
          * Get the cell data of one cell variable related to this class in the registered patch.
          */
-        boost::shared_ptr<pdat::CellData<double> >
+        HAMERS_SHARED_PTR<pdat::CellData<double> >
         getCellData(const std::string& variable_key);
         
         /*
          * Get the cell data of different cell variables related to this class in the registered patch.
          */
-        std::vector<boost::shared_ptr<pdat::CellData<double> > >
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
         getCellData(
             const std::vector<std::string>& variable_keys);
         
@@ -70,7 +70,7 @@ class FlowModelDiffusiveFluxUtilitiesSingleSpecies: public FlowModelDiffusiveFlu
          */
         void
         getCellDataOfDiffusiveFluxVariablesForDerivative(
-            std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_var_data,
+            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_var_data,
             std::vector<std::vector<int> >& derivative_var_component_idx,
             const DIRECTION::TYPE& flux_direction,
             const DIRECTION::TYPE& derivative_direction);
@@ -80,7 +80,7 @@ class FlowModelDiffusiveFluxUtilitiesSingleSpecies: public FlowModelDiffusiveFlu
          */
         void
         getCellDataOfDiffusiveFluxDiffusivities(
-            std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& diffusivities_data,
+            std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& diffusivities_data,
             std::vector<std::vector<int> >& diffusivities_component_idx,
             const DIRECTION::TYPE& flux_direction,
             const DIRECTION::TYPE& derivative_direction);
@@ -145,11 +145,11 @@ class FlowModelDiffusiveFluxUtilitiesSingleSpecies: public FlowModelDiffusiveFlu
         hier::IntVector d_subghostcell_dims_thermal_conductivity;
         
         /*
-         * boost::shared_ptr to derived cell data related to this class.
+         * HAMERS_SHARED_PTR to derived cell data related to this class.
          */
-        boost::shared_ptr<pdat::CellData<double> > d_data_shear_viscosity;
-        boost::shared_ptr<pdat::CellData<double> > d_data_bulk_viscosity;
-        boost::shared_ptr<pdat::CellData<double> > d_data_thermal_conductivity;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_shear_viscosity;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_bulk_viscosity;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_thermal_conductivity;
         
         /*
          * Whether derived cell data related to this class is computed.
@@ -159,21 +159,21 @@ class FlowModelDiffusiveFluxUtilitiesSingleSpecies: public FlowModelDiffusiveFlu
         bool d_cell_data_computed_thermal_conductivity;
         
         /*
-         * boost::shared_ptr to EquationOfShearViscosityMixingRules.
+         * HAMERS_SHARED_PTR to EquationOfShearViscosityMixingRules.
          */
-        const boost::shared_ptr<EquationOfShearViscosityMixingRules>
+        const HAMERS_SHARED_PTR<EquationOfShearViscosityMixingRules>
             d_equation_of_shear_viscosity_mixing_rules;
         
         /*
-         * boost::shared_ptr to EquationOfBulkViscosityMixingRules.
+         * HAMERS_SHARED_PTR to EquationOfBulkViscosityMixingRules.
          */
-        const boost::shared_ptr<EquationOfBulkViscosityMixingRules>
+        const HAMERS_SHARED_PTR<EquationOfBulkViscosityMixingRules>
             d_equation_of_bulk_viscosity_mixing_rules;
         
         /*
-         * boost::shared_ptr to EquationOfThermalConductivityMixingRules.
+         * HAMERS_SHARED_PTR to EquationOfThermalConductivityMixingRules.
          */
-        const boost::shared_ptr<EquationOfThermalConductivityMixingRules>
+        const HAMERS_SHARED_PTR<EquationOfThermalConductivityMixingRules>
             d_equation_of_thermal_conductivity_mixing_rules;
         
 };

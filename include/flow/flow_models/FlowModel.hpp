@@ -56,16 +56,16 @@ class FlowModelStatisticsUtilities;
  */
 class FlowModel:
     public appu::VisDerivedDataStrategy,
-    public boost::enable_shared_from_this<FlowModel> 
+    public HAMERS_ENABLE_SHARED_FROM_THIS<FlowModel> 
 {
     public:
         FlowModel(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
             const int& num_eqn,
-            const boost::shared_ptr<tbox::Database>& flow_model_db):
+            const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db):
                 d_object_name(object_name),
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
@@ -128,63 +128,63 @@ class FlowModel:
         }
         
         /*
-         * Return the boost::shared_ptr to the equation of state mixing rules.
+         * Return the HAMERS_SHARED_PTR to the equation of state mixing rules.
          */
-        const boost::shared_ptr<EquationOfStateMixingRules>&
+        const HAMERS_SHARED_PTR<EquationOfStateMixingRules>&
         getEquationOfStateMixingRules() const
         {
             return d_equation_of_state_mixing_rules;
         }
         
         /*
-         * Return the boost::shared_ptr to the Riemann solver object.
+         * Return the HAMERS_SHARED_PTR to the Riemann solver object.
          */
-        const boost::shared_ptr<FlowModelRiemannSolver>&
+        const HAMERS_SHARED_PTR<FlowModelRiemannSolver>&
         getFlowModelRiemannSolver() const
         {
             return d_flow_model_riemann_solver;
         }
         
         /*
-         * Return the boost::shared_ptr to the basic utilities object.
+         * Return the HAMERS_SHARED_PTR to the basic utilities object.
          */
-        const boost::shared_ptr<FlowModelBasicUtilities>&
+        const HAMERS_SHARED_PTR<FlowModelBasicUtilities>&
         getFlowModelBasicUtilities() const
         {
             return d_flow_model_basic_utilities;
         }
         
         /*
-         * Return the boost::shared_ptr to the diffusive flux utilities object.
+         * Return the HAMERS_SHARED_PTR to the diffusive flux utilities object.
          */
-        const boost::shared_ptr<FlowModelDiffusiveFluxUtilities>&
+        const HAMERS_SHARED_PTR<FlowModelDiffusiveFluxUtilities>&
         getFlowModelDiffusiveFluxUtilities() const
         {
             return d_flow_model_diffusive_flux_utilities;
         }
         
         /*
-         * Return the boost::shared_ptr to the source utilities object.
+         * Return the HAMERS_SHARED_PTR to the source utilities object.
          */
-        const boost::shared_ptr<FlowModelSourceUtilities>&
+        const HAMERS_SHARED_PTR<FlowModelSourceUtilities>&
         getFlowModelSourceUtilities() const
         {
             return d_flow_model_source_utilities;
         }
         
         /*
-         * Return the boost::shared_ptr to the boundary utilities object.
+         * Return the HAMERS_SHARED_PTR to the boundary utilities object.
          */
-        const boost::shared_ptr<FlowModelBoundaryUtilities>&
+        const HAMERS_SHARED_PTR<FlowModelBoundaryUtilities>&
         getFlowModelBoundaryUtilities() const
         {
             return d_flow_model_boundary_utilities;
         }
         
         /*
-         * Return the boost::shared_ptr to the statistics utilities object.
+         * Return the HAMERS_SHARED_PTR to the statistics utilities object.
          */
-        const boost::shared_ptr<FlowModelStatisticsUtilities>&
+        const HAMERS_SHARED_PTR<FlowModelStatisticsUtilities>&
         getFlowModelStatisticsUtilities() const
         {
             return d_flow_model_statistics_utilities;
@@ -200,7 +200,7 @@ class FlowModel:
          */
         virtual void
         putToRestart(
-            const boost::shared_ptr<tbox::Database>& restart_db) const = 0;
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const = 0;
         
         /*
          * Register the conservative variables.
@@ -234,7 +234,7 @@ class FlowModel:
         /*
          * Get the conservative variables.
          */
-        virtual std::vector<boost::shared_ptr<pdat::CellVariable<double> > >
+        virtual std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > >
         getConservativeVariables() = 0;
         
         /*
@@ -243,7 +243,7 @@ class FlowModel:
         virtual void
         registerPatchWithDataContext(
             const hier::Patch& patch,
-            const boost::shared_ptr<hier::VariableContext>& data_context) = 0;
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) = 0;
         
         /*
          * Register different derived variables in the registered patch. The derived variables to be registered
@@ -272,9 +272,9 @@ class FlowModel:
         const hier::Patch& getRegisteredPatch() const;
         
         /*
-         * Return boost::shared_ptr to patch data context.
+         * Return HAMERS_SHARED_PTR to patch data context.
          */
-        const boost::shared_ptr<hier::VariableContext>& getDataContext() const;
+        const HAMERS_SHARED_PTR<hier::VariableContext>& getDataContext() const;
         
         /*
          * Get sub-domain box.
@@ -299,19 +299,19 @@ class FlowModel:
         /*
          * Get the cell data of one cell variable in the registered patch.
          */
-        virtual boost::shared_ptr<pdat::CellData<double> >
+        virtual HAMERS_SHARED_PTR<pdat::CellData<double> >
         getCellData(const std::string& variable_key) = 0;
         
         /*
          * Get the cell data of different cell variables in the registered patch.
          */
-        virtual std::vector<boost::shared_ptr<pdat::CellData<double> > >
+        virtual std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
         getCellData(const std::vector<std::string>& variable_keys) = 0;
         
         /*
          * Get the cell data of species cell variables in the registered patch.
          */
-        virtual std::vector<boost::shared_ptr<pdat::CellData<double> > >
+        virtual std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
         getSpeciesCellData(const std::string& variable_key) = 0;
         
         /*
@@ -329,13 +329,13 @@ class FlowModel:
         /*
          * Get the cell data of the conservative variables in the registered patch.
          */
-        virtual std::vector<boost::shared_ptr<pdat::CellData<double> > >
+        virtual std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
         getCellDataOfConservativeVariables() = 0;
         
         /*
          * Get the cell data of the primitive variables in the registered patch.
          */
-        virtual std::vector<boost::shared_ptr<pdat::CellData<double> > >
+        virtual std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
         getCellDataOfPrimitiveVariables() = 0;
         
         /*
@@ -343,7 +343,7 @@ class FlowModel:
          */
         void
         setPlotContext(
-            const boost::shared_ptr<hier::VariableContext>& plot_context)
+            const HAMERS_SHARED_PTR<hier::VariableContext>& plot_context)
         {
             d_plot_context = plot_context;
         }
@@ -397,7 +397,7 @@ class FlowModel:
 #ifdef HAVE_HDF5
         virtual void
         registerPlotQuantities(
-            const boost::shared_ptr<ExtendedVisItDataWriter>& visit_writer) = 0;
+            const HAMERS_SHARED_PTR<ExtendedVisItDataWriter>& visit_writer) = 0;
 #endif
         
     protected:
@@ -405,7 +405,7 @@ class FlowModel:
          * Set the context for data on a patch.
          */
         void
-        setDataContext(const boost::shared_ptr<hier::VariableContext>& context)
+        setDataContext(const HAMERS_SHARED_PTR<hier::VariableContext>& context)
         {
            d_data_context = context;
         }
@@ -430,9 +430,9 @@ class FlowModel:
         const tbox::Dimension d_dim;
         
         /*
-         * boost::shared_ptr to the grid geometry.
+         * HAMERS_SHARED_PTR to the grid geometry.
          */
-        const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
+        const HAMERS_SHARED_PTR<geom::CartesianGridGeometry> d_grid_geometry;
         
         /*
          * A string variable to describe the equation of state used.
@@ -450,14 +450,14 @@ class FlowModel:
         const int d_num_eqn;
         
         /*
-         * boost::shared_ptr to EquationOfStateMixingRules.
+         * HAMERS_SHARED_PTR to EquationOfStateMixingRules.
          */
-        boost::shared_ptr<EquationOfStateMixingRules> d_equation_of_state_mixing_rules;
+        HAMERS_SHARED_PTR<EquationOfStateMixingRules> d_equation_of_state_mixing_rules;
         
         /*
-         * boost::shared_ptr to EquationOfStateMixingRulesManager.
+         * HAMERS_SHARED_PTR to EquationOfStateMixingRulesManager.
          */
-        boost::shared_ptr<EquationOfStateMixingRulesManager> d_equation_of_state_mixing_rules_manager;
+        HAMERS_SHARED_PTR<EquationOfStateMixingRulesManager> d_equation_of_state_mixing_rules_manager;
         
         /*
          * Form of each equation.
@@ -475,9 +475,9 @@ class FlowModel:
         const hier::Patch* d_patch;
         
         /*
-         * boost::shared_ptr to patch data context.
+         * HAMERS_SHARED_PTR to patch data context.
          */
-        boost::shared_ptr<hier::VariableContext> d_data_context;
+        HAMERS_SHARED_PTR<hier::VariableContext> d_data_context;
         
         /*
          * Interior box and box with ghost cells.
@@ -502,39 +502,39 @@ class FlowModel:
         bool d_derived_cell_data_computed;
         
         /*
-         * boost::shared_ptr to the plotting context.
+         * HAMERS_SHARED_PTR to the plotting context.
          */
-        boost::shared_ptr<hier::VariableContext> d_plot_context;
+        HAMERS_SHARED_PTR<hier::VariableContext> d_plot_context;
         
         /*
-         * boost::shared_ptr to the Riemann solver object for the flow model.
+         * HAMERS_SHARED_PTR to the Riemann solver object for the flow model.
          */
-        boost::shared_ptr<FlowModelRiemannSolver> d_flow_model_riemann_solver;
+        HAMERS_SHARED_PTR<FlowModelRiemannSolver> d_flow_model_riemann_solver;
         
         /*
-         * boost::shared_ptr to the basic utilities object for the flow model.
+         * HAMERS_SHARED_PTR to the basic utilities object for the flow model.
          */
-        boost::shared_ptr<FlowModelBasicUtilities> d_flow_model_basic_utilities;
+        HAMERS_SHARED_PTR<FlowModelBasicUtilities> d_flow_model_basic_utilities;
         
         /*
-         * boost::shared_ptr to the diffusive flux utilities object for the flow model.
+         * HAMERS_SHARED_PTR to the diffusive flux utilities object for the flow model.
          */
-        boost::shared_ptr<FlowModelDiffusiveFluxUtilities> d_flow_model_diffusive_flux_utilities;
+        HAMERS_SHARED_PTR<FlowModelDiffusiveFluxUtilities> d_flow_model_diffusive_flux_utilities;
         
         /*
-         * boost::shared_ptr to the source utilities object for the flow model.
+         * HAMERS_SHARED_PTR to the source utilities object for the flow model.
          */
-        boost::shared_ptr<FlowModelSourceUtilities> d_flow_model_source_utilities;
+        HAMERS_SHARED_PTR<FlowModelSourceUtilities> d_flow_model_source_utilities;
         
         /*
-         * boost::shared_ptr to the boundary utilities object for the flow model.
+         * HAMERS_SHARED_PTR to the boundary utilities object for the flow model.
          */
-        boost::shared_ptr<FlowModelBoundaryUtilities> d_flow_model_boundary_utilities;
+        HAMERS_SHARED_PTR<FlowModelBoundaryUtilities> d_flow_model_boundary_utilities;
         
         /*
-         * boost::shared_ptr to the statistics utilities object for the flow model.
+         * HAMERS_SHARED_PTR to the statistics utilities object for the flow model.
          */
-        boost::shared_ptr<FlowModelStatisticsUtilities> d_flow_model_statistics_utilities;
+        HAMERS_SHARED_PTR<FlowModelStatisticsUtilities> d_flow_model_statistics_utilities;
         
 };
 

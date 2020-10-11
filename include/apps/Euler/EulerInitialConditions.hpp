@@ -26,9 +26,9 @@ class EulerInitialConditions
             const std::string& object_name,
             const std::string& project_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const FLOW_MODEL::TYPE& flow_model_type,
-            const boost::shared_ptr<FlowModel>& flow_model):
+            const HAMERS_SHARED_PTR<FlowModel>& flow_model):
                 d_object_name(object_name),
                 d_project_name(project_name),
                 d_dim(dim),
@@ -44,7 +44,7 @@ class EulerInitialConditions
         void
         initializeDataOnPatch(
             hier::Patch& patch,
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_variables,
             const double data_time,
             const bool initial_time);
         
@@ -65,9 +65,9 @@ class EulerInitialConditions
         const tbox::Dimension d_dim;
         
         /*
-         * boost::shared_ptr to the grid geometry.
+         * HAMERS_SHARED_PTR to the grid geometry.
          */
-        const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
+        const HAMERS_SHARED_PTR<geom::CartesianGridGeometry> d_grid_geometry;
         
         /*
          * Flow model type.
@@ -77,7 +77,7 @@ class EulerInitialConditions
         /*
          * Flow model.
          */
-        const boost::shared_ptr<FlowModel> d_flow_model;
+        const HAMERS_SHARED_PTR<FlowModel> d_flow_model;
         
 };
 

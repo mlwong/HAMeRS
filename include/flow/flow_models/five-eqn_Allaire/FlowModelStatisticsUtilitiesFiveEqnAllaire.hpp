@@ -11,12 +11,12 @@ class FlowModelStatisticsUtilitiesFiveEqnAllaire: public FlowModelStatisticsUtil
         FlowModelStatisticsUtilitiesFiveEqnAllaire(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
-            const boost::shared_ptr<tbox::Database>& flow_model_db,
-            const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules,
-            const boost::shared_ptr<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
-            const boost::shared_ptr<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules):
+            const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db,
+            const HAMERS_SHARED_PTR<EquationOfStateMixingRules> equation_of_state_mixing_rules,
+            const HAMERS_SHARED_PTR<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
+            const HAMERS_SHARED_PTR<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules):
                 FlowModelStatisticsUtilities(
                     object_name,
                     dim,
@@ -43,26 +43,26 @@ class FlowModelStatisticsUtilitiesFiveEqnAllaire: public FlowModelStatisticsUtil
         void
         outputStatisticalQuantities(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
     private:
         /*
-         * boost::shared_ptr to EquationOfStateMixingRules.
+         * HAMERS_SHARED_PTR to EquationOfStateMixingRules.
          */
-        const boost::shared_ptr<EquationOfStateMixingRules>
+        const HAMERS_SHARED_PTR<EquationOfStateMixingRules>
             d_equation_of_state_mixing_rules;
         
         /*
-         * boost::shared_ptr to EquationOfShearViscosityMixingRules.
+         * HAMERS_SHARED_PTR to EquationOfShearViscosityMixingRules.
          */
-        const boost::shared_ptr<EquationOfShearViscosityMixingRules>
+        const HAMERS_SHARED_PTR<EquationOfShearViscosityMixingRules>
             d_equation_of_shear_viscosity_mixing_rules;
         
         /*
-         * boost::shared_ptr to EquationOfBulkViscosityMixingRules.
+         * HAMERS_SHARED_PTR to EquationOfBulkViscosityMixingRules.
          */
-        const boost::shared_ptr<EquationOfBulkViscosityMixingRules>
+        const HAMERS_SHARED_PTR<EquationOfBulkViscosityMixingRules>
             d_equation_of_bulk_viscosity_mixing_rules;
         
 };

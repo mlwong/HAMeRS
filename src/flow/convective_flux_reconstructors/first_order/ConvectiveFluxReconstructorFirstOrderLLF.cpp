@@ -5,10 +5,10 @@
 ConvectiveFluxReconstructorFirstOrderLLF::ConvectiveFluxReconstructorFirstOrderLLF(
     const std::string& object_name,
     const tbox::Dimension& dim,
-    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+    const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_eqn,
-    const boost::shared_ptr<FlowModel>& flow_model,
-    const boost::shared_ptr<tbox::Database>& convective_flux_reconstructor_db):
+    const HAMERS_SHARED_PTR<FlowModel>& flow_model,
+    const HAMERS_SHARED_PTR<tbox::Database>& convective_flux_reconstructor_db):
         ConvectiveFluxReconstructor(
             object_name,
             dim,
@@ -48,7 +48,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::printClassData(
  */
 void
 ConvectiveFluxReconstructorFirstOrderLLF::putToRestart(
-   const boost::shared_ptr<tbox::Database>& restart_db) const
+   const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
     restart_db->putString("d_shock_capturing_scheme", "LLF");
 }
@@ -60,9 +60,9 @@ ConvectiveFluxReconstructorFirstOrderLLF::putToRestart(
 void
 ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
     hier::Patch& patch,
-    const boost::shared_ptr<pdat::SideVariable<double> >& variable_convective_flux,
-    const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
-    const boost::shared_ptr<hier::VariableContext>& data_context,
+    const HAMERS_SHARED_PTR<pdat::SideVariable<double> >& variable_convective_flux,
+    const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double time,
     const double dt,
     const int RK_step_number)
@@ -81,20 +81,20 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
     const hier::IntVector conv_ghostcell_dims = conv_ghost_box.numberCells();
     
     // Get the grid spacing.
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     
     const double* const dx = patch_geom->getDx();
     
     // Get the side data of convective flux.
-    boost::shared_ptr<pdat::SideData<double> > convective_flux(
-        BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux(
+        HAMERS_SHARED_PTR_CAST<pdat::SideData<double>, hier::PatchData>(
             patch.getPatchData(variable_convective_flux, data_context)));
     
     // Get the cell data of source.
-    boost::shared_ptr<pdat::CellData<double> > source(
-        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<double> > source(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
             patch.getPatchData(variable_source, data_context)));
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -119,7 +119,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
     }
     
     // Allocate temporary patch data.
-    boost::shared_ptr<pdat::SideData<double> > velocity_intercell;
+    HAMERS_SHARED_PTR<pdat::SideData<double> > velocity_intercell;
     
     if (has_advection_eqn)
     {
@@ -157,9 +157,9 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        boost::shared_ptr<pdat::CellData<double> > density;
-        boost::shared_ptr<pdat::CellData<double> > pressure;
-        boost::shared_ptr<pdat::CellData<double> > velocity;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > density;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > pressure;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > velocity;
         
         if (has_advection_eqn)
         {
@@ -168,9 +168,9 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
             velocity = d_flow_model->getCellData("VELOCITY");
         }
         
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
+        HAMERS_SHARED_PTR<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
         
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > convective_flux_node(1);
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > convective_flux_node(1);
         convective_flux_node[0] = d_flow_model->getCellData("CONVECTIVE_FLUX_X");
         
         hier::IntVector num_subghosts_density(d_dim);
@@ -224,7 +224,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables =
             d_flow_model->getCellDataOfConservativeVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
@@ -368,9 +368,9 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        boost::shared_ptr<pdat::CellData<double> > density;
-        boost::shared_ptr<pdat::CellData<double> > pressure;
-        boost::shared_ptr<pdat::CellData<double> > velocity;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > density;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > pressure;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > velocity;
         
         if (has_advection_eqn)
         {
@@ -379,10 +379,10 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
             velocity = d_flow_model->getCellData("VELOCITY");
         }
         
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_y = d_flow_model->getCellData("MAX_WAVE_SPEED_Y");
+        HAMERS_SHARED_PTR<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
+        HAMERS_SHARED_PTR<pdat::CellData<double> > max_wave_speed_y = d_flow_model->getCellData("MAX_WAVE_SPEED_Y");
         
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > convective_flux_node(2);
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > convective_flux_node(2);
         convective_flux_node[0] = d_flow_model->getCellData("CONVECTIVE_FLUX_X");
         convective_flux_node[1] = d_flow_model->getCellData("CONVECTIVE_FLUX_Y");
         
@@ -449,7 +449,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables =
             d_flow_model->getCellDataOfConservativeVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
@@ -724,9 +724,9 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        boost::shared_ptr<pdat::CellData<double> > density;
-        boost::shared_ptr<pdat::CellData<double> > pressure;
-        boost::shared_ptr<pdat::CellData<double> > velocity;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > density;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > pressure;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > velocity;
         
         if (has_advection_eqn)
         {
@@ -735,11 +735,11 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
             velocity = d_flow_model->getCellData("VELOCITY");
         }
         
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_y = d_flow_model->getCellData("MAX_WAVE_SPEED_Y");
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_z = d_flow_model->getCellData("MAX_WAVE_SPEED_Z");
+        HAMERS_SHARED_PTR<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
+        HAMERS_SHARED_PTR<pdat::CellData<double> > max_wave_speed_y = d_flow_model->getCellData("MAX_WAVE_SPEED_Y");
+        HAMERS_SHARED_PTR<pdat::CellData<double> > max_wave_speed_z = d_flow_model->getCellData("MAX_WAVE_SPEED_Z");
         
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > convective_flux_node(3);
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > convective_flux_node(3);
         convective_flux_node[0] = d_flow_model->getCellData("CONVECTIVE_FLUX_X");
         convective_flux_node[1] = d_flow_model->getCellData("CONVECTIVE_FLUX_Y");
         convective_flux_node[2] = d_flow_model->getCellData("CONVECTIVE_FLUX_Z");
@@ -819,7 +819,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables =
             d_flow_model->getCellDataOfConservativeVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;

@@ -11,7 +11,7 @@ class FlowModelBoundaryUtilitiesFiveEqnAllaire: public FlowModelBoundaryUtilitie
             const tbox::Dimension& dim,
             const int& num_species,
             const int& num_eqn,
-            const boost::shared_ptr<EquationOfStateMixingRules>& equation_of_state_mixing_rules):
+            const HAMERS_SHARED_PTR<EquationOfStateMixingRules>& equation_of_state_mixing_rules):
                 FlowModelBoundaryUtilities(
                     object_name,
                     dim,
@@ -28,7 +28,7 @@ class FlowModelBoundaryUtilitiesFiveEqnAllaire: public FlowModelBoundaryUtilitie
          */
         void
         getFromInput1d(
-            const boost::shared_ptr<tbox::Database>& input_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db,
             std::vector<int>& node_locs,
             std::vector<int>& node_conds,
             const hier::IntVector& periodic);
@@ -40,7 +40,7 @@ class FlowModelBoundaryUtilitiesFiveEqnAllaire: public FlowModelBoundaryUtilitie
          */
         void
         getFromInput2d(
-            const boost::shared_ptr<tbox::Database>& input_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db,
             std::vector<int>& edge_locs,
             std::vector<int>& node_locs,
             std::vector<int>& edge_conds,
@@ -54,7 +54,7 @@ class FlowModelBoundaryUtilitiesFiveEqnAllaire: public FlowModelBoundaryUtilitie
          */
         void
         getFromInput3d(
-            const boost::shared_ptr<tbox::Database>& input_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db,
             std::vector<int>& face_locs,
             std::vector<int>& edge_locs,
             std::vector<int>& node_locs,
@@ -69,7 +69,7 @@ class FlowModelBoundaryUtilitiesFiveEqnAllaire: public FlowModelBoundaryUtilitie
          */
         void
         fill1dNodeBoundaryData(
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_var_data,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
             const hier::Patch& patch,
             std::vector<int>& bdry_node_locs,
             const std::vector<int>& bdry_node_conds,
@@ -82,7 +82,7 @@ class FlowModelBoundaryUtilitiesFiveEqnAllaire: public FlowModelBoundaryUtilitie
          */
         void
         fill2dEdgeBoundaryData(
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_var_data,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
             const hier::Patch& patch,
             std::vector<int>& bdry_edge_locs,
             const std::vector<int>& bdry_edge_conds,
@@ -95,7 +95,7 @@ class FlowModelBoundaryUtilitiesFiveEqnAllaire: public FlowModelBoundaryUtilitie
          */
         void
         fill2dNodeBoundaryData(
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_var_data,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
             const hier::Patch& patch,
             std::vector<int>& bdry_node_locs,
             const std::vector<int>& bdry_node_conds,
@@ -108,7 +108,7 @@ class FlowModelBoundaryUtilitiesFiveEqnAllaire: public FlowModelBoundaryUtilitie
          */
         void
         fill3dFaceBoundaryData(
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_var_data,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
             const hier::Patch& patch,
             std::vector<int>& bdry_face_locs,
             const std::vector<int>& bdry_face_conds,
@@ -121,7 +121,7 @@ class FlowModelBoundaryUtilitiesFiveEqnAllaire: public FlowModelBoundaryUtilitie
          */
         void
         fill3dEdgeBoundaryData(
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_var_data,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
             const hier::Patch& patch,
             std::vector<int>& bdry_edge_locs,
             const std::vector<int>& bdry_edge_conds,
@@ -134,7 +134,7 @@ class FlowModelBoundaryUtilitiesFiveEqnAllaire: public FlowModelBoundaryUtilitie
          */
         void
         fill3dNodeBoundaryData(
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_var_data,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
             const hier::Patch& patch,
             std::vector<int>& bdry_node_locs,
             const std::vector<int>& bdry_node_conds,
@@ -144,21 +144,21 @@ class FlowModelBoundaryUtilitiesFiveEqnAllaire: public FlowModelBoundaryUtilitie
     private:
         void
         read1dBdryNodes(
-            const boost::shared_ptr<tbox::Database>& input_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db,
             std::vector<int>& node_locs,
             std::vector<int>& node_conds,
             const hier::IntVector& periodic);
         
         void
         read2dBdryEdges(
-            const boost::shared_ptr<tbox::Database>& input_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db,
             std::vector<int>& edge_locs,
             std::vector<int>& edge_conds,
             const hier::IntVector& periodic);
         
         void
         read2dBdryNodes(
-            const boost::shared_ptr<tbox::Database>& input_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db,
             std::vector<int>& node_locs,
             const std::vector<int>& edge_conds,
             std::vector<int>& node_conds,
@@ -166,14 +166,14 @@ class FlowModelBoundaryUtilitiesFiveEqnAllaire: public FlowModelBoundaryUtilitie
         
         void
         read3dBdryFaces(
-            const boost::shared_ptr<tbox::Database>& input_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db,
             std::vector<int>& face_locs,
             std::vector<int>& face_conds,
             const hier::IntVector& periodic);
         
         void
         read3dBdryEdges(
-            const boost::shared_ptr<tbox::Database>& input_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db,
             std::vector<int>& edge_locs,
             const std::vector<int>& face_conds,
             std::vector<int>& edge_conds,
@@ -181,7 +181,7 @@ class FlowModelBoundaryUtilitiesFiveEqnAllaire: public FlowModelBoundaryUtilitie
         
         void
         read3dBdryNodes(
-            const boost::shared_ptr<tbox::Database>& input_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db,
             std::vector<int>& node_locs,
             const std::vector<int>& face_conds,
             std::vector<int>& node_conds,

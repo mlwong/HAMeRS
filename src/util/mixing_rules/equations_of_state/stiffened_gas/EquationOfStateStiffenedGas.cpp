@@ -50,9 +50,9 @@ EquationOfStateStiffenedGas::getPressure(
  */
 void
 EquationOfStateStiffenedGas::computePressure(
-    boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::CellData<double> >& data_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
     const std::vector<const double*>& thermo_properties,
     const hier::Box& domain) const
 {
@@ -166,9 +166,9 @@ EquationOfStateStiffenedGas::computePressure(
  */
 void
 EquationOfStateStiffenedGas::computePressure(
-    boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::SideData<double> >& data_density,
-    const boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
+    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
     const std::vector<const double*>& thermo_properties,
     int side_normal,
     const hier::Box& domain) const
@@ -296,10 +296,10 @@ EquationOfStateStiffenedGas::computePressure(
  */
 void
 EquationOfStateStiffenedGas::computePressure(
-    boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::CellData<double> >& data_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
-    const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -424,10 +424,10 @@ EquationOfStateStiffenedGas::computePressure(
  */
 void
 EquationOfStateStiffenedGas::computePressure(
-    boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::SideData<double> >& data_density,
-    const boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
-    const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -591,9 +591,9 @@ EquationOfStateStiffenedGas::getSoundSpeed(
  */
 void
 EquationOfStateStiffenedGas::computeSoundSpeed(
-    boost::shared_ptr<pdat::CellData<double> >& data_sound_speed,
-    const boost::shared_ptr<pdat::CellData<double> >& data_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_sound_speed,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
     const std::vector<const double*>& thermo_properties,
     const hier::Box& domain) const
 {
@@ -707,9 +707,9 @@ EquationOfStateStiffenedGas::computeSoundSpeed(
  */
 void
 EquationOfStateStiffenedGas::computeSoundSpeed(
-    boost::shared_ptr<pdat::SideData<double> >& data_sound_speed,
-    const boost::shared_ptr<pdat::SideData<double> >& data_density,
-    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_sound_speed,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
     const std::vector<const double*>& thermo_properties,
     int side_normal,
     const hier::Box& domain) const
@@ -837,10 +837,10 @@ EquationOfStateStiffenedGas::computeSoundSpeed(
  */
 void
 EquationOfStateStiffenedGas::computeSoundSpeed(
-    boost::shared_ptr<pdat::CellData<double> >& data_sound_speed,
-    const boost::shared_ptr<pdat::CellData<double> >& data_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_sound_speed,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -965,10 +965,10 @@ EquationOfStateStiffenedGas::computeSoundSpeed(
  */
 void
 EquationOfStateStiffenedGas::computeSoundSpeed(
-    boost::shared_ptr<pdat::SideData<double> >& data_sound_speed,
-    const boost::shared_ptr<pdat::SideData<double> >& data_density,
-    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_sound_speed,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -1132,9 +1132,9 @@ EquationOfStateStiffenedGas::getInternalEnergy(
  */
 void
 EquationOfStateStiffenedGas::computeInternalEnergy(
-    boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
-    const boost::shared_ptr<pdat::CellData<double> >& data_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
     const std::vector<const double*>& thermo_properties,
     const hier::Box& domain) const
 {
@@ -1248,9 +1248,9 @@ EquationOfStateStiffenedGas::computeInternalEnergy(
  */
 void
 EquationOfStateStiffenedGas::computeInternalEnergy(
-    boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
-    const boost::shared_ptr<pdat::SideData<double> >& data_density,
-    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
     const std::vector<const double*>& thermo_properties,
     int side_normal,
     const hier::Box& domain) const
@@ -1378,10 +1378,10 @@ EquationOfStateStiffenedGas::computeInternalEnergy(
  */
 void
 EquationOfStateStiffenedGas::computeInternalEnergy(
-    boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
-    const boost::shared_ptr<pdat::CellData<double> >& data_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -1506,10 +1506,10 @@ EquationOfStateStiffenedGas::computeInternalEnergy(
  */
 void
 EquationOfStateStiffenedGas::computeInternalEnergy(
-    boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
-    const boost::shared_ptr<pdat::SideData<double> >& data_density,
-    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -1673,9 +1673,9 @@ EquationOfStateStiffenedGas::getEnthalpy(
  */
 void
 EquationOfStateStiffenedGas::computeEnthalpy(
-    boost::shared_ptr<pdat::CellData<double> >& data_enthalpy,
-    const boost::shared_ptr<pdat::CellData<double> >& data_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_enthalpy,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
     const std::vector<const double*>& thermo_properties,
     const hier::Box& domain) const
 {
@@ -1789,9 +1789,9 @@ EquationOfStateStiffenedGas::computeEnthalpy(
  */
 void
 EquationOfStateStiffenedGas::computeEnthalpy(
-    boost::shared_ptr<pdat::SideData<double> >& data_enthalpy,
-    const boost::shared_ptr<pdat::SideData<double> >& data_density,
-    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_enthalpy,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
     const std::vector<const double*>& thermo_properties,
     int side_normal,
     const hier::Box& domain) const
@@ -1919,10 +1919,10 @@ EquationOfStateStiffenedGas::computeEnthalpy(
  */
 void
 EquationOfStateStiffenedGas::computeEnthalpy(
-    boost::shared_ptr<pdat::CellData<double> >& data_enthalpy,
-    const boost::shared_ptr<pdat::CellData<double> >& data_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_enthalpy,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2047,10 +2047,10 @@ EquationOfStateStiffenedGas::computeEnthalpy(
  */
 void
 EquationOfStateStiffenedGas::computeEnthalpy(
-    boost::shared_ptr<pdat::SideData<double> >& data_enthalpy,
-    const boost::shared_ptr<pdat::SideData<double> >& data_density,
-    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_enthalpy,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -2215,9 +2215,9 @@ EquationOfStateStiffenedGas::getTemperature(
  */
 void
 EquationOfStateStiffenedGas::computeTemperature(
-    boost::shared_ptr<pdat::CellData<double> >& data_temperature,
-    const boost::shared_ptr<pdat::CellData<double> >& data_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
     const std::vector<const double*>& thermo_properties,
     const hier::Box& domain) const
 {
@@ -2333,9 +2333,9 @@ EquationOfStateStiffenedGas::computeTemperature(
  */
 void
 EquationOfStateStiffenedGas::computeTemperature(
-    boost::shared_ptr<pdat::SideData<double> >& data_temperature,
-    const boost::shared_ptr<pdat::SideData<double> >& data_density,
-    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
     const std::vector<const double*>& thermo_properties,
     int side_normal,
     const hier::Box& domain) const
@@ -2465,10 +2465,10 @@ EquationOfStateStiffenedGas::computeTemperature(
  */
 void
 EquationOfStateStiffenedGas::computeTemperature(
-    boost::shared_ptr<pdat::CellData<double> >& data_temperature,
-    const boost::shared_ptr<pdat::CellData<double> >& data_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2595,10 +2595,10 @@ EquationOfStateStiffenedGas::computeTemperature(
  */
 void
 EquationOfStateStiffenedGas::computeTemperature(
-    boost::shared_ptr<pdat::SideData<double> >& data_temperature,
-    const boost::shared_ptr<pdat::SideData<double> >& data_density,
-    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -2764,9 +2764,9 @@ EquationOfStateStiffenedGas::getInternalEnergyFromTemperature(
  */
 void
 EquationOfStateStiffenedGas::computeInternalEnergyFromTemperature(
-    boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
-    const boost::shared_ptr<pdat::CellData<double> >& data_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
     const std::vector<const double*>& thermo_properties,
     const hier::Box& domain) const
 {
@@ -2880,9 +2880,9 @@ EquationOfStateStiffenedGas::computeInternalEnergyFromTemperature(
  */
 void
 EquationOfStateStiffenedGas::computeInternalEnergyFromTemperature(
-    boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
-    const boost::shared_ptr<pdat::SideData<double> >& data_density,
-    const boost::shared_ptr<pdat::SideData<double> >& data_temperature,
+    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
     const std::vector<const double*>& thermo_properties,
     int side_normal,
     const hier::Box& domain) const
@@ -3010,10 +3010,10 @@ EquationOfStateStiffenedGas::computeInternalEnergyFromTemperature(
  */
 void
 EquationOfStateStiffenedGas::computeInternalEnergyFromTemperature(
-    boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
-    const boost::shared_ptr<pdat::CellData<double> >& data_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
-    const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -3138,10 +3138,10 @@ EquationOfStateStiffenedGas::computeInternalEnergyFromTemperature(
  */
 void
 EquationOfStateStiffenedGas::computeInternalEnergyFromTemperature(
-    boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
-    const boost::shared_ptr<pdat::SideData<double> >& data_density,
-    const boost::shared_ptr<pdat::SideData<double> >& data_temperature,
-    const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -3302,9 +3302,9 @@ EquationOfStateStiffenedGas::getIsochoricSpecificHeatCapacity(
  */
 void
 EquationOfStateStiffenedGas::computeIsochoricSpecificHeatCapacity(
-    boost::shared_ptr<pdat::CellData<double> >& data_isochoric_specific_heat_capacity,
-    const boost::shared_ptr<pdat::CellData<double> >& data_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isochoric_specific_heat_capacity,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
     const std::vector<const double*>& thermo_properties,
     const hier::Box& domain) const
 {
@@ -3385,9 +3385,9 @@ EquationOfStateStiffenedGas::computeIsochoricSpecificHeatCapacity(
  */
 void
 EquationOfStateStiffenedGas::computeIsochoricSpecificHeatCapacity(
-    boost::shared_ptr<pdat::SideData<double> >& data_isochoric_specific_heat_capacity,
-    const boost::shared_ptr<pdat::SideData<double> >& data_density,
-    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isochoric_specific_heat_capacity,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
     const std::vector<const double*>& thermo_properties,
     int side_normal,
     const hier::Box& domain) const
@@ -3478,10 +3478,10 @@ EquationOfStateStiffenedGas::computeIsochoricSpecificHeatCapacity(
  */
 void
 EquationOfStateStiffenedGas::computeIsochoricSpecificHeatCapacity(
-    boost::shared_ptr<pdat::CellData<double> >& data_isochoric_specific_heat_capacity,
-    const boost::shared_ptr<pdat::CellData<double> >& data_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isochoric_specific_heat_capacity,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
     const hier::Box& domain) const
 {
     NULL_USE(data_density);
@@ -3580,10 +3580,10 @@ EquationOfStateStiffenedGas::computeIsochoricSpecificHeatCapacity(
  */
 void
 EquationOfStateStiffenedGas::computeIsochoricSpecificHeatCapacity(
-    boost::shared_ptr<pdat::SideData<double> >& data_isochoric_specific_heat_capacity,
-    const boost::shared_ptr<pdat::SideData<double> >& data_density,
-    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isochoric_specific_heat_capacity,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -3714,9 +3714,9 @@ EquationOfStateStiffenedGas::getIsobaricSpecificHeatCapacity(
  */
 void
 EquationOfStateStiffenedGas::computeIsobaricSpecificHeatCapacity(
-    boost::shared_ptr<pdat::CellData<double> >& data_isobaric_specific_heat_capacity,
-    const boost::shared_ptr<pdat::CellData<double> >& data_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isobaric_specific_heat_capacity,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
     const std::vector<const double*>& thermo_properties,
     const hier::Box& domain) const
 {
@@ -3797,9 +3797,9 @@ EquationOfStateStiffenedGas::computeIsobaricSpecificHeatCapacity(
  */
 void
 EquationOfStateStiffenedGas::computeIsobaricSpecificHeatCapacity(
-    boost::shared_ptr<pdat::SideData<double> >& data_isobaric_specific_heat_capacity,
-    const boost::shared_ptr<pdat::SideData<double> >& data_density,
-    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isobaric_specific_heat_capacity,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
     const std::vector<const double*>& thermo_properties,
     int side_normal,
     const hier::Box& domain) const
@@ -3890,10 +3890,10 @@ EquationOfStateStiffenedGas::computeIsobaricSpecificHeatCapacity(
  */
 void
 EquationOfStateStiffenedGas::computeIsobaricSpecificHeatCapacity(
-    boost::shared_ptr<pdat::CellData<double> >& data_isobaric_specific_heat_capacity,
-    const boost::shared_ptr<pdat::CellData<double> >& data_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isobaric_specific_heat_capacity,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
     const hier::Box& domain) const
 {
     NULL_USE(data_density);
@@ -3992,10 +3992,10 @@ EquationOfStateStiffenedGas::computeIsobaricSpecificHeatCapacity(
  */
 void
 EquationOfStateStiffenedGas::computeIsobaricSpecificHeatCapacity(
-    boost::shared_ptr<pdat::SideData<double> >& data_isobaric_specific_heat_capacity,
-    const boost::shared_ptr<pdat::SideData<double> >& data_density,
-    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isobaric_specific_heat_capacity,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -4130,9 +4130,9 @@ EquationOfStateStiffenedGas::getGruneisenParameter(
  */
 void
 EquationOfStateStiffenedGas::computeGruneisenParameter(
-    boost::shared_ptr<pdat::CellData<double> >& data_gruneisen_parameter,
-    const boost::shared_ptr<pdat::CellData<double> >& data_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_gruneisen_parameter,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
     const std::vector<const double*>& thermo_properties,
     const hier::Box& domain) const
 {
@@ -4211,9 +4211,9 @@ EquationOfStateStiffenedGas::computeGruneisenParameter(
  */
 void
 EquationOfStateStiffenedGas::computeGruneisenParameter(
-    boost::shared_ptr<pdat::SideData<double> >& data_gruneisen_parameter,
-    const boost::shared_ptr<pdat::SideData<double> >& data_density,
-    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_gruneisen_parameter,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
     const std::vector<const double*>& thermo_properties,
     int side_normal,
     const hier::Box& domain) const
@@ -4302,10 +4302,10 @@ EquationOfStateStiffenedGas::computeGruneisenParameter(
  */
 void
 EquationOfStateStiffenedGas::computeGruneisenParameter(
-    boost::shared_ptr<pdat::CellData<double> >& data_gruneisen_parameter,
-    const boost::shared_ptr<pdat::CellData<double> >& data_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_gruneisen_parameter,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
     const hier::Box& domain) const
 {
     NULL_USE(data_density);
@@ -4402,10 +4402,10 @@ EquationOfStateStiffenedGas::computeGruneisenParameter(
  */
 void
 EquationOfStateStiffenedGas::computeGruneisenParameter(
-    boost::shared_ptr<pdat::SideData<double> >& data_gruneisen_parameter,
-    const boost::shared_ptr<pdat::SideData<double> >& data_density,
-    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_gruneisen_parameter,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -4536,9 +4536,9 @@ EquationOfStateStiffenedGas::getPressureDerivativeWithDensity(
  */
 void
 EquationOfStateStiffenedGas::computePressureDerivativeWithDensity(
-    boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_pressure_partial_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
     const std::vector<const double*>& thermo_properties,
     const hier::Box& domain) const
 {
@@ -4655,9 +4655,9 @@ EquationOfStateStiffenedGas::computePressureDerivativeWithDensity(
  */
 void
 EquationOfStateStiffenedGas::computePressureDerivativeWithDensity(
-    boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_density,
-    const boost::shared_ptr<pdat::SideData<double> >& data_density,
-    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_pressure_partial_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
     const std::vector<const double*>& thermo_properties,
     int side_normal,
     const hier::Box& domain) const
@@ -4788,10 +4788,10 @@ EquationOfStateStiffenedGas::computePressureDerivativeWithDensity(
  */
 void
 EquationOfStateStiffenedGas::computePressureDerivativeWithDensity(
-    boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_pressure_partial_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -4919,10 +4919,10 @@ EquationOfStateStiffenedGas::computePressureDerivativeWithDensity(
  */
 void
 EquationOfStateStiffenedGas::computePressureDerivativeWithDensity(
-    boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_density,
-    const boost::shared_ptr<pdat::SideData<double> >& data_density,
-    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_pressure_partial_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {
@@ -5090,9 +5090,9 @@ EquationOfStateStiffenedGas::getDensity(
  */
 void
 EquationOfStateStiffenedGas::computeDensity(
-    boost::shared_ptr<pdat::CellData<double> >& data_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
     const std::vector<const double*>& thermo_properties,
     const hier::Box& domain) const
 {
@@ -5208,9 +5208,9 @@ EquationOfStateStiffenedGas::computeDensity(
  */
 void
 EquationOfStateStiffenedGas::computeDensity(
-    boost::shared_ptr<pdat::SideData<double> >& data_density,
-    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::SideData<double> >& data_temperature,
+    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
     const std::vector<const double*>& thermo_properties,
     int side_normal,
     const hier::Box& domain) const
@@ -5340,10 +5340,10 @@ EquationOfStateStiffenedGas::computeDensity(
  */
 void
 EquationOfStateStiffenedGas::computeDensity(
-    boost::shared_ptr<pdat::CellData<double> >& data_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
-    const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermo_properties,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -5470,10 +5470,10 @@ EquationOfStateStiffenedGas::computeDensity(
  */
 void
 EquationOfStateStiffenedGas::computeDensity(
-    boost::shared_ptr<pdat::SideData<double> >& data_density,
-    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::SideData<double> >& data_temperature,
-    const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+    HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_thermo_properties,
     int side_normal,
     const hier::Box& domain) const
 {

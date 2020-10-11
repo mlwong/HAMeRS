@@ -41,8 +41,8 @@ class Difference
          */
         virtual void
         computeDifference(
-            boost::shared_ptr<pdat::CellData<double> >& difference,
-            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& difference,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
             const int depth = 0) = 0;
         
         /*
@@ -50,8 +50,8 @@ class Difference
          */
         virtual void
         computeDifference(
-            boost::shared_ptr<pdat::CellData<double> >& difference,
-            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& difference,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
             const hier::Box& domain,
             const int depth = 0) = 0;
         
@@ -60,9 +60,9 @@ class Difference
          */
         virtual void
         computeDifferenceWithVariableLocalMean(
-            boost::shared_ptr<pdat::CellData<double> >& difference,
-            boost::shared_ptr<pdat::CellData<double> >& variable_local_mean,
-            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& difference,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& variable_local_mean,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
             const int depth = 0) = 0;
         
         /*
@@ -70,9 +70,9 @@ class Difference
          */
         virtual void
         computeDifferenceWithVariableLocalMean(
-            boost::shared_ptr<pdat::CellData<double> >& difference,
-            boost::shared_ptr<pdat::CellData<double> >& variable_local_mean,
-            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& difference,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& variable_local_mean,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
             const hier::Box& domain,
             const int depth = 0) = 0;
         

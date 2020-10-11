@@ -117,7 +117,7 @@ struct BasicCartesianBoundaryUtilities1
         static void
         getFromInput(
             BoundaryUtilityStrategy* bdry_strategy,
-            const boost::shared_ptr<tbox::Database>& input_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db,
             const std::vector<int>& node_locs,
             std::vector<int>& node_conds,
             const hier::IntVector& periodic);
@@ -150,7 +150,7 @@ struct BasicCartesianBoundaryUtilities1
         static void
         fillNodeBoundaryData(
             const std::string& var_name,
-            const boost::shared_ptr<pdat::CellData<double> >& var_data,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& var_data,
             const hier::Patch& patch,
             const std::vector<int>& bdry_node_locs,
             const std::vector<int>& bdry_node_conds,
@@ -161,7 +161,7 @@ struct BasicCartesianBoundaryUtilities1
         static void
         read1dBdryNodes(
             BoundaryUtilityStrategy* bdry_strategy,
-            const boost::shared_ptr<tbox::Database>& input_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db,
             const std::vector<int>& node_locs,
             std::vector<int>& node_conds,
             const hier::IntVector& periodic);

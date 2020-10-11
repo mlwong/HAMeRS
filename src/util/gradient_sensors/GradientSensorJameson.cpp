@@ -20,8 +20,8 @@ GradientSensorJameson::GradientSensorJameson(
  */
 void
 GradientSensorJameson::computeGradient(
-    boost::shared_ptr<pdat::CellData<double> >& gradient,
-    const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& gradient,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
     hier::Patch& patch,
     const int depth)
 {
@@ -62,9 +62,9 @@ GradientSensorJameson::computeGradient(
         const int num_ghosts_0_gradient = num_ghosts_gradient[0];
         
         // Allocate memory.
-        boost::shared_ptr<pdat::CellData<double> > gradient_x(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > gradient_x(
             new pdat::CellData<double>(interior_box, 1, num_ghosts_gradient));
-        boost::shared_ptr<pdat::CellData<double> > local_mean_value_x(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > local_mean_value_x(
             new pdat::CellData<double>(interior_box, 1, num_ghosts_gradient));
         
         double* psi_x = gradient_x->getPointer(0);
@@ -110,13 +110,13 @@ GradientSensorJameson::computeGradient(
         const int ghostcell_dim_0_gradient = ghostcell_dims_gradient[0];
         
         // Allocate memory in different dimensions.
-        boost::shared_ptr<pdat::CellData<double> > gradient_x(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > gradient_x(
             new pdat::CellData<double>(interior_box, 1, num_ghosts_gradient));
-        boost::shared_ptr<pdat::CellData<double> > gradient_y(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > gradient_y(
             new pdat::CellData<double>(interior_box, 1, num_ghosts_gradient));
-        boost::shared_ptr<pdat::CellData<double> > local_mean_value_x(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > local_mean_value_x(
             new pdat::CellData<double>(interior_box, 1, num_ghosts_gradient));
-        boost::shared_ptr<pdat::CellData<double> > local_mean_value_y(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > local_mean_value_y(
             new pdat::CellData<double>(interior_box, 1, num_ghosts_gradient));
         
         double* psi_x = gradient_x->getPointer(0);
@@ -209,17 +209,17 @@ GradientSensorJameson::computeGradient(
         const int ghostcell_dim_1_gradient = ghostcell_dims_gradient[1];
         
         // Allocate memory in different dimensions.
-        boost::shared_ptr<pdat::CellData<double> > gradient_x(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > gradient_x(
             new pdat::CellData<double>(interior_box, 1, num_ghosts_gradient));
-        boost::shared_ptr<pdat::CellData<double> > gradient_y(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > gradient_y(
             new pdat::CellData<double>(interior_box, 1, num_ghosts_gradient));
-        boost::shared_ptr<pdat::CellData<double> > gradient_z(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > gradient_z(
             new pdat::CellData<double>(interior_box, 1, num_ghosts_gradient));
-        boost::shared_ptr<pdat::CellData<double> > local_mean_value_x(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > local_mean_value_x(
             new pdat::CellData<double>(interior_box, 1, num_ghosts_gradient));
-        boost::shared_ptr<pdat::CellData<double> > local_mean_value_y(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > local_mean_value_y(
             new pdat::CellData<double>(interior_box, 1, num_ghosts_gradient));
-        boost::shared_ptr<pdat::CellData<double> > local_mean_value_z(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > local_mean_value_z(
             new pdat::CellData<double>(interior_box, 1, num_ghosts_gradient));
         
         double* psi_x = gradient_x->getPointer(0);

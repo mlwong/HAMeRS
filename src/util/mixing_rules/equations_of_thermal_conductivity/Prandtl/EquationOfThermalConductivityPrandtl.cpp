@@ -69,9 +69,9 @@ EquationOfThermalConductivityPrandtl::getThermalConductivity(
  */
 void
 EquationOfThermalConductivityPrandtl::computeThermalConductivity(
-    boost::shared_ptr<pdat::CellData<double> >& data_thermal_conductivity,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermal_conductivity,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
     const std::vector<const double*>& molecular_properties,
     const hier::Box& domain) const
 {
@@ -88,7 +88,7 @@ EquationOfThermalConductivityPrandtl::computeThermalConductivity(
     const hier::IntVector ghostcell_dims_thermal_conductivity = ghost_box_thermal_conductivity.numberCells();
     
     // Delcare data container for shear viscosity.
-    boost::shared_ptr<pdat::CellData<double> > data_shear_viscosity;
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_shear_viscosity;
     
     /*
      * Get the local lower index and number of cells in each direction of the domain.
@@ -319,10 +319,10 @@ EquationOfThermalConductivityPrandtl::computeThermalConductivity(
  */
 void
 EquationOfThermalConductivityPrandtl::computeThermalConductivity(
-    boost::shared_ptr<pdat::CellData<double> >& data_thermal_conductivity,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
-    const boost::shared_ptr<pdat::CellData<double> >& data_molecular_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermal_conductivity,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_molecular_properties,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -342,8 +342,8 @@ EquationOfThermalConductivityPrandtl::computeThermalConductivity(
     const hier::IntVector ghostcell_dims_molecular_properties = ghost_box_molecular_properties.numberCells();
     
     // Delcare data containers for shear viscosity and molecular properties.
-    boost::shared_ptr<pdat::CellData<double> > data_shear_viscosity;
-    boost::shared_ptr<pdat::CellData<double> > data_molecular_properties_shear_viscosity;
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_shear_viscosity;
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_molecular_properties_shear_viscosity;
     
     /*
      * Get the local lower index and number of cells in each direction of the domain.

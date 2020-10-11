@@ -26,10 +26,10 @@ class ConvectiveFluxReconstructor
         ConvectiveFluxReconstructor(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_eqn,
-            const boost::shared_ptr<FlowModel>& flow_model,
-            const boost::shared_ptr<tbox::Database>& convective_flux_reconstructor_db):
+            const HAMERS_SHARED_PTR<FlowModel>& flow_model,
+            const HAMERS_SHARED_PTR<tbox::Database>& convective_flux_reconstructor_db):
                 d_object_name(object_name),
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
@@ -63,7 +63,7 @@ class ConvectiveFluxReconstructor
          */
         virtual void
         putToRestart(
-            const boost::shared_ptr<tbox::Database>& restart_db) const = 0;
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const = 0;
         
         /*
          * Compute the convective flux and source due to splitting of convective term on a patch.
@@ -71,9 +71,9 @@ class ConvectiveFluxReconstructor
         virtual void
         computeConvectiveFluxAndSourceOnPatch(
             hier::Patch& patch,
-            const boost::shared_ptr<pdat::SideVariable<double> >& variable_convective_flux,
-            const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
-            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const HAMERS_SHARED_PTR<pdat::SideVariable<double> >& variable_convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double time,
             const double dt,
             const int RK_step_number) = 0;
@@ -90,9 +90,9 @@ class ConvectiveFluxReconstructor
         const tbox::Dimension d_dim;
         
         /*
-         * boost::shared_ptr to the grid geometry.
+         * HAMERS_SHARED_PTR to the grid geometry.
          */
-        const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
+        const HAMERS_SHARED_PTR<geom::CartesianGridGeometry> d_grid_geometry;
         
         /*
          * Number of ghost cells needed by the convective flux reconstructor.
@@ -107,12 +107,12 @@ class ConvectiveFluxReconstructor
         /*
          * Flow model.
          */
-        const boost::shared_ptr<FlowModel> d_flow_model;
+        const HAMERS_SHARED_PTR<FlowModel> d_flow_model;
         
         /*
-         * boost::shared_ptr to database of the convective_flux_reconstructor.
+         * HAMERS_SHARED_PTR to database of the convective_flux_reconstructor.
          */
-        const boost::shared_ptr<tbox::Database> d_convective_flux_reconstructor_db;
+        const HAMERS_SHARED_PTR<tbox::Database> d_convective_flux_reconstructor_db;
         
 };
 

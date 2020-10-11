@@ -27,9 +27,9 @@ class ValueTagger
         ValueTagger(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
-            const boost::shared_ptr<FlowModel>& flow_model,
-            const boost::shared_ptr<tbox::Database>& value_tagger_db);
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<FlowModel>& flow_model,
+            const HAMERS_SHARED_PTR<tbox::Database>& value_tagger_db);
         
         /*
          * Get the number of ghost cells needed by the value tagger.
@@ -52,8 +52,8 @@ class ValueTagger
          */
         void
         registerPlotQuantities(
-            const boost::shared_ptr<ExtendedVisItDataWriter>& visit_writer,
-            const boost::shared_ptr<hier::VariableContext>& plot_context);
+            const HAMERS_SHARED_PTR<ExtendedVisItDataWriter>& visit_writer,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& plot_context);
         
         /*
          * Print all characteristics of the value tagger class.
@@ -67,7 +67,7 @@ class ValueTagger
          */
         void
         putToRestart(
-            const boost::shared_ptr<tbox::Database>& restart_db) const;
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
         
         /*
          * Compute values on a patch for value tagger.
@@ -75,16 +75,16 @@ class ValueTagger
         void
         computeValueTaggerValuesOnPatch(
             hier::Patch& patch,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Get the statistics of values that are required by the value tagger.
          */
         void
         getValueStatistics(
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const int level_number,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Tag cells on a patch for refinement using value tagger.
@@ -92,8 +92,8 @@ class ValueTagger
         void
         tagCellsOnPatch(
             hier::Patch& patch,
-            const boost::shared_ptr<pdat::CellData<int> >& tags,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<pdat::CellData<int> >& tags,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
     private:
         /*
@@ -102,9 +102,9 @@ class ValueTagger
         void
         tagCellsOnPatchWithValue(
             hier::Patch& patch,
-            const boost::shared_ptr<hier::VariableContext>& data_context,
-            const boost::shared_ptr<pdat::CellData<int> >& tags,
-            const boost::shared_ptr<pdat::CellVariable<double> >& variable_value_tagger,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const HAMERS_SHARED_PTR<pdat::CellData<int> >& tags,
+            const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_value_tagger,
             const double value_max,
             const bool uses_global_tol_up,
             const bool uses_global_tol_lo,
@@ -120,9 +120,9 @@ class ValueTagger
          */
         void transferDataOnPatchToClassVariable(
             hier::Patch& patch,
-            const boost::shared_ptr<hier::VariableContext>& data_context,
-            const boost::shared_ptr<pdat::CellData<double> >& data_input,
-            const boost::shared_ptr<pdat::CellVariable<double> >& variable_value_tagger,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_input,
+            const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_value_tagger,
             const int depth);
         
         /*
@@ -136,9 +136,9 @@ class ValueTagger
         const tbox::Dimension d_dim;
         
         /*
-         * boost::shared_ptr to the grid geometry.
+         * HAMERS_SHARED_PTR to the grid geometry.
          */
-        const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
+        const HAMERS_SHARED_PTR<geom::CartesianGridGeometry> d_grid_geometry;
         
         /*
          * Number of ghost cells needed by the the value detector.
@@ -148,7 +148,7 @@ class ValueTagger
         /*
          * Flow model.
          */
-        const boost::shared_ptr<FlowModel> d_flow_model;
+        const HAMERS_SHARED_PTR<FlowModel> d_flow_model;
         
         /*
          * Number of ghost cells to use in taking derivatives.
@@ -169,14 +169,14 @@ class ValueTagger
         std::vector<bool> d_uses_local_tol_lo;
         
         /*
-         * boost::shared_ptr to data values.
+         * HAMERS_SHARED_PTR to data values.
          */
-        boost::shared_ptr<pdat::CellVariable<double> > d_value_tagger_variable_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_value_tagger_variable_total_energy;
-        boost::shared_ptr<pdat::CellVariable<double> > d_value_tagger_variable_pressure;
-        boost::shared_ptr<pdat::CellVariable<double> > d_value_tagger_variable_dilatation;
-        boost::shared_ptr<pdat::CellVariable<double> > d_value_tagger_variable_enstrophy;
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_value_tagger_variable_mass_fractions;
+        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_value_tagger_variable_density;
+        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_value_tagger_variable_total_energy;
+        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_value_tagger_variable_pressure;
+        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_value_tagger_variable_dilatation;
+        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_value_tagger_variable_enstrophy;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > d_value_tagger_variable_mass_fractions;
         
         /*
          * Statistics of data values.

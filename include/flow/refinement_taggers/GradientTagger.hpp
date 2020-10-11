@@ -29,9 +29,9 @@ class GradientTagger
         GradientTagger(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
-            const boost::shared_ptr<FlowModel>& flow_model,
-            const boost::shared_ptr<tbox::Database>& gradient_tagger_db);
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<FlowModel>& flow_model,
+            const HAMERS_SHARED_PTR<tbox::Database>& gradient_tagger_db);
         
         /*
          * Get the number of ghost cells needed by the gradient tagger.
@@ -54,8 +54,8 @@ class GradientTagger
          */
         void
         registerPlotQuantities(
-            const boost::shared_ptr<ExtendedVisItDataWriter>& visit_writer,
-            const boost::shared_ptr<hier::VariableContext>& plot_context);
+            const HAMERS_SHARED_PTR<ExtendedVisItDataWriter>& visit_writer,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& plot_context);
         
         /*
          * Print all characteristics of the gradient tagger class.
@@ -69,7 +69,7 @@ class GradientTagger
          */
         void
         putToRestart(
-            const boost::shared_ptr<tbox::Database>& restart_db) const;
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
         
         /*
          * Compute values of gradient sensors on a patch.
@@ -77,7 +77,7 @@ class GradientTagger
         void
         computeGradientSensorValuesOnPatch(
             hier::Patch& patch,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Get the statistics of the sensor values that are required by the
@@ -85,9 +85,9 @@ class GradientTagger
          */
         void
         getSensorValueStatistics(
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const int level_number,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Tag cells on a patch for refinement using gradient sensors.
@@ -95,8 +95,8 @@ class GradientTagger
         void
         tagCellsOnPatch(
             hier::Patch& patch,
-            const boost::shared_ptr<pdat::CellData<int> >& tags,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<pdat::CellData<int> >& tags,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
     private:
         /*
@@ -105,8 +105,8 @@ class GradientTagger
         void
         tagCellsOnPatchWithGradientSensor(
             hier::Patch& patch,
-            const boost::shared_ptr<pdat::CellData<int> >& tags,
-            const boost::shared_ptr<pdat::CellData<double> >& gradient,
+            const HAMERS_SHARED_PTR<pdat::CellData<int> >& tags,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& gradient,
             const std::string& sensor_key,
             const double tol);
         
@@ -116,10 +116,10 @@ class GradientTagger
         void
         tagCellsOnPatchWithDifferenceSensor(
             hier::Patch& patch,
-            const boost::shared_ptr<pdat::CellData<int> >& tags,
-            const boost::shared_ptr<pdat::CellData<double> >& difference,
+            const HAMERS_SHARED_PTR<pdat::CellData<int> >& tags,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& difference,
             const double difference_max,
-            const boost::shared_ptr<pdat::CellData<double> >& variable_local_mean,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& variable_local_mean,
             const bool uses_global_tol,
             const bool uses_local_tol,
             const double global_tol,
@@ -136,9 +136,9 @@ class GradientTagger
         const tbox::Dimension d_dim;
         
         /*
-         * boost::shared_ptr to the grid geometry.
+         * HAMERS_SHARED_PTR to the grid geometry.
          */
-        const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
+        const HAMERS_SHARED_PTR<geom::CartesianGridGeometry> d_grid_geometry;
         
         /*
          * Number of ghost cells needed by the the gradient tagger.
@@ -148,7 +148,7 @@ class GradientTagger
         /*
          * Flow model.
          */
-        const boost::shared_ptr<FlowModel> d_flow_model;
+        const HAMERS_SHARED_PTR<FlowModel> d_flow_model;
         
         /*
          * Chosen gradient sensors.
@@ -156,15 +156,15 @@ class GradientTagger
         std::vector<std::string> d_gradient_sensors;
         
         /*
-         * boost::shared_ptr to difference operators.
+         * HAMERS_SHARED_PTR to difference operators.
          */
-        boost::shared_ptr<DifferenceFirstOrder> d_difference_first_order;
-        boost::shared_ptr<DifferenceSecondOrder> d_difference_second_order;
+        HAMERS_SHARED_PTR<DifferenceFirstOrder> d_difference_first_order;
+        HAMERS_SHARED_PTR<DifferenceSecondOrder> d_difference_second_order;
         
         /*
-         * boost::shared_ptr to GradientSensorJameson.
+         * HAMERS_SHARED_PTR to GradientSensorJameson.
          */
-        boost::shared_ptr<GradientSensorJameson> d_gradient_sensor_Jameson;
+        HAMERS_SHARED_PTR<GradientSensorJameson> d_gradient_sensor_Jameson;
         
         /*
          * Variables, tolerances and settings for the gradient sensors.
@@ -188,22 +188,22 @@ class GradientTagger
         std::vector<double> d_Jameson_gradient_tol;
         
         /*
-         * boost::shared_ptr to differences.
+         * HAMERS_SHARED_PTR to differences.
          */
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_order_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_order_total_energy;
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_order_pressure;
+        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_difference_first_order_density;
+        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_difference_first_order_total_energy;
+        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_difference_first_order_pressure;
         
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_order_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_order_total_energy;
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_order_pressure;
+        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_difference_second_order_density;
+        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_difference_second_order_total_energy;
+        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_difference_second_order_pressure;
         
         /*
-         * boost::shared_ptr to values of Jameson gradient sensor.
+         * HAMERS_SHARED_PTR to values of Jameson gradient sensor.
          */
-        boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_gradient_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_gradient_total_energy;
-        boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_gradient_pressure;
+        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_Jameson_gradient_density;
+        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_Jameson_gradient_total_energy;
+        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_Jameson_gradient_pressure;
         
         /*
          * Statistics of sensor values.
@@ -216,13 +216,13 @@ class GradientTagger
         double d_difference_second_order_max_total_energy;
         double d_difference_second_order_max_pressure;
         
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_order_local_mean_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_order_local_mean_total_energy;
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_order_local_mean_pressure;
+        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_difference_first_order_local_mean_density;
+        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_difference_first_order_local_mean_total_energy;
+        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_difference_first_order_local_mean_pressure;
         
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_order_local_mean_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_order_local_mean_total_energy;
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_order_local_mean_pressure;
+        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_difference_second_order_local_mean_density;
+        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_difference_second_order_local_mean_total_energy;
+        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_difference_second_order_local_mean_pressure;
         
 };
 

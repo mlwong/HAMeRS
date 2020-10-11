@@ -83,7 +83,7 @@ class ExtendedTagAndInitStrategy
          */
         virtual double
         getLevelDt(
-            const boost::shared_ptr<hier::PatchLevel>& level,
+            const HAMERS_SHARED_PTR<hier::PatchLevel>& level,
             const double dt_time,
             const bool initial_time);
         
@@ -144,8 +144,8 @@ class ExtendedTagAndInitStrategy
          */
         virtual double
         advanceLevel(
-            const boost::shared_ptr<hier::PatchLevel>& level,
-            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchLevel>& level,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
             const double current_time,
             const double new_time,
             const bool first_step,
@@ -162,7 +162,7 @@ class ExtendedTagAndInitStrategy
          */
         virtual void
         resetTimeDependentData(
-            const boost::shared_ptr<hier::PatchLevel>& level,
+            const HAMERS_SHARED_PTR<hier::PatchLevel>& level,
             const double new_time,
             const bool can_be_refined);
 
@@ -179,7 +179,7 @@ class ExtendedTagAndInitStrategy
          */
         virtual void
         resetDataToPreadvanceState(
-            const boost::shared_ptr<hier::PatchLevel>& level);
+            const HAMERS_SHARED_PTR<hier::PatchLevel>& level);
         
         /**
          * Initialize data on a new level after it is inserted into an AMR patch
@@ -205,13 +205,13 @@ class ExtendedTagAndInitStrategy
          */
         virtual void
         initializeLevelData(
-            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
             const int level_number,
             const double init_data_time,
             const bool can_be_refined,
             const bool initial_time,
-            const boost::shared_ptr<hier::PatchLevel>& old_level =
-               boost::shared_ptr<hier::PatchLevel>(),
+            const HAMERS_SHARED_PTR<hier::PatchLevel>& old_level =
+               HAMERS_SHARED_PTR<hier::PatchLevel>(),
             const bool allocate_data = true) = 0;
         
         /**
@@ -234,7 +234,7 @@ class ExtendedTagAndInitStrategy
          */
         virtual void
         resetHierarchyConfiguration(
-            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
             const int coarsest_level,
             const int finest_level) = 0;
         
@@ -276,7 +276,7 @@ class ExtendedTagAndInitStrategy
          */
         virtual void
         applyValueDetector(
-            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
             const int level_number,
             const double error_data_time,
             const int tag_index,
@@ -324,7 +324,7 @@ class ExtendedTagAndInitStrategy
          */
         virtual void
         applyGradientDetector(
-            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
             const int level_number,
             const double error_data_time,
             const int tag_index,
@@ -372,7 +372,7 @@ class ExtendedTagAndInitStrategy
          */
         virtual void
         applyMultiresolutionDetector(
-            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
             const int level_number,
             const double error_data_time,
             const int tag_index,
@@ -425,7 +425,7 @@ class ExtendedTagAndInitStrategy
          */
         virtual void
         applyIntegralDetector(
-            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
             const int level_number,
             const double error_data_time,
             const int tag_index,
@@ -481,7 +481,7 @@ class ExtendedTagAndInitStrategy
          */
         virtual void
         applyRichardsonExtrapolation(
-            const boost::shared_ptr<hier::PatchLevel>& level,
+            const HAMERS_SHARED_PTR<hier::PatchLevel>& level,
             const double error_data_time,
             const int tag_index,
             const double deltat,
@@ -509,9 +509,9 @@ class ExtendedTagAndInitStrategy
          */
         virtual void
         coarsenDataForRichardsonExtrapolation(
-           const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+           const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
            const int level_number,
-           const boost::shared_ptr<hier::PatchLevel>& coarser_level,
+           const HAMERS_SHARED_PTR<hier::PatchLevel>& coarser_level,
            const double coarsen_data_time,
            const bool before_advance);
         
@@ -538,9 +538,9 @@ class ExtendedTagAndInitStrategy
          */
         virtual void
         processHierarchyBeforeAddingNewLevel(
-           const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+           const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
            const int level_number,
-           const boost::shared_ptr<hier::BoxLevel>& new_box_level);
+           const HAMERS_SHARED_PTR<hier::BoxLevel>& new_box_level);
         
         /**
          * In some cases user code may wish to process a PatchLevel before it is
@@ -565,10 +565,10 @@ class ExtendedTagAndInitStrategy
          */
         virtual void
         processLevelBeforeRemoval(
-            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
             const int level_number,
-            const boost::shared_ptr<hier::PatchLevel>& old_level =
-                boost::shared_ptr<hier::PatchLevel>());
+            const HAMERS_SHARED_PTR<hier::PatchLevel>& old_level =
+                HAMERS_SHARED_PTR<hier::PatchLevel>());
         
     private:
         

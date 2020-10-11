@@ -9,9 +9,9 @@
 ValueTagger::ValueTagger(
     const std::string& object_name,
     const tbox::Dimension& dim,
-    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
-    const boost::shared_ptr<FlowModel>& flow_model,
-    const boost::shared_ptr<tbox::Database>& value_tagger_db):
+    const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
+    const HAMERS_SHARED_PTR<FlowModel>& flow_model,
+    const HAMERS_SHARED_PTR<tbox::Database>& value_tagger_db):
         d_object_name(object_name),
         d_dim(dim),
         d_grid_geometry(grid_geometry),
@@ -506,8 +506,8 @@ ValueTagger::registerValueTaggerVariables(
  */
 void
 ValueTagger::registerPlotQuantities(
-    const boost::shared_ptr<ExtendedVisItDataWriter>& visit_writer,
-    const boost::shared_ptr<hier::VariableContext>& plot_context)
+    const HAMERS_SHARED_PTR<ExtendedVisItDataWriter>& visit_writer,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& plot_context)
 {
 #ifdef HAMERS_PLOTTING_VALUE_TAGGER
 #endif
@@ -641,7 +641,7 @@ ValueTagger::printClassData(std::ostream& os) const
  */
 void
 ValueTagger::putToRestart(
-    const boost::shared_ptr<tbox::Database>& restart_db) const
+    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
     restart_db->putInteger("d_num_ghosts_derivative", d_num_ghosts_derivative);
     
@@ -686,7 +686,7 @@ ValueTagger::putToRestart(
 void
 ValueTagger::computeValueTaggerValuesOnPatch(
     hier::Patch& patch,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     // Loop over variables chosen.
     for (int vi = 0; vi < static_cast<int>(d_variables.size()); vi++)
@@ -717,7 +717,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
              * Get the pointer to density data inside the flow model.
              */
             
-            boost::shared_ptr<pdat::CellData<double> > flow_model_data_density = d_flow_model->getCellData("DENSITY");
+            HAMERS_SHARED_PTR<pdat::CellData<double> > flow_model_data_density = d_flow_model->getCellData("DENSITY");
             
             /*
              * Transfer data from flow model to the class variable.
@@ -759,7 +759,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
              * Get the pointer to total energy data inside the flow model.
              */
             
-            boost::shared_ptr<pdat::CellData<double> > flow_model_data_total_energy =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > flow_model_data_total_energy =
                 d_flow_model->getCellData("TOTAL_ENERGY");
             
             /*
@@ -802,7 +802,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
              * Get the pointer to pressure data inside the flow model.
              */
             
-            boost::shared_ptr<pdat::CellData<double> > flow_model_data_pressure = d_flow_model->getCellData("PRESSURE");
+            HAMERS_SHARED_PTR<pdat::CellData<double> > flow_model_data_pressure = d_flow_model->getCellData("PRESSURE");
             
             /*
              * Transfer data from flow model to the class variable.
@@ -847,11 +847,11 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             d_flow_model->computeDerivedCellData();
             
             // Get the cell data.
-            boost::shared_ptr<pdat::CellData<double> > dilatation(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+            HAMERS_SHARED_PTR<pdat::CellData<double> > dilatation(
+                HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                     patch.getPatchData(d_value_tagger_variable_dilatation, data_context)));
             
-            boost::shared_ptr<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
+            HAMERS_SHARED_PTR<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
             
             // Get the dimensions of box that covers the interior of patch.
             const hier::Box interior_box = patch.getBox();
@@ -863,12 +863,12 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 dilatation->getGhostBox().numberCells();
     
             // Initialize cell data for velocity derivatives.
-            boost::shared_ptr<pdat::CellData<double> > velocity_derivatives(
+            HAMERS_SHARED_PTR<pdat::CellData<double> > velocity_derivatives(
                 new pdat::CellData<double>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
             
             // Get the grid spacing.
-            const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+            const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                     patch.getPatchGeometry()));
             
             const double* const dx = patch_geom->getDx();
@@ -886,7 +886,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 
                 const int num_ghosts_0_dilatation = num_ghosts_dilatation[0];
                 
-                boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+                HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
                     new DerivativeFirstOrder(
                         "first order derivative in x-direction",
                         d_dim, DIRECTION::X_DIRECTION,
@@ -928,13 +928,13 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 const int num_ghosts_1_dilatation = num_ghosts_dilatation[1];
                 const int ghostcell_dim_0_dilatation = ghostcell_dims_dilatation[0];
                 
-                boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+                HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
                     new DerivativeFirstOrder(
                         "first order derivative in x-direction",
                         d_dim, DIRECTION::X_DIRECTION,
                         d_num_ghosts_derivative));
                 
-                boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
+                HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_y(
                     new DerivativeFirstOrder(
                         "first order derivative in y-direction",
                         d_dim, DIRECTION::Y_DIRECTION,
@@ -994,19 +994,19 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 const int ghostcell_dim_0_dilatation = ghostcell_dims_dilatation[0];
                 const int ghostcell_dim_1_dilatation = ghostcell_dims_dilatation[1];
                 
-                boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+                HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
                     new DerivativeFirstOrder(
                         "first order derivative in x-direction",
                         d_dim, DIRECTION::X_DIRECTION,
                         d_num_ghosts_derivative));
                 
-                boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
+                HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_y(
                     new DerivativeFirstOrder(
                         "first order derivative in y-direction",
                         d_dim, DIRECTION::Y_DIRECTION,
                         d_num_ghosts_derivative));
                 
-                boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_z(
+                HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_z(
                     new DerivativeFirstOrder(
                         "first order derivative in z-direction",
                         d_dim, DIRECTION::Z_DIRECTION,
@@ -1097,11 +1097,11 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             d_flow_model->computeDerivedCellData();
             
             // Get the cell data.
-            boost::shared_ptr<pdat::CellData<double> > enstrophy(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+            HAMERS_SHARED_PTR<pdat::CellData<double> > enstrophy(
+                HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                     patch.getPatchData(d_value_tagger_variable_enstrophy, data_context)));
             
-            boost::shared_ptr<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
+            HAMERS_SHARED_PTR<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
             
             // Get the dimensions of box that covers the interior of patch.
             const hier::Box interior_box = patch.getBox();
@@ -1113,8 +1113,8 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 enstrophy->getGhostBox().numberCells();
     
             // Get the grid spacing.
-            const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+            const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                     patch.getPatchGeometry()));
             
             const double* const dx = patch_geom->getDx();
@@ -1143,17 +1143,17 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 const int ghostcell_dim_0_enstrophy = ghostcell_dims_enstrophy[0];
                 
                 // Initialize cell data for velocity derivatives.
-                boost::shared_ptr<pdat::CellData<double> > velocity_derivatives(
+                HAMERS_SHARED_PTR<pdat::CellData<double> > velocity_derivatives(
                     new pdat::CellData<double>(interior_box, d_dim.getValue()*d_dim.getValue() - d_dim.getValue(),
                         hier::IntVector::getZero(d_dim)));
                 
-                boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+                HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
                     new DerivativeFirstOrder(
                         "first order derivative in x-direction",
                         d_dim, DIRECTION::X_DIRECTION,
                         d_num_ghosts_derivative));
                 
-                boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
+                HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_y(
                     new DerivativeFirstOrder(
                         "first order derivative in y-direction",
                         d_dim, DIRECTION::Y_DIRECTION,
@@ -1215,23 +1215,23 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 const int ghostcell_dim_1_enstrophy = ghostcell_dims_enstrophy[1];
                 
                 // Initialize cell data for velocity derivatives.
-                boost::shared_ptr<pdat::CellData<double> > velocity_derivatives(
+                HAMERS_SHARED_PTR<pdat::CellData<double> > velocity_derivatives(
                     new pdat::CellData<double>(interior_box, d_dim.getValue()*d_dim.getValue() - d_dim.getValue(),
                         hier::IntVector::getZero(d_dim)));
                 
-                boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+                HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
                     new DerivativeFirstOrder(
                         "first order derivative in x-direction",
                         d_dim, DIRECTION::X_DIRECTION,
                         d_num_ghosts_derivative));
                 
-                boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
+                HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_y(
                     new DerivativeFirstOrder(
                         "first order derivative in y-direction",
                         d_dim, DIRECTION::Y_DIRECTION,
                         d_num_ghosts_derivative));
                 
-                boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_z(
+                HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_z(
                     new DerivativeFirstOrder(
                         "first order derivative in z-direction",
                         d_dim, DIRECTION::Z_DIRECTION,
@@ -1350,7 +1350,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
              * Get the pointer to mass fraction data inside the flow model.
              */
             
-            boost::shared_ptr<pdat::CellData<double> > flow_model_data_mass_fractions =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > flow_model_data_mass_fractions =
                 d_flow_model->getCellData("MASS_FRACTIONS");
             
             /*
@@ -1382,9 +1382,9 @@ ValueTagger::computeValueTaggerValuesOnPatch(
  */
 void
 ValueTagger::getValueStatistics(
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const int level_number,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -1510,8 +1510,8 @@ ValueTagger::getValueStatistics(
 void
 ValueTagger::tagCellsOnPatch(
    hier::Patch& patch,
-   const boost::shared_ptr<pdat::CellData<int> >& tags,
-   const boost::shared_ptr<hier::VariableContext>& data_context)
+   const HAMERS_SHARED_PTR<pdat::CellData<int> >& tags,
+   const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     int count_global_tol_up = 0;
     int count_global_tol_lo = 0;
@@ -1673,9 +1673,9 @@ ValueTagger::tagCellsOnPatch(
 void
 ValueTagger::tagCellsOnPatchWithValue(
     hier::Patch& patch,
-    const boost::shared_ptr<hier::VariableContext>& data_context,
-    const boost::shared_ptr<pdat::CellData<int> >& tags,
-    const boost::shared_ptr<pdat::CellVariable<double> >& variable_value_tagger,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const HAMERS_SHARED_PTR<pdat::CellData<int> >& tags,
+    const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_value_tagger,
     const double value_max,
     const bool uses_global_tol_up,
     const bool uses_global_tol_lo,
@@ -1690,8 +1690,8 @@ ValueTagger::tagCellsOnPatchWithValue(
     TBOX_ASSERT(tags->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
 #endif
     
-    boost::shared_ptr<pdat::CellData<double> > data_value_tagger(
-        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_value_tagger(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
             patch.getPatchData(variable_value_tagger, data_context)));
     
     // Get the dimensions of box that covers the interior of patch.
@@ -1704,7 +1704,7 @@ ValueTagger::tagCellsOnPatchWithValue(
     const hier::IntVector ghostcell_dims_value_tagger = data_value_tagger->getGhostBox().numberCells();
     
     // Allocate temporary patch data.
-    boost::shared_ptr<pdat::CellData<int> > tags_value_tagger(
+    HAMERS_SHARED_PTR<pdat::CellData<int> > tags_value_tagger(
         new pdat::CellData<int>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
     
     tags_value_tagger->fillAll(1);
@@ -2133,17 +2133,17 @@ ValueTagger::tagCellsOnPatchWithValue(
 void
 ValueTagger::transferDataOnPatchToClassVariable(
     hier::Patch& patch,
-    const boost::shared_ptr<hier::VariableContext>& data_context,
-    const boost::shared_ptr<pdat::CellData<double> >& data_input,
-    const boost::shared_ptr<pdat::CellVariable<double> >& variable_value_tagger,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_input,
+    const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_value_tagger,
     const int depth)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(data_input->getDepth() > depth);
 #endif
     
-    boost::shared_ptr<pdat::CellData<double> > data_value_tagger(
-        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_value_tagger(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
             patch.getPatchData(variable_value_tagger, data_context)));
     
     // Get the snumber of ghost cells and dimensions of box that covers interior of patch plus

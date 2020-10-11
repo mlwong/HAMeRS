@@ -80,7 +80,7 @@ ExtendedUncoveredBoxIterator::ExtendedUncoveredBoxIterator(
 {
     if (other.d_item)
     {
-        d_item = new std::pair<boost::shared_ptr<SAMRAI::hier::Patch>, SAMRAI::hier::Box>(*other.d_item);
+        d_item = new std::pair<HAMERS_SHARED_PTR<SAMRAI::hier::Patch>, SAMRAI::hier::Box>(*other.d_item);
     }
     if (other.d_extended_flattened_hierarchy)
     {
@@ -146,7 +146,7 @@ ExtendedUncoveredBoxIterator::operator = (
         }
         if (rhs.d_item)
         {
-            d_item = new std::pair<boost::shared_ptr<SAMRAI::hier::Patch>, SAMRAI::hier::Box>(*rhs.d_item);
+            d_item = new std::pair<HAMERS_SHARED_PTR<SAMRAI::hier::Patch>, SAMRAI::hier::Box>(*rhs.d_item);
             d_item->first = rhs.d_item->first;
             d_item->second = rhs.d_item->second;
         }
@@ -199,14 +199,14 @@ ExtendedUncoveredBoxIterator::operator = (
 }
 
 
-const std::pair<boost::shared_ptr<SAMRAI::hier::Patch>, SAMRAI::hier::Box>&
+const std::pair<HAMERS_SHARED_PTR<SAMRAI::hier::Patch>, SAMRAI::hier::Box>&
 ExtendedUncoveredBoxIterator::operator * () const
 {
     return *d_item;
 }
 
 
-const std::pair<boost::shared_ptr<SAMRAI::hier::Patch>, SAMRAI::hier::Box> *
+const std::pair<HAMERS_SHARED_PTR<SAMRAI::hier::Patch>, SAMRAI::hier::Box> *
 ExtendedUncoveredBoxIterator::operator -> () const
 {
     return d_item;
@@ -314,7 +314,7 @@ ExtendedUncoveredBoxIterator::incrementIterator()
         bool new_level = false;
         while (d_level_num <= d_finest_level_num)
         {
-            boost::shared_ptr<SAMRAI::hier::PatchLevel> this_level =
+            HAMERS_SHARED_PTR<SAMRAI::hier::PatchLevel> this_level =
                 d_hierarchy->getPatchLevel(d_level_num);
             
             const SAMRAI::hier::BoxContainer& this_level_boxes =
@@ -376,14 +376,14 @@ void
 ExtendedUncoveredBoxIterator::findFirstUncoveredBox()
 {
     ++d_level_num;
-    boost::shared_ptr<SAMRAI::hier::PatchLevel> this_level =
+    HAMERS_SHARED_PTR<SAMRAI::hier::PatchLevel> this_level =
        d_hierarchy->getPatchLevel(d_level_num);
     
     bool id_found = false;
     
     while (d_level_num <= d_finest_level_num)
     { 
-        boost::shared_ptr<SAMRAI::hier::PatchLevel> this_level =
+        HAMERS_SHARED_PTR<SAMRAI::hier::PatchLevel> this_level =
             d_hierarchy->getPatchLevel(d_level_num);
         
         const SAMRAI::hier::BoxContainer& this_level_boxes =
@@ -444,7 +444,7 @@ ExtendedUncoveredBoxIterator::setIteratorItem()
 {
     // Get the current uncovered box.
     const SAMRAI::hier::Box& cur_box = *d_uncovered_boxes_itr;
-    boost::shared_ptr<SAMRAI::hier::PatchLevel> this_level =
+    HAMERS_SHARED_PTR<SAMRAI::hier::PatchLevel> this_level =
         d_hierarchy->getPatchLevel(d_level_num);
  
     // Update item with the current originating patch and the current box.
@@ -457,7 +457,7 @@ ExtendedUncoveredBoxIterator::setIteratorItem()
     else
     {
         d_item =
-            new std::pair<boost::shared_ptr<SAMRAI::hier::Patch>, SAMRAI::hier::Box>(
+            new std::pair<HAMERS_SHARED_PTR<SAMRAI::hier::Patch>, SAMRAI::hier::Box>(
                 this_level->getPatch(d_current_patch_id),
                 cur_box);
     }

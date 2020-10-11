@@ -3,12 +3,12 @@
 FlowModelDiffusiveFluxUtilitiesFourEqnConservative::FlowModelDiffusiveFluxUtilitiesFourEqnConservative(
     const std::string& object_name,
     const tbox::Dimension& dim,
-    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+    const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_species,
-    const boost::shared_ptr<EquationOfMassDiffusivityMixingRules> equation_of_mass_diffusivity_mixing_rules,
-    const boost::shared_ptr<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
-    const boost::shared_ptr<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules,
-    const boost::shared_ptr<EquationOfThermalConductivityMixingRules> equation_of_thermal_conductivity_mixing_rules):
+    const HAMERS_SHARED_PTR<EquationOfMassDiffusivityMixingRules> equation_of_mass_diffusivity_mixing_rules,
+    const HAMERS_SHARED_PTR<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
+    const HAMERS_SHARED_PTR<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules,
+    const HAMERS_SHARED_PTR<EquationOfThermalConductivityMixingRules> equation_of_thermal_conductivity_mixing_rules):
         FlowModelDiffusiveFluxUtilities(
             object_name,
             dim,
@@ -55,7 +55,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::registerDerivedVariables(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     // Check whether a patch is already registered.
     if (!flow_model_tmp->hasRegisteredPatch())
@@ -205,7 +205,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::registerDerivedVariablesForD
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     // Check whether a patch is already registered.
     if (!flow_model_tmp->hasRegisteredPatch())
@@ -283,7 +283,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::allocateMemoryForDerivedCell
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     flow_model_tmp->allocateMemoryForDerivedCellData();
     
@@ -464,7 +464,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeDerivedCellData()
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     // Check whether a patch is already registered.
     if (!flow_model_tmp->hasRegisteredPatch())
@@ -538,7 +538,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeDerivedCellData()
 /*
  * Get the cell data of one cell variable related to this class in the registered patch.
  */
-boost::shared_ptr<pdat::CellData<double> >
+HAMERS_SHARED_PTR<pdat::CellData<double> >
 FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellData(const std::string& variable_key)
 {
     if (d_flow_model.expired())
@@ -549,7 +549,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellData(const std::strin
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     // Check whether a patch is already registered.
     if (!flow_model_tmp->hasRegisteredPatch())
@@ -561,7 +561,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellData(const std::strin
             << std::endl);
     }
     
-    boost::shared_ptr<pdat::CellData<double> > cell_data;
+    HAMERS_SHARED_PTR<pdat::CellData<double> > cell_data;
     
     if (variable_key == "MASS_DIFFUSIVITIES")
     {
@@ -615,11 +615,11 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellData(const std::strin
 /*
  * Get the cell data of different cell variables related to this class in the registered patch.
  */
-std::vector<boost::shared_ptr<pdat::CellData<double> > >
+std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
 FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellData(
     const std::vector<std::string>& variable_keys)
 {
-    std::vector<boost::shared_ptr<pdat::CellData<double> > > cell_data(
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > cell_data(
         static_cast<int>(variable_keys.size()));
     
     for (int vi = 0; static_cast<int>(variable_keys.size()); vi++)
@@ -636,7 +636,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellData(
  */
 void
 FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVariablesForDerivative(
-    std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_var_data,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_var_data,
     std::vector<std::vector<int> >& derivative_var_component_idx,
     const DIRECTION::TYPE& flux_direction,
     const DIRECTION::TYPE& derivative_direction)
@@ -649,21 +649,21 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVa
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     derivative_var_data.resize(d_num_eqn);
     derivative_var_component_idx.resize(d_num_eqn);
     
     // Get the cell data of mass fractions.
-    boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
         flow_model_tmp->getCellData("MASS_FRACTIONS");
     
     // Get the cell data of velocity.
-    boost::shared_ptr<pdat::CellData<double> > data_velocity =
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
         flow_model_tmp->getCellData("VELOCITY");
     
     // Get the cell data of temperature.
-    boost::shared_ptr<pdat::CellData<double> > data_temperature =
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
         flow_model_tmp->getCellData("TEMPERATURE");
     
     if (d_dim == tbox::Dimension(1))
@@ -1696,7 +1696,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxVa
  */
 void
 FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDiffusivities(
-    std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& diffusivities_data,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& diffusivities_data,
     std::vector<std::vector<int> >& diffusivities_component_idx,
     const DIRECTION::TYPE& flux_direction,
     const DIRECTION::TYPE& derivative_direction)
@@ -1709,7 +1709,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::getCellDataOfDiffusiveFluxDi
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     // Check whether a patch is already registered.
     if (!flow_model_tmp->hasRegisteredPatch())
@@ -2923,7 +2923,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::setDerivedCellVariableGhostB
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
     const hier::Box interior_box = patch.getBox();
     
@@ -2989,18 +2989,18 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeCellDataOfMassDiffusi
                     << std::endl);
             }
             
-            boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+            HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
             
             // Get the cell data of mass fractions.
-            boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                 flow_model_tmp->getCellData("MASS_FRACTIONS");
             
             // Get the cell data of pressure.
-            boost::shared_ptr<pdat::CellData<double> > data_pressure =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                 flow_model_tmp->getCellData("PRESSURE");
             
             // Get the cell data of temperature.
-            boost::shared_ptr<pdat::CellData<double> > data_temperature =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                 flow_model_tmp->getCellData("TEMPERATURE");
             
             // Compute the mass diffusivity fields.
@@ -3049,18 +3049,18 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeCellDataOfShearViscos
                     << std::endl);
             }
             
-            boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+            HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
             
             // Get the cell data of mass fractions.
-            boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                 flow_model_tmp->getCellData("MASS_FRACTIONS");
             
             // Get the cell data of pressure.
-            boost::shared_ptr<pdat::CellData<double> > data_pressure =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                 flow_model_tmp->getCellData("PRESSURE");
             
             // Get the cell data of temperature.
-            boost::shared_ptr<pdat::CellData<double> > data_temperature =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                 flow_model_tmp->getCellData("TEMPERATURE");
             
             // Compute the shear viscosity field.
@@ -3109,18 +3109,18 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeCellDataOfBulkViscosi
                     << std::endl);
             }
             
-            boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+            HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
             
             // Get the cell data of mass fractions.
-            boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                 flow_model_tmp->getCellData("MASS_FRACTIONS");
             
             // Get the cell data of pressure.
-            boost::shared_ptr<pdat::CellData<double> > data_pressure =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                 flow_model_tmp->getCellData("PRESSURE");
             
             // Get the cell data of temperature.
-            boost::shared_ptr<pdat::CellData<double> > data_temperature =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                 flow_model_tmp->getCellData("TEMPERATURE");
             
             // Compute the bulk viscosity field.
@@ -3169,18 +3169,18 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeCellDataOfThermalCond
                     << std::endl);
             }
             
-            boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+            HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
             
             // Get the cell data of mass fractions.
-            boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                 flow_model_tmp->getCellData("MASS_FRACTIONS");
             
             // Get the cell data of pressure.
-            boost::shared_ptr<pdat::CellData<double> > data_pressure =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                 flow_model_tmp->getCellData("PRESSURE");
             
             // Get the cell data of temperature.
-            boost::shared_ptr<pdat::CellData<double> > data_temperature =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                 flow_model_tmp->getCellData("TEMPERATURE");
             
             // Compute the thermal conductivity field.
@@ -3226,7 +3226,7 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeCellDataOfDiffusiviti
                     << std::endl);
             }
             
-            boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+            HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
             const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
             
             /*
@@ -3257,19 +3257,19 @@ FlowModelDiffusiveFluxUtilitiesFourEqnConservative::computeCellDataOfDiffusiviti
             }
             
             // Get the cell data of density.
-            boost::shared_ptr<pdat::CellData<double> > data_density =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                 flow_model_tmp->getCellData("DENSITY");
             
             // Get the cell data of mass fractions.
-            boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                 flow_model_tmp->getCellData("MASS_FRACTIONS");
             
             // Get the cell data of velocity.
-            boost::shared_ptr<pdat::CellData<double> > data_velocity =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                 flow_model_tmp->getCellData("VELOCITY");
             
             // Get the cell data of species enthalpies.
-            std::vector<boost::shared_ptr<pdat::CellData<double> > > data_species_enthalpies =
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_species_enthalpies =
                 flow_model_tmp->getSpeciesCellData("SPECIES_ENTHALPIES");
             
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS

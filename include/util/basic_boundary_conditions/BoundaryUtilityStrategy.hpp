@@ -67,7 +67,7 @@ class BoundaryUtilityStrategy
          */
         virtual void
         readDirichletBoundaryDataEntry(
-            const boost::shared_ptr<tbox::Database>& db,
+            const HAMERS_SHARED_PTR<tbox::Database>& db,
             std::string& db_name,
             int bdry_location_index) = 0;
         
@@ -82,7 +82,7 @@ class BoundaryUtilityStrategy
          */
         virtual void
         readNeumannBoundaryDataEntry(
-            const boost::shared_ptr<tbox::Database>& db,
+            const HAMERS_SHARED_PTR<tbox::Database>& db,
             std::string& db_name,
             int bdry_location_index) = 0;
         

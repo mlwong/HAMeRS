@@ -95,7 +95,7 @@ GCD(
 ExtendedTagAndInitialize::ExtendedTagAndInitialize(
     const std::string& object_name,
     ExtendedTagAndInitStrategy* tag_strategy,
-    const boost::shared_ptr<tbox::Database>& input_db):
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db):
     TagAndInitializeStrategy(object_name),
     d_tag_strategy(tag_strategy),
     d_error_coarsen_ratio(1),
@@ -159,12 +159,12 @@ ExtendedTagAndInitialize::~ExtendedTagAndInitialize()
  */
 void
 ExtendedTagAndInitialize::initializeLevelData(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
     const int level_number,
     const double init_data_time,
     const bool can_be_refined,
     const bool initial_time,
-    const boost::shared_ptr<hier::PatchLevel>& old_level,
+    const HAMERS_SHARED_PTR<hier::PatchLevel>& old_level,
     const bool allocate_data)
 {
     TBOX_ASSERT(hierarchy);
@@ -197,7 +197,7 @@ ExtendedTagAndInitialize::initializeLevelData(
  */
 void
 ExtendedTagAndInitialize::resetHierarchyConfiguration(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
     const int coarsest_level,
     const int finest_level)
 {
@@ -247,7 +247,7 @@ ExtendedTagAndInitialize::resetHierarchyConfiguration(
  */
 void
 ExtendedTagAndInitialize::tagCellsForRefinement(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
     const int level_number,
     const int regrid_cycle,
     const double regrid_time,
@@ -370,17 +370,17 @@ ExtendedTagAndInitialize::tagCellsForRefinement(
            regrid_cycle,
            regrid_time);
         
-        boost::shared_ptr<hier::PatchLevel> level(
+        HAMERS_SHARED_PTR<hier::PatchLevel> level(
            hierarchy->getPatchLevel(level_number));
         
         for (hier::PatchLevel::iterator ip(level->begin());
              ip != level->end();
              ip++)
         {
-            const boost::shared_ptr<hier::Patch>& patch = *ip;
+            const HAMERS_SHARED_PTR<hier::Patch>& patch = *ip;
             
-            boost::shared_ptr<pdat::CellData<int> > tag_data(
-                BOOST_CAST<pdat::CellData<int>, hier::PatchData>(
+            HAMERS_SHARED_PTR<pdat::CellData<int> > tag_data(
+                HAMERS_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
                     patch->getPatchData(tag_index)));
             
             TBOX_ASSERT(tag_data);
@@ -464,7 +464,7 @@ ExtendedTagAndInitialize::tagCellsForRefinement(
  */
 void
 ExtendedTagAndInitialize::tagCellsUsingRichardsonExtrapolation(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
     const int level_number,
     const int regrid_cycle,
     const double regrid_time,
@@ -479,7 +479,7 @@ ExtendedTagAndInitialize::tagCellsUsingRichardsonExtrapolation(
     
     const tbox::Dimension& dim = hierarchy->getDim();
     
-    boost::shared_ptr<hier::PatchLevel> patch_level(
+    HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
         hierarchy->getPatchLevel(level_number));
     
     /*
@@ -565,7 +565,7 @@ ExtendedTagAndInitialize::tagCellsUsingRichardsonExtrapolation(
         start_time = end_time;
     }
     
-    boost::shared_ptr<hier::PatchLevel> coarser_level(
+    HAMERS_SHARED_PTR<hier::PatchLevel> coarser_level(
         d_rich_extrap_coarsened_levels[level_number]);
     
     /*
@@ -589,14 +589,14 @@ ExtendedTagAndInitialize::tagCellsUsingRichardsonExtrapolation(
          ip != coarser_level->end();
          ip++)
     {
-        const boost::shared_ptr<hier::Patch>& coarse_patch = *ip;
-        boost::shared_ptr<hier::Patch> fine_patch(
+        const HAMERS_SHARED_PTR<hier::Patch>& coarse_patch = *ip;
+        HAMERS_SHARED_PTR<hier::Patch> fine_patch(
             patch_level->getPatch(coarse_patch->getGlobalId()));
-        boost::shared_ptr<pdat::CellData<int> > ftags(
-            BOOST_CAST<pdat::CellData<int>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<int> > ftags(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
                 fine_patch->getPatchData(tag_index)));
-        boost::shared_ptr<pdat::CellData<int> > ctags(
-            BOOST_CAST<pdat::CellData<int>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<int> > ctags(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
                 coarse_patch->getPatchData(tag_index)));
         
         TBOX_ASSERT(ftags);
@@ -679,8 +679,8 @@ ExtendedTagAndInitialize::tagCellsUsingRichardsonExtrapolation(
          ip != coarser_level->end();
          ip++)
     {
-        const boost::shared_ptr<hier::Patch>& coarse_patch = *ip;
-        boost::shared_ptr<hier::Patch> fine_patch(
+        const HAMERS_SHARED_PTR<hier::Patch>& coarse_patch = *ip;
+        HAMERS_SHARED_PTR<hier::Patch> fine_patch(
             patch_level->getPatch(coarse_patch->getGlobalId()));
         copytags.refine(
             *fine_patch,
@@ -705,7 +705,7 @@ ExtendedTagAndInitialize::tagCellsUsingRichardsonExtrapolation(
             regrid_time,
             can_be_refined,
             initial_time,
-            boost::shared_ptr<hier::PatchLevel>(),
+            HAMERS_SHARED_PTR<hier::PatchLevel>(),
             allocate_data);
     }
 }
@@ -722,7 +722,7 @@ ExtendedTagAndInitialize::tagCellsUsingRichardsonExtrapolation(
  */
 void
 ExtendedTagAndInitialize::preprocessErrorEstimation(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
     const int level_number,
     const int cycle,
     const double regrid_time,
@@ -782,7 +782,7 @@ ExtendedTagAndInitialize::preprocessErrorEstimation(
  */
 void
 ExtendedTagAndInitialize::preprocessRichardsonExtrapolation(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
     const int level_number,
     const double regrid_time,
     const double regrid_start_time,
@@ -794,7 +794,7 @@ ExtendedTagAndInitialize::preprocessRichardsonExtrapolation(
     
     const tbox::Dimension& dim = hierarchy->getDim();
     
-    boost::shared_ptr<hier::PatchLevel> patch_level(
+    HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
        hierarchy->getPatchLevel(level_number));
     
     /*
@@ -848,7 +848,7 @@ ExtendedTagAndInitialize::preprocessRichardsonExtrapolation(
      * so user routines can use this information.
      */
     
-    boost::shared_ptr<hier::PatchLevel> coarsened_level(
+    HAMERS_SHARED_PTR<hier::PatchLevel> coarsened_level(
        boost::make_shared<hier::PatchLevel>(dim));
     hier::IntVector coarsen_ratio(dim, d_error_coarsen_ratio);
     coarsened_level->setCoarsenedPatchLevel(patch_level, coarsen_ratio);
@@ -876,7 +876,7 @@ ExtendedTagAndInitialize::preprocessRichardsonExtrapolation(
         level_to_level_width,
         hier::CONNECTOR_IMPLICIT_CREATION_RULE);
     
-    boost::shared_ptr<hier::Connector> tmp_coarsened(
+    HAMERS_SHARED_PTR<hier::Connector> tmp_coarsened(
         boost::make_shared<hier::Connector>(level_to_level));
     tmp_coarsened->setBase(*coarsened_level->getBoxLevel());
     tmp_coarsened->setHead(*coarsened_level->getBoxLevel());
@@ -885,7 +885,7 @@ ExtendedTagAndInitialize::preprocessRichardsonExtrapolation(
     tmp_coarsened->coarsenLocalNeighbors(coarsen_ratio);
     tmp_coarsened->setTranspose(0, false);
     
-    boost::shared_ptr<hier::Connector> level_to_coarsened(
+    HAMERS_SHARED_PTR<hier::Connector> level_to_coarsened(
         boost::make_shared<hier::Connector>(*tmp_coarsened));
     level_to_coarsened->setBase(*patch_level->getBoxLevel());
     level_to_coarsened->setHead(*coarsened_level->getBoxLevel());
@@ -900,8 +900,8 @@ ExtendedTagAndInitialize::preprocessRichardsonExtrapolation(
          * Get Connectors coarsened<==>coarser, which are used for recursive
          * refinement filling of the coarsened level's ghosts.
          */
-        boost::shared_ptr<hier::Connector> coarser_to_coarsened;
-        boost::shared_ptr<hier::PatchLevel> coarser_level(
+        HAMERS_SHARED_PTR<hier::Connector> coarser_to_coarsened;
+        HAMERS_SHARED_PTR<hier::PatchLevel> coarser_level(
             hierarchy->getPatchLevel(level_number - 1));
         const hier::Connector& coarser_to_level =
             coarser_level->findConnectorWithTranspose(
@@ -1561,7 +1561,7 @@ ExtendedTagAndInitialize::refineUserBoxInputOnly(
  */
 void
 ExtendedTagAndInitialize::getFromInput(
-   const boost::shared_ptr<tbox::Database>& input_db)
+   const HAMERS_SHARED_PTR<tbox::Database>& input_db)
 {
     /*
      * If no input database is provided, no criteria is set to tag cells
@@ -1619,7 +1619,7 @@ ExtendedTagAndInitialize::getFromInput(
                             << std::endl);
                     }
                     int level = atoi(level_keys[k].substr(6).c_str());
-                    boost::shared_ptr<tbox::Database> level_db(
+                    HAMERS_SHARED_PTR<tbox::Database> level_db(
                         input_db->getDatabase(level_keys[k]));
                     std::vector<std::string> block_keys = level_db->getAllKeys();
                     int n_block_keys = static_cast<int>(block_keys.size());
@@ -1655,7 +1655,7 @@ ExtendedTagAndInitialize::getFromInput(
                                     << std::endl);
                             }
                             int block = atoi(block_keys[l].substr(6).c_str());
-                            boost::shared_ptr<tbox::Database> block_db(
+                            HAMERS_SHARED_PTR<tbox::Database> block_db(
                                 level_db->getDatabase(block_keys[l]));
                             std::vector<tbox::DatabaseBox> db_box_vector =
                                 block_db->getDatabaseBoxVector("boxes");
@@ -1723,7 +1723,7 @@ ExtendedTagAndInitialize::getFromInput(
                         << "Missing tagging criteria " << i << "."
                         << std::endl);
                 }
-                boost::shared_ptr<tbox::Database> at_db(
+                HAMERS_SHARED_PTR<tbox::Database> at_db(
                     input_db->getDatabase(at_name));
                 
                 // Read information specific to a cycle or a time criteria.
@@ -1787,7 +1787,7 @@ ExtendedTagAndInitialize::getFromInput(
                             << "::getFromInput \n"
                             << "Missing tag criteria." << std::endl);
                     }
-                    boost::shared_ptr<tbox::Database> this_tag_db(
+                    HAMERS_SHARED_PTR<tbox::Database> this_tag_db(
                         at_db->getDatabase(tag_name));
                     std::string tagging_method =
                         this_tag_db->getString("tagging_method");
@@ -1837,7 +1837,7 @@ ExtendedTagAndInitialize::getFromInput(
                                     << std::endl);
                             }
                             int level = atoi(level_keys[k].substr(6).c_str());
-                            boost::shared_ptr<tbox::Database> level_db(
+                            HAMERS_SHARED_PTR<tbox::Database> level_db(
                                 this_tag_db->getDatabase(level_keys[k]));
                             std::vector<std::string> block_keys =
                                 level_db->getAllKeys();
@@ -1874,7 +1874,7 @@ ExtendedTagAndInitialize::getFromInput(
                                             << std::endl);
                                     }
                                     int block = atoi(block_keys[l].substr(6).c_str());
-                                    boost::shared_ptr<tbox::Database> block_db(
+                                    HAMERS_SHARED_PTR<tbox::Database> block_db(
                                         level_db->getDatabase(block_keys[l]));
                                     std::vector<tbox::DatabaseBox> db_box_vector =
                                         block_db->getDatabaseBoxVector("boxes");
@@ -2911,9 +2911,9 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
 
 void
 ExtendedTagAndInitialize::processHierarchyBeforeAddingNewLevel(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
     const int level_number,
-    const boost::shared_ptr<hier::BoxLevel>& new_box_level)
+    const HAMERS_SHARED_PTR<hier::BoxLevel>& new_box_level)
 {
     d_tag_strategy->processHierarchyBeforeAddingNewLevel(
         hierarchy,
@@ -2924,9 +2924,9 @@ ExtendedTagAndInitialize::processHierarchyBeforeAddingNewLevel(
 
 void
 ExtendedTagAndInitialize::processLevelBeforeRemoval(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
     const int level_number,
-    const boost::shared_ptr<hier::PatchLevel>& old_level)
+    const HAMERS_SHARED_PTR<hier::PatchLevel>& old_level)
 {
    d_tag_strategy->processLevelBeforeRemoval(
         hierarchy,

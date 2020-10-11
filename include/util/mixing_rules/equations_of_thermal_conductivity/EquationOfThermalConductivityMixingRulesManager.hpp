@@ -21,7 +21,7 @@ class EquationOfThermalConductivityMixingRulesManager
             const tbox::Dimension& dim,
             const int& num_species,
             const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
-            const boost::shared_ptr<tbox::Database>& equation_of_thermal_conductivity_mixing_rules_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& equation_of_thermal_conductivity_mixing_rules_db,
             const std::string& equation_of_thermal_conductivity_str);
         
         /*
@@ -36,7 +36,7 @@ class EquationOfThermalConductivityMixingRulesManager
         /*
          * Get the equation of thermal conductivity mixing rules.
          */
-        boost::shared_ptr<EquationOfThermalConductivityMixingRules>
+        HAMERS_SHARED_PTR<EquationOfThermalConductivityMixingRules>
         getEquationOfThermalConductivityMixingRules() const
         {
             return d_equation_of_thermal_conductivity_mixing_rules;
@@ -60,9 +60,9 @@ class EquationOfThermalConductivityMixingRulesManager
         EQN_THERMAL_CONDUCTIVITY::TYPE d_equation_of_thermal_conductivity_type;
         
         /*
-         * boost::shared_ptr to the equation of thermal conductivity.
+         * HAMERS_SHARED_PTR to the equation of thermal conductivity.
          */
-        boost::shared_ptr<EquationOfThermalConductivityMixingRules> d_equation_of_thermal_conductivity_mixing_rules;
+        HAMERS_SHARED_PTR<EquationOfThermalConductivityMixingRules> d_equation_of_thermal_conductivity_mixing_rules;
         
 };
 

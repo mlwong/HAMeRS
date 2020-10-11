@@ -60,13 +60,13 @@ public:
     /*!
      * @brief Dereference operator mimicking a pointer dereference.
      */
-    const std::pair<boost::shared_ptr<SAMRAI::hier::Patch>, SAMRAI::hier::Box>&
+    const std::pair<HAMERS_SHARED_PTR<SAMRAI::hier::Patch>, SAMRAI::hier::Box>&
     operator * () const;
     
     /*!
      * @brief Dereference operator mimicking a pointer dereference.
      */
-    const std::pair<boost::shared_ptr<SAMRAI::hier::Patch>, SAMRAI::hier::Box> *
+    const std::pair<HAMERS_SHARED_PTR<SAMRAI::hier::Patch>, SAMRAI::hier::Box> *
     operator -> () const;
     
     /*!
@@ -163,7 +163,7 @@ private:
     SAMRAI::hier::BoxContainer::const_iterator d_uncovered_boxes_itr_end;
     
     /* The current item in the iteration. */
-    std::pair<boost::shared_ptr<SAMRAI::hier::Patch>, SAMRAI::hier::Box>* d_item;
+    std::pair<HAMERS_SHARED_PTR<SAMRAI::hier::Patch>, SAMRAI::hier::Box>* d_item;
     
     /* The number of the finest level in the hierarchy. */
     int d_finest_level_num;

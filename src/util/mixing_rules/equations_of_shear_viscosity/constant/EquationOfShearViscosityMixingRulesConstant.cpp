@@ -5,7 +5,7 @@ EquationOfShearViscosityMixingRulesConstant::EquationOfShearViscosityMixingRules
     const tbox::Dimension& dim,
     const int& num_species,
     const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
-    const boost::shared_ptr<tbox::Database>& equation_of_shear_viscosity_mixing_rules_db):
+    const HAMERS_SHARED_PTR<tbox::Database>& equation_of_shear_viscosity_mixing_rules_db):
         EquationOfShearViscosityMixingRules(
             object_name,
             dim,
@@ -168,7 +168,7 @@ EquationOfShearViscosityMixingRulesConstant::printClassData(
  */
 void
 EquationOfShearViscosityMixingRulesConstant::putToRestart(
-    const boost::shared_ptr<tbox::Database>& restart_db) const
+    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
     restart_db->putDoubleVector("d_species_mu", d_species_mu);
     restart_db->putDoubleVector("d_species_M", d_species_M);
@@ -295,10 +295,10 @@ EquationOfShearViscosityMixingRulesConstant::getShearViscosity(
  */
 void
 EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
-    boost::shared_ptr<pdat::CellData<double> >& data_shear_viscosity,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
-    const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_shear_viscosity,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -322,12 +322,12 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
     const hier::IntVector ghostcell_dims_mass_fractions = ghost_box_mass_fractions.numberCells();
     
     // Delcare data containers for shear viscosity of a species, denominator and numerator.
-    boost::shared_ptr<pdat::CellData<double> > data_shear_viscosity_species;
-    boost::shared_ptr<pdat::CellData<double> > data_den;
-    boost::shared_ptr<pdat::CellData<double> > data_num;
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_shear_viscosity_species;
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_den;
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_num;
     
     // Declare data container for last mass fraction.
-    boost::shared_ptr<pdat::CellData<double> > data_mass_fractions_last;
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions_last;
     
     /*
      * Get the local lower index and number of cells in each direction of the domain.
@@ -1139,11 +1139,11 @@ EquationOfShearViscosityMixingRulesConstant::getShearViscosity(
  */
 void
 EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
-    boost::shared_ptr<pdat::CellData<double> >& data_shear_viscosity,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& data_species_temperatures,
-    const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
-    const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_shear_viscosity,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& data_species_temperatures,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions,
     const hier::Box& domain) const
 {
     NULL_USE(data_mass_fractions);
@@ -1180,10 +1180,10 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
     const hier::IntVector ghostcell_dims_volume_fractions = ghost_box_volume_fractions.numberCells();
     
     // Delcare data container for shear viscosity of a species.
-    boost::shared_ptr<pdat::CellData<double> > data_shear_viscosity_species;
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_shear_viscosity_species;
     
     // Declare data container for last volume fraction.
-    boost::shared_ptr<pdat::CellData<double> > data_volume_fractions_last;
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_volume_fractions_last;
     
     /*
      * Get the local lower index and number of cells in each direction of the domain.

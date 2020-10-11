@@ -40,7 +40,7 @@ ExtendedFlattenedHierarchy::ExtendedFlattenedHierarchy(
     
     for (int ln = finest_level; ln >= coarsest_level; ln--)
     {
-        const boost::shared_ptr<SAMRAI::hier::PatchLevel>& current_level =
+        const HAMERS_SHARED_PTR<SAMRAI::hier::PatchLevel>& current_level =
             hierarchy.getPatchLevel(ln);
         
         if (ln != finest_level)
@@ -65,7 +65,7 @@ ExtendedFlattenedHierarchy::ExtendedFlattenedHierarchy(
                  ip != current_level->end();
                  ip++)
             {
-                const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
+                const HAMERS_SHARED_PTR<SAMRAI::hier::Patch>& patch = *ip;
                 const SAMRAI::hier::Box& box = patch->getBox();
                 const SAMRAI::hier::BlockId& block_id = box.getBlockId();
                 const SAMRAI::hier::BoxId& box_id = box.getBoxId();
@@ -154,7 +154,7 @@ ExtendedFlattenedHierarchy::ExtendedFlattenedHierarchy(
                  ip != current_level->end();
                  ip++)
             {
-                const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
+                const HAMERS_SHARED_PTR<SAMRAI::hier::Patch>& patch = *ip;
                 const SAMRAI::hier::Box& box = patch->getBox();
                 const SAMRAI::hier::BoxId& box_id = box.getBoxId();
                 SAMRAI::hier::BoxContainer& visible_boxes = d_visible_boxes[ln][box_id];
