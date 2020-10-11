@@ -1491,8 +1491,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             drho_Y_dx.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
-                                drho_Y_dx[si] = -(Q[si][idx_cell_rho_Y_x_RRR] - double(4)*Q[si][idx_cell_rho_Y_x_RR] +
-                                    double(3)*Q[si][idx_cell_rho_Y_x_R])/(double(2)*dx[0]);
+                                drho_Y_dx.push_back(-(Q[si][idx_cell_rho_Y_x_RRR] - double(4)*Q[si][idx_cell_rho_Y_x_RR] +
+                                    double(3)*Q[si][idx_cell_rho_Y_x_R])/(double(2)*dx[0]));
                             }
                             const double du_dx = -(u_x_RRR - double(4)*u_x_RR + double(3)*u_x_R)/(double(2)*dx[0]);
                             const double dv_dx = -(v_x_RRR - double(4)*v_x_RR + double(3)*v_x_R)/(double(2)*dx[0]);
@@ -2086,8 +2086,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             drho_Y_dx.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
-                                drho_Y_dx[si] = (Q[si][idx_cell_rho_Y_x_LLL] - double(4)*Q[si][idx_cell_rho_Y_x_LL] +
-                                    double(3)*Q[si][idx_cell_rho_Y_x_L])/(double(2)*dx[0]);
+                                drho_Y_dx.push_back((Q[si][idx_cell_rho_Y_x_LLL] - double(4)*Q[si][idx_cell_rho_Y_x_LL] +
+                                    double(3)*Q[si][idx_cell_rho_Y_x_L])/(double(2)*dx[0]));
                             }
                             const double du_dx   = (u_x_LLL - double(4)*u_x_LL + double(3)*u_x_L)/(double(2)*dx[0]);
                             const double dv_dx   = (v_x_LLL - double(4)*v_x_LL + double(3)*v_x_L)/(double(2)*dx[0]);
@@ -2584,9 +2584,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             std::vector<double> rho_Y_y_T;
                             std::vector<double> rho_Y_y_TT;
                             std::vector<double> rho_Y_y_TTT;
-                            rho_Y_y_B.reserve(d_num_species);
-                            rho_Y_y_BB.reserve(d_num_species);
-                            rho_Y_y_BBB.reserve(d_num_species);
+                            rho_Y_y_T.reserve(d_num_species);
+                            rho_Y_y_TT.reserve(d_num_species);
+                            rho_Y_y_TTT.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
                                 rho_Y_y_T.push_back(Q[si][idx_cell_rho_Y_y_T]);
@@ -2680,8 +2680,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             drho_Y_dy.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
-                                drho_Y_dy[si] = -(Q[si][idx_cell_rho_Y_y_TTT] - double(4)*Q[si][idx_cell_rho_Y_y_TT] +
-                                    double(3)*Q[si][idx_cell_rho_Y_y_T])/(double(2)*dx[1]);
+                                drho_Y_dy.push_back(-(Q[si][idx_cell_rho_Y_y_TTT] - double(4)*Q[si][idx_cell_rho_Y_y_TT] +
+                                    double(3)*Q[si][idx_cell_rho_Y_y_T])/(double(2)*dx[1]));
                             }
                             const double du_dy   = -(u_y_TTT - double(4)*u_y_TT + double(3)*u_y_T)/(double(2)*dx[1]);
                             const double dv_dy   = -(v_y_TTT - double(4)*v_y_TT + double(3)*v_y_T)/(double(2)*dx[1]);
@@ -2954,11 +2954,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             const double c_sq_inv  = double(1)/(c_y_T*c_y_T);
                             const double rho_c_inv = double(1)/(rho_y_T*c_y_T);
                             
-                            double dV_dx[d_num_species + 3];
+                            double dV_dy[d_num_species + 3];
                             
                             for (int si = 0; si < d_num_species; si++)
                             {
-                                dV_dy[si] = half*c_sq_inv*Y_x_R[si]*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 2]) +
+                                dV_dy[si] = half*c_sq_inv*Y_y_T[si]*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 2]) +
                                     c_sq_inv*Lambda_inv_L[si + 2];
                             }
                             dV_dy[d_num_species]     = Lambda_inv_L[d_num_species];
@@ -2969,7 +2969,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
 
                             for (int j = num_ghosts_to_fill - 1; j >= 0; j--)
                             {
-                                const int idx_cell_rho = (i + num_subghosts_conservative_var[0][0]) +
+                                const int idx_cell_rho_Y = (i + num_subghosts_conservative_var[0][0]) +
                                     (j + fill_box_lo_idx[1] + num_subghosts_conservative_var[0][1])*
                                         subghostcell_dims_conservative_var[0][0];
                                 
@@ -2992,16 +2992,127 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                     V_ghost[j*(d_num_species + 3) + d_num_species + 2] = p_y_TT   - double(2)*dx[1]*dV_dy[d_num_species + 2];
                                 }
 
+                                else if (j == num_ghosts_to_fill - 2)
+                                {
+                                    for (int si = 0; si < d_num_species; si ++)
+                                    {
+                                    V_ghost[j*(d_num_species + 3) + si] = -double(2)*rho_Y_y_TT[si] - double(3)*rho_Y_y_T[si] +
+                                        double(6)*V_ghost[(j + 1)*(d_num_species + 3) + si] + double(6)*dx[1]*dV_dy[si];
+                                    }
+                                    V_ghost[j*(d_num_species + 3) + d_num_species] = -double(2)*u_y_TT - double(3)*u_y_T +
+                                        double(6)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species] + double(6)*dx[1]*dV_dy[d_num_species];
+                                    
+                                    V_ghost[j*(d_num_species + 3) + d_num_species + 1] = -double(2)*v_y_TT - double(3)*v_y_T +
+                                        double(6)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 1] + double(6)*dx[1]*dV_dy[d_num_species + 1];
+                                    
+                                    V_ghost[j*(d_num_species + 3) +d_num_species + 2] = -double(2)*p_y_TT - double(3)*p_y_T +
+                                        double(6)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 2] + double(6)*dx[1]*dV_dy[d_num_species + 2];
+                                }
 
-
-
-
-
-
-
-
-
-
+                                else if (j == num_ghosts_to_fill - 3)
+                                {
+                                    for (int si = 0; si < d_num_species; si ++)
+                                    {
+                                        V_ghost[j*(d_num_species + 3) + si] = double(3)*rho_Y_y_TT[si] + double(10)*rho_Y_y_T[si] -
+                                        double(18)*V_ghost[(j + 2)*(d_num_species + 3) + si] +
+                                        double(6)*V_ghost[(j + 1)*(d_num_species + 3) + si] -
+                                        double(12)*dx[1]*dV_dy[si];
+                                    }
+                                    V_ghost[j*(d_num_species + 3) + d_num_species] = double(3)*u_y_TT + double(10)*u_y_T -
+                                        double(18)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species] +
+                                        double(6)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species] -
+                                        double(12)*dx[1]*dV_dy[d_num_species];
+                                    
+                                    V_ghost[j*(d_num_species + 3) + d_num_species + 1] = double(3)*v_y_TT + double(10)*v_y_T -
+                                        double(18)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(6)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 1] -
+                                        double(12)*dx[1]*dV_dy[d_num_species + 1];
+                                    
+                                    V_ghost[j*(d_num_species + 3) + d_num_species + 2] = double(3)*p_y_TT + double(10)*p_y_T -
+                                        double(18)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(6)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 2] -
+                                        double(12)*dx[1]*dV_dy[d_num_species + 2];
+                                }
+                                else if (j == num_ghosts_to_fill - 4)  
+                                {
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                    V_ghost[j*(d_num_species + 3) + si] = -double(4)*rho_Y_y_TT[si] - double(65)/double(3)*rho_Y_y_T[si] +
+                                        double(40)*V_ghost[(j + 3)*(d_num_species + 3) + si] -
+                                        double(20)*V_ghost[(j + 2)*(d_num_species + 3) + si] +
+                                        double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 3) + si] - double(20)*dx[1]*dV_dy[si];
+                                    } 
+                                    
+                                    V_ghost[j*(d_num_species + 3) + d_num_species] = -double(4)*u_y_TT - double(65)/double(3)*u_y_T +
+                                        double(40)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species] -
+                                        double(20)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species] +
+                                        double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species] - double(20)*dx[1]*dV_dy[d_num_species];
+                                    
+                                    V_ghost[j*(d_num_species + 3) + d_num_species + 1] = -double(4)*v_y_TT - double(65)/double(3)*v_y_T +
+                                        double(40)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species + 1] -
+                                        double(20)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 1] - double(20)*dx[1]*dV_dy[d_num_species + 1];
+                                    
+                                    V_ghost[j*(d_num_species + 3) + d_num_species + 2] = -double(4)*p_y_TT - double(65)/double(3)*p_y_T +
+                                        double(40)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species + 2] -
+                                        double(20)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 2] - double(20)*dx[1]*dV_dy[d_num_species + 2];
+                                }
+                                
+                                /*
+                                 * Compute the mixture density.
+                                 */
+                                
+                                double rho_ghost = double(0);
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    rho_ghost += V_ghost[j*(d_num_species + 3) + si];
+                                }
+                                
+                                /*
+                                 * Compute the mass fractions.
+                                 */
+                                
+                                std::vector<double> Y_ghost;
+                                Y_ghost.reserve(d_num_species);
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_ghost.push_back(V_ghost[j*(d_num_species + 3) + si]/rho_ghost);
+                                }
+                                
+                                /*
+                                 * Get the pointers to the mass fractions.
+                                 */
+                                
+                                std::vector<const double*> Y_ghost_ptr;
+                                Y_ghost_ptr.reserve(d_num_species);
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_ghost_ptr.push_back(&Y_ghost[si]);
+                                }
+                                
+                                for(int si=0; si < d_num_species; si++)
+                                {
+                                    Q[si][idx_cell_rho_Y] = V_ghost[j*(d_num_species + 3) + si];
+                                }
+                                
+                                Q[d_num_species][idx_cell_mom]     = rho_ghost*V_ghost[j*(d_num_species + 3) + d_num_species];
+                                Q[d_num_species + 1][idx_cell_mom] = rho_ghost*V_ghost[j*(d_num_species + 3) + d_num_species + 1];
+                                
+                                const double epsilon = d_equation_of_state_mixing_rules->
+                                    getInternalEnergy(
+                                        &rho_ghost,
+                                        &V_ghost[j*(d_num_species + 3) + d_num_species + 2],
+                                        Y_ghost_ptr);
+                                
+                                const double E = rho_ghost*epsilon +
+                                    half*(Q[d_num_species][idx_cell_mom]*Q[d_num_species][idx_cell_mom] +
+                                        Q[d_num_species + 1][idx_cell_mom]*Q[d_num_species + 1][idx_cell_mom])/
+                                        rho_ghost;
+                                
+                                Q[d_num_species + 2][idx_cell_E] = E;
+                            }
+                        }
                     }
                     else if (edge_loc == BDRY_LOC::YHI)
                     {
@@ -3148,8 +3259,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             drho_Y_dy.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
-                                drho_Y_dy[si] = (Q[si][idx_cell_rho_Y_y_BBB] - double(4)*Q[si][idx_cell_rho_Y_y_BB] +
-                                    double(3)*Q[si][idx_cell_rho_Y_y_B])/(double(2)*dx[1]);
+                                drho_Y_dy.push_back((Q[si][idx_cell_rho_Y_y_BBB] - double(4)*Q[si][idx_cell_rho_Y_y_BB] +
+                                    double(3)*Q[si][idx_cell_rho_Y_y_B])/(double(2)*dx[1]));
                             }
                             const double du_dy   = (u_y_BBB - double(4)*u_y_BB + double(3)*u_y_B)/(double(2)*dx[1]);
                             const double dv_dy   = (v_y_BBB - double(4)*v_y_BB + double(3)*v_y_B)/(double(2)*dx[1]);
@@ -3430,7 +3541,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 dV_dy[si] = half*c_sq_inv*Y_y_B[si]*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 2]) +
                                     c_sq_inv*Lambda_inv_L[si+2];
                             }
-                            dV_dy[d_num_species] = Lambda_inv_L[d_num_species];
+                            dV_dy[d_num_species] = Lambda_inv_L[1];
                             dV_dy[d_num_species + 1] = half*rho_c_inv*(-Lambda_inv_L[0] + Lambda_inv_L[d_num_species +2]);
                             dV_dy[d_num_species + 2] = half*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 2]); 
 
@@ -3525,6 +3636,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                         double(20)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species + 2] +
                                         double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 2] + double(20)*dx[1]*dV_dy[d_num_species + 2];
                                 }
+                                
                                 /*
                                  * Compute the mixture density.
                                  */
