@@ -2701,13 +2701,13 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 // Patch is touching left physical or periodic boundary.
                                 
                                 const int idx_cell_rho_Y_x_R = (i + 1 + num_subghosts_conservative_var[0][0]) +
-                                    (interior_box_hi_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
+                                    (interior_box_lo_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
                                 
                                 const int idx_cell_mom_x_R = (i + 1 + num_subghosts_conservative_var[1][0]) +
-                                    (interior_box_hi_idx[1] + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
+                                    (interior_box_lo_idx[1] + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
                                 
                                 const int idx_cell_E_x_R = (i + 1 + num_subghosts_conservative_var[2][0]) +
-                                    (interior_box_hi_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
+                                    (interior_box_lo_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
 
                                  /*
                                  * Compute the mixture density.
@@ -2764,13 +2764,13 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 // Patch is touching right physical or periodic boundary.
                                 
                                 const int idx_cell_rho_Y_x_L = (i - 1 + num_subghosts_conservative_var[0][0]) +
-                                    (interior_box_hi_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
+                                    (interior_box_lo_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
                                 
                                 const int idx_cell_mom_x_L = (i - 1 + num_subghosts_conservative_var[1][0]) +
-                                    (interior_box_hi_idx[1] + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
+                                    (interior_box_lo_idx[1] + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
                                 
                                 const int idx_cell_E_x_L = (i - 1 + num_subghosts_conservative_var[2][0]) +
-                                    (interior_box_hi_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
+                                    (interior_box_lo_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
                                 
                                 /*
                                  * Compute the mixture density.
@@ -2822,22 +2822,22 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             else
                             {
                                 const int idx_cell_rho_Y_x_L = (i - 1 + num_subghosts_conservative_var[0][0]) +
-                                    (interior_box_hi_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
+                                    (interior_box_lo_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
                                 
                                 const int idx_cell_rho_Y_x_R = (i + 1 + num_subghosts_conservative_var[0][0]) +
-                                    (interior_box_hi_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
+                                    (interior_box_lo_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
                                 
                                 const int idx_cell_mom_x_L = (i - 1 + num_subghosts_conservative_var[1][0]) +
-                                    (interior_box_hi_idx[1] + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
+                                    (interior_box_lo_idx[1] + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
                                 
                                 const int idx_cell_mom_x_R = (i + 1 + num_subghosts_conservative_var[1][0]) +
-                                    (interior_box_hi_idx[1] + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
+                                    (interior_box_lo_idx[1] + num_subghosts_conservative_var[1][1])*subghostcell_dims_conservative_var[1][0];
                                 
                                 const int idx_cell_E_x_L = (i - 1 + num_subghosts_conservative_var[2][0]) +
-                                    (interior_box_hi_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
+                                    (interior_box_lo_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
                                 
                                 const int idx_cell_E_x_R = (i + 1 + num_subghosts_conservative_var[2][0]) +
-                                    (interior_box_hi_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
+                                    (interior_box_lo_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
 
                                 /*
                                  * Compute the mixture density.
@@ -2947,7 +2947,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             {
                                 Lambda_inv_L[si + 2] = c_y_T*c_y_T*drho_Y_dy[si] - Y_y_T[si]*dp_dy;
                             }
-                            Lambda_inv_L[d_num_species + 3] = (double(1)/lambda_last)*(K*(p_y_T - p_t) - (double(1) - beta)*T_last);
+                            Lambda_inv_L[d_num_species + 2] = (double(1)/lambda_last)*(K*(p_y_T - p_t) - (double(1) - beta)*T_last);
 
                             // Compute dV_dx.
                             
@@ -2961,11 +2961,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 dV_dy[si] = half*c_sq_inv*Y_y_T[si]*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 2]) +
                                     c_sq_inv*Lambda_inv_L[si + 2];
                             }
-                            dV_dy[d_num_species]     = Lambda_inv_L[d_num_species];
+                            dV_dy[d_num_species]     = Lambda_inv_L[1];
                             dV_dy[d_num_species + 1] = half*rho_c_inv*(-Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 2]);
                             dV_dy[d_num_species + 2] = half*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 2]);
 
-                            double V_ghost[4*num_ghosts_to_fill];
+                            double V_ghost[(d_num_species + 3)*num_ghosts_to_fill];
 
                             for (int j = num_ghosts_to_fill - 1; j >= 0; j--)
                             {
