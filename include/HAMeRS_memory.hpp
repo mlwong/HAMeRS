@@ -8,7 +8,7 @@
 #include "boost/weak_ptr.hpp"
 #include "boost/make_shared.hpp"
 #include "boost/enable_shared_from_this.hpp"
-#elif /* USE_BOOST */
+#else /* USE_BOOST */
 #include <memory>
 #endif /* USE_BOOST */
 
@@ -17,7 +17,7 @@
 #define HAMERS_WEAK_PTR boost::weak_ptr
 #define HAMERS_ENABLE_SHARED_FROM_THIS boost::enable_shared_from_this
 #define HAMERS_SHARED_PTR_CAST BOOST_CAST
-#elif /* USE_BOOST */
+#else /* USE_BOOST */
 #define HAMERS_SHARED_PTR std::shared_ptr
 #define HAMERS_WEAK_PTR std::weak_ptr
 #define HAMERS_ENABLE_SHARED_FROM_THIS std::enable_shared_from_this
