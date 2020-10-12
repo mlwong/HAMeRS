@@ -849,7 +849,7 @@ ExtendedTagAndInitialize::preprocessRichardsonExtrapolation(
      */
     
     HAMERS_SHARED_PTR<hier::PatchLevel> coarsened_level(
-       boost::make_shared<hier::PatchLevel>(dim));
+       HAMERS_MAKE_SHARED<hier::PatchLevel>(dim));
     hier::IntVector coarsen_ratio(dim, d_error_coarsen_ratio);
     coarsened_level->setCoarsenedPatchLevel(patch_level, coarsen_ratio);
     
@@ -877,7 +877,7 @@ ExtendedTagAndInitialize::preprocessRichardsonExtrapolation(
         hier::CONNECTOR_IMPLICIT_CREATION_RULE);
     
     HAMERS_SHARED_PTR<hier::Connector> tmp_coarsened(
-        boost::make_shared<hier::Connector>(level_to_level));
+        HAMERS_MAKE_SHARED<hier::Connector>(level_to_level));
     tmp_coarsened->setBase(*coarsened_level->getBoxLevel());
     tmp_coarsened->setHead(*coarsened_level->getBoxLevel());
     tmp_coarsened->setWidth(
@@ -886,7 +886,7 @@ ExtendedTagAndInitialize::preprocessRichardsonExtrapolation(
     tmp_coarsened->setTranspose(0, false);
     
     HAMERS_SHARED_PTR<hier::Connector> level_to_coarsened(
-        boost::make_shared<hier::Connector>(*tmp_coarsened));
+        HAMERS_MAKE_SHARED<hier::Connector>(*tmp_coarsened));
     level_to_coarsened->setBase(*patch_level->getBoxLevel());
     level_to_coarsened->setHead(*coarsened_level->getBoxLevel());
     level_to_coarsened->setWidth(level_to_level_width, true);

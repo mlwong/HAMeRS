@@ -249,7 +249,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
         std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > scaling_coeffs_x;
         for (int li = 0; li < d_num_level; li++)
         {
-            scaling_coeffs_x.push_back(boost::make_shared<pdat::CellData<double> >(
+            scaling_coeffs_x.push_back(HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, num_ghosts_wavelet_coeffs));
         }
         
@@ -549,13 +549,13 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
         std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > scaling_coeffs_y;
         for (int li = 0; li < d_num_level; li++)
         {
-            wavelet_coeffs_x.push_back(boost::make_shared<pdat::CellData<double> >(
+            wavelet_coeffs_x.push_back(HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, num_ghosts_wavelet_coeffs));
-            wavelet_coeffs_y.push_back(boost::make_shared<pdat::CellData<double> >(
+            wavelet_coeffs_y.push_back(HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, num_ghosts_wavelet_coeffs));
-            scaling_coeffs_x.push_back(boost::make_shared<pdat::CellData<double> >(
+            scaling_coeffs_x.push_back(HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, num_ghosts_wavelet_coeffs));
-            scaling_coeffs_y.push_back(boost::make_shared<pdat::CellData<double> >(
+            scaling_coeffs_y.push_back(HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, num_ghosts_wavelet_coeffs));
         }
         
@@ -1218,17 +1218,17 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
         std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > scaling_coeffs_z;
         for (int li = 0; li < d_num_level; li++)
         {
-            wavelet_coeffs_x.push_back(boost::make_shared<pdat::CellData<double> >(
+            wavelet_coeffs_x.push_back(HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, num_ghosts_wavelet_coeffs));
-            wavelet_coeffs_y.push_back(boost::make_shared<pdat::CellData<double> >(
+            wavelet_coeffs_y.push_back(HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, num_ghosts_wavelet_coeffs));
-            wavelet_coeffs_z.push_back(boost::make_shared<pdat::CellData<double> >(
+            wavelet_coeffs_z.push_back(HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, num_ghosts_wavelet_coeffs));
-            scaling_coeffs_x.push_back(boost::make_shared<pdat::CellData<double> >(
+            scaling_coeffs_x.push_back(HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, num_ghosts_wavelet_coeffs));
-            scaling_coeffs_y.push_back(boost::make_shared<pdat::CellData<double> >(
+            scaling_coeffs_y.push_back(HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, num_ghosts_wavelet_coeffs));
-            scaling_coeffs_z.push_back(boost::make_shared<pdat::CellData<double> >(
+            scaling_coeffs_z.push_back(HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, num_ghosts_wavelet_coeffs));
         }
         

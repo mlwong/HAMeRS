@@ -494,7 +494,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
                         d_Harten_wavelet_coeffs_density.push_back(
-                            boost::make_shared<pdat::CellVariable<double> >(
+                            HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
                                 d_dim,
                                 "Harten wavelet coefficient of density at level " +
                                     std::to_string(li),
@@ -508,7 +508,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         if (d_Harten_wavelet_uses_local_tol[vi])
                         {
                             d_Harten_local_means_density.push_back(
-                                boost::make_shared<pdat::CellVariable<double> >(
+                                HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
                                     d_dim,
                                     "Harten local mean of density at level " +
                                         std::to_string(li),
@@ -531,7 +531,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
                         d_Harten_wavelet_coeffs_total_energy.push_back(
-                            boost::make_shared<pdat::CellVariable<double> >(
+                            HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
                                 d_dim,
                                 "Harten wavelet coefficient of total energy at level " +
                                     std::to_string(li),
@@ -545,7 +545,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         if (d_Harten_wavelet_uses_local_tol[vi])
                         {
                             d_Harten_local_means_total_energy.push_back(
-                                boost::make_shared<pdat::CellVariable<double> >(
+                                HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
                                     d_dim,
                                     "Harten local mean of total energy at level " +
                                         std::to_string(li),
@@ -568,7 +568,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
                         d_Harten_wavelet_coeffs_pressure.push_back(
-                            boost::make_shared<pdat::CellVariable<double> >(
+                            HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
                                 d_dim,
                                 "Harten wavelet coefficient of pressure at level " +
                                     std::to_string(li),
@@ -582,7 +582,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         if (d_Harten_wavelet_uses_local_tol[vi])
                         {
                             d_Harten_local_means_pressure.push_back(
-                                boost::make_shared<pdat::CellVariable<double> >(
+                                HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
                                     d_dim,
                                     "Harten local mean of pressure at level " +
                                         std::to_string(li),
@@ -1632,7 +1632,7 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
         std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > wavelet_coeffs_local_max;
         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
         {
-            wavelet_coeffs_local_max.push_back(boost::make_shared<pdat::CellData<double> >(
+            wavelet_coeffs_local_max.push_back(HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, num_ghosts_wavelet_coeffs));
         }
         

@@ -538,7 +538,7 @@ NavierStokes::setupLoadBalancer(
     if (d_use_nonuniform_workload && gridding_algorithm)
     {
         HAMERS_SHARED_PTR<mesh::TreeLoadBalancer> load_balancer(
-            boost::dynamic_pointer_cast<mesh::TreeLoadBalancer, mesh::LoadBalanceStrategy>(
+            HAMERS_DYNAMIC_POINTER_CAST<mesh::TreeLoadBalancer, mesh::LoadBalanceStrategy>(
                 gridding_algorithm->getLoadBalanceStrategy()));
         
         if (load_balancer)

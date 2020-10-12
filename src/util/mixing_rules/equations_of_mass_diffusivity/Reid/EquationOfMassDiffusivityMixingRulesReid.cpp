@@ -525,18 +525,18 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
         
         ghostcell_dims_min = interior_dims + num_ghosts_min*2;
         
-        data_binary_mass_diffusivities = boost::make_shared<pdat::CellData<double> >(
+        data_binary_mass_diffusivities = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             interior_box, (d_num_species - 1)*d_num_species/2, num_ghosts_min);
         
-        data_mole_fractions = boost::make_shared<pdat::CellData<double> >(
+        data_mole_fractions = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             interior_box, d_num_species, num_ghosts_min);
         
-        data_sum = boost::make_shared<pdat::CellData<double> >(
+        data_sum = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             interior_box, 1, num_ghosts_min);
         
         if (data_mass_fractions->getDepth() == d_num_species - 1)
         {
-            data_mass_fractions_last = boost::make_shared<pdat::CellData<double> >(
+            data_mass_fractions_last = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, num_ghosts_min);
         }
     }
@@ -560,18 +560,18 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
         
         ghostcell_dims_min = domain_dims;
         
-        data_binary_mass_diffusivities = boost::make_shared<pdat::CellData<double> >(
+        data_binary_mass_diffusivities = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             domain, (d_num_species - 1)*d_num_species/2, hier::IntVector::getZero(d_dim));
         
-        data_mole_fractions = boost::make_shared<pdat::CellData<double> >(
+        data_mole_fractions = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             domain, d_num_species, hier::IntVector::getZero(d_dim));
         
-        data_sum = boost::make_shared<pdat::CellData<double> >(
+        data_sum = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             domain, 1, hier::IntVector::getZero(d_dim));
         
         if (data_mass_fractions->getDepth() == d_num_species - 1)
         {
-            data_mass_fractions_last = boost::make_shared<pdat::CellData<double> >(
+            data_mass_fractions_last = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 domain, 1, hier::IntVector::getZero(d_dim));
         }
     }

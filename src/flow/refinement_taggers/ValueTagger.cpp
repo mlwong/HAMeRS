@@ -347,35 +347,35 @@ ValueTagger::registerValueTaggerVariables(
         
         if (variable_key == "DENSITY")
         {
-            d_value_tagger_variable_density = boost::make_shared<pdat::CellVariable<double> >(
+            d_value_tagger_variable_density = HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
                 d_dim,
                 "Value tagger density",
                 1);
         }
         else if (variable_key == "TOTAL_ENERGY")
         {
-            d_value_tagger_variable_total_energy = boost::make_shared<pdat::CellVariable<double> >(
+            d_value_tagger_variable_total_energy = HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
                 d_dim,
                 "Value tagger total energy",
                 1);
         }
         else if (variable_key == "PRESSURE")
         {
-            d_value_tagger_variable_pressure = boost::make_shared<pdat::CellVariable<double> >(
+            d_value_tagger_variable_pressure = HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
                 d_dim,
                 "Value tagger pressure",
                 1);
         }
         else if (variable_key == "DILATATION")
         {
-            d_value_tagger_variable_dilatation = boost::make_shared<pdat::CellVariable<double> >(
+            d_value_tagger_variable_dilatation = HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
                 d_dim,
                 "Value tagger dilatation",
                 1);
         }
         else if (variable_key == "ENSTROPHY")
         {
-            d_value_tagger_variable_enstrophy = boost::make_shared<pdat::CellVariable<double> >(
+            d_value_tagger_variable_enstrophy = HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
                 d_dim,
                 "Value tagger enstrophy",
                 1);
@@ -389,7 +389,7 @@ ValueTagger::registerValueTaggerVariables(
             for (int si = 0; si < num_species; si++)
             {
                 d_value_tagger_variable_mass_fractions.push_back(
-                    boost::make_shared<pdat::CellVariable<double> >(
+                    HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
                         d_dim,
                         "Value tagger mass fraction " + std::to_string(si),
                         1));
@@ -833,6 +833,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
             const hier::IntVector& num_ghosts = d_flow_model->getNumberOfGhostCells();
             TBOX_ASSERT(num_ghosts >= hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative);
+            NULL_USE(num_ghosts);
 #endif
             
             std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
@@ -1083,6 +1084,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
             const hier::IntVector& num_ghosts = d_flow_model->getNumberOfGhostCells();
             TBOX_ASSERT(num_ghosts >= hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative);
+            NULL_USE(num_ghosts);
 #endif
             
             std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;

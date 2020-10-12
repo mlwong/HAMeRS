@@ -20,6 +20,8 @@
 #include "SAMRAI/tbox/Utilities.h"
 #include "SAMRAI/tbox/MathUtilities.h"
 
+#include <algorithm>
+
 /*
  * This function reads 3D boundary data from given input database.
  * The integer boundary condition types are placed in the integer

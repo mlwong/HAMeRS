@@ -2666,11 +2666,11 @@ RungeKuttaLevelIntegrator::registerVariable(
              * created to manage synchronization of data betweeen patch levels in the hierarchy.
              */
             const HAMERS_SHARED_PTR<pdat::FaceVariable<double> > face_var(
-                boost::dynamic_pointer_cast<pdat::FaceVariable<double>,
+                HAMERS_DYNAMIC_POINTER_CAST<pdat::FaceVariable<double>,
                 hier::Variable>(var));
             
             const HAMERS_SHARED_PTR<pdat::SideVariable<double> > side_var(
-                boost::dynamic_pointer_cast<pdat::SideVariable<double>,
+                HAMERS_DYNAMIC_POINTER_CAST<pdat::SideVariable<double>,
                 hier::Variable>(var));
             
             if (face_var)

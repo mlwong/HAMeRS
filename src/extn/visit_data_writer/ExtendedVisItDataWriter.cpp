@@ -394,7 +394,7 @@ ExtendedVisItDataWriter::resetLevelPlotQuantity(
     if (!found_type)
     {
         HAMERS_SHARED_PTR<SAMRAI::pdat::CellDataFactory<float> > ffactory(
-           boost::dynamic_pointer_cast<SAMRAI::pdat::CellDataFactory<float>,
+           HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::CellDataFactory<float>,
             SAMRAI::hier::PatchDataFactory>(factory));
         
         if (ffactory)
@@ -407,7 +407,7 @@ ExtendedVisItDataWriter::resetLevelPlotQuantity(
     if (!found_type)
     {
         HAMERS_SHARED_PTR<SAMRAI::pdat::NodeDataFactory<float> > ffactory(
-            boost::dynamic_pointer_cast<SAMRAI::pdat::NodeDataFactory<float>,
+            HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::NodeDataFactory<float>,
                 SAMRAI::hier::PatchDataFactory>(factory));
         
         if (ffactory)
@@ -421,7 +421,7 @@ ExtendedVisItDataWriter::resetLevelPlotQuantity(
     if (!found_type)
     {
         HAMERS_SHARED_PTR<SAMRAI::pdat::CellDataFactory<double> > dfactory(
-            boost::dynamic_pointer_cast<SAMRAI::pdat::CellDataFactory<double>,
+            HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::CellDataFactory<double>,
                 SAMRAI::hier::PatchDataFactory>(factory));
         
         if (dfactory)
@@ -434,7 +434,7 @@ ExtendedVisItDataWriter::resetLevelPlotQuantity(
     if (!found_type)
     {
         HAMERS_SHARED_PTR<SAMRAI::pdat::NodeDataFactory<double> > dfactory(
-            boost::dynamic_pointer_cast<SAMRAI::pdat::NodeDataFactory<double>,
+            HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::NodeDataFactory<double>,
                 SAMRAI::hier::PatchDataFactory>(factory));
        
         if (dfactory)
@@ -447,7 +447,7 @@ ExtendedVisItDataWriter::resetLevelPlotQuantity(
     if (!found_type)
     {
         HAMERS_SHARED_PTR<SAMRAI::pdat::CellDataFactory<int> > ifactory(
-            boost::dynamic_pointer_cast<SAMRAI::pdat::CellDataFactory<int>,
+            HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::CellDataFactory<int>,
                 SAMRAI::hier::PatchDataFactory>(factory));
         
         if (ifactory)
@@ -460,7 +460,7 @@ ExtendedVisItDataWriter::resetLevelPlotQuantity(
     if (!found_type)
     {
         HAMERS_SHARED_PTR<SAMRAI::pdat::NodeDataFactory<int> > ifactory(
-            boost::dynamic_pointer_cast<SAMRAI::pdat::NodeDataFactory<int>,
+            HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::NodeDataFactory<int>,
                 SAMRAI::hier::PatchDataFactory>(factory));
         
         if (ifactory)
@@ -568,7 +568,7 @@ ExtendedVisItDataWriter::registerNodeCoordinates(
     if (!found_type)
     {
         HAMERS_SHARED_PTR<SAMRAI::pdat::NodeDataFactory<float> > ffactory(
-            boost::dynamic_pointer_cast<SAMRAI::pdat::NodeDataFactory<float>,
+            HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::NodeDataFactory<float>,
                 SAMRAI::hier::PatchDataFactory>(factory));
         
         if (ffactory)
@@ -580,7 +580,7 @@ ExtendedVisItDataWriter::registerNodeCoordinates(
     if (!found_type)
     {
         HAMERS_SHARED_PTR<SAMRAI::pdat::NodeDataFactory<double> > dfactory(
-            boost::dynamic_pointer_cast<SAMRAI::pdat::NodeDataFactory<double>,
+            HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::NodeDataFactory<double>,
             SAMRAI::hier::PatchDataFactory>(factory));
         
         if (dfactory)
@@ -686,7 +686,7 @@ ExtendedVisItDataWriter::registerSingleNodeCoordinate(
     if (!found_type)
     {
         HAMERS_SHARED_PTR<SAMRAI::pdat::NodeDataFactory<float> > ffactory(
-            boost::dynamic_pointer_cast<SAMRAI::pdat::NodeDataFactory<float>,
+            HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::NodeDataFactory<float>,
                 SAMRAI::hier::PatchDataFactory>(factory));
         
         if (ffactory)
@@ -697,7 +697,7 @@ ExtendedVisItDataWriter::registerSingleNodeCoordinate(
     if (!found_type)
     {
         HAMERS_SHARED_PTR<SAMRAI::pdat::NodeDataFactory<double> > dfactory(
-            boost::dynamic_pointer_cast<SAMRAI::pdat::NodeDataFactory<double>,
+            HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::NodeDataFactory<double>,
                 SAMRAI::hier::PatchDataFactory>(factory));
         
         if (dfactory)
@@ -1181,7 +1181,7 @@ ExtendedVisItDataWriter::initializePlotItem(
             if (!found_type)
             {
                 HAMERS_SHARED_PTR<SAMRAI::pdat::CellDataFactory<float> > ffactory(
-                    boost::dynamic_pointer_cast<SAMRAI::pdat::CellDataFactory<float>,
+                    HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::CellDataFactory<float>,
                         SAMRAI::hier::PatchDataFactory>(factory));
                 
                 if (ffactory)
@@ -1195,7 +1195,7 @@ ExtendedVisItDataWriter::initializePlotItem(
             if (!found_type)
             {
                 HAMERS_SHARED_PTR<SAMRAI::pdat::CellDataFactory<double> > dfactory(
-                    boost::dynamic_pointer_cast<SAMRAI::pdat::CellDataFactory<double>,
+                    HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::CellDataFactory<double>,
                         SAMRAI::hier::PatchDataFactory>(factory));
                 
                 if (dfactory)
@@ -1209,7 +1209,7 @@ ExtendedVisItDataWriter::initializePlotItem(
             if (!found_type)
             {
                 HAMERS_SHARED_PTR<SAMRAI::pdat::CellDataFactory<int> > ifactory(
-                    boost::dynamic_pointer_cast<SAMRAI::pdat::CellDataFactory<int>,
+                    HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::CellDataFactory<int>,
                         SAMRAI::hier::PatchDataFactory>(factory));
                 
                 if (ifactory)
@@ -1223,7 +1223,7 @@ ExtendedVisItDataWriter::initializePlotItem(
             if (!found_type)
             {
                 HAMERS_SHARED_PTR<SAMRAI::pdat::NodeDataFactory<float> > ffactory(
-                    boost::dynamic_pointer_cast<SAMRAI::pdat::NodeDataFactory<float>,
+                    HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::NodeDataFactory<float>,
                         SAMRAI::hier::PatchDataFactory>(factory));
                 
                 if (ffactory)
@@ -1237,7 +1237,7 @@ ExtendedVisItDataWriter::initializePlotItem(
             if (!found_type)
             {
                 HAMERS_SHARED_PTR<SAMRAI::pdat::NodeDataFactory<double> > dfactory(
-                    boost::dynamic_pointer_cast<SAMRAI::pdat::NodeDataFactory<double>,
+                    HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::NodeDataFactory<double>,
                             SAMRAI::hier::PatchDataFactory>(factory));
                 
                 if (dfactory)
@@ -1251,7 +1251,7 @@ ExtendedVisItDataWriter::initializePlotItem(
             if (!found_type)
             {
                 HAMERS_SHARED_PTR<SAMRAI::pdat::NodeDataFactory<int> > ifactory(
-                    boost::dynamic_pointer_cast<SAMRAI::pdat::NodeDataFactory<int>,
+                    HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::NodeDataFactory<int>,
                         SAMRAI::hier::PatchDataFactory>(factory));
                 
                 if (ifactory)
@@ -2940,7 +2940,7 @@ ExtendedVisItDataWriter::writeSummaryToHDFFile(
         //string summary_HDFFilename = dump_dirname + temp_buf;
         std::string summary_HDFFilename = dump_dirname + "/" + d_summary_filename;
         HAMERS_SHARED_PTR<SAMRAI::tbox::Database> summary_HDFFilePointer(
-            boost::make_shared<SAMRAI::tbox::HDFDatabase>("root"));
+            HAMERS_MAKE_SHARED<SAMRAI::tbox::HDFDatabase>("root"));
         summary_HDFFilePointer->create(summary_HDFFilename);
         
         /*

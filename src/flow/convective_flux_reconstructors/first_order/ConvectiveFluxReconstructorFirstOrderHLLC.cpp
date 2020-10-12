@@ -194,10 +194,10 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            conservative_variables_minus.push_back(boost::make_shared<pdat::SideData<double> >(
+            conservative_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getZero(d_dim)));
             
-            conservative_variables_plus.push_back(boost::make_shared<pdat::SideData<double> >(
+            conservative_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getZero(d_dim)));
         }
         
@@ -373,10 +373,10 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            conservative_variables_minus.push_back(boost::make_shared<pdat::SideData<double> >(
+            conservative_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getZero(d_dim)));
             
-            conservative_variables_plus.push_back(boost::make_shared<pdat::SideData<double> >(
+            conservative_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getZero(d_dim)));
         }
         
@@ -661,10 +661,10 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            conservative_variables_minus.push_back(boost::make_shared<pdat::SideData<double> >(
+            conservative_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getZero(d_dim)));
             
-            conservative_variables_plus.push_back(boost::make_shared<pdat::SideData<double> >(
+            conservative_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getZero(d_dim)));
         }
         

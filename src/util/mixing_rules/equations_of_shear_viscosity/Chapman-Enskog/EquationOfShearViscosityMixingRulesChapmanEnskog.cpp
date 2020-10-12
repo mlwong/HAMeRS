@@ -446,13 +446,13 @@ EquationOfShearViscosityMixingRulesChapmanEnskog::computeShearViscosity(
         
         ghostcell_dims_min = interior_dims + num_ghosts_min*2;
         
-        data_shear_viscosity_species = boost::make_shared<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
-        data_den = boost::make_shared<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
-        data_num = boost::make_shared<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
+        data_shear_viscosity_species = HAMERS_MAKE_SHARED<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
+        data_den = HAMERS_MAKE_SHARED<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
+        data_num = HAMERS_MAKE_SHARED<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
         
         if (data_mass_fractions->getDepth() == d_num_species - 1)
         {
-            data_mass_fractions_last = boost::make_shared<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
+            data_mass_fractions_last = HAMERS_MAKE_SHARED<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
         }
     }
     else
@@ -474,14 +474,14 @@ EquationOfShearViscosityMixingRulesChapmanEnskog::computeShearViscosity(
         ghostcell_dims_min = domain_dims;
         
         data_shear_viscosity_species =
-            boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
-        data_den = boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
-        data_num = boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+            HAMERS_MAKE_SHARED<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+        data_den = HAMERS_MAKE_SHARED<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+        data_num = HAMERS_MAKE_SHARED<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
         
         if (data_mass_fractions->getDepth() == d_num_species - 1)
         {
             data_mass_fractions_last =
-                boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+                HAMERS_MAKE_SHARED<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
         }
     }
     
@@ -1302,11 +1302,11 @@ EquationOfShearViscosityMixingRulesChapmanEnskog::computeShearViscosity(
         
         ghostcell_dims_min = interior_dims + num_ghosts_min*2;
         
-        data_shear_viscosity_species = boost::make_shared<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
+        data_shear_viscosity_species = HAMERS_MAKE_SHARED<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
         
         if (data_volume_fractions->getDepth() == d_num_species - 1)
         {
-            data_volume_fractions_last = boost::make_shared<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
+            data_volume_fractions_last = HAMERS_MAKE_SHARED<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
         }
     }
     else
@@ -1328,12 +1328,12 @@ EquationOfShearViscosityMixingRulesChapmanEnskog::computeShearViscosity(
         ghostcell_dims_min = domain_dims;
         
         data_shear_viscosity_species =
-            boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+            HAMERS_MAKE_SHARED<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
         
         if (data_volume_fractions->getDepth() == d_num_species - 1)
         {
             data_volume_fractions_last =
-                boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+                HAMERS_MAKE_SHARED<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
         }
     }
     

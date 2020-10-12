@@ -8,6 +8,8 @@
 #include "SAMRAI/tbox/Utilities.h"
 #include "SAMRAI/tbox/MathUtilities.h"
 
+#include <algorithm>
+
 // Integer constant for debugging improperly set boundary data.
 #define BOGUS_BDRY_LOC (-9999)
 

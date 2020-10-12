@@ -298,7 +298,7 @@ EquationOfStateMixingRulesIdealGas::computePressure(
         num_ghosts_min = hier::IntVector::min(num_ghosts_internal_energy, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             interior_box, num_thermo_properties, num_ghosts_min);
     }
     else
@@ -310,7 +310,7 @@ EquationOfStateMixingRulesIdealGas::computePressure(
         TBOX_ASSERT(data_mass_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
     }
     
@@ -402,7 +402,7 @@ EquationOfStateMixingRulesIdealGas::computePressure(
         num_ghosts_min = hier::IntVector::min(num_ghosts_internal_energy, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
             interior_box, num_thermo_properties, num_ghosts_min, direction);
     }
     else
@@ -414,7 +414,7 @@ EquationOfStateMixingRulesIdealGas::computePressure(
         TBOX_ASSERT(data_mass_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
     }
     
@@ -543,7 +543,7 @@ EquationOfStateMixingRulesIdealGas::computePressure(
         num_ghosts_min = hier::IntVector::min(num_ghosts_internal_energy, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             interior_box, num_thermo_properties, num_ghosts_min);
     }
     else
@@ -555,7 +555,7 @@ EquationOfStateMixingRulesIdealGas::computePressure(
         TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
     }
     
@@ -649,7 +649,7 @@ EquationOfStateMixingRulesIdealGas::computePressure(
         num_ghosts_min = hier::IntVector::min(num_ghosts_internal_energy, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
             interior_box, num_thermo_properties, num_ghosts_min, direction);
     }
     else
@@ -661,7 +661,7 @@ EquationOfStateMixingRulesIdealGas::computePressure(
         TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
     }
     
@@ -786,7 +786,7 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergy(
         num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             interior_box, num_thermo_properties, num_ghosts_min);
     }
     else
@@ -798,7 +798,7 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergy(
         TBOX_ASSERT(data_mass_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
     }
     
@@ -890,7 +890,7 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergy(
         num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
             interior_box, num_thermo_properties, num_ghosts_min, direction);
     }
     else
@@ -902,7 +902,7 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergy(
         TBOX_ASSERT(data_mass_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
     }
     
@@ -1031,7 +1031,7 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergy(
         num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             interior_box, num_thermo_properties, num_ghosts_min);
     }
     else
@@ -1043,7 +1043,7 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergy(
         TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
     }
     
@@ -1137,7 +1137,7 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergy(
         num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
             interior_box, num_thermo_properties, num_ghosts_min, direction);
     }
     else
@@ -1149,7 +1149,7 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergy(
         TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
     }
     
@@ -1274,7 +1274,7 @@ EquationOfStateMixingRulesIdealGas::computeTemperature(
         num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             interior_box, num_thermo_properties, num_ghosts_min);
     }
     else
@@ -1286,7 +1286,7 @@ EquationOfStateMixingRulesIdealGas::computeTemperature(
         TBOX_ASSERT(data_mass_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
     }
     
@@ -1378,7 +1378,7 @@ EquationOfStateMixingRulesIdealGas::computeTemperature(
         num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
             interior_box, num_thermo_properties, num_ghosts_min, direction);
     }
     else
@@ -1390,7 +1390,7 @@ EquationOfStateMixingRulesIdealGas::computeTemperature(
         TBOX_ASSERT(data_mass_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
     }
     
@@ -1517,7 +1517,7 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergyFromTemperature(
         num_ghosts_min = hier::IntVector::min(num_ghosts_temperature, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             interior_box, num_thermo_properties, num_ghosts_min);
     }
     else
@@ -1529,7 +1529,7 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergyFromTemperature(
         TBOX_ASSERT(data_mass_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
     }
     
@@ -1622,7 +1622,7 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergyFromTemperature(
         num_ghosts_min = hier::IntVector::min(num_ghosts_temperature, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
             interior_box, num_thermo_properties, num_ghosts_min, direction);
     }
     else
@@ -1634,7 +1634,7 @@ EquationOfStateMixingRulesIdealGas::computeInternalEnergyFromTemperature(
         TBOX_ASSERT(data_mass_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
     }
     
@@ -1855,7 +1855,7 @@ EquationOfStateMixingRulesIdealGas::computeIsochoricSpecificHeatCapacity(
             offset_mass_fractions_last = data_mass_fractions->getGhostCellWidth();
             
             data_mass_fractions_last =
-                boost::make_shared<pdat::CellData<double> >(interior_box, 1, data_mass_fractions->getGhostCellWidth());
+                HAMERS_MAKE_SHARED<pdat::CellData<double> >(interior_box, 1, data_mass_fractions->getGhostCellWidth());
             
             data_mass_fractions_last->fillAll(double(1));
         }
@@ -1864,7 +1864,7 @@ EquationOfStateMixingRulesIdealGas::computeIsochoricSpecificHeatCapacity(
             offset_mass_fractions_last = hier::IntVector::getZero(d_dim);
             
             data_mass_fractions_last =
-                boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+                HAMERS_MAKE_SHARED<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
             
             data_mass_fractions_last->fillAll(double(1), domain);
         }
@@ -2069,7 +2069,7 @@ EquationOfStateMixingRulesIdealGas::computeIsochoricSpecificHeatCapacity(
             offset_mass_fractions_last = data_mass_fractions->getGhostCellWidth();
             
             HAMERS_SHARED_PTR<pdat::SideData<double> > data_mass_fractions_last =
-                boost::make_shared<pdat::SideData<double> >(
+                HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                     interior_box, 1, data_mass_fractions->getGhostCellWidth(), direction);
             
             data_mass_fractions_last->fillAll(double(1));
@@ -2079,7 +2079,7 @@ EquationOfStateMixingRulesIdealGas::computeIsochoricSpecificHeatCapacity(
             offset_mass_fractions_last = hier::IntVector::getZero(d_dim);
             
             data_mass_fractions_last =
-                boost::make_shared<pdat::SideData<double> >(domain, 1, hier::IntVector::getZero(d_dim), direction);
+                HAMERS_MAKE_SHARED<pdat::SideData<double> >(domain, 1, hier::IntVector::getZero(d_dim), direction);
             
             data_mass_fractions_last->fillAll(double(1), domain);
         }
@@ -2324,7 +2324,7 @@ EquationOfStateMixingRulesIdealGas::computeIsobaricSpecificHeatCapacity(
             offset_mass_fractions_last = data_mass_fractions->getGhostCellWidth();
             
             data_mass_fractions_last =
-                boost::make_shared<pdat::CellData<double> >(interior_box, 1, data_mass_fractions->getGhostCellWidth());
+                HAMERS_MAKE_SHARED<pdat::CellData<double> >(interior_box, 1, data_mass_fractions->getGhostCellWidth());
             
             data_mass_fractions_last->fillAll(double(1));
         }
@@ -2333,7 +2333,7 @@ EquationOfStateMixingRulesIdealGas::computeIsobaricSpecificHeatCapacity(
             offset_mass_fractions_last = hier::IntVector::getZero(d_dim);
             
             data_mass_fractions_last =
-                boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+                HAMERS_MAKE_SHARED<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
             
             data_mass_fractions_last->fillAll(double(1), domain);
         }
@@ -2538,7 +2538,7 @@ EquationOfStateMixingRulesIdealGas::computeIsobaricSpecificHeatCapacity(
             offset_mass_fractions_last = data_mass_fractions->getGhostCellWidth();
             
             HAMERS_SHARED_PTR<pdat::SideData<double> > data_mass_fractions_last =
-                boost::make_shared<pdat::SideData<double> >(
+                HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                     interior_box, 1, data_mass_fractions->getGhostCellWidth(), direction);
             
             data_mass_fractions_last->fillAll(double(1));
@@ -2548,7 +2548,7 @@ EquationOfStateMixingRulesIdealGas::computeIsobaricSpecificHeatCapacity(
             offset_mass_fractions_last = hier::IntVector::getZero(d_dim);
             
             data_mass_fractions_last =
-                boost::make_shared<pdat::SideData<double> >(domain, 1, hier::IntVector::getZero(d_dim), direction);
+                HAMERS_MAKE_SHARED<pdat::SideData<double> >(domain, 1, hier::IntVector::getZero(d_dim), direction);
             
             data_mass_fractions_last->fillAll(double(1), domain);
         }
@@ -2704,7 +2704,7 @@ EquationOfStateMixingRulesIdealGas::computeGruneisenParameter(
         num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             interior_box, num_thermo_properties, num_ghosts_min);
     }
     else
@@ -2716,7 +2716,7 @@ EquationOfStateMixingRulesIdealGas::computeGruneisenParameter(
         TBOX_ASSERT(data_mass_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
     }
     
@@ -2810,7 +2810,7 @@ EquationOfStateMixingRulesIdealGas::computeGruneisenParameter(
         num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
             interior_box, num_thermo_properties, num_ghosts_min, direction);
     }
     else
@@ -2822,7 +2822,7 @@ EquationOfStateMixingRulesIdealGas::computeGruneisenParameter(
         TBOX_ASSERT(data_mass_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
     }
     
@@ -2955,7 +2955,7 @@ EquationOfStateMixingRulesIdealGas::computeGruneisenParameter(
         num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             interior_box, num_thermo_properties, num_ghosts_min);
     }
     else
@@ -2967,7 +2967,7 @@ EquationOfStateMixingRulesIdealGas::computeGruneisenParameter(
         TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
     }
     
@@ -3063,7 +3063,7 @@ EquationOfStateMixingRulesIdealGas::computeGruneisenParameter(
         num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
             interior_box, num_thermo_properties, num_ghosts_min, direction);
     }
     else
@@ -3074,7 +3074,7 @@ EquationOfStateMixingRulesIdealGas::computeGruneisenParameter(
         TBOX_ASSERT(data_pressure->getGhostBox().contains(domain));
         TBOX_ASSERT(data_volume_fractions->getGhostBox().contains(domain));
 #endif
-        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
     }
     
@@ -3244,10 +3244,10 @@ EquationOfStateMixingRulesIdealGas::computePressureDerivativeWithPartialDensitie
         offset_partial_pressure_partial_partial_densities = num_ghosts_partial_pressure_partial_partial_densities;
         offset_min = num_ghosts_min;
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             interior_box, num_thermo_properties, num_ghosts_min);
         
-        data_internal_energy = boost::make_shared<pdat::CellData<double> >(
+        data_internal_energy = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             interior_box, 1, num_ghosts_min);
     }
     else
@@ -3268,10 +3268,10 @@ EquationOfStateMixingRulesIdealGas::computePressureDerivativeWithPartialDensitie
             domain.lower() - ghost_box_partial_pressure_partial_partial_densities.lower();
         offset_min = hier::IntVector::getZero(d_dim);
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
         
-        data_internal_energy = boost::make_shared<pdat::CellData<double> >(
+        data_internal_energy = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             domain, 1, hier::IntVector::getZero(d_dim));
     }
     
@@ -3433,10 +3433,10 @@ EquationOfStateMixingRulesIdealGas::computePressureDerivativeWithPartialDensitie
         offset_partial_pressure_partial_partial_densities = num_ghosts_partial_pressure_partial_partial_densities;
         offset_min = num_ghosts_min;
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
             interior_box, num_thermo_properties, num_ghosts_min, direction);
         
-        data_internal_energy = boost::make_shared<pdat::SideData<double> >(
+        data_internal_energy = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
             interior_box, 1, num_ghosts_min, direction);
     }
     else
@@ -3457,10 +3457,10 @@ EquationOfStateMixingRulesIdealGas::computePressureDerivativeWithPartialDensitie
             domain.lower() - ghost_box_partial_pressure_partial_partial_densities.lower();
         offset_min = hier::IntVector::getZero(d_dim);
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
         
-        data_internal_energy = boost::make_shared<pdat::SideData<double> >(
+        data_internal_energy = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
             domain, 1, hier::IntVector::getZero(d_dim), direction);
     }
     
@@ -3991,7 +3991,7 @@ EquationOfStateMixingRulesIdealGas::computePressureDerivativeWithVolumeFractions
         offset_pressure = num_ghosts_pressure;
         offset_min = num_ghosts_min;
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             interior_box, num_thermo_properties, num_ghosts_min);
     }
     else
@@ -4013,7 +4013,7 @@ EquationOfStateMixingRulesIdealGas::computePressureDerivativeWithVolumeFractions
         offset_pressure = domain.lower() - ghost_box_pressure.lower();
         offset_min = hier::IntVector::getZero(d_dim);
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::CellData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim));
     }
     
@@ -4164,7 +4164,7 @@ EquationOfStateMixingRulesIdealGas::computePressureDerivativeWithVolumeFractions
         offset_pressure = num_ghosts_pressure;
         offset_min = num_ghosts_min;
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
             interior_box, num_thermo_properties, num_ghosts_min, direction);
     }
     else
@@ -4186,7 +4186,7 @@ EquationOfStateMixingRulesIdealGas::computePressureDerivativeWithVolumeFractions
         offset_pressure = domain.lower() - ghost_box_pressure.lower();
         offset_min = hier::IntVector::getZero(d_dim);
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
     }
     
@@ -4442,7 +4442,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureDensity(
         num_ghosts_min = hier::IntVector::min(num_ghosts_temperature, num_ghosts_min);
         num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fractions, num_ghosts_min);
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
             interior_box, num_thermo_properties, num_ghosts_min, direction);
     }
     else
@@ -4454,7 +4454,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureDensity(
         TBOX_ASSERT(data_mass_fractions->getGhostBox().contains(domain));
 #endif
         
-        data_mixture_thermo_properties = boost::make_shared<pdat::SideData<double> >(
+        data_mixture_thermo_properties = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
             domain, num_thermo_properties, hier::IntVector::getZero(d_dim), direction);
     }
     
@@ -4867,7 +4867,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMas
             
             offset_mass_fractions_last = data_mass_fractions->getGhostCellWidth();
             
-            data_mass_fractions_last = boost::make_shared<pdat::CellData<double> >(
+            data_mass_fractions_last = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, data_mass_fractions->getGhostCellWidth());
             
             data_mass_fractions_last->fillAll(double(1));
@@ -4876,7 +4876,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMas
         {
             offset_mass_fractions_last = hier::IntVector::getZero(d_dim);
             
-            data_mass_fractions_last = boost::make_shared<pdat::CellData<double> >(
+            data_mass_fractions_last = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 domain, 1, hier::IntVector::getZero(d_dim));
             
             data_mass_fractions_last->fillAll(double(1), domain);
@@ -5076,7 +5076,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMas
             
             offset_mass_fractions_last = data_mass_fractions->getGhostCellWidth();
             
-            data_mass_fractions_last = boost::make_shared<pdat::SideData<double> >(
+            data_mass_fractions_last = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, data_mass_fractions->getGhostCellWidth(), direction);
             
             data_mass_fractions_last->fillAll(double(1));
@@ -5085,7 +5085,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMas
         {
             offset_mass_fractions_last = hier::IntVector::getZero(d_dim);
             
-            data_mass_fractions_last = boost::make_shared<pdat::SideData<double> >(
+            data_mass_fractions_last = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 domain, 1, hier::IntVector::getZero(d_dim), direction);
             
             data_mass_fractions_last->fillAll(double(1), domain);
@@ -5314,7 +5314,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
             
             offset_volume_fractions_last = data_volume_fractions->getGhostCellWidth();
             
-            data_volume_fractions_last = boost::make_shared<pdat::CellData<double> >(
+            data_volume_fractions_last = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, data_volume_fractions->getGhostCellWidth());
             
             data_volume_fractions_last->fillAll(double(1));
@@ -5323,7 +5323,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
         {
             offset_volume_fractions_last = hier::IntVector::getZero(d_dim);
             
-            data_volume_fractions_last = boost::make_shared<pdat::CellData<double> >(
+            data_volume_fractions_last = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 domain, 1, hier::IntVector::getZero(d_dim));
             
             data_volume_fractions_last->fillAll(double(1), domain);
@@ -5512,7 +5512,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
             
             offset_volume_fractions_last = data_volume_fractions->getGhostCellWidth();
             
-            data_volume_fractions_last = boost::make_shared<pdat::SideData<double> >(
+            data_volume_fractions_last = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, data_volume_fractions->getGhostCellWidth(), direction);
             
             data_volume_fractions_last->fillAll(double(1));
@@ -5521,7 +5521,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
         {
             offset_volume_fractions_last = hier::IntVector::getZero(d_dim);
             
-            data_volume_fractions_last = boost::make_shared<pdat::SideData<double> >(
+            data_volume_fractions_last = HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 domain, 1, hier::IntVector::getZero(d_dim), direction);
             
             data_volume_fractions_last->fillAll(double(1), domain);

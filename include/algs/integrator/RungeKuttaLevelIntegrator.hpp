@@ -217,7 +217,7 @@ class RungeKuttaLevelIntegrator:
          *
          * This routine also invokes variable registration in the patch strategy.
          *
-         * @pre gridding_alg_strategy is actually a boost::dynamic_pointer_cast<mesh::GriddingAlgorithm>
+         * @pre gridding_alg_strategy is actually a HAMERS_DYNAMIC_POINTER_CAST<mesh::GriddingAlgorithm>
          */
         virtual void
         initializeLevelIntegrator(

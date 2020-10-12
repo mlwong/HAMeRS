@@ -142,7 +142,7 @@ EquationOfThermalConductivityPrandtl::computeThermalConductivity(
         
         ghostcell_dims_min = interior_dims + num_ghosts_min*2;
         
-        data_shear_viscosity = boost::make_shared<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
+        data_shear_viscosity = HAMERS_MAKE_SHARED<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
     }
     else
     {
@@ -160,7 +160,7 @@ EquationOfThermalConductivityPrandtl::computeThermalConductivity(
         
         ghostcell_dims_min = domain_dims;
         
-        data_shear_viscosity = boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+        data_shear_viscosity = HAMERS_MAKE_SHARED<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
     }
     
     /*
@@ -402,9 +402,9 @@ EquationOfThermalConductivityPrandtl::computeThermalConductivity(
         
         ghostcell_dims_min = interior_dims + num_ghosts_min*2;
         
-        data_shear_viscosity = boost::make_shared<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
+        data_shear_viscosity = HAMERS_MAKE_SHARED<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
         
-        data_molecular_properties_shear_viscosity = boost::make_shared<pdat::CellData<double> >(
+        data_molecular_properties_shear_viscosity = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             interior_box, data_molecular_properties->getDepth() - 3, num_ghosts_min);
     }
     else
@@ -425,9 +425,9 @@ EquationOfThermalConductivityPrandtl::computeThermalConductivity(
         
         ghostcell_dims_min = domain_dims;
         
-        data_shear_viscosity = boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+        data_shear_viscosity = HAMERS_MAKE_SHARED<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
         
-        data_molecular_properties_shear_viscosity = boost::make_shared<pdat::CellData<double> >(
+        data_molecular_properties_shear_viscosity = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
             domain, data_molecular_properties->getDepth() - 3, hier::IntVector::getZero(d_dim));
     }
     

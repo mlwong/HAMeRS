@@ -282,7 +282,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int vi = 0; vi < num_projection_var; vi++)
         {
-            projection_variables.push_back(boost::make_shared<pdat::SideData<double> >(
+            projection_variables.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
         }
         
@@ -293,7 +293,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
             characteristic_variables[m].reserve(d_num_eqn);
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                characteristic_variables[m].push_back(boost::make_shared<pdat::SideData<double> >(
+                characteristic_variables[m].push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                     interior_box, 1, hier::IntVector::getOne(d_dim)));
             }
         }
@@ -305,16 +305,16 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            characteristic_variables_minus.push_back(boost::make_shared<pdat::SideData<double> >(
+            characteristic_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            characteristic_variables_plus.push_back(boost::make_shared<pdat::SideData<double> >(
+            characteristic_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            primitive_variables_minus.push_back(boost::make_shared<pdat::SideData<double> >(
+            primitive_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            primitive_variables_plus.push_back(boost::make_shared<pdat::SideData<double> >(
+            primitive_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
         }
         
@@ -827,7 +827,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int vi = 0; vi < num_projection_var; vi++)
         {
-            projection_variables.push_back(boost::make_shared<pdat::SideData<double> >(
+            projection_variables.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
         }
         
@@ -838,7 +838,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
             characteristic_variables[m].reserve(d_num_eqn);
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                characteristic_variables[m].push_back(boost::make_shared<pdat::SideData<double> >(
+                characteristic_variables[m].push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                     interior_box, 1, hier::IntVector::getOne(d_dim)));
             }
         }
@@ -850,16 +850,16 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            characteristic_variables_minus.push_back(boost::make_shared<pdat::SideData<double> >(
+            characteristic_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            characteristic_variables_plus.push_back(boost::make_shared<pdat::SideData<double> >(
+            characteristic_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            primitive_variables_minus.push_back(boost::make_shared<pdat::SideData<double> >(
+            primitive_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            primitive_variables_plus.push_back(boost::make_shared<pdat::SideData<double> >(
+            primitive_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
         }
         
@@ -1755,7 +1755,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int vi = 0; vi < num_projection_var; vi++)
         {
-            projection_variables.push_back(boost::make_shared<pdat::SideData<double> >(
+            projection_variables.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
         }
         
@@ -1766,7 +1766,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
             characteristic_variables[m].reserve(d_num_eqn);
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                characteristic_variables[m].push_back(boost::make_shared<pdat::SideData<double> >(
+                characteristic_variables[m].push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                     interior_box, 1, hier::IntVector::getOne(d_dim)));
             }
         }
@@ -1778,16 +1778,16 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            characteristic_variables_minus.push_back(boost::make_shared<pdat::SideData<double> >(
+            characteristic_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            characteristic_variables_plus.push_back(boost::make_shared<pdat::SideData<double> >(
+            characteristic_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            primitive_variables_minus.push_back(boost::make_shared<pdat::SideData<double> >(
+            primitive_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            primitive_variables_plus.push_back(boost::make_shared<pdat::SideData<double> >(
+            primitive_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
         }
         

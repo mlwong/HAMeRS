@@ -19,6 +19,7 @@ FilterTruncatedGaussian::FilterTruncatedGaussian(
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     const double sum_coeffs = a_G + double(2)*(b_G + c_G + d_G + e_G);
     TBOX_ASSERT(fabs(sum_coeffs - double(1)) < DBL_EPSILON);
+    NULL_USE(sum_coeffs);
 #endif
     
     switch (direction)
