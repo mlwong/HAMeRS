@@ -15,6 +15,7 @@
 /* Define epsilon to prevent divisoin by zero */
 #define HAMERS_EPSILON 1.0e-40
 
-#define USE_BOOST
+/* Enable compilation with Boost library */
+#cmakedefine HAMERS_USE_BOOST
 
 #endif /* HAMERS_CONFIG_HPP */
