@@ -15,12 +15,13 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.hpp"
 #include "algs/integrator/ExtendedTagAndInitStrategy.hpp"
 
 #include "SAMRAI/mesh/TagAndInitializeStrategy.h"
 
-#include "boost/shared_ptr.hpp"
 #include <vector>
 
 using namespace SAMRAI;
@@ -192,8 +193,8 @@ class ExtendedTagAndInitialize:
         ExtendedTagAndInitialize(
             const std::string& object_name,
             ExtendedTagAndInitStrategy* tag_strategy,
-            const boost::shared_ptr<tbox::Database>& input_db =
-                boost::shared_ptr<tbox::Database>());
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db =
+                HAMERS_SHARED_PTR<tbox::Database>());
         
         /*!
          * Virtual destructor for ExtendedTagAndInitialize.
@@ -352,13 +353,13 @@ class ExtendedTagAndInitialize:
          */
         void
         initializeLevelData(
-            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
             const int level_number,
             const double init_data_time,
             const bool can_be_refined,
             const bool initial_time,
-            const boost::shared_ptr<hier::PatchLevel>& old_level =
-               boost::shared_ptr<hier::PatchLevel>(),
+            const HAMERS_SHARED_PTR<hier::PatchLevel>& old_level =
+               HAMERS_SHARED_PTR<hier::PatchLevel>(),
             const bool allocate_data = true);
         
         /*!
@@ -374,7 +375,7 @@ class ExtendedTagAndInitialize:
          */
         void
         resetHierarchyConfiguration(
-            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
             const int coarsest_level,
             const int finest_level);
         
@@ -392,7 +393,7 @@ class ExtendedTagAndInitialize:
          */
         void
         preprocessErrorEstimation(
-           const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+           const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
            const int level_number,
            const int cycle,
            const double regrid_time,
@@ -415,7 +416,7 @@ class ExtendedTagAndInitialize:
          */
         void
         tagCellsForRefinement(
-            const boost::shared_ptr<hier::PatchHierarchy>& level,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& level,
             const int level_number,
             const int regrid_cycle,
             const double regrid_time,
@@ -631,9 +632,9 @@ class ExtendedTagAndInitialize:
          */
         virtual void
         processHierarchyBeforeAddingNewLevel(
-            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
             const int level_number,
-            const boost::shared_ptr<hier::BoxLevel>& new_box_level);
+            const HAMERS_SHARED_PTR<hier::BoxLevel>& new_box_level);
         
         /*!
          * In some cases user code may wish to process a PatchLevel before it is
@@ -655,10 +656,10 @@ class ExtendedTagAndInitialize:
          */
         void
         processLevelBeforeRemoval(
-            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
             const int level_number,
-            const boost::shared_ptr<hier::PatchLevel>& old_level =
-                boost::shared_ptr<hier::PatchLevel>());
+            const HAMERS_SHARED_PTR<hier::PatchLevel>& old_level =
+                HAMERS_SHARED_PTR<hier::PatchLevel>());
         
     private:
         /*
@@ -666,7 +667,7 @@ class ExtendedTagAndInitialize:
          */
         void
         preprocessRichardsonExtrapolation(
-            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
             const int level_number,
             const double regrid_time,
             const double regrid_start_time,
@@ -677,7 +678,7 @@ class ExtendedTagAndInitialize:
          */
         void
         tagCellsUsingRichardsonExtrapolation(
-           const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+           const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
            const int level_number,
            const int regrid_cycle,
            const double regrid_time,
@@ -702,7 +703,7 @@ class ExtendedTagAndInitialize:
          */
         void
         getFromInput(
-           const boost::shared_ptr<tbox::Database>& input_db);
+           const HAMERS_SHARED_PTR<tbox::Database>& input_db);
         
         /*
          * Concrete object that supplies problem-specific initialization
@@ -722,7 +723,7 @@ class ExtendedTagAndInitialize:
          * tbox::Array of patch levels containing coarsened versions of the patch
          * levels, for use with Richardson extrapolation.
          */
-        std::vector<boost::shared_ptr<hier::PatchLevel> > d_rich_extrap_coarsened_levels;
+        std::vector<HAMERS_SHARED_PTR<hier::PatchLevel> > d_rich_extrap_coarsened_levels;
         
         ExtendedTagAndInitializeConnectorWidthRequestor d_staicwri;
         

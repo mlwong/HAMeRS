@@ -3,6 +3,8 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "flow/flow_models/FlowModels.hpp"
 
 #include "SAMRAI/appu/VisDerivedDataStrategy.h"
@@ -15,7 +17,6 @@
 #include "SAMRAI/pdat/CellVariable.h"
 #include "SAMRAI/tbox/Dimension.h"
 
-#include "boost/shared_ptr.hpp"
 #include <string>
 #include <vector>
 
@@ -27,9 +28,9 @@ class FlowModelManager
         FlowModelManager(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
-            const boost::shared_ptr<tbox::Database>& flow_model_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db,
             const std::string& flow_model_str);
         
         /*
@@ -44,7 +45,7 @@ class FlowModelManager
         /*
          * Get the flow model.
          */
-        boost::shared_ptr<FlowModel>
+        HAMERS_SHARED_PTR<FlowModel>
         getFlowModel() const
         {
             return d_flow_model;
@@ -68,9 +69,9 @@ class FlowModelManager
         const tbox::Dimension d_dim;
         
         /*
-         * boost::shared_ptr to the grid geometry.
+         * HAMERS_SHARED_PTR to the grid geometry.
          */
-        const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
+        const HAMERS_SHARED_PTR<geom::CartesianGridGeometry> d_grid_geometry;
         
         /*
          * Type of flow model.
@@ -80,7 +81,7 @@ class FlowModelManager
         /*
          * Flow model.
          */
-        boost::shared_ptr<FlowModel> d_flow_model;
+        HAMERS_SHARED_PTR<FlowModel> d_flow_model;
         
         /*
          * Number of species.

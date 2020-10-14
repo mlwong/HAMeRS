@@ -3,12 +3,13 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "flow/flow_models/FlowModel.hpp"
 #include "util/derivatives/DerivativeFirstOrder.hpp"
 
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 
-#include "boost/weak_ptr.hpp"
 #include <string>
 
 class FlowModel;
@@ -19,9 +20,9 @@ class FlowModelStatisticsUtilities
         FlowModelStatisticsUtilities(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
-            const boost::shared_ptr<tbox::Database>& flow_model_db):
+            const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db):
                 d_object_name(object_name),
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
@@ -45,7 +46,7 @@ class FlowModelStatisticsUtilities
         /*
          * Set the weak pointer to the flow model from the parent FlowModel class.
          */
-        void setFlowModel(const boost::weak_ptr<FlowModel>& flow_model)
+        void setFlowModel(const HAMERS_WEAK_PTR<FlowModel>& flow_model)
         {
             d_flow_model = flow_model;
         }
@@ -55,7 +56,7 @@ class FlowModelStatisticsUtilities
          */
         void
         putToRestart(
-            const boost::shared_ptr<tbox::Database>& restart_db) const
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
         {
             if (!d_statistical_quantities.empty())
             {
@@ -80,8 +81,8 @@ class FlowModelStatisticsUtilities
          */
         virtual void
         computeVariables(
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context)
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
         {
             NULL_USE(patch_hierarchy);
             NULL_USE(data_context);
@@ -93,8 +94,8 @@ class FlowModelStatisticsUtilities
         virtual void
         filterVariables(
             const int level,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context)
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
         {
             NULL_USE(level);
             NULL_USE(patch_hierarchy);
@@ -114,8 +115,8 @@ class FlowModelStatisticsUtilities
         virtual void
         outputStatisticalQuantities(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context) = 0;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) = 0;
         
     protected:
         /*
@@ -129,9 +130,9 @@ class FlowModelStatisticsUtilities
         const tbox::Dimension d_dim;
         
         /*
-         * boost::shared_ptr to the grid geometry.
+         * HAMERS_SHARED_PTR to the grid geometry.
          */
-        const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
+        const HAMERS_SHARED_PTR<geom::CartesianGridGeometry> d_grid_geometry;
         
         /*
          * Number of species.
@@ -139,9 +140,9 @@ class FlowModelStatisticsUtilities
         const int d_num_species;
         
         /*
-         * boost::weak_ptr to FlowModel.
+         * HAMERS_WEAK_PTR to FlowModel.
          */
-        boost::weak_ptr<FlowModel> d_flow_model;
+        HAMERS_WEAK_PTR<FlowModel> d_flow_model;
         
         /*
          * Names of statistical quantities to output.

@@ -11,14 +11,14 @@ class SBIStatisticsUtilities
         SBIStatisticsUtilities(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
-            const boost::weak_ptr<FlowModel> flow_model,
-            const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules,
-            const boost::shared_ptr<EquationOfMassDiffusivityMixingRules> equation_of_mass_diffusivity_mixing_rules,
-            const boost::shared_ptr<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
-            const boost::shared_ptr<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules,
-            const boost::shared_ptr<EquationOfThermalConductivityMixingRules> equation_of_thermal_conductivity_mixing_rules):
+            const HAMERS_WEAK_PTR<FlowModel> flow_model,
+            const HAMERS_SHARED_PTR<EquationOfStateMixingRules> equation_of_state_mixing_rules,
+            const HAMERS_SHARED_PTR<EquationOfMassDiffusivityMixingRules> equation_of_mass_diffusivity_mixing_rules,
+            const HAMERS_SHARED_PTR<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
+            const HAMERS_SHARED_PTR<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules,
+            const HAMERS_SHARED_PTR<EquationOfThermalConductivityMixingRules> equation_of_thermal_conductivity_mixing_rules):
                 d_object_name(object_name),
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
@@ -38,8 +38,8 @@ class SBIStatisticsUtilities
         void
         outputMixingWidthInXDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output centroid in x-directioin to a file.
@@ -47,8 +47,8 @@ class SBIStatisticsUtilities
         void
         outputCentroidInXDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output minimum interface location in x-direction to a file.
@@ -56,8 +56,8 @@ class SBIStatisticsUtilities
         void
         outputInterfaceMinInXDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output maximum interface location in x-direction to a file.
@@ -65,8 +65,8 @@ class SBIStatisticsUtilities
         void
         outputInterfaceMaxInXDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output minimum interface location in y-direction to a file.
@@ -74,8 +74,8 @@ class SBIStatisticsUtilities
         void
         outputInterfaceMinInYDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output maximum interface location in y-direction to a file.
@@ -83,8 +83,8 @@ class SBIStatisticsUtilities
         void
         outputInterfaceMaxInYDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output minimum interface location in z-direction to a file.
@@ -92,8 +92,8 @@ class SBIStatisticsUtilities
         void
         outputInterfaceMinInZDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output maximum interface location in z-direction to a file.
@@ -101,8 +101,8 @@ class SBIStatisticsUtilities
         void
         outputInterfaceMaxInZDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output circulation to a file.
@@ -110,8 +110,8 @@ class SBIStatisticsUtilities
         void
         outputCirculation(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output scalar dissipation rate of first species integrated to a file.
@@ -119,8 +119,8 @@ class SBIStatisticsUtilities
         void
         outputScalarDissipationRateIntegrated(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output enstrophy integrated to a file.
@@ -128,8 +128,8 @@ class SBIStatisticsUtilities
         void
         outputEnstrophyIntegrated(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output number of cells to a file.
@@ -137,8 +137,8 @@ class SBIStatisticsUtilities
         void
         outputNumberOfCells(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output weighted number of cells to a file.
@@ -146,8 +146,8 @@ class SBIStatisticsUtilities
         void
         outputWeightedNumberOfCells(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
     private:
         /*
@@ -161,9 +161,9 @@ class SBIStatisticsUtilities
         const tbox::Dimension d_dim;
         
         /*
-         * boost::shared_ptr to the grid geometry.
+         * HAMERS_SHARED_PTR to the grid geometry.
          */
-        const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
+        const HAMERS_SHARED_PTR<geom::CartesianGridGeometry> d_grid_geometry;
         
         /*
          * Number of species.
@@ -171,38 +171,38 @@ class SBIStatisticsUtilities
         const int d_num_species;
         
         /*
-         * boost::weak_ptr to FlowModel.
+         * HAMERS_WEAK_PTR to FlowModel.
          */
-        const boost::weak_ptr<FlowModel> d_flow_model;
+        const HAMERS_WEAK_PTR<FlowModel> d_flow_model;
         
         /*
-         * boost::shared_ptr to EquationOfStateMixingRules.
+         * HAMERS_SHARED_PTR to EquationOfStateMixingRules.
          */
-        const boost::shared_ptr<EquationOfStateMixingRules>
+        const HAMERS_SHARED_PTR<EquationOfStateMixingRules>
             d_equation_of_state_mixing_rules;
         
         /*
-         * boost::shared_ptr to EquationOfMassDiffusivityMixingRules.
+         * HAMERS_SHARED_PTR to EquationOfMassDiffusivityMixingRules.
          */
-        const boost::shared_ptr<EquationOfMassDiffusivityMixingRules>
+        const HAMERS_SHARED_PTR<EquationOfMassDiffusivityMixingRules>
             d_equation_of_mass_diffusivity_mixing_rules;
         
         /*
-         * boost::shared_ptr to EquationOfShearViscosityMixingRules.
+         * HAMERS_SHARED_PTR to EquationOfShearViscosityMixingRules.
          */
-        const boost::shared_ptr<EquationOfShearViscosityMixingRules>
+        const HAMERS_SHARED_PTR<EquationOfShearViscosityMixingRules>
             d_equation_of_shear_viscosity_mixing_rules;
         
         /*
-         * boost::shared_ptr to EquationOfBulkViscosityMixingRules.
+         * HAMERS_SHARED_PTR to EquationOfBulkViscosityMixingRules.
          */
-        const boost::shared_ptr<EquationOfBulkViscosityMixingRules>
+        const HAMERS_SHARED_PTR<EquationOfBulkViscosityMixingRules>
             d_equation_of_bulk_viscosity_mixing_rules;
         
         /*
-         * boost::shared_ptr to EquationOfThermalConductivityMixingRules.
+         * HAMERS_SHARED_PTR to EquationOfThermalConductivityMixingRules.
          */
-        const boost::shared_ptr<EquationOfThermalConductivityMixingRules>
+        const HAMERS_SHARED_PTR<EquationOfThermalConductivityMixingRules>
             d_equation_of_thermal_conductivity_mixing_rules;
         
         /*
@@ -219,8 +219,8 @@ class SBIStatisticsUtilities
 void
 SBIStatisticsUtilities::outputMixingWidthInXDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -242,7 +242,7 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -278,7 +278,7 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -325,7 +325,7 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -348,7 +348,7 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index.
@@ -382,7 +382,7 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -527,7 +527,7 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -550,7 +550,7 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -560,8 +560,8 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -590,7 +590,7 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -748,7 +748,7 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -771,7 +771,7 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -781,8 +781,8 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -811,7 +811,7 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -966,8 +966,8 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
 void
 SBIStatisticsUtilities::outputCentroidInXDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -989,7 +989,7 @@ SBIStatisticsUtilities::outputCentroidInXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -1014,7 +1014,7 @@ SBIStatisticsUtilities::outputCentroidInXDirection(
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -1034,14 +1034,14 @@ SBIStatisticsUtilities::outputCentroidInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index, grid spacing and the lower spatial coordinate.
@@ -1051,8 +1051,8 @@ SBIStatisticsUtilities::outputCentroidInXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -1087,7 +1087,7 @@ SBIStatisticsUtilities::outputCentroidInXDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -1227,14 +1227,14 @@ SBIStatisticsUtilities::outputCentroidInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index, grid spacing and the lower spatial coordinate.
@@ -1244,8 +1244,8 @@ SBIStatisticsUtilities::outputCentroidInXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -1280,7 +1280,7 @@ SBIStatisticsUtilities::outputCentroidInXDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -1430,14 +1430,14 @@ SBIStatisticsUtilities::outputCentroidInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index, grid spacing and the lower spatial coordinate.
@@ -1447,8 +1447,8 @@ SBIStatisticsUtilities::outputCentroidInXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -1483,7 +1483,7 @@ SBIStatisticsUtilities::outputCentroidInXDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -1638,8 +1638,8 @@ SBIStatisticsUtilities::outputCentroidInXDirection(
 void
 SBIStatisticsUtilities::outputInterfaceMinInXDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -1661,7 +1661,7 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -1686,7 +1686,7 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -1709,14 +1709,14 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index, grid spacing and the lower spatial coordinate.
@@ -1726,8 +1726,8 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -1762,7 +1762,7 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -1857,14 +1857,14 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index, grid spacing and the lower spatial coordinate.
@@ -1874,8 +1874,8 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -1910,7 +1910,7 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -2014,14 +2014,14 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index, grid spacing and the lower spatial coordinate.
@@ -2031,8 +2031,8 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -2067,7 +2067,7 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -2178,8 +2178,8 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
 void
 SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -2201,7 +2201,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -2226,7 +2226,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -2249,14 +2249,14 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index, grid spacing and the lower spatial coordinate.
@@ -2266,8 +2266,8 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -2302,7 +2302,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -2397,14 +2397,14 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index, grid spacing and the lower spatial coordinate.
@@ -2414,8 +2414,8 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -2450,7 +2450,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -2554,14 +2554,14 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index, grid spacing and the lower spatial coordinate.
@@ -2571,8 +2571,8 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -2607,7 +2607,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -2718,8 +2718,8 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
 void
 SBIStatisticsUtilities::outputInterfaceMinInYDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -2741,7 +2741,7 @@ SBIStatisticsUtilities::outputInterfaceMinInYDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -2766,7 +2766,7 @@ SBIStatisticsUtilities::outputInterfaceMinInYDirection(
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -2796,14 +2796,14 @@ SBIStatisticsUtilities::outputInterfaceMinInYDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index, grid spacing and the lower spatial coordinate.
@@ -2813,8 +2813,8 @@ SBIStatisticsUtilities::outputInterfaceMinInYDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -2849,7 +2849,7 @@ SBIStatisticsUtilities::outputInterfaceMinInYDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -2953,14 +2953,14 @@ SBIStatisticsUtilities::outputInterfaceMinInYDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index, grid spacing and the lower spatial coordinate.
@@ -2970,8 +2970,8 @@ SBIStatisticsUtilities::outputInterfaceMinInYDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -3006,7 +3006,7 @@ SBIStatisticsUtilities::outputInterfaceMinInYDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -3117,8 +3117,8 @@ SBIStatisticsUtilities::outputInterfaceMinInYDirection(
 void
 SBIStatisticsUtilities::outputInterfaceMaxInYDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -3140,7 +3140,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInYDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -3165,7 +3165,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInYDirection(
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -3195,14 +3195,14 @@ SBIStatisticsUtilities::outputInterfaceMaxInYDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index, grid spacing and the lower spatial coordinate.
@@ -3212,8 +3212,8 @@ SBIStatisticsUtilities::outputInterfaceMaxInYDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -3248,7 +3248,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInYDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -3352,14 +3352,14 @@ SBIStatisticsUtilities::outputInterfaceMaxInYDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index, grid spacing and the lower spatial coordinate.
@@ -3369,8 +3369,8 @@ SBIStatisticsUtilities::outputInterfaceMaxInYDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -3405,7 +3405,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInYDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -3516,8 +3516,8 @@ SBIStatisticsUtilities::outputInterfaceMaxInYDirection(
 void
 SBIStatisticsUtilities::outputInterfaceMinInZDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -3539,7 +3539,7 @@ SBIStatisticsUtilities::outputInterfaceMinInZDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -3564,7 +3564,7 @@ SBIStatisticsUtilities::outputInterfaceMinInZDirection(
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -3601,14 +3601,14 @@ SBIStatisticsUtilities::outputInterfaceMinInZDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index, grid spacing and the lower spatial coordinate.
@@ -3618,8 +3618,8 @@ SBIStatisticsUtilities::outputInterfaceMinInZDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -3654,7 +3654,7 @@ SBIStatisticsUtilities::outputInterfaceMinInZDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -3765,8 +3765,8 @@ SBIStatisticsUtilities::outputInterfaceMinInZDirection(
 void
 SBIStatisticsUtilities::outputInterfaceMaxInZDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -3788,7 +3788,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInZDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -3813,7 +3813,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInZDirection(
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -3850,14 +3850,14 @@ SBIStatisticsUtilities::outputInterfaceMaxInZDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index, grid spacing and the lower spatial coordinate.
@@ -3867,8 +3867,8 @@ SBIStatisticsUtilities::outputInterfaceMaxInZDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -3903,7 +3903,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInZDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -4014,8 +4014,8 @@ SBIStatisticsUtilities::outputInterfaceMaxInZDirection(
 void
 SBIStatisticsUtilities::outputCirculation(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -4029,7 +4029,7 @@ SBIStatisticsUtilities::outputCirculation(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -4054,7 +4054,7 @@ SBIStatisticsUtilities::outputCirculation(
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -4078,14 +4078,14 @@ SBIStatisticsUtilities::outputCirculation(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch geometry.
@@ -4099,8 +4099,8 @@ SBIStatisticsUtilities::outputCirculation(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -4129,7 +4129,7 @@ SBIStatisticsUtilities::outputCirculation(
                  * Get the pointer to velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 const hier::BoxContainer& patch_visible_boxes =
@@ -4154,7 +4154,7 @@ SBIStatisticsUtilities::outputCirculation(
                  * Initialize cell data for velocity derivatives and get pointers to the derivatives.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity_derivatives(
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity_derivatives(
                     new pdat::CellData<double>(patch_box, d_dim.getValue()*d_dim.getValue() - d_dim.getValue(),
                         hier::IntVector::getZero(d_dim)));
                 
@@ -4180,14 +4180,14 @@ SBIStatisticsUtilities::outputCirculation(
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
                         new DerivativeFirstOrder(
                             "first order derivative in x-direction",
                             d_dim,
                             DIRECTION::X_DIRECTION,
                             d_num_ghosts_derivative));
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_y(
                         new DerivativeFirstOrder(
                             "first order derivative in y-direction",
                             d_dim,
@@ -4299,14 +4299,14 @@ SBIStatisticsUtilities::outputCirculation(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch geometry.
@@ -4321,8 +4321,8 @@ SBIStatisticsUtilities::outputCirculation(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -4351,7 +4351,7 @@ SBIStatisticsUtilities::outputCirculation(
                  * Get the pointer to velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity = flow_model_tmp->getCellData("VELOCITY");
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity = flow_model_tmp->getCellData("VELOCITY");
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -4376,7 +4376,7 @@ SBIStatisticsUtilities::outputCirculation(
                  * Initialize cell data for velocity derivatives and get pointers to the derivatives.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity_derivatives(
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity_derivatives(
                     new pdat::CellData<double>(patch_box, d_dim.getValue()*d_dim.getValue() - d_dim.getValue(),
                         hier::IntVector::getZero(d_dim)));
                 
@@ -4409,21 +4409,21 @@ SBIStatisticsUtilities::outputCirculation(
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
                         new DerivativeFirstOrder(
                             "first order derivative in x-direction",
                             d_dim,
                             DIRECTION::X_DIRECTION,
                             d_num_ghosts_derivative));
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_y(
                         new DerivativeFirstOrder(
                             "first order derivative in y-direction",
                             d_dim,
                             DIRECTION::Y_DIRECTION,
                             d_num_ghosts_derivative));
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_z(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_z(
                         new DerivativeFirstOrder(
                             "first order derivative in z-direction",
                             d_dim,
@@ -4584,8 +4584,8 @@ SBIStatisticsUtilities::outputCirculation(
 void
 SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -4607,7 +4607,7 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -4632,7 +4632,7 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -4649,14 +4649,14 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch geometry.
@@ -4666,8 +4666,8 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -4702,13 +4702,13 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -4748,7 +4748,7 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                  * Initialize cell data for mass fraction derivatives and get pointers to the derivatives.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction_derivatives(
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction_derivatives(
                     new pdat::CellData<double>(patch_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
                 
                 double* dYdx = data_mass_fraction_derivatives->getPointer(0);
@@ -4769,7 +4769,7 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                     const int idx_lo_0 = index_lo[0];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
                         new DerivativeFirstOrder(
                             "first order derivative in x-direction",
                             d_dim,
@@ -4886,14 +4886,14 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch geometry.
@@ -4907,8 +4907,8 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -4943,13 +4943,13 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -5002,7 +5002,7 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                  * Initialize cell data for mass fraction derivatives and get pointers to the derivatives.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction_derivatives(
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction_derivatives(
                     new pdat::CellData<double>(patch_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
                 
                 double* dYdx = data_mass_fraction_derivatives->getPointer(0);
@@ -5027,14 +5027,14 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
                         new DerivativeFirstOrder(
                             "first order derivative in x-direction",
                             d_dim,
                             DIRECTION::X_DIRECTION,
                             d_num_ghosts_derivative));
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_y(
                         new DerivativeFirstOrder(
                             "first order derivative in y-direction",
                             d_dim,
@@ -5170,14 +5170,14 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch geometry.
@@ -5192,8 +5192,8 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -5228,13 +5228,13 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -5293,7 +5293,7 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                  * Initialize cell data for mass fraction derivatives and get pointers to the derivatives.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction_derivatives(
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction_derivatives(
                     new pdat::CellData<double>(patch_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
                 
                 double* dYdx = data_mass_fraction_derivatives->getPointer(0);
@@ -5322,21 +5322,21 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
                         new DerivativeFirstOrder(
                             "first order derivative in x-direction",
                             d_dim,
                             DIRECTION::X_DIRECTION,
                             d_num_ghosts_derivative));
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_y(
                         new DerivativeFirstOrder(
                             "first order derivative in y-direction",
                             d_dim,
                             DIRECTION::Y_DIRECTION,
                             d_num_ghosts_derivative));
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_z(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_z(
                         new DerivativeFirstOrder(
                             "first order derivative in z-direction",
                             d_dim,
@@ -5496,8 +5496,8 @@ SBIStatisticsUtilities::outputScalarDissipationRateIntegrated(
 void
 SBIStatisticsUtilities::outputEnstrophyIntegrated(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -5511,7 +5511,7 @@ SBIStatisticsUtilities::outputEnstrophyIntegrated(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -5536,7 +5536,7 @@ SBIStatisticsUtilities::outputEnstrophyIntegrated(
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -5560,14 +5560,14 @@ SBIStatisticsUtilities::outputEnstrophyIntegrated(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch geometry.
@@ -5581,8 +5581,8 @@ SBIStatisticsUtilities::outputEnstrophyIntegrated(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -5614,8 +5614,8 @@ SBIStatisticsUtilities::outputEnstrophyIntegrated(
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density = flow_model_tmp->getCellData("DENSITY");
-                boost::shared_ptr<pdat::CellData<double> > data_velocity = flow_model_tmp->getCellData("VELOCITY");
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density = flow_model_tmp->getCellData("DENSITY");
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity = flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 
@@ -5648,7 +5648,7 @@ SBIStatisticsUtilities::outputEnstrophyIntegrated(
                  * Initialize cell data for velocity derivatives and get pointers to the derivatives.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity_derivatives(
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity_derivatives(
                     new pdat::CellData<double>(patch_box, d_dim.getValue()*d_dim.getValue() - d_dim.getValue(),
                         hier::IntVector::getZero(d_dim)));
                 
@@ -5674,14 +5674,14 @@ SBIStatisticsUtilities::outputEnstrophyIntegrated(
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
                         new DerivativeFirstOrder(
                             "first order derivative in x-direction",
                             d_dim,
                             DIRECTION::X_DIRECTION,
                             d_num_ghosts_derivative));
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_y(
                         new DerivativeFirstOrder(
                             "first order derivative in y-direction",
                             d_dim,
@@ -5788,14 +5788,14 @@ SBIStatisticsUtilities::outputEnstrophyIntegrated(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch geometry.
@@ -5810,8 +5810,8 @@ SBIStatisticsUtilities::outputEnstrophyIntegrated(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -5843,8 +5843,8 @@ SBIStatisticsUtilities::outputEnstrophyIntegrated(
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density = flow_model_tmp->getCellData("DENSITY");
-                boost::shared_ptr<pdat::CellData<double> > data_velocity = flow_model_tmp->getCellData("VELOCITY");
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density = flow_model_tmp->getCellData("DENSITY");
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity = flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
                 
@@ -5879,7 +5879,7 @@ SBIStatisticsUtilities::outputEnstrophyIntegrated(
                  * Initialize cell data for velocity derivatives and get pointers to the derivatives.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity_derivatives(
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity_derivatives(
                     new pdat::CellData<double>(patch_box, d_dim.getValue()*d_dim.getValue() - d_dim.getValue(),
                         hier::IntVector::getZero(d_dim)));
                 
@@ -5912,21 +5912,21 @@ SBIStatisticsUtilities::outputEnstrophyIntegrated(
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
                         new DerivativeFirstOrder(
                             "first order derivative in x-direction",
                             d_dim,
                             DIRECTION::X_DIRECTION,
                             d_num_ghosts_derivative));
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_y(
                         new DerivativeFirstOrder(
                             "first order derivative in y-direction",
                             d_dim,
                             DIRECTION::Y_DIRECTION,
                             d_num_ghosts_derivative));
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_z(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_z(
                         new DerivativeFirstOrder(
                             "first order derivative in z-direction",
                             d_dim,
@@ -6083,8 +6083,8 @@ SBIStatisticsUtilities::outputEnstrophyIntegrated(
 void
 SBIStatisticsUtilities::outputNumberOfCells(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -6119,14 +6119,14 @@ SBIStatisticsUtilities::outputNumberOfCells(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Add the number of cells in current patch.
@@ -6173,14 +6173,14 @@ SBIStatisticsUtilities::outputNumberOfCells(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Add the number of cells in current patch.
@@ -6227,14 +6227,14 @@ SBIStatisticsUtilities::outputNumberOfCells(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Add the number of cells in current patch.
@@ -6284,8 +6284,8 @@ SBIStatisticsUtilities::outputNumberOfCells(
 void
 SBIStatisticsUtilities::outputWeightedNumberOfCells(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -6336,14 +6336,14 @@ SBIStatisticsUtilities::outputWeightedNumberOfCells(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Add the number of cells in current patch.
@@ -6406,14 +6406,14 @@ SBIStatisticsUtilities::outputWeightedNumberOfCells(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Add the number of cells in current patch.
@@ -6477,14 +6477,14 @@ SBIStatisticsUtilities::outputWeightedNumberOfCells(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Add the number of cells in current patch.
@@ -6633,14 +6633,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
 void
 FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
 #endif
     
-    boost::shared_ptr<SBIStatisticsUtilities> sbi_statistics_utilities(
+    HAMERS_SHARED_PTR<SBIStatisticsUtilities> sbi_statistics_utilities(
         new SBIStatisticsUtilities(
             "SBI statistics utilities",
             d_dim,

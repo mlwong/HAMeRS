@@ -11,10 +11,14 @@ if (MPI_FOUND)
   include_directories(${MPI_INCLUDE_PATH})
 endif()
 
-# Find the boost package
-find_package(Boost 1.45 REQUIRED)
-include_directories(${Boost_INCLUDE_DIR})
-link_directories(${Boost_LIBRARY_DIRS})
+option(HAMERS_USE_BOOST "HAMERS_USE_BOOST" ON)
+
+if("${HAMERS_USE_BOOST}")
+    # Find the boost package
+    find_package(Boost 1.45 REQUIRED)
+    include_directories(${Boost_INCLUDE_DIR})
+    link_directories(${Boost_LIBRARY_DIRS})
+endif()
 
 # Find the hdf5 package
 find_package(HDF5 1.8.4 REQUIRED)

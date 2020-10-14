@@ -3,9 +3,9 @@
 FlowModelManager::FlowModelManager(
     const std::string& object_name,
     const tbox::Dimension& dim,
-    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+    const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_species,
-    const boost::shared_ptr<tbox::Database>& flow_model_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db,
     const std::string& flow_model_str):
         d_object_name(object_name),
         d_dim(dim),

@@ -3,12 +3,13 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructors.hpp"
 
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/tbox/Dimension.h"
 
-#include "boost/shared_ptr.hpp"
 #include <string>
 
 using namespace SAMRAI;
@@ -19,10 +20,10 @@ class ConvectiveFluxReconstructorManager
         ConvectiveFluxReconstructorManager(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_eqn,
-            const boost::shared_ptr<FlowModel>& flow_model,
-            const boost::shared_ptr<tbox::Database>& convective_flux_reconstructor_db,
+            const HAMERS_SHARED_PTR<FlowModel>& flow_model,
+            const HAMERS_SHARED_PTR<tbox::Database>& convective_flux_reconstructor_db,
             const std::string& convective_flux_reconstructor_str);
         
         /*
@@ -37,7 +38,7 @@ class ConvectiveFluxReconstructorManager
         /*
          * Get the convective flux reconstructor.
          */
-        boost::shared_ptr<ConvectiveFluxReconstructor>
+        HAMERS_SHARED_PTR<ConvectiveFluxReconstructor>
         getConvectiveFluxReconstructor() const
         {
             return d_conv_flux_reconstructor;
@@ -61,9 +62,9 @@ class ConvectiveFluxReconstructorManager
         CONVECTIVE_FLUX_RECONSTRUCTOR::TYPE d_convective_flux_reconstructor_type;
         
         /*
-         * boost::shared_ptr to the convective flux reconstructor.
+         * HAMERS_SHARED_PTR to the convective flux reconstructor.
          */
-        boost::shared_ptr<ConvectiveFluxReconstructor> d_conv_flux_reconstructor;
+        HAMERS_SHARED_PTR<ConvectiveFluxReconstructor> d_conv_flux_reconstructor;
         
 };
 

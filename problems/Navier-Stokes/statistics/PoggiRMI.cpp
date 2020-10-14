@@ -10,14 +10,14 @@ class RMIStatisticsUtilities
         RMIStatisticsUtilities(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
-            const boost::weak_ptr<FlowModel> flow_model,
-            const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules,
-            const boost::shared_ptr<EquationOfMassDiffusivityMixingRules> equation_of_mass_diffusivity_mixing_rules,
-            const boost::shared_ptr<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
-            const boost::shared_ptr<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules,
-            const boost::shared_ptr<EquationOfThermalConductivityMixingRules> equation_of_thermal_conductivity_mixing_rules):
+            const HAMERS_WEAK_PTR<FlowModel> flow_model,
+            const HAMERS_SHARED_PTR<EquationOfStateMixingRules> equation_of_state_mixing_rules,
+            const HAMERS_SHARED_PTR<EquationOfMassDiffusivityMixingRules> equation_of_mass_diffusivity_mixing_rules,
+            const HAMERS_SHARED_PTR<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
+            const HAMERS_SHARED_PTR<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules,
+            const HAMERS_SHARED_PTR<EquationOfThermalConductivityMixingRules> equation_of_thermal_conductivity_mixing_rules):
                 d_object_name(object_name),
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
@@ -37,8 +37,8 @@ class RMIStatisticsUtilities
         void
         outputMixingWidthInXDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mixing width in y-direction to a file.
@@ -46,8 +46,8 @@ class RMIStatisticsUtilities
         void
         outputMixingWidthInYDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mixing width in z-direction to a file.
@@ -55,8 +55,8 @@ class RMIStatisticsUtilities
         void
         outputMixingWidthInZDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mixedness in x-direction to a file.
@@ -64,8 +64,8 @@ class RMIStatisticsUtilities
         void
         outputMixednessInXDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mixedness in y-direction to a file.
@@ -73,8 +73,8 @@ class RMIStatisticsUtilities
         void
         outputMixednessInYDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mixedness in z-direction to a file.
@@ -82,8 +82,8 @@ class RMIStatisticsUtilities
         void
         outputMixednessInZDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output TKE integrated with assumed homogeneity in x-direction to a file.
@@ -91,8 +91,8 @@ class RMIStatisticsUtilities
         void
         outputTKEIntegratedWithHomogeneityInXDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output TKE integrated with assumed homogeneity in y-direction to a file.
@@ -100,8 +100,8 @@ class RMIStatisticsUtilities
         void
         outputTKEIntegratedWithHomogeneityInYDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output TKE integrated with assumed homogeneity in z-direction to a file.
@@ -109,8 +109,8 @@ class RMIStatisticsUtilities
         void
         outputTKEIntegratedWithHomogeneityInZDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output TKE integrated with assumed homogeneity in xy-plane to a file.
@@ -118,8 +118,8 @@ class RMIStatisticsUtilities
         void
         outputTKEIntegratedWithHomogeneityInXYPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output TKE integrated with assumed homogeneity in yz-plane to a file.
@@ -127,8 +127,8 @@ class RMIStatisticsUtilities
         void
         outputTKEIntegratedWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output TKE integrated with assumed homogeneity in xz-plane to a file.
@@ -136,8 +136,8 @@ class RMIStatisticsUtilities
         void
         outputTKEIntegratedWithHomogeneityInXZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output TKE in x-direction integrated with assumed homogeneity in yz-plane to a file.
@@ -145,8 +145,8 @@ class RMIStatisticsUtilities
         void
         outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output TKE in y-direction integrated with assumed homogeneity in yz-plane to a file.
@@ -154,8 +154,8 @@ class RMIStatisticsUtilities
         void
         outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output TKE in z-direction integrated with assumed homogeneity in yz-plane to a file.
@@ -163,8 +163,8 @@ class RMIStatisticsUtilities
         void
         outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output enstrophy integrated to a file.
@@ -172,8 +172,8 @@ class RMIStatisticsUtilities
         void
         outputEnstrophyIntegrated(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output scalar dissipation rate of first species integrated to a file.
@@ -181,8 +181,8 @@ class RMIStatisticsUtilities
         void
         outputScalarDissipationRateIntegrated(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean Reynolds number inside mixing layer with assumed homogeneity in y-direction to
@@ -191,8 +191,8 @@ class RMIStatisticsUtilities
         void
         outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean Reynolds number inside mixing layer with assumed homogeneity in yz-plane to
@@ -201,8 +201,8 @@ class RMIStatisticsUtilities
         void
         outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean TKE inside mixing layer with assumed homogeneity in y-direction to a file.
@@ -210,8 +210,8 @@ class RMIStatisticsUtilities
         void
         outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean TKE in x-direction inside mixing layer with assumed homogeneity in y-direction
@@ -220,8 +220,8 @@ class RMIStatisticsUtilities
         void
         outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean TKE in y-direction inside mixing layer with assumed homogeneity in y-direction
@@ -230,8 +230,8 @@ class RMIStatisticsUtilities
         void
         outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean TKE inside mixing layer with assumed homogeneity in yz-plane to a file.
@@ -239,8 +239,8 @@ class RMIStatisticsUtilities
         void
         outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean TKE in x-direction inside mixing layer with assumed homogeneity in yz-plane
@@ -249,8 +249,8 @@ class RMIStatisticsUtilities
         void
         outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean TKE in y-direction inside mixing layer with assumed homogeneity in yz-plane
@@ -259,8 +259,8 @@ class RMIStatisticsUtilities
         void
         outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean TKE in z-direction inside mixing layer with assumed homogeneity in yz-plane
@@ -269,8 +269,8 @@ class RMIStatisticsUtilities
         void
         outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean Reynolds normal stress component in x-direction inside mixing layer with
@@ -279,8 +279,8 @@ class RMIStatisticsUtilities
         void
         outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean Reynolds normal stress component in y-direction inside mixing layer with
@@ -289,8 +289,8 @@ class RMIStatisticsUtilities
         void
         outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean Reynolds normal stress component in x-direction inside mixing layer with
@@ -299,8 +299,8 @@ class RMIStatisticsUtilities
         void
         outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean Reynolds normal stress component in y-direction inside mixing layer with
@@ -309,8 +309,8 @@ class RMIStatisticsUtilities
         void
         outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean Reynolds normal stress component in z-direction inside mixing layer with
@@ -319,8 +319,8 @@ class RMIStatisticsUtilities
         void
         outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean Reynolds shear stress component in x- and y-directions inside mixing layer
@@ -329,8 +329,8 @@ class RMIStatisticsUtilities
         void
         outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean Reynolds shear stress component in x- and y-directions inside mixing layer
@@ -339,8 +339,8 @@ class RMIStatisticsUtilities
         void
         outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean Reynolds shear stress component in x- and z-directions inside mixing layer
@@ -349,8 +349,8 @@ class RMIStatisticsUtilities
         void
         outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean Reynolds shear stress component in y- and z-directions inside mixing layer
@@ -359,8 +359,8 @@ class RMIStatisticsUtilities
         void
         outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean Reynolds normal stress anisotropy component in x-direction inside mixing layer with
@@ -369,8 +369,8 @@ class RMIStatisticsUtilities
         void
         outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean Reynolds normal stress anisotropy component in y-direction inside mixing layer with
@@ -379,8 +379,8 @@ class RMIStatisticsUtilities
         void
         outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean Reynolds normal stress anisotropy component in x-direction inside mixing layer with
@@ -389,8 +389,8 @@ class RMIStatisticsUtilities
         void
         outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean Reynolds normal stress anisotropy component in y-direction inside mixing layer with
@@ -399,8 +399,8 @@ class RMIStatisticsUtilities
         void
         outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean Reynolds normal stress anisotropy component in z-direction inside mixing layer with
@@ -409,8 +409,8 @@ class RMIStatisticsUtilities
         void
         outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean Reynolds shear stress anisotropy component in x- and y-directions inside mixing layer
@@ -419,8 +419,8 @@ class RMIStatisticsUtilities
         void
         outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean Reynolds shear stress anisotropy component in x- and y-directions inside mixing layer
@@ -429,8 +429,8 @@ class RMIStatisticsUtilities
         void
         outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean Reynolds shear stress anisotropy component in x- and z-directions inside mixing layer
@@ -439,8 +439,8 @@ class RMIStatisticsUtilities
         void
         outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean Reynolds shear stress anisotropy component in y- and z-directions inside mixing layer
@@ -449,8 +449,8 @@ class RMIStatisticsUtilities
         void
         outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean turbulent mass flux in x-direction inside mixing layer with assumed homogeneity
@@ -459,8 +459,8 @@ class RMIStatisticsUtilities
         void
         outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean turbulent mass flux in x-direction inside mixing layer with assumed homogeneity
@@ -469,8 +469,8 @@ class RMIStatisticsUtilities
         void
         outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean density specific volume covariance inside mixing layer with assumed homogeneity
@@ -479,8 +479,8 @@ class RMIStatisticsUtilities
         void
         outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean density specific volume covariance inside mixing layer with assumed homogeneity
@@ -489,8 +489,8 @@ class RMIStatisticsUtilities
         void
         outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean density inside mixing layer with assumed homogeneity in y-direction to a file.
@@ -498,8 +498,8 @@ class RMIStatisticsUtilities
         void
         outputDensityMeanInMixingLayerWithHomogeneityInYDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean density inside mixing layer with assumed homogeneity in yz-plane to a file.
@@ -507,8 +507,8 @@ class RMIStatisticsUtilities
         void
         outputDensityMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean deviation from Boussinesq approximation inside mixing layer with assumed
@@ -517,8 +517,8 @@ class RMIStatisticsUtilities
         void
         outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean deviation from Boussinesq approximation inside mixing layer with assumed
@@ -527,8 +527,8 @@ class RMIStatisticsUtilities
         void
         outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean mass diffusivity inside mixing layer in x-direction to a file.
@@ -536,8 +536,8 @@ class RMIStatisticsUtilities
         void
         outputMassDiffusivityMeanInMixingLayerInXDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean dynamic shear viscosity inside mixing layer in x-direction to a file.
@@ -545,8 +545,8 @@ class RMIStatisticsUtilities
         void
         outputDynamicShearViscosityMeanInMixingLayerInXDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean kinematic shear viscosity inside mixing layer in x-direction to a file.
@@ -554,8 +554,8 @@ class RMIStatisticsUtilities
         void
         outputKinematicShearViscosityMeanInMixingLayerInXDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean dynamic bulk viscosity inside mixing layer in x-direction to a file.
@@ -563,8 +563,8 @@ class RMIStatisticsUtilities
         void
         outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean kinematic bulk viscosity inside mixing layer in x-direction to a file.
@@ -572,8 +572,8 @@ class RMIStatisticsUtilities
         void
         outputKinematicBulkViscosityMeanInMixingLayerInXDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean thermal conductivity inside mixing layer in x-direction to a file.
@@ -581,8 +581,8 @@ class RMIStatisticsUtilities
         void
         outputThermalConductivityMeanInMixingLayerInXDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mean thermal diffusivity inside mixing layer in x-direction to a file.
@@ -590,8 +590,8 @@ class RMIStatisticsUtilities
         void
         outputThermalDiffusivityMeanInMixingLayerInXDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mixing layer width 1 in x-direction to a file.
@@ -599,8 +599,8 @@ class RMIStatisticsUtilities
         void
         outputMixingLayerWidth1InXDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mixing layer width 2 in x-direction to a file.
@@ -608,8 +608,8 @@ class RMIStatisticsUtilities
         void
         outputMixingLayerWidth2InXDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mixing layer width 3 in x-direction to a file.
@@ -617,8 +617,8 @@ class RMIStatisticsUtilities
         void
         outputMixingLayerWidth3InXDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mixing layer width 4 in x-direction to a file.
@@ -626,8 +626,8 @@ class RMIStatisticsUtilities
         void
         outputMixingLayerWidth4InXDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mixing layer width 5 in x-direction to a file.
@@ -635,8 +635,8 @@ class RMIStatisticsUtilities
         void
         outputMixingLayerWidth5InXDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mixing layer width 6 in x-direction to a file.
@@ -644,8 +644,8 @@ class RMIStatisticsUtilities
         void
         outputMixingLayerWidth6InXDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mixing layer width 7 in x-direction to a file.
@@ -653,8 +653,8 @@ class RMIStatisticsUtilities
         void
         outputMixingLayerWidth7InXDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mixing layer width 8 in x-direction to a file.
@@ -662,8 +662,8 @@ class RMIStatisticsUtilities
         void
         outputMixingLayerWidth8InXDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output mixing layer width 9 in x-direction to a file.
@@ -671,8 +671,8 @@ class RMIStatisticsUtilities
         void
         outputMixingLayerWidth9InXDirection(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output numerical interface thickness to a file.
@@ -680,8 +680,8 @@ class RMIStatisticsUtilities
         void
         outputNumericalInterfaceThickness(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output number of cells to a file.
@@ -689,8 +689,8 @@ class RMIStatisticsUtilities
         void
         outputNumberOfCells(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Output weighted number of cells to a file.
@@ -698,8 +698,8 @@ class RMIStatisticsUtilities
         void
         outputWeightedNumberOfCells(
             const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
     private:
         /*
@@ -713,9 +713,9 @@ class RMIStatisticsUtilities
         const tbox::Dimension d_dim;
         
         /*
-         * boost::shared_ptr to the grid geometry.
+         * HAMERS_SHARED_PTR to the grid geometry.
          */
-        const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
+        const HAMERS_SHARED_PTR<geom::CartesianGridGeometry> d_grid_geometry;
         
         /*
          * Number of species.
@@ -723,38 +723,38 @@ class RMIStatisticsUtilities
         const int d_num_species;
         
         /*
-         * boost::weak_ptr to FlowModel.
+         * HAMERS_WEAK_PTR to FlowModel.
          */
-        const boost::weak_ptr<FlowModel> d_flow_model;
+        const HAMERS_WEAK_PTR<FlowModel> d_flow_model;
         
         /*
-         * boost::shared_ptr to EquationOfStateMixingRules.
+         * HAMERS_SHARED_PTR to EquationOfStateMixingRules.
          */
-        const boost::shared_ptr<EquationOfStateMixingRules>
+        const HAMERS_SHARED_PTR<EquationOfStateMixingRules>
             d_equation_of_state_mixing_rules;
         
         /*
-         * boost::shared_ptr to EquationOfMassDiffusivityMixingRules.
+         * HAMERS_SHARED_PTR to EquationOfMassDiffusivityMixingRules.
          */
-        const boost::shared_ptr<EquationOfMassDiffusivityMixingRules>
+        const HAMERS_SHARED_PTR<EquationOfMassDiffusivityMixingRules>
             d_equation_of_mass_diffusivity_mixing_rules;
         
         /*
-         * boost::shared_ptr to EquationOfShearViscosityMixingRules.
+         * HAMERS_SHARED_PTR to EquationOfShearViscosityMixingRules.
          */
-        const boost::shared_ptr<EquationOfShearViscosityMixingRules>
+        const HAMERS_SHARED_PTR<EquationOfShearViscosityMixingRules>
             d_equation_of_shear_viscosity_mixing_rules;
         
         /*
-         * boost::shared_ptr to EquationOfBulkViscosityMixingRules.
+         * HAMERS_SHARED_PTR to EquationOfBulkViscosityMixingRules.
          */
-        const boost::shared_ptr<EquationOfBulkViscosityMixingRules>
+        const HAMERS_SHARED_PTR<EquationOfBulkViscosityMixingRules>
             d_equation_of_bulk_viscosity_mixing_rules;
         
         /*
-         * boost::shared_ptr to EquationOfThermalConductivityMixingRules.
+         * HAMERS_SHARED_PTR to EquationOfThermalConductivityMixingRules.
          */
-        const boost::shared_ptr<EquationOfThermalConductivityMixingRules>
+        const HAMERS_SHARED_PTR<EquationOfThermalConductivityMixingRules>
             d_equation_of_thermal_conductivity_mixing_rules;
         
         /*
@@ -771,8 +771,8 @@ class RMIStatisticsUtilities
 void
 RMIStatisticsUtilities::outputMixingWidthInXDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -794,7 +794,7 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -830,7 +830,7 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -877,7 +877,7 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -900,7 +900,7 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index.
@@ -934,7 +934,7 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -1079,7 +1079,7 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -1102,7 +1102,7 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -1112,8 +1112,8 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -1142,7 +1142,7 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -1300,7 +1300,7 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -1323,7 +1323,7 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -1333,8 +1333,8 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -1363,7 +1363,7 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -1518,8 +1518,8 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
 void
 RMIStatisticsUtilities::outputMixingWidthInYDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -1541,7 +1541,7 @@ RMIStatisticsUtilities::outputMixingWidthInYDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -1577,7 +1577,7 @@ RMIStatisticsUtilities::outputMixingWidthInYDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -1632,7 +1632,7 @@ RMIStatisticsUtilities::outputMixingWidthInYDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -1655,7 +1655,7 @@ RMIStatisticsUtilities::outputMixingWidthInYDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -1665,8 +1665,8 @@ RMIStatisticsUtilities::outputMixingWidthInYDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -1695,7 +1695,7 @@ RMIStatisticsUtilities::outputMixingWidthInYDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -1853,7 +1853,7 @@ RMIStatisticsUtilities::outputMixingWidthInYDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -1876,7 +1876,7 @@ RMIStatisticsUtilities::outputMixingWidthInYDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -1886,8 +1886,8 @@ RMIStatisticsUtilities::outputMixingWidthInYDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -1916,7 +1916,7 @@ RMIStatisticsUtilities::outputMixingWidthInYDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -2071,8 +2071,8 @@ RMIStatisticsUtilities::outputMixingWidthInYDirection(
 void
 RMIStatisticsUtilities::outputMixingWidthInZDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -2094,7 +2094,7 @@ RMIStatisticsUtilities::outputMixingWidthInZDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -2130,7 +2130,7 @@ RMIStatisticsUtilities::outputMixingWidthInZDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -2193,7 +2193,7 @@ RMIStatisticsUtilities::outputMixingWidthInZDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -2216,7 +2216,7 @@ RMIStatisticsUtilities::outputMixingWidthInZDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -2226,8 +2226,8 @@ RMIStatisticsUtilities::outputMixingWidthInZDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -2256,7 +2256,7 @@ RMIStatisticsUtilities::outputMixingWidthInZDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -2411,8 +2411,8 @@ RMIStatisticsUtilities::outputMixingWidthInZDirection(
 void
 RMIStatisticsUtilities::outputMixednessInXDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -2434,7 +2434,7 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -2470,7 +2470,7 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -2515,7 +2515,7 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -2538,7 +2538,7 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index.
@@ -2572,7 +2572,7 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -2740,7 +2740,7 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -2763,7 +2763,7 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -2773,8 +2773,8 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -2803,7 +2803,7 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -2984,7 +2984,7 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -3007,7 +3007,7 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -3017,8 +3017,8 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -3047,7 +3047,7 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -3222,8 +3222,8 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
 void
 RMIStatisticsUtilities::outputMixednessInYDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -3245,7 +3245,7 @@ RMIStatisticsUtilities::outputMixednessInYDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -3281,7 +3281,7 @@ RMIStatisticsUtilities::outputMixednessInYDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -3339,7 +3339,7 @@ RMIStatisticsUtilities::outputMixednessInYDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -3362,7 +3362,7 @@ RMIStatisticsUtilities::outputMixednessInYDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -3372,8 +3372,8 @@ RMIStatisticsUtilities::outputMixednessInYDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -3402,7 +3402,7 @@ RMIStatisticsUtilities::outputMixednessInYDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -3583,7 +3583,7 @@ RMIStatisticsUtilities::outputMixednessInYDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -3606,7 +3606,7 @@ RMIStatisticsUtilities::outputMixednessInYDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -3616,8 +3616,8 @@ RMIStatisticsUtilities::outputMixednessInYDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -3646,7 +3646,7 @@ RMIStatisticsUtilities::outputMixednessInYDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -3821,8 +3821,8 @@ RMIStatisticsUtilities::outputMixednessInYDirection(
 void
 RMIStatisticsUtilities::outputMixednessInZDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -3844,7 +3844,7 @@ RMIStatisticsUtilities::outputMixednessInZDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -3880,7 +3880,7 @@ RMIStatisticsUtilities::outputMixednessInZDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -3946,7 +3946,7 @@ RMIStatisticsUtilities::outputMixednessInZDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -3969,7 +3969,7 @@ RMIStatisticsUtilities::outputMixednessInZDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -3979,8 +3979,8 @@ RMIStatisticsUtilities::outputMixednessInZDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -4009,7 +4009,7 @@ RMIStatisticsUtilities::outputMixednessInZDirection(
                  * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 double* Y = data_mass_fractions->getPointer(0);
@@ -4184,8 +4184,8 @@ RMIStatisticsUtilities::outputMixednessInZDirection(
 void
 RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -4199,7 +4199,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -4235,7 +4235,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -4297,7 +4297,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -4320,15 +4320,15 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -4360,10 +4360,10 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXDirection(
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -4506,7 +4506,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -4529,15 +4529,15 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -4569,10 +4569,10 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXDirection(
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -4730,8 +4730,8 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXDirection(
 void
 RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -4745,7 +4745,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -4781,7 +4781,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -4843,7 +4843,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -4866,15 +4866,15 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -4906,10 +4906,10 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYDirection(
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -5052,7 +5052,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -5075,15 +5075,15 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -5115,10 +5115,10 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYDirection(
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -5276,8 +5276,8 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYDirection(
 void
 RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInZDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     if (d_dim == tbox::Dimension(1))
     {
@@ -5309,8 +5309,8 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInZDirection(
 void
 RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXYPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -5324,7 +5324,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXYPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -5360,7 +5360,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXYPlane(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -5434,7 +5434,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXYPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -5457,15 +5457,15 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXYPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -5497,10 +5497,10 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXYPlane(
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -5667,7 +5667,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXYPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -5690,15 +5690,15 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXYPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -5730,10 +5730,10 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXYPlane(
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -5905,8 +5905,8 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXYPlane(
 void
 RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -5920,7 +5920,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -5956,7 +5956,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYZPlane(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -6030,7 +6030,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -6053,15 +6053,15 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -6093,10 +6093,10 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYZPlane(
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -6263,7 +6263,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -6286,15 +6286,15 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -6326,10 +6326,10 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYZPlane(
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -6501,8 +6501,8 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYZPlane(
 void
 RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -6516,7 +6516,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -6552,7 +6552,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXZPlane(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -6626,7 +6626,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -6649,15 +6649,15 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -6689,10 +6689,10 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXZPlane(
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -6859,7 +6859,7 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -6882,15 +6882,15 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -6922,10 +6922,10 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXZPlane(
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -7098,8 +7098,8 @@ void
 RMIStatisticsUtilities::
 outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -7113,7 +7113,7 @@ outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -7149,7 +7149,7 @@ outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -7215,7 +7215,7 @@ outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -7238,15 +7238,15 @@ outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -7278,10 +7278,10 @@ outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -7428,7 +7428,7 @@ outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -7451,15 +7451,15 @@ outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -7491,10 +7491,10 @@ outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -7651,8 +7651,8 @@ void
 RMIStatisticsUtilities::
 outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -7666,7 +7666,7 @@ outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -7702,7 +7702,7 @@ outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -7768,7 +7768,7 @@ outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -7791,15 +7791,15 @@ outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -7831,10 +7831,10 @@ outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -7981,7 +7981,7 @@ outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -8004,15 +8004,15 @@ outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -8044,10 +8044,10 @@ outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -8207,8 +8207,8 @@ void
 RMIStatisticsUtilities::
 outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -8222,7 +8222,7 @@ outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -8258,7 +8258,7 @@ outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -8324,7 +8324,7 @@ outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -8347,15 +8347,15 @@ outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -8387,10 +8387,10 @@ outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -8537,7 +8537,7 @@ outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -8560,15 +8560,15 @@ outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -8600,10 +8600,10 @@ outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -8762,8 +8762,8 @@ outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
 void
 RMIStatisticsUtilities::outputEnstrophyIntegrated(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -8777,7 +8777,7 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -8802,7 +8802,7 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -8826,14 +8826,14 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch geometry.
@@ -8847,8 +8847,8 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -8880,10 +8880,10 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -8917,7 +8917,7 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
                  * Initialize cell data for velocity derivatives and get pointers to the derivatives.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity_derivatives(
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity_derivatives(
                     new pdat::CellData<double>(patch_box, d_dim.getValue()*d_dim.getValue() - d_dim.getValue(),
                         hier::IntVector::getZero(d_dim)));
                 
@@ -8943,14 +8943,14 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
                         new DerivativeFirstOrder(
                             "first order derivative in x-direction",
                             d_dim,
                             DIRECTION::X_DIRECTION,
                             d_num_ghosts_derivative));
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_y(
                         new DerivativeFirstOrder(
                             "first order derivative in y-direction",
                             d_dim,
@@ -9057,14 +9057,14 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch geometry.
@@ -9079,8 +9079,8 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -9112,10 +9112,10 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -9151,7 +9151,7 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
                  * Initialize cell data for velocity derivatives and get pointers to the derivatives.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity_derivatives(
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity_derivatives(
                     new pdat::CellData<double>(patch_box, d_dim.getValue()*d_dim.getValue() - d_dim.getValue(),
                         hier::IntVector::getZero(d_dim)));
                 
@@ -9184,21 +9184,21 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
                         new DerivativeFirstOrder(
                             "first order derivative in x-direction",
                             d_dim,
                             DIRECTION::X_DIRECTION,
                             d_num_ghosts_derivative));
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_y(
                         new DerivativeFirstOrder(
                             "first order derivative in y-direction",
                             d_dim,
                             DIRECTION::Y_DIRECTION,
                             d_num_ghosts_derivative));
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_z(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_z(
                         new DerivativeFirstOrder(
                             "first order derivative in z-direction",
                             d_dim,
@@ -9355,8 +9355,8 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
 void
 RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -9378,7 +9378,7 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -9403,7 +9403,7 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
     
     const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -9420,14 +9420,14 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch geometry.
@@ -9437,8 +9437,8 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -9473,13 +9473,13 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -9519,7 +9519,7 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                  * Initialize cell data for mass fraction derivatives and get pointers to the derivatives.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction_derivatives(
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction_derivatives(
                     new pdat::CellData<double>(patch_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
                 
                 double* dYdx = data_mass_fraction_derivatives->getPointer(0);
@@ -9540,7 +9540,7 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                     const int idx_lo_0 = index_lo[0];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
                         new DerivativeFirstOrder(
                             "first order derivative in x-direction",
                             d_dim,
@@ -9657,14 +9657,14 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch geometry.
@@ -9678,8 +9678,8 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -9714,13 +9714,13 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -9773,7 +9773,7 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                  * Initialize cell data for mass fraction derivatives and get pointers to the derivatives.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction_derivatives(
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction_derivatives(
                     new pdat::CellData<double>(patch_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
                 
                 double* dYdx = data_mass_fraction_derivatives->getPointer(0);
@@ -9798,14 +9798,14 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
                         new DerivativeFirstOrder(
                             "first order derivative in x-direction",
                             d_dim,
                             DIRECTION::X_DIRECTION,
                             d_num_ghosts_derivative));
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_y(
                         new DerivativeFirstOrder(
                             "first order derivative in y-direction",
                             d_dim,
@@ -9941,14 +9941,14 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch geometry.
@@ -9963,8 +9963,8 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -9999,13 +9999,13 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -10064,7 +10064,7 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                  * Initialize cell data for mass fraction derivatives and get pointers to the derivatives.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction_derivatives(
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction_derivatives(
                     new pdat::CellData<double>(patch_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
                 
                 double* dYdx = data_mass_fraction_derivatives->getPointer(0);
@@ -10093,21 +10093,21 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
                         new DerivativeFirstOrder(
                             "first order derivative in x-direction",
                             d_dim,
                             DIRECTION::X_DIRECTION,
                             d_num_ghosts_derivative));
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_y(
                         new DerivativeFirstOrder(
                             "first order derivative in y-direction",
                             d_dim,
                             DIRECTION::Y_DIRECTION,
                             d_num_ghosts_derivative));
                     
-                    boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_z(
+                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_z(
                         new DerivativeFirstOrder(
                             "first order derivative in z-direction",
                             d_dim,
@@ -10269,8 +10269,8 @@ void
 RMIStatisticsUtilities::
 outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -10292,7 +10292,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -10328,7 +10328,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -10399,7 +10399,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -10422,15 +10422,15 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -10472,19 +10472,19 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
                  * data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -10703,7 +10703,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -10726,15 +10726,15 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -10763,7 +10763,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* u = data_velocity->getPointer(0);
@@ -10949,8 +10949,8 @@ void
 RMIStatisticsUtilities::
 outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -10972,7 +10972,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -11008,7 +11008,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -11091,7 +11091,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -11114,15 +11114,15 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -11164,19 +11164,19 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
                  * data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -11431,7 +11431,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -11454,15 +11454,15 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -11491,7 +11491,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* u = data_velocity->getPointer(0);
@@ -11686,8 +11686,8 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
 void
 RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -11709,7 +11709,7 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -11745,7 +11745,7 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -11811,7 +11811,7 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -11834,15 +11834,15 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -11877,13 +11877,13 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -12057,7 +12057,7 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -12080,15 +12080,15 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -12120,10 +12120,10 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -12303,8 +12303,8 @@ void
 RMIStatisticsUtilities::
 outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -12326,7 +12326,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -12362,7 +12362,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -12424,7 +12424,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -12447,15 +12447,15 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -12490,13 +12490,13 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -12660,7 +12660,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -12683,15 +12683,15 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -12723,10 +12723,10 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -12900,8 +12900,8 @@ void
 RMIStatisticsUtilities::
 outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -12923,7 +12923,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -12959,7 +12959,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -13021,7 +13021,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -13044,15 +13044,15 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -13087,13 +13087,13 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -13257,7 +13257,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -13280,15 +13280,15 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -13320,10 +13320,10 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -13495,8 +13495,8 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
 void
 RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -13518,7 +13518,7 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -13554,7 +13554,7 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -13632,7 +13632,7 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -13655,15 +13655,15 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -13698,13 +13698,13 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -13906,7 +13906,7 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -13929,15 +13929,15 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -13969,10 +13969,10 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -14165,8 +14165,8 @@ void
 RMIStatisticsUtilities::
 outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -14188,7 +14188,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -14224,7 +14224,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -14294,7 +14294,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -14317,15 +14317,15 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -14360,13 +14360,13 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -14548,7 +14548,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -14571,15 +14571,15 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -14611,10 +14611,10 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -14795,8 +14795,8 @@ void
 RMIStatisticsUtilities::
 outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -14818,7 +14818,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -14854,7 +14854,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -14924,7 +14924,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -14947,15 +14947,15 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -14990,13 +14990,13 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -15178,7 +15178,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -15201,15 +15201,15 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -15241,10 +15241,10 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -15425,8 +15425,8 @@ void
 RMIStatisticsUtilities::
 outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -15448,7 +15448,7 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -15484,7 +15484,7 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -15554,7 +15554,7 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -15577,15 +15577,15 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -15620,13 +15620,13 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -15808,7 +15808,7 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -15831,15 +15831,15 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -15871,10 +15871,10 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Get the pointers to velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -16055,8 +16055,8 @@ void
 RMIStatisticsUtilities::
 outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -16078,7 +16078,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -16114,7 +16114,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -16176,7 +16176,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -16199,15 +16199,15 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -16242,13 +16242,13 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -16412,7 +16412,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -16435,15 +16435,15 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -16475,10 +16475,10 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -16653,8 +16653,8 @@ void
 RMIStatisticsUtilities::
 outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -16676,7 +16676,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -16712,7 +16712,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -16774,7 +16774,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -16797,15 +16797,15 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -16840,13 +16840,13 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -17010,7 +17010,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -17033,15 +17033,15 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -17073,10 +17073,10 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -17251,8 +17251,8 @@ void
 RMIStatisticsUtilities::
 outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -17274,7 +17274,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -17310,7 +17310,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -17380,7 +17380,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -17403,15 +17403,15 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -17446,13 +17446,13 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -17634,7 +17634,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -17657,15 +17657,15 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -17697,10 +17697,10 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -17882,8 +17882,8 @@ void
 RMIStatisticsUtilities::
 outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -17905,7 +17905,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -17941,7 +17941,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -18011,7 +18011,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -18034,15 +18034,15 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -18077,13 +18077,13 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -18265,7 +18265,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -18288,15 +18288,15 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -18328,10 +18328,10 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -18513,8 +18513,8 @@ void
 RMIStatisticsUtilities::
 outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -18536,7 +18536,7 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -18572,7 +18572,7 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -18642,7 +18642,7 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -18665,15 +18665,15 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -18708,13 +18708,13 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -18896,7 +18896,7 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -18919,15 +18919,15 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -18959,10 +18959,10 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -19144,8 +19144,8 @@ void
 RMIStatisticsUtilities::
 outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -19167,7 +19167,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -19203,7 +19203,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -19269,7 +19269,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -19292,15 +19292,15 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -19335,13 +19335,13 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -19515,7 +19515,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -19538,15 +19538,15 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -19578,10 +19578,10 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -19762,8 +19762,8 @@ void
 RMIStatisticsUtilities::
 outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -19785,7 +19785,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -19821,7 +19821,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -19895,7 +19895,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -19918,15 +19918,15 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -19961,13 +19961,13 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -20159,7 +20159,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -20182,15 +20182,15 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -20222,10 +20222,10 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -20413,8 +20413,8 @@ void
 RMIStatisticsUtilities::
 outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -20436,7 +20436,7 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -20472,7 +20472,7 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -20546,7 +20546,7 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -20569,15 +20569,15 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -20612,13 +20612,13 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -20810,7 +20810,7 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -20833,15 +20833,15 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -20873,10 +20873,10 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -21064,8 +21064,8 @@ void
 RMIStatisticsUtilities::
 outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -21087,7 +21087,7 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -21123,7 +21123,7 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -21197,7 +21197,7 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -21220,15 +21220,15 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -21263,13 +21263,13 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -21461,7 +21461,7 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -21484,15 +21484,15 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -21524,10 +21524,10 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -21715,8 +21715,8 @@ void
 RMIStatisticsUtilities::
 outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -21738,7 +21738,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -21774,7 +21774,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -21840,7 +21840,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -21863,15 +21863,15 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -21906,13 +21906,13 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -22090,7 +22090,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -22113,15 +22113,15 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -22153,10 +22153,10 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -22353,8 +22353,8 @@ void
 RMIStatisticsUtilities::
 outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -22376,7 +22376,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -22412,7 +22412,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -22478,7 +22478,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -22501,15 +22501,15 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -22544,13 +22544,13 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -22728,7 +22728,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -22751,15 +22751,15 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -22791,10 +22791,10 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -22991,8 +22991,8 @@ void
 RMIStatisticsUtilities::
 outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -23014,7 +23014,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -23050,7 +23050,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -23128,7 +23128,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -23151,15 +23151,15 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -23194,13 +23194,13 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -23410,7 +23410,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -23433,15 +23433,15 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -23473,10 +23473,10 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -23700,8 +23700,8 @@ void
 RMIStatisticsUtilities::
 outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -23723,7 +23723,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -23759,7 +23759,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -23837,7 +23837,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -23860,15 +23860,15 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -23903,13 +23903,13 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -24119,7 +24119,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -24142,15 +24142,15 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -24182,10 +24182,10 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -24409,8 +24409,8 @@ void
 RMIStatisticsUtilities::
 outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -24432,7 +24432,7 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -24468,7 +24468,7 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -24546,7 +24546,7 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -24569,15 +24569,15 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -24612,13 +24612,13 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -24828,7 +24828,7 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -24851,15 +24851,15 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -24891,10 +24891,10 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -25118,8 +25118,8 @@ void
 RMIStatisticsUtilities::
 outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -25141,7 +25141,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -25177,7 +25177,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -25243,7 +25243,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -25266,15 +25266,15 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -25309,13 +25309,13 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -25499,7 +25499,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -25522,15 +25522,15 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -25562,10 +25562,10 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -25777,8 +25777,8 @@ void
 RMIStatisticsUtilities::
 outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -25800,7 +25800,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -25836,7 +25836,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -25914,7 +25914,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -25937,15 +25937,15 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -25980,13 +25980,13 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -26202,7 +26202,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -26225,15 +26225,15 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -26265,10 +26265,10 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -26507,8 +26507,8 @@ void
 RMIStatisticsUtilities::
 outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -26530,7 +26530,7 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -26566,7 +26566,7 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -26644,7 +26644,7 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -26667,15 +26667,15 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -26710,13 +26710,13 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -26932,7 +26932,7 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -26955,15 +26955,15 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -26995,10 +26995,10 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -27237,8 +27237,8 @@ void
 RMIStatisticsUtilities::
 outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -27260,7 +27260,7 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -27296,7 +27296,7 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -27374,7 +27374,7 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -27397,15 +27397,15 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -27440,13 +27440,13 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -27662,7 +27662,7 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -27685,15 +27685,15 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -27725,10 +27725,10 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -27967,8 +27967,8 @@ void
 RMIStatisticsUtilities::
 outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -27990,7 +27990,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -28026,7 +28026,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -28088,7 +28088,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -28111,15 +28111,15 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -28154,13 +28154,13 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -28324,7 +28324,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -28347,15 +28347,15 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -28387,10 +28387,10 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -28563,8 +28563,8 @@ void
 RMIStatisticsUtilities::
 outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -28586,7 +28586,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -28622,7 +28622,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -28692,7 +28692,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -28715,15 +28715,15 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -28758,13 +28758,13 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Get the pointers to mass fraction, density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 std::vector<double*> Y;
@@ -28946,7 +28946,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -28969,15 +28969,15 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -29009,10 +29009,10 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Get the pointers to density and velocity data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
                     flow_model_tmp->getCellData("VELOCITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -29192,8 +29192,8 @@ void
 RMIStatisticsUtilities::
 outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -29215,7 +29215,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -29251,7 +29251,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -29313,7 +29313,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -29336,15 +29336,15 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -29376,10 +29376,10 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
                  * Get the pointers to mass fraction and density data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
                 std::vector<double*> Y;
@@ -29532,7 +29532,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -29555,15 +29555,15 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -29592,7 +29592,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
                  * Get the pointers to density data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -29754,8 +29754,8 @@ void
 RMIStatisticsUtilities::
 outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -29777,7 +29777,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -29813,7 +29813,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -29883,7 +29883,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -29906,15 +29906,15 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -29946,10 +29946,10 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Get the pointers to mass fraction and density data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
                 std::vector<double*> Y;
@@ -30116,7 +30116,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -30139,15 +30139,15 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -30176,7 +30176,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Get the pointers to density data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -30339,8 +30339,8 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
 void
 RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -30362,7 +30362,7 @@ RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYDirectio
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -30398,7 +30398,7 @@ RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYDirectio
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -30456,7 +30456,7 @@ RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYDirectio
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -30479,15 +30479,15 @@ RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYDirectio
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -30519,10 +30519,10 @@ RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYDirectio
                  * Get the pointers to mass fraction and density data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
                 std::vector<double*> Y;
@@ -30701,8 +30701,8 @@ RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYDirectio
 void
 RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -30724,7 +30724,7 @@ RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -30760,7 +30760,7 @@ RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYZPlane(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -30826,7 +30826,7 @@ RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -30849,15 +30849,15 @@ RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -30889,10 +30889,10 @@ RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Get the pointers to mass fraction and density data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
                 std::vector<double*> Y;
@@ -31080,8 +31080,8 @@ void
 RMIStatisticsUtilities::
 outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -31103,7 +31103,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -31139,7 +31139,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -31201,7 +31201,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -31224,15 +31224,15 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -31264,10 +31264,10 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
                  * Get the pointers to mass fraction and density data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
                 std::vector<double*> Y;
@@ -31426,7 +31426,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -31449,15 +31449,15 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -31486,7 +31486,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
                  * Get the pointers to density data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -31661,8 +31661,8 @@ void
 RMIStatisticsUtilities::
 outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -31684,7 +31684,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -31720,7 +31720,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -31790,7 +31790,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -31813,15 +31813,15 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -31853,10 +31853,10 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Get the pointers to mass fraction and density data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
                 std::vector<double*> Y;
@@ -32029,7 +32029,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -32052,15 +32052,15 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 // Get the dimensions of box that covers the interior of patch.
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -32089,7 +32089,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
                  * Get the pointers to density data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
                 double* rho = data_density->getPointer(0);
@@ -32265,8 +32265,8 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
 void
 RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -32288,7 +32288,7 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -32324,7 +32324,7 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -32369,7 +32369,7 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -32392,7 +32392,7 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index.
@@ -32432,13 +32432,13 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -32638,7 +32638,7 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -32661,7 +32661,7 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -32671,8 +32671,8 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -32707,13 +32707,13 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -32940,7 +32940,7 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -32963,7 +32963,7 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -32973,8 +32973,8 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -33009,13 +33009,13 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -33244,8 +33244,8 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
 void
 RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -33267,7 +33267,7 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -33303,7 +33303,7 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -33348,7 +33348,7 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -33371,7 +33371,7 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index.
@@ -33411,13 +33411,13 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -33606,7 +33606,7 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -33629,7 +33629,7 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -33639,8 +33639,8 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -33675,13 +33675,13 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -33897,7 +33897,7 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -33920,7 +33920,7 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -33930,8 +33930,8 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -33966,13 +33966,13 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -34190,8 +34190,8 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
 void
 RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -34213,7 +34213,7 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -34249,7 +34249,7 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -34294,7 +34294,7 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -34317,7 +34317,7 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index.
@@ -34361,16 +34361,16 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
                  * the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -34565,7 +34565,7 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -34588,7 +34588,7 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -34598,8 +34598,8 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -34638,16 +34638,16 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
                  * the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -34876,7 +34876,7 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -34899,7 +34899,7 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -34909,8 +34909,8 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -34949,16 +34949,16 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
                  * the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -35193,8 +35193,8 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
 void
 RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -35216,7 +35216,7 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -35252,7 +35252,7 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -35297,7 +35297,7 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -35320,7 +35320,7 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index.
@@ -35360,13 +35360,13 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -35555,7 +35555,7 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -35578,7 +35578,7 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -35588,8 +35588,8 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -35624,13 +35624,13 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -35846,7 +35846,7 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -35869,7 +35869,7 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -35879,8 +35879,8 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -35915,13 +35915,13 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -36139,8 +36139,8 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
 void
 RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -36162,7 +36162,7 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -36198,7 +36198,7 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -36243,7 +36243,7 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -36266,7 +36266,7 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index.
@@ -36310,16 +36310,16 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
                  * the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -36514,7 +36514,7 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -36537,7 +36537,7 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -36547,8 +36547,8 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -36587,16 +36587,16 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
                  * the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -36825,7 +36825,7 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -36848,7 +36848,7 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -36858,8 +36858,8 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -36898,16 +36898,16 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
                  * the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -37142,8 +37142,8 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
 void
 RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -37165,7 +37165,7 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -37201,7 +37201,7 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -37246,7 +37246,7 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -37269,7 +37269,7 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index.
@@ -37309,13 +37309,13 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -37504,7 +37504,7 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -37527,7 +37527,7 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -37537,8 +37537,8 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -37573,13 +37573,13 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -37795,7 +37795,7 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -37818,7 +37818,7 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -37828,8 +37828,8 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -37864,13 +37864,13 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -38088,8 +38088,8 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
 void
 RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -38111,7 +38111,7 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -38147,7 +38147,7 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -38192,7 +38192,7 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -38215,7 +38215,7 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index.
@@ -38259,16 +38259,16 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
                  * the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -38469,7 +38469,7 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -38492,7 +38492,7 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -38502,8 +38502,8 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -38542,16 +38542,16 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
                  * the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -38786,7 +38786,7 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -38809,7 +38809,7 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -38819,8 +38819,8 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -38859,16 +38859,16 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
                  * the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_density =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                     flow_model_tmp->getCellData("DENSITY");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_pressure =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     flow_model_tmp->getCellData("PRESSURE");
                 
-                boost::shared_ptr<pdat::CellData<double> > data_temperature =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
                     flow_model_tmp->getCellData("TEMPERATURE");
                 
                 std::vector<double*> Y;
@@ -39109,8 +39109,8 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
 void
 RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -39132,7 +39132,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -39168,7 +39168,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -39215,7 +39215,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -39238,7 +39238,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index.
@@ -39272,7 +39272,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -39432,7 +39432,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -39455,7 +39455,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -39465,8 +39465,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -39495,7 +39495,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -39668,7 +39668,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -39691,7 +39691,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -39701,8 +39701,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -39731,7 +39731,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -39901,8 +39901,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
 void
 RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -39924,7 +39924,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -39960,7 +39960,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -40007,7 +40007,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -40030,7 +40030,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index.
@@ -40064,7 +40064,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -40224,7 +40224,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -40247,7 +40247,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -40257,8 +40257,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -40287,7 +40287,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -40460,7 +40460,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -40483,7 +40483,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -40493,8 +40493,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -40523,7 +40523,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -40693,8 +40693,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
 void
 RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -40716,7 +40716,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -40752,7 +40752,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -40799,7 +40799,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -40822,7 +40822,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index.
@@ -40856,7 +40856,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -41016,7 +41016,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -41039,7 +41039,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -41049,8 +41049,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -41079,7 +41079,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -41252,7 +41252,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -41275,7 +41275,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -41285,8 +41285,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -41315,7 +41315,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -41485,8 +41485,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
 void
 RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -41508,7 +41508,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -41544,7 +41544,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -41591,7 +41591,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -41614,7 +41614,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index.
@@ -41648,7 +41648,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -41808,7 +41808,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -41831,7 +41831,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -41841,8 +41841,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -41871,7 +41871,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -42044,7 +42044,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -42067,7 +42067,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -42077,8 +42077,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -42107,7 +42107,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -42277,8 +42277,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
 void
 RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -42300,7 +42300,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -42336,7 +42336,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -42383,7 +42383,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -42406,7 +42406,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index.
@@ -42440,7 +42440,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -42586,7 +42586,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -42609,7 +42609,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -42619,8 +42619,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -42649,7 +42649,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -42808,7 +42808,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -42831,7 +42831,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -42841,8 +42841,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -42871,7 +42871,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -43027,8 +43027,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
 void
 RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -43050,7 +43050,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -43086,7 +43086,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -43133,7 +43133,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -43156,7 +43156,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index.
@@ -43190,7 +43190,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -43336,7 +43336,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -43359,7 +43359,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -43369,8 +43369,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -43399,7 +43399,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -43558,7 +43558,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -43581,7 +43581,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -43591,8 +43591,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -43621,7 +43621,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -43777,8 +43777,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
 void
 RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -43800,7 +43800,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -43836,7 +43836,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -43883,7 +43883,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -43906,7 +43906,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index.
@@ -43940,7 +43940,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -44086,7 +44086,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -44109,7 +44109,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -44119,8 +44119,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -44149,7 +44149,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -44308,7 +44308,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -44331,7 +44331,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -44341,8 +44341,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -44371,7 +44371,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -44527,8 +44527,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
 void
 RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -44550,7 +44550,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -44586,7 +44586,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -44633,7 +44633,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -44656,7 +44656,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index.
@@ -44690,7 +44690,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -44836,7 +44836,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -44859,7 +44859,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -44869,8 +44869,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -44899,7 +44899,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -45058,7 +45058,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -45081,7 +45081,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -45091,8 +45091,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -45121,7 +45121,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -45277,8 +45277,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
 void
 RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -45300,7 +45300,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -45336,7 +45336,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -45383,7 +45383,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -45406,7 +45406,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index.
@@ -45440,7 +45440,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -45586,7 +45586,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -45609,7 +45609,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -45619,8 +45619,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -45649,7 +45649,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -45808,7 +45808,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             /*
@@ -45831,7 +45831,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch lower index and grid spacing.
@@ -45841,8 +45841,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -45871,7 +45871,7 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
                  * Get the pointer to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
                     flow_model_tmp->getCellData("MASS_FRACTION");
                 
                 double* Y = data_mass_fraction->getPointer(0);
@@ -46027,8 +46027,8 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
 void
 RMIStatisticsUtilities::outputNumericalInterfaceThickness(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -46042,7 +46042,7 @@ RMIStatisticsUtilities::outputNumericalInterfaceThickness(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -46078,7 +46078,7 @@ RMIStatisticsUtilities::outputNumericalInterfaceThickness(
      * location in the problem space.
      */
     
-    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
@@ -46104,14 +46104,14 @@ RMIStatisticsUtilities::outputNumericalInterfaceThickness(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch geometry.
@@ -46121,8 +46121,8 @@ RMIStatisticsUtilities::outputNumericalInterfaceThickness(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -46151,7 +46151,7 @@ RMIStatisticsUtilities::outputNumericalInterfaceThickness(
                  * Get the pointers to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 std::vector<double*> Y;
@@ -46337,14 +46337,14 @@ RMIStatisticsUtilities::outputNumericalInterfaceThickness(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch geometry.
@@ -46354,8 +46354,8 @@ RMIStatisticsUtilities::outputNumericalInterfaceThickness(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -46384,7 +46384,7 @@ RMIStatisticsUtilities::outputNumericalInterfaceThickness(
                  * Get the pointers to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 std::vector<double*> Y;
@@ -46725,14 +46725,14 @@ RMIStatisticsUtilities::outputNumericalInterfaceThickness(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Get the patch geometry.
@@ -46742,8 +46742,8 @@ RMIStatisticsUtilities::outputNumericalInterfaceThickness(
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -46772,7 +46772,7 @@ RMIStatisticsUtilities::outputNumericalInterfaceThickness(
                  * Get the pointers to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                     flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 std::vector<double*> Y;
@@ -47363,8 +47363,8 @@ RMIStatisticsUtilities::outputNumericalInterfaceThickness(
 void
 RMIStatisticsUtilities::outputNumberOfCells(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -47399,14 +47399,14 @@ RMIStatisticsUtilities::outputNumberOfCells(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Add the number of cells in current patch.
@@ -47453,14 +47453,14 @@ RMIStatisticsUtilities::outputNumberOfCells(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Add the number of cells in current patch.
@@ -47507,14 +47507,14 @@ RMIStatisticsUtilities::outputNumberOfCells(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Add the number of cells in current patch.
@@ -47564,8 +47564,8 @@ RMIStatisticsUtilities::outputNumberOfCells(
 void
 RMIStatisticsUtilities::outputWeightedNumberOfCells(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -47616,14 +47616,14 @@ RMIStatisticsUtilities::outputWeightedNumberOfCells(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Add the number of cells in current patch.
@@ -47686,14 +47686,14 @@ RMIStatisticsUtilities::outputWeightedNumberOfCells(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Add the number of cells in current patch.
@@ -47757,14 +47757,14 @@ RMIStatisticsUtilities::outputWeightedNumberOfCells(
              * Get the current patch level.
              */
             
-            boost::shared_ptr<hier::PatchLevel> patch_level(
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
                 patch_hierarchy->getPatchLevel(li));
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch> patch = *ip;
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
                  * Add the number of cells in current patch.
@@ -48149,14 +48149,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
 void
 FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
     const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
 #endif
     
-    boost::shared_ptr<RMIStatisticsUtilities> rmi_statistics_utilities(
+    HAMERS_SHARED_PTR<RMIStatisticsUtilities> rmi_statistics_utilities(
         new RMIStatisticsUtilities(
             "RMI statistics utilities",
             d_dim,

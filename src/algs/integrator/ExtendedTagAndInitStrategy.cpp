@@ -33,7 +33,7 @@ ExtendedTagAndInitStrategy::~ExtendedTagAndInitStrategy()
 
 void
 ExtendedTagAndInitStrategy::applyValueDetector(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
     const int level_number,
     const double error_data_time,
     const int tag_index,
@@ -60,7 +60,7 @@ ExtendedTagAndInitStrategy::applyValueDetector(
 
 void
 ExtendedTagAndInitStrategy::applyGradientDetector(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
     const int level_number,
     const double error_data_time,
     const int tag_index,
@@ -87,7 +87,7 @@ ExtendedTagAndInitStrategy::applyGradientDetector(
 
 void
 ExtendedTagAndInitStrategy::applyMultiresolutionDetector(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
     const int level_number,
     const double error_data_time,
     const int tag_index,
@@ -114,7 +114,7 @@ ExtendedTagAndInitStrategy::applyMultiresolutionDetector(
 
 void
 ExtendedTagAndInitStrategy::applyIntegralDetector(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
     const int level_number,
     const double error_data_time,
     const int tag_index,
@@ -141,7 +141,7 @@ ExtendedTagAndInitStrategy::applyIntegralDetector(
 
 void
 ExtendedTagAndInitStrategy::applyRichardsonExtrapolation(
-    const boost::shared_ptr<hier::PatchLevel>& level,
+    const HAMERS_SHARED_PTR<hier::PatchLevel>& level,
     const double error_data_time,
     const int tag_index,
     const double deltat,
@@ -170,9 +170,9 @@ ExtendedTagAndInitStrategy::applyRichardsonExtrapolation(
 
 void
 ExtendedTagAndInitStrategy::coarsenDataForRichardsonExtrapolation(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
     const int level_number,
-    const boost::shared_ptr<hier::PatchLevel>& coarser_level,
+    const HAMERS_SHARED_PTR<hier::PatchLevel>& coarser_level,
     const double coarsen_data_time,
     const bool before_advance)
 {
@@ -189,7 +189,7 @@ ExtendedTagAndInitStrategy::coarsenDataForRichardsonExtrapolation(
 
 double
 ExtendedTagAndInitStrategy::getLevelDt(
-    const boost::shared_ptr<hier::PatchLevel>& level,
+    const HAMERS_SHARED_PTR<hier::PatchLevel>& level,
     const double dt_time,
     const bool initial_time)
 {
@@ -206,7 +206,7 @@ ExtendedTagAndInitStrategy::getLevelDt(
 
 void
 ExtendedTagAndInitStrategy::resetTimeDependentData(
-   const boost::shared_ptr<hier::PatchLevel>& level,
+   const HAMERS_SHARED_PTR<hier::PatchLevel>& level,
    const double new_time,
    const bool can_be_refined)
 {
@@ -221,8 +221,8 @@ ExtendedTagAndInitStrategy::resetTimeDependentData(
 
 double
 ExtendedTagAndInitStrategy::advanceLevel(
-    const boost::shared_ptr<hier::PatchLevel>& level,
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchLevel>& level,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
     const double current_time,
     const double new_time,
     const bool first_step,
@@ -246,7 +246,7 @@ ExtendedTagAndInitStrategy::advanceLevel(
 
 void
 ExtendedTagAndInitStrategy::resetDataToPreadvanceState(
-    const boost::shared_ptr<hier::PatchLevel>& level)
+    const HAMERS_SHARED_PTR<hier::PatchLevel>& level)
 {
     NULL_USE(level);
     TBOX_ERROR("ExtendedTagAndInitStrategy::resetDataToPreadvanceState()"
@@ -257,9 +257,9 @@ ExtendedTagAndInitStrategy::resetDataToPreadvanceState(
 
 void
 ExtendedTagAndInitStrategy::processHierarchyBeforeAddingNewLevel(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
     const int level_number,
-    const boost::shared_ptr<hier::BoxLevel>& new_box_level)
+    const HAMERS_SHARED_PTR<hier::BoxLevel>& new_box_level)
 {
     NULL_USE(hierarchy);
     NULL_USE(level_number);
@@ -269,9 +269,9 @@ ExtendedTagAndInitStrategy::processHierarchyBeforeAddingNewLevel(
 
 void
 ExtendedTagAndInitStrategy::processLevelBeforeRemoval(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
     const int level_number,
-    const boost::shared_ptr<hier::PatchLevel>& old_level)
+    const HAMERS_SHARED_PTR<hier::PatchLevel>& old_level)
 {
     NULL_USE(hierarchy);
     NULL_USE(level_number);

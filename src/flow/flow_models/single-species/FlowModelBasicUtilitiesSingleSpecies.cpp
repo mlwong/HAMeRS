@@ -101,8 +101,8 @@ FlowModelBasicUtilitiesSingleSpecies::convertConservativeVariablesToPrimitiveVar
  */
 void
 FlowModelBasicUtilitiesSingleSpecies::convertConservativeVariablesToPrimitiveVariables(
-    std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables)
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables)
 {
     if (d_flow_model.expired())
     {
@@ -112,7 +112,7 @@ FlowModelBasicUtilitiesSingleSpecies::convertConservativeVariablesToPrimitiveVar
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -265,13 +265,13 @@ FlowModelBasicUtilitiesSingleSpecies::convertConservativeVariablesToPrimitiveVar
      */
     
     // Create the temporary side data.
-    boost::shared_ptr<pdat::SideData<double> > data_density(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > data_density(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_var));
     
-    boost::shared_ptr<pdat::SideData<double> > data_internal_energy(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > data_internal_energy(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_var));
     
-    boost::shared_ptr<pdat::SideData<double> > data_pressure(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > data_pressure(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_var));
     
     double* rho     = nullptr;
@@ -1365,8 +1365,8 @@ FlowModelBasicUtilitiesSingleSpecies::convertPrimitiveVariablesToConservativeVar
  */
 void
 FlowModelBasicUtilitiesSingleSpecies::convertPrimitiveVariablesToConservativeVariables(
-    std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables)
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables)
 {
     if (d_flow_model.expired())
     {
@@ -1376,7 +1376,7 @@ FlowModelBasicUtilitiesSingleSpecies::convertPrimitiveVariablesToConservativeVar
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -1529,13 +1529,13 @@ FlowModelBasicUtilitiesSingleSpecies::convertPrimitiveVariablesToConservativeVar
      */
     
     // Create the temporary side data.
-    boost::shared_ptr<pdat::SideData<double> > data_density(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > data_density(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_var));
     
-    boost::shared_ptr<pdat::SideData<double> > data_pressure(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > data_pressure(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_var));
     
-    boost::shared_ptr<pdat::SideData<double> > data_internal_energy(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > data_internal_energy(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_var));
     
     double* rho     = nullptr;
@@ -2545,8 +2545,8 @@ FlowModelBasicUtilitiesSingleSpecies::convertPrimitiveVariablesToConservativeVar
  */
 void
 FlowModelBasicUtilitiesSingleSpecies::checkCellDataOfConservativeVariablesBounded(
-    boost::shared_ptr<pdat::CellData<int> >& bounded_flag,
-    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables)
+    HAMERS_SHARED_PTR<pdat::CellData<int> >& bounded_flag,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_variables)
 {
     NULL_USE(bounded_flag);
     NULL_USE(conservative_variables);
@@ -2565,8 +2565,8 @@ FlowModelBasicUtilitiesSingleSpecies::checkCellDataOfConservativeVariablesBounde
  */
 void
 FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfConservativeVariablesBounded(
-    boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables)
+    HAMERS_SHARED_PTR<pdat::SideData<int> >& bounded_flag,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables)
 {
     if (d_flow_model.expired())
     {
@@ -2576,7 +2576,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfConservativeVariablesBounde
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -2991,8 +2991,8 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfConservativeVariablesBounde
  */
 void
 FlowModelBasicUtilitiesSingleSpecies::checkCellDataOfPrimitiveVariablesBounded(
-    boost::shared_ptr<pdat::CellData<int> >& bounded_flag,
-    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables)
+    HAMERS_SHARED_PTR<pdat::CellData<int> >& bounded_flag,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& primitive_variables)
 {
     NULL_USE(bounded_flag);
     NULL_USE(primitive_variables);
@@ -3011,8 +3011,8 @@ FlowModelBasicUtilitiesSingleSpecies::checkCellDataOfPrimitiveVariablesBounded(
  */
 void
 FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
-    boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables)
+    HAMERS_SHARED_PTR<pdat::SideData<int> >& bounded_flag,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables)
 {
     if (d_flow_model.expired())
     {
@@ -3022,7 +3022,7 @@ FlowModelBasicUtilitiesSingleSpecies::checkSideDataOfPrimitiveVariablesBounded(
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -3451,7 +3451,7 @@ FlowModelBasicUtilitiesSingleSpecies::registerDerivedVariablesForCharacteristicP
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     // Check whether a patch is already registered.
     if (!flow_model_tmp->hasRegisteredPatch())
@@ -3484,7 +3484,7 @@ FlowModelBasicUtilitiesSingleSpecies::registerDerivedVariablesForCharacteristicP
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
     // Check whether a patch is already registered.
     if (!flow_model_tmp->hasRegisteredPatch())
@@ -3535,7 +3535,7 @@ FlowModelBasicUtilitiesSingleSpecies::getNumberOfProjectionVariablesForPrimitive
  */
 void
 FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForConservativeVariables(
-    std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& projection_variables)
 {
     if (d_flow_model.expired())
     {
@@ -3545,7 +3545,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForCon
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     const hier::IntVector& num_ghosts = flow_model_tmp->getNumberOfGhostCells();
     const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
     
@@ -3622,13 +3622,13 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForCon
     
     // Get the cell data of the conservative variables.
     
-    boost::shared_ptr<pdat::CellData<double> > data_density =
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
         flow_model_tmp->getCellData("DENSITY");
     
-    boost::shared_ptr<pdat::CellData<double> > data_momentum =
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum =
         flow_model_tmp->getCellData("MOMENTUM");
     
-    boost::shared_ptr<pdat::CellData<double> > data_total_energy =
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy =
         flow_model_tmp->getCellData("TOTAL_ENERGY");
     
     // Get the pointers to the cell data of density and total energy.
@@ -3640,23 +3640,23 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForCon
      * Create temporary side data of averaged conservative variables.
      */
     
-    boost::shared_ptr<pdat::SideData<double> > data_density_averaged(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > data_density_averaged(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_projection_var));
     
-    boost::shared_ptr<pdat::SideData<double> > data_momentum_averaged(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > data_momentum_averaged(
         new pdat::SideData<double>(interior_box, d_dim.getValue(), num_ghosts_projection_var));
     
-    boost::shared_ptr<pdat::SideData<double> > data_total_energy_averaged(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > data_total_energy_averaged(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_projection_var));
     
     /*
      * Create other temporary side data.
      */
     
-    boost::shared_ptr<pdat::SideData<double> > data_internal_energy_averaged(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > data_internal_energy_averaged(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_projection_var));
     
-    boost::shared_ptr<pdat::SideData<double> > data_pressure_averaged(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > data_pressure_averaged(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_projection_var));
     
     /*
@@ -4636,7 +4636,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForCon
  */
 void
 FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForPrimitiveVariables(
-    std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& projection_variables)
 {
     if (d_flow_model.expired())
     {
@@ -4646,7 +4646,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForPri
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     const hier::IntVector& num_ghosts = flow_model_tmp->getNumberOfGhostCells();
     const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
     
@@ -4719,11 +4719,11 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForPri
     }
     
     // Get the cell data of the variable density.
-    boost::shared_ptr<pdat::CellData<double> > data_density =
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
         flow_model_tmp->getCellData("DENSITY");
     
     // Get the cell data of sound speed.
-    boost::shared_ptr<pdat::CellData<double> > data_sound_speed =
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_sound_speed =
         flow_model_tmp->getCellData("SOUND_SPEED");
     
     // Get the number of ghost cells and ghost cell dimension of sound speed.
@@ -5133,9 +5133,9 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfProjectionVariablesForPri
  */
 void
 FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFromConservativeVariables(
-    std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
-    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& characteristic_variables,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_variables,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& projection_variables,
     const int& idx_offset)
 {
     if (d_flow_model.expired())
@@ -5146,7 +5146,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -5880,9 +5880,9 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
  */
 void
 FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFromPrimitiveVariables(
-    std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
-    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& characteristic_variables,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& primitive_variables,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& projection_variables,
     const int& idx_offset)
 {
     if (d_flow_model.expired())
@@ -5893,7 +5893,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -6450,9 +6450,9 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
  */
 void
 FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfConservativeVariablesFromCharacteristicVariables(
-    std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& characteristic_variables,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& projection_variables)
 {
     if (d_flow_model.expired())
     {
@@ -6462,7 +6462,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfConservativeVariablesFrom
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
     
     /*
@@ -7021,9 +7021,9 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfConservativeVariablesFrom
  */
 void
 FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
-    std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& characteristic_variables,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& projection_variables)
 {
     if (d_flow_model.expired())
     {
@@ -7033,7 +7033,7 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfPrimitiveVariablesFromCha
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
     
     /*

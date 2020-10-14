@@ -63,6 +63,8 @@ export SAMRAI_ROOT=<path to the directory of SAMRAI>
 
 HAMeRS has already been successfully tested with HDF5-1.8, Boost-1.60 and SAMRAI-3.11.2.
 
+Note that SAMRAI does not depend on the Boost library anymore since version 3.12.0. Please install HAMeRS without Boost library dependency using the CMake flag `-DHAMERS_USE_BOOST=OFF` when SAMRAI verison is equal to or greater than 3.12.0.
+
 ### How do I change the problem? ###
 
 To change the problem that you want to run for an application, e.g. the Euler application, just simply link the corresponding initial conditions cpp symlink (`EulerInitialConditions.cpp` in `src/apps/Euler`) to the actual problem file using `ln -sf <absolute path to .cpp file containing problem's initial conditions> EulerInitialConditions.cpp`. If the problem has special boundary conditions, the user can supply the boundary conditions with `ln -sf <absolute path to .cpp file containing problem's user-coded boundary conditions> EulerSpecialBoundaryConditions.cpp`. There are some initial conditions and boundary conditions files from different example problems in the `problems` folder.

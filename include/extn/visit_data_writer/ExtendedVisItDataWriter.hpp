@@ -18,6 +18,8 @@
  */
 #ifdef HAVE_HDF5
 
+#include "HAMeRS_memory.hpp"
+
 #include "SAMRAI/appu/VisDerivedDataStrategy.h"
 #include "SAMRAI/appu/VisMaterialsDataStrategy.h"
 #include "SAMRAI/hier/PatchData.h"
@@ -29,7 +31,6 @@
 #include "SAMRAI/tbox/Database.h"
 #include "SAMRAI/tbox/SAMRAI_MPI.h"
 
-#include "boost/shared_ptr.hpp"
 #include <string>
 #include <list>
 #include <vector>
@@ -575,7 +576,7 @@ class ExtendedVisItDataWriter
          */
         void
         writePlotData(
-            const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<SAMRAI::hier::PatchHierarchy>& hierarchy,
             int time_step,
             double simulation_time = 0.0);
         
@@ -828,8 +829,8 @@ class ExtendedVisItDataWriter
             bool d_isa_species;
             std::string d_species_name;
             VisItItem* d_parent_material_pointer;
-            boost::shared_ptr<SAMRAI::tbox::Database> d_species_HDFGroup;
-            boost::shared_ptr<SAMRAI::tbox::Database> d_extents_species_HDFGroup;
+            HAMERS_SHARED_PTR<SAMRAI::tbox::Database> d_species_HDFGroup;
+            HAMERS_SHARED_PTR<SAMRAI::tbox::Database> d_extents_species_HDFGroup;
         };
         
         /*
@@ -863,7 +864,7 @@ class ExtendedVisItDataWriter
          */
         void
         writeHDFFiles(
-            const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<SAMRAI::hier::PatchHierarchy>& hierarchy,
             double simulation_time);
         
         /*
@@ -872,15 +873,15 @@ class ExtendedVisItDataWriter
          */
         void
         initializePlotVariableMinMaxInfo(
-            const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy);
+            const HAMERS_SHARED_PTR<SAMRAI::hier::PatchHierarchy>& hierarchy);
         
         /*
          * Write variable data to HDF file.
          */
         void
         writeVisItVariablesToHDFFile(
-            const boost::shared_ptr<SAMRAI::tbox::Database>& processor_HDFGroup,
-            const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<SAMRAI::tbox::Database>& processor_HDFGroup,
+            const HAMERS_SHARED_PTR<SAMRAI::hier::PatchHierarchy>& hierarchy,
             int coarsest_level,
             int finest_level,
             double simulation_time);
@@ -891,8 +892,8 @@ class ExtendedVisItDataWriter
          */
         void
         packRegularAndDerivedData(
-            const boost::shared_ptr<SAMRAI::tbox::Database>& patch_HDFGroup,
-            const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<SAMRAI::tbox::Database>& patch_HDFGroup,
+            const HAMERS_SHARED_PTR<SAMRAI::hier::PatchHierarchy>& hierarchy,
             const int level_number,
             SAMRAI::hier::Patch& patch,
             double simulation_time);
@@ -902,8 +903,8 @@ class ExtendedVisItDataWriter
          */
         void
         packMaterialsData(
-            const boost::shared_ptr<SAMRAI::tbox::Database>& patch_HDFGroup,
-            const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<SAMRAI::tbox::Database>& patch_HDFGroup,
+            const HAMERS_SHARED_PTR<SAMRAI::hier::PatchHierarchy>& hierarchy,
             const int level_number,
             SAMRAI::hier::Patch& patch);
         
@@ -912,7 +913,7 @@ class ExtendedVisItDataWriter
          */
         void
         packSpeciesData(
-            const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<SAMRAI::hier::PatchHierarchy>& hierarchy,
             const int level_number,
             SAMRAI::hier::Patch& patch);
         
@@ -935,7 +936,7 @@ class ExtendedVisItDataWriter
          */
         int
         getGlobalPatchNumber(
-            const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<SAMRAI::hier::PatchHierarchy>& hierarchy,
             const int level_number,
             const int patch_number);
         
@@ -944,8 +945,8 @@ class ExtendedVisItDataWriter
          */
         void
         writeParentChildInfoToSummaryHDFFile(
-            const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
-            const boost::shared_ptr<SAMRAI::tbox::Database>& basic_HDFGroup);
+            const HAMERS_SHARED_PTR<SAMRAI::hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<SAMRAI::tbox::Database>& basic_HDFGroup);
         
         /*
          * Sort function for use by qsort to sort child_parent array by child patch number so can
@@ -969,7 +970,7 @@ class ExtendedVisItDataWriter
         void
         writeSummaryToHDFFile(
             std::string dump_dir_name,
-            const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<SAMRAI::hier::PatchHierarchy>& hierarchy,
             int coarsest_plot_level,
             int finest_plot_level,
             double simulation_time);
@@ -981,7 +982,7 @@ class ExtendedVisItDataWriter
          */
         void
         exchangeMinMaxPatchInformation(
-            const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<SAMRAI::hier::PatchHierarchy>& hierarchy,
             const int coarsest_plot_level,
             const int finest_plot_level);
         
@@ -990,7 +991,7 @@ class ExtendedVisItDataWriter
          */
         void
         packPatchDataIntoDoubleBuffer(
-            const boost::shared_ptr<SAMRAI::hier::PatchData>& pdata,
+            const HAMERS_SHARED_PTR<SAMRAI::hier::PatchData>& pdata,
             const int depth_index,
             const variable_data_type type_of_data,
             const SAMRAI::hier::Box patch_box,
@@ -1201,7 +1202,7 @@ class ExtendedVisItDataWriter
         std::vector<std::string> d_visit_expression_types;
         
         //! @brief Timer for writePlotData().
-        static boost::shared_ptr<SAMRAI::tbox::Timer> t_write_plot_data;
+        static HAMERS_SHARED_PTR<SAMRAI::tbox::Timer> t_write_plot_data;
         
         /*!
          * @brief Initialize static objects and register shutdown routine.

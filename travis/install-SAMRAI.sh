@@ -1,13 +1,13 @@
 #!/bin/sh
 
 cd ${HOME}
-wget https://computation.llnl.gov/projects/samrai/download/SAMRAI-v3.11.2.tar.gz
-gunzip SAMRAI-v3.11.2.tar.gz
-mkdir SAMRAI-v3.11.2
-cd SAMRAI-v3.11.2
-tar xvf ../SAMRAI-v3.11.2.tar > /dev/null 2>&1
+wget https://computing.llnl.gov/projects/samrai/download/SAMRAI-v4.0.2.tar.gz
+gunzip SAMRAI-v4.0.2.tar.gz
+mkdir SAMRAI-v4.0.2
+cd SAMRAI-v4.0.2
+tar xvf ../SAMRAI-v4.0.2.tar > /dev/null 2>&1
 mkdir objs
 cd objs
-sh ../SAMRAI/configure --prefix=$SAMRAI_ROOT --enable-opt --with-CXX=mpicxx --with-CC=mpicc --with-F77=mpif77 --with-boost --with-hdf5=$HDF5_ROOT
-make library
+cmake ../SAMRAI -DCMAKE_INSTALL_PREFIX=$SAMRAI_ROOT_NO_BOOST -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_CC_COMPILER=mpicc -DCMAKE_Fortran_COMPILER=mpif77 -DENABLE_HDF5=ON -DHDF5_DIR=$HDF5_ROOT
+make
 make install

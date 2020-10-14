@@ -3,6 +3,8 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "flow/flow_models/FlowModels.hpp"
 
 #include "SAMRAI/geom/CartesianGridGeometry.h"
@@ -13,7 +15,6 @@
 #include "SAMRAI/tbox/Dimension.h"
 #include "SAMRAI/tbox/Utilities.h"
 
-#include "boost/shared_ptr.hpp"
 #include <string>
 #include <vector>
 
@@ -25,10 +26,10 @@ class NonconservativeDiffusiveFluxDivergenceOperator
         NonconservativeDiffusiveFluxDivergenceOperator(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_eqn,
-            const boost::shared_ptr<FlowModel>& flow_model,
-            const boost::shared_ptr<tbox::Database>& nonconservative_diffusive_flux_divergence_operator_db):
+            const HAMERS_SHARED_PTR<FlowModel>& flow_model,
+            const HAMERS_SHARED_PTR<tbox::Database>& nonconservative_diffusive_flux_divergence_operator_db):
                 d_object_name(object_name),
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
@@ -63,7 +64,7 @@ class NonconservativeDiffusiveFluxDivergenceOperator
          */
         virtual void
         putToRestart(
-            const boost::shared_ptr<tbox::Database>& restart_db) const = 0;
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const = 0;
         
         /*
          * Compute the non-conservative diffusive flux divergence on a patch.
@@ -71,8 +72,8 @@ class NonconservativeDiffusiveFluxDivergenceOperator
         virtual void
         computeNonconservativeDiffusiveFluxDivergenceOnPatch(
             hier::Patch& patch,
-            const boost::shared_ptr<pdat::CellVariable<double> >& variable_diffusive_flux_divergence,
-            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_diffusive_flux_divergence,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double time,
             const double dt,
             const int RK_step_number) = 0;
@@ -89,9 +90,9 @@ class NonconservativeDiffusiveFluxDivergenceOperator
         const tbox::Dimension d_dim;
         
         /*
-         * boost::shared_ptr to the grid geometry.
+         * HAMERS_SHARED_PTR to the grid geometry.
          */
-        const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
+        const HAMERS_SHARED_PTR<geom::CartesianGridGeometry> d_grid_geometry;
         
         /*
          * Number of ghost cells needed by the non-conservative diffusive flux divergence operator.
@@ -106,12 +107,12 @@ class NonconservativeDiffusiveFluxDivergenceOperator
         /*
          * Flow model.
          */
-        const boost::shared_ptr<FlowModel> d_flow_model;
+        const HAMERS_SHARED_PTR<FlowModel> d_flow_model;
         
         /*
-         * boost::shared_ptr to database of the non-conservative diffusive flux divergence operatore.
+         * HAMERS_SHARED_PTR to database of the non-conservative diffusive flux divergence operatore.
          */
-        const boost::shared_ptr<tbox::Database> d_nonconservative_diffusive_flux_divergence_operator_db;
+        const HAMERS_SHARED_PTR<tbox::Database> d_nonconservative_diffusive_flux_divergence_operator_db;
         
 };
 

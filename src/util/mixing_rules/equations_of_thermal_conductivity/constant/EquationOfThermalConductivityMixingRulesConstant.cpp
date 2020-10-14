@@ -5,7 +5,7 @@ EquationOfThermalConductivityMixingRulesConstant::EquationOfThermalConductivityM
     const tbox::Dimension& dim,
     const int& num_species,
     const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
-    const boost::shared_ptr<tbox::Database>& equation_of_thermal_conductivity_mixing_rules_db):
+    const HAMERS_SHARED_PTR<tbox::Database>& equation_of_thermal_conductivity_mixing_rules_db):
         EquationOfThermalConductivityMixingRules(
             object_name,
             dim,
@@ -164,7 +164,7 @@ EquationOfThermalConductivityMixingRulesConstant::printClassData(
  */
 void
 EquationOfThermalConductivityMixingRulesConstant::putToRestart(
-    const boost::shared_ptr<tbox::Database>& restart_db) const
+    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
     restart_db->putDoubleVector("d_species_kappa", d_species_kappa);
     restart_db->putDoubleVector("d_species_M", d_species_M);
@@ -290,10 +290,10 @@ EquationOfThermalConductivityMixingRulesConstant::getThermalConductivity(
  */
 void
 EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
-    boost::shared_ptr<pdat::CellData<double> >& data_thermal_conductivity,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
-    const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermal_conductivity,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -318,12 +318,12 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
     
     // Delcare data containers for thermal conductivity of a species, denominator, numerator and
     // species molecular properties.
-    boost::shared_ptr<pdat::CellData<double> > data_thermal_conductivity_species;
-    boost::shared_ptr<pdat::CellData<double> > data_den;
-    boost::shared_ptr<pdat::CellData<double> > data_num;
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_thermal_conductivity_species;
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_den;
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_num;
     
     // Declare data container for last mass fraction.
-    boost::shared_ptr<pdat::CellData<double> > data_mass_fractions_last;
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions_last;
     
     /*
      * Get the local lower index and number of cells in each direction of the domain.
@@ -382,13 +382,13 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
         
         ghostcell_dims_min = interior_dims + num_ghosts_min*2;
         
-        data_thermal_conductivity_species = boost::make_shared<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
-        data_den = boost::make_shared<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
-        data_num = boost::make_shared<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
+        data_thermal_conductivity_species = HAMERS_MAKE_SHARED<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
+        data_den = HAMERS_MAKE_SHARED<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
+        data_num = HAMERS_MAKE_SHARED<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
         
         if (data_mass_fractions->getDepth() == d_num_species - 1)
         {
-            data_mass_fractions_last = boost::make_shared<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
+            data_mass_fractions_last = HAMERS_MAKE_SHARED<pdat::CellData<double> >(interior_box, 1, num_ghosts_min);
         }
     }
     else
@@ -410,14 +410,14 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
         ghostcell_dims_min = domain_dims;
         
         data_thermal_conductivity_species =
-            boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
-        data_den = boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
-        data_num = boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+            HAMERS_MAKE_SHARED<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+        data_den = HAMERS_MAKE_SHARED<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+        data_num = HAMERS_MAKE_SHARED<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
         
         if (data_mass_fractions->getDepth() == d_num_species - 1)
         {
             data_mass_fractions_last =
-                boost::make_shared<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
+                HAMERS_MAKE_SHARED<pdat::CellData<double> >(domain, 1, hier::IntVector::getZero(d_dim));
         }
     }
     

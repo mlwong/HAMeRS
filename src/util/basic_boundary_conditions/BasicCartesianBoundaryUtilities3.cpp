@@ -20,6 +20,8 @@
 #include "SAMRAI/tbox/Utilities.h"
 #include "SAMRAI/tbox/MathUtilities.h"
 
+#include <algorithm>
+
 /*
  * This function reads 3D boundary data from given input database.
  * The integer boundary condition types are placed in the integer
@@ -58,7 +60,7 @@
 void
 BasicCartesianBoundaryUtilities3::getFromInput(
     BoundaryUtilityStrategy* bdry_strategy,
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     const std::vector<int>& face_locs,
     const std::vector<int>& edge_locs,
     const std::vector<int>& node_locs,
@@ -149,7 +151,7 @@ BasicCartesianBoundaryUtilities3::getFromInput(
 void
 BasicCartesianBoundaryUtilities3::fillFaceBoundaryData(
     const std::string& var_name,
-    const boost::shared_ptr<pdat::CellData<double> >& var_data,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& var_data,
     const hier::Patch& patch,
     const std::vector<int>& bdry_face_locs,
     const std::vector<int>& bdry_face_conds,
@@ -169,8 +171,8 @@ BasicCartesianBoundaryUtilities3::fillFaceBoundaryData(
     
     NULL_USE(var_name);
     
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     TBOX_ASSERT(patch_geom);
     
@@ -485,7 +487,7 @@ BasicCartesianBoundaryUtilities3::fillFaceBoundaryData(
 void
 BasicCartesianBoundaryUtilities3::fillEdgeBoundaryData(
     const std::string& var_name,
-    const boost::shared_ptr<pdat::CellData<double> >& var_data,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& var_data,
     const hier::Patch& patch,
     const std::vector<int>& bdry_edge_locs,
     const std::vector<int>& bdry_edge_conds,
@@ -505,8 +507,8 @@ BasicCartesianBoundaryUtilities3::fillEdgeBoundaryData(
     
     NULL_USE(var_name);
     
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     TBOX_ASSERT(patch_geom);
     
@@ -1092,7 +1094,7 @@ BasicCartesianBoundaryUtilities3::fillEdgeBoundaryData(
 void
 BasicCartesianBoundaryUtilities3::fillNodeBoundaryData(
     const std::string& var_name,
-    const boost::shared_ptr<pdat::CellData<double> >& var_data,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& var_data,
     const hier::Patch& patch,
     const std::vector<int>& bdry_node_locs,
     const std::vector<int>& bdry_node_conds,
@@ -1112,8 +1114,8 @@ BasicCartesianBoundaryUtilities3::fillNodeBoundaryData(
     
     NULL_USE(var_name);
     
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     TBOX_ASSERT(patch_geom);
     
@@ -1881,7 +1883,7 @@ BasicCartesianBoundaryUtilities3::getFaceLocationForNodeBdry(
 void
 BasicCartesianBoundaryUtilities3::read3dBdryFaces(
     BoundaryUtilityStrategy* bdry_strategy,
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     const std::vector<int>& face_locs,
     std::vector<int>& face_conds,
     const hier::IntVector& periodic)
@@ -1964,7 +1966,7 @@ BasicCartesianBoundaryUtilities3::read3dBdryFaces(
             
             if (need_data_read)
             {
-                boost::shared_ptr<tbox::Database> bdry_loc_db(
+                HAMERS_SHARED_PTR<tbox::Database> bdry_loc_db(
                     input_db->getDatabase(bdry_loc_str));
                 std::string bdry_cond_str =
                     bdry_loc_db->getString("boundary_condition");
@@ -2015,7 +2017,7 @@ BasicCartesianBoundaryUtilities3::read3dBdryFaces(
  */
 void
 BasicCartesianBoundaryUtilities3::read3dBdryEdges(
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     const std::vector<int>& edge_locs,
     const std::vector<int>& face_conds,
     std::vector<int>& edge_conds,
@@ -2142,7 +2144,7 @@ BasicCartesianBoundaryUtilities3::read3dBdryEdges(
             
             if (need_data_read)
             {
-                boost::shared_ptr<tbox::Database> bdry_loc_db(
+                HAMERS_SHARED_PTR<tbox::Database> bdry_loc_db(
                    input_db->getDatabase(bdry_loc_str));
                 
                 std::string bdry_cond_str =
@@ -2532,7 +2534,7 @@ BasicCartesianBoundaryUtilities3::read3dBdryEdges(
  */
 void
 BasicCartesianBoundaryUtilities3::read3dBdryNodes(
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     const std::vector<int>& node_locs,
     const std::vector<int>& face_conds,
     std::vector<int>& node_conds,
@@ -2606,7 +2608,7 @@ BasicCartesianBoundaryUtilities3::read3dBdryNodes(
                 }
                 default: NULL_STATEMENT;
             }
-            boost::shared_ptr<tbox::Database> bdry_loc_db(
+            HAMERS_SHARED_PTR<tbox::Database> bdry_loc_db(
                 input_db->getDatabase(bdry_loc_str));
             std::string bdry_cond_str =
                 bdry_loc_db->getString("boundary_condition");

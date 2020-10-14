@@ -5,7 +5,7 @@ EquationOfMassDiffusivityMixingRulesConstant::EquationOfMassDiffusivityMixingRul
     const tbox::Dimension& dim,
     const int& num_species,
     const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
-    const boost::shared_ptr<tbox::Database>& equation_of_mass_diffusivity_mixing_rules_db):
+    const HAMERS_SHARED_PTR<tbox::Database>& equation_of_mass_diffusivity_mixing_rules_db):
         EquationOfMassDiffusivityMixingRules(
             object_name,
             dim,
@@ -105,7 +105,7 @@ EquationOfMassDiffusivityMixingRulesConstant::printClassData(
  */
 void
 EquationOfMassDiffusivityMixingRulesConstant::putToRestart(
-    const boost::shared_ptr<tbox::Database>& restart_db) const
+    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
     restart_db->putDoubleVector("d_species_D", d_species_D);
 }
@@ -144,10 +144,10 @@ EquationOfMassDiffusivityMixingRulesConstant::getMassDiffusivities(
  */
 void
 EquationOfMassDiffusivityMixingRulesConstant::computeMassDiffusivities(
-    boost::shared_ptr<pdat::CellData<double> >& data_mass_diffusivities,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
-    const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_diffusivities,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
     const hier::Box& domain) const
 {
     NULL_USE(data_pressure);

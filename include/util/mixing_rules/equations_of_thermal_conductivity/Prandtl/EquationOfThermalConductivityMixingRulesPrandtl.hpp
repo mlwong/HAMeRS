@@ -14,14 +14,14 @@ class EquationOfThermalConductivityMixingRulesPrandtl: public EquationOfThermalC
             const tbox::Dimension& dim,
             const int& num_species,
             const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
-            const boost::shared_ptr<tbox::Database>& equation_of_thermal_conductivity_mixing_rules_db);
+            const HAMERS_SHARED_PTR<tbox::Database>& equation_of_thermal_conductivity_mixing_rules_db);
         
         ~EquationOfThermalConductivityMixingRulesPrandtl() {}
         
         /*
-         * Return the boost::shared_ptr to the equation of thermal conductivity.
+         * Return the HAMERS_SHARED_PTR to the equation of thermal conductivity.
          */
-        const boost::shared_ptr<EquationOfThermalConductivity>&
+        const HAMERS_SHARED_PTR<EquationOfThermalConductivity>&
         getEquationOfThermalConductivity(const int species_index = 0) const
         {
             NULL_USE(species_index);
@@ -40,7 +40,7 @@ class EquationOfThermalConductivityMixingRulesPrandtl: public EquationOfThermalC
          */
         void
         putToRestart(
-            const boost::shared_ptr<tbox::Database>& restart_db) const;
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
         
         /*
          * Compute the thermal conductivity of the mixture with isothermal and isobaric equilibrium assumptions.
@@ -56,10 +56,10 @@ class EquationOfThermalConductivityMixingRulesPrandtl: public EquationOfThermalC
          */
         void
         computeThermalConductivity(
-            boost::shared_ptr<pdat::CellData<double> >& data_thermal_conductivity,
-            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermal_conductivity,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
             const hier::Box& domain) const;
         
         /*
@@ -104,19 +104,19 @@ class EquationOfThermalConductivityMixingRulesPrandtl: public EquationOfThermalC
         std::string d_equation_of_shear_viscosity_str;
         
         /*
-         * boost::shared_ptr to EquationOfShearViscosityMixingRules.
+         * HAMERS_SHARED_PTR to EquationOfShearViscosityMixingRules.
          */
-        boost::shared_ptr<EquationOfShearViscosityMixingRules> d_equation_of_shear_viscosity_mixing_rules;
+        HAMERS_SHARED_PTR<EquationOfShearViscosityMixingRules> d_equation_of_shear_viscosity_mixing_rules;
         
         /*
-         * boost::shared_ptr to EquationOfShearViscosityMixingRulesManager.
+         * HAMERS_SHARED_PTR to EquationOfShearViscosityMixingRulesManager.
          */
-        boost::shared_ptr<EquationOfShearViscosityMixingRulesManager> d_equation_of_shear_viscosity_mixing_rules_manager;
+        HAMERS_SHARED_PTR<EquationOfShearViscosityMixingRulesManager> d_equation_of_shear_viscosity_mixing_rules_manager;
         
         /*
-         * boost::shared_ptr to EquationOfThermalConductivity.
+         * HAMERS_SHARED_PTR to EquationOfThermalConductivity.
          */
-        boost::shared_ptr<EquationOfThermalConductivity> d_equation_of_thermal_conductivity;
+        HAMERS_SHARED_PTR<EquationOfThermalConductivity> d_equation_of_thermal_conductivity;
         
 };
     
