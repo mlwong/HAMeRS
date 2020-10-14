@@ -3,12 +3,13 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "flow/flow_models/FlowModel.hpp"
 
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/pdat/CellData.h"
 
-#include "boost/weak_ptr.hpp"
 #include <string>
 
 class FlowModel;
@@ -19,10 +20,10 @@ class FlowModelSourceUtilities
         FlowModelSourceUtilities(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
             const int& num_eqn,
-            const boost::shared_ptr<tbox::Database>& flow_model_db);
+            const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db);
         
         virtual ~FlowModelSourceUtilities() {}
         
@@ -34,7 +35,7 @@ class FlowModelSourceUtilities
         /*
          * Set the weak pointer to the flow model from the parent FlowModel class.
          */
-        void setFlowModel(const boost::weak_ptr<FlowModel>& flow_model)
+        void setFlowModel(const HAMERS_WEAK_PTR<FlowModel>& flow_model)
         {
             d_flow_model = flow_model;
         }
@@ -75,7 +76,7 @@ class FlowModelSourceUtilities
          */
         virtual void
         computeSourceTermsOnPatch(
-            const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
+            const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
             const double time,
             const double dt,
             const int RK_step_number);
@@ -91,7 +92,7 @@ class FlowModelSourceUtilities
          */
         virtual void
         putToRestart(
-            const boost::shared_ptr<tbox::Database>& restart_db) const;
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
         
 protected:
         /*
@@ -105,9 +106,9 @@ protected:
         const tbox::Dimension d_dim;
         
         /*
-         * boost::shared_ptr to the grid geometry.
+         * HAMERS_SHARED_PTR to the grid geometry.
          */
-        const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
+        const HAMERS_SHARED_PTR<geom::CartesianGridGeometry> d_grid_geometry;
         
         /*
          * Number of species.
@@ -145,9 +146,9 @@ protected:
         hier::IntVector d_subghostcell_dims_source_terms;
         
         /*
-         * boost::weak_ptr to FlowModel.
+         * HAMERS_WEAK_PTR to FlowModel.
          */
-        boost::weak_ptr<FlowModel> d_flow_model;
+        HAMERS_WEAK_PTR<FlowModel> d_flow_model;
         
 };
 

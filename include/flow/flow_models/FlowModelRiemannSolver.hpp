@@ -3,13 +3,14 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "flow/flow_models/FlowModel.hpp"
 #include "util/Directions.hpp"
 
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/pdat/SideData.h"
 
-#include "boost/weak_ptr.hpp"
 #include <string>
 
 namespace RIEMANN_SOLVER
@@ -26,7 +27,7 @@ class FlowModelRiemannSolver
         FlowModelRiemannSolver(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species):
                 d_object_name(object_name),
                 d_dim(dim),
@@ -39,7 +40,7 @@ class FlowModelRiemannSolver
         /*
          * Set the weak pointer to the flow model from the parent FlowModel class.
          */
-        void setFlowModel(const boost::weak_ptr<FlowModel>& flow_model)
+        void setFlowModel(const HAMERS_WEAK_PTR<FlowModel>& flow_model)
         {
             d_flow_model = flow_model;
         }
@@ -49,9 +50,9 @@ class FlowModelRiemannSolver
          */
         void
         computeConvectiveFluxFromConservativeVariables(
-            boost::shared_ptr<pdat::SideData<double> > convective_flux,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_minus,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_plus,
+            HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_minus,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_plus,
             const DIRECTION::TYPE& direction,
             const RIEMANN_SOLVER::TYPE& riemann_solver_type) const
         {
@@ -70,9 +71,9 @@ class FlowModelRiemannSolver
          */
         virtual void
         computeConvectiveFluxFromConservativeVariables(
-            boost::shared_ptr<pdat::SideData<double> > convective_flux,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_minus,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_plus,
+            HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_minus,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_plus,
             const DIRECTION::TYPE& direction,
             const RIEMANN_SOLVER::TYPE& riemann_solver_type,
             const hier::Box& domain) const = 0;
@@ -82,9 +83,9 @@ class FlowModelRiemannSolver
          */
         void
         computeConvectiveFluxFromPrimitiveVariables(
-            boost::shared_ptr<pdat::SideData<double> > convective_flux,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_minus,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_plus,
+            HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_minus,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_plus,
             const DIRECTION::TYPE& direction,
             const RIEMANN_SOLVER::TYPE& riemann_solver_type) const
         {
@@ -103,9 +104,9 @@ class FlowModelRiemannSolver
          */
         virtual void
         computeConvectiveFluxFromPrimitiveVariables(
-            boost::shared_ptr<pdat::SideData<double> > convective_flux,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_minus,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_plus,
+            HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_minus,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_plus,
             const DIRECTION::TYPE& direction,
             const RIEMANN_SOLVER::TYPE& riemann_solver_type,
             const hier::Box& domain) const = 0;
@@ -115,10 +116,10 @@ class FlowModelRiemannSolver
          */
         void
         computeConvectiveFluxAndVelocityFromConservativeVariables(
-            boost::shared_ptr<pdat::SideData<double> > convective_flux,
-            boost::shared_ptr<pdat::SideData<double> > velocity,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_minus,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_plus,
+            HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
+            HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_minus,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_plus,
             const DIRECTION::TYPE& direction,
             const RIEMANN_SOLVER::TYPE& riemann_solver_type) const
         {
@@ -138,10 +139,10 @@ class FlowModelRiemannSolver
          */
         virtual void
         computeConvectiveFluxAndVelocityFromConservativeVariables(
-            boost::shared_ptr<pdat::SideData<double> > convective_flux,
-            boost::shared_ptr<pdat::SideData<double> > velocity,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_minus,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_plus,
+            HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
+            HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_minus,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_plus,
             const DIRECTION::TYPE& direction,
             const RIEMANN_SOLVER::TYPE& riemann_solver_type,
             const hier::Box& domain) const = 0;
@@ -151,10 +152,10 @@ class FlowModelRiemannSolver
          */
         void
         computeConvectiveFluxAndVelocityFromPrimitiveVariables(
-            boost::shared_ptr<pdat::SideData<double> > convective_flux,
-            boost::shared_ptr<pdat::SideData<double> > velocity,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_minus,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_plus,
+            HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
+            HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_minus,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_plus,
             const DIRECTION::TYPE& direction,
             const RIEMANN_SOLVER::TYPE& riemann_solver_type) const
         {
@@ -174,10 +175,10 @@ class FlowModelRiemannSolver
          */
         virtual void
         computeConvectiveFluxAndVelocityFromPrimitiveVariables(
-            boost::shared_ptr<pdat::SideData<double> > convective_flux,
-            boost::shared_ptr<pdat::SideData<double> > velocity,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_minus,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_plus,
+            HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
+            HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_minus,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_plus,
             const DIRECTION::TYPE& direction,
             const RIEMANN_SOLVER::TYPE& riemann_solver_type,
             const hier::Box& domain) const = 0;
@@ -194,9 +195,9 @@ class FlowModelRiemannSolver
         const tbox::Dimension d_dim;
         
         /*
-         * boost::shared_ptr to the grid geometry.
+         * HAMERS_SHARED_PTR to the grid geometry.
          */
-        const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
+        const HAMERS_SHARED_PTR<geom::CartesianGridGeometry> d_grid_geometry;
         
         /*
          * Number of species.
@@ -204,9 +205,9 @@ class FlowModelRiemannSolver
         const int d_num_species;
         
         /*
-         * boost::weak_ptr to FlowModel.
+         * HAMERS_WEAK_PTR to FlowModel.
          */
-        boost::weak_ptr<FlowModel> d_flow_model;
+        HAMERS_WEAK_PTR<FlowModel> d_flow_model;
         
 };
 

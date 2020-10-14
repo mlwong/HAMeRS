@@ -5,10 +5,10 @@
 ConvectiveFluxReconstructorWCNS56::ConvectiveFluxReconstructorWCNS56(
     const std::string& object_name,
     const tbox::Dimension& dim,
-    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+    const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_eqn,
-    const boost::shared_ptr<FlowModel>& flow_model,
-    const boost::shared_ptr<tbox::Database>& convective_flux_reconstructor_db):
+    const HAMERS_SHARED_PTR<FlowModel>& flow_model,
+    const HAMERS_SHARED_PTR<tbox::Database>& convective_flux_reconstructor_db):
         ConvectiveFluxReconstructor(
             object_name,
             dim,
@@ -37,9 +37,9 @@ ConvectiveFluxReconstructorWCNS56::ConvectiveFluxReconstructorWCNS56(
 void
 ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
     hier::Patch& patch,
-    const boost::shared_ptr<pdat::SideVariable<double> >& variable_convective_flux,
-    const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
-    const boost::shared_ptr<hier::VariableContext>& data_context,
+    const HAMERS_SHARED_PTR<pdat::SideVariable<double> >& variable_convective_flux,
+    const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double time,
     const double dt,
     const int RK_step_number)
@@ -50,8 +50,8 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
     d_flow_model->setupRiemannSolver();
     d_flow_model->setupBasicUtilities();
     
-    boost::shared_ptr<FlowModelRiemannSolver> riemann_solver = d_flow_model->getFlowModelRiemannSolver();
-    boost::shared_ptr<FlowModelBasicUtilities> basic_utilities = d_flow_model->getFlowModelBasicUtilities();
+    HAMERS_SHARED_PTR<FlowModelRiemannSolver> riemann_solver = d_flow_model->getFlowModelRiemannSolver();
+    HAMERS_SHARED_PTR<FlowModelBasicUtilities> basic_utilities = d_flow_model->getFlowModelBasicUtilities();
     
     // Get the dimensions of box that covers the interior of patch.
     hier::Box interior_box = patch.getBox();
@@ -64,20 +64,20 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
     const hier::IntVector conv_ghostcell_dims = conv_ghost_box.numberCells();
     
     // Get the grid spacing.
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     
     const double* const dx = patch_geom->getDx();
     
     // Get the side data of convective flux.
-    boost::shared_ptr<pdat::SideData<double> > convective_flux(
-        BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux(
+        HAMERS_SHARED_PTR_CAST<pdat::SideData<double>, hier::PatchData>(
             patch.getPatchData(variable_convective_flux, data_context)));
     
     // Get the cell data of source.
-    boost::shared_ptr<pdat::CellData<double> > source(
-        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<double> > source(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
             patch.getPatchData(variable_source, data_context)));
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -89,7 +89,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
 #endif
     
     // Allocate temporary patch data.
-    boost::shared_ptr<pdat::SideData<double> > velocity_midpoint;
+    HAMERS_SHARED_PTR<pdat::SideData<double> > velocity_midpoint;
     
     if (d_has_advective_eqn_form)
     {
@@ -97,13 +97,13 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
             interior_box, d_dim.getValue(), hier::IntVector::getOne(d_dim)));
     }
     
-    boost::shared_ptr<pdat::SideData<double> > convective_flux_midpoint(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux_midpoint(
         new pdat::SideData<double>(interior_box, d_num_eqn, hier::IntVector::getOne(d_dim)));
     
-    boost::shared_ptr<pdat::SideData<double> > convective_flux_midpoint_HLLC(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux_midpoint_HLLC(
         new pdat::SideData<double>(interior_box, d_num_eqn, hier::IntVector::getOne(d_dim)));
     
-    boost::shared_ptr<pdat::SideData<double> > convective_flux_midpoint_HLLC_HLL;
+    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux_midpoint_HLLC_HLL;
     
     if (d_dim > tbox::Dimension(1))
     {
@@ -111,10 +111,10 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
             interior_box, d_num_eqn, hier::IntVector::getOne(d_dim)));
     }
     
-    boost::shared_ptr<pdat::CellData<double> > velocity_derivatives;
-    boost::shared_ptr<pdat::CellData<double> > dilatation;
-    boost::shared_ptr<pdat::CellData<double> > vorticity_magnitude;
-    boost::shared_ptr<pdat::SideData<double> > shock_sensor;;
+    HAMERS_SHARED_PTR<pdat::CellData<double> > velocity_derivatives;
+    HAMERS_SHARED_PTR<pdat::CellData<double> > dilatation;
+    HAMERS_SHARED_PTR<pdat::CellData<double> > vorticity_magnitude;
+    HAMERS_SHARED_PTR<pdat::SideData<double> > shock_sensor;;
     
     if (d_dim > tbox::Dimension(1))
     {
@@ -166,9 +166,9 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        boost::shared_ptr<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
+        HAMERS_SHARED_PTR<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
         
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > convective_flux_node(1);
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > convective_flux_node(1);
         convective_flux_node[0] = d_flow_model->getCellData("CONVECTIVE_FLUX_X");
         
         hier::IntVector num_subghosts_velocity = velocity->getGhostCellWidth();
@@ -198,10 +198,10 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells are also determined.
          */
         
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables =
             d_flow_model->getCellDataOfConservativeVariables();
         
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > primitive_variables =
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > primitive_variables =
             d_flow_model->getCellDataOfPrimitiveVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
@@ -260,18 +260,18 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * Declare temporary data containers for WENO interpolation.
          */
         
-        std::vector<boost::shared_ptr<pdat::SideData<double> > > projection_variables;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > projection_variables;
         
-        std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > > characteristic_variables;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > characteristic_variables;
         
-        std::vector<boost::shared_ptr<pdat::SideData<double> > > characteristic_variables_minus;
-        std::vector<boost::shared_ptr<pdat::SideData<double> > > characteristic_variables_plus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > characteristic_variables_minus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > characteristic_variables_plus;
         
-        std::vector<boost::shared_ptr<pdat::SideData<double> > > primitive_variables_minus;
-        std::vector<boost::shared_ptr<pdat::SideData<double> > > primitive_variables_plus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > primitive_variables_minus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > primitive_variables_plus;
         
-        boost::shared_ptr<pdat::SideData<int> > bounded_flag_minus;
-        boost::shared_ptr<pdat::SideData<int> > bounded_flag_plus;
+        HAMERS_SHARED_PTR<pdat::SideData<int> > bounded_flag_minus;
+        HAMERS_SHARED_PTR<pdat::SideData<int> > bounded_flag_plus;
         
         /*
          * Initialize temporary data containers for WENO interpolation.
@@ -282,7 +282,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int vi = 0; vi < num_projection_var; vi++)
         {
-            projection_variables.push_back(boost::make_shared<pdat::SideData<double> >(
+            projection_variables.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
         }
         
@@ -293,7 +293,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
             characteristic_variables[m].reserve(d_num_eqn);
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                characteristic_variables[m].push_back(boost::make_shared<pdat::SideData<double> >(
+                characteristic_variables[m].push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                     interior_box, 1, hier::IntVector::getOne(d_dim)));
             }
         }
@@ -305,16 +305,16 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            characteristic_variables_minus.push_back(boost::make_shared<pdat::SideData<double> >(
+            characteristic_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            characteristic_variables_plus.push_back(boost::make_shared<pdat::SideData<double> >(
+            characteristic_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            primitive_variables_minus.push_back(boost::make_shared<pdat::SideData<double> >(
+            primitive_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            primitive_variables_plus.push_back(boost::make_shared<pdat::SideData<double> >(
+            primitive_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
         }
         
@@ -576,9 +576,9 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        boost::shared_ptr<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
+        HAMERS_SHARED_PTR<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
         
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > convective_flux_node(2);
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > convective_flux_node(2);
         convective_flux_node[0] = d_flow_model->getCellData("CONVECTIVE_FLUX_X");
         convective_flux_node[1] = d_flow_model->getCellData("CONVECTIVE_FLUX_Y");
         
@@ -652,10 +652,10 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * Compute the derivatives of velocity, dilatation and vorticity magnitude.
          */
         
-        boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+        HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
             new DerivativeFirstOrder("first order derivative in x-direction", d_dim, DIRECTION::X_DIRECTION, 1));
         
-        boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
+        HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_y(
             new DerivativeFirstOrder("first order derivative in y-direction", d_dim, DIRECTION::Y_DIRECTION, 1));
         
         // Compute dudx.
@@ -733,10 +733,10 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables =
             d_flow_model->getCellDataOfConservativeVariables();
         
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > primitive_variables =
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > primitive_variables =
             d_flow_model->getCellDataOfPrimitiveVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
@@ -805,18 +805,18 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * Declare temporary data containers for WENO interpolation.
          */
         
-        std::vector<boost::shared_ptr<pdat::SideData<double> > > projection_variables;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > projection_variables;
         
-        std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > > characteristic_variables;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > characteristic_variables;
         
-        std::vector<boost::shared_ptr<pdat::SideData<double> > > characteristic_variables_minus;
-        std::vector<boost::shared_ptr<pdat::SideData<double> > > characteristic_variables_plus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > characteristic_variables_minus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > characteristic_variables_plus;
         
-        std::vector<boost::shared_ptr<pdat::SideData<double> > > primitive_variables_minus;
-        std::vector<boost::shared_ptr<pdat::SideData<double> > > primitive_variables_plus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > primitive_variables_minus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > primitive_variables_plus;
         
-        boost::shared_ptr<pdat::SideData<int> > bounded_flag_minus;
-        boost::shared_ptr<pdat::SideData<int> > bounded_flag_plus;
+        HAMERS_SHARED_PTR<pdat::SideData<int> > bounded_flag_minus;
+        HAMERS_SHARED_PTR<pdat::SideData<int> > bounded_flag_plus;
         
         /*
          * Initialize temporary data containers for WENO interpolation.
@@ -827,7 +827,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int vi = 0; vi < num_projection_var; vi++)
         {
-            projection_variables.push_back(boost::make_shared<pdat::SideData<double> >(
+            projection_variables.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
         }
         
@@ -838,7 +838,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
             characteristic_variables[m].reserve(d_num_eqn);
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                characteristic_variables[m].push_back(boost::make_shared<pdat::SideData<double> >(
+                characteristic_variables[m].push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                     interior_box, 1, hier::IntVector::getOne(d_dim)));
             }
         }
@@ -850,16 +850,16 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            characteristic_variables_minus.push_back(boost::make_shared<pdat::SideData<double> >(
+            characteristic_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            characteristic_variables_plus.push_back(boost::make_shared<pdat::SideData<double> >(
+            characteristic_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            primitive_variables_minus.push_back(boost::make_shared<pdat::SideData<double> >(
+            primitive_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            primitive_variables_plus.push_back(boost::make_shared<pdat::SideData<double> >(
+            primitive_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
         }
         
@@ -1412,9 +1412,9 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        boost::shared_ptr<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
+        HAMERS_SHARED_PTR<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
         
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > convective_flux_node(3);
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > convective_flux_node(3);
         convective_flux_node[0] = d_flow_model->getCellData("CONVECTIVE_FLUX_X");
         convective_flux_node[1] = d_flow_model->getCellData("CONVECTIVE_FLUX_Y");
         convective_flux_node[2] = d_flow_model->getCellData("CONVECTIVE_FLUX_Z");
@@ -1518,13 +1518,13 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * Compute the derivatives of velocity, dilatation and vorticity magnitude.
          */
         
-        boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+        HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
             new DerivativeFirstOrder("first order derivative in x-direction", d_dim, DIRECTION::X_DIRECTION, 1));
         
-        boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
+        HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_y(
             new DerivativeFirstOrder("first order derivative in y-direction", d_dim, DIRECTION::Y_DIRECTION, 1));
         
-        boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_z(
+        HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_z(
             new DerivativeFirstOrder("first order derivative in z-direction", d_dim, DIRECTION::Z_DIRECTION, 1));
         
         // Compute dudx.
@@ -1661,10 +1661,10 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables =
             d_flow_model->getCellDataOfConservativeVariables();
         
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > primitive_variables =
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > primitive_variables =
             d_flow_model->getCellDataOfPrimitiveVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
@@ -1733,18 +1733,18 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
          * Declare temporary data containers for WENO interpolation.
          */
         
-        std::vector<boost::shared_ptr<pdat::SideData<double> > > projection_variables;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > projection_variables;
         
-        std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > > characteristic_variables;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > > characteristic_variables;
         
-        std::vector<boost::shared_ptr<pdat::SideData<double> > > characteristic_variables_minus;
-        std::vector<boost::shared_ptr<pdat::SideData<double> > > characteristic_variables_plus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > characteristic_variables_minus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > characteristic_variables_plus;
         
-        std::vector<boost::shared_ptr<pdat::SideData<double> > > primitive_variables_minus;
-        std::vector<boost::shared_ptr<pdat::SideData<double> > > primitive_variables_plus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > primitive_variables_minus;
+        std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > primitive_variables_plus;
         
-        boost::shared_ptr<pdat::SideData<int> > bounded_flag_minus;
-        boost::shared_ptr<pdat::SideData<int> > bounded_flag_plus;
+        HAMERS_SHARED_PTR<pdat::SideData<int> > bounded_flag_minus;
+        HAMERS_SHARED_PTR<pdat::SideData<int> > bounded_flag_plus;
         
         /*
          * Initialize temporary data containers for WENO interpolation.
@@ -1755,7 +1755,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int vi = 0; vi < num_projection_var; vi++)
         {
-            projection_variables.push_back(boost::make_shared<pdat::SideData<double> >(
+            projection_variables.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
         }
         
@@ -1766,7 +1766,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
             characteristic_variables[m].reserve(d_num_eqn);
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                characteristic_variables[m].push_back(boost::make_shared<pdat::SideData<double> >(
+                characteristic_variables[m].push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                     interior_box, 1, hier::IntVector::getOne(d_dim)));
             }
         }
@@ -1778,16 +1778,16 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            characteristic_variables_minus.push_back(boost::make_shared<pdat::SideData<double> >(
+            characteristic_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            characteristic_variables_plus.push_back(boost::make_shared<pdat::SideData<double> >(
+            characteristic_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            primitive_variables_minus.push_back(boost::make_shared<pdat::SideData<double> >(
+            primitive_variables_minus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            primitive_variables_plus.push_back(boost::make_shared<pdat::SideData<double> >(
+            primitive_variables_plus.push_back(HAMERS_MAKE_SHARED<pdat::SideData<double> >(
                 interior_box, 1, hier::IntVector::getOne(d_dim)));
         }
         

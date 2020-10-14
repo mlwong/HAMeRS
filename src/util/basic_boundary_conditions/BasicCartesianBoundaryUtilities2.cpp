@@ -56,7 +56,7 @@
 void
 BasicCartesianBoundaryUtilities2::getFromInput(
     BoundaryUtilityStrategy* bdry_strategy,
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     const std::vector<int>& edge_locs,
     const std::vector<int>& node_locs,
     std::vector<int>& edge_conds,
@@ -127,7 +127,7 @@ BasicCartesianBoundaryUtilities2::getFromInput(
 void
 BasicCartesianBoundaryUtilities2::fillEdgeBoundaryData(
     const std::string& var_name,
-    const boost::shared_ptr<pdat::CellData<double> >& var_data,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& var_data,
     const hier::Patch& patch,
     const std::vector<int>& bdry_edge_locs,
     const std::vector<int>& bdry_edge_conds,
@@ -147,8 +147,8 @@ BasicCartesianBoundaryUtilities2::fillEdgeBoundaryData(
     
     NULL_USE(var_name);
     
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     TBOX_ASSERT(patch_geom);
     
@@ -391,7 +391,7 @@ BasicCartesianBoundaryUtilities2::fillEdgeBoundaryData(
 void
 BasicCartesianBoundaryUtilities2::fillNodeBoundaryData(
     const std::string& var_name,
-    const boost::shared_ptr<pdat::CellData<double> >& var_data,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& var_data,
     const hier::Patch& patch,
     const std::vector<int>& bdry_node_locs,
     const std::vector<int>& bdry_node_conds,
@@ -411,8 +411,8 @@ BasicCartesianBoundaryUtilities2::fillNodeBoundaryData(
     
     NULL_USE(var_name);
     
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     TBOX_ASSERT(patch_geom);
     
@@ -830,7 +830,7 @@ BasicCartesianBoundaryUtilities2::getEdgeLocationForNodeBdry(
 void
 BasicCartesianBoundaryUtilities2::read2dBdryEdges(
     BoundaryUtilityStrategy* bdry_strategy,
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     const std::vector<int>& edge_locs,
     std::vector<int>& edge_conds,
     const hier::IntVector& periodic)
@@ -899,7 +899,7 @@ BasicCartesianBoundaryUtilities2::read2dBdryEdges(
             
             if (need_data_read)
             {
-                boost::shared_ptr<tbox::Database> bdry_loc_db(
+                HAMERS_SHARED_PTR<tbox::Database> bdry_loc_db(
                     input_db->getDatabase(bdry_loc_str));
                 std::string bdry_cond_str =
                     bdry_loc_db->getString("boundary_condition");
@@ -950,7 +950,7 @@ BasicCartesianBoundaryUtilities2::read2dBdryEdges(
  */
 void
 BasicCartesianBoundaryUtilities2::read2dBdryNodes(
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     const std::vector<int>& node_locs,
     const std::vector<int>& edge_conds,
     std::vector<int>& node_conds,
@@ -1005,7 +1005,7 @@ BasicCartesianBoundaryUtilities2::read2dBdryNodes(
                 default: NULL_STATEMENT;
             }
             
-            boost::shared_ptr<tbox::Database> bdry_loc_db(
+            HAMERS_SHARED_PTR<tbox::Database> bdry_loc_db(
                 input_db->getDatabase(bdry_loc_str));
             std::string bdry_cond_str =
                 bdry_loc_db->getString("boundary_condition");

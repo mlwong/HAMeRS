@@ -1,7 +1,5 @@
 #include "flow/refinement_taggers/GradientTagger.hpp"
 
-#include "boost/lexical_cast.hpp"
-
 // #define HAMERS_PLOTTING_GRADIENT_TAGGER
 
 #define EPSILON HAMERS_EPSILON
@@ -9,9 +7,9 @@
 GradientTagger::GradientTagger(
     const std::string& object_name,
     const tbox::Dimension& dim,
-    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
-    const boost::shared_ptr<FlowModel>& flow_model,
-    const boost::shared_ptr<tbox::Database>& gradient_tagger_db):
+    const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
+    const HAMERS_SHARED_PTR<FlowModel>& flow_model,
+    const HAMERS_SHARED_PTR<tbox::Database>& gradient_tagger_db):
         d_object_name(object_name),
         d_dim(dim),
         d_grid_geometry(grid_geometry),
@@ -43,7 +41,7 @@ GradientTagger::GradientTagger(
         
         std::vector<std::string> sensor_keys_defined(num_keys);
         int sensor_keys_count = 0;
-        boost::shared_ptr<tbox::Database> sensor_db;
+        HAMERS_SHARED_PTR<tbox::Database> sensor_db;
         for (int i = 0; i < num_keys; i++)
         {
             std::string sensor_key = sensor_keys[i];
@@ -647,7 +645,7 @@ GradientTagger::registerGradientTaggerVariables(
                 if (variable_key == "DENSITY")
                 {
                     d_difference_first_order_density =
-                        boost::shared_ptr<pdat::CellVariable<double> > (
+                        HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
                             new pdat::CellVariable<double>(
                                 d_dim,
                                 "first order difference of density",
@@ -661,7 +659,7 @@ GradientTagger::registerGradientTaggerVariables(
                     if (d_difference_first_order_uses_local_tol[vi])
                     {
                         d_difference_first_order_local_mean_density =
-                            boost::shared_ptr<pdat::CellVariable<double> > (
+                            HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
                                 new pdat::CellVariable<double>(
                                     d_dim,
                                     "first order difference local mean of density",
@@ -671,7 +669,7 @@ GradientTagger::registerGradientTaggerVariables(
                 else if (variable_key == "TOTAL_ENERGY")
                 {
                     d_difference_first_order_total_energy =
-                        boost::shared_ptr<pdat::CellVariable<double> > (
+                        HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
                             new pdat::CellVariable<double>(
                                 d_dim,
                                 "first order difference of total energy",
@@ -685,7 +683,7 @@ GradientTagger::registerGradientTaggerVariables(
                     if (d_difference_first_order_uses_local_tol[vi])
                     {
                         d_difference_first_order_local_mean_total_energy =
-                            boost::shared_ptr<pdat::CellVariable<double> > (
+                            HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
                                 new pdat::CellVariable<double>(
                                     d_dim,
                                     "first order difference local mean of total energy",
@@ -695,7 +693,7 @@ GradientTagger::registerGradientTaggerVariables(
                 else if (variable_key == "PRESSURE")
                 {
                     d_difference_first_order_pressure =
-                        boost::shared_ptr<pdat::CellVariable<double> > (
+                        HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
                             new pdat::CellVariable<double>(
                                 d_dim,
                                 "first order difference of pressure",
@@ -709,7 +707,7 @@ GradientTagger::registerGradientTaggerVariables(
                     if (d_difference_first_order_uses_local_tol[vi])
                     {
                         d_difference_first_order_local_mean_pressure =
-                            boost::shared_ptr<pdat::CellVariable<double> > (
+                            HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
                                 new pdat::CellVariable<double>(
                                     d_dim,
                                     "first order difference local mean of pressure",
@@ -826,7 +824,7 @@ GradientTagger::registerGradientTaggerVariables(
                 if (variable_key == "DENSITY")
                 {
                     d_difference_second_order_density =
-                        boost::shared_ptr<pdat::CellVariable<double> > (
+                        HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
                             new pdat::CellVariable<double>(
                                 d_dim,
                                 "second order difference of density",
@@ -840,7 +838,7 @@ GradientTagger::registerGradientTaggerVariables(
                     if (d_difference_second_order_uses_local_tol[vi])
                     {
                         d_difference_second_order_local_mean_density =
-                            boost::shared_ptr<pdat::CellVariable<double> > (
+                            HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
                                 new pdat::CellVariable<double>(
                                     d_dim,
                                     "second order difference local mean of density",
@@ -850,7 +848,7 @@ GradientTagger::registerGradientTaggerVariables(
                 else if (variable_key == "TOTAL_ENERGY")
                 {
                     d_difference_second_order_total_energy =
-                        boost::shared_ptr<pdat::CellVariable<double> > (
+                        HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
                             new pdat::CellVariable<double>(
                                 d_dim,
                                 "second order difference of total energy",
@@ -864,7 +862,7 @@ GradientTagger::registerGradientTaggerVariables(
                     if (d_difference_second_order_uses_local_tol[vi])
                     {
                         d_difference_second_order_local_mean_total_energy =
-                            boost::shared_ptr<pdat::CellVariable<double> > (
+                            HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
                                 new pdat::CellVariable<double>(
                                     d_dim,
                                     "second order difference local mean of total energy",
@@ -874,7 +872,7 @@ GradientTagger::registerGradientTaggerVariables(
                 else if (variable_key == "PRESSURE")
                 {
                     d_difference_second_order_pressure =
-                        boost::shared_ptr<pdat::CellVariable<double> > (
+                        HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
                             new pdat::CellVariable<double>(
                                 d_dim,
                                 "second order difference of pressure",
@@ -888,7 +886,7 @@ GradientTagger::registerGradientTaggerVariables(
                     if (d_difference_second_order_uses_local_tol[vi])
                     {
                         d_difference_second_order_local_mean_pressure =
-                            boost::shared_ptr<pdat::CellVariable<double> > (
+                            HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
                                 new pdat::CellVariable<double>(
                                     d_dim,
                                     "second order difference local mean of pressure",
@@ -1005,7 +1003,7 @@ GradientTagger::registerGradientTaggerVariables(
                 if (variable_key == "DENSITY")
                 {
                     d_Jameson_gradient_density =
-                        boost::shared_ptr<pdat::CellVariable<double> > (
+                        HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
                             new pdat::CellVariable<double>(
                                 d_dim,
                                 "Jameson density gradient",
@@ -1014,7 +1012,7 @@ GradientTagger::registerGradientTaggerVariables(
                 else if (variable_key == "TOTAL_ENERGY")
                 {
                     d_Jameson_gradient_total_energy =
-                        boost::shared_ptr<pdat::CellVariable<double> > (
+                        HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
                             new pdat::CellVariable<double>(
                                 d_dim,
                                 "Jameson total_energy gradient",
@@ -1023,7 +1021,7 @@ GradientTagger::registerGradientTaggerVariables(
                 else if (variable_key == "PRESSURE")
                 {
                     d_Jameson_gradient_pressure =
-                        boost::shared_ptr<pdat::CellVariable<double> > (
+                        HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
                             new pdat::CellVariable<double>(
                                 d_dim,
                                 "Jameson pressure gradient",
@@ -1100,8 +1098,8 @@ GradientTagger::registerGradientTaggerVariables(
  */
 void
 GradientTagger::registerPlotQuantities(
-    const boost::shared_ptr<ExtendedVisItDataWriter>& visit_writer,
-    const boost::shared_ptr<hier::VariableContext>& plot_context)
+    const HAMERS_SHARED_PTR<ExtendedVisItDataWriter>& visit_writer,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& plot_context)
 {
 #ifdef HAMERS_PLOTTING_GRADIENT_TAGGER
     hier::VariableDatabase* vardb = hier::VariableDatabase::getDatabase();
@@ -1439,7 +1437,7 @@ GradientTagger::printClassData(std::ostream& os) const
  */
 void
 GradientTagger::putToRestart(
-    const boost::shared_ptr<tbox::Database>& restart_db) const
+    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
     if (static_cast<int>(d_gradient_sensors.size()) > 0)
     {
@@ -1450,7 +1448,7 @@ GradientTagger::putToRestart(
     {
         if (d_gradient_sensors[si] == "DIFFERENCE_FIRST_ORDER")
         {
-            boost::shared_ptr<tbox::Database> sensor_db =
+            HAMERS_SHARED_PTR<tbox::Database> sensor_db =
                 restart_db->putDatabase("DIFFERENCE_FIRST_ORDER");
             
             sensor_db->putStringVector("d_difference_first_order_variables",
@@ -1485,7 +1483,7 @@ GradientTagger::putToRestart(
         
         if (d_gradient_sensors[si] == "DIFFERENCE_SECOND_ORDER")
         {
-            boost::shared_ptr<tbox::Database> sensor_db =
+            HAMERS_SHARED_PTR<tbox::Database> sensor_db =
                 restart_db->putDatabase("DIFFERENCE_SECOND_ORDER");
             
             sensor_db->putStringVector("d_difference_second_order_variables",
@@ -1520,7 +1518,7 @@ GradientTagger::putToRestart(
         
         if (d_gradient_sensors[si] == "JAMESON_GRADIENT")
         {
-            boost::shared_ptr<tbox::Database> sensor_db =
+            HAMERS_SHARED_PTR<tbox::Database> sensor_db =
                 restart_db->putDatabase("JAMESON_GRADIENT");
             
             sensor_db->putStringVector("d_Jameson_gradient_variables",
@@ -1539,7 +1537,7 @@ GradientTagger::putToRestart(
 void
 GradientTagger::computeGradientSensorValuesOnPatch(
     hier::Patch& patch,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     // Loop over gradient sensors chosen.
     for (int si = 0; si < static_cast<int>(d_gradient_sensors.size()); si++)
@@ -1576,19 +1574,19 @@ GradientTagger::computeGradientSensorValuesOnPatch(
                     d_flow_model->computeDerivedCellData();
                     
                     // Get the pointer to density data inside the flow model.
-                    boost::shared_ptr<pdat::CellData<double> > data_density = d_flow_model->getCellData("DENSITY");
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > data_density = d_flow_model->getCellData("DENSITY");
                     
                     // Get the cell data of the difference.
-                    boost::shared_ptr<pdat::CellData<double> > difference(
-                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > difference(
+                        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(d_difference_first_order_density, data_context)));
                     
                     // Compute the difference.
                     if (d_difference_first_order_uses_local_tol[vi])
                     {
                         // Get the cell data of local mean.
-                        boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
-                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        HAMERS_SHARED_PTR<pdat::CellData<double> > variable_local_mean(
+                            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                                 patch.getPatchData(
                                     d_difference_first_order_local_mean_density,
                                     data_context)));
@@ -1634,12 +1632,12 @@ GradientTagger::computeGradientSensorValuesOnPatch(
                     d_flow_model->computeDerivedCellData();
                     
                     // Get the pointer to total energy data inside the flow model.
-                    boost::shared_ptr<pdat::CellData<double> > data_total_energy =
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy =
                         d_flow_model->getCellData("TOTAL_ENERGY");
                     
                     // Get the cell data of the difference.
-                    boost::shared_ptr<pdat::CellData<double> > difference(
-                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > difference(
+                        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_difference_first_order_total_energy,
                                 data_context)));
@@ -1648,8 +1646,8 @@ GradientTagger::computeGradientSensorValuesOnPatch(
                     if (d_difference_first_order_uses_local_tol[vi])
                     {
                         // Get the cell data of local mean.
-                        boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
-                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        HAMERS_SHARED_PTR<pdat::CellData<double> > variable_local_mean(
+                            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                                 patch.getPatchData(
                                     d_difference_first_order_local_mean_total_energy,
                                     data_context)));
@@ -1695,11 +1693,11 @@ GradientTagger::computeGradientSensorValuesOnPatch(
                     d_flow_model->computeDerivedCellData();
                     
                     // Get the pointer to pressure data inside the flow model.
-                    boost::shared_ptr<pdat::CellData<double> > data_pressure = d_flow_model->getCellData("PRESSURE");
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure = d_flow_model->getCellData("PRESSURE");
                     
                     // Get the cell data of the difference.
-                    boost::shared_ptr<pdat::CellData<double> > difference(
-                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > difference(
+                        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_difference_first_order_pressure,
                                 data_context)));
@@ -1708,8 +1706,8 @@ GradientTagger::computeGradientSensorValuesOnPatch(
                     if (d_difference_first_order_uses_local_tol[vi])
                     {
                         // Get the local mean.
-                        boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
-                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        HAMERS_SHARED_PTR<pdat::CellData<double> > variable_local_mean(
+                            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                                 patch.getPatchData(
                                     d_difference_first_order_local_mean_pressure,
                                     data_context)));
@@ -1775,11 +1773,11 @@ GradientTagger::computeGradientSensorValuesOnPatch(
                     d_flow_model->computeDerivedCellData();
                     
                     // Get the pointer to density data inside the flow model.
-                    boost::shared_ptr<pdat::CellData<double> > data_density = d_flow_model->getCellData("DENSITY");
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > data_density = d_flow_model->getCellData("DENSITY");
                     
                     // Get the cell data of the difference.
-                    boost::shared_ptr<pdat::CellData<double> > difference(
-                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > difference(
+                        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_difference_second_order_density,
                                 data_context)));
@@ -1788,8 +1786,8 @@ GradientTagger::computeGradientSensorValuesOnPatch(
                     if (d_difference_second_order_uses_local_tol[vi])
                     {
                         // Get the cell data of local mean.
-                        boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
-                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        HAMERS_SHARED_PTR<pdat::CellData<double> > variable_local_mean(
+                            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                                 patch.getPatchData(
                                     d_difference_second_order_local_mean_density,
                                     data_context)));
@@ -1835,12 +1833,12 @@ GradientTagger::computeGradientSensorValuesOnPatch(
                     d_flow_model->computeDerivedCellData();
                     
                     // Get the pointer to total energy data inside the flow model.
-                    boost::shared_ptr<pdat::CellData<double> > data_total_energy =
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy =
                         d_flow_model->getCellData("TOTAL_ENERGY");
                     
                     // Get the cell data of the difference.
-                    boost::shared_ptr<pdat::CellData<double> > difference(
-                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > difference(
+                        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_difference_second_order_total_energy,
                                 data_context)));
@@ -1849,8 +1847,8 @@ GradientTagger::computeGradientSensorValuesOnPatch(
                     if (d_difference_second_order_uses_local_tol[vi])
                     {
                         // Get the cell data of local mean.
-                        boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
-                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        HAMERS_SHARED_PTR<pdat::CellData<double> > variable_local_mean(
+                            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                                 patch.getPatchData(
                                     d_difference_second_order_local_mean_total_energy,
                                     data_context)));
@@ -1896,11 +1894,11 @@ GradientTagger::computeGradientSensorValuesOnPatch(
                     d_flow_model->computeDerivedCellData();
                     
                     // Get the pointer to pressure data inside the flow model.
-                    boost::shared_ptr<pdat::CellData<double> > data_pressure = d_flow_model->getCellData("PRESSURE");
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure = d_flow_model->getCellData("PRESSURE");
                     
                     // Get the cell data of the difference.
-                    boost::shared_ptr<pdat::CellData<double> > difference(
-                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > difference(
+                        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_difference_second_order_pressure,
                                 data_context)));
@@ -1909,8 +1907,8 @@ GradientTagger::computeGradientSensorValuesOnPatch(
                     if (d_difference_second_order_uses_local_tol[vi])
                     {
                         // Get the local mean.
-                        boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
-                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        HAMERS_SHARED_PTR<pdat::CellData<double> > variable_local_mean(
+                            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                                 patch.getPatchData(
                                     d_difference_second_order_local_mean_pressure,
                                     data_context)));
@@ -1956,9 +1954,9 @@ GradientTagger::computeGradientSensorValuesOnPatch(
  */
 void
 GradientTagger::getSensorValueStatistics(
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const int level_number,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -2106,8 +2104,8 @@ GradientTagger::getSensorValueStatistics(
 void
 GradientTagger::tagCellsOnPatch(
    hier::Patch& patch,
-   const boost::shared_ptr<pdat::CellData<int> >& tags,
-   const boost::shared_ptr<hier::VariableContext>& data_context)
+   const HAMERS_SHARED_PTR<pdat::CellData<int> >& tags,
+   const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     // Loop over gradient sensors chosen.
     for (int si = 0; si < static_cast<int>(d_gradient_sensors.size()); si++)
@@ -2154,17 +2152,17 @@ GradientTagger::tagCellsOnPatch(
                 if (variable_key == "DENSITY")
                 {
                     // Get the cell data of the difference.
-                    boost::shared_ptr<pdat::CellData<double> > difference(
-                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > difference(
+                        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_difference_first_order_density,
                                 data_context)));
                     
-                    boost::shared_ptr<pdat::CellData<double> > variable_local_mean;
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > variable_local_mean;
                     if (uses_local_tol)
                     {
                         // Get the cell data of local mean.
-                        variable_local_mean = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        variable_local_mean = HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_difference_first_order_local_mean_density,
                                 data_context));
@@ -2184,17 +2182,17 @@ GradientTagger::tagCellsOnPatch(
                 else if (variable_key == "TOTAL_ENERGY")
                 {
                     // Get the cell data of the difference.
-                    boost::shared_ptr<pdat::CellData<double> > difference(
-                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > difference(
+                        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_difference_first_order_total_energy,
                                 data_context)));
                     
-                    boost::shared_ptr<pdat::CellData<double> > variable_local_mean;
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > variable_local_mean;
                     if (uses_local_tol)
                     {
                         // Get the cell data of local mean.
-                        variable_local_mean = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        variable_local_mean = HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_difference_first_order_local_mean_total_energy,
                                 data_context));
@@ -2214,17 +2212,17 @@ GradientTagger::tagCellsOnPatch(
                 else if (variable_key == "PRESSURE")
                 {
                     // Get the cell data of the difference.
-                    boost::shared_ptr<pdat::CellData<double> > difference(
-                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > difference(
+                        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_difference_first_order_pressure,
                                 data_context)));
                     
-                    boost::shared_ptr<pdat::CellData<double> > variable_local_mean;
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > variable_local_mean;
                     if (uses_local_tol)
                     {
                         // Get the cell data of local mean.
-                        variable_local_mean = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        variable_local_mean = HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_difference_first_order_local_mean_pressure,
                                 data_context));
@@ -2292,17 +2290,17 @@ GradientTagger::tagCellsOnPatch(
                 if (variable_key == "DENSITY")
                 {
                     // Get the cell data of the difference.
-                    boost::shared_ptr<pdat::CellData<double> > difference(
-                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > difference(
+                        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_difference_second_order_density,
                                 data_context)));
                     
-                    boost::shared_ptr<pdat::CellData<double> > variable_local_mean;
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > variable_local_mean;
                     if (uses_local_tol)
                     {
                         // Get the cell data of local mean.
-                        variable_local_mean = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        variable_local_mean = HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_difference_second_order_local_mean_density,
                                 data_context));
@@ -2322,17 +2320,17 @@ GradientTagger::tagCellsOnPatch(
                 else if (variable_key == "TOTAL_ENERGY")
                 {
                     // Get the cell data of the difference.
-                    boost::shared_ptr<pdat::CellData<double> > difference(
-                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > difference(
+                        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_difference_second_order_total_energy,
                                 data_context)));
                     
-                    boost::shared_ptr<pdat::CellData<double> > variable_local_mean;
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > variable_local_mean;
                     if (uses_local_tol)
                     {
                         // Get the cell data of local mean.
-                        variable_local_mean = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        variable_local_mean = HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_difference_second_order_local_mean_total_energy,
                                 data_context));
@@ -2352,17 +2350,17 @@ GradientTagger::tagCellsOnPatch(
                 else if (variable_key == "PRESSURE")
                 {
                     // Get the cell data of the difference.
-                    boost::shared_ptr<pdat::CellData<double> > difference(
-                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > difference(
+                        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_difference_second_order_pressure,
                                 data_context)));
                     
-                    boost::shared_ptr<pdat::CellData<double> > variable_local_mean;
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > variable_local_mean;
                     if (uses_local_tol)
                     {
                         // Get the cell data of local mean.
-                        variable_local_mean = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        variable_local_mean = HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_difference_second_order_local_mean_pressure,
                                 data_context));
@@ -2427,11 +2425,11 @@ GradientTagger::tagCellsOnPatch(
                      * Get the pointer to density data inside the flow model.
                      */
                     
-                    boost::shared_ptr<pdat::CellData<double> > data_density = d_flow_model->getCellData("DENSITY");
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > data_density = d_flow_model->getCellData("DENSITY");
                     
                     // Get the cell data of the density gradient.
-                    boost::shared_ptr<pdat::CellData<double> > gradient(
-                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > gradient(
+                        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_Jameson_gradient_density,
                                 data_context)));
@@ -2479,12 +2477,12 @@ GradientTagger::tagCellsOnPatch(
                      * Get the pointer to total energy data inside the flow model.
                      */
                     
-                    boost::shared_ptr<pdat::CellData<double> > data_total_energy =
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy =
                         d_flow_model->getCellData("TOTAL_ENERGY");
                     
                     // Get the cell data of the total energy gradient.
-                    boost::shared_ptr<pdat::CellData<double> > gradient(
-                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > gradient(
+                        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_Jameson_gradient_total_energy,
                                 data_context)));
@@ -2532,11 +2530,11 @@ GradientTagger::tagCellsOnPatch(
                      * Get the pointer to pressure data inside the flow model.
                      */
                     
-                    boost::shared_ptr<pdat::CellData<double> > data_pressure = d_flow_model->getCellData("PRESSURE");
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure = d_flow_model->getCellData("PRESSURE");
                     
                     // Get the cell data of the pressure gradient.
-                    boost::shared_ptr<pdat::CellData<double> > gradient(
-                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > gradient(
+                        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_Jameson_gradient_pressure,
                                 data_context)));
@@ -2581,8 +2579,8 @@ GradientTagger::tagCellsOnPatch(
 void
 GradientTagger::tagCellsOnPatchWithGradientSensor(
     hier::Patch& patch,
-    const boost::shared_ptr<pdat::CellData<int> >& tags,
-    const boost::shared_ptr<pdat::CellData<double> >& gradient,
+    const HAMERS_SHARED_PTR<pdat::CellData<int> >& tags,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& gradient,
     const std::string& sensor_key,
     const double tol)
 {
@@ -2707,10 +2705,10 @@ GradientTagger::tagCellsOnPatchWithGradientSensor(
 void
 GradientTagger::tagCellsOnPatchWithDifferenceSensor(
     hier::Patch& patch,
-    const boost::shared_ptr<pdat::CellData<int> >& tags,
-    const boost::shared_ptr<pdat::CellData<double> >& difference,
+    const HAMERS_SHARED_PTR<pdat::CellData<int> >& tags,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& difference,
     const double difference_max,
-    const boost::shared_ptr<pdat::CellData<double> >& variable_local_mean,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& variable_local_mean,
     const bool uses_global_tol,
     const bool uses_local_tol,
     const double global_tol,
@@ -2730,7 +2728,7 @@ GradientTagger::tagCellsOnPatchWithDifferenceSensor(
     const hier::IntVector ghostcell_dims_difference = difference->getGhostBox().numberCells();
     
     // Allocate temporary patch data.
-    boost::shared_ptr<pdat::CellData<int> > tags_gradient_tagger(
+    HAMERS_SHARED_PTR<pdat::CellData<int> > tags_gradient_tagger(
         new pdat::CellData<int>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
     
     tags_gradient_tagger->fillAll(1);
@@ -2758,7 +2756,7 @@ GradientTagger::tagCellsOnPatchWithDifferenceSensor(
         if (uses_global_tol)
         {
             // Allocate temporary patch data.
-            boost::shared_ptr<pdat::CellData<int> > tags_global_tol(
+            HAMERS_SHARED_PTR<pdat::CellData<int> > tags_global_tol(
                 new pdat::CellData<int>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
             
             tags_global_tol->fillAll(0);
@@ -2796,7 +2794,7 @@ GradientTagger::tagCellsOnPatchWithDifferenceSensor(
         if (uses_local_tol)
         {
             // Allocate temporary patch data.
-            boost::shared_ptr<pdat::CellData<int> > tags_local_tol(
+            HAMERS_SHARED_PTR<pdat::CellData<int> > tags_local_tol(
                 new pdat::CellData<int>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
             
             tags_local_tol->fillAll(0);
@@ -2854,7 +2852,7 @@ GradientTagger::tagCellsOnPatchWithDifferenceSensor(
         if (uses_global_tol)
         {
             // Allocate temporary patch data.
-            boost::shared_ptr<pdat::CellData<int> > tags_global_tol(
+            HAMERS_SHARED_PTR<pdat::CellData<int> > tags_global_tol(
                 new pdat::CellData<int>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
             
             tags_global_tol->fillAll(0);
@@ -2900,7 +2898,7 @@ GradientTagger::tagCellsOnPatchWithDifferenceSensor(
         if (uses_local_tol)
         {
             // Allocate temporary patch data.
-            boost::shared_ptr<pdat::CellData<int> > tags_local_tol(
+            HAMERS_SHARED_PTR<pdat::CellData<int> > tags_local_tol(
                 new pdat::CellData<int>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
             
             tags_local_tol->fillAll(0);
@@ -2973,7 +2971,7 @@ GradientTagger::tagCellsOnPatchWithDifferenceSensor(
         if (uses_global_tol)
         {
             // Allocate temporary patch data.
-            boost::shared_ptr<pdat::CellData<int> > tags_global_tol(
+            HAMERS_SHARED_PTR<pdat::CellData<int> > tags_global_tol(
                 new pdat::CellData<int>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
             
             tags_global_tol->fillAll(0);
@@ -3027,7 +3025,7 @@ GradientTagger::tagCellsOnPatchWithDifferenceSensor(
         if (uses_local_tol)
         {
             // Allocate temporary patch data.
-            boost::shared_ptr<pdat::CellData<int> > tags_local_tol(
+            HAMERS_SHARED_PTR<pdat::CellData<int> > tags_local_tol(
                 new pdat::CellData<int>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
             
             tags_local_tol->fillAll(0);

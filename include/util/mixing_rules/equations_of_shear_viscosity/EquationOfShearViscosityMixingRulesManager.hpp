@@ -3,11 +3,12 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "util/mixing_rules/equations_of_shear_viscosity/EquationsOfShearViscosity.hpp"
 
 #include "SAMRAI/tbox/Dimension.h"
 
-#include "boost/shared_ptr.hpp"
 #include <string>
 
 using namespace SAMRAI;
@@ -20,7 +21,7 @@ class EquationOfShearViscosityMixingRulesManager
             const tbox::Dimension& dim,
             const int& num_species,
             const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
-            const boost::shared_ptr<tbox::Database>& equation_of_shear_viscosity_mixing_rules_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& equation_of_shear_viscosity_mixing_rules_db,
             const std::string& equation_of_shear_viscosity_str);
         
         /*
@@ -35,7 +36,7 @@ class EquationOfShearViscosityMixingRulesManager
         /*
          * Get the equation of shear viscosity mixing rules.
          */
-        boost::shared_ptr<EquationOfShearViscosityMixingRules>
+        HAMERS_SHARED_PTR<EquationOfShearViscosityMixingRules>
         getEquationOfShearViscosityMixingRules() const
         {
             return d_equation_of_shear_viscosity_mixing_rules;
@@ -59,9 +60,9 @@ class EquationOfShearViscosityMixingRulesManager
         EQN_SHEAR_VISCOSITY::TYPE d_equation_of_shear_viscosity_type;
         
         /*
-         * boost::shared_ptr to the equation of shear viscosity.
+         * HAMERS_SHARED_PTR to the equation of shear viscosity.
          */
-        boost::shared_ptr<EquationOfShearViscosityMixingRules> d_equation_of_shear_viscosity_mixing_rules;
+        HAMERS_SHARED_PTR<EquationOfShearViscosityMixingRules> d_equation_of_shear_viscosity_mixing_rules;
         
 };
 

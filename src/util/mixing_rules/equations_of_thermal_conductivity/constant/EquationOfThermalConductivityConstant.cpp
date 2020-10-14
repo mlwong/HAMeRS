@@ -49,9 +49,9 @@ EquationOfThermalConductivityConstant::getThermalConductivity(
  */
 void
 EquationOfThermalConductivityConstant::computeThermalConductivity(
-    boost::shared_ptr<pdat::CellData<double> >& data_thermal_conductivity,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermal_conductivity,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
     const std::vector<const double*>& molecular_properties,
     const hier::Box& domain) const
 {
@@ -84,10 +84,10 @@ EquationOfThermalConductivityConstant::computeThermalConductivity(
  */
 void
 EquationOfThermalConductivityConstant::computeThermalConductivity(
-    boost::shared_ptr<pdat::CellData<double> >& data_thermal_conductivity,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
-    const boost::shared_ptr<pdat::CellData<double> >& data_molecular_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermal_conductivity,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_molecular_properties,
     const hier::Box& domain) const
 {
     NULL_USE(data_pressure);

@@ -3,6 +3,8 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "util/Directions.hpp"
 
 #include "SAMRAI/hier/Box.h"
@@ -10,7 +12,6 @@
 #include "SAMRAI/pdat/CellData.h"
 #include "SAMRAI/tbox/Dimension.h"
 
-#include "boost/shared_ptr.hpp"
 #include <string>
 #include <vector>
 
@@ -32,8 +33,8 @@ class Derivative
          */
         virtual void
         computeDerivative(
-            boost::shared_ptr<pdat::CellData<double> >& derivative,
-            const boost::shared_ptr<pdat::CellData<double> >& data,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& derivative,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data,
             const double dx,
             const int depth_derivative = 0,
             const int depth_data = 0) = 0;
@@ -43,8 +44,8 @@ class Derivative
          */
         virtual void
         computeDerivative(
-            boost::shared_ptr<pdat::CellData<double> >& derivative,
-            const boost::shared_ptr<pdat::CellData<double> >& data,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& derivative,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data,
             const double dx,
             const hier::Box& domain,
             const int depth_derivative = 0,

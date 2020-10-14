@@ -7,10 +7,10 @@
 DiffusiveFluxReconstructorSixthOrder::DiffusiveFluxReconstructorSixthOrder(
     const std::string& object_name,
     const tbox::Dimension& dim,
-    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+    const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_eqn,
-    const boost::shared_ptr<FlowModel>& flow_model,
-    const boost::shared_ptr<tbox::Database>& diffusive_flux_reconstructor_db):
+    const HAMERS_SHARED_PTR<FlowModel>& flow_model,
+    const HAMERS_SHARED_PTR<tbox::Database>& diffusive_flux_reconstructor_db):
         DiffusiveFluxReconstructor(
             object_name,
             dim,
@@ -50,7 +50,7 @@ DiffusiveFluxReconstructorSixthOrder::printClassData(
  */
 void
 DiffusiveFluxReconstructorSixthOrder::putToRestart(
-   const boost::shared_ptr<tbox::Database>& restart_db) const
+   const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
     restart_db->putString("d_diffusive_flux_reconstructor", "SIXTH_ORDER");
 }
@@ -62,8 +62,8 @@ DiffusiveFluxReconstructorSixthOrder::putToRestart(
 void
 DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
     hier::Patch& patch,
-    const boost::shared_ptr<pdat::SideVariable<double> >& variable_diffusive_flux,
-    const boost::shared_ptr<hier::VariableContext>& data_context,
+    const HAMERS_SHARED_PTR<pdat::SideVariable<double> >& variable_diffusive_flux,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
     const double time,
     const double dt,
     const int RK_step_number)
@@ -77,7 +77,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
     
     d_flow_model->setupDiffusiveFluxUtilities();
     
-    boost::shared_ptr<FlowModelDiffusiveFluxUtilities> diffusive_flux_utilities =
+    HAMERS_SHARED_PTR<FlowModelDiffusiveFluxUtilities> diffusive_flux_utilities =
         d_flow_model->getFlowModelDiffusiveFluxUtilities();
     
     // Get the dimensions of box that covers the interior of patch.
@@ -91,8 +91,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
     const hier::IntVector diff_ghostcell_dims = diff_ghost_box.numberCells();
     
     // Get the side data of diffusive flux.
-    boost::shared_ptr<pdat::SideData<double> > diffusive_flux(
-        BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > diffusive_flux(
+        HAMERS_SHARED_PTR_CAST<pdat::SideData<double>, hier::PatchData>(
             patch.getPatchData(variable_diffusive_flux, data_context)));
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -129,19 +129,19 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          * Delcare containers for computing fluxes in different directions.
          */
         
-        std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > > var_data_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_data_x;
         
-        std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > > diffusivities_data_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > diffusivities_data_x;
         
         std::vector<std::vector<int> > var_component_idx_x;
         
         std::vector<std::vector<int> > diffusivities_component_idx_x;
         
-        std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > > derivative_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > derivative_x;
         
-        std::map<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_x_computed;
+        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_x_computed;
         
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > diffusive_flux_node(1);
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > diffusive_flux_node(1);
         diffusive_flux_node[0].reset(new pdat::CellData<double>(interior_box, d_num_eqn, d_num_diff_ghosts));
         
         std::vector<double*> F_node_x;
@@ -305,11 +305,11 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          * Delcare containers for computing fluxes in different directions.
          */
         
-        std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > > var_data_x;
-        std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > > var_data_y;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_data_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_data_y;
         
-        std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > > diffusivities_data_x;
-        std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > > diffusivities_data_y;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > diffusivities_data_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > diffusivities_data_y;
         
         std::vector<std::vector<int> > var_component_idx_x;
         std::vector<std::vector<int> > var_component_idx_y;
@@ -317,13 +317,13 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         std::vector<std::vector<int> > diffusivities_component_idx_x;
         std::vector<std::vector<int> > diffusivities_component_idx_y;
         
-        std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > > derivative_x;
-        std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > > derivative_y;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > derivative_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > derivative_y;
         
-        std::map<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_x_computed;
-        std::map<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_y_computed;
+        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_x_computed;
+        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_y_computed;
         
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > diffusive_flux_node(2);
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > diffusive_flux_node(2);
         diffusive_flux_node[0].reset(new pdat::CellData<double>(interior_box, d_num_eqn, d_num_diff_ghosts));
         diffusive_flux_node[1].reset(new pdat::CellData<double>(interior_box, d_num_eqn, d_num_diff_ghosts));
         
@@ -837,13 +837,13 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
          * Delcare containers for computing fluxes in different directions.
          */
         
-        std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > > var_data_x;
-        std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > > var_data_y;
-        std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > > var_data_z;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_data_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_data_y;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > var_data_z;
         
-        std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > > diffusivities_data_x;
-        std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > > diffusivities_data_y;
-        std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > > diffusivities_data_z;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > diffusivities_data_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > diffusivities_data_y;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > diffusivities_data_z;
         
         std::vector<std::vector<int> > var_component_idx_x;
         std::vector<std::vector<int> > var_component_idx_y;
@@ -853,15 +853,15 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
         std::vector<std::vector<int> > diffusivities_component_idx_y;
         std::vector<std::vector<int> > diffusivities_component_idx_z;
         
-        std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > > derivative_x;
-        std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > > derivative_y;
-        std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > > derivative_z;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > derivative_x;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > derivative_y;
+        std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > > derivative_z;
         
-        std::map<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_x_computed;
-        std::map<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_y_computed;
-        std::map<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_z_computed;
+        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_x_computed;
+        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_y_computed;
+        std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_z_computed;
         
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > diffusive_flux_node(3);
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > diffusive_flux_node(3);
         diffusive_flux_node[0].reset(new pdat::CellData<double>(interior_box, d_num_eqn, d_num_diff_ghosts));
         diffusive_flux_node[1].reset(new pdat::CellData<double>(interior_box, d_num_eqn, d_num_diff_ghosts));
         diffusive_flux_node[2].reset(new pdat::CellData<double>(interior_box, d_num_eqn, d_num_diff_ghosts));
@@ -1960,9 +1960,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
 void
 DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInX(
     hier::Patch& patch,
-    std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_x,
-    std::map<double*, boost::shared_ptr<pdat::CellData<double> > >& derivative_x_computed,
-    const std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& data_x,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_x,
+    std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_x_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_x,
     const std::vector<std::vector<int> >& data_component_idx_x)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -1986,8 +1986,8 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInX(
     const hier::IntVector diff_ghostcell_dims = diff_ghost_box.numberCells();
     
     // Get the grid spacing.
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     
     const double* const dx = patch_geom->getDx();
@@ -2020,7 +2020,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInX(
                     double* u = data_x[ei][vi]->getPointer(u_idx);
                     
                     // Declare container to store the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > derivative(
                         new pdat::CellData<double>(
                             interior_box, 1, d_num_diff_ghosts));
                     
@@ -2057,7 +2057,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInX(
                                         dx_0;
                     }
                     
-                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
+                    std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
                         u,
                         derivative);
                     
@@ -2100,7 +2100,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInX(
                     double* u = data_x[ei][vi]->getPointer(u_idx);
                     
                     // Declare container to store the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > derivative(
                         new pdat::CellData<double>(
                             interior_box, 1, d_num_diff_ghosts));
                     
@@ -2157,7 +2157,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInX(
                         }
                     }
                     
-                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
+                    std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
                         u,
                         derivative);
                     
@@ -2203,7 +2203,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInX(
                     double* u = data_x[ei][vi]->getPointer(u_idx);
                     
                     // Declare container to store the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > derivative(
                         new pdat::CellData<double>(
                             interior_box, 1, d_num_diff_ghosts));
                     
@@ -2279,7 +2279,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInX(
                         }
                     }
                     
-                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
+                    std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
                         u,
                         derivative);
                     
@@ -2301,9 +2301,9 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInX(
 void
 DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInY(
     hier::Patch& patch,
-    std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_y,
-    std::map<double*, boost::shared_ptr<pdat::CellData<double> > >& derivative_y_computed,
-    const std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& data_y,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_y,
+    std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_y_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_y,
     const std::vector<std::vector<int> >& data_component_idx_y)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -2327,8 +2327,8 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInY(
     const hier::IntVector diff_ghostcell_dims = diff_ghost_box.numberCells();
     
     // Get the grid spacing.
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     
     const double* const dx = patch_geom->getDx();
@@ -2373,7 +2373,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInY(
                     double* u = data_y[ei][vi]->getPointer(u_idx);
                     
                     // Declare container to store the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > derivative(
                         new pdat::CellData<double>(
                             interior_box, 1, d_num_diff_ghosts));
                     
@@ -2430,7 +2430,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInY(
                         }
                     }
                     
-                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
+                    std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
                         u,
                         derivative);
                     
@@ -2476,7 +2476,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInY(
                     double* u = data_y[ei][vi]->getPointer(u_idx);
                     
                     // Declare container to store the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > derivative(
                         new pdat::CellData<double>(
                             interior_box, 1, d_num_diff_ghosts));
                     
@@ -2552,7 +2552,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInY(
                         }
                     }
                     
-                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
+                    std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
                         u,
                         derivative);
                     
@@ -2574,9 +2574,9 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInY(
 void
 DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInZ(
     hier::Patch& patch,
-    std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_z,
-    std::map<double*, boost::shared_ptr<pdat::CellData<double> > >& derivative_z_computed,
-    const std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& data_z,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_z,
+    std::map<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > >& derivative_z_computed,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& data_z,
     const std::vector<std::vector<int> >& data_component_idx_z)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
@@ -2600,8 +2600,8 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInZ(
     const hier::IntVector diff_ghostcell_dims = diff_ghost_box.numberCells();
     
     // Get the grid spacing.
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     
     const double* const dx = patch_geom->getDx();
@@ -2657,7 +2657,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInZ(
                     double* u = data_z[ei][vi]->getPointer(u_idx);
                     
                     // Declare container to store the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > derivative(
                         new pdat::CellData<double>(
                             interior_box, 1, d_num_diff_ghosts));
                     
@@ -2733,7 +2733,7 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInZ(
                         }
                     }
                     
-                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
+                    std::pair<double*, HAMERS_SHARED_PTR<pdat::CellData<double> > > derivative_pair(
                         u,
                         derivative);
                     

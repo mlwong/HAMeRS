@@ -7,7 +7,7 @@
 void
 EulerSpecialBoundaryConditions::setSpecialBoundaryConditions(
     hier::Patch& patch,
-    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_variables,
     const double fill_time,
     const hier::IntVector& ghost_width_to_fill)
 {
@@ -50,8 +50,8 @@ EulerSpecialBoundaryConditions::setSpecialBoundaryConditions(
     const hier::Box ghost_box = conservative_variables[0]->getGhostBox();
     const hier::IntVector ghostcell_dims = ghost_box.numberCells();
     
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -64,9 +64,9 @@ EulerSpecialBoundaryConditions::setSpecialBoundaryConditions(
         const double* const dx = patch_geom->getDx();
         const double* const patch_xlo = patch_geom->getXLower();
         
-        boost::shared_ptr<pdat::CellData<double> > density = conservative_variables[0];
-        boost::shared_ptr<pdat::CellData<double> > momentum = conservative_variables[1];
-        boost::shared_ptr<pdat::CellData<double> > total_energy = conservative_variables[2];
+        HAMERS_SHARED_PTR<pdat::CellData<double> > density = conservative_variables[0];
+        HAMERS_SHARED_PTR<pdat::CellData<double> > momentum = conservative_variables[1];
+        HAMERS_SHARED_PTR<pdat::CellData<double> > total_energy = conservative_variables[2];
         
         double* rho   = density->getPointer(0);
         double* rho_u = momentum->getPointer(0);

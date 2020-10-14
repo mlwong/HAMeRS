@@ -322,10 +322,10 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationP
 ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL::ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL(
     const std::string& object_name,
     const tbox::Dimension& dim,
-    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+    const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_eqn,
-    const boost::shared_ptr<FlowModel>& flow_model,
-    const boost::shared_ptr<tbox::Database>& convective_flux_reconstructor_db):
+    const HAMERS_SHARED_PTR<FlowModel>& flow_model,
+    const HAMERS_SHARED_PTR<tbox::Database>& convective_flux_reconstructor_db):
         ConvectiveFluxReconstructorWCNS56(
             object_name,
             dim,
@@ -399,7 +399,7 @@ ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL::printClassData(
  */
 void
 ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL::putToRestart(
-   const boost::shared_ptr<tbox::Database>& restart_db) const
+   const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
     restart_db->putInteger("d_constant_p", d_constant_p);
     restart_db->putInteger("d_constant_q", d_constant_q);
@@ -413,9 +413,9 @@ ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL::putToRestart(
  */
 void
 ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL::performWENOInterpolation(
-    std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_minus,
-    std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_plus,
-    const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables)
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& variables_minus,
+    std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& variables_plus,
+    const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& variables)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(variables_minus.size()) == d_num_eqn);

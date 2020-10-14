@@ -7,16 +7,16 @@
 #include "flow/flow_models/four-eqn_conservative/FlowModelSourceUtilitiesFourEqnConservative.hpp"
 #include "flow/flow_models/four-eqn_conservative/FlowModelStatisticsUtilitiesFourEqnConservative.hpp"
 
-boost::shared_ptr<pdat::CellVariable<double> > FlowModelFourEqnConservative::s_variable_partial_densities;
-boost::shared_ptr<pdat::CellVariable<double> > FlowModelFourEqnConservative::s_variable_momentum;
-boost::shared_ptr<pdat::CellVariable<double> > FlowModelFourEqnConservative::s_variable_total_energy;
+HAMERS_SHARED_PTR<pdat::CellVariable<double> > FlowModelFourEqnConservative::s_variable_partial_densities;
+HAMERS_SHARED_PTR<pdat::CellVariable<double> > FlowModelFourEqnConservative::s_variable_momentum;
+HAMERS_SHARED_PTR<pdat::CellVariable<double> > FlowModelFourEqnConservative::s_variable_total_energy;
 
 FlowModelFourEqnConservative::FlowModelFourEqnConservative(
     const std::string& object_name,
     const tbox::Dimension& dim,
-    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+    const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_species,
-    const boost::shared_ptr<tbox::Database>& flow_model_db):
+    const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db):
         FlowModel(
             object_name,
             dim,
@@ -114,13 +114,13 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
      * Initialize the conservative variables.
      */
     
-    s_variable_partial_densities = boost::shared_ptr<pdat::CellVariable<double> > (
+    s_variable_partial_densities = HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "partial densities", d_num_species));
     
-    s_variable_momentum = boost::shared_ptr<pdat::CellVariable<double> > (
+    s_variable_momentum = HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "momentum", d_dim.getValue()));
     
-    s_variable_total_energy = boost::shared_ptr<pdat::CellVariable<double> > (
+    s_variable_total_energy = HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "total energy", 1));
     
     /*
@@ -143,7 +143,7 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
             << std::endl);
     }
     
-    boost::shared_ptr<tbox::Database> equation_of_state_mixing_rules_db;
+    HAMERS_SHARED_PTR<tbox::Database> equation_of_state_mixing_rules_db;
     
     if (flow_model_db->keyExists("Equation_of_state_mixing_rules"))
     {
@@ -191,7 +191,7 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
                 flow_model_db->getString("d_equation_of_mass_diffusivity_str");
         }
         
-        boost::shared_ptr<tbox::Database> equation_of_mass_diffusivity_mixing_rules_db;
+        HAMERS_SHARED_PTR<tbox::Database> equation_of_mass_diffusivity_mixing_rules_db;
         
         if (flow_model_db->keyExists("Equation_of_mass_diffusivity_mixing_rules"))
         {
@@ -245,7 +245,7 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
                 flow_model_db->getString("d_equation_of_shear_viscosity_str");
         }
         
-        boost::shared_ptr<tbox::Database> equation_of_shear_viscosity_mixing_rules_db;
+        HAMERS_SHARED_PTR<tbox::Database> equation_of_shear_viscosity_mixing_rules_db;
         
         if (flow_model_db->keyExists("Equation_of_shear_viscosity_mixing_rules"))
         {
@@ -299,7 +299,7 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
                 flow_model_db->getString("d_equation_of_bulk_viscosity_str");
         }
         
-        boost::shared_ptr<tbox::Database> equation_of_bulk_viscosity_mixing_rules_db;
+        HAMERS_SHARED_PTR<tbox::Database> equation_of_bulk_viscosity_mixing_rules_db;
         
         if (flow_model_db->keyExists("Equation_of_bulk_viscosity_mixing_rules"))
         {
@@ -353,7 +353,7 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
                 flow_model_db->getString("d_equation_of_thermal_conductivity_str");
         }
         
-        boost::shared_ptr<tbox::Database> equation_of_thermal_conductivity_mixing_rules_db;
+        HAMERS_SHARED_PTR<tbox::Database> equation_of_thermal_conductivity_mixing_rules_db;
         
         if (flow_model_db->keyExists("Equation_of_thermal_conductivity_mixing_rules"))
         {
@@ -490,7 +490,7 @@ FlowModelFourEqnConservative::printClassData(std::ostream& os) const
  */
 void
 FlowModelFourEqnConservative::putToRestart(
-    const boost::shared_ptr<tbox::Database>& restart_db) const
+    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
     /*
      * Put the properties of d_equation_of_state_mixing_rules into the restart database.
@@ -498,7 +498,7 @@ FlowModelFourEqnConservative::putToRestart(
     
     restart_db->putString("d_equation_of_state_str", d_equation_of_state_str);
     
-    boost::shared_ptr<tbox::Database> restart_equation_of_state_mixing_rules_db =
+    HAMERS_SHARED_PTR<tbox::Database> restart_equation_of_state_mixing_rules_db =
         restart_db->putDatabase("d_equation_of_state_mixing_rules_db");
     d_equation_of_state_mixing_rules->putToRestart(restart_equation_of_state_mixing_rules_db);
     
@@ -510,7 +510,7 @@ FlowModelFourEqnConservative::putToRestart(
     {
         restart_db->putString("d_equation_of_mass_diffusivity_str", d_equation_of_mass_diffusivity_str);
         
-        boost::shared_ptr<tbox::Database> restart_equation_of_mass_diffusivity_mixing_rules_db =
+        HAMERS_SHARED_PTR<tbox::Database> restart_equation_of_mass_diffusivity_mixing_rules_db =
             restart_db->putDatabase("d_equation_of_mass_diffusivity_mixing_rules_db");
         d_equation_of_mass_diffusivity_mixing_rules->
             putToRestart(restart_equation_of_mass_diffusivity_mixing_rules_db);
@@ -524,7 +524,7 @@ FlowModelFourEqnConservative::putToRestart(
     {
         restart_db->putString("d_equation_of_shear_viscosity_str", d_equation_of_shear_viscosity_str);
         
-        boost::shared_ptr<tbox::Database> restart_equation_of_shear_viscosity_mixing_rules_db =
+        HAMERS_SHARED_PTR<tbox::Database> restart_equation_of_shear_viscosity_mixing_rules_db =
             restart_db->putDatabase("d_equation_of_shear_viscosity_mixing_rules_db");
         d_equation_of_shear_viscosity_mixing_rules->
             putToRestart(restart_equation_of_shear_viscosity_mixing_rules_db);
@@ -538,7 +538,7 @@ FlowModelFourEqnConservative::putToRestart(
     {
         restart_db->putString("d_equation_of_bulk_viscosity_str", d_equation_of_bulk_viscosity_str);
         
-        boost::shared_ptr<tbox::Database> restart_equation_of_bulk_viscosity_mixing_rules_db =
+        HAMERS_SHARED_PTR<tbox::Database> restart_equation_of_bulk_viscosity_mixing_rules_db =
             restart_db->putDatabase("d_equation_of_bulk_viscosity_mixing_rules_db");
         d_equation_of_bulk_viscosity_mixing_rules->
             putToRestart(restart_equation_of_bulk_viscosity_mixing_rules_db);
@@ -552,7 +552,7 @@ FlowModelFourEqnConservative::putToRestart(
     {
         restart_db->putString("d_equation_of_thermal_conductivity_str", d_equation_of_thermal_conductivity_str);
         
-        boost::shared_ptr<tbox::Database> restart_equation_of_thermal_conductivity_mixing_rules_db =
+        HAMERS_SHARED_PTR<tbox::Database> restart_equation_of_thermal_conductivity_mixing_rules_db =
             restart_db->putDatabase("d_equation_of_thermal_conductivity_mixing_rules_db");
         d_equation_of_thermal_conductivity_mixing_rules->
             putToRestart(restart_equation_of_thermal_conductivity_mixing_rules_db);
@@ -696,10 +696,10 @@ FlowModelFourEqnConservative::getVariableTypesOfPrimitiveVariables()
 /*
  * Get the conservative variables.
  */
-std::vector<boost::shared_ptr<pdat::CellVariable<double> > >
+std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > >
 FlowModelFourEqnConservative::getConservativeVariables()
 {
-    std::vector<boost::shared_ptr<pdat::CellVariable<double> > > conservative_variables;
+    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > conservative_variables;
     conservative_variables.reserve(3);
     
     conservative_variables.push_back(s_variable_partial_densities);
@@ -716,7 +716,7 @@ FlowModelFourEqnConservative::getConservativeVariables()
 void
 FlowModelFourEqnConservative::registerPatchWithDataContext(
     const hier::Patch& patch,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     // Check whether the patch is already unregistered.
     if (d_patch)
@@ -735,8 +735,8 @@ FlowModelFourEqnConservative::registerPatchWithDataContext(
      * Set the number of ghost cells of conservative variables.
      */
     
-    boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
-        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
             d_patch->getPatchData(s_variable_partial_densities, getDataContext())));
     
     d_num_ghosts = data_partial_densities->getGhostCellWidth();
@@ -1623,7 +1623,7 @@ FlowModelFourEqnConservative::computeDerivedCellData()
 /*
  * Get the cell data of one cell variable in the registered patch.
  */
-boost::shared_ptr<pdat::CellData<double> >
+HAMERS_SHARED_PTR<pdat::CellData<double> >
 FlowModelFourEqnConservative::getCellData(const std::string& variable_key)
 {
     // Check whether a patch is already registered.
@@ -1635,7 +1635,7 @@ FlowModelFourEqnConservative::getCellData(const std::string& variable_key)
             << std::endl);
     }
     
-    boost::shared_ptr<pdat::CellData<double> > cell_data;
+    HAMERS_SHARED_PTR<pdat::CellData<double> > cell_data;
     
     if (variable_key == "PARTIAL_DENSITIES")
     {
@@ -1830,11 +1830,11 @@ FlowModelFourEqnConservative::getCellData(const std::string& variable_key)
 /*
  * Get the cell data of different cell variables in the registered patch.
  */
-std::vector<boost::shared_ptr<pdat::CellData<double> > >
+std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
 FlowModelFourEqnConservative::getCellData(
     const std::vector<std::string>& variable_keys)
 {
-    std::vector<boost::shared_ptr<pdat::CellData<double> > > cell_data(
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > cell_data(
         static_cast<int>(variable_keys.size()));
     
     for (int vi = 0; static_cast<int>(variable_keys.size()); vi++)
@@ -1849,7 +1849,7 @@ FlowModelFourEqnConservative::getCellData(
 /*
  * Get the cell data of species cell variables in the registered patch.
  */
-std::vector<boost::shared_ptr<pdat::CellData<double> > >
+std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
 FlowModelFourEqnConservative::getSpeciesCellData(
     const std::string& variable_key)
 {
@@ -1862,7 +1862,7 @@ FlowModelFourEqnConservative::getSpeciesCellData(
             << std::endl);
     }
     
-    std::vector<boost::shared_ptr<pdat::CellData<double> > > species_cell_data;
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > species_cell_data;
     
     if (variable_key == "SPECIES_DENSITIES")
     {
@@ -1914,9 +1914,9 @@ FlowModelFourEqnConservative::fillCellDataOfConservativeVariablesWithZero()
             << std::endl);
     }
     
-    boost::shared_ptr<pdat::CellData<double> > data_partial_densities = getCellDataOfPartialDensities();
-    boost::shared_ptr<pdat::CellData<double> > data_momentum = getCellDataOfMomentum();
-    boost::shared_ptr<pdat::CellData<double> > data_total_energy = getCellDataOfTotalEnergy();
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities = getCellDataOfPartialDensities();
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum = getCellDataOfMomentum();
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy = getCellDataOfTotalEnergy();
     
     data_partial_densities->fillAll(double(0), d_interior_box);
     data_momentum->fillAll(double(0), d_interior_box);
@@ -1944,7 +1944,7 @@ FlowModelFourEqnConservative::updateCellDataOfConservativeVariables()
 /*
  * Get the cell data of the conservative variables in the registered patch.
  */
-std::vector<boost::shared_ptr<pdat::CellData<double> > >
+std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
 FlowModelFourEqnConservative::getCellDataOfConservativeVariables()
 {
     // Check whether a patch is already registered.
@@ -1956,7 +1956,7 @@ FlowModelFourEqnConservative::getCellDataOfConservativeVariables()
             << std::endl);
     }
     
-    std::vector<boost::shared_ptr<pdat::CellData<double> > > cell_data;
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > cell_data;
     cell_data.reserve(3);
     
     cell_data.push_back(getCellDataOfPartialDensities());
@@ -1970,7 +1970,7 @@ FlowModelFourEqnConservative::getCellDataOfConservativeVariables()
 /*
  * Get the cell data of the primitive variables in the registered patch.
  */
-std::vector<boost::shared_ptr<pdat::CellData<double> > >
+std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
 FlowModelFourEqnConservative::getCellDataOfPrimitiveVariables()
 {
     // Check whether a patch is already registered.
@@ -1982,7 +1982,7 @@ FlowModelFourEqnConservative::getCellDataOfPrimitiveVariables()
             << std::endl);
     }
     
-    std::vector<boost::shared_ptr<pdat::CellData<double> > > cell_data;
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > cell_data;
     cell_data.reserve(3);
     
     cell_data.push_back(getCellDataOfPartialDensities());
@@ -2042,8 +2042,8 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
     
     if (variable_name == "density")
     {
-        boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2141,16 +2141,16 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
     }
     else if (variable_name == "pressure")
     {
-        boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
-        boost::shared_ptr<pdat::CellData<double> > data_momentum(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(s_variable_momentum, d_plot_context)));
         
-        boost::shared_ptr<pdat::CellData<double> > data_total_energy(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(s_variable_total_energy, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2403,16 +2403,16 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
     }
     else if (variable_name == "sound speed")
     {
-        boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
-        boost::shared_ptr<pdat::CellData<double> > data_momentum(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(s_variable_momentum, d_plot_context)));
         
-        boost::shared_ptr<pdat::CellData<double> > data_total_energy(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(s_variable_total_energy, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2755,12 +2755,12 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
     }
     else if (variable_name == "velocity")
     {
-        boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
-        boost::shared_ptr<pdat::CellData<double> > data_momentum(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(s_variable_momentum, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2869,8 +2869,8 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
     {
         int species_idx = std::stoi(variable_name.substr(14));
         
-        boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2994,7 +2994,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
 #ifdef HAVE_HDF5
 void
 FlowModelFourEqnConservative::registerPlotQuantities(
-    const boost::shared_ptr<ExtendedVisItDataWriter>& visit_writer)
+    const HAMERS_SHARED_PTR<ExtendedVisItDataWriter>& visit_writer)
 {
     if (!d_plot_context)
     {
@@ -3708,12 +3708,12 @@ FlowModelFourEqnConservative::setDerivedCellVariableGhostBoxes()
 /*
  * Get the cell data of partial densities in the registered patch.
  */
-boost::shared_ptr<pdat::CellData<double> >
+HAMERS_SHARED_PTR<pdat::CellData<double> >
 FlowModelFourEqnConservative::getCellDataOfPartialDensities()
 {
     // Get the cell data of the registered variable partial densities.
-    boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
-        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
             d_patch->getPatchData(s_variable_partial_densities, getDataContext())));
     
     return data_partial_densities;
@@ -3723,12 +3723,12 @@ FlowModelFourEqnConservative::getCellDataOfPartialDensities()
 /*
  * Get the cell data of momentum in the registered patch.
  */
-boost::shared_ptr<pdat::CellData<double> >
+HAMERS_SHARED_PTR<pdat::CellData<double> >
 FlowModelFourEqnConservative::getCellDataOfMomentum()
 {
     // Get the cell data of the registered variable momentum.
-    boost::shared_ptr<pdat::CellData<double> > data_momentum(
-        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
             d_patch->getPatchData(s_variable_momentum, getDataContext())));
     
     return data_momentum;
@@ -3738,12 +3738,12 @@ FlowModelFourEqnConservative::getCellDataOfMomentum()
 /*
  * Get the cell data of total energy in the registered patch.
  */
-boost::shared_ptr<pdat::CellData<double> >
+HAMERS_SHARED_PTR<pdat::CellData<double> >
 FlowModelFourEqnConservative::getCellDataOfTotalEnergy()
 {
     // Get the cell data of the registered variable total energy.
-    boost::shared_ptr<pdat::CellData<double> > data_total_energy(
-        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
             d_patch->getPatchData(s_variable_total_energy, getDataContext())));
     
     return data_total_energy;
@@ -3765,7 +3765,7 @@ FlowModelFourEqnConservative::computeCellDataOfDensity(
             TBOX_ASSERT(d_data_density);
 #endif
             // Get the cell data of the variable partial densities.
-            boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities =
                 getCellDataOfPartialDensities();
             
             // Compute the density field.
@@ -3825,7 +3825,7 @@ FlowModelFourEqnConservative::computeCellDataOfMassFractionsWithDensity(
             }
             
             // Get the cell data of the variable partial densities.
-            boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities =
                 getCellDataOfPartialDensities();
             
             if (!d_cell_data_computed_density)
@@ -4062,7 +4062,7 @@ FlowModelFourEqnConservative::computeCellDataOfMoleFractionsWithMassFractions(
             
             // Compute the molecular weight of the mixture.
             
-            boost::shared_ptr<pdat::CellData<double> > data_molecular_weight_mixture(
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_molecular_weight_mixture(
                 new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_mole_fractions));
             
             d_equation_of_state_mixing_rules->computeMixtureMolecularWeight(
@@ -4258,7 +4258,7 @@ FlowModelFourEqnConservative::computeCellDataOfVelocityWithDensity(
             }
             
             // Get the cell data of the variable momentum.
-            boost::shared_ptr<pdat::CellData<double> > data_momentum =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum =
                 getCellDataOfMomentum();
             
             if (!d_cell_data_computed_density)
@@ -4482,7 +4482,7 @@ FlowModelFourEqnConservative::computeCellDataOfInternalEnergyWithDensityAndVeloc
             }
             
             // Get the cell data of the variable total energy.
-            boost::shared_ptr<pdat::CellData<double> > data_total_energy =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy =
                 getCellDataOfTotalEnergy();
             
             if (!d_cell_data_computed_density)
@@ -4791,10 +4791,10 @@ FlowModelFourEqnConservative::computeCellDataOfSoundSpeedWithDensityMassFraction
             }
             
             // Compute the partial derivatives.
-            boost::shared_ptr<pdat::CellData<double> > data_gruneisen_parameter(
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_gruneisen_parameter(
                 new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_sound_speed));
             
-            boost::shared_ptr<pdat::CellData<double> > data_partial_pressure_partial_partial_densities(
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_pressure_partial_partial_densities(
                 new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_sound_speed));
             
             d_equation_of_state_mixing_rules->computeGruneisenParameter(
@@ -5198,13 +5198,13 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                     F_x.push_back(d_data_convective_flux_x->getPointer(ei));
                 }
                 
-                boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities =
                     getCellDataOfPartialDensities();
                 
-                boost::shared_ptr<pdat::CellData<double> > data_momentum =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum =
                     getCellDataOfMomentum();
                 
-                boost::shared_ptr<pdat::CellData<double> > data_total_energy =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy =
                     getCellDataOfTotalEnergy();
                 
                 if (!d_cell_data_computed_velocity)
@@ -5531,13 +5531,13 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                     F_y.push_back(d_data_convective_flux_y->getPointer(ei));
                 }
                 
-                boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities =
                     getCellDataOfPartialDensities();
                 
-                boost::shared_ptr<pdat::CellData<double> > data_momentum =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum =
                     getCellDataOfMomentum();
                 
-                boost::shared_ptr<pdat::CellData<double> > data_total_energy =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy =
                     getCellDataOfTotalEnergy();
                 
                 if (!d_cell_data_computed_pressure)
@@ -5820,13 +5820,13 @@ FlowModelFourEqnConservative::computeCellDataOfConvectiveFluxWithVelocityAndPres
                     F_z.push_back(d_data_convective_flux_z->getPointer(ei));
                 }
                 
-                boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_partial_densities =
                     getCellDataOfPartialDensities();
                 
-                boost::shared_ptr<pdat::CellData<double> > data_momentum =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum =
                     getCellDataOfMomentum();
                 
-                boost::shared_ptr<pdat::CellData<double> > data_total_energy =
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy =
                     getCellDataOfTotalEnergy();
                 
                 if (!d_cell_data_computed_pressure)
@@ -6576,19 +6576,19 @@ FlowModelFourEqnConservative::computeCellDataOfMaxDiffusivityWithDensityMassFrac
              * viscosity, bulk viscosity and thermal conductivity.
              */
             
-            boost::shared_ptr<pdat::CellData<double> > data_isobaric_specific_heat_capacity(
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_isobaric_specific_heat_capacity(
                 new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
             
-            boost::shared_ptr<pdat::CellData<double> > data_mass_diffusivities(
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_diffusivities(
                 new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_max_diffusivity));
             
-            boost::shared_ptr<pdat::CellData<double> > data_shear_viscosity(
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_shear_viscosity(
                 new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
             
-            boost::shared_ptr<pdat::CellData<double> > data_bulk_viscosity(
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_bulk_viscosity(
                 new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
             
-            boost::shared_ptr<pdat::CellData<double> > data_thermal_conductivity(
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_thermal_conductivity(
                 new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
             
             // Get the pointers to the cell data of maximum diffusivity, density, isobaric specific heat

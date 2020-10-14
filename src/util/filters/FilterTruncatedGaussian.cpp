@@ -19,6 +19,7 @@ FilterTruncatedGaussian::FilterTruncatedGaussian(
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     const double sum_coeffs = a_G + double(2)*(b_G + c_G + d_G + e_G);
     TBOX_ASSERT(fabs(sum_coeffs - double(1)) < DBL_EPSILON);
+    NULL_USE(sum_coeffs);
 #endif
     
     switch (direction)
@@ -49,8 +50,8 @@ FilterTruncatedGaussian::FilterTruncatedGaussian(
  */
 void
 FilterTruncatedGaussian::applyFilter(
-    boost::shared_ptr<pdat::CellData<double> >& filtered_cell_data,
-    const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& filtered_cell_data,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
     const int depth_filtered_cell_data,
     const int depth_cell_data,
     const hier::Box& domain)

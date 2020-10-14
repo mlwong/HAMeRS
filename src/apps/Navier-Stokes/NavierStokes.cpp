@@ -39,21 +39,21 @@
 #endif
 #endif
 
-boost::shared_ptr<tbox::Timer> NavierStokes::t_init;
-boost::shared_ptr<tbox::Timer> NavierStokes::t_compute_dt;
-boost::shared_ptr<tbox::Timer> NavierStokes::t_compute_fluxes_sources;
-boost::shared_ptr<tbox::Timer> NavierStokes::t_advance_step;
-boost::shared_ptr<tbox::Timer> NavierStokes::t_synchronize_fluxes;
-boost::shared_ptr<tbox::Timer> NavierStokes::t_setphysbcs;
-boost::shared_ptr<tbox::Timer> NavierStokes::t_tagvalue;
-boost::shared_ptr<tbox::Timer> NavierStokes::t_taggradient;
-boost::shared_ptr<tbox::Timer> NavierStokes::t_tagmultiresolution;
+HAMERS_SHARED_PTR<tbox::Timer> NavierStokes::t_init;
+HAMERS_SHARED_PTR<tbox::Timer> NavierStokes::t_compute_dt;
+HAMERS_SHARED_PTR<tbox::Timer> NavierStokes::t_compute_fluxes_sources;
+HAMERS_SHARED_PTR<tbox::Timer> NavierStokes::t_advance_step;
+HAMERS_SHARED_PTR<tbox::Timer> NavierStokes::t_synchronize_fluxes;
+HAMERS_SHARED_PTR<tbox::Timer> NavierStokes::t_setphysbcs;
+HAMERS_SHARED_PTR<tbox::Timer> NavierStokes::t_tagvalue;
+HAMERS_SHARED_PTR<tbox::Timer> NavierStokes::t_taggradient;
+HAMERS_SHARED_PTR<tbox::Timer> NavierStokes::t_tagmultiresolution;
 
 NavierStokes::NavierStokes(
     const std::string& object_name,
     const tbox::Dimension& dim,
-    const boost::shared_ptr<tbox::Database>& input_db,
-    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const std::string& stat_dump_filename):
         RungeKuttaPatchStrategy(),
         d_object_name(object_name),
@@ -243,7 +243,7 @@ NavierStokes::NavierStokes(
      * Initialize the side variable of convective flux.
      */
     
-    d_variable_convective_flux = boost::shared_ptr<pdat::SideVariable<double> > (
+    d_variable_convective_flux = HAMERS_SHARED_PTR<pdat::SideVariable<double> > (
         new pdat::SideVariable<double>(dim, "convective flux", d_flow_model->getNumberOfEquations()));
     
     if (d_use_conservative_form_diffusive_flux)
@@ -252,7 +252,7 @@ NavierStokes::NavierStokes(
          * Initialize the side variable of diffusive flux.
          */
         
-        d_variable_diffusive_flux = boost::shared_ptr<pdat::SideVariable<double> > (
+        d_variable_diffusive_flux = HAMERS_SHARED_PTR<pdat::SideVariable<double> > (
             new pdat::SideVariable<double>(dim, "diffusive flux", d_flow_model->getNumberOfEquations()));
     }
     else
@@ -261,7 +261,7 @@ NavierStokes::NavierStokes(
          * Initialize the cell variable of diffusive flux divergence.
          */
         
-        d_variable_diffusive_flux_divergence = boost::shared_ptr<pdat::CellVariable<double> > (
+        d_variable_diffusive_flux_divergence = HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
             new pdat::CellVariable<double>(dim, "diffusive flux divergence", d_flow_model->getNumberOfEquations()));
     }
     
@@ -269,7 +269,7 @@ NavierStokes::NavierStokes(
      * Initialize the cell variable of source.
      */
     
-    d_variable_source = boost::shared_ptr<pdat::CellVariable<double> > (
+    d_variable_source = HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(dim, "source", d_flow_model->getNumberOfEquations()));
     
     if ((!d_stat_dump_filename.empty()))
@@ -294,7 +294,7 @@ NavierStokes::NavierStokes(
             f_out.close();
         }
         
-        boost::shared_ptr<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
+        HAMERS_SHARED_PTR<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
             d_flow_model->getFlowModelStatisticsUtilities();
         
         flow_model_statistics_utilities->outputStatisticalQuantitiesNames(
@@ -465,7 +465,7 @@ NavierStokes::registerModelVariables(
     
     d_flow_model->setupStatisticsUtilities();
     
-    boost::shared_ptr<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
+    HAMERS_SHARED_PTR<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
         d_flow_model->getFlowModelStatisticsUtilities();
     
     flow_model_statistics_utilities->registerVariables(
@@ -537,8 +537,8 @@ NavierStokes::setupLoadBalancer(
     
     if (d_use_nonuniform_workload && gridding_algorithm)
     {
-        boost::shared_ptr<mesh::TreeLoadBalancer> load_balancer(
-            boost::dynamic_pointer_cast<mesh::TreeLoadBalancer, mesh::LoadBalanceStrategy>(
+        HAMERS_SHARED_PTR<mesh::TreeLoadBalancer> load_balancer(
+            HAMERS_DYNAMIC_POINTER_CAST<mesh::TreeLoadBalancer, mesh::LoadBalanceStrategy>(
                 gridding_algorithm->getLoadBalanceStrategy()));
         
         if (load_balancer)
@@ -580,7 +580,7 @@ NavierStokes::initializeDataOnPatch(
     
     d_flow_model->registerPatchWithDataContext(patch, getDataContext());
     
-    std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_var_data =
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_var_data =
         d_flow_model->getCellDataOfConservativeVariables();
     
     d_Navier_Stokes_initial_conditions->initializeDataOnPatch(
@@ -598,8 +598,8 @@ NavierStokes::initializeDataOnPatch(
             patch.allocatePatchData(d_workload_data_id);
         }
         
-        boost::shared_ptr<pdat::CellData<double> > workload_data(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > workload_data(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(d_workload_data_id)));
         TBOX_ASSERT(workload_data);
         workload_data->fillAll(1.0);
@@ -619,8 +619,8 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
     
     std::vector<double> spectral_radiuses_and_dt;
     
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     
 #ifdef DEBUG_CHECK_ASSERTIONS
@@ -658,7 +658,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         
         d_flow_model->setupSourceUtilities();
         
-        boost::shared_ptr<FlowModelSourceUtilities> source_utilities =
+        HAMERS_SHARED_PTR<FlowModelSourceUtilities> source_utilities =
             d_flow_model->getFlowModelSourceUtilities();
         
         std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
@@ -695,8 +695,8 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
-        boost::shared_ptr<pdat::CellData<double> > max_diffusivity = d_flow_model->getCellData("MAX_DIFFUSIVITY");
+        HAMERS_SHARED_PTR<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
+        HAMERS_SHARED_PTR<pdat::CellData<double> > max_diffusivity = d_flow_model->getCellData("MAX_DIFFUSIVITY");
         
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
         hier::IntVector num_subghosts_max_diffusivity = max_diffusivity->getGhostCellWidth();
@@ -788,7 +788,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         
         d_flow_model->setupSourceUtilities();
         
-        boost::shared_ptr<FlowModelSourceUtilities> source_utilities =
+        HAMERS_SHARED_PTR<FlowModelSourceUtilities> source_utilities =
             d_flow_model->getFlowModelSourceUtilities();
         
         std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
@@ -828,9 +828,9 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_y = d_flow_model->getCellData("MAX_WAVE_SPEED_Y");
-        boost::shared_ptr<pdat::CellData<double> > max_diffusivity = d_flow_model->getCellData("MAX_DIFFUSIVITY");
+        HAMERS_SHARED_PTR<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
+        HAMERS_SHARED_PTR<pdat::CellData<double> > max_wave_speed_y = d_flow_model->getCellData("MAX_WAVE_SPEED_Y");
+        HAMERS_SHARED_PTR<pdat::CellData<double> > max_diffusivity = d_flow_model->getCellData("MAX_DIFFUSIVITY");
         
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
         hier::IntVector num_subghosts_max_wave_speed_y = max_wave_speed_y->getGhostCellWidth();
@@ -947,7 +947,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         
         d_flow_model->setupSourceUtilities();
         
-        boost::shared_ptr<FlowModelSourceUtilities> source_utilities =
+        HAMERS_SHARED_PTR<FlowModelSourceUtilities> source_utilities =
             d_flow_model->getFlowModelSourceUtilities();
         
         std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
@@ -990,10 +990,10 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_y = d_flow_model->getCellData("MAX_WAVE_SPEED_Y");
-        boost::shared_ptr<pdat::CellData<double> > max_wave_speed_z = d_flow_model->getCellData("MAX_WAVE_SPEED_Z");
-        boost::shared_ptr<pdat::CellData<double> > max_diffusivity = d_flow_model->getCellData("MAX_DIFFUSIVITY");
+        HAMERS_SHARED_PTR<pdat::CellData<double> > max_wave_speed_x = d_flow_model->getCellData("MAX_WAVE_SPEED_X");
+        HAMERS_SHARED_PTR<pdat::CellData<double> > max_wave_speed_y = d_flow_model->getCellData("MAX_WAVE_SPEED_Y");
+        HAMERS_SHARED_PTR<pdat::CellData<double> > max_wave_speed_z = d_flow_model->getCellData("MAX_WAVE_SPEED_Z");
+        HAMERS_SHARED_PTR<pdat::CellData<double> > max_diffusivity = d_flow_model->getCellData("MAX_DIFFUSIVITY");
         
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
         hier::IntVector num_subghosts_max_wave_speed_y = max_wave_speed_y->getGhostCellWidth();
@@ -1110,7 +1110,7 @@ NavierStokes::computeFluxesAndSourcesOnPatch(
     const double time,
     const double dt,
     const int RK_step_number,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     t_compute_fluxes_sources->start();
     
@@ -1120,16 +1120,16 @@ NavierStokes::computeFluxesAndSourcesOnPatch(
     
     if (data_context)
     {
-        boost::shared_ptr<pdat::CellData<double> > data_source(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > data_source(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(d_variable_source, data_context)));
         
         data_source->fillAll(0.0);
     }
     else
     {
-        boost::shared_ptr<pdat::CellData<double> > data_source(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > data_source(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(d_variable_source, getDataContext())));
         
         data_source->fillAll(0.0);
@@ -1212,7 +1212,7 @@ NavierStokes::computeFluxesAndSourcesOnPatch(
     
     d_flow_model->setupSourceUtilities();
     
-    boost::shared_ptr<FlowModelSourceUtilities> source_utilities =
+    HAMERS_SHARED_PTR<FlowModelSourceUtilities> source_utilities =
         d_flow_model->getFlowModelSourceUtilities();
     
     if (source_utilities->hasSourceTerms())
@@ -1253,15 +1253,15 @@ NavierStokes::advanceSingleStepOnPatch(
     const std::vector<double>& alpha,
     const std::vector<double>& beta,
     const std::vector<double>& gamma,
-    const std::vector<boost::shared_ptr<hier::VariableContext> >& intermediate_context)
+    const std::vector<HAMERS_SHARED_PTR<hier::VariableContext> >& intermediate_context)
 {
     NULL_USE(time);
     NULL_USE(dt);
     
     t_advance_step->start();
     
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -1281,7 +1281,7 @@ NavierStokes::advanceSingleStepOnPatch(
     
     d_flow_model->registerPatchWithDataContext(patch, getDataContext());
     
-    std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables =
         d_flow_model->getCellDataOfConservativeVariables();
     
     std::vector<hier::IntVector> num_ghosts_conservative_var;
@@ -1324,28 +1324,28 @@ NavierStokes::advanceSingleStepOnPatch(
      * flux and source
      */
     
-    boost::shared_ptr<pdat::SideData<double> > convective_flux(
-        BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux(
+        HAMERS_SHARED_PTR_CAST<pdat::SideData<double>, hier::PatchData>(
             patch.getPatchData(d_variable_convective_flux, getDataContext())));
     
-    boost::shared_ptr<pdat::SideData<double> > diffusive_flux;
-    boost::shared_ptr<pdat::CellData<double> > diffusive_flux_divergence;
+    HAMERS_SHARED_PTR<pdat::SideData<double> > diffusive_flux;
+    HAMERS_SHARED_PTR<pdat::CellData<double> > diffusive_flux_divergence;
     
     if (d_use_conservative_form_diffusive_flux)
     {
         diffusive_flux =
-            BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
+            HAMERS_SHARED_PTR_CAST<pdat::SideData<double>, hier::PatchData>(
                 patch.getPatchData(d_variable_diffusive_flux, getDataContext()));
     }
     else
     {
         diffusive_flux_divergence =
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(d_variable_diffusive_flux_divergence, getDataContext()));
     }
     
-    boost::shared_ptr<pdat::CellData<double> > source(
-        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<double> > source(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
             patch.getPatchData(d_variable_source, getDataContext())));
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -1376,28 +1376,28 @@ NavierStokes::advanceSingleStepOnPatch(
     
     for (int n = 0; n < num_coeffs; n++)
     {
-        boost::shared_ptr<pdat::SideData<double> > convective_flux_intermediate(
-            BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux_intermediate(
+            HAMERS_SHARED_PTR_CAST<pdat::SideData<double>, hier::PatchData>(
                     patch.getPatchData(d_variable_convective_flux, intermediate_context[n])));
         
-        boost::shared_ptr<pdat::SideData<double> > diffusive_flux_intermediate;
-        boost::shared_ptr<pdat::CellData<double> > diffusive_flux_divergence_intermediate;
+        HAMERS_SHARED_PTR<pdat::SideData<double> > diffusive_flux_intermediate;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > diffusive_flux_divergence_intermediate;
         
         if (d_use_conservative_form_diffusive_flux)
         {
             diffusive_flux_intermediate =
-                BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR_CAST<pdat::SideData<double>, hier::PatchData>(
                         patch.getPatchData(d_variable_diffusive_flux, intermediate_context[n]));
         }
         else
         {
             diffusive_flux_divergence_intermediate =
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                     patch.getPatchData(d_variable_diffusive_flux_divergence, intermediate_context[n]));
         }
         
-        boost::shared_ptr<pdat::CellData<double> > source_intermediate(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > source_intermediate(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(d_variable_source, intermediate_context[n])));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -1431,7 +1431,7 @@ NavierStokes::advanceSingleStepOnPatch(
         
         d_flow_model->registerPatchWithDataContext(patch, intermediate_context[n]);
         
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables_intermediate =
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables_intermediate =
             d_flow_model->getCellDataOfConservativeVariables();
         
         std::vector<hier::IntVector> num_ghosts_conservative_var_intermediate;
@@ -2432,8 +2432,8 @@ NavierStokes::synchronizeFluxes(
     
     t_synchronize_fluxes->start();
     
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2453,7 +2453,7 @@ NavierStokes::synchronizeFluxes(
     
     d_flow_model->registerPatchWithDataContext(patch, getDataContext());
     
-    std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables =
         d_flow_model->getCellDataOfConservativeVariables();
     
     std::vector<hier::IntVector> num_ghosts_conservative_var;
@@ -2488,28 +2488,28 @@ NavierStokes::synchronizeFluxes(
     // Unregister the patch.
     d_flow_model->unregisterPatch();
     
-    boost::shared_ptr<pdat::SideData<double> > convective_flux(
-        BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux(
+        HAMERS_SHARED_PTR_CAST<pdat::SideData<double>, hier::PatchData>(
             patch.getPatchData(d_variable_convective_flux, getDataContext())));
     
-    boost::shared_ptr<pdat::SideData<double> > diffusive_flux;
-    boost::shared_ptr<pdat::CellData<double> > diffusive_flux_divergence;
+    HAMERS_SHARED_PTR<pdat::SideData<double> > diffusive_flux;
+    HAMERS_SHARED_PTR<pdat::CellData<double> > diffusive_flux_divergence;
     
     if (d_use_conservative_form_diffusive_flux)
     {
         diffusive_flux =
-            BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
+            HAMERS_SHARED_PTR_CAST<pdat::SideData<double>, hier::PatchData>(
                 patch.getPatchData(d_variable_diffusive_flux, getDataContext()));
     }
     else
     {
         diffusive_flux_divergence =
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(d_variable_diffusive_flux_divergence, getDataContext()));
     }
     
-    boost::shared_ptr<pdat::CellData<double> > source(
-        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<double> > source(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
             patch.getPatchData(d_variable_source, getDataContext())));
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2888,7 +2888,7 @@ NavierStokes::synchronizeFluxes(
  */
 void
 NavierStokes::preprocessTagCellsValueDetector(
-   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+   const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
    const int level_number,
    const double regrid_time,
    const bool initial_error,
@@ -2906,14 +2906,14 @@ NavierStokes::preprocessTagCellsValueDetector(
     
     if (d_value_tagger != nullptr)
     {
-        boost::shared_ptr<hier::PatchLevel> level(
+        HAMERS_SHARED_PTR<hier::PatchLevel> level(
             patch_hierarchy->getPatchLevel(level_number));
         
         for (hier::PatchLevel::iterator ip(level->begin());
              ip != level->end();
              ip++)
         {
-            const boost::shared_ptr<hier::Patch>& patch = *ip;
+            const HAMERS_SHARED_PTR<hier::Patch>& patch = *ip;
             
             d_value_tagger->computeValueTaggerValuesOnPatch(
                 *patch,
@@ -2948,8 +2948,8 @@ NavierStokes::tagCellsOnPatchValueDetector(
     t_tagvalue->start();
     
     // Get the tags.
-    boost::shared_ptr<pdat::CellData<int> > tags(
-        BOOST_CAST<pdat::CellData<int>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<int> > tags(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
             patch.getPatchData(tag_indx)));
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2984,7 +2984,7 @@ NavierStokes::tagCellsOnPatchValueDetector(
  */
 void
 NavierStokes::preprocessTagCellsGradientDetector(
-   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+   const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
    const int level_number,
    const double regrid_time,
    const bool initial_error,
@@ -3002,14 +3002,14 @@ NavierStokes::preprocessTagCellsGradientDetector(
     
     if (d_gradient_tagger != nullptr)
     {
-        boost::shared_ptr<hier::PatchLevel> level(
+        HAMERS_SHARED_PTR<hier::PatchLevel> level(
             patch_hierarchy->getPatchLevel(level_number));
         
         for (hier::PatchLevel::iterator ip(level->begin());
              ip != level->end();
              ip++)
         {
-            const boost::shared_ptr<hier::Patch>& patch = *ip;
+            const HAMERS_SHARED_PTR<hier::Patch>& patch = *ip;
             
             d_gradient_tagger->computeGradientSensorValuesOnPatch(
                 *patch,
@@ -3045,8 +3045,8 @@ NavierStokes::tagCellsOnPatchGradientDetector(
     t_taggradient->start();
     
     // Get the tags.
-    boost::shared_ptr<pdat::CellData<int> > tags(
-        BOOST_CAST<pdat::CellData<int>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<int> > tags(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
             patch.getPatchData(tag_indx)));
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -3080,7 +3080,7 @@ NavierStokes::tagCellsOnPatchGradientDetector(
  */
 void
 NavierStokes::preprocessTagCellsMultiresolutionDetector(
-   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+   const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
    const int level_number,
    const double regrid_time,
    const bool initial_error,
@@ -3098,14 +3098,14 @@ NavierStokes::preprocessTagCellsMultiresolutionDetector(
     
     if (d_multiresolution_tagger != nullptr)
     {
-        boost::shared_ptr<hier::PatchLevel> level(
+        HAMERS_SHARED_PTR<hier::PatchLevel> level(
             patch_hierarchy->getPatchLevel(level_number));
         
         for (hier::PatchLevel::iterator ip(level->begin());
              ip != level->end();
              ip++)
         {
-            const boost::shared_ptr<hier::Patch>& patch = *ip;
+            const HAMERS_SHARED_PTR<hier::Patch>& patch = *ip;
             
             d_multiresolution_tagger->computeMultiresolutionSensorValuesOnPatch(
                 *patch,
@@ -3142,8 +3142,8 @@ NavierStokes::tagCellsOnPatchMultiresolutionDetector(
     t_tagmultiresolution->start();
     
     // Get the tags.
-    boost::shared_ptr<pdat::CellData<int> > tags(
-        BOOST_CAST<pdat::CellData<int>, hier::PatchData>(
+    HAMERS_SHARED_PTR<pdat::CellData<int> > tags(
+        HAMERS_SHARED_PTR_CAST<pdat::CellData<int>, hier::PatchData>(
             patch.getPatchData(tag_indx)));
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -3191,7 +3191,7 @@ NavierStokes::setPhysicalBoundaryConditions(
 
 void
 NavierStokes::putToRestart(
-    const boost::shared_ptr<tbox::Database>& restart_db) const
+    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
     TBOX_ASSERT(restart_db);
     
@@ -3202,14 +3202,14 @@ NavierStokes::putToRestart(
     restart_db->putString("d_flow_model_str", d_flow_model_str);
     
     // Put the properties of d_flow_model into the restart database.
-    boost::shared_ptr<tbox::Database> restart_flow_model_db =
+    HAMERS_SHARED_PTR<tbox::Database> restart_flow_model_db =
         restart_db->putDatabase("d_flow_model_db");
     d_flow_model->putToRestart(restart_flow_model_db);
     
     restart_db->putString("d_convective_flux_reconstructor_str", d_convective_flux_reconstructor_str);
     
     // Put the properties of d_convective_flux_reconstructor into the restart database.
-    boost::shared_ptr<tbox::Database> restart_convective_flux_reconstructor_db =
+    HAMERS_SHARED_PTR<tbox::Database> restart_convective_flux_reconstructor_db =
         restart_db->putDatabase("d_convective_flux_reconstructor_db");
     d_convective_flux_reconstructor->putToRestart(restart_convective_flux_reconstructor_db);
     
@@ -3220,7 +3220,7 @@ NavierStokes::putToRestart(
         restart_db->putString("d_diffusive_flux_reconstructor_str", d_diffusive_flux_reconstructor_str);
         
         // Put the properties of d_diffusive_flux_reconstructor into the restart database.
-        boost::shared_ptr<tbox::Database> restart_diffusive_flux_reconstructor_db =
+        HAMERS_SHARED_PTR<tbox::Database> restart_diffusive_flux_reconstructor_db =
             restart_db->putDatabase("d_diffusive_flux_reconstructor_db");
         d_diffusive_flux_reconstructor->putToRestart(restart_diffusive_flux_reconstructor_db);
     }
@@ -3230,20 +3230,20 @@ NavierStokes::putToRestart(
             d_nonconservative_diffusive_flux_divergence_operator_str);
         
         // Put the properties of d_nonconservative_diffusive_flux_divergence_operator into the restart database.
-        boost::shared_ptr<tbox::Database> restart_nonconservative_diffusive_flux_divergence_operator_db =
+        HAMERS_SHARED_PTR<tbox::Database> restart_nonconservative_diffusive_flux_divergence_operator_db =
             restart_db->putDatabase("d_nonconservative_diffusive_flux_divergence_operator_db");
         d_nonconservative_diffusive_flux_divergence_operator->putToRestart(
             restart_nonconservative_diffusive_flux_divergence_operator_db);
     }
     
-    boost::shared_ptr<tbox::Database> restart_Navier_Stokes_boundary_conditions_db =
+    HAMERS_SHARED_PTR<tbox::Database> restart_Navier_Stokes_boundary_conditions_db =
         restart_db->putDatabase("d_Navier_Stokes_boundary_conditions_db");
     
     d_Navier_Stokes_boundary_conditions->putToRestart(restart_Navier_Stokes_boundary_conditions_db);
     
     if (d_value_tagger != nullptr)
     {
-        boost::shared_ptr<tbox::Database> restart_value_tagger_db =
+        HAMERS_SHARED_PTR<tbox::Database> restart_value_tagger_db =
             restart_db->putDatabase("d_value_tagger_db");
         
         d_value_tagger->putToRestart(restart_value_tagger_db);
@@ -3251,7 +3251,7 @@ NavierStokes::putToRestart(
     
     if (d_gradient_tagger != nullptr)
     {
-        boost::shared_ptr<tbox::Database> restart_gradient_tagger_db =
+        HAMERS_SHARED_PTR<tbox::Database> restart_gradient_tagger_db =
             restart_db->putDatabase("d_gradient_tagger_db");
         
         d_gradient_tagger->putToRestart(restart_gradient_tagger_db);
@@ -3259,7 +3259,7 @@ NavierStokes::putToRestart(
     
     if (d_multiresolution_tagger != nullptr)
     {
-        boost::shared_ptr<tbox::Database> restart_multiresolution_tagger_db =
+        HAMERS_SHARED_PTR<tbox::Database> restart_multiresolution_tagger_db =
             restart_db->putDatabase("d_multiresolution_tagger_db");
         
         d_multiresolution_tagger->putToRestart(restart_multiresolution_tagger_db);
@@ -3270,7 +3270,7 @@ NavierStokes::putToRestart(
 #ifdef HAVE_HDF5
 void
 NavierStokes::registerVisItDataWriter(
-    const boost::shared_ptr<ExtendedVisItDataWriter>& viz_writer)
+    const HAMERS_SHARED_PTR<ExtendedVisItDataWriter>& viz_writer)
 {
     TBOX_ASSERT(viz_writer);
     d_visit_writer = viz_writer;
@@ -3408,7 +3408,7 @@ void NavierStokes::printClassData(std::ostream& os) const
 void
 NavierStokes::printErrorStatistics(
     std::ostream& os,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
     NULL_USE(os);
     NULL_USE(patch_hierarchy);
@@ -3418,7 +3418,7 @@ NavierStokes::printErrorStatistics(
 void
 NavierStokes::printDataStatistics(
     std::ostream& os,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -3428,7 +3428,7 @@ NavierStokes::printDataStatistics(
     
     std::vector<std::string> variable_names = d_flow_model->getNamesOfConservativeVariables();
     
-    std::vector<boost::shared_ptr<pdat::CellVariable<double> > > variables =
+    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > variables =
         d_flow_model->getConservativeVariables();
     
     for (int vi = 0; vi < static_cast<int>(variables.size()); vi++)
@@ -3475,11 +3475,11 @@ NavierStokes::printDataStatistics(
  */
 void
 NavierStokes::computeStatisticsVariables(
-   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy)
+   const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy)
 {
     d_flow_model->setupStatisticsUtilities();
     
-    boost::shared_ptr<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
+    HAMERS_SHARED_PTR<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
         d_flow_model->getFlowModelStatisticsUtilities();
     
     flow_model_statistics_utilities->computeVariables(
@@ -3494,11 +3494,11 @@ NavierStokes::computeStatisticsVariables(
 void
 NavierStokes::filterStatisticsVariables(
     const int level,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy)
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy)
 {
     d_flow_model->setupStatisticsUtilities();
     
-     boost::shared_ptr<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
+     HAMERS_SHARED_PTR<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
         d_flow_model->getFlowModelStatisticsUtilities();
     
     flow_model_statistics_utilities->filterVariables(
@@ -3513,7 +3513,7 @@ NavierStokes::filterStatisticsVariables(
  */
 void
 NavierStokes::outputDataStatistics(
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const double output_time)
 {
     if ((!d_stat_dump_filename.empty()))
@@ -3539,7 +3539,7 @@ NavierStokes::outputDataStatistics(
         
         d_flow_model->setupStatisticsUtilities();
         
-        boost::shared_ptr<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
+        HAMERS_SHARED_PTR<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
             d_flow_model->getFlowModelStatisticsUtilities();
         
         flow_model_statistics_utilities->outputStatisticalQuantities(
@@ -3569,7 +3569,7 @@ NavierStokes::outputDataStatistics(
 
 void
 NavierStokes::getFromInput(
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     bool is_from_restart)
 {
     /*
@@ -3814,7 +3814,7 @@ NavierStokes::getFromInput(
 
 void NavierStokes::getFromRestart()
 {
-    boost::shared_ptr<tbox::Database> root_db(tbox::RestartManager::getManager()->getRootDatabase());
+    HAMERS_SHARED_PTR<tbox::Database> root_db(tbox::RestartManager::getManager()->getRootDatabase());
     
     if (!root_db->isDatabase(d_object_name))
     {
@@ -3824,7 +3824,7 @@ void NavierStokes::getFromRestart()
                    << std::endl);
     }
     
-    boost::shared_ptr<tbox::Database> db(root_db->getDatabase(d_object_name));
+    HAMERS_SHARED_PTR<tbox::Database> db(root_db->getDatabase(d_object_name));
     
     d_project_name = db->getString("d_project_name");
     

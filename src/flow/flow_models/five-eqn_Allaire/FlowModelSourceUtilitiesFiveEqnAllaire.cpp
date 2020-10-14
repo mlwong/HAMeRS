@@ -3,10 +3,10 @@
 FlowModelSourceUtilitiesFiveEqnAllaire::FlowModelSourceUtilitiesFiveEqnAllaire(
     const std::string& object_name,
     const tbox::Dimension& dim,
-    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+    const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_species,
-    const boost::shared_ptr<tbox::Database>& flow_model_db,
-    const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules):
+    const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db,
+    const HAMERS_SHARED_PTR<EquationOfStateMixingRules> equation_of_state_mixing_rules):
         FlowModelSourceUtilities(
             object_name,
             dim,
@@ -23,7 +23,7 @@ FlowModelSourceUtilitiesFiveEqnAllaire::FlowModelSourceUtilitiesFiveEqnAllaire(
 {
     if (d_has_source_terms)
     {
-        boost::shared_ptr<tbox::Database> source_terms_db;
+        HAMERS_SHARED_PTR<tbox::Database> source_terms_db;
         
         if (flow_model_db->keyExists("Source_terms"))
         {
@@ -109,7 +109,7 @@ FlowModelSourceUtilitiesFiveEqnAllaire::registerDerivedVariablesForSourceTerms(
                 << std::endl);
         }
         
-        boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+        HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
         
         // Check whether a patch is already registered.
         if (!flow_model_tmp->hasRegisteredPatch())
@@ -180,7 +180,7 @@ FlowModelSourceUtilitiesFiveEqnAllaire::registerDerivedVariablesForSourceTermsSt
                 << std::endl);
         }
         
-        boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+        HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
         
         // Check whether a patch is already registered.
         if (!flow_model_tmp->hasRegisteredPatch())
@@ -264,7 +264,7 @@ FlowModelSourceUtilitiesFiveEqnAllaire::allocateMemoryForDerivedCellData()
                 << std::endl);
         }
         
-        boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+        HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
         
         flow_model_tmp->allocateMemoryForDerivedCellData();
         
@@ -333,7 +333,7 @@ FlowModelSourceUtilitiesFiveEqnAllaire::computeDerivedCellData()
                 << std::endl);
         }
         
-        boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+        HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
         
         // Check whether a patch is already registered.
         if (!flow_model_tmp->hasRegisteredPatch())
@@ -371,7 +371,7 @@ FlowModelSourceUtilitiesFiveEqnAllaire::computeDerivedCellData()
 
 void
 FlowModelSourceUtilitiesFiveEqnAllaire::computeSourceTermsOnPatch(
-    const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
+    const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
     const double time,
     const double dt,
     const int RK_step_number)
@@ -389,13 +389,13 @@ FlowModelSourceUtilitiesFiveEqnAllaire::computeSourceTermsOnPatch(
                 << std::endl);
         }
         
-        boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+        HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
         const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
-        const boost::shared_ptr<hier::VariableContext> data_context = flow_model_tmp->getDataContext();
+        const HAMERS_SHARED_PTR<hier::VariableContext> data_context = flow_model_tmp->getDataContext();
         
         // Get the cell data of source.
-        boost::shared_ptr<pdat::CellData<double> > source(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+        HAMERS_SHARED_PTR<pdat::CellData<double> > source(
+            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(variable_source, data_context)));
         
         std::vector<double*> S;
@@ -415,11 +415,11 @@ FlowModelSourceUtilitiesFiveEqnAllaire::computeSourceTermsOnPatch(
         if (d_has_gravity)
         {
             // Get the cell data of momentum.
-            boost::shared_ptr<pdat::CellData<double> > data_momentum =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_momentum =
                 flow_model_tmp->getCellData("MOMENTUM");
             
             // Get the cell data of density.
-            boost::shared_ptr<pdat::CellData<double> > data_density =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                 flow_model_tmp->getCellData("DENSITY");
             
             /*
@@ -572,9 +572,9 @@ FlowModelSourceUtilitiesFiveEqnAllaire::getStableDtOnPatch()
                 << std::endl);
         }
         
-        boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+        HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
         const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
-        const boost::shared_ptr<hier::VariableContext> data_context = flow_model_tmp->getDataContext();
+        const HAMERS_SHARED_PTR<hier::VariableContext> data_context = flow_model_tmp->getDataContext();
         
         /*
          * Get the dimension of the interior box.
@@ -591,7 +591,7 @@ FlowModelSourceUtilitiesFiveEqnAllaire::getStableDtOnPatch()
             }
             
             // Get the cell data of sound speed.
-            boost::shared_ptr<pdat::CellData<double> > data_sound_speed =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_sound_speed =
                 flow_model_tmp->getCellData("SOUND_SPEED");
             
             /*
@@ -716,13 +716,13 @@ FlowModelSourceUtilitiesFiveEqnAllaire::getStableDtOnPatch()
  */
 void
 FlowModelSourceUtilitiesFiveEqnAllaire::putToRestart(
-    const boost::shared_ptr<tbox::Database>& restart_db) const
+    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
     restart_db->putBool("d_has_source_terms", d_has_source_terms);
     
     if (d_has_source_terms)
     {
-        boost::shared_ptr<tbox::Database> restart_source_terms_db =
+        HAMERS_SHARED_PTR<tbox::Database> restart_source_terms_db =
             restart_db->putDatabase("d_source_terms");
         
         restart_source_terms_db->putBool("d_has_gravity", d_has_gravity);
@@ -792,7 +792,7 @@ FlowModelSourceUtilitiesFiveEqnAllaire::setDerivedCellVariableGhostBoxes()
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
     const hier::Box interior_box = patch.getBox();
     
@@ -837,22 +837,22 @@ FlowModelSourceUtilitiesFiveEqnAllaire::computeCellDataOfGruneisenParameter()
                     << std::endl);
             }
             
-            boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+            HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
             
             // Get the cell data of density.
-            boost::shared_ptr<pdat::CellData<double> > data_density =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
                 flow_model_tmp->getCellData("DENSITY");
             
             // Get the cell data of pressure.
-            boost::shared_ptr<pdat::CellData<double> > data_pressure =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                 flow_model_tmp->getCellData("PRESSURE");
             
             // Get the cell data of mass fractions.
-            boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
                 flow_model_tmp->getCellData("MASS_FRACTIONS");
             
             // Get the cell data of volume fractions.
-            boost::shared_ptr<pdat::CellData<double> > data_volume_fractions =
+            HAMERS_SHARED_PTR<pdat::CellData<double> > data_volume_fractions =
                 flow_model_tmp->getCellData("VOLUME_FRACTIONS");
             
             // Compute the Gruneisen parameter.

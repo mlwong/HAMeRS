@@ -17,7 +17,7 @@ compiler:
   - gcc
 
 env:
-  - HDF5_ROOT=${HOME}/hdf5 SAMRAI_ROOT=${HOME}/SAMRAI
+  - HDF5_ROOT=${HOME}/hdf5 SAMRAI_ROOT_NO_BOOST=${HOME}/SAMRAI_NO_BOOST SAMRAI_ROOT_WITH_BOOST=${HOME}/SAMRAI_WITH_BOOST
 
 before_install:
   - test -n $CC  && unset CC
@@ -26,12 +26,18 @@ before_install:
   - export CXX=mpicxx
   - export F77=mpif77
   - sh travis/install-hdf5.sh
+  - sh travis/install-SAMRAI_with_Boost.sh
   - sh travis/install-SAMRAI.sh
 
 install:
+  - mkdir build_with_boost
+  - cd build_with_boost
+  - export SAMRAI_ROOT=$SAMRAI_ROOT_WITH_BOOST; cmake .. -DHAMERS_USE_BOOST=ON
+  - make
+  - cd ..
   - mkdir build
   - cd build
-  - cmake ..
+  - export SAMRAI_ROOT=$SAMRAI_ROOT_NO_BOOST; cmake .. -DHAMERS_USE_BOOST=OFF
   - make
 
 script: ./src/test/test_mixing_rules
