@@ -3,7 +3,7 @@ Application = "Navier-Stokes"
 NavierStokes
 {
     // Name of project
-    project_name = "2D Rayleigh-Taylor instability"
+    project_name = "2D discontinuous Rayleigh-Taylor instability"
 
     // Number of species
     num_species = 2
