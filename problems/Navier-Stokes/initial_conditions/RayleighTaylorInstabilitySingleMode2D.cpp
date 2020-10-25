@@ -156,7 +156,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         }
         else if (d_project_name == "2D smooth Rayleigh-Taylor instability")
         {
-            const double delta = 0.1*lambda; // characteristic length of interface.
+            const double delta = 0.01*lambda; // characteristic length of interface.
             
             for (int j = 0; j < patch_dims[1]; j++)
             {
@@ -171,15 +171,29 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
                     
                     const double X_2_H = 0.5*(1.0 + erf(x[0]/delta)); // mass fraction of second species (Y_2)
-                    const double R_H = R_1*(1.0 - X_2_H) + X_2_H*R_2;
-                    const double dX_2_H_dx = 1.0/(delta*sqrt(M_PI))*exp(-(x[0]/delta)*(x[0]/delta));
-                    const double dlnR_H_dx = (R_2 - R_1)*dX_2_H_dx;
-                    const double p_H = p_i*exp(g/(R_H*T_0)*(x[0] - 0.5*delta*delta*dlnR_H_dx));
+                    const double R_H   = R_1*(1.0 - X_2_H) + X_2_H*R_2;
+                    
+                    const int N_int = 10000; // number of numerical quadrature points
+                    const double dx_p = x[0]/(N_int - 1.0);
+                    
+                    double integral = 0.0;
+                    for (int ii = 0; ii < N_int; ii++)
+                    {
+                        const double x_p = x[0] + ii*dx_p;
+                        integral += 1.0/(0.5*(R_2 - R_1)*erf(x_p/delta) + 0.5*(R_1 + R_2))*dx_p;
+                    }
+                    
+                    const double p_H = p_i*exp(g/T_0*integral);
                     const double rho_H = p_H/(R_H*T_0);
                     
-                    const double eta = eta_0*cos(2.0*M_PI/lambda*x[1]);
+                    // Scott's implementation
+                    // const double dX_2_H_dx = 1.0/(delta*sqrt(M_PI))*exp(-(x[0]/delta)*(x[0]/delta));
+                    // const double dlnR_H_dx = (R_2 - R_1)*dX_2_H_dx;
+                    // const double p_H = p_i*exp(g/(R_H*T_0)*(x[0] - 0.5*delta*delta*dlnR_H_dx));
+                    // const double rho_H = p_H/(R_H*T_0);
                     
-                    const double X_2 = 0.5*(1.0 + erf((x[0] - eta)/delta)); // mass fraction of second species (Y_2)
+                    // const double eta = eta_0*cos(2.0*M_PI/lambda*x[1]);
+                    // const double X_2 = 0.5*(1.0 + erf((x[0] - eta)/delta)); // mass fraction of second species (Y_2)
                     
                     double rho, p;
                     
@@ -211,8 +225,8 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     //     rho = rho_2*rho_H/rho_2_H;
                     // }
                     
-                    rho_Y_0[idx_cell] = rho*(1.0 - X_2);
-                    rho_Y_1[idx_cell] = rho*X_2;
+                    rho_Y_0[idx_cell] = rho*(1.0 - X_2_H);
+                    rho_Y_1[idx_cell] = rho*X_2_H;
                     
                     const double u = 0.0;
                     const double v = 0.0;

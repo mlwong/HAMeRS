@@ -3,7 +3,7 @@ Application = "Navier-Stokes"
 NavierStokes
 {
     // Name of project
-    project_name = "2D discontinuous Rayleigh-Taylor instability"
+    project_name = "2D smooth Rayleigh-Taylor instability"
 
     // Number of species
     num_species = 2
@@ -87,12 +87,12 @@ NavierStokes
         boundary_edge_xlo
         {
             // boundary_condition = "DIRICHLET"
-            // partial_densities  = 1.1064402110278500, 0.0
+            // partial_densities  = 0.917546375094821, 0.0
             // velocity           = 0.0, 0.0
-            // pressure           = 82927.7864225896
+            // pressure           = 68770.1776095063
             
             boundary_condition = "NONREFLECTING_OUTFLOW"
-            pressure_target = 82927.7864225896
+            pressure_target = 68770.1776095063
             sigma = 100.0
             beta = 0.0
             // beta = 0.283
@@ -103,12 +103,12 @@ NavierStokes
         boundary_edge_xhi
         {
             // boundary_condition = "DIRICHLET"
-            // partial_densities  = 0.0, 1.4639015076171300
+            // partial_densities  = 0.0, 1.74003484181604
             // velocity           = 0.0, 0.0
-            // pressure           = 118862.835563875
+            // pressure           = 141283.736782848
             
             boundary_condition = "NONREFLECTING_OUTFLOW"
-            pressure_target = 118862.835563875
+            pressure_target = 141283.736782848
             sigma = 100.0
             beta = 0.0
             // beta = 0.283
@@ -175,9 +175,9 @@ Main
 CartesianGeometry
 {
     // Lower and upper indices of computational domain
-    domain_boxes = [(0, 0), (239, 59)]
-    x_lo         = -1403.06556681336,  0.0     // Lower end of computational domain
-    x_up         =  1403.06556681336,  701.53278340668 // Upper end of computational domain
+    domain_boxes = [(0, 0), (479, 59)]
+    x_lo         = -2806.13113362672,  0.0     // Lower end of computational domain
+    x_up         =  2806.13113362672,  701.53278340668 // Upper end of computational domain
 
     // Periodic dimension. A non-zero value indicates that the direction is periodic
     periodic_dimension = 0, 1
