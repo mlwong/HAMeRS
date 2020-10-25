@@ -88,8 +88,8 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         // const double gamma_1 = double(7)/double(5);
         
         const double lambda = 701.53278340668; // wavelength of single-mode perturbation
-        // const double eta_0  = 0.01*lambda;     // 1% perturbation
-        const double eta_0  = 0.0*lambda;      // no perturbation
+        const double eta_0  = 0.01*lambda;     // 1% perturbation
+        // const double eta_0  = 0.0*lambda;      // no perturbation
         
         const double W_1 = 0.03328; // molecular weight of heavier gas
         const double W_2 = 0.03072; // molecular weight of lighter gas
@@ -170,7 +170,9 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
                     x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
                     
-                    const double X_2_H = 0.5*(1.0 + erf(x[0]/delta)); // mass fraction of second species (Y_2)
+                    const double eta = eta_0*cos(2.0*M_PI/lambda*x[1]);
+                    
+                    const double X_2_H = 0.5*(1.0 + erf((x[0] - eta)/delta)); // mass fraction of second species (Y_2)
                     const double R_H   = R_1*(1.0 - X_2_H) + X_2_H*R_2;
                     
                     const int N_int = 10000; // number of numerical quadrature points
@@ -180,7 +182,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     for (int ii = 0; ii < N_int; ii++)
                     {
                         const double x_p = x[0] + ii*dx_p;
-                        integral += 1.0/(0.5*(R_2 - R_1)*erf(x_p/delta) + 0.5*(R_1 + R_2))*dx_p;
+                        integral += 1.0/(0.5*(R_2 - R_1)*erf((x_p - eta)/delta) + 0.5*(R_1 + R_2))*dx_p;
                     }
                     
                     const double p_H = p_i*exp(g/T_0*integral);
@@ -192,7 +194,6 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     // const double p_H = p_i*exp(g/(R_H*T_0)*(x[0] - 0.5*delta*delta*dlnR_H_dx));
                     // const double rho_H = p_H/(R_H*T_0);
                     
-                    // const double eta = eta_0*cos(2.0*M_PI/lambda*x[1]);
                     // const double X_2 = 0.5*(1.0 + erf((x[0] - eta)/delta)); // mass fraction of second species (Y_2)
                     
                     double rho, p;
