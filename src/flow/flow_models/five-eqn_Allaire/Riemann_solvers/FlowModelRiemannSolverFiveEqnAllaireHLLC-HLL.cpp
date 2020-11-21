@@ -2438,14 +2438,14 @@ computeLocalConvectiveFluxInZDirectionFromPrimitiveVariablesHLLC_HLL3D(
  */
 void
 FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirectionFromConservativeVariablesHLLC_HLL(
-    boost::shared_ptr<pdat::SideData<double> > convective_flux,
-    boost::shared_ptr<pdat::SideData<double> > velocity,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_L,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_R,
+    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
+    HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_L,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_R,
     const hier::Box& domain,
     bool compute_velocity) const
 {
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     // Get the box that covers the interior of patch.
@@ -2497,7 +2497,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
      * Get the equation of state mixing rules and the thermodynamic properties of the species.
      */
     
-    const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules =
+    const HAMERS_SHARED_PTR<EquationOfStateMixingRules> equation_of_state_mixing_rules =
         flow_model_tmp->getEquationOfStateMixingRules();
     
     /*
@@ -2528,67 +2528,67 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
     hier::IntVector direction_x = hier::IntVector::getZero(d_dim);
     direction_x[0] = 1;
     
-    boost::shared_ptr<pdat::SideData<double> > density_x_L(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > density_x_L(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > density_x_R(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > density_x_R(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > internal_energy_x_L(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > internal_energy_x_L(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > internal_energy_x_R(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > internal_energy_x_R(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > mass_fractions_x_L(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > mass_fractions_x_L(
         new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_conservative_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > mass_fractions_x_R(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > mass_fractions_x_R(
         new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_conservative_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > volume_fractions_x_L(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > volume_fractions_x_L(
         new pdat::SideData<double>(interior_box, d_num_species - 1, num_ghosts_conservative_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > volume_fractions_x_R(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > volume_fractions_x_R(
         new pdat::SideData<double>(interior_box, d_num_species - 1, num_ghosts_conservative_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > pressure_x_L(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > pressure_x_L(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > pressure_x_R(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > pressure_x_R(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_x_L(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > gruneisen_parameter_x_L(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_x_R(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > gruneisen_parameter_x_R(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_x_L(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > partial_pressure_partial_partial_densities_x_L(
             new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_conservative_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_x_R(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > partial_pressure_partial_partial_densities_x_R(
             new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_conservative_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > sound_speed_x_L(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > sound_speed_x_L(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > sound_speed_x_R(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > sound_speed_x_R(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_x));
     
@@ -3866,14 +3866,14 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
  */
 void
 FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirectionFromConservativeVariablesHLLC_HLL(
-    boost::shared_ptr<pdat::SideData<double> > convective_flux,
-    boost::shared_ptr<pdat::SideData<double> > velocity,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_B,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_T,
+    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
+    HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_B,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_T,
     const hier::Box& domain,
     bool compute_velocity) const
 {
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     // Get the box that covers the interior of patch.
@@ -3925,7 +3925,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
      * Get the equation of state mixing rules and the thermodynamic properties of the species.
      */
     
-    const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules =
+    const HAMERS_SHARED_PTR<EquationOfStateMixingRules> equation_of_state_mixing_rules =
         flow_model_tmp->getEquationOfStateMixingRules();
     
     /*
@@ -3956,67 +3956,67 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
     hier::IntVector direction_y = hier::IntVector::getZero(d_dim);
     direction_y[1] = 1;
     
-    boost::shared_ptr<pdat::SideData<double> > density_y_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > density_y_B(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > density_y_T(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > density_y_T(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > internal_energy_y_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > internal_energy_y_B(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > internal_energy_y_T(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > internal_energy_y_T(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > mass_fractions_y_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > mass_fractions_y_B(
         new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_conservative_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > mass_fractions_y_T(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > mass_fractions_y_T(
         new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_conservative_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > volume_fractions_y_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > volume_fractions_y_B(
         new pdat::SideData<double>(interior_box, d_num_species - 1, num_ghosts_conservative_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > volume_fractions_y_T(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > volume_fractions_y_T(
         new pdat::SideData<double>(interior_box, d_num_species - 1, num_ghosts_conservative_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > pressure_y_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > pressure_y_B(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > pressure_y_T(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > pressure_y_T(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_y_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > gruneisen_parameter_y_B(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_y_T(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > gruneisen_parameter_y_T(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_y_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > partial_pressure_partial_partial_densities_y_B(
             new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_conservative_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_y_T(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > partial_pressure_partial_partial_densities_y_T(
             new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_conservative_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > sound_speed_y_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > sound_speed_y_B(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > sound_speed_y_T(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > sound_speed_y_T(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_y));
     
@@ -4974,14 +4974,14 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
  */
 void
 FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirectionFromConservativeVariablesHLLC_HLL(
-    boost::shared_ptr<pdat::SideData<double> > convective_flux,
-    boost::shared_ptr<pdat::SideData<double> > velocity,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_B,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_F,
+    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
+    HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_B,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_F,
     const hier::Box& domain,
     bool compute_velocity) const
 {
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     // Get the box that covers the interior of patch.
@@ -5033,7 +5033,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
      * Get the equation of state mixing rules and the thermodynamic properties of the species.
      */
     
-    const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules =
+    const HAMERS_SHARED_PTR<EquationOfStateMixingRules> equation_of_state_mixing_rules =
         flow_model_tmp->getEquationOfStateMixingRules();
     
     /*
@@ -5064,67 +5064,67 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
     hier::IntVector direction_z = hier::IntVector::getZero(d_dim);
     direction_z[2] = 1;
     
-    boost::shared_ptr<pdat::SideData<double> > density_z_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > density_z_B(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > density_z_F(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > density_z_F(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > internal_energy_z_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > internal_energy_z_B(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > internal_energy_z_F(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > internal_energy_z_F(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > mass_fractions_z_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > mass_fractions_z_B(
         new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_conservative_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > mass_fractions_z_F(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > mass_fractions_z_F(
         new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_conservative_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > volume_fractions_z_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > volume_fractions_z_B(
         new pdat::SideData<double>(interior_box, d_num_species - 1, num_ghosts_conservative_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > volume_fractions_z_F(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > volume_fractions_z_F(
         new pdat::SideData<double>(interior_box, d_num_species - 1, num_ghosts_conservative_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > pressure_z_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > pressure_z_B(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > pressure_z_F(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > pressure_z_F(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_z_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > gruneisen_parameter_z_B(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_z_F(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > gruneisen_parameter_z_F(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_z_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > partial_pressure_partial_partial_densities_z_B(
             new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_conservative_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_z_F(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > partial_pressure_partial_partial_densities_z_F(
             new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_conservative_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > sound_speed_z_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > sound_speed_z_B(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > sound_speed_z_F(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > sound_speed_z_F(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_conservative_variables,
             direction_z));
     
@@ -5691,14 +5691,14 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
  */
 void
 FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirectionFromPrimitiveVariablesHLLC_HLL(
-    boost::shared_ptr<pdat::SideData<double> > convective_flux,
-    boost::shared_ptr<pdat::SideData<double> > velocity,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_L,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_R,
+    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
+    HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_L,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_R,
     const hier::Box& domain,
     bool compute_velocity) const
 {
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     // Get the box that covers the interior of patch.
@@ -5750,7 +5750,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
      * Get the equation of state mixing rules and the thermodynamic properties of the species.
      */
     
-    const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules =
+    const HAMERS_SHARED_PTR<EquationOfStateMixingRules> equation_of_state_mixing_rules =
         flow_model_tmp->getEquationOfStateMixingRules();
     
     /*
@@ -5781,59 +5781,59 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
     hier::IntVector direction_x = hier::IntVector::getZero(d_dim);
     direction_x[0] = 1;
     
-    boost::shared_ptr<pdat::SideData<double> > density_x_L(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > density_x_L(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > density_x_R(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > density_x_R(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > mass_fractions_x_L(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > mass_fractions_x_L(
         new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > mass_fractions_x_R(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > mass_fractions_x_R(
         new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > volume_fractions_x_L(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > volume_fractions_x_L(
         new pdat::SideData<double>(interior_box, d_num_species - 1, num_ghosts_primitive_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > volume_fractions_x_R(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > volume_fractions_x_R(
         new pdat::SideData<double>(interior_box, d_num_species - 1, num_ghosts_primitive_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_x_L(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > gruneisen_parameter_x_L(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_x_R(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > gruneisen_parameter_x_R(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_x_L(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > partial_pressure_partial_partial_densities_x_L(
             new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_x_R(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > partial_pressure_partial_partial_densities_x_R(
             new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > sound_speed_x_L(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > sound_speed_x_L(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > sound_speed_x_R(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > sound_speed_x_R(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > internal_energy_x_L(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > internal_energy_x_L(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_x));
     
-    boost::shared_ptr<pdat::SideData<double> > internal_energy_x_R(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > internal_energy_x_R(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_x));
     
@@ -6971,14 +6971,14 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
  */
 void
 FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirectionFromPrimitiveVariablesHLLC_HLL(
-    boost::shared_ptr<pdat::SideData<double> > convective_flux,
-    boost::shared_ptr<pdat::SideData<double> > velocity,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_B,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_T,
+    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
+    HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_B,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_T,
     const hier::Box& domain,
     bool compute_velocity) const
 {
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     // Get the box that covers the interior of patch.
@@ -7030,7 +7030,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
      * Get the equation of state mixing rules and the thermodynamic properties of the species.
      */
     
-    const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules =
+    const HAMERS_SHARED_PTR<EquationOfStateMixingRules> equation_of_state_mixing_rules =
         flow_model_tmp->getEquationOfStateMixingRules();
     
     /*
@@ -7061,59 +7061,59 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
     hier::IntVector direction_y = hier::IntVector::getZero(d_dim);
     direction_y[1] = 1;
     
-    boost::shared_ptr<pdat::SideData<double> > density_y_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > density_y_B(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > density_y_T(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > density_y_T(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > mass_fractions_y_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > mass_fractions_y_B(
         new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > mass_fractions_y_T(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > mass_fractions_y_T(
         new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > volume_fractions_y_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > volume_fractions_y_B(
         new pdat::SideData<double>(interior_box, d_num_species - 1, num_ghosts_primitive_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > volume_fractions_y_T(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > volume_fractions_y_T(
         new pdat::SideData<double>(interior_box, d_num_species - 1, num_ghosts_primitive_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_y_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > gruneisen_parameter_y_B(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_y_T(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > gruneisen_parameter_y_T(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_y_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > partial_pressure_partial_partial_densities_y_B(
             new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_y_T(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > partial_pressure_partial_partial_densities_y_T(
             new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > sound_speed_y_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > sound_speed_y_B(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > sound_speed_y_T(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > sound_speed_y_T(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > internal_energy_y_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > internal_energy_y_B(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_y));
     
-    boost::shared_ptr<pdat::SideData<double> > internal_energy_y_T(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > internal_energy_y_T(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_y));
     
@@ -7965,14 +7965,14 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
  */
 void
 FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirectionFromPrimitiveVariablesHLLC_HLL(
-    boost::shared_ptr<pdat::SideData<double> > convective_flux,
-    boost::shared_ptr<pdat::SideData<double> > velocity,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_B,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_F,
+    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
+    HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_B,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_F,
     const hier::Box& domain,
     bool compute_velocity) const
 {
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     // Get the box that covers the interior of patch.
@@ -8024,7 +8024,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
      * Get the equation of state mixing rules and the thermodynamic properties of the species.
      */
     
-    const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules =
+    const HAMERS_SHARED_PTR<EquationOfStateMixingRules> equation_of_state_mixing_rules =
         flow_model_tmp->getEquationOfStateMixingRules();
     
     /*
@@ -8055,59 +8055,59 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
     hier::IntVector direction_z = hier::IntVector::getZero(d_dim);
     direction_z[2] = 1;
     
-    boost::shared_ptr<pdat::SideData<double> > density_z_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > density_z_B(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > density_z_F(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > density_z_F(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > mass_fractions_z_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > mass_fractions_z_B(
         new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > mass_fractions_z_F(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > mass_fractions_z_F(
         new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > volume_fractions_z_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > volume_fractions_z_B(
         new pdat::SideData<double>(interior_box, d_num_species - 1, num_ghosts_primitive_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > volume_fractions_z_F(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > volume_fractions_z_F(
         new pdat::SideData<double>(interior_box, d_num_species - 1, num_ghosts_primitive_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_z_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > gruneisen_parameter_z_B(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > gruneisen_parameter_z_F(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > gruneisen_parameter_z_F(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_z_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > partial_pressure_partial_partial_densities_z_B(
             new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > partial_pressure_partial_partial_densities_z_F(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > partial_pressure_partial_partial_densities_z_F(
             new pdat::SideData<double>(interior_box, d_num_species, num_ghosts_primitive_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > sound_speed_z_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > sound_speed_z_B(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > sound_speed_z_F(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > sound_speed_z_F(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > internal_energy_z_B(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > internal_energy_z_B(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_z));
     
-    boost::shared_ptr<pdat::SideData<double> > internal_energy_z_F(
+    HAMERS_SHARED_PTR<pdat::SideData<double> > internal_energy_z_F(
         new pdat::SideData<double>(interior_box, 1, num_ghosts_primitive_variables,
             direction_z));
     

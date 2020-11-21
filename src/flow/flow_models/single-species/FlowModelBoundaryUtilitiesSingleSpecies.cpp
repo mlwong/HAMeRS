@@ -8,6 +8,8 @@
 #include "SAMRAI/tbox/Utilities.h"
 #include "SAMRAI/tbox/MathUtilities.h"
 
+#include <algorithm>
+
 // Integer constant for debugging improperly set boundary data.
 #define BOGUS_BDRY_LOC (-9999)
 
@@ -16,7 +18,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::FlowModelBoundaryUtilitiesSingleSpecies
     const tbox::Dimension& dim,
     const int& num_species,
     const int& num_eqn,
-    const boost::shared_ptr<EquationOfStateMixingRules>& equation_of_state_mixing_rules):
+    const HAMERS_SHARED_PTR<EquationOfStateMixingRules>& equation_of_state_mixing_rules):
         FlowModelBoundaryUtilities(
             object_name,
             dim,
@@ -91,7 +93,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::FlowModelBoundaryUtilitiesSingleSpecies
  */
 void
 FlowModelBoundaryUtilitiesSingleSpecies::getFromInput1d(
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     std::vector<int>& node_locs,
     std::vector<int>& node_conds,
     const hier::IntVector& periodic)
@@ -125,7 +127,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::getFromInput1d(
  */
 void
 FlowModelBoundaryUtilitiesSingleSpecies::getFromInput2d(
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     std::vector<int>& edge_locs,
     std::vector<int>& node_locs,
     std::vector<int>& edge_conds,
@@ -172,7 +174,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::getFromInput2d(
  */
 void
 FlowModelBoundaryUtilitiesSingleSpecies::getFromInput3d(
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     std::vector<int>& face_locs,
     std::vector<int>& edge_locs,
     std::vector<int>& node_locs,
@@ -457,7 +459,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::getFaceLocationForNodeBdry(
  */
 void
 FlowModelBoundaryUtilitiesSingleSpecies::fill1dNodeBoundaryData(
-    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_var_data,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
     const hier::Patch& patch,
     std::vector<int>& bdry_node_locs,
     const std::vector<int>& bdry_node_conds,
@@ -487,8 +489,8 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill1dNodeBoundaryData(
         TBOX_ASSERT_OBJDIM_EQUALITY3(*conservative_var_data[vi], patch, ghost_width_to_fill);
     }
     
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     TBOX_ASSERT(patch_geom);
     
@@ -787,7 +789,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill1dNodeBoundaryData(
  */
 void
 FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
-    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_var_data,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
     const hier::Patch& patch,
     std::vector<int>& bdry_edge_locs,
     const std::vector<int>& bdry_edge_conds,
@@ -817,8 +819,8 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
         TBOX_ASSERT_OBJDIM_EQUALITY3(*conservative_var_data[vi], patch, ghost_width_to_fill);
     }
     
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     TBOX_ASSERT(patch_geom);
     
@@ -2637,7 +2639,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
  */
 void
 FlowModelBoundaryUtilitiesSingleSpecies::fill2dNodeBoundaryData(
-    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_var_data,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
     const hier::Patch& patch,
     std::vector<int>& bdry_node_locs,
     const std::vector<int>& bdry_node_conds,
@@ -2667,8 +2669,8 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dNodeBoundaryData(
         TBOX_ASSERT_OBJDIM_EQUALITY3(*conservative_var_data[vi], patch, ghost_width_to_fill);
     }
     
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     TBOX_ASSERT(patch_geom);
     
@@ -3282,7 +3284,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dNodeBoundaryData(
  */
 void
 FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
-    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_var_data,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
     const hier::Patch& patch,
     std::vector<int>& bdry_face_locs,
     const std::vector<int>& bdry_face_conds,
@@ -3312,8 +3314,8 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
         TBOX_ASSERT_OBJDIM_EQUALITY3(*conservative_var_data[vi], patch, ghost_width_to_fill);
     }
     
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     TBOX_ASSERT(patch_geom);
     
@@ -7386,7 +7388,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
  */
 void
 FlowModelBoundaryUtilitiesSingleSpecies::fill3dEdgeBoundaryData(
-    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_var_data,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
     const hier::Patch& patch,
     std::vector<int>& bdry_edge_locs,
     const std::vector<int>& bdry_edge_conds,
@@ -7416,8 +7418,8 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dEdgeBoundaryData(
         TBOX_ASSERT_OBJDIM_EQUALITY3(*conservative_var_data[vi], patch, ghost_width_to_fill);
     }
     
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     TBOX_ASSERT(patch_geom);
     
@@ -8517,7 +8519,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dEdgeBoundaryData(
  */
 void
 FlowModelBoundaryUtilitiesSingleSpecies::fill3dNodeBoundaryData(
-    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_var_data,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
     const hier::Patch& patch,
     std::vector<int>& bdry_node_locs,
     const std::vector<int>& bdry_node_conds,
@@ -8547,8 +8549,8 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dNodeBoundaryData(
         TBOX_ASSERT_OBJDIM_EQUALITY3(*conservative_var_data[vi], patch, ghost_width_to_fill);
     }
     
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     TBOX_ASSERT(patch_geom);
     
@@ -9624,7 +9626,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dNodeBoundaryData(
 
 void
 FlowModelBoundaryUtilitiesSingleSpecies::read1dBdryNodes(
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     std::vector<int>& node_locs,
     std::vector<int>& node_conds,
     const hier::IntVector& periodic)
@@ -9678,7 +9680,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::read1dBdryNodes(
             
             if (need_data_read)
             {
-                boost::shared_ptr<tbox::Database> bdry_loc_db(
+                HAMERS_SHARED_PTR<tbox::Database> bdry_loc_db(
                     input_db->getDatabase(bdry_loc_str));
                 std::string bdry_cond_str =
                     bdry_loc_db->getString("boundary_condition");
@@ -9715,7 +9717,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::read1dBdryNodes(
 
 void
 FlowModelBoundaryUtilitiesSingleSpecies::read2dBdryEdges(
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     std::vector<int>& edge_locs,
     std::vector<int>& edge_conds,
     const hier::IntVector& periodic)
@@ -9783,7 +9785,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::read2dBdryEdges(
             
             if (need_data_read)
             {
-                boost::shared_ptr<tbox::Database> bdry_loc_db(
+                HAMERS_SHARED_PTR<tbox::Database> bdry_loc_db(
                     input_db->getDatabase(bdry_loc_str));
                 std::string bdry_cond_str =
                     bdry_loc_db->getString("boundary_condition");
@@ -9831,7 +9833,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::read2dBdryEdges(
 
 void
 FlowModelBoundaryUtilitiesSingleSpecies::read2dBdryNodes(
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     std::vector<int>& node_locs,
     const std::vector<int>& edge_conds,
     std::vector<int>& node_conds,
@@ -9886,7 +9888,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::read2dBdryNodes(
                 default: NULL_STATEMENT;
             }
             
-            boost::shared_ptr<tbox::Database> bdry_loc_db(
+            HAMERS_SHARED_PTR<tbox::Database> bdry_loc_db(
                 input_db->getDatabase(bdry_loc_str));
             std::string bdry_cond_str =
                 bdry_loc_db->getString("boundary_condition");
@@ -10012,7 +10014,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::read2dBdryNodes(
 
 void
 FlowModelBoundaryUtilitiesSingleSpecies::read3dBdryFaces(
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     std::vector<int>& face_locs,
     std::vector<int>& face_conds,
     const hier::IntVector& periodic)
@@ -10094,7 +10096,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::read3dBdryFaces(
             
             if (need_data_read)
             {
-                boost::shared_ptr<tbox::Database> bdry_loc_db(
+                HAMERS_SHARED_PTR<tbox::Database> bdry_loc_db(
                     input_db->getDatabase(bdry_loc_str));
                 std::string bdry_cond_str =
                     bdry_loc_db->getString("boundary_condition");
@@ -10142,7 +10144,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::read3dBdryFaces(
 
 void
 FlowModelBoundaryUtilitiesSingleSpecies::read3dBdryEdges(
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     std::vector<int>& edge_locs,
     const std::vector<int>& face_conds,
     std::vector<int>& edge_conds,
@@ -10269,7 +10271,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::read3dBdryEdges(
             
             if (need_data_read)
             {
-                boost::shared_ptr<tbox::Database> bdry_loc_db(
+                HAMERS_SHARED_PTR<tbox::Database> bdry_loc_db(
                    input_db->getDatabase(bdry_loc_str));
                 
                 std::string bdry_cond_str =
@@ -10495,7 +10497,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::read3dBdryEdges(
 
 void
 FlowModelBoundaryUtilitiesSingleSpecies::read3dBdryNodes(
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     std::vector<int>& node_locs,
     const std::vector<int>& face_conds,
     std::vector<int>& node_conds,
@@ -10569,7 +10571,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::read3dBdryNodes(
                 }
                 default: NULL_STATEMENT;
             }
-            boost::shared_ptr<tbox::Database> bdry_loc_db(
+            HAMERS_SHARED_PTR<tbox::Database> bdry_loc_db(
                 input_db->getDatabase(bdry_loc_str));
             std::string bdry_cond_str =
                 bdry_loc_db->getString("boundary_condition");
@@ -10748,7 +10750,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::read3dBdryNodes(
 
 void
 FlowModelBoundaryUtilitiesSingleSpecies::readAdiabaticNoSlip(
-    const boost::shared_ptr<tbox::Database>& db,
+    const HAMERS_SHARED_PTR<tbox::Database>& db,
     std::string& db_name,
     int bdry_location_index)
 {
@@ -10821,7 +10823,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::readAdiabaticNoSlip(
 
 void
 FlowModelBoundaryUtilitiesSingleSpecies::readIsothermalNoSlip(
-    const boost::shared_ptr<tbox::Database>& db,
+    const HAMERS_SHARED_PTR<tbox::Database>& db,
     std::string& db_name,
     int bdry_location_index)
 {
@@ -10911,7 +10913,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::readIsothermalNoSlip(
 
 void
 FlowModelBoundaryUtilitiesSingleSpecies::readNonreflectingOutflow(
-    const boost::shared_ptr<tbox::Database>& db,
+    const HAMERS_SHARED_PTR<tbox::Database>& db,
     std::string& db_name,
     int bdry_location_index)
 {

@@ -13,7 +13,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const tbox::Dimension& dim,
             const int& num_species,
             const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
-            const boost::shared_ptr<tbox::Database>& equation_of_state_mixing_rules_db);
+            const HAMERS_SHARED_PTR<tbox::Database>& equation_of_state_mixing_rules_db);
         
         ~EquationOfStateMixingRulesIdealGas() {}
         
@@ -29,12 +29,12 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         putToRestart(
-            const boost::shared_ptr<tbox::Database>& restart_db) const;
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
         
         /*
-         * Return the boost::shared_ptr to the equation of state.
+         * Return the HAMERS_SHARED_PTR to the equation of state.
          */
-        const boost::shared_ptr<EquationOfState>&
+        const HAMERS_SHARED_PTR<EquationOfState>&
         getEquationOfState(const int species_index = 0) const
         {
             NULL_USE(species_index);
@@ -55,10 +55,10 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computePressure(
-            boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_density,
-            const boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
             const hier::Box& domain) const;
         
         /*
@@ -66,10 +66,10 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computePressure(
-            boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::SideData<double> >& data_density,
-            const boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
-            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -88,11 +88,11 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computePressure(
-            boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_density,
-            const boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
-            const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions,
             const hier::Box& domain) const;
         
         /*
@@ -100,11 +100,11 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computePressure(
-            boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::SideData<double> >& data_density,
-            const boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
-            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
-            const boost::shared_ptr<pdat::SideData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_volume_fractions,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -122,10 +122,10 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computeInternalEnergy(
-            boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
-            const boost::shared_ptr<pdat::CellData<double> >& data_density,
-            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
             const hier::Box& domain) const;
         
         /*
@@ -133,10 +133,10 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computeInternalEnergy(
-            boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
-            const boost::shared_ptr<pdat::SideData<double> >& data_density,
-            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -155,11 +155,11 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computeInternalEnergy(
-            boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
-            const boost::shared_ptr<pdat::CellData<double> >& data_density,
-            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
-            const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions,
             const hier::Box& domain) const;
         
         /*
@@ -167,11 +167,11 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computeInternalEnergy(
-            boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
-            const boost::shared_ptr<pdat::SideData<double> >& data_density,
-            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
-            const boost::shared_ptr<pdat::SideData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_volume_fractions,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -189,10 +189,10 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computeTemperature(
-            boost::shared_ptr<pdat::CellData<double> >& data_temperature,
-            const boost::shared_ptr<pdat::CellData<double> >& data_density,
-            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
             const hier::Box& domain) const;
         
         /*
@@ -200,10 +200,10 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computeTemperature(
-            boost::shared_ptr<pdat::SideData<double> >& data_temperature,
-            const boost::shared_ptr<pdat::SideData<double> >& data_density,
-            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -223,10 +223,10 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computeInternalEnergyFromTemperature(
-            boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
-            const boost::shared_ptr<pdat::CellData<double> >& data_density,
-            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
             const hier::Box& domain) const;
         
         /*
@@ -235,10 +235,10 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computeInternalEnergyFromTemperature(
-            boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
-            const boost::shared_ptr<pdat::SideData<double> >& data_density,
-            const boost::shared_ptr<pdat::SideData<double> >& data_temperature,
-            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_internal_energy,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -258,10 +258,10 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computeIsochoricSpecificHeatCapacity(
-            boost::shared_ptr<pdat::CellData<double> >& data_isochoric_specific_heat_capacity,
-            const boost::shared_ptr<pdat::CellData<double> >& data_density,
-            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isochoric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
             const hier::Box& domain) const;
         
         /*
@@ -270,10 +270,10 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computeIsochoricSpecificHeatCapacity(
-            boost::shared_ptr<pdat::SideData<double> >& data_isochoric_specific_heat_capacity,
-            const boost::shared_ptr<pdat::SideData<double> >& data_density,
-            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isochoric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -293,10 +293,10 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computeIsobaricSpecificHeatCapacity(
-            boost::shared_ptr<pdat::CellData<double> >& data_isobaric_specific_heat_capacity,
-            const boost::shared_ptr<pdat::CellData<double> >& data_density,
-            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_isobaric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
             const hier::Box& domain) const;
         
         /*
@@ -305,10 +305,10 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computeIsobaricSpecificHeatCapacity(
-            boost::shared_ptr<pdat::SideData<double> >& data_isobaric_specific_heat_capacity,
-            const boost::shared_ptr<pdat::SideData<double> >& data_density,
-            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_isobaric_specific_heat_capacity,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -330,10 +330,10 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computeGruneisenParameter(
-            boost::shared_ptr<pdat::CellData<double> >& data_gruneisen_parameter,
-            const boost::shared_ptr<pdat::CellData<double> >& data_density,
-            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_gruneisen_parameter,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
             const hier::Box& domain) const;
         
         /*
@@ -343,10 +343,10 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computeGruneisenParameter(
-            boost::shared_ptr<pdat::SideData<double> >& data_gruneisen_parameter,
-            const boost::shared_ptr<pdat::SideData<double> >& data_density,
-            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_gruneisen_parameter,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -369,11 +369,11 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computeGruneisenParameter(
-            boost::shared_ptr<pdat::CellData<double> >& data_gruneisen_parameter,
-            const boost::shared_ptr<pdat::CellData<double> >& data_density,
-            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
-            const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_gruneisen_parameter,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions,
             const hier::Box& domain) const;
         
         /*
@@ -383,11 +383,11 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computeGruneisenParameter(
-            boost::shared_ptr<pdat::SideData<double> >& data_gruneisen_parameter,
-            const boost::shared_ptr<pdat::SideData<double> >& data_density,
-            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
-            const boost::shared_ptr<pdat::SideData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_gruneisen_parameter,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_volume_fractions,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -407,10 +407,10 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computePressureDerivativeWithPartialDensities(
-            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_partial_densities,
-            const boost::shared_ptr<pdat::CellData<double> >& data_density,
-            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_pressure_partial_partial_densities,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
             const hier::Box& domain) const;
         
         /*
@@ -419,10 +419,10 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computePressureDerivativeWithPartialDensities(
-            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_partial_densities,
-            const boost::shared_ptr<pdat::SideData<double> >& data_density,
-            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_pressure_partial_partial_densities,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -443,11 +443,11 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computePressureDerivativeWithPartialDensities(
-            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_partial_densities,
-            const boost::shared_ptr<pdat::CellData<double> >& data_density,
-            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
-            const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_pressure_partial_partial_densities,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions,
             const hier::Box& domain) const;
         
         /*
@@ -456,11 +456,11 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computePressureDerivativeWithPartialDensities(
-            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_partial_densities,
-            const boost::shared_ptr<pdat::SideData<double> >& data_density,
-            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
-            const boost::shared_ptr<pdat::SideData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_pressure_partial_partial_densities,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_volume_fractions,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -481,11 +481,11 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computePressureDerivativeWithVolumeFractions(
-            boost::shared_ptr<pdat::CellData<double> >& data_partial_pressure_partial_volume_fractions,
-            const boost::shared_ptr<pdat::CellData<double> >& data_density,
-            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
-            const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_partial_pressure_partial_volume_fractions,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions,
             const hier::Box& domain) const;
         
         /*
@@ -494,11 +494,11 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computePressureDerivativeWithVolumeFractions(
-            boost::shared_ptr<pdat::SideData<double> >& data_partial_pressure_partial_volume_fractions,
-            const boost::shared_ptr<pdat::SideData<double> >& data_density,
-            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
-            const boost::shared_ptr<pdat::SideData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_partial_pressure_partial_volume_fractions,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_volume_fractions,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -516,10 +516,10 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computeMixtureDensity(
-            boost::shared_ptr<pdat::CellData<double> >& data_mixture_density,
-            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mixture_density,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
             const hier::Box& domain) const;
         
         /*
@@ -527,10 +527,10 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computeMixtureDensity(
-            boost::shared_ptr<pdat::SideData<double> >& data_mixture_density,
-            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::SideData<double> >& data_temperature,
-            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mixture_density,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -572,8 +572,8 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computeMixtureThermodynamicProperties(
-            boost::shared_ptr<pdat::CellData<double> >& data_mixture_thermo_properties,
-            const boost::shared_ptr<pdat::CellData<double> >& data_species_fraction,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mixture_thermo_properties,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_species_fraction,
             const hier::Box& domain) const;
         
         /*
@@ -581,8 +581,8 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computeMixtureThermodynamicProperties(
-            boost::shared_ptr<pdat::SideData<double> >& data_mixture_thermo_properties,
-            const boost::shared_ptr<pdat::SideData<double> >& data_species_fraction,
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mixture_thermo_properties,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_species_fraction,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -599,8 +599,8 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computeMixtureThermodynamicPropertiesWithMassFractions(
-            boost::shared_ptr<pdat::CellData<double> >& data_mixture_thermo_properties,
-            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mixture_thermo_properties,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mass_fractions,
             const hier::Box& domain) const;
         
         /*
@@ -608,8 +608,8 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computeMixtureThermodynamicPropertiesWithMassFractions(
-            boost::shared_ptr<pdat::SideData<double> >& data_mixture_thermo_properties,
-            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mixture_thermo_properties,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mass_fractions,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -626,8 +626,8 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computeMixtureThermodynamicPropertiesWithVolumeFractions(
-            boost::shared_ptr<pdat::CellData<double> >& data_mixture_thermo_properties,
-            const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_mixture_thermo_properties,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_volume_fractions,
             const hier::Box& domain) const;
         
         /*
@@ -635,8 +635,8 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
          */
         void
         computeMixtureThermodynamicPropertiesWithVolumeFractions(
-            boost::shared_ptr<pdat::SideData<double> >& data_mixture_thermo_properties,
-            const boost::shared_ptr<pdat::SideData<double> >& data_volume_fractions,
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_mixture_thermo_properties,
+            const HAMERS_SHARED_PTR<pdat::SideData<double> >& data_volume_fractions,
             int side_normal,
             const hier::Box& domain) const;
         
@@ -846,9 +846,9 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
         std::vector<double> d_species_c_v;
         
         /*
-         * boost::shared_ptr to EquationOfState.
+         * HAMERS_SHARED_PTR to EquationOfState.
          */
-        boost::shared_ptr<EquationOfState> d_equation_of_state;
+        HAMERS_SHARED_PTR<EquationOfState> d_equation_of_state;
         
 };
 

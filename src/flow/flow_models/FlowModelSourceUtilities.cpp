@@ -3,10 +3,10 @@
 FlowModelSourceUtilities::FlowModelSourceUtilities(
     const std::string& object_name,
     const tbox::Dimension& dim,
-    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+    const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_species,
     const int& num_eqn,
-    const boost::shared_ptr<tbox::Database>& flow_model_db):
+    const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db):
         d_object_name(object_name),
         d_dim(dim),
         d_grid_geometry(grid_geometry),
@@ -113,7 +113,7 @@ FlowModelSourceUtilities::computeDerivedCellData()
  */
 void
 FlowModelSourceUtilities::computeSourceTermsOnPatch(
-    const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
+    const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
     const double time,
     const double dt,
     const int RK_step_number)
@@ -145,7 +145,7 @@ FlowModelSourceUtilities::getStableDtOnPatch()
  */
 void
 FlowModelSourceUtilities::putToRestart(
-    const boost::shared_ptr<tbox::Database>& restart_db) const
+    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
     restart_db->putBool("d_has_source_terms", d_has_source_terms);
 }

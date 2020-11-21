@@ -34,9 +34,9 @@ FlowModel::getRegisteredPatch() const
 
 
 /*
- * Return boost::shared_ptr to patch data context.
+ * Return HAMERS_SHARED_PTR to patch data context.
  */
-const boost::shared_ptr<hier::VariableContext>&
+const HAMERS_SHARED_PTR<hier::VariableContext>&
 FlowModel::getDataContext() const
 {
     if (d_patch == nullptr)

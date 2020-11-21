@@ -3,6 +3,8 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "util/mixing_rules/equations_of_state/EquationOfStateMixingRulesManager.hpp"
 
 #include "SAMRAI/pdat/CellData.h"
@@ -12,7 +14,6 @@
 #include "SAMRAI/hier/Patch.h"
 #include "SAMRAI/tbox/Database.h"
 
-#include "boost/shared_ptr.hpp"
 #include <string>
 #include <vector>
 
@@ -48,7 +49,7 @@ class FlowModelBoundaryUtilities
             const tbox::Dimension& dim,
             const int& num_species,
             const int& num_eqn,
-            const boost::shared_ptr<EquationOfStateMixingRules>& equation_of_state_mixing_rules):
+            const HAMERS_SHARED_PTR<EquationOfStateMixingRules>& equation_of_state_mixing_rules):
                 d_object_name(object_name),
                 d_dim(dim),
                 d_num_species(num_species),
@@ -64,7 +65,7 @@ class FlowModelBoundaryUtilities
          */
         virtual void
         getFromInput1d(
-            const boost::shared_ptr<tbox::Database>& input_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db,
             std::vector<int>& node_locs,
             std::vector<int>& node_conds,
             const hier::IntVector& periodic) = 0;
@@ -76,7 +77,7 @@ class FlowModelBoundaryUtilities
          */
         virtual void
         getFromInput2d(
-            const boost::shared_ptr<tbox::Database>& input_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db,
             std::vector<int>& edge_locs,
             std::vector<int>& node_locs,
             std::vector<int>& edge_conds,
@@ -90,7 +91,7 @@ class FlowModelBoundaryUtilities
          */
         virtual void
         getFromInput3d(
-            const boost::shared_ptr<tbox::Database>& input_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db,
             std::vector<int>& face_locs,
             std::vector<int>& edge_locs,
             std::vector<int>& node_locs,
@@ -165,7 +166,7 @@ class FlowModelBoundaryUtilities
          */
         virtual void
         fill1dNodeBoundaryData(
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_var_data,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
             const hier::Patch& patch,
             std::vector<int>& bdry_node_locs,
             const std::vector<int>& bdry_node_conds,
@@ -178,7 +179,7 @@ class FlowModelBoundaryUtilities
          */
         virtual void
         fill2dEdgeBoundaryData(
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_var_data,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
             const hier::Patch& patch,
             std::vector<int>& bdry_edge_locs,
             const std::vector<int>& bdry_edge_conds,
@@ -191,7 +192,7 @@ class FlowModelBoundaryUtilities
          */
         virtual void
         fill2dNodeBoundaryData(
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_var_data,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
             const hier::Patch& patch,
             std::vector<int>& bdry_node_locs,
             const std::vector<int>& bdry_node_conds,
@@ -204,7 +205,7 @@ class FlowModelBoundaryUtilities
          */
         virtual void
         fill3dFaceBoundaryData(
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_var_data,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
             const hier::Patch& patch,
             std::vector<int>& bdry_face_locs,
             const std::vector<int>& bdry_face_conds,
@@ -217,7 +218,7 @@ class FlowModelBoundaryUtilities
          */
         virtual void
         fill3dEdgeBoundaryData(
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_var_data,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
             const hier::Patch& patch,
             std::vector<int>& bdry_edge_locs,
             const std::vector<int>& bdry_edge_conds,
@@ -230,7 +231,7 @@ class FlowModelBoundaryUtilities
          */
         virtual void
         fill3dNodeBoundaryData(
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_var_data,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
             const hier::Patch& patch,
             std::vector<int>& bdry_node_locs,
             const std::vector<int>& bdry_node_conds,
@@ -259,9 +260,9 @@ protected:
         const int d_num_eqn;
         
         /*
-         * boost::shared_ptr to EquationOfStateMixingRules.
+         * HAMERS_SHARED_PTR to EquationOfStateMixingRules.
          */
-        boost::shared_ptr<EquationOfStateMixingRules> d_equation_of_state_mixing_rules;
+        HAMERS_SHARED_PTR<EquationOfStateMixingRules> d_equation_of_state_mixing_rules;
         
 };
 

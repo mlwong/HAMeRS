@@ -9,10 +9,10 @@ class ConvectiveFluxReconstructorFirstOrderLLF: public ConvectiveFluxReconstruct
         ConvectiveFluxReconstructorFirstOrderLLF(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_eqn,
-            const boost::shared_ptr<FlowModel>& flow_model,
-            const boost::shared_ptr<tbox::Database>& convective_flux_reconstructor_db);
+            const HAMERS_SHARED_PTR<FlowModel>& flow_model,
+            const HAMERS_SHARED_PTR<tbox::Database>& convective_flux_reconstructor_db);
         
         ~ConvectiveFluxReconstructorFirstOrderLLF() {}
         
@@ -28,16 +28,16 @@ class ConvectiveFluxReconstructorFirstOrderLLF: public ConvectiveFluxReconstruct
          */
         void
         putToRestart(
-            const boost::shared_ptr<tbox::Database>& restart_db) const;
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
         
         /*
          * Compute the convective flux and source due to splitting of convective term on a patch.
          */
         void computeConvectiveFluxAndSourceOnPatch(
             hier::Patch& patch,
-            const boost::shared_ptr<pdat::SideVariable<double> >& variable_convective_flux,
-            const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
-            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const HAMERS_SHARED_PTR<pdat::SideVariable<double> >& variable_convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double time,
             const double dt,
             const int RK_step_number);

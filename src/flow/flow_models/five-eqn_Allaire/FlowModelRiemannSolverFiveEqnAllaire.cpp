@@ -5,9 +5,9 @@
  */
 void
 FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxFromConservativeVariables(
-    boost::shared_ptr<pdat::SideData<double> > convective_flux,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_minus,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_plus,
+    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_minus,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_plus,
     const DIRECTION::TYPE& direction,
     const RIEMANN_SOLVER::TYPE& riemann_solver_type,
     const hier::Box& domain) const
@@ -20,7 +20,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxFromConservativeVaria
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     if (static_cast<int>(conservative_variables_minus.size()) != num_eqn ||
@@ -67,7 +67,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxFromConservativeVaria
     }
 #endif
     
-    boost::shared_ptr<pdat::SideData<double> > velocity;
+    HAMERS_SHARED_PTR<pdat::SideData<double> > velocity;
     
     switch (riemann_solver_type)
     {
@@ -192,9 +192,9 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxFromConservativeVaria
  */
 void
 FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxFromPrimitiveVariables(
-    boost::shared_ptr<pdat::SideData<double> > convective_flux,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_minus,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_plus,
+    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_minus,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_plus,
     const DIRECTION::TYPE& direction,
     const RIEMANN_SOLVER::TYPE& riemann_solver_type,
     const hier::Box& domain) const
@@ -207,7 +207,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxFromPrimitiveVariable
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     if (static_cast<int>(primitive_variables_minus.size()) != num_eqn ||
@@ -254,7 +254,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxFromPrimitiveVariable
     }
 #endif
     
-    boost::shared_ptr<pdat::SideData<double> > velocity;
+    HAMERS_SHARED_PTR<pdat::SideData<double> > velocity;
     
     switch (riemann_solver_type)
     {
@@ -379,10 +379,10 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxFromPrimitiveVariable
  */
 void
 FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityFromConservativeVariables(
-    boost::shared_ptr<pdat::SideData<double> > convective_flux,
-    boost::shared_ptr<pdat::SideData<double> > velocity,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_minus,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_plus,
+    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
+    HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_minus,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables_plus,
     const DIRECTION::TYPE& direction,
     const RIEMANN_SOLVER::TYPE& riemann_solver_type,
     const hier::Box& domain) const
@@ -395,7 +395,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityFromConser
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     if (static_cast<int>(conservative_variables_minus.size()) != num_eqn ||
@@ -570,10 +570,10 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityFromConser
  */
 void
 FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityFromPrimitiveVariables(
-    boost::shared_ptr<pdat::SideData<double> > convective_flux,
-    boost::shared_ptr<pdat::SideData<double> > velocity,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_minus,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_plus,
+    HAMERS_SHARED_PTR<pdat::SideData<double> > convective_flux,
+    HAMERS_SHARED_PTR<pdat::SideData<double> > velocity,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_minus,
+    const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables_plus,
     const DIRECTION::TYPE& direction,
     const RIEMANN_SOLVER::TYPE& riemann_solver_type,
     const hier::Box& domain) const
@@ -586,7 +586,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityFromPrimit
             << std::endl);
     }
     
-    boost::shared_ptr<FlowModel> flow_model_tmp = d_flow_model.lock();
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     const int num_eqn = flow_model_tmp->getNumberOfEquations();
     
     if (static_cast<int>(primitive_variables_minus.size()) != num_eqn ||

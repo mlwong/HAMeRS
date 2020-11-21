@@ -71,8 +71,8 @@ WaveletTransformHarten::WaveletTransformHarten(
  */
 void
 WaveletTransformHarten::computeWaveletCoefficients(
-    std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
-    const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& wavelet_coeffs,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
     hier::Patch& patch,
     const int depth,
     const bool smooth_cell_data)
@@ -85,7 +85,7 @@ WaveletTransformHarten::computeWaveletCoefficients(
     TBOX_ASSERT(cell_data);
     
     // Declare an empty vector.
-    std::vector<boost::shared_ptr<pdat::CellData<double> > > variable_local_means;
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > variable_local_means;
     
     computeWaveletCoefficientsWithVariableLocalMeans(
         wavelet_coeffs,
@@ -102,9 +102,9 @@ WaveletTransformHarten::computeWaveletCoefficients(
  */
 void
 WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
-    std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
-    std::vector<boost::shared_ptr<pdat::CellData<double> > >& variable_local_means,
-    const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& wavelet_coeffs,
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& variable_local_means,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
     hier::Patch& patch,
     const int depth,
     const bool smooth_cell_data)
@@ -228,7 +228,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
     /*
      * Smooth the depth component of the given cell data.
      */
-    boost::shared_ptr<pdat::CellData<double> > smoothed_cell_data;
+    HAMERS_SHARED_PTR<pdat::CellData<double> > smoothed_cell_data;
     
     if (smooth_cell_data)
     {
@@ -246,10 +246,10 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
         const int num_ghosts_0_wavelet_coeffs = num_ghosts_wavelet_coeffs[0];
         
         // Allocate scaling function coefficients.
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > scaling_coeffs_x;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > scaling_coeffs_x;
         for (int li = 0; li < d_num_level; li++)
         {
-            scaling_coeffs_x.push_back(boost::make_shared<pdat::CellData<double> >(
+            scaling_coeffs_x.push_back(HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, num_ghosts_wavelet_coeffs));
         }
         
@@ -543,19 +543,19 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
         const int ghostcell_dim_0_wavelet_coeffs = ghostcell_dims_wavelet_coeffs[0];
         
         // Allocate wavelet coefficients in different dimensions.
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > wavelet_coeffs_x;
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > wavelet_coeffs_y;
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > scaling_coeffs_x;
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > scaling_coeffs_y;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > wavelet_coeffs_x;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > wavelet_coeffs_y;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > scaling_coeffs_x;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > scaling_coeffs_y;
         for (int li = 0; li < d_num_level; li++)
         {
-            wavelet_coeffs_x.push_back(boost::make_shared<pdat::CellData<double> >(
+            wavelet_coeffs_x.push_back(HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, num_ghosts_wavelet_coeffs));
-            wavelet_coeffs_y.push_back(boost::make_shared<pdat::CellData<double> >(
+            wavelet_coeffs_y.push_back(HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, num_ghosts_wavelet_coeffs));
-            scaling_coeffs_x.push_back(boost::make_shared<pdat::CellData<double> >(
+            scaling_coeffs_x.push_back(HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, num_ghosts_wavelet_coeffs));
-            scaling_coeffs_y.push_back(boost::make_shared<pdat::CellData<double> >(
+            scaling_coeffs_y.push_back(HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, num_ghosts_wavelet_coeffs));
         }
         
@@ -1210,25 +1210,25 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
         const int ghostcell_dim_1_wavelet_coeffs = ghostcell_dims_wavelet_coeffs[1];
         
         // Allocate wavelet coefficients in different dimensions.
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > wavelet_coeffs_x;
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > wavelet_coeffs_y;
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > wavelet_coeffs_z;
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > scaling_coeffs_x;
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > scaling_coeffs_y;
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > scaling_coeffs_z;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > wavelet_coeffs_x;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > wavelet_coeffs_y;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > wavelet_coeffs_z;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > scaling_coeffs_x;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > scaling_coeffs_y;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > scaling_coeffs_z;
         for (int li = 0; li < d_num_level; li++)
         {
-            wavelet_coeffs_x.push_back(boost::make_shared<pdat::CellData<double> >(
+            wavelet_coeffs_x.push_back(HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, num_ghosts_wavelet_coeffs));
-            wavelet_coeffs_y.push_back(boost::make_shared<pdat::CellData<double> >(
+            wavelet_coeffs_y.push_back(HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, num_ghosts_wavelet_coeffs));
-            wavelet_coeffs_z.push_back(boost::make_shared<pdat::CellData<double> >(
+            wavelet_coeffs_z.push_back(HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, num_ghosts_wavelet_coeffs));
-            scaling_coeffs_x.push_back(boost::make_shared<pdat::CellData<double> >(
+            scaling_coeffs_x.push_back(HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, num_ghosts_wavelet_coeffs));
-            scaling_coeffs_y.push_back(boost::make_shared<pdat::CellData<double> >(
+            scaling_coeffs_y.push_back(HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, num_ghosts_wavelet_coeffs));
-            scaling_coeffs_z.push_back(boost::make_shared<pdat::CellData<double> >(
+            scaling_coeffs_z.push_back(HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, num_ghosts_wavelet_coeffs));
         }
         
@@ -2377,9 +2377,9 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
 /*
  * Smooth the given cell data in different directions.
  */
-boost::shared_ptr<pdat::CellData<double> >
+HAMERS_SHARED_PTR<pdat::CellData<double> >
 WaveletTransformHarten::smoothCellData(
-    const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
     hier::Patch& patch,
     const int depth)
 {
@@ -2398,7 +2398,7 @@ WaveletTransformHarten::smoothCellData(
     double* f = cell_data->getPointer(depth);
     
     // Allocate memory for the smoothed cell data.
-    boost::shared_ptr<pdat::CellData<double> > smoothed_cell_data(
+    HAMERS_SHARED_PTR<pdat::CellData<double> > smoothed_cell_data(
         new pdat::CellData<double>(interior_box, d_dim.getValue(), num_ghosts_cell_data));
     
     if (d_dim == tbox::Dimension(1))

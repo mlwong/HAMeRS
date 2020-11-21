@@ -17,8 +17,8 @@ class GradientSensorJameson: public GradientSensor
          */
         void
         computeGradient(
-            boost::shared_ptr<pdat::CellData<double> >& gradient,
-            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& gradient,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
             hier::Patch& patch,
             const int depth = 0);
         

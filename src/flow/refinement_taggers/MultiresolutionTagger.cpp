@@ -1,7 +1,6 @@
 #include "flow/refinement_taggers/MultiresolutionTagger.hpp"
 
 #include <algorithm>
-#include "boost/lexical_cast.hpp"
 
 // #define HAMERS_PLOTTING_MULTIRESOLUTION_TAGGER
 
@@ -10,9 +9,9 @@
 MultiresolutionTagger::MultiresolutionTagger(
     const std::string& object_name,
     const tbox::Dimension& dim,
-    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
-    const boost::shared_ptr<FlowModel>& flow_model,
-    const boost::shared_ptr<tbox::Database>& multiresolution_tagger_db):
+    const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
+    const HAMERS_SHARED_PTR<FlowModel>& flow_model,
+    const HAMERS_SHARED_PTR<tbox::Database>& multiresolution_tagger_db):
         d_object_name(object_name),
         d_dim(dim),
         d_grid_geometry(grid_geometry),
@@ -51,7 +50,7 @@ MultiresolutionTagger::MultiresolutionTagger(
         
         std::vector<std::string> sensor_keys_defined(num_keys);
         int sensor_keys_count = 0;
-        boost::shared_ptr<tbox::Database> sensor_db;
+        HAMERS_SHARED_PTR<tbox::Database> sensor_db;
         for (int i = 0; i < num_keys; i++)
         {
             std::string sensor_key = sensor_keys[i];
@@ -495,10 +494,10 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
                         d_Harten_wavelet_coeffs_density.push_back(
-                            boost::make_shared<pdat::CellVariable<double> >(
+                            HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
                                 d_dim,
                                 "Harten wavelet coefficient of density at level " +
-                                    boost::lexical_cast<std::string>(li),
+                                    std::to_string(li),
                                 1));
                         
                         if (d_Harten_wavelet_uses_global_tol[vi])
@@ -509,10 +508,10 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         if (d_Harten_wavelet_uses_local_tol[vi])
                         {
                             d_Harten_local_means_density.push_back(
-                                boost::make_shared<pdat::CellVariable<double> >(
+                                HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
                                     d_dim,
                                     "Harten local mean of density at level " +
-                                        boost::lexical_cast<std::string>(li),
+                                        std::to_string(li),
                                     1));
                         }
                     }
@@ -520,7 +519,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                     if (d_Harten_wavelet_uses_alpha_tol[vi])
                     {
                         d_Harten_Lipschitz_exponent_density =
-                            boost::shared_ptr<pdat::CellVariable<double> > (
+                            HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
                                 new pdat::CellVariable<double>(
                                     d_dim,
                                     "Harten Lipschitz's exponent of density",
@@ -532,10 +531,10 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
                         d_Harten_wavelet_coeffs_total_energy.push_back(
-                            boost::make_shared<pdat::CellVariable<double> >(
+                            HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
                                 d_dim,
                                 "Harten wavelet coefficient of total energy at level " +
-                                    boost::lexical_cast<std::string>(li),
+                                    std::to_string(li),
                                 1));
                         
                         if (d_Harten_wavelet_uses_global_tol[vi])
@@ -546,10 +545,10 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         if (d_Harten_wavelet_uses_local_tol[vi])
                         {
                             d_Harten_local_means_total_energy.push_back(
-                                boost::make_shared<pdat::CellVariable<double> >(
+                                HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
                                     d_dim,
                                     "Harten local mean of total energy at level " +
-                                        boost::lexical_cast<std::string>(li),
+                                        std::to_string(li),
                                     1));
                         }
                     }
@@ -557,7 +556,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                     if (d_Harten_wavelet_uses_alpha_tol[vi])
                     {
                         d_Harten_Lipschitz_exponent_total_energy =
-                            boost::shared_ptr<pdat::CellVariable<double> > (
+                            HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
                                 new pdat::CellVariable<double>(
                                     d_dim,
                                     "Harten Lipschitz's exponent of total energy",
@@ -569,10 +568,10 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
                         d_Harten_wavelet_coeffs_pressure.push_back(
-                            boost::make_shared<pdat::CellVariable<double> >(
+                            HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
                                 d_dim,
                                 "Harten wavelet coefficient of pressure at level " +
-                                    boost::lexical_cast<std::string>(li),
+                                    std::to_string(li),
                                 1));
                         
                         if (d_Harten_wavelet_uses_global_tol[vi])
@@ -583,10 +582,10 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         if (d_Harten_wavelet_uses_local_tol[vi])
                         {
                             d_Harten_local_means_pressure.push_back(
-                                boost::make_shared<pdat::CellVariable<double> >(
+                                HAMERS_MAKE_SHARED<pdat::CellVariable<double> >(
                                     d_dim,
                                     "Harten local mean of pressure at level " +
-                                        boost::lexical_cast<std::string>(li),
+                                        std::to_string(li),
                                     1));
                         }
                     }
@@ -594,7 +593,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                     if (d_Harten_wavelet_uses_alpha_tol[vi])
                     {
                         d_Harten_Lipschitz_exponent_pressure =
-                            boost::shared_ptr<pdat::CellVariable<double> > (
+                            HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
                                 new pdat::CellVariable<double>(
                                     d_dim,
                                     "Harten Lipschitz's exponent of pressure",
@@ -751,8 +750,8 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
  */
 void
 MultiresolutionTagger::registerPlotQuantities(
-    const boost::shared_ptr<ExtendedVisItDataWriter>& visit_writer,
-    const boost::shared_ptr<hier::VariableContext>& plot_context)
+    const HAMERS_SHARED_PTR<ExtendedVisItDataWriter>& visit_writer,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& plot_context)
 {
 #ifdef HAMERS_PLOTTING_MULTIRESOLUTION_TAGGER
     hier::VariableDatabase* vardb = hier::VariableDatabase::getDatabase();
@@ -774,7 +773,7 @@ MultiresolutionTagger::registerPlotQuantities(
                     {
                         visit_writer->registerPlotQuantity(
                             "Harten wavelet coefficient of density at level " +
-                                boost::lexical_cast<std::string>(li),
+                                std::to_string(li),
                             "SCALAR",
                             vardb->mapVariableAndContextToIndex(
                                d_Harten_wavelet_coeffs_density[li],
@@ -797,7 +796,7 @@ MultiresolutionTagger::registerPlotQuantities(
                     {
                         visit_writer->registerPlotQuantity(
                             "Harten wavelet coefficient of total energy at level " +
-                                boost::lexical_cast<std::string>(li),
+                                std::to_string(li),
                             "SCALAR",
                             vardb->mapVariableAndContextToIndex(
                                d_Harten_wavelet_coeffs_total_energy[li],
@@ -820,7 +819,7 @@ MultiresolutionTagger::registerPlotQuantities(
                     {
                         visit_writer->registerPlotQuantity(
                             "Harten wavelet coefficient of pressure at level " +
-                                boost::lexical_cast<std::string>(li),
+                                std::to_string(li),
                             "SCALAR",
                             vardb->mapVariableAndContextToIndex(
                                d_Harten_wavelet_coeffs_pressure[li],
@@ -963,7 +962,7 @@ MultiresolutionTagger::printClassData(std::ostream& os) const
  */
 void
 MultiresolutionTagger::putToRestart(
-    const boost::shared_ptr<tbox::Database>& restart_db) const
+    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
     if (static_cast<int>(d_multiresolution_sensors.size()) > 0)
     {
@@ -974,7 +973,7 @@ MultiresolutionTagger::putToRestart(
     {
         if (d_multiresolution_sensors[si] == "HARTEN_WAVELET")
         {
-            boost::shared_ptr<tbox::Database> sensor_db =
+            HAMERS_SHARED_PTR<tbox::Database> sensor_db =
                 restart_db->putDatabase("HARTEN_WAVELET");
             
             sensor_db->putInteger("d_Harten_wavelet_num_level",
@@ -1034,7 +1033,7 @@ MultiresolutionTagger::putToRestart(
 void
 MultiresolutionTagger::computeMultiresolutionSensorValuesOnPatch(
     hier::Patch& patch,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     // Loop over multiresolution sensors chosen.
     for (int si = 0; si < static_cast<int>(d_multiresolution_sensors.size()); si++)
@@ -1070,14 +1069,14 @@ MultiresolutionTagger::computeMultiresolutionSensorValuesOnPatch(
                     d_flow_model->computeDerivedCellData();
                     
                     // Get the pointer to density data inside the flow model.
-                    boost::shared_ptr<pdat::CellData<double> > data_density = d_flow_model->getCellData("DENSITY");
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > data_density = d_flow_model->getCellData("DENSITY");
                     
                     // Get the wavelet coefficients.
-                    std::vector<boost::shared_ptr<pdat::CellData<double> > > wavelet_coeffs;
+                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > wavelet_coeffs;
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
                         wavelet_coeffs.push_back(
-                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                                 patch.getPatchData(
                                     d_Harten_wavelet_coeffs_density[li],
                                     data_context)));
@@ -1087,11 +1086,11 @@ MultiresolutionTagger::computeMultiresolutionSensorValuesOnPatch(
                     if (d_Harten_wavelet_uses_local_tol[vi])
                     {
                         // Get the local means.
-                        std::vector<boost::shared_ptr<pdat::CellData<double> > > variable_local_means;
+                        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > variable_local_means;
                         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                         {
                             variable_local_means.push_back(
-                                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                                     patch.getPatchData(
                                         d_Harten_local_means_density[li],
                                         data_context)));
@@ -1141,15 +1140,15 @@ MultiresolutionTagger::computeMultiresolutionSensorValuesOnPatch(
                     d_flow_model->computeDerivedCellData();
                     
                     // Get the pointer to total energy data inside the flow model.
-                    boost::shared_ptr<pdat::CellData<double> > data_total_energy =
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > data_total_energy =
                         d_flow_model->getCellData("TOTAL_ENERGY");
                     
                     // Get the wavelet coefficients.
-                    std::vector<boost::shared_ptr<pdat::CellData<double> > > wavelet_coeffs;
+                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > wavelet_coeffs;
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
                         wavelet_coeffs.push_back(
-                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                                 patch.getPatchData(
                                     d_Harten_wavelet_coeffs_total_energy[li],
                                     data_context)));
@@ -1159,11 +1158,11 @@ MultiresolutionTagger::computeMultiresolutionSensorValuesOnPatch(
                     if (d_Harten_wavelet_uses_local_tol[vi])
                     {
                         // Get the local means.
-                        std::vector<boost::shared_ptr<pdat::CellData<double> > > variable_local_means;
+                        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > variable_local_means;
                         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                         {
                             variable_local_means.push_back(
-                                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                                     patch.getPatchData(
                                         d_Harten_local_means_total_energy[li],
                                         data_context)));
@@ -1213,14 +1212,14 @@ MultiresolutionTagger::computeMultiresolutionSensorValuesOnPatch(
                     d_flow_model->computeDerivedCellData();
                     
                     // Get the pointer to pressure data inside the flow model.
-                    boost::shared_ptr<pdat::CellData<double> > data_pressure = d_flow_model->getCellData("PRESSURE");
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure = d_flow_model->getCellData("PRESSURE");
                     
                     // Get the wavelet coefficients.
-                    std::vector<boost::shared_ptr<pdat::CellData<double> > > wavelet_coeffs;
+                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > wavelet_coeffs;
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
                         wavelet_coeffs.push_back(
-                                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                                     patch.getPatchData(
                                         d_Harten_wavelet_coeffs_pressure[li],
                                         data_context)));
@@ -1230,11 +1229,11 @@ MultiresolutionTagger::computeMultiresolutionSensorValuesOnPatch(
                     if (d_Harten_wavelet_uses_local_tol[vi])
                     {
                         // Get the local means.
-                        std::vector<boost::shared_ptr<pdat::CellData<double> > > variable_local_means;
+                        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > variable_local_means;
                         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                         {
                             variable_local_means.push_back(
-                                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                                         patch.getPatchData(
                                             d_Harten_local_means_pressure[li],
                                             data_context)));
@@ -1282,9 +1281,9 @@ MultiresolutionTagger::computeMultiresolutionSensorValuesOnPatch(
  */
 void
 MultiresolutionTagger::getSensorValueStatistics(
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const int level_number,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -1376,8 +1375,8 @@ MultiresolutionTagger::getSensorValueStatistics(
 void
 MultiresolutionTagger::tagCellsOnPatch(
    hier::Patch& patch,
-   const boost::shared_ptr<pdat::CellData<int> >& tags,
-   const boost::shared_ptr<hier::VariableContext>& data_context)
+   const HAMERS_SHARED_PTR<pdat::CellData<int> >& tags,
+   const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     for (int si = 0; si < static_cast<int>(d_multiresolution_sensors.size()); si++)
     {
@@ -1429,35 +1428,35 @@ MultiresolutionTagger::tagCellsOnPatch(
                 
                 if (variable_key == "DENSITY")
                 {
-                    std::vector<boost::shared_ptr<pdat::CellData<double> > > wavelet_coeffs;
+                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > wavelet_coeffs;
                     
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
                         wavelet_coeffs.push_back(
-                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                                 patch.getPatchData(
                                     d_Harten_wavelet_coeffs_density[li],
                                     data_context)));
                     }
                     
-                    std::vector<boost::shared_ptr<pdat::CellData<double> > > variable_local_means;
+                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > variable_local_means;
                     if (uses_local_tol)
                     {
                         // Get the local means.
                         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                         {
                             variable_local_means.push_back(
-                                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                                     patch.getPatchData(
                                         d_Harten_local_means_density[li],
                                         data_context)));
                         }
                     }
                     
-                    boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent;
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > Lipschitz_exponent;
                     if (uses_alpha_tol)
                     {
-                        Lipschitz_exponent = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        Lipschitz_exponent = HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_Harten_Lipschitz_exponent_density,
                                 data_context));
@@ -1480,35 +1479,35 @@ MultiresolutionTagger::tagCellsOnPatch(
                 }
                 else if (variable_key == "TOTAL_ENERGY")
                 {
-                    std::vector<boost::shared_ptr<pdat::CellData<double> > > wavelet_coeffs;
+                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > wavelet_coeffs;
                     
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
                         wavelet_coeffs.push_back(
-                                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                                     patch.getPatchData(
                                         d_Harten_wavelet_coeffs_total_energy[li],
                                         data_context)));
                     }
                     
-                    std::vector<boost::shared_ptr<pdat::CellData<double> > > variable_local_means;
+                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > variable_local_means;
                     if (uses_local_tol)
                     {
                         // Get the local means.
                         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                         {
                             variable_local_means.push_back(
-                                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                                         patch.getPatchData(
                                             d_Harten_local_means_total_energy[li],
                                             data_context)));
                         }
                     }
                     
-                    boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent;
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > Lipschitz_exponent;
                     if (uses_alpha_tol)
                     {
-                        Lipschitz_exponent = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        Lipschitz_exponent = HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_Harten_Lipschitz_exponent_total_energy,
                                 data_context));
@@ -1531,35 +1530,35 @@ MultiresolutionTagger::tagCellsOnPatch(
                 }
                 else if (variable_key == "PRESSURE")
                 {
-                    std::vector<boost::shared_ptr<pdat::CellData<double> > > wavelet_coeffs;
+                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > wavelet_coeffs;
                     
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
                         wavelet_coeffs.push_back(
-                                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                                     patch.getPatchData(
                                         d_Harten_wavelet_coeffs_pressure[li],
                                         data_context)));
                     }
                     
-                    std::vector<boost::shared_ptr<pdat::CellData<double> > > variable_local_means;
+                    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > variable_local_means;
                     if (uses_local_tol)
                     {
                         // Get the local means.
                         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                         {
                             variable_local_means.push_back(
-                                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                    HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                                         patch.getPatchData(
                                             d_Harten_local_means_pressure[li],
                                             data_context)));
                         }
                     }
                     
-                    boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent;
+                    HAMERS_SHARED_PTR<pdat::CellData<double> > Lipschitz_exponent;
                     if (uses_alpha_tol)
                     {
-                        Lipschitz_exponent = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        Lipschitz_exponent = HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_Harten_Lipschitz_exponent_pressure,
                                 data_context));
@@ -1603,8 +1602,8 @@ MultiresolutionTagger::tagCellsOnPatch(
 void
 MultiresolutionTagger::computeLipschitzExponentOnPatch(
     hier::Patch& patch,
-    const boost::shared_ptr<pdat::CellData<double> >& Lipschitz_exponent,
-    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& Lipschitz_exponent,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& wavelet_coeffs,
     const std::string& sensor_key)
 {
     // Get the dimensions of box that covers the interior of patch.
@@ -1630,10 +1629,10 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
         const hier::IntVector ghostcell_dims_wavelet_coeffs = wavelet_coeffs[0]->getGhostBox().numberCells();
         
         // Create a vector of maximum wavelet coefficients in domain of dependence.
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > wavelet_coeffs_local_max;
+        std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > wavelet_coeffs_local_max;
         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
         {
-            wavelet_coeffs_local_max.push_back(boost::make_shared<pdat::CellData<double> >(
+            wavelet_coeffs_local_max.push_back(HAMERS_MAKE_SHARED<pdat::CellData<double> >(
                 interior_box, 1, num_ghosts_wavelet_coeffs));
         }
         
@@ -2148,11 +2147,11 @@ MultiresolutionTagger::computeLipschitzExponentOnPatch(
 void
 MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
     hier::Patch& patch,
-    const boost::shared_ptr<pdat::CellData<int> >& tags,
-    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
+    const HAMERS_SHARED_PTR<pdat::CellData<int> >& tags,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& wavelet_coeffs,
     const std::vector<double>& wavelet_coeffs_maxs,
-    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& variable_local_means,
-    const boost::shared_ptr<pdat::CellData<double> >& Lipschitz_exponent,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& variable_local_means,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& Lipschitz_exponent,
     const std::string& sensor_key,
     const bool uses_global_tol,
     const bool uses_local_tol,
@@ -2175,7 +2174,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
     const hier::IntVector ghostcell_dims_wavelet_coeffs = wavelet_coeffs[0]->getGhostBox().numberCells();
     
     // Allocate temporary patch data.
-    boost::shared_ptr<pdat::CellData<int> > tags_multiresolution_tagger(
+    HAMERS_SHARED_PTR<pdat::CellData<int> > tags_multiresolution_tagger(
         new pdat::CellData<int>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
     
     tags_multiresolution_tagger->fillAll(1);
@@ -2224,7 +2223,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
         if (uses_global_tol)
         {
             // Allocate temporary patch data.
-            boost::shared_ptr<pdat::CellData<int> > tags_global_tol(
+            HAMERS_SHARED_PTR<pdat::CellData<int> > tags_global_tol(
                 new pdat::CellData<int>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
             
             tags_global_tol->fillAll(0);
@@ -2265,7 +2264,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
         if (uses_local_tol)
         {
             // Allocate temporary patch data.
-            boost::shared_ptr<pdat::CellData<int> > tags_local_tol(
+            HAMERS_SHARED_PTR<pdat::CellData<int> > tags_local_tol(
                 new pdat::CellData<int>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
             
             tags_local_tol->fillAll(0);
@@ -2348,7 +2347,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
         if (uses_global_tol)
         {
             // Allocate temporary patch data.
-            boost::shared_ptr<pdat::CellData<int> > tags_global_tol(
+            HAMERS_SHARED_PTR<pdat::CellData<int> > tags_global_tol(
                 new pdat::CellData<int>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
             
             tags_global_tol->fillAll(0);
@@ -2397,7 +2396,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
         if (uses_local_tol)
         {
             // Allocate temporary patch data.
-            boost::shared_ptr<pdat::CellData<int> > tags_local_tol(
+            HAMERS_SHARED_PTR<pdat::CellData<int> > tags_local_tol(
                 new pdat::CellData<int>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
             
             tags_local_tol->fillAll(0);
@@ -2499,7 +2498,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
         if (uses_global_tol)
         {
             // Allocate temporary patch data.
-            boost::shared_ptr<pdat::CellData<int> > tags_global_tol(
+            HAMERS_SHARED_PTR<pdat::CellData<int> > tags_global_tol(
                 new pdat::CellData<int>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
             
             tags_global_tol->fillAll(0);
@@ -2556,7 +2555,7 @@ MultiresolutionTagger::tagCellsOnPatchWithWaveletSensor(
         if (uses_local_tol)
         {
             // Allocate temporary patch data.
-            boost::shared_ptr<pdat::CellData<int> > tags_local_tol(
+            HAMERS_SHARED_PTR<pdat::CellData<int> > tags_local_tol(
                 new pdat::CellData<int>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
             
             tags_local_tol->fillAll(0);

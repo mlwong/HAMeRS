@@ -12,10 +12,10 @@ EulerBoundaryConditions::EulerBoundaryConditions(
     const std::string& object_name,
     const std::string& project_name,
     const tbox::Dimension& dim,
-    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+    const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const FLOW_MODEL::TYPE& flow_model_type,
-    const boost::shared_ptr<FlowModel>& flow_model,
-    const boost::shared_ptr<tbox::Database>& boundary_conditions_db,
+    const HAMERS_SHARED_PTR<FlowModel>& flow_model,
+    const HAMERS_SHARED_PTR<tbox::Database>& boundary_conditions_db,
     const bool& boundary_conditions_db_is_from_restart):
         d_object_name(object_name),
         d_project_name(project_name),
@@ -44,7 +44,7 @@ EulerBoundaryConditions::EulerBoundaryConditions(
     {
         if (boundary_conditions_db_is_from_restart)
         {
-            std::vector<boost::shared_ptr<pdat::CellVariable<double> > > conservative_var =
+            std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > conservative_var =
                 d_flow_model->getConservativeVariables();
             
             d_master_bdry_node_conds = boundary_conditions_db->getIntegerVector("d_master_bdry_node_conds");
@@ -180,7 +180,7 @@ EulerBoundaryConditions::EulerBoundaryConditions(
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        const boost::shared_ptr<FlowModelBoundaryUtilities> flow_model_boundary_utilities =
+        const HAMERS_SHARED_PTR<FlowModelBoundaryUtilities> flow_model_boundary_utilities =
             d_flow_model->getFlowModelBoundaryUtilities();
         
         for (int i = 0; i < NUM_2D_EDGES; i++)
@@ -235,7 +235,7 @@ EulerBoundaryConditions::EulerBoundaryConditions(
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        const boost::shared_ptr<FlowModelBoundaryUtilities> flow_model_boundary_utilities =
+        const HAMERS_SHARED_PTR<FlowModelBoundaryUtilities> flow_model_boundary_utilities =
             d_flow_model->getFlowModelBoundaryUtilities();
         
         for (int i = 0; i < NUM_3D_FACES; i++)
@@ -351,7 +351,7 @@ EulerBoundaryConditions::EulerBoundaryConditions(
 void
 EulerBoundaryConditions::printClassData(std::ostream& os) const
 {
-    std::vector<boost::shared_ptr<pdat::CellVariable<double> > > conservative_var =
+    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > conservative_var =
         d_flow_model->getConservativeVariables();
     
     os << "\nPrint EulerBoundaryConditions object..."
@@ -554,9 +554,9 @@ EulerBoundaryConditions::printClassData(std::ostream& os) const
  */
 void
 EulerBoundaryConditions::putToRestart(
-    const boost::shared_ptr<tbox::Database>& restart_db) const
+    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
-    std::vector<boost::shared_ptr<pdat::CellVariable<double> > > conservative_var =
+    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > conservative_var =
         d_flow_model->getConservativeVariables();
     
     restart_db->putIntegerVector("d_master_bdry_node_conds", d_master_bdry_node_conds);
@@ -609,7 +609,7 @@ EulerBoundaryConditions::putToRestart(
  */
 void
 EulerBoundaryConditions::readDirichletBoundaryDataEntry(
-    const boost::shared_ptr<tbox::Database>& db,
+    const HAMERS_SHARED_PTR<tbox::Database>& db,
     std::string& db_name,
     int bdry_location_index)
 {
@@ -639,10 +639,10 @@ EulerBoundaryConditions::readDirichletBoundaryDataEntry(
     
     // Convert the primitive boundary data to conservative boundary data.
     d_flow_model->setupBasicUtilities();
-    boost::shared_ptr<FlowModelBasicUtilities> basic_utilities = d_flow_model->getFlowModelBasicUtilities();
+    HAMERS_SHARED_PTR<FlowModelBasicUtilities> basic_utilities = d_flow_model->getFlowModelBasicUtilities();
     basic_utilities->convertPrimitiveVariablesToConservativeVariables(V_ptr, Q_ptr);
     
-    std::vector<boost::shared_ptr<pdat::CellVariable<double> > > conservative_var =
+    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > conservative_var =
         d_flow_model->getConservativeVariables();
         
     if (d_dim == tbox::Dimension(1))
@@ -700,7 +700,7 @@ EulerBoundaryConditions::readDirichletBoundaryDataEntry(
  */
 void
 EulerBoundaryConditions::readNeumannBoundaryDataEntry(
-    const boost::shared_ptr<tbox::Database>& db,
+    const HAMERS_SHARED_PTR<tbox::Database>& db,
     std::string& db_name,
     int bdry_location_index)
 {
@@ -720,11 +720,11 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
     hier::Patch& patch,
     const double fill_time,
     const hier::IntVector& ghost_width_to_fill,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     NULL_USE(fill_time);
     
-    std::vector<boost::shared_ptr<pdat::CellVariable<double> > > conservative_var =
+    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > conservative_var =
         d_flow_model->getConservativeVariables();
     
     std::vector<std::string> conservative_var_types =
@@ -735,7 +735,7 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
     
     d_flow_model->registerPatchWithDataContext(patch, data_context);
     
-    std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_var_data =
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_var_data =
         d_flow_model->getCellDataOfConservativeVariables();
     
     if (d_dim == tbox::Dimension(1))
@@ -979,7 +979,7 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
 
 std::vector<double>
 EulerBoundaryConditions::readPrimitiveDataEntry(
-    boost::shared_ptr<tbox::Database> db,
+    HAMERS_SHARED_PTR<tbox::Database> db,
     const std::string& db_name)
 {
     TBOX_ASSERT(db);
@@ -1025,7 +1025,7 @@ EulerBoundaryConditions::readPrimitiveDataEntry(
 void
 EulerBoundaryConditions::setDefaultBoundaryConditions()
 {
-    std::vector<boost::shared_ptr<pdat::CellVariable<double> > > conservative_var =
+    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > conservative_var =
         d_flow_model->getConservativeVariables();
     
     if (d_dim == tbox::Dimension(1))

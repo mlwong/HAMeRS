@@ -11,7 +11,7 @@ class EquationOfThermalConductivityPrandtl: public EquationOfThermalConductivity
         EquationOfThermalConductivityPrandtl(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<EquationOfShearViscosity>& equation_of_shear_viscosity):
+            const HAMERS_SHARED_PTR<EquationOfShearViscosity>& equation_of_shear_viscosity):
                 EquationOfThermalConductivity(
                     object_name,
                     dim),
@@ -40,9 +40,9 @@ class EquationOfThermalConductivityPrandtl: public EquationOfThermalConductivity
          */
         void
         computeThermalConductivity(
-            boost::shared_ptr<pdat::CellData<double> >& data_thermal_conductivity,
-            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermal_conductivity,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
             const std::vector<const double*>& molecular_properties,
             const hier::Box& domain) const;
         
@@ -51,17 +51,17 @@ class EquationOfThermalConductivityPrandtl: public EquationOfThermalConductivity
          */
         void
         computeThermalConductivity(
-            boost::shared_ptr<pdat::CellData<double> >& data_thermal_conductivity,
-            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
-            const boost::shared_ptr<pdat::CellData<double> >& data_molecular_properties,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& data_thermal_conductivity,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_molecular_properties,
             const hier::Box& domain) const;
         
     private:
         /*
          * Boost shared pointer to equation of shear viscosity.
          */
-        const boost::shared_ptr<EquationOfShearViscosity> d_equation_of_shear_viscosity;
+        const HAMERS_SHARED_PTR<EquationOfShearViscosity> d_equation_of_shear_viscosity;
         
 };
 

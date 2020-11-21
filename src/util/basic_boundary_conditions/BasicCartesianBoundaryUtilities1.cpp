@@ -39,7 +39,7 @@
 void
 BasicCartesianBoundaryUtilities1::getFromInput(
     BoundaryUtilityStrategy* bdry_strategy,
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     const std::vector<int>& node_locs,
     std::vector<int>& node_conds,
     const hier::IntVector& periodic)
@@ -91,7 +91,7 @@ BasicCartesianBoundaryUtilities1::getFromInput(
 void
 BasicCartesianBoundaryUtilities1::fillNodeBoundaryData(
     const std::string& var_name,
-    const boost::shared_ptr<pdat::CellData<double> >& var_data,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& var_data,
     const hier::Patch& patch,
     const std::vector<int>& bdry_node_locs,
     const std::vector<int>& bdry_node_conds,
@@ -111,8 +111,8 @@ BasicCartesianBoundaryUtilities1::fillNodeBoundaryData(
     
     NULL_USE(var_name);
     
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     TBOX_ASSERT(patch_geom);
     
@@ -284,7 +284,7 @@ BasicCartesianBoundaryUtilities1::fillNodeBoundaryData(
 void
 BasicCartesianBoundaryUtilities1::read1dBdryNodes(
     BoundaryUtilityStrategy* bdry_strategy,
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     const std::vector<int>& node_locs,
     std::vector<int>& node_conds,
     const hier::IntVector& periodic)
@@ -339,7 +339,7 @@ BasicCartesianBoundaryUtilities1::read1dBdryNodes(
             
             if (need_data_read)
             {
-                boost::shared_ptr<tbox::Database> bdry_loc_db(
+                HAMERS_SHARED_PTR<tbox::Database> bdry_loc_db(
                     input_db->getDatabase(bdry_loc_str));
                 std::string bdry_cond_str =
                     bdry_loc_db->getString("boundary_condition");

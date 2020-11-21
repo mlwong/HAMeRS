@@ -9,6 +9,8 @@
 
 #ifdef HAVE_HDF5
 
+#include "HAMeRS_memory.hpp"
+
 #include "SAMRAI/tbox/TimerManager.h"
 #include "SAMRAI/hier/BoxLevelConnectorUtils.h"
 #include "SAMRAI/hier/PatchLevel.h"
@@ -18,7 +20,6 @@
 #include "SAMRAI/pdat/NodeDataFactory.h"
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 
-#include "boost/make_shared.hpp"
 #include <cstring>
 #include <ctime>
 #include <vector>
@@ -95,7 +96,7 @@ ExtendedVisItDataWriter::s_initialize_handler(
     ExtendedVisItDataWriter::finalizeCallback,
     SAMRAI::tbox::StartupShutdownManager::priorityTimers);
 
-boost::shared_ptr<SAMRAI::tbox::Timer> ExtendedVisItDataWriter::t_write_plot_data;
+HAMERS_SHARED_PTR<SAMRAI::tbox::Timer> ExtendedVisItDataWriter::t_write_plot_data;
 
 /*
  **************************************************************************************************
@@ -381,7 +382,7 @@ ExtendedVisItDataWriter::resetLevelPlotQuantity(
      * Verify the supplied patch data index has the same type and centering as the plot item its
      * replacing.
      */
-    boost::shared_ptr<SAMRAI::hier::PatchDataFactory> factory(
+    HAMERS_SHARED_PTR<SAMRAI::hier::PatchDataFactory> factory(
         SAMRAI::hier::VariableDatabase::getDatabase()->
         getPatchDescriptor()->
         getPatchDataFactory(patch_data_index));
@@ -392,8 +393,8 @@ ExtendedVisItDataWriter::resetLevelPlotQuantity(
     
     if (!found_type)
     {
-        boost::shared_ptr<SAMRAI::pdat::CellDataFactory<float> > ffactory(
-           boost::dynamic_pointer_cast<SAMRAI::pdat::CellDataFactory<float>,
+        HAMERS_SHARED_PTR<SAMRAI::pdat::CellDataFactory<float> > ffactory(
+           HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::CellDataFactory<float>,
             SAMRAI::hier::PatchDataFactory>(factory));
         
         if (ffactory)
@@ -405,8 +406,8 @@ ExtendedVisItDataWriter::resetLevelPlotQuantity(
     }
     if (!found_type)
     {
-        boost::shared_ptr<SAMRAI::pdat::NodeDataFactory<float> > ffactory(
-            boost::dynamic_pointer_cast<SAMRAI::pdat::NodeDataFactory<float>,
+        HAMERS_SHARED_PTR<SAMRAI::pdat::NodeDataFactory<float> > ffactory(
+            HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::NodeDataFactory<float>,
                 SAMRAI::hier::PatchDataFactory>(factory));
         
         if (ffactory)
@@ -419,8 +420,8 @@ ExtendedVisItDataWriter::resetLevelPlotQuantity(
     
     if (!found_type)
     {
-        boost::shared_ptr<SAMRAI::pdat::CellDataFactory<double> > dfactory(
-            boost::dynamic_pointer_cast<SAMRAI::pdat::CellDataFactory<double>,
+        HAMERS_SHARED_PTR<SAMRAI::pdat::CellDataFactory<double> > dfactory(
+            HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::CellDataFactory<double>,
                 SAMRAI::hier::PatchDataFactory>(factory));
         
         if (dfactory)
@@ -432,8 +433,8 @@ ExtendedVisItDataWriter::resetLevelPlotQuantity(
     }
     if (!found_type)
     {
-        boost::shared_ptr<SAMRAI::pdat::NodeDataFactory<double> > dfactory(
-            boost::dynamic_pointer_cast<SAMRAI::pdat::NodeDataFactory<double>,
+        HAMERS_SHARED_PTR<SAMRAI::pdat::NodeDataFactory<double> > dfactory(
+            HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::NodeDataFactory<double>,
                 SAMRAI::hier::PatchDataFactory>(factory));
        
         if (dfactory)
@@ -445,8 +446,8 @@ ExtendedVisItDataWriter::resetLevelPlotQuantity(
     }
     if (!found_type)
     {
-        boost::shared_ptr<SAMRAI::pdat::CellDataFactory<int> > ifactory(
-            boost::dynamic_pointer_cast<SAMRAI::pdat::CellDataFactory<int>,
+        HAMERS_SHARED_PTR<SAMRAI::pdat::CellDataFactory<int> > ifactory(
+            HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::CellDataFactory<int>,
                 SAMRAI::hier::PatchDataFactory>(factory));
         
         if (ifactory)
@@ -458,8 +459,8 @@ ExtendedVisItDataWriter::resetLevelPlotQuantity(
     }
     if (!found_type)
     {
-        boost::shared_ptr<SAMRAI::pdat::NodeDataFactory<int> > ifactory(
-            boost::dynamic_pointer_cast<SAMRAI::pdat::NodeDataFactory<int>,
+        HAMERS_SHARED_PTR<SAMRAI::pdat::NodeDataFactory<int> > ifactory(
+            HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::NodeDataFactory<int>,
                 SAMRAI::hier::PatchDataFactory>(factory));
         
         if (ifactory)
@@ -558,7 +559,7 @@ ExtendedVisItDataWriter::registerNodeCoordinates(
      * Verify the supplied patch data index is a valid NODE-centered
      * float or double and has a depth of at least d_dim
      */
-    boost::shared_ptr<SAMRAI::hier::PatchDataFactory> factory(
+    HAMERS_SHARED_PTR<SAMRAI::hier::PatchDataFactory> factory(
         SAMRAI::hier::VariableDatabase::getDatabase()->getPatchDescriptor()->
             getPatchDataFactory(patch_data_index));
  
@@ -566,8 +567,8 @@ ExtendedVisItDataWriter::registerNodeCoordinates(
     int var_depth = VISIT_UNDEFINED_INDEX;
     if (!found_type)
     {
-        boost::shared_ptr<SAMRAI::pdat::NodeDataFactory<float> > ffactory(
-            boost::dynamic_pointer_cast<SAMRAI::pdat::NodeDataFactory<float>,
+        HAMERS_SHARED_PTR<SAMRAI::pdat::NodeDataFactory<float> > ffactory(
+            HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::NodeDataFactory<float>,
                 SAMRAI::hier::PatchDataFactory>(factory));
         
         if (ffactory)
@@ -578,8 +579,8 @@ ExtendedVisItDataWriter::registerNodeCoordinates(
     }
     if (!found_type)
     {
-        boost::shared_ptr<SAMRAI::pdat::NodeDataFactory<double> > dfactory(
-            boost::dynamic_pointer_cast<SAMRAI::pdat::NodeDataFactory<double>,
+        HAMERS_SHARED_PTR<SAMRAI::pdat::NodeDataFactory<double> > dfactory(
+            HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::NodeDataFactory<double>,
             SAMRAI::hier::PatchDataFactory>(factory));
         
         if (dfactory)
@@ -677,15 +678,15 @@ ExtendedVisItDataWriter::registerSingleNodeCoordinate(
     /*
      * Verify the supplied patch data index is a valid NODE-centered float or double.
      */
-    boost::shared_ptr<SAMRAI::hier::PatchDataFactory> factory(
+    HAMERS_SHARED_PTR<SAMRAI::hier::PatchDataFactory> factory(
         SAMRAI::hier::VariableDatabase::getDatabase()->getPatchDescriptor()->
             getPatchDataFactory(patch_data_index));
     
     bool found_type = false;
     if (!found_type)
     {
-        boost::shared_ptr<SAMRAI::pdat::NodeDataFactory<float> > ffactory(
-            boost::dynamic_pointer_cast<SAMRAI::pdat::NodeDataFactory<float>,
+        HAMERS_SHARED_PTR<SAMRAI::pdat::NodeDataFactory<float> > ffactory(
+            HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::NodeDataFactory<float>,
                 SAMRAI::hier::PatchDataFactory>(factory));
         
         if (ffactory)
@@ -695,8 +696,8 @@ ExtendedVisItDataWriter::registerSingleNodeCoordinate(
     }
     if (!found_type)
     {
-        boost::shared_ptr<SAMRAI::pdat::NodeDataFactory<double> > dfactory(
-            boost::dynamic_pointer_cast<SAMRAI::pdat::NodeDataFactory<double>,
+        HAMERS_SHARED_PTR<SAMRAI::pdat::NodeDataFactory<double> > dfactory(
+            HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::NodeDataFactory<double>,
                 SAMRAI::hier::PatchDataFactory>(factory));
         
         if (dfactory)
@@ -1164,7 +1165,7 @@ ExtendedVisItDataWriter::initializePlotItem(
     int var_depth = 0;
     if (patch_data_index >= 0)
     {
-        boost::shared_ptr<SAMRAI::hier::PatchDataFactory> factory(
+        HAMERS_SHARED_PTR<SAMRAI::hier::PatchDataFactory> factory(
             SAMRAI::hier::VariableDatabase::getDatabase()->getPatchDescriptor()->
                 getPatchDataFactory(patch_data_index));
         
@@ -1179,8 +1180,8 @@ ExtendedVisItDataWriter::initializePlotItem(
         {
             if (!found_type)
             {
-                boost::shared_ptr<SAMRAI::pdat::CellDataFactory<float> > ffactory(
-                    boost::dynamic_pointer_cast<SAMRAI::pdat::CellDataFactory<float>,
+                HAMERS_SHARED_PTR<SAMRAI::pdat::CellDataFactory<float> > ffactory(
+                    HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::CellDataFactory<float>,
                         SAMRAI::hier::PatchDataFactory>(factory));
                 
                 if (ffactory)
@@ -1193,8 +1194,8 @@ ExtendedVisItDataWriter::initializePlotItem(
             }
             if (!found_type)
             {
-                boost::shared_ptr<SAMRAI::pdat::CellDataFactory<double> > dfactory(
-                    boost::dynamic_pointer_cast<SAMRAI::pdat::CellDataFactory<double>,
+                HAMERS_SHARED_PTR<SAMRAI::pdat::CellDataFactory<double> > dfactory(
+                    HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::CellDataFactory<double>,
                         SAMRAI::hier::PatchDataFactory>(factory));
                 
                 if (dfactory)
@@ -1207,8 +1208,8 @@ ExtendedVisItDataWriter::initializePlotItem(
             }
             if (!found_type)
             {
-                boost::shared_ptr<SAMRAI::pdat::CellDataFactory<int> > ifactory(
-                    boost::dynamic_pointer_cast<SAMRAI::pdat::CellDataFactory<int>,
+                HAMERS_SHARED_PTR<SAMRAI::pdat::CellDataFactory<int> > ifactory(
+                    HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::CellDataFactory<int>,
                         SAMRAI::hier::PatchDataFactory>(factory));
                 
                 if (ifactory)
@@ -1221,8 +1222,8 @@ ExtendedVisItDataWriter::initializePlotItem(
             }
             if (!found_type)
             {
-                boost::shared_ptr<SAMRAI::pdat::NodeDataFactory<float> > ffactory(
-                    boost::dynamic_pointer_cast<SAMRAI::pdat::NodeDataFactory<float>,
+                HAMERS_SHARED_PTR<SAMRAI::pdat::NodeDataFactory<float> > ffactory(
+                    HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::NodeDataFactory<float>,
                         SAMRAI::hier::PatchDataFactory>(factory));
                 
                 if (ffactory)
@@ -1235,8 +1236,8 @@ ExtendedVisItDataWriter::initializePlotItem(
             }
             if (!found_type)
             {
-                boost::shared_ptr<SAMRAI::pdat::NodeDataFactory<double> > dfactory(
-                    boost::dynamic_pointer_cast<SAMRAI::pdat::NodeDataFactory<double>,
+                HAMERS_SHARED_PTR<SAMRAI::pdat::NodeDataFactory<double> > dfactory(
+                    HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::NodeDataFactory<double>,
                             SAMRAI::hier::PatchDataFactory>(factory));
                 
                 if (dfactory)
@@ -1249,8 +1250,8 @@ ExtendedVisItDataWriter::initializePlotItem(
             }
             if (!found_type)
             {
-                boost::shared_ptr<SAMRAI::pdat::NodeDataFactory<int> > ifactory(
-                    boost::dynamic_pointer_cast<SAMRAI::pdat::NodeDataFactory<int>,
+                HAMERS_SHARED_PTR<SAMRAI::pdat::NodeDataFactory<int> > ifactory(
+                    HAMERS_DYNAMIC_POINTER_CAST<SAMRAI::pdat::NodeDataFactory<int>,
                         SAMRAI::hier::PatchDataFactory>(factory));
                 
                 if (ifactory)
@@ -1429,7 +1430,7 @@ ExtendedVisItDataWriter::dumpWriteBarrierEnd()
  */
 void
 ExtendedVisItDataWriter::writePlotData(
-    const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<SAMRAI::hier::PatchHierarchy>& hierarchy,
     int time_step_number,
     double simulation_time)
 {
@@ -1447,8 +1448,8 @@ ExtendedVisItDataWriter::writePlotData(
     {
         const SAMRAI::hier::BoxLevel& unsorted_box_level =
            *hierarchy->getPatchLevel(ln)->getBoxLevel();
-        boost::shared_ptr<SAMRAI::hier::BoxLevel> sorted_box_level;
-        boost::shared_ptr<SAMRAI::hier::MappingConnector> unused_sorting_map;
+        HAMERS_SHARED_PTR<SAMRAI::hier::BoxLevel> sorted_box_level;
+        HAMERS_SHARED_PTR<SAMRAI::hier::MappingConnector> unused_sorting_map;
         dlbg_edge_utils.makeSortingMap(
             sorted_box_level,
             unused_sorting_map,
@@ -1539,7 +1540,7 @@ ExtendedVisItDataWriter::writePlotData(
  */
 void
 ExtendedVisItDataWriter::initializePlotVariableMinMaxInfo(
-    const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy)
+    const HAMERS_SHARED_PTR<SAMRAI::hier::PatchHierarchy>& hierarchy)
 {
     TBOX_ASSERT(hierarchy);
  
@@ -1551,7 +1552,7 @@ ExtendedVisItDataWriter::initializePlotVariableMinMaxInfo(
  
     for (int ln = 0; ln <= hierarchy->getFinestLevelNumber(); ++ln)
     {
-        boost::shared_ptr<SAMRAI::hier::PatchLevel> patch_level(
+        HAMERS_SHARED_PTR<SAMRAI::hier::PatchLevel> patch_level(
             hierarchy->getPatchLevel(ln));
         tot_number_of_patches += patch_level->getGlobalNumberOfPatches();
         for (SAMRAI::hier::PatchLevel::iterator ip(patch_level->begin());
@@ -1662,7 +1663,7 @@ ExtendedVisItDataWriter::initializePlotVariableMinMaxInfo(
  */
 void
 ExtendedVisItDataWriter::writeHDFFiles(
-    const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<SAMRAI::hier::PatchHierarchy>& hierarchy,
     double simulation_time)
 {
     TBOX_ASSERT(hierarchy);
@@ -1769,7 +1770,7 @@ ExtendedVisItDataWriter::writeHDFFiles(
         
         // create group for this proc
         sprintf(temp_buf, "processor.%0*d", d_dump_directory_name_zero_padding_length, my_proc);
-        boost::shared_ptr<SAMRAI::tbox::Database> processor_HDFGroup(
+        HAMERS_SHARED_PTR<SAMRAI::tbox::Database> processor_HDFGroup(
             visit_HDFFilePointer->putDatabase(std::string(temp_buf)));
         writeVisItVariablesToHDFFile(processor_HDFGroup,
             hierarchy,
@@ -1815,7 +1816,7 @@ ExtendedVisItDataWriter::writeHDFFiles(
  */
 int
 ExtendedVisItDataWriter::getGlobalPatchNumber(
-    const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<SAMRAI::hier::PatchHierarchy>& hierarchy,
     const int level_number,
     const int patch_number)
 {
@@ -1844,8 +1845,8 @@ ExtendedVisItDataWriter::getGlobalPatchNumber(
  */
 void
 ExtendedVisItDataWriter::writeVisItVariablesToHDFFile(
-    const boost::shared_ptr<SAMRAI::tbox::Database>& processor_HDFGroup,
-    const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<SAMRAI::tbox::Database>& processor_HDFGroup,
+    const HAMERS_SHARED_PTR<SAMRAI::hier::PatchHierarchy>& hierarchy,
     int coarsest_level,
     int finest_level,
     double simulation_time)
@@ -1862,7 +1863,7 @@ ExtendedVisItDataWriter::writeVisItVariablesToHDFFile(
     d_var_id_ctr = 0;
     
     char temp_buf[VISIT_NAME_BUFSIZE];
-    boost::shared_ptr<SAMRAI::tbox::Database> level_HDFGroup, patch_HDFGroup;
+    HAMERS_SHARED_PTR<SAMRAI::tbox::Database> level_HDFGroup, patch_HDFGroup;
     
     for (int ln = coarsest_level; ln <= finest_level; ++ln)
     {
@@ -1872,14 +1873,14 @@ ExtendedVisItDataWriter::writeVisItVariablesToHDFFile(
         sprintf(temp_buf, "level.%05d", ln);
         level_HDFGroup = processor_HDFGroup->putDatabase(std::string(temp_buf));
         
-        boost::shared_ptr<SAMRAI::hier::PatchLevel> patch_level(
+        HAMERS_SHARED_PTR<SAMRAI::hier::PatchLevel> patch_level(
            hierarchy->getPatchLevel(ln));
         
         SAMRAI::hier::IntVector coarsen_ratio(patch_level->getRatioToCoarserLevel());
         
         for (SAMRAI::hier::PatchLevel::iterator ip(patch_level->begin()); ip != patch_level->end(); ++ip)
         {
-            const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
+            const HAMERS_SHARED_PTR<SAMRAI::hier::Patch>& patch = *ip;
             
             /*
              * create new HDFGroup for this patch
@@ -1930,8 +1931,8 @@ ExtendedVisItDataWriter::writeVisItVariablesToHDFFile(
  */
 void
 ExtendedVisItDataWriter::packRegularAndDerivedData(
-    const boost::shared_ptr<SAMRAI::tbox::Database>& patch_HDFGroup,
-    const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<SAMRAI::tbox::Database>& patch_HDFGroup,
+    const HAMERS_SHARED_PTR<SAMRAI::hier::PatchHierarchy>& hierarchy,
     const int level_number,
     SAMRAI::hier::Patch& patch,
     double simulation_time)
@@ -2236,7 +2237,7 @@ ExtendedVisItDataWriter::packRegularAndDerivedData(
                              */
                             
                             // Use an HDF Group for all material state data
-                            boost::shared_ptr<SAMRAI::tbox::Database> mat_state_HDFGroup;
+                            HAMERS_SHARED_PTR<SAMRAI::tbox::Database> mat_state_HDFGroup;
                             if (patch_HDFGroup->isDatabase("material_state"))
                             {
                                 mat_state_HDFGroup = patch_HDFGroup->getDatabase("material_state");
@@ -2311,8 +2312,8 @@ ExtendedVisItDataWriter::packRegularAndDerivedData(
  */
 void
 ExtendedVisItDataWriter::packMaterialsData(
-    const boost::shared_ptr<SAMRAI::tbox::Database>& patch_HDFGroup,
-    const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<SAMRAI::tbox::Database>& patch_HDFGroup,
+    const HAMERS_SHARED_PTR<SAMRAI::hier::PatchHierarchy>& hierarchy,
     const int level_number,
     SAMRAI::hier::Patch& patch)
 {
@@ -2322,8 +2323,8 @@ ExtendedVisItDataWriter::packMaterialsData(
     /*
      * Loop over variables and pull out those that are material variables.
      */
-    boost::shared_ptr<SAMRAI::tbox::Database> materials_HDFGroup;
-    boost::shared_ptr<SAMRAI::tbox::Database> material_name_HDFGroup;
+    HAMERS_SHARED_PTR<SAMRAI::tbox::Database> materials_HDFGroup;
+    HAMERS_SHARED_PTR<SAMRAI::tbox::Database> material_name_HDFGroup;
     for (std::list<VisItItem>::iterator ipi(d_plot_items.begin()); ipi != d_plot_items.end(); ++ipi)
     {
         if (ipi->d_isa_material)
@@ -2667,7 +2668,7 @@ ExtendedVisItDataWriter::packMaterialsData(
  */
 void
 ExtendedVisItDataWriter::packSpeciesData(
-    const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<SAMRAI::hier::PatchHierarchy>& hierarchy,
     const int level_number,
     SAMRAI::hier::Patch& patch)
 {
@@ -2901,7 +2902,7 @@ ExtendedVisItDataWriter::checkFloatMinMax(
 void
 ExtendedVisItDataWriter::writeSummaryToHDFFile(
     std::string dump_dirname,
-    const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<SAMRAI::hier::PatchHierarchy>& hierarchy,
     int coarsest_plot_level,
     int finest_plot_level,
     double simulation_time)
@@ -2938,8 +2939,8 @@ ExtendedVisItDataWriter::writeSummaryToHDFFile(
         //sprintf(temp_buf, "/summary.samrai");
         //string summary_HDFFilename = dump_dirname + temp_buf;
         std::string summary_HDFFilename = dump_dirname + "/" + d_summary_filename;
-        boost::shared_ptr<SAMRAI::tbox::Database> summary_HDFFilePointer(
-            boost::make_shared<SAMRAI::tbox::HDFDatabase>("root"));
+        HAMERS_SHARED_PTR<SAMRAI::tbox::Database> summary_HDFFilePointer(
+            HAMERS_MAKE_SHARED<SAMRAI::tbox::HDFDatabase>("root"));
         summary_HDFFilePointer->create(summary_HDFFilename);
         
         /*
@@ -2958,11 +2959,11 @@ ExtendedVisItDataWriter::writeSummaryToHDFFile(
          */
         
         sprintf(temp_buf, "BASIC_INFO");
-        boost::shared_ptr<SAMRAI::tbox::Database> basic_HDFGroup(
+        HAMERS_SHARED_PTR<SAMRAI::tbox::Database> basic_HDFGroup(
             summary_HDFFilePointer->putDatabase(std::string(temp_buf)));
         
-        boost::shared_ptr<SAMRAI::tbox::HDFDatabase> hdf_database(
-            BOOST_CAST<SAMRAI::tbox::HDFDatabase, SAMRAI::tbox::Database>(basic_HDFGroup));
+        HAMERS_SHARED_PTR<SAMRAI::tbox::HDFDatabase> hdf_database(
+            HAMERS_SHARED_PTR_CAST<SAMRAI::tbox::HDFDatabase, SAMRAI::tbox::Database>(basic_HDFGroup));
         TBOX_ASSERT(hdf_database);
         hid_t basic_group_id = hdf_database->getGroupId();
         
@@ -3181,7 +3182,7 @@ ExtendedVisItDataWriter::writeSummaryToHDFFile(
                         (d_visit_expressions.size() == d_visit_expression_types.size()));
             
             std::string expdbname = "visit_expressions";
-            boost::shared_ptr<SAMRAI::tbox::Database> expression_HDFGroup(
+            HAMERS_SHARED_PTR<SAMRAI::tbox::Database> expression_HDFGroup(
                 summary_HDFFilePointer->putDatabase(expdbname));
             std::string expression_keys("expression_keys");
             std::string expressions("expressions");
@@ -3226,7 +3227,7 @@ ExtendedVisItDataWriter::writeSummaryToHDFFile(
         if (d_materials_names.size() > 0)
         {
             sprintf(temp_buf, "materials");
-            boost::shared_ptr<SAMRAI::tbox::Database> materials_HDFGroup(
+            HAMERS_SHARED_PTR<SAMRAI::tbox::Database> materials_HDFGroup(
                 summary_HDFFilePointer->putDatabase(std::string(temp_buf)));
             
             key_string = "material_names";
@@ -3251,7 +3252,7 @@ ExtendedVisItDataWriter::writeSummaryToHDFFile(
                 VISIT_FIXED_DIM);
             
             sprintf(temp_buf, "species");
-            boost::shared_ptr<SAMRAI::tbox::Database> species_HDFGroup(
+            HAMERS_SHARED_PTR<SAMRAI::tbox::Database> species_HDFGroup(
                 materials_HDFGroup->putDatabase(std::string(temp_buf)));
             
             for (i = 0; i < static_cast<int>(d_materials_names.size()); ++i)
@@ -3299,8 +3300,8 @@ ExtendedVisItDataWriter::writeSummaryToHDFFile(
         if (d_grid_type != VISIT_DEFORMED)
         {
             //This is never entered in multiblock case
-            const boost::shared_ptr<SAMRAI::geom::CartesianGridGeometry> ggeom(
-                BOOST_CAST<SAMRAI::geom::CartesianGridGeometry, SAMRAI::hier::BaseGridGeometry>(
+            const HAMERS_SHARED_PTR<SAMRAI::geom::CartesianGridGeometry> ggeom(
+                HAMERS_SHARED_PTR_CAST<SAMRAI::geom::CartesianGridGeometry, SAMRAI::hier::BaseGridGeometry>(
                     hierarchy->getGridGeometry()));
             TBOX_ASSERT(ggeom);
             int next = 0;
@@ -3358,10 +3359,10 @@ ExtendedVisItDataWriter::writeSummaryToHDFFile(
          */
         
         sprintf(temp_buf, "extents");
-        boost::shared_ptr<SAMRAI::tbox::Database> extents_HDFGroup(
+        HAMERS_SHARED_PTR<SAMRAI::tbox::Database> extents_HDFGroup(
             summary_HDFFilePointer->putDatabase(std::string(temp_buf)));
         hdf_database =
-            BOOST_CAST<SAMRAI::tbox::HDFDatabase, SAMRAI::tbox::Database>(extents_HDFGroup);
+            HAMERS_SHARED_PTR_CAST<SAMRAI::tbox::HDFDatabase, SAMRAI::tbox::Database>(extents_HDFGroup);
         TBOX_ASSERT(hdf_database);
         hid_t extents_group_id = hdf_database->getGroupId();
         
@@ -3372,7 +3373,7 @@ ExtendedVisItDataWriter::writeSummaryToHDFFile(
         
         for (ln = coarsest_plot_level; ln <= finest_plot_level; ++ln)
         {
-            boost::shared_ptr<SAMRAI::hier::PatchLevel> patch_level(hierarchy->getPatchLevel(ln));
+            HAMERS_SHARED_PTR<SAMRAI::hier::PatchLevel> patch_level(hierarchy->getPatchLevel(ln));
             const std::vector<int>& proc_mapping = patch_level->getProcessorMapping().getProcessorMapping();
             
             for (pn = 0; pn < patch_level->getGlobalNumberOfPatches(); ++pn)
@@ -3429,8 +3430,8 @@ ExtendedVisItDataWriter::writeSummaryToHDFFile(
         if (d_grid_type != VISIT_DEFORMED)
         {
             //This is never entered in multiblock case
-            const boost::shared_ptr<SAMRAI::geom::CartesianGridGeometry> ggeom(
-                BOOST_CAST<SAMRAI::geom::CartesianGridGeometry, SAMRAI::hier::BaseGridGeometry>(
+            const HAMERS_SHARED_PTR<SAMRAI::geom::CartesianGridGeometry> ggeom(
+                HAMERS_SHARED_PTR_CAST<SAMRAI::geom::CartesianGridGeometry, SAMRAI::hier::BaseGridGeometry>(
                     hierarchy->getGridGeometry()));
             TBOX_ASSERT(ggeom);
             for (i = 0; i < d_dim.getValue(); ++i)
@@ -3496,7 +3497,7 @@ ExtendedVisItDataWriter::writeSummaryToHDFFile(
         /*
          * Write patch min/max for each variable.
          */
-        boost::shared_ptr<SAMRAI::tbox::Database> extents_materials_HDFGroup;
+        HAMERS_SHARED_PTR<SAMRAI::tbox::Database> extents_materials_HDFGroup;
         for (std::list<VisItItem>::iterator ipi(d_plot_items.begin()); ipi != d_plot_items.end(); ++ipi)
         {
             for (int comp = 0; comp < ipi->d_depth; ++comp)
@@ -3528,7 +3529,7 @@ ExtendedVisItDataWriter::writeSummaryToHDFFile(
                     }
                     
                     key_string = ipi->d_material_name;
-                    boost::shared_ptr<SAMRAI::tbox::Database> extents_material_name_HDFGroup;
+                    HAMERS_SHARED_PTR<SAMRAI::tbox::Database> extents_material_name_HDFGroup;
                     if (!(ipi->d_is_material_state_variable))
                     {
                         std::string mname = ipi->d_material_name;
@@ -3541,8 +3542,8 @@ ExtendedVisItDataWriter::writeSummaryToHDFFile(
                         // Sparse Format does not need additional group
                         extents_material_name_HDFGroup = extents_materials_HDFGroup;
                     }
-                    boost::shared_ptr<SAMRAI::tbox::HDFDatabase> extents_database(
-                        BOOST_CAST<SAMRAI::tbox::HDFDatabase, SAMRAI::tbox::Database>(
+                    HAMERS_SHARED_PTR<SAMRAI::tbox::HDFDatabase> extents_database(
+                        HAMERS_SHARED_PTR_CAST<SAMRAI::tbox::HDFDatabase, SAMRAI::tbox::Database>(
                             extents_material_name_HDFGroup));
                     TBOX_ASSERT(extents_database);
                     hid_t extents_material_name_group_id = extents_database->getGroupId();
@@ -3564,8 +3565,8 @@ ExtendedVisItDataWriter::writeSummaryToHDFFile(
                 {
                     // species
                     key_string = ipi->d_species_name;
-                    boost::shared_ptr<SAMRAI::tbox::HDFDatabase> extents_database(
-                        BOOST_CAST<SAMRAI::tbox::HDFDatabase, SAMRAI::tbox::Database>(
+                    HAMERS_SHARED_PTR<SAMRAI::tbox::HDFDatabase> extents_database(
+                        HAMERS_SHARED_PTR_CAST<SAMRAI::tbox::HDFDatabase, SAMRAI::tbox::Database>(
                             ipi->d_parent_material_pointer->d_extents_species_HDFGroup));
                     TBOX_ASSERT(extents_database);
                     
@@ -3655,7 +3656,7 @@ ExtendedVisItDataWriter::writeSummaryToHDFFile(
  */
 void
 ExtendedVisItDataWriter::exchangeMinMaxPatchInformation(
-    const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<SAMRAI::hier::PatchHierarchy>& hierarchy,
     const int coarsest_plot_level,
     const int finest_plot_level)
 {
@@ -3672,7 +3673,7 @@ ExtendedVisItDataWriter::exchangeMinMaxPatchInformation(
 
     for (ln = coarsest_plot_level; ln <= finest_plot_level; ++ln)
     {
-        boost::shared_ptr<SAMRAI::hier::PatchLevel> patch_level(hierarchy->getPatchLevel(ln));
+        HAMERS_SHARED_PTR<SAMRAI::hier::PatchLevel> patch_level(hierarchy->getPatchLevel(ln));
         tot_number_of_patches += patch_level->getGlobalNumberOfPatches();
         for (SAMRAI::hier::PatchLevel::iterator ip(patch_level->begin()); ip != patch_level->end(); ++ip)
         {
@@ -3805,8 +3806,8 @@ ExtendedVisItDataWriter::exchangeMinMaxPatchInformation(
  */
 void
 ExtendedVisItDataWriter::writeParentChildInfoToSummaryHDFFile(
-    const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
-    const boost::shared_ptr<SAMRAI::tbox::Database>& basic_HDFGroup)
+    const HAMERS_SHARED_PTR<SAMRAI::hier::PatchHierarchy>& hierarchy,
+    const HAMERS_SHARED_PTR<SAMRAI::tbox::Database>& basic_HDFGroup)
 {
     TBOX_ASSERT(hierarchy);
 
@@ -3843,12 +3844,12 @@ ExtendedVisItDataWriter::writeParentChildInfoToSummaryHDFFile(
         const SAMRAI::hier::BoxContainer& coarser_boxes =
             hierarchy->getPatchLevel(ln)->getBoxLevel()->getGlobalizedVersion().getGlobalBoxes();
         
-        boost::shared_ptr<SAMRAI::hier::BoxContainer> child_box_tree;
+        HAMERS_SHARED_PTR<SAMRAI::hier::BoxContainer> child_box_tree;
         SAMRAI::hier::IntVector ratio(SAMRAI::hier::IntVector::getZero(d_dim));
         
         if (ln != finest_level)
         {
-            boost::shared_ptr<SAMRAI::hier::PatchLevel> child_patch_level(
+            HAMERS_SHARED_PTR<SAMRAI::hier::PatchLevel> child_patch_level(
                 hierarchy->getPatchLevel(ln + 1));
             ratio = child_patch_level->getRatioToCoarserLevel();
             
@@ -4017,8 +4018,8 @@ ExtendedVisItDataWriter::writeParentChildInfoToSummaryHDFFile(
     basic_HDFGroup->putInteger(key_string, child_array_length);
     key_string = "parent_array_length";
     basic_HDFGroup->putInteger(key_string, parent_array_length);
-    boost::shared_ptr<SAMRAI::tbox::HDFDatabase> hdf_database(
-        BOOST_CAST<SAMRAI::tbox::HDFDatabase, SAMRAI::tbox::Database>(basic_HDFGroup));
+    HAMERS_SHARED_PTR<SAMRAI::tbox::HDFDatabase> hdf_database(
+        HAMERS_SHARED_PTR_CAST<SAMRAI::tbox::HDFDatabase, SAMRAI::tbox::Database>(basic_HDFGroup));
     TBOX_ASSERT(hdf_database);
     hid_t basic_group_id = hdf_database->getGroupId();
     if (child_array_length > 0)
@@ -4110,7 +4111,7 @@ ExtendedVisItDataWriter::childParentCompareFunc(
  */
 void
 ExtendedVisItDataWriter::packPatchDataIntoDoubleBuffer(
-    const boost::shared_ptr<SAMRAI::hier::PatchData>& pdata,
+    const HAMERS_SHARED_PTR<SAMRAI::hier::PatchData>& pdata,
     const int depth_index,
     const variable_data_type data_type,
     const SAMRAI::hier::Box patch_box,
@@ -4162,8 +4163,8 @@ ExtendedVisItDataWriter::packPatchDataIntoDoubleBuffer(
             const float* dat_ptr = 0;
             if (centering == VISIT_CELL)
             {
-                boost::shared_ptr<const SAMRAI::pdat::CellData<float> > fpdata(
-                    BOOST_CAST<const SAMRAI::pdat::CellData<float>, SAMRAI::hier::PatchData>(pdata));
+                HAMERS_SHARED_PTR<const SAMRAI::pdat::CellData<float> > fpdata(
+                    HAMERS_SHARED_PTR_CAST<const SAMRAI::pdat::CellData<float>, SAMRAI::hier::PatchData>(pdata));
                 
                 TBOX_ASSERT(fpdata);
                 
@@ -4180,8 +4181,8 @@ ExtendedVisItDataWriter::packPatchDataIntoDoubleBuffer(
             }
             else if (centering == VISIT_NODE)
             {
-                boost::shared_ptr<const SAMRAI::pdat::NodeData<float> > fpdata(
-                    BOOST_CAST<const SAMRAI::pdat::NodeData<float>, SAMRAI::hier::PatchData>(pdata));
+                HAMERS_SHARED_PTR<const SAMRAI::pdat::NodeData<float> > fpdata(
+                    HAMERS_SHARED_PTR_CAST<const SAMRAI::pdat::NodeData<float>, SAMRAI::hier::PatchData>(pdata));
                 
                 TBOX_ASSERT(fpdata);
                 
@@ -4223,8 +4224,8 @@ ExtendedVisItDataWriter::packPatchDataIntoDoubleBuffer(
             const double* dat_ptr = 0;
             if (centering == VISIT_CELL)
             {
-                boost::shared_ptr<const SAMRAI::pdat::CellData<double> > dpdata(
-                    BOOST_CAST<const SAMRAI::pdat::CellData<double>, SAMRAI::hier::PatchData>(pdata));
+                HAMERS_SHARED_PTR<const SAMRAI::pdat::CellData<double> > dpdata(
+                    HAMERS_SHARED_PTR_CAST<const SAMRAI::pdat::CellData<double>, SAMRAI::hier::PatchData>(pdata));
                 TBOX_ASSERT(dpdata);
                 
                 dat_ptr = dpdata->getPointer(depth_index);
@@ -4240,8 +4241,8 @@ ExtendedVisItDataWriter::packPatchDataIntoDoubleBuffer(
             }
             else if (centering == VISIT_NODE)
             {
-                boost::shared_ptr<const SAMRAI::pdat::NodeData<double> > dpdata(
-                    BOOST_CAST<const SAMRAI::pdat::NodeData<double>, SAMRAI::hier::PatchData>(pdata));
+                HAMERS_SHARED_PTR<const SAMRAI::pdat::NodeData<double> > dpdata(
+                    HAMERS_SHARED_PTR_CAST<const SAMRAI::pdat::NodeData<double>, SAMRAI::hier::PatchData>(pdata));
                 TBOX_ASSERT(dpdata);
                 
                 dat_ptr = dpdata->getPointer(depth_index);
@@ -4283,8 +4284,8 @@ ExtendedVisItDataWriter::packPatchDataIntoDoubleBuffer(
             const int* dat_ptr = 0;
             if (centering == VISIT_CELL)
             {
-                boost::shared_ptr<const SAMRAI::pdat::CellData<int> > ipdata(
-                    BOOST_CAST<const SAMRAI::pdat::CellData<int>, SAMRAI::hier::PatchData>(pdata));
+                HAMERS_SHARED_PTR<const SAMRAI::pdat::CellData<int> > ipdata(
+                    HAMERS_SHARED_PTR_CAST<const SAMRAI::pdat::CellData<int>, SAMRAI::hier::PatchData>(pdata));
                 
                 TBOX_ASSERT(ipdata);
                 
@@ -4299,8 +4300,8 @@ ExtendedVisItDataWriter::packPatchDataIntoDoubleBuffer(
             }
             else if (centering == VISIT_NODE)
             {
-                boost::shared_ptr<const SAMRAI::pdat::NodeData<int> > ipdata(
-                    BOOST_CAST<const SAMRAI::pdat::NodeData<int>, SAMRAI::hier::PatchData>(pdata));
+                HAMERS_SHARED_PTR<const SAMRAI::pdat::NodeData<int> > ipdata(
+                    HAMERS_SHARED_PTR_CAST<const SAMRAI::pdat::NodeData<int>, SAMRAI::hier::PatchData>(pdata));
                 
                 TBOX_ASSERT(ipdata);
                 

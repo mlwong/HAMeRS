@@ -3,6 +3,8 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
 #include "algs/patch_strategy/RungeKuttaPatchStrategy.hpp"
 #include "apps/Navier-Stokes/NavierStokesBoundaryConditions.hpp"
@@ -32,7 +34,6 @@
 #include "SAMRAI/tbox/MessageStream.h"
 #include "SAMRAI/tbox/Serializable.h"
 
-#include "boost/shared_ptr.hpp"
 #include <string>
 #include <vector>
 
@@ -67,8 +68,8 @@ class NavierStokes:
         NavierStokes(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<tbox::Database>& input_db,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db,
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const std::string& stat_dump_filename = "");
         
         /**
@@ -146,7 +147,7 @@ class NavierStokes:
             const double time,
             const double dt,
             const int RK_step_number,
-            const boost::shared_ptr<hier::VariableContext>& data_context = boost::shared_ptr<hier::VariableContext>());
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context = HAMERS_SHARED_PTR<hier::VariableContext>());
         
         /**
          * Advance a single Runge-Kutta step. Conservative differencing is implemented here by using
@@ -160,7 +161,7 @@ class NavierStokes:
             const std::vector<double>& alpha,
             const std::vector<double>& beta,
             const std::vector<double>& gamma,
-            const std::vector<boost::shared_ptr<hier::VariableContext> >& intermediate_context);
+            const std::vector<HAMERS_SHARED_PTR<hier::VariableContext> >& intermediate_context);
         
         /**
          * Correct Navier-Stokes solution variables at coarse-fine booundaries by repeating conservative
@@ -177,7 +178,7 @@ class NavierStokes:
          */
         void
         preprocessTagCellsValueDetector(
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const int level_number,
             const double regrid_time,
             const bool initial_error,
@@ -205,7 +206,7 @@ class NavierStokes:
          */
         void
         preprocessTagCellsGradientDetector(
-           const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+           const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
            const int level_number,
            const double regrid_time,
            const bool initial_error,
@@ -233,7 +234,7 @@ class NavierStokes:
          */
         void
         preprocessTagCellsMultiresolutionDetector(
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const int level_number,
             const double regrid_time,
             const bool initial_error,
@@ -375,14 +376,14 @@ class NavierStokes:
          */
         void
         putToRestart(
-            const boost::shared_ptr<tbox::Database>& restart_db) const;
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
         
         /**
          * Register a VisIt data writer so this class will write plot files that may be postprocessed
          * with the VisIt visualization tool.
          */
 #ifdef HAVE_HDF5
-        void registerVisItDataWriter(const boost::shared_ptr<ExtendedVisItDataWriter>& viz_writer);
+        void registerVisItDataWriter(const HAMERS_SHARED_PTR<ExtendedVisItDataWriter>& viz_writer);
 #endif
         
         /**
@@ -422,19 +423,34 @@ class NavierStokes:
         void
         printDataStatistics(
             std::ostream& os,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
         
         void
         printErrorStatistics(
             std::ostream& os,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
+        
+        /**
+         * Compute variables for computing the statistics of data.
+         */
+        void
+        computeStatisticsVariables(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy);
+        
+        /**
+         * Filter variables for computing the statistics of data.
+         */
+        void
+        filterStatisticsVariables(
+            const int level,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy);
         
         /**
          * Output the statistics of data.
          */
         void
         outputDataStatistics(
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const double output_time);
         
         /*
@@ -442,11 +458,11 @@ class NavierStokes:
          */
         void
         setPlotContext(
-            const boost::shared_ptr<hier::VariableContext>& plot_context)
+            const HAMERS_SHARED_PTR<hier::VariableContext>& plot_context)
         {
             d_plot_context = plot_context;
         }
-
+        
     private:
         /*
          * These private member functions read data from input and restart. When beginning a run
@@ -458,7 +474,7 @@ class NavierStokes:
          */
         void
         getFromInput(
-            const boost::shared_ptr<tbox::Database>& input_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db,
             bool is_from_restart);
         
         void getFromRestart();
@@ -483,7 +499,7 @@ class NavierStokes:
          * physical boundary conditions, and register plot variables. We also cache a pointer to the
          * plot context passed to the variable registration routine.
          */
-        const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
+        const HAMERS_SHARED_PTR<geom::CartesianGridGeometry> d_grid_geometry;
         
         /*
          * Name of file output that contains statistics of data.
@@ -491,13 +507,13 @@ class NavierStokes:
         const std::string d_stat_dump_filename;
         
 #ifdef HAVE_HDF5
-        boost::shared_ptr<ExtendedVisItDataWriter> d_visit_writer;
+        HAMERS_SHARED_PTR<ExtendedVisItDataWriter> d_visit_writer;
 #endif
         
         /*
          * Data iterms used for nonuniform load balance, if used.
          */
-        boost::shared_ptr<pdat::CellVariable<double> > d_workload_variable;
+        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_workload_variable;
         int d_workload_data_id;
         bool d_use_nonuniform_workload;
         
@@ -527,29 +543,29 @@ class NavierStokes:
         int d_num_species;
         
         /*
-         * boost::shared_ptr to FlowModel and its database.
+         * HAMERS_SHARED_PTR to FlowModel and its database.
          */
-        boost::shared_ptr<FlowModel> d_flow_model;
-        boost::shared_ptr<tbox::Database> d_flow_model_db;
+        HAMERS_SHARED_PTR<FlowModel> d_flow_model;
+        HAMERS_SHARED_PTR<tbox::Database> d_flow_model_db;
         
         /*
-         * boost::shared_ptr to the ConvectiveFluxReconstructor and its database.
+         * HAMERS_SHARED_PTR to the ConvectiveFluxReconstructor and its database.
          */
-        boost::shared_ptr<ConvectiveFluxReconstructor> d_convective_flux_reconstructor;
-        boost::shared_ptr<tbox::Database> d_convective_flux_reconstructor_db;
+        HAMERS_SHARED_PTR<ConvectiveFluxReconstructor> d_convective_flux_reconstructor;
+        HAMERS_SHARED_PTR<tbox::Database> d_convective_flux_reconstructor_db;
         
         /*
-         * boost::shared_ptr to the DiffusiveFluxReconstructor and its database.
+         * HAMERS_SHARED_PTR to the DiffusiveFluxReconstructor and its database.
          */
-        boost::shared_ptr<DiffusiveFluxReconstructor> d_diffusive_flux_reconstructor;
-        boost::shared_ptr<tbox::Database> d_diffusive_flux_reconstructor_db;
+        HAMERS_SHARED_PTR<DiffusiveFluxReconstructor> d_diffusive_flux_reconstructor;
+        HAMERS_SHARED_PTR<tbox::Database> d_diffusive_flux_reconstructor_db;
         
         /*
-         * boost::shared_ptr to the NonconservativeDiffusiveFluxDivergenceOperator and its database.
+         * HAMERS_SHARED_PTR to the NonconservativeDiffusiveFluxDivergenceOperator and its database.
          */
-        boost::shared_ptr<NonconservativeDiffusiveFluxDivergenceOperator>
+        HAMERS_SHARED_PTR<NonconservativeDiffusiveFluxDivergenceOperator>
             d_nonconservative_diffusive_flux_divergence_operator;
-        boost::shared_ptr<tbox::Database> d_nonconservative_diffusive_flux_divergence_operator_db;
+        HAMERS_SHARED_PTR<tbox::Database> d_nonconservative_diffusive_flux_divergence_operator_db;
         
         /*
          * Boolean to determine whether to use conservative or non-conservative form of diffusive flux.
@@ -557,93 +573,93 @@ class NavierStokes:
         bool d_use_conservative_form_diffusive_flux;
         
         /*
-         * boost::shared_ptr to NavierStokesInitialConditions.
+         * HAMERS_SHARED_PTR to NavierStokesInitialConditions.
          */
-        boost::shared_ptr<NavierStokesInitialConditions> d_Navier_Stokes_initial_conditions;
+        HAMERS_SHARED_PTR<NavierStokesInitialConditions> d_Navier_Stokes_initial_conditions;
         
         /*
-         * boost::shared_ptr to NavierStokesBoundaryConditions and its database.
+         * HAMERS_SHARED_PTR to NavierStokesBoundaryConditions and its database.
          */
-        boost::shared_ptr<NavierStokesBoundaryConditions> d_Navier_Stokes_boundary_conditions;
-        boost::shared_ptr<tbox::Database> d_Navier_Stokes_boundary_conditions_db;
+        HAMERS_SHARED_PTR<NavierStokesBoundaryConditions> d_Navier_Stokes_boundary_conditions;
+        HAMERS_SHARED_PTR<tbox::Database> d_Navier_Stokes_boundary_conditions_db;
         bool d_Navier_Stokes_boundary_conditions_db_is_from_restart;
         
         /*
-         * boost::shared_ptr to ValueTagger and its database.
+         * HAMERS_SHARED_PTR to ValueTagger and its database.
          */
-        boost::shared_ptr<ValueTagger> d_value_tagger;
-        boost::shared_ptr<tbox::Database> d_value_tagger_db;
+        HAMERS_SHARED_PTR<ValueTagger> d_value_tagger;
+        HAMERS_SHARED_PTR<tbox::Database> d_value_tagger_db;
         
         /*
-         * boost::shared_ptr to GradientTagger and its database.
+         * HAMERS_SHARED_PTR to GradientTagger and its database.
          */
-        boost::shared_ptr<GradientTagger> d_gradient_tagger;
-        boost::shared_ptr<tbox::Database> d_gradient_tagger_db;
+        HAMERS_SHARED_PTR<GradientTagger> d_gradient_tagger;
+        HAMERS_SHARED_PTR<tbox::Database> d_gradient_tagger_db;
         
         /*
-         * boost::shared_ptr to MultiresolutionTagger and its database.
+         * HAMERS_SHARED_PTR to MultiresolutionTagger and its database.
          */
-        boost::shared_ptr<MultiresolutionTagger> d_multiresolution_tagger;
-        boost::shared_ptr<tbox::Database> d_multiresolution_tagger_db;
+        HAMERS_SHARED_PTR<MultiresolutionTagger> d_multiresolution_tagger;
+        HAMERS_SHARED_PTR<tbox::Database> d_multiresolution_tagger_db;
         
         /*
-         * boost::shared_ptr to FlowModelManager.
+         * HAMERS_SHARED_PTR to FlowModelManager.
          */
-        boost::shared_ptr<FlowModelManager> d_flow_model_manager;
+        HAMERS_SHARED_PTR<FlowModelManager> d_flow_model_manager;
         
         /*
-         * boost::shared_ptr to ConvectiveFluxReconstructorManager.
+         * HAMERS_SHARED_PTR to ConvectiveFluxReconstructorManager.
          */
-        boost::shared_ptr<ConvectiveFluxReconstructorManager> d_convective_flux_reconstructor_manager;
+        HAMERS_SHARED_PTR<ConvectiveFluxReconstructorManager> d_convective_flux_reconstructor_manager;
         
         /*
-         * boost::shared_ptr to DiffusiveFluxReconstructorManager.
+         * HAMERS_SHARED_PTR to DiffusiveFluxReconstructorManager.
          */
-        boost::shared_ptr<DiffusiveFluxReconstructorManager> d_diffusive_flux_reconstructor_manager;
+        HAMERS_SHARED_PTR<DiffusiveFluxReconstructorManager> d_diffusive_flux_reconstructor_manager;
         
         /*
-         * boost::shared_ptr to NonconservativeDiffusiveFluxDivergenceOperatorManager.
+         * HAMERS_SHARED_PTR to NonconservativeDiffusiveFluxDivergenceOperatorManager.
          */
-        boost::shared_ptr<NonconservativeDiffusiveFluxDivergenceOperatorManager>
+        HAMERS_SHARED_PTR<NonconservativeDiffusiveFluxDivergenceOperatorManager>
             d_nonconservative_diffusive_flux_divergence_operator_manager;
         
         /*
-         * boost::shared_ptr to side variable of convective flux.
+         * HAMERS_SHARED_PTR to side variable of convective flux.
          */
-        boost::shared_ptr<pdat::SideVariable<double> > d_variable_convective_flux;
+        HAMERS_SHARED_PTR<pdat::SideVariable<double> > d_variable_convective_flux;
         
         /*
-         * boost::shared_ptr to side variable of diffusive flux.
+         * HAMERS_SHARED_PTR to side variable of diffusive flux.
          */
-        boost::shared_ptr<pdat::SideVariable<double> > d_variable_diffusive_flux;
+        HAMERS_SHARED_PTR<pdat::SideVariable<double> > d_variable_diffusive_flux;
         
         /*
-         * boost::shared_ptr to cell variable of diffusive flux divergence.
+         * HAMERS_SHARED_PTR to cell variable of diffusive flux divergence.
          */
-        boost::shared_ptr<pdat::CellVariable<double> > d_variable_diffusive_flux_divergence;
+        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_variable_diffusive_flux_divergence;
         
         /*
-         * boost::shared_ptr to cell variable of source terms.
+         * HAMERS_SHARED_PTR to cell variable of source terms.
          */
-        boost::shared_ptr<pdat::CellVariable<double> > d_variable_source;
+        HAMERS_SHARED_PTR<pdat::CellVariable<double> > d_variable_source;
         
         /*
-         * boost::shared_ptr to the plotting context.
+         * HAMERS_SHARED_PTR to the plotting context.
          */
-        boost::shared_ptr<hier::VariableContext> d_plot_context;
+        HAMERS_SHARED_PTR<hier::VariableContext> d_plot_context;
         
         /*
          * Timers.
          */
-        static boost::shared_ptr<tbox::Timer> t_init;
-        static boost::shared_ptr<tbox::Timer> t_compute_dt;
-        static boost::shared_ptr<tbox::Timer> t_compute_fluxes_sources;
-        static boost::shared_ptr<tbox::Timer> t_advance_step;
-        static boost::shared_ptr<tbox::Timer> t_synchronize_fluxes;
-        static boost::shared_ptr<tbox::Timer> t_setphysbcs;
-        static boost::shared_ptr<tbox::Timer> t_tagvalue;
-        static boost::shared_ptr<tbox::Timer> t_taggradient;
-        static boost::shared_ptr<tbox::Timer> t_tagmultiresolution;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_init;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_compute_dt;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_compute_fluxes_sources;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_advance_step;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_synchronize_fluxes;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_setphysbcs;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_tagvalue;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_taggradient;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_tagmultiresolution;
         
 };
 

@@ -6,7 +6,7 @@
 void
 EulerInitialConditions::initializeDataOnPatch(
     hier::Patch& patch,
-    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_variables,
     const double data_time,
     const bool initial_time)
 {
@@ -52,8 +52,8 @@ EulerInitialConditions::initializeDataOnPatch(
     
     if (initial_time)
     {
-        const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-            BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+        const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+            HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                 patch.getPatchGeometry()));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -73,9 +73,9 @@ EulerInitialConditions::initializeDataOnPatch(
         
         if (d_flow_model_type == FLOW_MODEL::SINGLE_SPECIES)
         {
-            boost::shared_ptr<pdat::CellData<double> > density      = conservative_variables[0];
-            boost::shared_ptr<pdat::CellData<double> > momentum     = conservative_variables[1];
-            boost::shared_ptr<pdat::CellData<double> > total_energy = conservative_variables[2];
+            HAMERS_SHARED_PTR<pdat::CellData<double> > density      = conservative_variables[0];
+            HAMERS_SHARED_PTR<pdat::CellData<double> > momentum     = conservative_variables[1];
+            HAMERS_SHARED_PTR<pdat::CellData<double> > total_energy = conservative_variables[2];
             
             double* rho   = density->getPointer(0);
             double* rho_u = momentum->getPointer(0);
@@ -129,9 +129,9 @@ EulerInitialConditions::initializeDataOnPatch(
         }
         else if (d_flow_model_type == FLOW_MODEL::FOUR_EQN_CONSERVATIVE)
         {
-            boost::shared_ptr<pdat::CellData<double> > partial_density = conservative_variables[0];
-            boost::shared_ptr<pdat::CellData<double> > momentum     = conservative_variables[1];
-            boost::shared_ptr<pdat::CellData<double> > total_energy = conservative_variables[2];
+            HAMERS_SHARED_PTR<pdat::CellData<double> > partial_density = conservative_variables[0];
+            HAMERS_SHARED_PTR<pdat::CellData<double> > momentum     = conservative_variables[1];
+            HAMERS_SHARED_PTR<pdat::CellData<double> > total_energy = conservative_variables[2];
             
             double* rho_Y_0   = partial_density->getPointer(0);
             double* rho_Y_1   = partial_density->getPointer(1);
