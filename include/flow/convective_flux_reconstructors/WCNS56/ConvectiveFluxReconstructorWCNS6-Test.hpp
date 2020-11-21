@@ -7,18 +7,16 @@
 
 #include "SAMRAI/pdat/SideVariable.h"
 
-#include "boost/multi_array.hpp"
-
 class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
 {
     public:
         ConvectiveFluxReconstructorWCNS6_Test(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_eqn,
-            const boost::shared_ptr<FlowModel>& flow_model,
-            const boost::shared_ptr<tbox::Database>& convective_flux_reconstructor_db);
+            const HAMERS_SHARED_PTR<FlowModel>& flow_model,
+            const HAMERS_SHARED_PTR<tbox::Database>& convective_flux_reconstructor_db);
         
         ~ConvectiveFluxReconstructorWCNS6_Test();
         
@@ -34,7 +32,7 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
          */
         void
         putToRestart(
-            const boost::shared_ptr<tbox::Database>& restart_db) const;
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
         
         /*
          * Compute the convective flux and source due to splitting of convective term on a patch.
@@ -42,9 +40,9 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
         void
         computeConvectiveFluxAndSourceOnPatch(
             hier::Patch& patch,
-            const boost::shared_ptr<pdat::SideVariable<double> >& variable_convective_flux,
-            const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
-            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const HAMERS_SHARED_PTR<pdat::SideVariable<double> >& variable_convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double time,
             const double dt,
             const int RK_step_number);
@@ -55,9 +53,9 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
          */
         void
         performWENOInterpolation(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_minus,
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_plus,
-            const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables);
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& variables_minus,
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& variables_plus,
+            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > > >& variables);
         
         /*
          * Constants used by the scheme.
@@ -77,11 +75,11 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
          * Timers interspersed throughout the class.
          */
         
-        static boost::shared_ptr<tbox::Timer> t_characteristic_decomposition;
-        static boost::shared_ptr<tbox::Timer> t_WENO_interpolation;
-        static boost::shared_ptr<tbox::Timer> t_Riemann_solver;
-        static boost::shared_ptr<tbox::Timer> t_reconstruct_flux;
-        static boost::shared_ptr<tbox::Timer> t_compute_source;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_characteristic_decomposition;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_WENO_interpolation;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_Riemann_solver;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_reconstruct_flux;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_compute_source;
         
 };
 

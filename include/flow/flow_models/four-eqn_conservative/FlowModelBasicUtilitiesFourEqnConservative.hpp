@@ -9,9 +9,9 @@ class FlowModelBasicUtilitiesFourEqnConservative: public FlowModelBasicUtilities
         FlowModelBasicUtilitiesFourEqnConservative(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
-            const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules):
+            const HAMERS_SHARED_PTR<EquationOfStateMixingRules> equation_of_state_mixing_rules):
                 FlowModelBasicUtilities(
                     object_name,
                     dim,
@@ -40,8 +40,8 @@ class FlowModelBasicUtilitiesFourEqnConservative: public FlowModelBasicUtilities
          */
         void
         convertConservativeVariablesToPrimitiveVariables(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables);
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables);
         
         /*
          * Convert primitive variables to conservative variables.
@@ -56,40 +56,40 @@ class FlowModelBasicUtilitiesFourEqnConservative: public FlowModelBasicUtilities
          */
         void
         convertPrimitiveVariablesToConservativeVariables(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables);
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables);
         
         /*
          * Check whether the given cell conservative variables are within the bounds.
          */
         void
         checkCellDataOfConservativeVariablesBounded(
-            boost::shared_ptr<pdat::CellData<int> >& bounded_flag,
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables);
+            HAMERS_SHARED_PTR<pdat::CellData<int> >& bounded_flag,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_variables);
         
         /*
          * Check whether the given side conservative variables are within the bounds.
          */
         void
         checkSideDataOfConservativeVariablesBounded(
-            boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables);
+            HAMERS_SHARED_PTR<pdat::SideData<int> >& bounded_flag,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables);
         
         /*
          * Check whether the given cell primitive variables are within the bounds.
          */
         void
         checkCellDataOfPrimitiveVariablesBounded(
-            boost::shared_ptr<pdat::CellData<int> >& bounded_flag,
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables);
+            HAMERS_SHARED_PTR<pdat::CellData<int> >& bounded_flag,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& primitive_variables);
         
         /*
          * Check whether the given side primitive variables are within the bounds.
          */
         void
         checkSideDataOfPrimitiveVariablesBounded(
-            boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables);
+            HAMERS_SHARED_PTR<pdat::SideData<int> >& bounded_flag,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables);
         
         /*
          * Register the required derived variables for transformation between conservative
@@ -129,7 +129,7 @@ class FlowModelBasicUtilitiesFourEqnConservative: public FlowModelBasicUtilities
          */
         void
         computeSideDataOfProjectionVariablesForConservativeVariables(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables);
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& projection_variables);
         
         /*
          * Compute the side data of the projection variables for transformation between primitive variables and
@@ -137,16 +137,16 @@ class FlowModelBasicUtilitiesFourEqnConservative: public FlowModelBasicUtilities
          */
         void
         computeSideDataOfProjectionVariablesForPrimitiveVariables(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables);
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& projection_variables);
         
         /*
          * Compute the side data of characteristic variables from conservative variables.
          */
         void
         computeSideDataOfCharacteristicVariablesFromConservativeVariables(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& characteristic_variables,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_variables,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& projection_variables,
             const int& idx_offset);
         
         /*
@@ -154,9 +154,9 @@ class FlowModelBasicUtilitiesFourEqnConservative: public FlowModelBasicUtilities
          */
         void
         computeSideDataOfCharacteristicVariablesFromPrimitiveVariables(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& characteristic_variables,
+            const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& primitive_variables,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& projection_variables,
             const int& idx_offset);
         
         /*
@@ -164,18 +164,18 @@ class FlowModelBasicUtilitiesFourEqnConservative: public FlowModelBasicUtilities
          */
         void
         computeSideDataOfConservativeVariablesFromCharacteristicVariables(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables);
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& conservative_variables,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& characteristic_variables,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& projection_variables);
         
         /*
          * Compute the side data of primitive variables from characteristic variables.
          */
         void
         computeSideDataOfPrimitiveVariablesFromCharacteristicVariables(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables);
+            std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& primitive_variables,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& characteristic_variables,
+            const std::vector<HAMERS_SHARED_PTR<pdat::SideData<double> > >& projection_variables);
         
     private:
         /*
@@ -185,9 +185,9 @@ class FlowModelBasicUtilitiesFourEqnConservative: public FlowModelBasicUtilities
         double d_Y_bound_up;
         
         /*
-         * boost::shared_ptr to EquationOfStateMixingRules.
+         * HAMERS_SHARED_PTR to EquationOfStateMixingRules.
          */
-        const boost::shared_ptr<EquationOfStateMixingRules>
+        const HAMERS_SHARED_PTR<EquationOfStateMixingRules>
             d_equation_of_state_mixing_rules;
         
 };

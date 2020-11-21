@@ -11,12 +11,13 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "extn/patch_hierarchies/ExtendedUncoveredBoxIterator.hpp"
 
 #include "SAMRAI/hier/HierarchyNeighbors.h"
 #include "SAMRAI/hier/PatchHierarchy.h"
 
-#include "boost/shared_ptr.hpp"
 #include <string>
 #include <vector>
 

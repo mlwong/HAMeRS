@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
     
     double mu = 0.0;
     
-    boost::shared_ptr<EquationOfShearViscosity> equation_of_shear_viscosity;
+    HAMERS_SHARED_PTR<EquationOfShearViscosity> equation_of_shear_viscosity;
     
     equation_of_shear_viscosity.reset(new EquationOfShearViscosityConstant(
         "equation_of_shear_viscosity",
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
     
     double mu_v = 0.0;
     
-    boost::shared_ptr<EquationOfBulkViscosity> equation_of_bulk_viscosity;
+    HAMERS_SHARED_PTR<EquationOfBulkViscosity> equation_of_bulk_viscosity;
     
     equation_of_bulk_viscosity.reset(new EquationOfBulkViscosityConstant(
         "equation_of_bulk_viscosity",
@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
     
     double kappa = 0.0;
     
-    boost::shared_ptr<EquationOfThermalConductivity> equation_of_thermal_conductivity;
+    HAMERS_SHARED_PTR<EquationOfThermalConductivity> equation_of_thermal_conductivity;
     
     equation_of_thermal_conductivity.reset(new EquationOfThermalConductivityConstant(
         "equation_of_thermal_conductivity",
@@ -325,9 +325,9 @@ int main(int argc, char *argv[])
     std::vector<double> Y;
     std::vector<const double*> Y_const_ptr;
     
-    boost::shared_ptr<EquationOfMassDiffusivityMixingRules> equation_of_mass_diffusivity_mixing_rules;
+    HAMERS_SHARED_PTR<EquationOfMassDiffusivityMixingRules> equation_of_mass_diffusivity_mixing_rules;
     
-    boost::shared_ptr<tbox::Database> equation_of_mass_diffusivity_mixing_rules_db;
+    HAMERS_SHARED_PTR<tbox::Database> equation_of_mass_diffusivity_mixing_rules_db;
     
     equation_of_mass_diffusivity_mixing_rules_db.reset(new
         tbox::MemoryDatabase("equation_of_mass_diffusivity_mixing_rules_db"));

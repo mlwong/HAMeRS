@@ -3,11 +3,12 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "util/mixing_rules/equations_of_mass_diffusivity/EquationsOfMassDiffusivity.hpp"
 
 #include "SAMRAI/tbox/Dimension.h"
 
-#include "boost/shared_ptr.hpp"
 #include <string>
 
 using namespace SAMRAI;
@@ -20,7 +21,7 @@ class EquationOfMassDiffusivityMixingRulesManager
             const tbox::Dimension& dim,
             const int& num_species,
             const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
-            const boost::shared_ptr<tbox::Database>& equation_of_mass_diffusivity_mixing_rules_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& equation_of_mass_diffusivity_mixing_rules_db,
             const std::string& equation_of_mass_diffusivity_str);
         
         /*
@@ -35,7 +36,7 @@ class EquationOfMassDiffusivityMixingRulesManager
         /*
          * Get the equation of mass diffusivity mixing rules.
          */
-        boost::shared_ptr<EquationOfMassDiffusivityMixingRules>
+        HAMERS_SHARED_PTR<EquationOfMassDiffusivityMixingRules>
         getEquationOfMassDiffusivityMixingRules() const
         {
             return d_equation_of_mass_diffusivity_mixing_rules;
@@ -59,9 +60,9 @@ class EquationOfMassDiffusivityMixingRulesManager
         EQN_MASS_DIFFUSIVITY::TYPE d_equation_of_mass_diffusivity_type;
         
         /*
-         * boost::shared_ptr to the equation of mass diffusivity.
+         * HAMERS_SHARED_PTR to the equation of mass diffusivity.
          */
-        boost::shared_ptr<EquationOfMassDiffusivityMixingRules> d_equation_of_mass_diffusivity_mixing_rules;
+        HAMERS_SHARED_PTR<EquationOfMassDiffusivityMixingRules> d_equation_of_mass_diffusivity_mixing_rules;
         
 };
 

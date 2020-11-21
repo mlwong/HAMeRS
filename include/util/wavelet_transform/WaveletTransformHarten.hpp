@@ -19,8 +19,8 @@ class WaveletTransformHarten: public WaveletTransform
          */
         void
         computeWaveletCoefficients(
-            std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
-            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& wavelet_coeffs,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
             hier::Patch& patch,
             const int depth = 0,
             const bool smooth_cell_data = false);
@@ -30,9 +30,9 @@ class WaveletTransformHarten: public WaveletTransform
          */
         void
         computeWaveletCoefficientsWithVariableLocalMeans(
-            std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
-            std::vector<boost::shared_ptr<pdat::CellData<double> > >& variable_local_means,
-            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& wavelet_coeffs,
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& variable_local_means,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
             hier::Patch& patch,
             const int depth = 0,
             const bool smooth_cell_data = false);
@@ -46,9 +46,9 @@ class WaveletTransformHarten: public WaveletTransform
         /*
          * Smooth the given cell data in different directions.
          */
-        boost::shared_ptr<pdat::CellData<double> >
+        HAMERS_SHARED_PTR<pdat::CellData<double> >
         smoothCellData(
-            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
             hier::Patch& patch,
             const int depth = 0);
 };

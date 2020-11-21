@@ -16,6 +16,8 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "algs/integrator/ExtendedTagAndInitialize.hpp"
 #include "algs/patch_strategy/RungeKuttaPatchStrategy.hpp"
 
@@ -40,8 +42,6 @@
 #include "SAMRAI/tbox/Statistician.h"
 #endif
 
-#include "boost/shared_ptr.hpp"
-#include "boost/multi_array.hpp"
 #include <iostream>
 #include <list>
 #include <string>
@@ -176,14 +176,17 @@ class RungeKuttaLevelIntegrator:
          * - \b TEMPORARY      {Accessory values intended to live only for computation on a single
          *                      patch (i.e., they cannot be assumed to exist between patch routine
          *                      function calls.)}
+         * - \b STATISTICS     {Cell-centered double values used for statistics variables that need
+                                spatial interpolation.)}
          *
          */
-        enum RK_VAR_TYPE { TIME_DEP    = 0,
-                           INPUT       = 1,
-                           NO_FILL     = 2,
-                           FLUX        = 3,
-                           SOURCE      = 4,
-                           TEMPORARY   = 5};
+        enum RK_VAR_TYPE { TIME_DEP   = 0,
+                           INPUT      = 1,
+                           NO_FILL    = 2,
+                           FLUX       = 3,
+                           SOURCE     = 4,
+                           TEMPORARY  = 5,
+                           STATISTICS = 6};
         
         /**
          * Constructor for RungeKuttaLevelIntegrator initializes integration parameters to default
@@ -198,7 +201,7 @@ class RungeKuttaLevelIntegrator:
          */
         RungeKuttaLevelIntegrator(
             const std::string& object_name,
-            const boost::shared_ptr<tbox::Database>& input_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db,
             RungeKuttaPatchStrategy* patch_strategy,
             bool use_time_refinement = true);
         
@@ -214,11 +217,11 @@ class RungeKuttaLevelIntegrator:
          *
          * This routine also invokes variable registration in the patch strategy.
          *
-         * @pre gridding_alg_strategy is actually a boost::dynamic_pointer_cast<mesh::GriddingAlgorithm>
+         * @pre gridding_alg_strategy is actually a HAMERS_DYNAMIC_POINTER_CAST<mesh::GriddingAlgorithm>
          */
         virtual void
         initializeLevelIntegrator(
-            const boost::shared_ptr<mesh::GriddingAlgorithmStrategy>& gridding_alg_strategy);
+            const HAMERS_SHARED_PTR<mesh::GriddingAlgorithmStrategy>& gridding_alg_strategy);
         
         /**
          * Determine time increment to advance data on level and return that value. The double
@@ -233,7 +236,7 @@ class RungeKuttaLevelIntegrator:
          */
         virtual double
         getLevelDt(
-            const boost::shared_ptr<hier::PatchLevel>& level,
+            const HAMERS_SHARED_PTR<hier::PatchLevel>& level,
             const double dt_time,
             const bool initial_time);
         
@@ -341,8 +344,8 @@ class RungeKuttaLevelIntegrator:
         
         virtual double
         advanceLevel(
-            const boost::shared_ptr<hier::PatchLevel>& level,
-            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchLevel>& level,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
             const double current_time,
             const double new_time,
             const bool first_step,
@@ -365,7 +368,7 @@ class RungeKuttaLevelIntegrator:
          */
         virtual void
         standardLevelSynchronization(
-            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
             const int coarsest_level,
             const int finest_level,
             const double sync_time,
@@ -385,7 +388,7 @@ class RungeKuttaLevelIntegrator:
          */
         virtual void
         standardLevelSynchronization(
-            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
             const int coarsest_level,
             const int finest_level,
             const double sync_time,
@@ -411,7 +414,7 @@ class RungeKuttaLevelIntegrator:
          */
         virtual void
         synchronizeNewLevels(
-            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
             const int coarsest_level,
             const int finest_level,
             const double sync_time,
@@ -424,7 +427,7 @@ class RungeKuttaLevelIntegrator:
          */
         virtual void
         resetTimeDependentData(
-            const boost::shared_ptr<hier::PatchLevel>& level,
+            const HAMERS_SHARED_PTR<hier::PatchLevel>& level,
             const double new_time,
             const bool can_be_refined);
         
@@ -436,7 +439,7 @@ class RungeKuttaLevelIntegrator:
          */
         virtual void
         resetDataToPreadvanceState(
-            const boost::shared_ptr<hier::PatchLevel>& level);
+            const HAMERS_SHARED_PTR<hier::PatchLevel>& level);
         
         /**
          * Initialize data on a new level after it is inserted into an AMR patch hierarchy by the
@@ -470,13 +473,13 @@ class RungeKuttaLevelIntegrator:
          */
         virtual void
         initializeLevelData(
-            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
             const int level_number,
             const double init_data_time,
             const bool can_be_refined,
             const bool initial_time,
-            const boost::shared_ptr<hier::PatchLevel>& old_level =
-                boost::shared_ptr<hier::PatchLevel>(),
+            const HAMERS_SHARED_PTR<hier::PatchLevel>& old_level =
+                HAMERS_SHARED_PTR<hier::PatchLevel>(),
             const bool allocate_data = true);
 
 #if !defined(__xlC__)
@@ -498,7 +501,7 @@ class RungeKuttaLevelIntegrator:
          */
         virtual void
         resetHierarchyConfiguration(
-            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
             const int coarsest_level,
             const int finest_level);
         
@@ -540,7 +543,7 @@ class RungeKuttaLevelIntegrator:
          */
         virtual void
         applyValueDetector(
-            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
             const int level_number,
             const double error_data_time,
             const int tag_index,
@@ -588,7 +591,7 @@ class RungeKuttaLevelIntegrator:
          */
         virtual void
         applyGradientDetector(
-            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
             const int level_number,
             const double error_data_time,
             const int tag_index,
@@ -636,7 +639,7 @@ class RungeKuttaLevelIntegrator:
          */
         virtual void
         applyMultiresolutionDetector(
-            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
             const int level_number,
             const double error_data_time,
             const int tag_index,
@@ -684,7 +687,7 @@ class RungeKuttaLevelIntegrator:
          */
         virtual void
         applyIntegralDetector(
-            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
             const int level_number,
             const double error_data_time,
             const int tag_index,
@@ -735,7 +738,7 @@ class RungeKuttaLevelIntegrator:
          */
         virtual void
         applyRichardsonExtrapolation(
-            const boost::shared_ptr<hier::PatchLevel>& level,
+            const HAMERS_SHARED_PTR<hier::PatchLevel>& level,
             const double error_data_time,
             const int tag_index,
             const double deltat,
@@ -762,9 +765,9 @@ class RungeKuttaLevelIntegrator:
          */
         virtual void
         coarsenDataForRichardsonExtrapolation(
-            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
             const int level_number,
-            const boost::shared_ptr<hier::PatchLevel>& coarse_level,
+            const HAMERS_SHARED_PTR<hier::PatchLevel>& coarse_level,
             const double coarsen_data_time,
             const bool before_advance);
         
@@ -781,11 +784,11 @@ class RungeKuttaLevelIntegrator:
          */
         virtual void
         registerVariable(
-            const boost::shared_ptr<hier::Variable>& var,
+            const HAMERS_SHARED_PTR<hier::Variable>& var,
             const hier::IntVector& ghosts,
             const hier::IntVector& ghosts_intermediate,
             const RK_VAR_TYPE& RK_v_type,
-            const boost::shared_ptr<hier::BaseGridGeometry>& transfer_geom,
+            const HAMERS_SHARED_PTR<hier::BaseGridGeometry>& transfer_geom,
             const std::string& coarsen_name = std::string(),
             const std::string& refine_name = std::string());
         
@@ -803,21 +806,21 @@ class RungeKuttaLevelIntegrator:
          */
         virtual void
         putToRestart(
-            const boost::shared_ptr<tbox::Database>& restart_db) const;
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
         
         /**
          * Output statistics of data.
          */
         virtual void
         outputDataStatistics(
-            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
             const double statistics_data_time);
         
         /**
          * Return pointer to "current" variable context used by integrator. Current data corresponds
          * to state data at the beginning of a timestep, or when a new level is initialized.
          */
-        boost::shared_ptr<hier::VariableContext>
+        HAMERS_SHARED_PTR<hier::VariableContext>
         getCurrentContext() const
         {
             return d_current;
@@ -828,7 +831,7 @@ class RungeKuttaLevelIntegrator:
          * advanced state data at the end of a timestep. The data is one timestep later than the
          * "current" data.
          */
-        boost::shared_ptr<hier::VariableContext>
+        HAMERS_SHARED_PTR<hier::VariableContext>
         getNewContext() const
         {
             return d_new;
@@ -843,7 +846,7 @@ class RungeKuttaLevelIntegrator:
          * Richardson extrapolation, is the returned pointer will non-null. See contructor for more
          * information.
          */
-        boost::shared_ptr<hier::VariableContext>
+        HAMERS_SHARED_PTR<hier::VariableContext>
         getOldContext() const
         {
             return d_old;
@@ -854,7 +857,7 @@ class RungeKuttaLevelIntegrator:
          * corresponds to storage that user-routines in the concrete RungeKuttaPatchStrategy object
          * manipulate; in particular, scratch data contains ghost cells.
          */
-        boost::shared_ptr<hier::VariableContext>
+        HAMERS_SHARED_PTR<hier::VariableContext>
         getScratchContext() const
         {
             return d_scratch;
@@ -865,7 +868,7 @@ class RungeKuttaLevelIntegrator:
          * data storage that should be written to plot files. Typically, this is the same as the
          * "current" context.
          */
-        boost::shared_ptr<hier::VariableContext>
+        HAMERS_SHARED_PTR<hier::VariableContext>
         getPlotContext() const
         {
            return d_plot_context;
@@ -907,7 +910,7 @@ class RungeKuttaLevelIntegrator:
          */
         virtual void
         getFromInput(
-            const boost::shared_ptr<tbox::Database>& input_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& input_db,
             bool is_from_restart);
         
         /**
@@ -942,7 +945,7 @@ class RungeKuttaLevelIntegrator:
          */
         virtual void
         preprocessFluxAndSourceData(
-            const boost::shared_ptr<hier::PatchLevel>& level,
+            const HAMERS_SHARED_PTR<hier::PatchLevel>& level,
             const double cur_time,
             const double new_time,
             const bool regrid_advance,
@@ -957,7 +960,7 @@ class RungeKuttaLevelIntegrator:
          */
         virtual void
         postprocessFluxAndSourceData(
-           const boost::shared_ptr<hier::PatchLevel>& level,
+           const HAMERS_SHARED_PTR<hier::PatchLevel>& level,
            const bool regrid_advance,
            const bool first_step,
            const bool last_step);
@@ -967,9 +970,9 @@ class RungeKuttaLevelIntegrator:
          */
         virtual void
         copyTimeDependentData(
-            const boost::shared_ptr<hier::PatchLevel>& level,
-            const boost::shared_ptr<hier::VariableContext>& src_context,
-            const boost::shared_ptr<hier::VariableContext>& dst_context);
+            const HAMERS_SHARED_PTR<hier::PatchLevel>& level,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& src_context,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& dst_context);
         
         /**
          * Apply the standard AMR Runge-Kutta flux synchronization process preserve conservation
@@ -988,8 +991,8 @@ class RungeKuttaLevelIntegrator:
          */
         virtual void
         synchronizeLevelWithCoarser(
-            const boost::shared_ptr<hier::PatchLevel>& fine,
-            const boost::shared_ptr<hier::PatchLevel>& coarse,
+            const HAMERS_SHARED_PTR<hier::PatchLevel>& fine,
+            const HAMERS_SHARED_PTR<hier::PatchLevel>& coarse,
             const double sync_time,
             const double coarse_sim_time);
         
@@ -1016,7 +1019,7 @@ class RungeKuttaLevelIntegrator:
         /*
          * The gridding algorithm is used to generate some DLBG data for levels not on a hiearchy.
          */
-        boost::shared_ptr<mesh::GriddingAlgorithm> d_gridding_alg;
+        HAMERS_SHARED_PTR<mesh::GriddingAlgorithm> d_gridding_alg;
         
         /*
          * The object name is used as a handle to databases stored in restart files and for error
@@ -1066,6 +1069,11 @@ class RungeKuttaLevelIntegrator:
         std::vector<std::vector<double> > d_gamma;
         
         /*
+         * Number of times of filtering before computing statistics.
+         */
+        int d_num_filtering_stats;
+        
+        /*
          * Boolean flags for indicating whether face or side data types are used for fluxes (choice
          * is determined by numerical routines in Runge-Kutta patch model).
          */
@@ -1085,8 +1093,8 @@ class RungeKuttaLevelIntegrator:
          * with TIME_DEP and INPUT data at specified time. TIME_DEP data in patch interiors will be
          * filled with CURRENT_VAR values.
          */
-        boost::shared_ptr<xfer::RefineAlgorithm> d_bdry_fill_advance;
-        std::vector<boost::shared_ptr<xfer::RefineSchedule> > d_bdry_sched_advance;
+        HAMERS_SHARED_PTR<xfer::RefineAlgorithm> d_bdry_fill_advance;
+        std::vector<HAMERS_SHARED_PTR<xfer::RefineSchedule> > d_bdry_sched_advance;
         
         /*
          * The "advance new" schedule can be used twice during a time integration cycle. The first
@@ -1100,8 +1108,8 @@ class RungeKuttaLevelIntegrator:
          * in patch interiors will be filled with values corresponding to NEW descriptor indices.
          * See notes accompanying RungeKuttaLevelIntegrator::advanceLevel.
          */
-        boost::shared_ptr<xfer::RefineAlgorithm> d_bdry_fill_advance_new;
-        std::vector<boost::shared_ptr<xfer::RefineSchedule> >
+        HAMERS_SHARED_PTR<xfer::RefineAlgorithm> d_bdry_fill_advance_new;
+        std::vector<HAMERS_SHARED_PTR<xfer::RefineSchedule> >
             d_bdry_sched_advance_new;
         
         /*
@@ -1110,28 +1118,38 @@ class RungeKuttaLevelIntegrator:
          * data on a temporary level during the Richardson extrapolation algorithm. Use of OLD_VAR
          * data is required only when three time levels are used (i.e. d_number_time_data_levels=3).
          */
-        boost::shared_ptr<xfer::RefineAlgorithm> d_bdry_fill_advance_old;
+        HAMERS_SHARED_PTR<xfer::RefineAlgorithm> d_bdry_fill_advance_old;
         
-        std::vector<boost::shared_ptr<xfer::RefineAlgorithm> > d_bdry_fill_intermediate;
+        std::vector<HAMERS_SHARED_PTR<xfer::RefineAlgorithm> > d_bdry_fill_intermediate;
         
         /*
          * Coarsen algorithms for conservative data synchronization (e.g., flux correction or
          * refluxing).
          */
-        boost::shared_ptr<xfer::CoarsenAlgorithm> d_coarsen_fluxsum;
-        boost::shared_ptr<xfer::CoarsenAlgorithm> d_coarsen_sync_data;
-        boost::shared_ptr<xfer::CoarsenAlgorithm> d_sync_initial_data;
+        HAMERS_SHARED_PTR<xfer::CoarsenAlgorithm> d_coarsen_fluxsum;
+        HAMERS_SHARED_PTR<xfer::CoarsenAlgorithm> d_coarsen_sync_data;
+        HAMERS_SHARED_PTR<xfer::CoarsenAlgorithm> d_sync_initial_data;
         
         /*
          * Coarsen algorithms for Richardson extrapolation.
          */
-        boost::shared_ptr<xfer::CoarsenAlgorithm> d_coarsen_rich_extrap_init;
-        boost::shared_ptr<xfer::CoarsenAlgorithm> d_coarsen_rich_extrap_final;
+        HAMERS_SHARED_PTR<xfer::CoarsenAlgorithm> d_coarsen_rich_extrap_init;
+        HAMERS_SHARED_PTR<xfer::CoarsenAlgorithm> d_coarsen_rich_extrap_final;
         
         /*
          * Algorithm for filling a new patch level in the hierarchy.
          */
-        boost::shared_ptr<xfer::RefineAlgorithm> d_fill_new_level;
+        HAMERS_SHARED_PTR<xfer::RefineAlgorithm> d_fill_new_level;
+        
+        /*
+         * Set boundary fill schedules for scratch data when data statistics are outputted.
+         */
+        HAMERS_SHARED_PTR<xfer::RefineAlgorithm> d_fill_statistics;
+        
+        /*
+         * Coarsen algorithms for statistics data.
+         */
+        HAMERS_SHARED_PTR<xfer::CoarsenAlgorithm> d_coarsen_statistics;
         
         /*
          * Number of levels of time-dependent data that must be maintained on each patch level. This
@@ -1147,18 +1165,19 @@ class RungeKuttaLevelIntegrator:
          * and component selectors are set in the registerVariable() function.
          */
         
-        boost::shared_ptr<hier::VariableContext> d_scratch;
-        boost::shared_ptr<hier::VariableContext> d_current;
-        boost::shared_ptr<hier::VariableContext> d_new;
-        boost::shared_ptr<hier::VariableContext> d_old;
-        boost::shared_ptr<hier::VariableContext> d_plot_context;
-        std::vector<boost::shared_ptr<hier::VariableContext> > d_intermediate;
+        HAMERS_SHARED_PTR<hier::VariableContext> d_scratch;
+        HAMERS_SHARED_PTR<hier::VariableContext> d_current;
+        HAMERS_SHARED_PTR<hier::VariableContext> d_new;
+        HAMERS_SHARED_PTR<hier::VariableContext> d_old;
+        HAMERS_SHARED_PTR<hier::VariableContext> d_plot_context;
+        HAMERS_SHARED_PTR<hier::VariableContext> d_stats_tmp;
+        std::vector<HAMERS_SHARED_PTR<hier::VariableContext> > d_intermediate;
         
-        std::list<boost::shared_ptr<hier::Variable> > d_all_variables;
-        std::list<boost::shared_ptr<hier::Variable> > d_time_dep_variables;
-        std::list<boost::shared_ptr<hier::Variable> > d_flux_variables;
-        std::list<boost::shared_ptr<hier::Variable> > d_fluxsum_variables;
-        std::list<boost::shared_ptr<hier::Variable> > d_source_variables;
+        std::list<HAMERS_SHARED_PTR<hier::Variable> > d_all_variables;
+        std::list<HAMERS_SHARED_PTR<hier::Variable> > d_time_dep_variables;
+        std::list<HAMERS_SHARED_PTR<hier::Variable> > d_flux_variables;
+        std::list<HAMERS_SHARED_PTR<hier::Variable> > d_fluxsum_variables;
+        std::list<HAMERS_SHARED_PTR<hier::Variable> > d_source_variables;
         
         /*
          * SCRATCH descriptor indices for (non-TEMPORARY) variables (i.e., TIME_DEP, INPUT, FLUX,
@@ -1226,6 +1245,11 @@ class RungeKuttaLevelIntegrator:
         hier::ComponentSelector d_old_time_dep_data;
         
         /*
+         * SCRATCH descriptor indices for STATISTICS variables.
+         */
+        hier::ComponentSelector d_stats_var_scratch_data;
+        
+        /*
          * Option to distinguish tbox::MPI reduction costs from load imbalances when doing performance
          * timings.
          */
@@ -1236,47 +1260,47 @@ class RungeKuttaLevelIntegrator:
         /*
          * Timers interspersed throughout the class.
          */
-        static boost::shared_ptr<tbox::Timer> t_advance_bdry_fill_comm;
-        static boost::shared_ptr<tbox::Timer> t_error_bdry_fill_create;
-        static boost::shared_ptr<tbox::Timer> t_error_bdry_fill_comm;
-        static boost::shared_ptr<tbox::Timer> t_advance_mpi_reductions;
-        static boost::shared_ptr<tbox::Timer> t_get_level_dt_mpi_reductions;
-        static boost::shared_ptr<tbox::Timer> t_initialize_level_data;
-        static boost::shared_ptr<tbox::Timer> t_init_level_create_sched;
-        static boost::shared_ptr<tbox::Timer> t_init_level_fill_data;
-        static boost::shared_ptr<tbox::Timer> t_init_level_fill_interior;
-        static boost::shared_ptr<tbox::Timer> t_advance_bdry_fill_create;
-        static boost::shared_ptr<tbox::Timer> t_new_advance_bdry_fill_create;
-        static boost::shared_ptr<tbox::Timer> t_apply_value_detector;
-        static boost::shared_ptr<tbox::Timer> t_apply_gradient_detector;
-        static boost::shared_ptr<tbox::Timer> t_apply_multiresolution_detector;
-        static boost::shared_ptr<tbox::Timer> t_apply_integral_detector;
-        static boost::shared_ptr<tbox::Timer> t_tag_cells;
-        static boost::shared_ptr<tbox::Timer> t_coarsen_rich_extrap;
-        static boost::shared_ptr<tbox::Timer> t_get_level_dt;
-        static boost::shared_ptr<tbox::Timer> t_get_level_dt_sync;
-        static boost::shared_ptr<tbox::Timer> t_advance_level;
-        static boost::shared_ptr<tbox::Timer> t_new_advance_bdry_fill_comm;
-        static boost::shared_ptr<tbox::Timer> t_patch_num_kernel;
-        static boost::shared_ptr<tbox::Timer> t_advance_level_sync;
-        static boost::shared_ptr<tbox::Timer> t_std_level_sync;
-        static boost::shared_ptr<tbox::Timer> t_sync_new_levels;
-        static boost::shared_ptr<tbox::Timer> t_barrier_after_error_bdry_fill_comm;
-        static boost::shared_ptr<tbox::Timer> t_sync_initial_comm;
-        static boost::shared_ptr<tbox::Timer> t_sync_initial_create;
-        static boost::shared_ptr<tbox::Timer> t_coarsen_fluxsum_create;
-        static boost::shared_ptr<tbox::Timer> t_coarsen_fluxsum_comm;
-        static boost::shared_ptr<tbox::Timer> t_coarsen_sync_create;
-        static boost::shared_ptr<tbox::Timer> t_coarsen_sync_comm;
-        static boost::shared_ptr<tbox::Timer> t_output_data_statistics;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_advance_bdry_fill_comm;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_error_bdry_fill_create;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_error_bdry_fill_comm;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_advance_mpi_reductions;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_get_level_dt_mpi_reductions;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_initialize_level_data;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_init_level_create_sched;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_init_level_fill_data;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_init_level_fill_interior;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_advance_bdry_fill_create;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_new_advance_bdry_fill_create;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_apply_value_detector;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_apply_gradient_detector;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_apply_multiresolution_detector;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_apply_integral_detector;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_tag_cells;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_coarsen_rich_extrap;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_get_level_dt;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_get_level_dt_sync;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_advance_level;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_new_advance_bdry_fill_comm;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_patch_num_kernel;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_advance_level_sync;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_std_level_sync;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_sync_new_levels;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_barrier_after_error_bdry_fill_comm;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_sync_initial_comm;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_sync_initial_create;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_coarsen_fluxsum_create;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_coarsen_fluxsum_comm;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_coarsen_sync_create;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_coarsen_sync_comm;
+        static HAMERS_SHARED_PTR<tbox::Timer> t_output_data_statistics;
         
 #ifdef HLI_RECORD_STATS
         /*
          * Statistics on number of cells and patches generated.
          */
-        static std::vector<boost::shared_ptr<tbox::Statistic> > s_boxes_stat;
-        static std::vector<boost::shared_ptr<tbox::Statistic> > s_cells_stat;
-        static std::vector<boost::shared_ptr<tbox::Statistic> > s_timestamp_stat;
+        static std::vector<HAMERS_SHARED_PTR<tbox::Statistic> > s_boxes_stat;
+        static std::vector<HAMERS_SHARED_PTR<tbox::Statistic> > s_cells_stat;
+        static std::vector<HAMERS_SHARED_PTR<tbox::Statistic> > s_timestamp_stat;
 #endif
         
         /*!

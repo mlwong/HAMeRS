@@ -3,13 +3,14 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "flow/flow_models/FlowModels.hpp"
 #include "apps/Navier-Stokes/NavierStokesSpecialBoundaryConditions.hpp"
 #include "util/basic_boundary_conditions/BasicBoundaryConditions.hpp"
 #include "util/basic_boundary_conditions/BoundaryUtilityStrategy.hpp"
 #include "util/basic_boundary_conditions/CartesianBoundaryDefines.hpp"
 
-#include "boost/shared_ptr.hpp"
 #include <map>
 #include <string>
 #include <vector>
@@ -24,10 +25,10 @@ class NavierStokesBoundaryConditions:
             const std::string& object_name,
             const std::string& project_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const FLOW_MODEL::TYPE& flow_model_type,
-            const boost::shared_ptr<FlowModel>& flow_model,
-            const boost::shared_ptr<tbox::Database>& boundary_conditions_db,
+            const HAMERS_SHARED_PTR<FlowModel>& flow_model,
+            const HAMERS_SHARED_PTR<tbox::Database>& boundary_conditions_db,
             const bool& is_from_restart);
         
         ~NavierStokesBoundaryConditions() {};
@@ -44,7 +45,7 @@ class NavierStokesBoundaryConditions:
          */
         void
         putToRestart(
-            const boost::shared_ptr<tbox::Database>& restart_db) const;
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
         
         /*
          * This routine is a concrete implementation of the virtual function
@@ -56,7 +57,7 @@ class NavierStokesBoundaryConditions:
          */
         void
         readDirichletBoundaryDataEntry(
-            const boost::shared_ptr<tbox::Database>& db,
+            const HAMERS_SHARED_PTR<tbox::Database>& db,
             std::string& db_name,
             int bdry_location_index);
         
@@ -67,7 +68,7 @@ class NavierStokesBoundaryConditions:
          */
         void
         readNeumannBoundaryDataEntry(
-            const boost::shared_ptr<tbox::Database>& db,
+            const HAMERS_SHARED_PTR<tbox::Database>& db,
             std::string& db_name,
             int bdry_location_index);
         
@@ -81,12 +82,12 @@ class NavierStokesBoundaryConditions:
             hier::Patch& patch,
             const double fill_time,
             const hier::IntVector& ghost_width_to_fill,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
     private:
         std::vector<double>
         readPrimitiveDataEntry(
-            boost::shared_ptr<tbox::Database> db,
+            HAMERS_SHARED_PTR<tbox::Database> db,
             const std::string& db_name);
         
         /*
@@ -112,9 +113,9 @@ class NavierStokesBoundaryConditions:
         const tbox::Dimension d_dim;
         
         /*
-         * boost::shared_ptr to the grid geometry.
+         * HAMERS_SHARED_PTR to the grid geometry.
          */
-        const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
+        const HAMERS_SHARED_PTR<geom::CartesianGridGeometry> d_grid_geometry;
         
         /*
          * Flow model type.
@@ -124,7 +125,7 @@ class NavierStokesBoundaryConditions:
         /*
          * Flow model.
          */
-        const boost::shared_ptr<FlowModel> d_flow_model;
+        const HAMERS_SHARED_PTR<FlowModel> d_flow_model;
         
         /*
          * Boundary condition cases and boundary values.
@@ -161,9 +162,9 @@ class NavierStokesBoundaryConditions:
         std::vector<std::vector<double> > d_bdry_face_conservative_var;
         
         /*
-         * boost::shared_ptr to the special boundary conditions.
+         * HAMERS_SHARED_PTR to the special boundary conditions.
          */
-        boost::shared_ptr<NavierStokesSpecialBoundaryConditions> d_Navier_Stokes_special_boundary_conditions;
+        HAMERS_SHARED_PTR<NavierStokesSpecialBoundaryConditions> d_Navier_Stokes_special_boundary_conditions;
         
 };
 

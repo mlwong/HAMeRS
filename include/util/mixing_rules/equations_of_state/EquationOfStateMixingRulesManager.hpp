@@ -3,11 +3,12 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "util/mixing_rules/equations_of_state/EquationsOfState.hpp"
 
 #include "SAMRAI/tbox/Dimension.h"
 
-#include "boost/shared_ptr.hpp"
 #include <string>
 
 using namespace SAMRAI;
@@ -20,7 +21,7 @@ class EquationOfStateMixingRulesManager
             const tbox::Dimension& dim,
             const int& num_species,
             const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
-            const boost::shared_ptr<tbox::Database>& equation_of_state_mixing_rules_db,
+            const HAMERS_SHARED_PTR<tbox::Database>& equation_of_state_mixing_rules_db,
             const std::string& equation_of_state_str);
         
         /*
@@ -35,7 +36,7 @@ class EquationOfStateMixingRulesManager
         /*
          * Get the equation of state mixing rules.
          */
-        boost::shared_ptr<EquationOfStateMixingRules>
+        HAMERS_SHARED_PTR<EquationOfStateMixingRules>
         getEquationOfStateMixingRules() const
         {
             return d_equation_of_state_mixing_rules;
@@ -59,9 +60,9 @@ class EquationOfStateMixingRulesManager
         EQN_STATE::TYPE d_equation_of_state_type;
         
         /*
-         * boost::shared_ptr to the equation of state.
+         * HAMERS_SHARED_PTR to the equation of state.
          */
-        boost::shared_ptr<EquationOfStateMixingRules> d_equation_of_state_mixing_rules;
+        HAMERS_SHARED_PTR<EquationOfStateMixingRules> d_equation_of_state_mixing_rules;
         
 };
 

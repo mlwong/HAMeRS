@@ -11,10 +11,14 @@ if (MPI_FOUND)
   include_directories(${MPI_INCLUDE_PATH})
 endif()
 
-# Find the boost package
-find_package(Boost 1.45 REQUIRED)
-include_directories(${Boost_INCLUDE_DIR})
-link_directories(${Boost_LIBRARY_DIRS})
+option(HAMERS_USE_BOOST "HAMERS_USE_BOOST" ON)
+
+if("${HAMERS_USE_BOOST}")
+    # Find the boost package
+    find_package(Boost 1.45 REQUIRED)
+    include_directories(${Boost_INCLUDE_DIR})
+    link_directories(${Boost_LIBRARY_DIRS})
+endif()
 
 # Find the hdf5 package
 find_package(HDF5 1.8.4 REQUIRED)
@@ -127,6 +131,7 @@ add_subdirectory(src/util)
 add_subdirectory(src/util/basic_boundary_conditions)
 add_subdirectory(src/util/derivatives)
 add_subdirectory(src/util/differences)
+add_subdirectory(src/util/filters)
 add_subdirectory(src/util/gradient_sensors)
 add_subdirectory(src/util/mixing_rules)
 add_subdirectory(src/util/mixing_rules/equations_of_state)

@@ -50,8 +50,8 @@ DerivativeSecondOrder::DerivativeSecondOrder(
  */
 void
 DerivativeSecondOrder::computeDerivative(
-    boost::shared_ptr<pdat::CellData<double> >& derivative,
-    const boost::shared_ptr<pdat::CellData<double> >& data,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& derivative,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data,
     const double dx,
     const hier::Box& domain,
     const int depth_derivative,

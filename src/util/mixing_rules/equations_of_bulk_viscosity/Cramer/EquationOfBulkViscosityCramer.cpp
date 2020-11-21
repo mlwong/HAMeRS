@@ -64,9 +64,9 @@ EquationOfBulkViscosityCramer::getBulkViscosity(
  */
 void
 EquationOfBulkViscosityCramer::computeBulkViscosity(
-    boost::shared_ptr<pdat::CellData<double> >& data_bulk_viscosity,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_bulk_viscosity,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
     const std::vector<const double*>& molecular_properties,
     const hier::Box& domain) const
 {
@@ -283,10 +283,10 @@ EquationOfBulkViscosityCramer::computeBulkViscosity(
  */
 void
 EquationOfBulkViscosityCramer::computeBulkViscosity(
-    boost::shared_ptr<pdat::CellData<double> >& data_bulk_viscosity,
-    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
-    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
-    const boost::shared_ptr<pdat::CellData<double> >& data_molecular_properties,
+    HAMERS_SHARED_PTR<pdat::CellData<double> >& data_bulk_viscosity,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_pressure,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_temperature,
+    const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_molecular_properties,
     const hier::Box& domain) const
 {
     NULL_USE(data_pressure);

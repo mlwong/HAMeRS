@@ -3,7 +3,7 @@
 FlowModelDiffusiveFluxUtilities::FlowModelDiffusiveFluxUtilities(
     const std::string& object_name,
     const tbox::Dimension& dim,
-    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+    const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_species,
     const int& num_eqn):
         d_object_name(object_name),
@@ -92,7 +92,7 @@ FlowModelDiffusiveFluxUtilities::computeDerivedCellData()
 /*
  * Get the cell data of one cell variable related to this class in the registered patch.
  */
-boost::shared_ptr<pdat::CellData<double> >
+HAMERS_SHARED_PTR<pdat::CellData<double> >
 FlowModelDiffusiveFluxUtilities::getCellData(const std::string& variable_key)
 {
     NULL_USE(variable_key);
@@ -109,7 +109,7 @@ FlowModelDiffusiveFluxUtilities::getCellData(const std::string& variable_key)
 /*
  * Get the cell data of different cell variables related to this class in the registered patch.
  */
-std::vector<boost::shared_ptr<pdat::CellData<double> > >
+std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >
 FlowModelDiffusiveFluxUtilities::getCellData(
     const std::vector<std::string>& variable_keys)
 {
@@ -120,7 +120,7 @@ FlowModelDiffusiveFluxUtilities::getCellData(
         << "Function is not yet implemented!"
         << std::endl);
     
-    std::vector<boost::shared_ptr<pdat::CellData<double> > > cell_data(
+    std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > cell_data(
         static_cast<int>(variable_keys.size()));
     
     return cell_data;
@@ -132,7 +132,7 @@ FlowModelDiffusiveFluxUtilities::getCellData(
  */
 void
 FlowModelDiffusiveFluxUtilities::getCellDataOfDiffusiveFluxVariablesForDerivative(
-    std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_var_data,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& derivative_var_data,
     std::vector<std::vector<int> >& derivative_var_component_idx,
     const DIRECTION::TYPE& flux_direction,
     const DIRECTION::TYPE& derivative_direction)
@@ -154,7 +154,7 @@ FlowModelDiffusiveFluxUtilities::getCellDataOfDiffusiveFluxVariablesForDerivativ
  */
 void
 FlowModelDiffusiveFluxUtilities::getCellDataOfDiffusiveFluxDiffusivities(
-    std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& diffusivities_data,
+    std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& diffusivities_data,
     std::vector<std::vector<int> >& diffusivities_component_idx,
     const DIRECTION::TYPE& flux_direction,
     const DIRECTION::TYPE& derivative_direction)

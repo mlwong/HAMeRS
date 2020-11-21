@@ -5,7 +5,7 @@ EquationOfBulkViscosityMixingRulesManager::EquationOfBulkViscosityMixingRulesMan
     const tbox::Dimension& dim,
     const int& num_species,
     const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
-    const boost::shared_ptr<tbox::Database>& equation_of_bulk_viscosity_mixing_rules_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& equation_of_bulk_viscosity_mixing_rules_db,
     const std::string& equation_of_bulk_viscosity_str):
         d_object_name(object_name)
 {

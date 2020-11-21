@@ -3,12 +3,13 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "HAMeRS_memory.hpp"
+
 #include "SAMRAI/hier/IntVector.h"
 #include "SAMRAI/hier/Patch.h"
 #include "SAMRAI/pdat/CellData.h"
 #include "SAMRAI/tbox/Dimension.h"
 
-#include "boost/shared_ptr.hpp"
 #include <string>
 #include <vector>
 
@@ -41,8 +42,8 @@ class GradientSensor
          */
         virtual void
         computeGradient(
-            boost::shared_ptr<pdat::CellData<double> >& gradient,
-            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+            HAMERS_SHARED_PTR<pdat::CellData<double> >& gradient,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& cell_data,
             hier::Patch& patch,
             const int depth = 0) = 0;
         

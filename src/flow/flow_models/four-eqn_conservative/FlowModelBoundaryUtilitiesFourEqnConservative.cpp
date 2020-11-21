@@ -8,6 +8,8 @@
 #include "SAMRAI/tbox/Utilities.h"
 #include "SAMRAI/tbox/MathUtilities.h"
 
+#include <algorithm>
+
 // Integer constant for debugging improperly set boundary data.
 #define BOGUS_BDRY_LOC (-9999)
 
@@ -16,7 +18,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::FlowModelBoundaryUtilitiesFourEqn
     const tbox::Dimension& dim,
     const int& num_species,
     const int& num_eqn,
-    const boost::shared_ptr<EquationOfStateMixingRules>& equation_of_state_mixing_rules):
+    const HAMERS_SHARED_PTR<EquationOfStateMixingRules>& equation_of_state_mixing_rules):
         FlowModelBoundaryUtilities(
             object_name,
             dim,
@@ -73,7 +75,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::FlowModelBoundaryUtilitiesFourEqn
  */
 void
 FlowModelBoundaryUtilitiesFourEqnConservative::getFromInput1d(
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     std::vector<int>& node_locs,
     std::vector<int>& node_conds,
     const hier::IntVector& periodic)
@@ -106,7 +108,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::getFromInput1d(
  */
 void
 FlowModelBoundaryUtilitiesFourEqnConservative::getFromInput2d(
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     std::vector<int>& edge_locs,
     std::vector<int>& node_locs,
     std::vector<int>& edge_conds,
@@ -152,7 +154,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::getFromInput2d(
  */
 void
 FlowModelBoundaryUtilitiesFourEqnConservative::getFromInput3d(
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     std::vector<int>& face_locs,
     std::vector<int>& edge_locs,
     std::vector<int>& node_locs,
@@ -437,7 +439,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::getFaceLocationForNodeBdry(
  */
 void
 FlowModelBoundaryUtilitiesFourEqnConservative::fill1dNodeBoundaryData(
-    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_var_data,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
     const hier::Patch& patch,
     std::vector<int>& bdry_node_locs,
     const std::vector<int>& bdry_node_conds,
@@ -467,8 +469,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill1dNodeBoundaryData(
         TBOX_ASSERT_OBJDIM_EQUALITY3(*conservative_var_data[vi], patch, ghost_width_to_fill);
     }
     
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     TBOX_ASSERT(patch_geom);
     
@@ -829,7 +831,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill1dNodeBoundaryData(
  */
 void
 FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
-    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_var_data,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
     const hier::Patch& patch,
     std::vector<int>& bdry_edge_locs,
     const std::vector<int>& bdry_edge_conds,
@@ -859,8 +861,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
         TBOX_ASSERT_OBJDIM_EQUALITY3(*conservative_var_data[vi], patch, ghost_width_to_fill);
     }
     
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     TBOX_ASSERT(patch_geom);
     
@@ -3709,7 +3711,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
  */
 void
 FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
-    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_var_data,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
     const hier::Patch& patch,
     std::vector<int>& bdry_node_locs,
     const std::vector<int>& bdry_node_conds,
@@ -3739,8 +3741,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
         TBOX_ASSERT_OBJDIM_EQUALITY3(*conservative_var_data[vi], patch, ghost_width_to_fill);
     }
     
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     TBOX_ASSERT(patch_geom);
     
@@ -4486,7 +4488,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
  */
 void
 FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
-    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_var_data,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
     const hier::Patch& patch,
     std::vector<int>& bdry_face_locs,
     const std::vector<int>& bdry_face_conds,
@@ -4516,8 +4518,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
         TBOX_ASSERT_OBJDIM_EQUALITY3(*conservative_var_data[vi], patch, ghost_width_to_fill);
     }
     
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     TBOX_ASSERT(patch_geom);
     
@@ -5249,7 +5251,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
  */
 void
 FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
-    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_var_data,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
     const hier::Patch& patch,
     std::vector<int>& bdry_edge_locs,
     const std::vector<int>& bdry_edge_conds,
@@ -5279,8 +5281,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
         TBOX_ASSERT_OBJDIM_EQUALITY3(*conservative_var_data[vi], patch, ghost_width_to_fill);
     }
     
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     TBOX_ASSERT(patch_geom);
     
@@ -6588,7 +6590,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
  */
 void
 FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
-    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_var_data,
+    const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_var_data,
     const hier::Patch& patch,
     std::vector<int>& bdry_node_locs,
     const std::vector<int>& bdry_node_conds,
@@ -6618,8 +6620,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
         TBOX_ASSERT_OBJDIM_EQUALITY3(*conservative_var_data[vi], patch, ghost_width_to_fill);
     }
     
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     TBOX_ASSERT(patch_geom);
     
@@ -7903,7 +7905,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
 
 void
 FlowModelBoundaryUtilitiesFourEqnConservative::read1dBdryNodes(
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     std::vector<int>& node_locs,
     std::vector<int>& node_conds,
     const hier::IntVector& periodic)
@@ -7957,7 +7959,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read1dBdryNodes(
             
             if (need_data_read)
             {
-                boost::shared_ptr<tbox::Database> bdry_loc_db(
+                HAMERS_SHARED_PTR<tbox::Database> bdry_loc_db(
                     input_db->getDatabase(bdry_loc_str));
                 std::string bdry_cond_str =
                     bdry_loc_db->getString("boundary_condition");
@@ -7994,7 +7996,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read1dBdryNodes(
 
 void
 FlowModelBoundaryUtilitiesFourEqnConservative::read2dBdryEdges(
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     std::vector<int>& edge_locs,
     std::vector<int>& edge_conds,
     const hier::IntVector& periodic)
@@ -8062,7 +8064,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read2dBdryEdges(
             
             if (need_data_read)
             {
-                boost::shared_ptr<tbox::Database> bdry_loc_db(
+                HAMERS_SHARED_PTR<tbox::Database> bdry_loc_db(
                     input_db->getDatabase(bdry_loc_str));
                 std::string bdry_cond_str =
                     bdry_loc_db->getString("boundary_condition");
@@ -8110,7 +8112,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read2dBdryEdges(
 
 void
 FlowModelBoundaryUtilitiesFourEqnConservative::read2dBdryNodes(
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     std::vector<int>& node_locs,
     const std::vector<int>& edge_conds,
     std::vector<int>& node_conds,
@@ -8165,7 +8167,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read2dBdryNodes(
                 default: NULL_STATEMENT;
             }
             
-            boost::shared_ptr<tbox::Database> bdry_loc_db(
+            HAMERS_SHARED_PTR<tbox::Database> bdry_loc_db(
                 input_db->getDatabase(bdry_loc_str));
             std::string bdry_cond_str =
                 bdry_loc_db->getString("boundary_condition");
@@ -8291,7 +8293,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read2dBdryNodes(
 
 void
 FlowModelBoundaryUtilitiesFourEqnConservative::read3dBdryFaces(
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     std::vector<int>& face_locs,
     std::vector<int>& face_conds,
     const hier::IntVector& periodic)
@@ -8373,7 +8375,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read3dBdryFaces(
             
             if (need_data_read)
             {
-                boost::shared_ptr<tbox::Database> bdry_loc_db(
+                HAMERS_SHARED_PTR<tbox::Database> bdry_loc_db(
                     input_db->getDatabase(bdry_loc_str));
                 std::string bdry_cond_str =
                     bdry_loc_db->getString("boundary_condition");
@@ -8410,7 +8412,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read3dBdryFaces(
 
 void
 FlowModelBoundaryUtilitiesFourEqnConservative::read3dBdryEdges(
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     std::vector<int>& edge_locs,
     const std::vector<int>& face_conds,
     std::vector<int>& edge_conds,
@@ -8537,7 +8539,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read3dBdryEdges(
             
             if (need_data_read)
             {
-                boost::shared_ptr<tbox::Database> bdry_loc_db(
+                HAMERS_SHARED_PTR<tbox::Database> bdry_loc_db(
                    input_db->getDatabase(bdry_loc_str));
                 
                 std::string bdry_cond_str =
@@ -8763,7 +8765,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read3dBdryEdges(
 
 void
 FlowModelBoundaryUtilitiesFourEqnConservative::read3dBdryNodes(
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     std::vector<int>& node_locs,
     const std::vector<int>& face_conds,
     std::vector<int>& node_conds,
@@ -8837,7 +8839,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read3dBdryNodes(
                 }
                 default: NULL_STATEMENT;
             }
-            boost::shared_ptr<tbox::Database> bdry_loc_db(
+            HAMERS_SHARED_PTR<tbox::Database> bdry_loc_db(
                 input_db->getDatabase(bdry_loc_str));
             std::string bdry_cond_str =
                 bdry_loc_db->getString("boundary_condition");
@@ -9017,7 +9019,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read3dBdryNodes(
 
 void
 FlowModelBoundaryUtilitiesFourEqnConservative::readAdiabaticNoSlip(
-    const boost::shared_ptr<tbox::Database>& db,
+    const HAMERS_SHARED_PTR<tbox::Database>& db,
     std::string& db_name,
     int bdry_location_index)
 {
@@ -9090,7 +9092,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::readAdiabaticNoSlip(
 
 void
 FlowModelBoundaryUtilitiesFourEqnConservative::readIsothermalNoSlip(
-    const boost::shared_ptr<tbox::Database>& db,
+    const HAMERS_SHARED_PTR<tbox::Database>& db,
     std::string& db_name,
     int bdry_location_index)
 {
@@ -9181,7 +9183,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::readIsothermalNoSlip(
 
 void
 FlowModelBoundaryUtilitiesFourEqnConservative::readNonreflectingOutflow(
-    const boost::shared_ptr<tbox::Database>& db,
+    const HAMERS_SHARED_PTR<tbox::Database>& db,
     std::string& db_name,
     int bdry_location_index)
 {
