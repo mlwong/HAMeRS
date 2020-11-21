@@ -1,1 +1,1 @@
-/home/wongml/Codes/HAMeRS_bc/problems/Navier-Stokes/initial_conditions/RayleighTaylorInstabilitySingleMode2D.cpp
+/mnt/c/Users/denis/Desktop/HAMeRS_BC/HAMeRS_BC_06272020/HAMeRS/problems/Navier-Stokes/initial_conditions/RayleighTaylorInstabilitySingleMode2D.cpp
