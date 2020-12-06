@@ -13644,8 +13644,13 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read2dBdryEdges(
                     
                     edge_locs[ei] = BOGUS_BDRY_LOC;
                     
-                    d_use_transverse_derivatives_bc = true;
-                    d_num_ghosts_transverse_derivatives_bc = hier::IntVector::getOne(d_dim);
+                    if (d_bdry_edge_nonreflecting_outflow_beta[s] != double(1))
+                    {
+                        d_use_transverse_derivatives_bc |= true;
+                        d_num_ghosts_transverse_derivatives_bc = hier::IntVector::max(
+                            d_num_ghosts_transverse_derivatives_bc,
+                            hier::IntVector::getOne(d_dim));
+                    }
                 }
             } // if (need_data_read)
        } // for (int ei = 0 ...
@@ -13958,8 +13963,13 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read3dBdryFaces(
                     
                     face_locs[fi] = BOGUS_BDRY_LOC;
                     
-                    d_use_transverse_derivatives_bc = true;
-                    d_num_ghosts_transverse_derivatives_bc = hier::IntVector::getOne(d_dim);
+                    if (d_bdry_face_nonreflecting_outflow_beta[s] != double(1))
+                    {
+                        d_use_transverse_derivatives_bc |= true;
+                        d_num_ghosts_transverse_derivatives_bc = hier::IntVector::max(
+                            d_num_ghosts_transverse_derivatives_bc,
+                            hier::IntVector::getOne(d_dim));
+                    }
                 }
             } // if (need_data_read)
         } // for (int fi = 0 ...
@@ -14751,7 +14761,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::readNonreflectingOutflow(
     TBOX_ASSERT(!db_name.empty());
 
     double p_t = 0.0;
-    double sigma = 0.25;
+    double sigma = double(1)/double(4); // 0.25
     double beta = 0.0;
     double length_char = 0.0;
 
