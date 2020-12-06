@@ -54,7 +54,9 @@ class FlowModelBoundaryUtilities
                 d_dim(dim),
                 d_num_species(num_species),
                 d_num_eqn(num_eqn),
-                d_equation_of_state_mixing_rules(equation_of_state_mixing_rules)
+                d_equation_of_state_mixing_rules(equation_of_state_mixing_rules),
+                d_use_transverse_derivatives_bc(false),
+                d_num_ghosts_transverse_derivatives_bc(hier::IntVector::getZero(d_dim))
         {}
         
         virtual ~FlowModelBoundaryUtilities() {}
@@ -238,6 +240,18 @@ class FlowModelBoundaryUtilities
             const std::vector<std::vector<double> >& bdry_face_values,
             const hier::IntVector& ghost_width_to_fill = -hier::IntVector::getOne(tbox::Dimension(3))) = 0;
         
+        bool
+        useTransverseDerivativesBoundaryConditions()
+        {
+            return d_use_transverse_derivatives_bc;
+        }
+        
+        hier::IntVector
+        getBoundaryConditionsTransverseDerivativesNumberOfGhostCells()
+        {
+            return d_num_ghosts_transverse_derivatives_bc;
+        }
+        
 protected:
         /*
          * The object name is used for error/warning reporting.
@@ -263,6 +277,16 @@ protected:
          * HAMERS_SHARED_PTR to EquationOfStateMixingRules.
          */
         HAMERS_SHARED_PTR<EquationOfStateMixingRules> d_equation_of_state_mixing_rules;
+        
+        /*
+         * Whether transverse derivatives are used in boundary conditions.
+         */
+        bool d_use_transverse_derivatives_bc;
+        
+        /*
+         * Number of ghost cells used for transverse derivatives in boundary conditions.
+         */
+        hier::IntVector d_num_ghosts_transverse_derivatives_bc;
         
 };
 

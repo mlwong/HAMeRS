@@ -13643,6 +13643,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read2dBdryEdges(
                         s);
                     
                     edge_locs[ei] = BOGUS_BDRY_LOC;
+                    
+                    d_use_transverse_derivatives_bc = true;
+                    d_num_ghosts_transverse_derivatives_bc = hier::IntVector::getOne(d_dim);
                 }
             } // if (need_data_read)
        } // for (int ei = 0 ...
@@ -13954,6 +13957,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read3dBdryFaces(
                         s);
                     
                     face_locs[fi] = BOGUS_BDRY_LOC;
+                    
+                    d_use_transverse_derivatives_bc = true;
+                    d_num_ghosts_transverse_derivatives_bc = hier::IntVector::getOne(d_dim);
                 }
             } // if (need_data_read)
         } // for (int fi = 0 ...
