@@ -1553,23 +1553,23 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                         double(18)*V_ghost[(i + 2)*4 + 3] + double(6)*V_ghost[(i + 1)*4 + 3] -
                                         double(12)*dx[0]*dV_dx[3];
                                 }
-                                else if (i == num_ghosts_to_fill - 4)  
+                                else if (i == num_ghosts_to_fill - 4)
                                 {
                                     V_ghost[i*4 + 0] = -double(4)*rho_x_RR - double(65)/double(3)*rho_x_R +
                                         double(40)*V_ghost[(i + 3)*4 + 0] - double(20)*V_ghost[(i + 2)*4 + 0] +
-                                        double(20)/double(3)*V_ghost[(i + 1)*4 + 0] - double(20)*dx[0]*dV_dx[0];
+                                        double(20)/double(3)*V_ghost[(i + 1)*4 + 0] + double(20)*dx[0]*dV_dx[0];
                                     
                                     V_ghost[i*4 + 1] = -double(4)*u_x_RR - double(65)/double(3)*u_x_R +
                                         double(40)*V_ghost[(i + 3)*4 + 1] - double(20)*V_ghost[(i + 2)*4 + 1] +
-                                        double(20)/double(3)*V_ghost[(i + 1)*4 + 1] - double(20)*dx[0]*dV_dx[1];
+                                        double(20)/double(3)*V_ghost[(i + 1)*4 + 1] + double(20)*dx[0]*dV_dx[1];
                                     
                                     V_ghost[i*4 + 2] = -double(4)*v_x_RR - double(65)/double(3)*v_x_R +
                                         double(40)*V_ghost[(i + 3)*4 + 2] - double(20)*V_ghost[(i + 2)*4 + 2] +
-                                        double(20)/double(3)*V_ghost[(i + 1)*4 + 2] - double(20)*dx[0]*dV_dx[2];
+                                        double(20)/double(3)*V_ghost[(i + 1)*4 + 2] + double(20)*dx[0]*dV_dx[2];
                                     
                                     V_ghost[i*4 + 3] = -double(4)*p_x_RR - double(65)/double(3)*p_x_R +
                                         double(40)*V_ghost[(i + 3)*4 + 3] - double(20)*V_ghost[(i + 2)*4 + 3] +
-                                        double(20)/double(3)*V_ghost[(i + 1)*4 + 3] - double(20)*dx[0]*dV_dx[3];
+                                        double(20)/double(3)*V_ghost[(i + 1)*4 + 3] + double(20)*dx[0]*dV_dx[3];
                                 }
                                 
                                 Q[0][idx_cell_rho] = V_ghost[i*4 + 0];
@@ -1900,19 +1900,19 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                 {
                                     V_ghost[i*4 + 0] = -double(4)*rho_x_LL - double(65)/double(3)*rho_x_L +
                                         double(40)*V_ghost[(i - 3)*4 + 0] - double(20)*V_ghost[(i - 2)*4 + 0] +
-                                        double(20)/double(3)*V_ghost[(i - 1)*4 + 0] + double(20)*dx[0]*dV_dx[0];
+                                        double(20)/double(3)*V_ghost[(i - 1)*4 + 0] - double(20)*dx[0]*dV_dx[0];
                                     
                                     V_ghost[i*4 + 1] = -double(4)*u_x_LL - double(65)/double(3)*u_x_L +
                                         double(40)*V_ghost[(i - 3)*4 + 1] - double(20)*V_ghost[(i - 2)*4 + 1] +
-                                        double(20)/double(3)*V_ghost[(i - 1)*4 + 1] + double(20)*dx[0]*dV_dx[1];
+                                        double(20)/double(3)*V_ghost[(i - 1)*4 + 1] - double(20)*dx[0]*dV_dx[1];
                                     
                                     V_ghost[i*4 + 2] = -double(4)*v_x_LL - double(65)/double(3)*v_x_L +
                                         double(40)*V_ghost[(i - 3)*4 + 2] - double(20)*V_ghost[(i - 2)*4 + 2] +
-                                        double(20)/double(3)*V_ghost[(i - 1)*4 + 2] + double(20)*dx[0]*dV_dx[2];
+                                        double(20)/double(3)*V_ghost[(i - 1)*4 + 2] - double(20)*dx[0]*dV_dx[2];
                                     
                                     V_ghost[i*4 + 3] = -double(4)*p_x_LL - double(65)/double(3)*p_x_L +
                                         double(40)*V_ghost[(i - 3)*4 + 3] - double(20)*V_ghost[(i - 2)*4 + 3] +
-                                        double(20)/double(3)*V_ghost[(i - 1)*4 + 3] + double(20)*dx[0]*dV_dx[3];
+                                        double(20)/double(3)*V_ghost[(i - 1)*4 + 3] - double(20)*dx[0]*dV_dx[3];
                                 }
                                 
                                 Q[0][idx_cell_rho] = V_ghost[i*4 + 0];
@@ -2248,23 +2248,23 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                         double(18)*V_ghost[(j + 2)*4 + 3] + double(6)*V_ghost[(j + 1)*4 + 3] -
                                         double(12)*dx[1]*dV_dy[3];
                                 }
-                                else if (j == num_ghosts_to_fill - 4)  
+                                else if (j == num_ghosts_to_fill - 4)
                                 {
                                     V_ghost[j*4 + 0] = -double(4)*rho_y_TT - double(65)/double(3)*rho_y_T +
                                         double(40)*V_ghost[(j + 3)*4 + 0] - double(20)*V_ghost[(j + 2)*4 + 0] +
-                                        double(20)/double(3)*V_ghost[(j + 1)*4 + 0] - double(20)*dx[1]*dV_dy[0];
+                                        double(20)/double(3)*V_ghost[(j + 1)*4 + 0] + double(20)*dx[1]*dV_dy[0];
                                     
                                     V_ghost[j*4 + 1] = -double(4)*u_y_TT - double(65)/double(3)*u_y_T +
                                         double(40)*V_ghost[(j + 3)*4 + 1] - double(20)*V_ghost[(j + 2)*4 + 1] +
-                                        double(20)/double(3)*V_ghost[(j + 1)*4 + 1] - double(20)*dx[1]*dV_dy[1];
+                                        double(20)/double(3)*V_ghost[(j + 1)*4 + 1] + double(20)*dx[1]*dV_dy[1];
                                     
                                     V_ghost[j*4 + 2] = -double(4)*v_y_TT - double(65)/double(3)*v_y_T +
                                         double(40)*V_ghost[(j + 3)*4 + 2] - double(20)*V_ghost[(j + 2)*4 + 2] +
-                                        double(20)/double(3)*V_ghost[(j + 1)*4 + 2] - double(20)*dx[1]*dV_dy[2];
+                                        double(20)/double(3)*V_ghost[(j + 1)*4 + 2] + double(20)*dx[1]*dV_dy[2];
                                     
                                     V_ghost[j*4 + 3] = -double(4)*p_y_TT - double(65)/double(3)*p_y_T +
                                         double(40)*V_ghost[(j + 3)*4 + 3] - double(20)*V_ghost[(j + 2)*4 + 3] +
-                                        double(20)/double(3)*V_ghost[(j + 1)*4 + 3] - double(20)*dx[1]*dV_dy[3];
+                                        double(20)/double(3)*V_ghost[(j + 1)*4 + 3] + double(20)*dx[1]*dV_dy[3];
                                 }
                                 
                                 Q[0][idx_cell_rho] = V_ghost[j*4 + 0];
@@ -2589,19 +2589,19 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                 {
                                     V_ghost[j*4 + 0] = -double(4)*rho_y_BB - double(65)/double(3)*rho_y_B +
                                         double(40)*V_ghost[(j - 3)*4 + 0] - double(20)*V_ghost[(j - 2)*4 + 0] +
-                                        double(20)/double(3)*V_ghost[(j - 1)*4 + 0] + double(20)*dx[1]*dV_dy[0];
+                                        double(20)/double(3)*V_ghost[(j - 1)*4 + 0] - double(20)*dx[1]*dV_dy[0];
                                     
                                     V_ghost[j*4 + 1] = -double(4)*u_y_BB - double(65)/double(3)*u_y_B +
                                         double(40)*V_ghost[(j - 3)*4 + 1] - double(20)*V_ghost[(j - 2)*4 + 1] +
-                                        double(20)/double(3)*V_ghost[(j - 1)*4 + 1] + double(20)*dx[1]*dV_dy[1];
+                                        double(20)/double(3)*V_ghost[(j - 1)*4 + 1] - double(20)*dx[1]*dV_dy[1];
                                     
                                     V_ghost[j*4 + 2] = -double(4)*v_y_BB - double(65)/double(3)*v_y_B +
                                         double(40)*V_ghost[(j - 3)*4 + 2] - double(20)*V_ghost[(j - 2)*4 + 2] +
-                                        double(20)/double(3)*V_ghost[(j - 1)*4 + 2] + double(20)*dx[1]*dV_dy[2];
+                                        double(20)/double(3)*V_ghost[(j - 1)*4 + 2] - double(20)*dx[1]*dV_dy[2];
                                     
                                     V_ghost[j*4 + 3] = -double(4)*p_y_BB - double(65)/double(3)*p_y_B +
                                         double(40)*V_ghost[(j - 3)*4 + 3] - double(20)*V_ghost[(j - 2)*4 + 3] +
-                                        double(20)/double(3)*V_ghost[(j - 1)*4 + 3] + double(20)*dx[1]*dV_dy[3];
+                                        double(20)/double(3)*V_ghost[(j - 1)*4 + 3] - double(20)*dx[1]*dV_dy[3];
                                 }
                                 
                                 Q[0][idx_cell_rho] = V_ghost[j*4 + 0];
@@ -4469,27 +4469,27 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                             double(18)*V_ghost[(i + 2)*5 + 4] + double(6)*V_ghost[(i + 1)*5 + 4] -
                                             double(12)*dx[0]*dV_dx[4];
                                     }
-                                    else if (i == num_ghosts_to_fill - 4)  
+                                    else if (i == num_ghosts_to_fill - 4)
                                     {
                                         V_ghost[i*5 + 0] = -double(4)*rho_x_RR - double(65)/double(3)*rho_x_R +
                                             double(40)*V_ghost[(i + 3)*5 + 0] - double(20)*V_ghost[(i + 2)*5 + 0] +
-                                            double(20)/double(3)*V_ghost[(i + 1)*5 + 0] - double(20)*dx[0]*dV_dx[0];
+                                            double(20)/double(3)*V_ghost[(i + 1)*5 + 0] + double(20)*dx[0]*dV_dx[0];
                                         
                                         V_ghost[i*5 + 1] = -double(4)*u_x_RR - double(65)/double(3)*u_x_R +
                                             double(40)*V_ghost[(i + 3)*5 + 1] - double(20)*V_ghost[(i + 2)*5 + 1] +
-                                            double(20)/double(3)*V_ghost[(i + 1)*5 + 1] - double(20)*dx[0]*dV_dx[1];
+                                            double(20)/double(3)*V_ghost[(i + 1)*5 + 1] + double(20)*dx[0]*dV_dx[1];
                                         
                                         V_ghost[i*5 + 2] = -double(4)*v_x_RR - double(65)/double(3)*v_x_R +
                                             double(40)*V_ghost[(i + 3)*5 + 2] - double(20)*V_ghost[(i + 2)*5 + 2] +
-                                            double(20)/double(3)*V_ghost[(i + 1)*5 + 2] - double(20)*dx[0]*dV_dx[2];
+                                            double(20)/double(3)*V_ghost[(i + 1)*5 + 2] + double(20)*dx[0]*dV_dx[2];
                                         
                                         V_ghost[i*5 + 3] = -double(4)*w_x_RR - double(65)/double(3)*w_x_R +
                                             double(40)*V_ghost[(i + 3)*5 + 3] - double(20)*V_ghost[(i + 2)*5 + 3] +
-                                            double(20)/double(3)*V_ghost[(i + 1)*5 + 3] - double(20)*dx[0]*dV_dx[3];
+                                            double(20)/double(3)*V_ghost[(i + 1)*5 + 3] + double(20)*dx[0]*dV_dx[3];
                                         
                                         V_ghost[i*5 + 4] = -double(4)*p_x_RR - double(65)/double(3)*p_x_R +
                                             double(40)*V_ghost[(i + 3)*5 + 4] - double(20)*V_ghost[(i + 2)*5 + 4] +
-                                            double(20)/double(3)*V_ghost[(i + 1)*5 + 4] - double(20)*dx[0]*dV_dx[4];
+                                            double(20)/double(3)*V_ghost[(i + 1)*5 + 4] + double(20)*dx[0]*dV_dx[4];
                                     }
                                     
                                     Q[0][idx_cell_rho] = V_ghost[i*5 + 0];
@@ -5041,27 +5041,27 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                             double(18)*V_ghost[(i - 2)*5 + 4] + double(6)*V_ghost[(i - 1)*5 + 4] +
                                             double(12)*dx[0]*dV_dx[4];
                                     }
-                                    else if (i == 3)  
+                                    else if (i == 3)
                                     {
                                         V_ghost[i*5 + 0] = -double(4)*rho_x_LL - double(65)/double(3)*rho_x_L +
                                             double(40)*V_ghost[(i - 3)*5 + 0] - double(20)*V_ghost[(i - 2)*5 + 0] +
-                                            double(20)/double(3)*V_ghost[(i - 1)*5 + 0] + double(20)*dx[0]*dV_dx[0];
+                                            double(20)/double(3)*V_ghost[(i - 1)*5 + 0] - double(20)*dx[0]*dV_dx[0];
                                         
                                         V_ghost[i*5 + 1] = -double(4)*u_x_LL - double(65)/double(3)*u_x_L +
                                             double(40)*V_ghost[(i - 3)*5 + 1] - double(20)*V_ghost[(i - 2)*5 + 1] +
-                                            double(20)/double(3)*V_ghost[(i - 1)*5 + 1] + double(20)*dx[0]*dV_dx[1];
+                                            double(20)/double(3)*V_ghost[(i - 1)*5 + 1] - double(20)*dx[0]*dV_dx[1];
                                         
                                         V_ghost[i*5 + 2] = -double(4)*v_x_LL - double(65)/double(3)*v_x_L +
                                             double(40)*V_ghost[(i - 3)*5 + 2] - double(20)*V_ghost[(i - 2)*5 + 2] +
-                                            double(20)/double(3)*V_ghost[(i - 1)*5 + 2] + double(20)*dx[0]*dV_dx[2];
+                                            double(20)/double(3)*V_ghost[(i - 1)*5 + 2] - double(20)*dx[0]*dV_dx[2];
                                         
                                         V_ghost[i*5 + 3] = -double(4)*w_x_LL - double(65)/double(3)*w_x_L +
                                             double(40)*V_ghost[(i - 3)*5 + 3] - double(20)*V_ghost[(i - 2)*5 + 3] +
-                                            double(20)/double(3)*V_ghost[(i - 1)*5 + 3] + double(20)*dx[0]*dV_dx[3];
+                                            double(20)/double(3)*V_ghost[(i - 1)*5 + 3] - double(20)*dx[0]*dV_dx[3];
                                         
                                         V_ghost[i*5 + 4] = -double(4)*p_x_LL - double(65)/double(3)*p_x_L +
                                             double(40)*V_ghost[(i - 3)*5 + 4] - double(20)*V_ghost[(i - 2)*5 + 4] +
-                                            double(20)/double(3)*V_ghost[(i - 1)*5 + 4] + double(20)*dx[0]*dV_dx[4];
+                                            double(20)/double(3)*V_ghost[(i - 1)*5 + 4] - double(20)*dx[0]*dV_dx[4];
                                     }
                                     
                                     Q[0][idx_cell_rho] = V_ghost[i*5 + 0];
@@ -5614,27 +5614,27 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                             double(18)*V_ghost[(j + 2)*5 + 4] + double(6)*V_ghost[(j + 1)*5 + 4] -
                                             double(12)*dx[1]*dV_dy[4];
                                     }
-                                    else if (j == num_ghosts_to_fill - 4)  
+                                    else if (j == num_ghosts_to_fill - 4)
                                     {
                                         V_ghost[j*5 + 0] = -double(4)*rho_y_TT - double(65)/double(3)*rho_y_T +
                                             double(40)*V_ghost[(j + 3)*5 + 0] - double(20)*V_ghost[(j + 2)*5 + 0] +
-                                            double(20)/double(3)*V_ghost[(j + 1)*5 + 0] - double(20)*dx[1]*dV_dy[0];
+                                            double(20)/double(3)*V_ghost[(j + 1)*5 + 0] + double(20)*dx[1]*dV_dy[0];
                                         
                                         V_ghost[j*5 + 1] = -double(4)*u_y_TT - double(65)/double(3)*u_y_T +
                                             double(40)*V_ghost[(j + 3)*5 + 1] - double(20)*V_ghost[(j + 2)*5 + 1] +
-                                            double(20)/double(3)*V_ghost[(j + 1)*5 + 1] - double(20)*dx[1]*dV_dy[1];
+                                            double(20)/double(3)*V_ghost[(j + 1)*5 + 1] + double(20)*dx[1]*dV_dy[1];
                                         
                                         V_ghost[j*5 + 2] = -double(4)*v_y_TT - double(65)/double(3)*v_y_T +
                                             double(40)*V_ghost[(j + 3)*5 + 2] - double(20)*V_ghost[(j + 2)*5 + 2] +
-                                            double(20)/double(3)*V_ghost[(j + 1)*5 + 2] - double(20)*dx[1]*dV_dy[2];
+                                            double(20)/double(3)*V_ghost[(j + 1)*5 + 2] + double(20)*dx[1]*dV_dy[2];
                                         
                                         V_ghost[j*5 + 3] = -double(4)*w_y_TT - double(65)/double(3)*w_y_T +
                                             double(40)*V_ghost[(j + 3)*5 + 3] - double(20)*V_ghost[(j + 2)*5 + 3] +
-                                            double(20)/double(3)*V_ghost[(j + 1)*5 + 3] - double(20)*dx[1]*dV_dy[3];
+                                            double(20)/double(3)*V_ghost[(j + 1)*5 + 3] + double(20)*dx[1]*dV_dy[3];
                                         
                                         V_ghost[j*5 + 4] = -double(4)*p_y_TT - double(65)/double(3)*p_y_T +
                                             double(40)*V_ghost[(j + 3)*5 + 4] - double(20)*V_ghost[(j + 2)*5 + 4] +
-                                            double(20)/double(3)*V_ghost[(j + 1)*5 + 4] - double(20)*dx[1]*dV_dy[4];
+                                            double(20)/double(3)*V_ghost[(j + 1)*5 + 4] + double(20)*dx[1]*dV_dy[4];
                                     }
                                     
                                     Q[0][idx_cell_rho] = V_ghost[j*5 + 0];
@@ -6186,27 +6186,27 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                             double(18)*V_ghost[(j - 2)*5 + 4] + double(6)*V_ghost[(j - 1)*5 + 4] +
                                             double(12)*dx[1]*dV_dy[4];
                                     }
-                                    else if (j == 3)  
+                                    else if (j == 3)
                                     {
                                         V_ghost[j*5 + 0] = -double(4)*rho_y_BB - double(65)/double(3)*rho_y_B +
                                             double(40)*V_ghost[(j - 3)*5 + 0] - double(20)*V_ghost[(j - 2)*5 + 0] +
-                                            double(20)/double(3)*V_ghost[(j - 1)*5 + 0] + double(20)*dx[1]*dV_dy[0];
+                                            double(20)/double(3)*V_ghost[(j - 1)*5 + 0] - double(20)*dx[1]*dV_dy[0];
                                         
                                         V_ghost[j*5 + 1] = -double(4)*u_y_BB - double(65)/double(3)*u_y_B +
                                             double(40)*V_ghost[(j - 3)*5 + 1] - double(20)*V_ghost[(j - 2)*5 + 1] +
-                                            double(20)/double(3)*V_ghost[(j - 1)*5 + 1] + double(20)*dx[1]*dV_dy[1];
+                                            double(20)/double(3)*V_ghost[(j - 1)*5 + 1] - double(20)*dx[1]*dV_dy[1];
                                         
                                         V_ghost[j*5 + 2] = -double(4)*v_y_BB - double(65)/double(3)*v_y_B +
                                             double(40)*V_ghost[(j - 3)*5 + 2] - double(20)*V_ghost[(j - 2)*5 + 2] +
-                                            double(20)/double(3)*V_ghost[(j - 1)*5 + 2] + double(20)*dx[1]*dV_dy[2];
+                                            double(20)/double(3)*V_ghost[(j - 1)*5 + 2] - double(20)*dx[1]*dV_dy[2];
                                         
                                         V_ghost[j*5 + 3] = -double(4)*w_y_BB - double(65)/double(3)*w_y_B +
                                             double(40)*V_ghost[(j - 3)*5 + 3] - double(20)*V_ghost[(j - 2)*5 + 3] +
-                                            double(20)/double(3)*V_ghost[(j - 1)*5 + 3] + double(20)*dx[1]*dV_dy[3];
+                                            double(20)/double(3)*V_ghost[(j - 1)*5 + 3] - double(20)*dx[1]*dV_dy[3];
                                         
                                         V_ghost[j*5 + 4] = -double(4)*p_y_BB - double(65)/double(3)*p_y_B +
                                             double(40)*V_ghost[(j - 3)*5 + 4] - double(20)*V_ghost[(j - 2)*5 + 4] +
-                                            double(20)/double(3)*V_ghost[(j - 1)*5 + 4] + double(20)*dx[1]*dV_dy[4];
+                                            double(20)/double(3)*V_ghost[(j - 1)*5 + 4] - double(20)*dx[1]*dV_dy[4];
                                     }
                                     
                                     Q[0][idx_cell_rho] = V_ghost[j*5 + 0];
@@ -6757,27 +6757,27 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                             double(18)*V_ghost[(k + 2)*5 + 4] + double(6)*V_ghost[(k + 1)*5 + 4] -
                                             double(12)*dx[2]*dV_dz[4];
                                     }
-                                    else if (k == num_ghosts_to_fill - 4)  
+                                    else if (k == num_ghosts_to_fill - 4)
                                     {
                                         V_ghost[k*5 + 0] = -double(4)*rho_z_FF - double(65)/double(3)*rho_z_F +
                                             double(40)*V_ghost[(k + 3)*5 + 0] - double(20)*V_ghost[(k + 2)*5 + 0] +
-                                            double(20)/double(3)*V_ghost[(k + 1)*5 + 0] - double(20)*dx[2]*dV_dz[0];
+                                            double(20)/double(3)*V_ghost[(k + 1)*5 + 0] + double(20)*dx[2]*dV_dz[0];
                                         
                                         V_ghost[k*5 + 1] = -double(4)*u_z_FF - double(65)/double(3)*u_z_F +
                                             double(40)*V_ghost[(k + 3)*5 + 1] - double(20)*V_ghost[(k + 2)*5 + 1] +
-                                            double(20)/double(3)*V_ghost[(k + 1)*5 + 1] - double(20)*dx[2]*dV_dz[1];
+                                            double(20)/double(3)*V_ghost[(k + 1)*5 + 1] + double(20)*dx[2]*dV_dz[1];
                                         
                                         V_ghost[k*5 + 2] = -double(4)*v_z_FF - double(65)/double(3)*v_z_F +
                                             double(40)*V_ghost[(k + 3)*5 + 2] - double(20)*V_ghost[(k + 2)*5 + 2] +
-                                            double(20)/double(3)*V_ghost[(k + 1)*5 + 2] - double(20)*dx[2]*dV_dz[2];
+                                            double(20)/double(3)*V_ghost[(k + 1)*5 + 2] + double(20)*dx[2]*dV_dz[2];
                                         
                                         V_ghost[k*5 + 3] = -double(4)*w_z_FF - double(65)/double(3)*w_z_F +
                                             double(40)*V_ghost[(k + 3)*5 + 3] - double(20)*V_ghost[(k + 2)*5 + 3] +
-                                            double(20)/double(3)*V_ghost[(k + 1)*5 + 3] - double(20)*dx[2]*dV_dz[3];
+                                            double(20)/double(3)*V_ghost[(k + 1)*5 + 3] + double(20)*dx[2]*dV_dz[3];
                                         
                                         V_ghost[k*5 + 4] = -double(4)*p_z_FF - double(65)/double(3)*p_z_F +
                                             double(40)*V_ghost[(k + 3)*5 + 4] - double(20)*V_ghost[(k + 2)*5 + 4] +
-                                            double(20)/double(3)*V_ghost[(k + 1)*5 + 4] - double(20)*dx[2]*dV_dz[4];
+                                            double(20)/double(3)*V_ghost[(k + 1)*5 + 4] + double(20)*dx[2]*dV_dz[4];
                                     }
                                     
                                     Q[0][idx_cell_rho] = V_ghost[k*5 + 0];
@@ -7328,27 +7328,27 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                             double(18)*V_ghost[(k - 2)*5 + 4] + double(6)*V_ghost[(k - 1)*5 + 4] +
                                             double(12)*dx[2]*dV_dz[4];
                                     }
-                                    else if (k == 3)  
+                                    else if (k == 3)
                                     {
                                         V_ghost[k*5 + 0] = -double(4)*rho_z_BB - double(65)/double(3)*rho_z_B +
                                             double(40)*V_ghost[(k - 3)*5 + 0] - double(20)*V_ghost[(k - 2)*5 + 0] +
-                                            double(20)/double(3)*V_ghost[(k - 1)*5 + 0] + double(20)*dx[2]*dV_dz[0];
+                                            double(20)/double(3)*V_ghost[(k - 1)*5 + 0] - double(20)*dx[2]*dV_dz[0];
                                         
                                         V_ghost[k*5 + 1] = -double(4)*u_z_BB - double(65)/double(3)*u_z_B +
                                             double(40)*V_ghost[(k - 3)*5 + 1] - double(20)*V_ghost[(k - 2)*5 + 1] +
-                                            double(20)/double(3)*V_ghost[(k - 1)*5 + 1] + double(20)*dx[2]*dV_dz[1];
+                                            double(20)/double(3)*V_ghost[(k - 1)*5 + 1] - double(20)*dx[2]*dV_dz[1];
                                         
                                         V_ghost[k*5 + 2] = -double(4)*v_z_BB - double(65)/double(3)*v_z_B +
                                             double(40)*V_ghost[(k - 3)*5 + 2] - double(20)*V_ghost[(k - 2)*5 + 2] +
-                                            double(20)/double(3)*V_ghost[(k - 1)*5 + 2] + double(20)*dx[2]*dV_dz[2];
+                                            double(20)/double(3)*V_ghost[(k - 1)*5 + 2] - double(20)*dx[2]*dV_dz[2];
                                         
                                         V_ghost[k*5 + 3] = -double(4)*w_z_BB - double(65)/double(3)*w_z_B +
                                             double(40)*V_ghost[(k - 3)*5 + 3] - double(20)*V_ghost[(k - 2)*5 + 3] +
-                                            double(20)/double(3)*V_ghost[(k - 1)*5 + 3] + double(20)*dx[2]*dV_dz[3];
+                                            double(20)/double(3)*V_ghost[(k - 1)*5 + 3] - double(20)*dx[2]*dV_dz[3];
                                         
                                         V_ghost[k*5 + 4] = -double(4)*p_z_BB - double(65)/double(3)*p_z_B +
                                             double(40)*V_ghost[(k - 3)*5 + 4] - double(20)*V_ghost[(k - 2)*5 + 4] +
-                                            double(20)/double(3)*V_ghost[(k - 1)*5 + 4] + double(20)*dx[2]*dV_dz[4];
+                                            double(20)/double(3)*V_ghost[(k - 1)*5 + 4] - double(20)*dx[2]*dV_dz[4];
                                     }
                                     
                                     Q[0][idx_cell_rho] = V_ghost[k*5 + 0];
