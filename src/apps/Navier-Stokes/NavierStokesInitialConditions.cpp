@@ -1,1 +1,1 @@
-/home/wongml/Codes/HAMeRS_bc/problems/Navier-Stokes/initial_conditions/VortexLeavingDomain3D.cpp
+NavierStokesInitialConditionsDefault.cpp
