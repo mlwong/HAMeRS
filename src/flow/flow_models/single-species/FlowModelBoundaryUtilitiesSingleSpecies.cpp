@@ -1249,11 +1249,11 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                         // number of ghostcells START
                         const int num_ghosts_to_fill = fill_box_hi_idx[0] - fill_box_lo_idx[0] + 1;
                         TBOX_ASSERT(fill_box_hi_idx[0] == interior_box_lo_idx[0] - 1);
-                        if (num_ghosts_to_fill > 4)
+                        if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData()\n"
-                                << "Non-reflecting outflow BC doesn't support more than four ghost cells yet!");
+                                << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         // number of ghostcells END
 
@@ -1571,6 +1571,50 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                         double(40)*V_ghost[(i + 3)*4 + 3] - double(20)*V_ghost[(i + 2)*4 + 3] +
                                         double(20)/double(3)*V_ghost[(i + 1)*4 + 3] + double(20)*dx[0]*dV_dx[3];
                                 }
+                                else if (i == num_ghosts_to_fill - 5)
+                                {
+                                    V_ghost[i*4 + 0] = double(5)*rho_x_RR + double(77)/double(2)*rho_x_R -
+                                        double(75)*V_ghost[(i + 4)*4 + 0] + double(50)*V_ghost[(i + 3)*4 + 0] -
+                                        double(25)*V_ghost[(i + 2)*4 + 0] + double(15)/double(2)*V_ghost[(i + 1)*4 + 0] -
+                                        double(30)*dx[0]*dV_dx[0];
+                                    
+                                    V_ghost[i*4 + 1] = double(5)*u_x_RR + double(77)/double(2)*u_x_R -
+                                        double(75)*V_ghost[(i + 4)*4 + 1] + double(50)*V_ghost[(i + 3)*4 + 1] -
+                                        double(25)*V_ghost[(i + 2)*4 + 1] + double(15)/double(2)*V_ghost[(i + 1)*4 + 1] -
+                                        double(30)*dx[0]*dV_dx[1];
+                                    
+                                    V_ghost[i*4 + 2] = double(5)*v_x_RR + double(77)/double(2)*v_x_R -
+                                        double(75)*V_ghost[(i + 4)*4 + 2] + double(50)*V_ghost[(i + 3)*4 + 2] -
+                                        double(25)*V_ghost[(i + 2)*4 + 2] + double(15)/double(2)*V_ghost[(i + 1)*4 + 2] -
+                                        double(30)*dx[0]*dV_dx[2];
+                                    
+                                    V_ghost[i*4 + 3] = double(5)*p_x_RR + double(77)/double(2)*p_x_R -
+                                        double(75)*V_ghost[(i + 4)*4 + 3] + double(50)*V_ghost[(i + 3)*4 + 3] -
+                                        double(25)*V_ghost[(i + 2)*4 + 3] + double(15)/double(2)*V_ghost[(i + 1)*4 + 3] -
+                                        double(30)*dx[0]*dV_dx[3];
+                                }
+                                else if (i == num_ghosts_to_fill - 6)
+                                {
+                                    V_ghost[i*4 + 0] = -double(6)*rho_x_RR - double(609)/double(10)*rho_x_R +
+                                        double(126)*V_ghost[(i + 5)*4 + 0] - double(105)*V_ghost[(i + 4)*4 + 0] +
+                                        double(70)*V_ghost[(i + 3)*4 + 0] - double(63)/double(2)*V_ghost[(i + 2)*4 + 0] +
+                                        double(42)/double(5)*V_ghost[(i + 1)*4 + 0] + double(42)*dx[0]*dV_dx[0];
+                                    
+                                    V_ghost[i*4 + 1] = -double(6)*u_x_RR - double(609)/double(10)*u_x_R +
+                                        double(126)*V_ghost[(i + 5)*4 + 1] - double(105)*V_ghost[(i + 4)*4 + 1] +
+                                        double(70)*V_ghost[(i + 3)*4 + 1] - double(63)/double(2)*V_ghost[(i + 2)*4 + 1] +
+                                        double(42)/double(5)*V_ghost[(i + 1)*4 + 1] + double(42)*dx[0]*dV_dx[1];
+                                    
+                                    V_ghost[i*4 + 2] = -double(6)*v_x_RR - double(609)/double(10)*v_x_R +
+                                        double(126)*V_ghost[(i + 5)*4 + 2] - double(105)*V_ghost[(i + 4)*4 + 2] +
+                                        double(70)*V_ghost[(i + 3)*4 + 2] - double(63)/double(2)*V_ghost[(i + 2)*4 + 2] +
+                                        double(42)/double(5)*V_ghost[(i + 1)*4 + 2] + double(42)*dx[0]*dV_dx[2];
+                                    
+                                    V_ghost[i*4 + 3] = -double(6)*p_x_RR - double(609)/double(10)*p_x_R +
+                                        double(126)*V_ghost[(i + 5)*4 + 3] - double(105)*V_ghost[(i + 4)*4 + 3] +
+                                        double(70)*V_ghost[(i + 3)*4 + 3] - double(63)/double(2)*V_ghost[(i + 2)*4 + 3] +
+                                        double(42)/double(5)*V_ghost[(i + 1)*4 + 3] + double(42)*dx[0]*dV_dx[3];
+                                }
                                 
                                 Q[0][idx_cell_rho] = V_ghost[i*4 + 0];
                                 Q[1][idx_cell_mom] = V_ghost[i*4 + 0]*V_ghost[i*4 + 1];
@@ -1600,11 +1644,11 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                     {
                         const int num_ghosts_to_fill = fill_box_hi_idx[0] - fill_box_lo_idx[0] + 1;
                         TBOX_ASSERT(fill_box_lo_idx[0] == interior_box_hi_idx[0] + 1);
-                        if (num_ghosts_to_fill > 4)
+                        if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData()\n"
-                                << "Non-reflecting outflow BC doesn't support more than four ghost cells yet!");
+                                << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         
                         for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
@@ -1914,6 +1958,50 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                         double(40)*V_ghost[(i - 3)*4 + 3] - double(20)*V_ghost[(i - 2)*4 + 3] +
                                         double(20)/double(3)*V_ghost[(i - 1)*4 + 3] - double(20)*dx[0]*dV_dx[3];
                                 }
+                                else if (i == 4)
+                                {
+                                    V_ghost[i*4 + 0] = double(5)*rho_x_LL + double(77)/double(2)*rho_x_L -
+                                        double(75)*V_ghost[(i - 4)*4 + 0] + double(50)*V_ghost[(i - 3)*4 + 0] -
+                                        double(25)*V_ghost[(i - 2)*4 + 0] + double(15)/double(2)*V_ghost[(i - 1)*4 + 0] +
+                                        double(30)*dx[0]*dV_dx[0];
+                                    
+                                    V_ghost[i*4 + 1] = double(5)*u_x_LL + double(77)/double(2)*u_x_L -
+                                        double(75)*V_ghost[(i - 4)*4 + 1] + double(50)*V_ghost[(i - 3)*4 + 1] -
+                                        double(25)*V_ghost[(i - 2)*4 + 1] + double(15)/double(2)*V_ghost[(i - 1)*4 + 1] +
+                                        double(30)*dx[0]*dV_dx[1];
+                                    
+                                    V_ghost[i*4 + 2] = double(5)*v_x_LL + double(77)/double(2)*v_x_L -
+                                        double(75)*V_ghost[(i - 4)*4 + 2] + double(50)*V_ghost[(i - 3)*4 + 2] -
+                                        double(25)*V_ghost[(i - 2)*4 + 2] + double(15)/double(2)*V_ghost[(i - 1)*4 + 2] +
+                                        double(30)*dx[0]*dV_dx[2];
+                                    
+                                    V_ghost[i*4 + 3] = double(5)*p_x_LL + double(77)/double(2)*p_x_L -
+                                        double(75)*V_ghost[(i - 4)*4 + 3] + double(50)*V_ghost[(i - 3)*4 + 3] -
+                                        double(25)*V_ghost[(i - 2)*4 + 3] + double(15)/double(2)*V_ghost[(i - 1)*4 + 3] +
+                                        double(30)*dx[0]*dV_dx[3];
+                                }
+                                else if (i == 5)
+                                {
+                                    V_ghost[i*4 + 0] = -double(6)*rho_x_LL - double(609)/double(10)*rho_x_L +
+                                        double(126)*V_ghost[(i - 5)*4 + 0] - double(105)*V_ghost[(i - 4)*4 + 0] +
+                                        double(70)*V_ghost[(i - 3)*4 + 0] - double(63)/double(2)*V_ghost[(i - 2)*4 + 0] +
+                                        double(42)/double(5)*V_ghost[(i - 1)*4 + 0] - double(42)*dx[0]*dV_dx[0];
+                                    
+                                    V_ghost[i*4 + 1] = -double(6)*u_x_LL - double(609)/double(10)*u_x_L +
+                                        double(126)*V_ghost[(i - 5)*4 + 1] - double(105)*V_ghost[(i - 4)*4 + 1] +
+                                        double(70)*V_ghost[(i - 3)*4 + 1] - double(63)/double(2)*V_ghost[(i - 2)*4 + 1] +
+                                        double(42)/double(5)*V_ghost[(i - 1)*4 + 1] - double(42)*dx[0]*dV_dx[1];
+                                    
+                                    V_ghost[i*4 + 2] = -double(6)*v_x_LL - double(609)/double(10)*v_x_L +
+                                        double(126)*V_ghost[(i - 5)*4 + 2] - double(105)*V_ghost[(i - 4)*4 + 2] +
+                                        double(70)*V_ghost[(i - 3)*4 + 2] - double(63)/double(2)*V_ghost[(i - 2)*4 + 2] +
+                                        double(42)/double(5)*V_ghost[(i - 1)*4 + 2] - double(42)*dx[0]*dV_dx[2];
+                                    
+                                    V_ghost[i*4 + 3] = -double(6)*p_x_LL - double(609)/double(10)*p_x_L +
+                                        double(126)*V_ghost[(i - 5)*4 + 3] - double(105)*V_ghost[(i - 4)*4 + 3] +
+                                        double(70)*V_ghost[(i - 3)*4 + 3] - double(63)/double(2)*V_ghost[(i - 2)*4 + 3] +
+                                        double(42)/double(5)*V_ghost[(i - 1)*4 + 3] - double(42)*dx[0]*dV_dx[3];
+                                }
                                 
                                 Q[0][idx_cell_rho] = V_ghost[i*4 + 0];
                                 Q[1][idx_cell_mom] = V_ghost[i*4 + 0]*V_ghost[i*4 + 1];
@@ -1944,11 +2032,11 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                         // number of ghostcells START
                         const int num_ghosts_to_fill = fill_box_hi_idx[1] - fill_box_lo_idx[1] + 1;
                         TBOX_ASSERT(fill_box_hi_idx[1] == interior_box_lo_idx[1] - 1);
-                        if (num_ghosts_to_fill > 4)
+                        if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData()\n"
-                                << "Non-reflecting outflow BC doesn't support more than four ghost cells yet!");
+                                << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         // number of ghostcells END
 
@@ -2266,6 +2354,50 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                         double(40)*V_ghost[(j + 3)*4 + 3] - double(20)*V_ghost[(j + 2)*4 + 3] +
                                         double(20)/double(3)*V_ghost[(j + 1)*4 + 3] + double(20)*dx[1]*dV_dy[3];
                                 }
+                                else if (j == num_ghosts_to_fill - 5)
+                                {
+                                    V_ghost[j*4 + 0] = double(5)*rho_y_TT + double(77)/double(2)*rho_y_T -
+                                        double(75)*V_ghost[(j + 4)*4 + 0] + double(50)*V_ghost[(j + 3)*4 + 0] -
+                                        double(25)*V_ghost[(j + 2)*4 + 0] + double(15)/double(2)*V_ghost[(j + 1)*4 + 0] -
+                                        double(30)*dx[1]*dV_dy[0];
+                                    
+                                    V_ghost[j*4 + 1] = double(5)*u_y_TT + double(77)/double(2)*u_y_T -
+                                        double(75)*V_ghost[(j + 4)*4 + 1] + double(50)*V_ghost[(j + 3)*4 + 1] -
+                                        double(25)*V_ghost[(j + 2)*4 + 1] + double(15)/double(2)*V_ghost[(j + 1)*4 + 1] -
+                                        double(30)*dx[1]*dV_dy[1];
+                                    
+                                    V_ghost[j*4 + 2] = double(5)*v_y_TT + double(77)/double(2)*v_y_T -
+                                        double(75)*V_ghost[(j + 4)*4 + 2] + double(50)*V_ghost[(j + 3)*4 + 2] -
+                                        double(25)*V_ghost[(j + 2)*4 + 2] + double(15)/double(2)*V_ghost[(j + 1)*4 + 2] -
+                                        double(30)*dx[1]*dV_dy[2];
+                                    
+                                    V_ghost[j*4 + 3] = double(5)*p_y_TT + double(77)/double(2)*p_y_T -
+                                        double(75)*V_ghost[(j + 4)*4 + 3] + double(50)*V_ghost[(j + 3)*4 + 3] -
+                                        double(25)*V_ghost[(j + 2)*4 + 3] + double(15)/double(2)*V_ghost[(j + 1)*4 + 3] -
+                                        double(30)*dx[1]*dV_dy[3];
+                                }
+                                else if (j == num_ghosts_to_fill - 6)
+                                {
+                                    V_ghost[j*4 + 0] = -double(6)*rho_y_TT - double(609)/double(10)*rho_y_T +
+                                        double(126)*V_ghost[(j + 5)*4 + 0] - double(105)*V_ghost[(j + 4)*4 + 0] +
+                                        double(70)*V_ghost[(j + 3)*4 + 0] - double(63)/double(2)*V_ghost[(j + 2)*4 + 0] +
+                                        double(42)/double(5)*V_ghost[(j + 1)*4 + 0] + double(42)*dx[1]*dV_dy[0];
+                                    
+                                    V_ghost[j*4 + 1] = -double(6)*u_y_TT - double(609)/double(10)*u_y_T +
+                                        double(126)*V_ghost[(j + 5)*4 + 1] - double(105)*V_ghost[(j + 4)*4 + 1] +
+                                        double(70)*V_ghost[(j + 3)*4 + 1] - double(63)/double(2)*V_ghost[(j + 2)*4 + 1] +
+                                        double(42)/double(5)*V_ghost[(j + 1)*4 + 1] + double(42)*dx[1]*dV_dy[1];
+                                    
+                                    V_ghost[j*4 + 2] = -double(6)*v_y_TT - double(609)/double(10)*v_y_T +
+                                        double(126)*V_ghost[(j + 5)*4 + 2] - double(105)*V_ghost[(j + 4)*4 + 2] +
+                                        double(70)*V_ghost[(j + 3)*4 + 2] - double(63)/double(2)*V_ghost[(j + 2)*4 + 2] +
+                                        double(42)/double(5)*V_ghost[(j + 1)*4 + 2] + double(42)*dx[1]*dV_dy[2];
+                                    
+                                    V_ghost[j*4 + 3] = -double(6)*p_y_TT - double(609)/double(10)*p_y_T +
+                                        double(126)*V_ghost[(j + 5)*4 + 3] - double(105)*V_ghost[(j + 4)*4 + 3] +
+                                        double(70)*V_ghost[(j + 3)*4 + 3] - double(63)/double(2)*V_ghost[(j + 2)*4 + 3] +
+                                        double(42)/double(5)*V_ghost[(j + 1)*4 + 3] + double(42)*dx[1]*dV_dy[3];
+                                }
                                 
                                 Q[0][idx_cell_rho] = V_ghost[j*4 + 0];
                                 Q[1][idx_cell_mom] = V_ghost[j*4 + 0]*V_ghost[j*4 + 1];
@@ -2289,11 +2421,11 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                     {
                         const int num_ghosts_to_fill = fill_box_hi_idx[1] - fill_box_lo_idx[1] + 1;
                         TBOX_ASSERT(fill_box_lo_idx[1] == interior_box_hi_idx[1] + 1);
-                        if (num_ghosts_to_fill > 4)
+                        if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData()\n"
-                                << "Non-reflecting outflow BC doesn't support more than four ghost cells yet!");
+                                << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         
                         for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
@@ -2602,6 +2734,50 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                     V_ghost[j*4 + 3] = -double(4)*p_y_BB - double(65)/double(3)*p_y_B +
                                         double(40)*V_ghost[(j - 3)*4 + 3] - double(20)*V_ghost[(j - 2)*4 + 3] +
                                         double(20)/double(3)*V_ghost[(j - 1)*4 + 3] - double(20)*dx[1]*dV_dy[3];
+                                }
+                                else if (j == 4)
+                                {
+                                    V_ghost[j*4 + 0] = double(5)*rho_y_BB + double(77)/double(2)*rho_y_B -
+                                        double(75)*V_ghost[(j - 4)*4 + 0] + double(50)*V_ghost[(j - 3)*4 + 0] -
+                                        double(25)*V_ghost[(j - 2)*4 + 0] + double(15)/double(2)*V_ghost[(j - 1)*4 + 0] +
+                                        double(30)*dx[1]*dV_dy[0];
+                                    
+                                    V_ghost[j*4 + 1] = double(5)*u_y_BB + double(77)/double(2)*u_y_B -
+                                        double(75)*V_ghost[(j - 4)*4 + 1] + double(50)*V_ghost[(j - 3)*4 + 1] -
+                                        double(25)*V_ghost[(j - 2)*4 + 1] + double(15)/double(2)*V_ghost[(j - 1)*4 + 1] +
+                                        double(30)*dx[1]*dV_dy[1];
+                                    
+                                    V_ghost[j*4 + 2] = double(5)*v_y_BB + double(77)/double(2)*v_y_B -
+                                        double(75)*V_ghost[(j - 4)*4 + 2] + double(50)*V_ghost[(j - 3)*4 + 2] -
+                                        double(25)*V_ghost[(j - 2)*4 + 2] + double(15)/double(2)*V_ghost[(j - 1)*4 + 2] +
+                                        double(30)*dx[1]*dV_dy[2];
+                                    
+                                    V_ghost[j*4 + 3] = double(5)*p_y_BB + double(77)/double(2)*p_y_B -
+                                        double(75)*V_ghost[(j - 4)*4 + 3] + double(50)*V_ghost[(j - 3)*4 + 3] -
+                                        double(25)*V_ghost[(j - 2)*4 + 3] + double(15)/double(2)*V_ghost[(j - 1)*4 + 3] +
+                                        double(30)*dx[1]*dV_dy[3];
+                                }
+                                else if (j == 5)
+                                {
+                                    V_ghost[j*4 + 0] = -double(6)*rho_y_BB - double(609)/double(10)*rho_y_B +
+                                        double(126)*V_ghost[(j - 5)*4 + 0] - double(105)*V_ghost[(j - 4)*4 + 0] +
+                                        double(70)*V_ghost[(j - 3)*4 + 0] - double(63)/double(2)*V_ghost[(j - 2)*4 + 0] +
+                                        double(42)/double(5)*V_ghost[(j - 1)*4 + 0] - double(42)*dx[1]*dV_dy[0];
+                                    
+                                    V_ghost[j*4 + 1] = -double(6)*u_y_BB - double(609)/double(10)*u_y_B +
+                                        double(126)*V_ghost[(j - 5)*4 + 1] - double(105)*V_ghost[(j - 4)*4 + 1] +
+                                        double(70)*V_ghost[(j - 3)*4 + 1] - double(63)/double(2)*V_ghost[(j - 2)*4 + 1] +
+                                        double(42)/double(5)*V_ghost[(j - 1)*4 + 1] - double(42)*dx[1]*dV_dy[1];
+                                    
+                                    V_ghost[j*4 + 2] = -double(6)*v_y_BB - double(609)/double(10)*v_y_B +
+                                        double(126)*V_ghost[(j - 5)*4 + 2] - double(105)*V_ghost[(j - 4)*4 + 2] +
+                                        double(70)*V_ghost[(j - 3)*4 + 2] - double(63)/double(2)*V_ghost[(j - 2)*4 + 2] +
+                                        double(42)/double(5)*V_ghost[(j - 1)*4 + 2] - double(42)*dx[1]*dV_dy[2];
+                                    
+                                    V_ghost[j*4 + 3] = -double(6)*p_y_BB - double(609)/double(10)*p_y_B +
+                                        double(126)*V_ghost[(j - 5)*4 + 3] - double(105)*V_ghost[(j - 4)*4 + 3] +
+                                        double(70)*V_ghost[(j - 3)*4 + 3] - double(63)/double(2)*V_ghost[(j - 2)*4 + 3] +
+                                        double(42)/double(5)*V_ghost[(j - 1)*4 + 3] - double(42)*dx[1]*dV_dy[3];
                                 }
                                 
                                 Q[0][idx_cell_rho] = V_ghost[j*4 + 0];
@@ -3945,11 +4121,11 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                     {
                         const int num_ghosts_to_fill = fill_box_hi_idx[0] - fill_box_lo_idx[0] + 1;
                         TBOX_ASSERT(fill_box_hi_idx[0] == interior_box_lo_idx[0] - 1);
-                        if (num_ghosts_to_fill > 4)
+                        if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData()\n"
-                                << "Non-reflecting outflow BC doesn't support more than four ghost cells yet!");
+                                << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         
                         for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
@@ -4491,6 +4667,60 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                             double(40)*V_ghost[(i + 3)*5 + 4] - double(20)*V_ghost[(i + 2)*5 + 4] +
                                             double(20)/double(3)*V_ghost[(i + 1)*5 + 4] + double(20)*dx[0]*dV_dx[4];
                                     }
+                                    else if (i == num_ghosts_to_fill - 5)
+                                    {
+                                        V_ghost[i*5 + 0] = double(5)*rho_x_RR + double(77)/double(2)*rho_x_R -
+                                            double(75)*V_ghost[(i + 4)*5 + 0] + double(50)*V_ghost[(i + 3)*5 + 0] -
+                                            double(25)*V_ghost[(i + 2)*5 + 0] + double(15)/double(2)*V_ghost[(i + 1)*5 + 0] -
+                                            double(30)*dx[0]*dV_dx[0];
+                                        
+                                        V_ghost[i*5 + 1] = double(5)*u_x_RR + double(77)/double(2)*u_x_R -
+                                            double(75)*V_ghost[(i + 4)*5 + 1] + double(50)*V_ghost[(i + 3)*5 + 1] -
+                                            double(25)*V_ghost[(i + 2)*5 + 1] + double(15)/double(2)*V_ghost[(i + 1)*5 + 1] -
+                                            double(30)*dx[0]*dV_dx[1];
+                                        
+                                        V_ghost[i*5 + 2] = double(5)*v_x_RR + double(77)/double(2)*v_x_R -
+                                            double(75)*V_ghost[(i + 4)*5 + 2] + double(50)*V_ghost[(i + 3)*5 + 2] -
+                                            double(25)*V_ghost[(i + 2)*5 + 2] + double(15)/double(2)*V_ghost[(i + 1)*5 + 2] -
+                                            double(30)*dx[0]*dV_dx[2];
+                                        
+                                        V_ghost[i*5 + 3] = double(5)*w_x_RR + double(77)/double(2)*w_x_R -
+                                            double(75)*V_ghost[(i + 4)*5 + 3] + double(50)*V_ghost[(i + 3)*5 + 3] -
+                                            double(25)*V_ghost[(i + 2)*5 + 3] + double(15)/double(2)*V_ghost[(i + 1)*5 + 3] -
+                                            double(30)*dx[0]*dV_dx[3];
+                                        
+                                        V_ghost[i*5 + 4] = double(5)*p_x_RR + double(77)/double(2)*p_x_R -
+                                            double(75)*V_ghost[(i + 4)*5 + 4] + double(50)*V_ghost[(i + 3)*5 + 4] -
+                                            double(25)*V_ghost[(i + 2)*5 + 4] + double(15)/double(2)*V_ghost[(i + 1)*5 + 4] -
+                                            double(30)*dx[0]*dV_dx[4];
+                                    }
+                                    else if (i == num_ghosts_to_fill - 6)
+                                    {
+                                        V_ghost[i*5 + 0] = -double(6)*rho_x_RR - double(609)/double(10)*rho_x_R +
+                                            double(126)*V_ghost[(i + 5)*5 + 0] - double(105)*V_ghost[(i + 4)*5 + 0] +
+                                            double(70)*V_ghost[(i + 3)*5 + 0] - double(63)/double(2)*V_ghost[(i + 2)*5 + 0] +
+                                            double(42)/double(5)*V_ghost[(i + 1)*5 + 0] + double(42)*dx[0]*dV_dx[0];
+                                        
+                                        V_ghost[i*5 + 1] = -double(6)*u_x_RR - double(609)/double(10)*u_x_R +
+                                            double(126)*V_ghost[(i + 5)*5 + 1] - double(105)*V_ghost[(i + 4)*5 + 1] +
+                                            double(70)*V_ghost[(i + 3)*5 + 1] - double(63)/double(2)*V_ghost[(i + 2)*5 + 1] +
+                                            double(42)/double(5)*V_ghost[(i + 1)*5 + 1] + double(42)*dx[0]*dV_dx[1];
+                                        
+                                        V_ghost[i*5 + 2] = -double(6)*v_x_RR - double(609)/double(10)*v_x_R +
+                                            double(126)*V_ghost[(i + 5)*5 + 2] - double(105)*V_ghost[(i + 4)*5 + 2] +
+                                            double(70)*V_ghost[(i + 3)*5 + 2] - double(63)/double(2)*V_ghost[(i + 2)*5 + 2] +
+                                            double(42)/double(5)*V_ghost[(i + 1)*5 + 2] + double(42)*dx[0]*dV_dx[2];
+                                        
+                                        V_ghost[i*5 + 3] = -double(6)*w_x_RR - double(609)/double(10)*w_x_R +
+                                            double(126)*V_ghost[(i + 5)*5 + 3] - double(105)*V_ghost[(i + 4)*5 + 3] +
+                                            double(70)*V_ghost[(i + 3)*5 + 3] - double(63)/double(2)*V_ghost[(i + 2)*5 + 3] +
+                                            double(42)/double(5)*V_ghost[(i + 1)*5 + 3] + double(42)*dx[0]*dV_dx[3];
+                                        
+                                        V_ghost[i*5 + 4] = -double(6)*p_x_RR - double(609)/double(10)*p_x_R +
+                                            double(126)*V_ghost[(i + 5)*5 + 4] - double(105)*V_ghost[(i + 4)*5 + 4] +
+                                            double(70)*V_ghost[(i + 3)*5 + 4] - double(63)/double(2)*V_ghost[(i + 2)*5 + 4] +
+                                            double(42)/double(5)*V_ghost[(i + 1)*5 + 4] + double(42)*dx[0]*dV_dx[4];
+                                    }
                                     
                                     Q[0][idx_cell_rho] = V_ghost[i*5 + 0];
                                     Q[1][idx_cell_mom] = V_ghost[i*5 + 0]*V_ghost[i*5 + 1];
@@ -4517,11 +4747,11 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                     {
                         const int num_ghosts_to_fill = fill_box_hi_idx[0] - fill_box_lo_idx[0] + 1;
                         TBOX_ASSERT(fill_box_lo_idx[0] == interior_box_hi_idx[0] + 1);
-                        if (num_ghosts_to_fill > 4)
+                        if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData()\n"
-                                << "Non-reflecting outflow BC doesn't support more than four ghost cells yet!");
+                                << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         
                         for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
@@ -5063,6 +5293,60 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                             double(40)*V_ghost[(i - 3)*5 + 4] - double(20)*V_ghost[(i - 2)*5 + 4] +
                                             double(20)/double(3)*V_ghost[(i - 1)*5 + 4] - double(20)*dx[0]*dV_dx[4];
                                     }
+                                    else if (i == 4)
+                                    {
+                                        V_ghost[i*5 + 0] = double(5)*rho_x_LL + double(77)/double(2)*rho_x_L -
+                                            double(75)*V_ghost[(i - 4)*5 + 0] + double(50)*V_ghost[(i - 3)*5 + 0] -
+                                            double(25)*V_ghost[(i - 2)*5 + 0] + double(15)/double(2)*V_ghost[(i - 1)*5 + 0] +
+                                            double(30)*dx[0]*dV_dx[0];
+                                        
+                                        V_ghost[i*5 + 1] = double(5)*u_x_LL + double(77)/double(2)*u_x_L -
+                                            double(75)*V_ghost[(i - 4)*5 + 1] + double(50)*V_ghost[(i - 3)*5 + 1] -
+                                            double(25)*V_ghost[(i - 2)*5 + 1] + double(15)/double(2)*V_ghost[(i - 1)*5 + 1] +
+                                            double(30)*dx[0]*dV_dx[1];
+                                        
+                                        V_ghost[i*5 + 2] = double(5)*v_x_LL + double(77)/double(2)*v_x_L -
+                                            double(75)*V_ghost[(i - 4)*5 + 2] + double(50)*V_ghost[(i - 3)*5 + 2] -
+                                            double(25)*V_ghost[(i - 2)*5 + 2] + double(15)/double(2)*V_ghost[(i - 1)*5 + 2] +
+                                            double(30)*dx[0]*dV_dx[2];
+                                        
+                                        V_ghost[i*5 + 3] = double(5)*w_x_LL + double(77)/double(2)*w_x_L -
+                                            double(75)*V_ghost[(i - 4)*5 + 3] + double(50)*V_ghost[(i - 3)*5 + 3] -
+                                            double(25)*V_ghost[(i - 2)*5 + 3] + double(15)/double(2)*V_ghost[(i - 1)*5 + 3] +
+                                            double(30)*dx[0]*dV_dx[3];
+                                        
+                                        V_ghost[i*5 + 4] = double(5)*p_x_LL + double(77)/double(2)*p_x_L -
+                                            double(75)*V_ghost[(i - 4)*5 + 4] + double(50)*V_ghost[(i - 3)*5 + 4] -
+                                            double(25)*V_ghost[(i - 2)*5 + 4] + double(15)/double(2)*V_ghost[(i - 1)*5 + 4] +
+                                            double(30)*dx[0]*dV_dx[4];
+                                    }
+                                    else if (i == 5)
+                                    {
+                                        V_ghost[i*5 + 0] = -double(6)*rho_x_LL - double(609)/double(10)*rho_x_L +
+                                            double(126)*V_ghost[(i - 5)*5 + 0] - double(105)*V_ghost[(i - 4)*5 + 0] +
+                                            double(70)*V_ghost[(i - 3)*5 + 0] - double(63)/double(2)*V_ghost[(i - 2)*5 + 0] +
+                                            double(42)/double(5)*V_ghost[(i - 1)*5 + 0] - double(42)*dx[0]*dV_dx[0];
+                                        
+                                        V_ghost[i*5 + 1] = -double(6)*u_x_LL - double(609)/double(10)*u_x_L +
+                                            double(126)*V_ghost[(i - 5)*5 + 1] - double(105)*V_ghost[(i - 4)*5 + 1] +
+                                            double(70)*V_ghost[(i - 3)*5 + 1] - double(63)/double(2)*V_ghost[(i - 2)*5 + 1] +
+                                            double(42)/double(5)*V_ghost[(i - 1)*5 + 1] - double(42)*dx[0]*dV_dx[1];
+                                        
+                                        V_ghost[i*5 + 2] = -double(6)*v_x_LL - double(609)/double(10)*v_x_L +
+                                            double(126)*V_ghost[(i - 5)*5 + 2] - double(105)*V_ghost[(i - 4)*5 + 2] +
+                                            double(70)*V_ghost[(i - 3)*5 + 2] - double(63)/double(2)*V_ghost[(i - 2)*5 + 2] +
+                                            double(42)/double(5)*V_ghost[(i - 1)*5 + 2] - double(42)*dx[0]*dV_dx[2];
+                                        
+                                        V_ghost[i*5 + 3] = -double(6)*w_x_LL - double(609)/double(10)*w_x_L +
+                                            double(126)*V_ghost[(i - 5)*5 + 3] - double(105)*V_ghost[(i - 4)*5 + 3] +
+                                            double(70)*V_ghost[(i - 3)*5 + 3] - double(63)/double(2)*V_ghost[(i - 2)*5 + 3] +
+                                            double(42)/double(5)*V_ghost[(i - 1)*5 + 3] - double(42)*dx[0]*dV_dx[3];
+                                        
+                                        V_ghost[i*5 + 4] = -double(6)*p_x_LL - double(609)/double(10)*p_x_L +
+                                            double(126)*V_ghost[(i - 5)*5 + 4] - double(105)*V_ghost[(i - 4)*5 + 4] +
+                                            double(70)*V_ghost[(i - 3)*5 + 4] - double(63)/double(2)*V_ghost[(i - 2)*5 + 4] +
+                                            double(42)/double(5)*V_ghost[(i - 1)*5 + 4] - double(42)*dx[0]*dV_dx[4];
+                                    }
                                     
                                     Q[0][idx_cell_rho] = V_ghost[i*5 + 0];
                                     Q[1][idx_cell_mom] = V_ghost[i*5 + 0]*V_ghost[i*5 + 1];
@@ -5090,11 +5374,11 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                     {
                         const int num_ghosts_to_fill = fill_box_hi_idx[1] - fill_box_lo_idx[1] + 1;
                         TBOX_ASSERT(fill_box_hi_idx[1] == interior_box_lo_idx[1] - 1);
-                        if (num_ghosts_to_fill > 4)
+                        if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData()\n"
-                                << "Non-reflecting outflow BC doesn't support more than four ghost cells yet!");
+                                << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         
                         for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
@@ -5636,6 +5920,60 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                             double(40)*V_ghost[(j + 3)*5 + 4] - double(20)*V_ghost[(j + 2)*5 + 4] +
                                             double(20)/double(3)*V_ghost[(j + 1)*5 + 4] + double(20)*dx[1]*dV_dy[4];
                                     }
+                                    else if (j == num_ghosts_to_fill - 5)
+                                    {
+                                        V_ghost[j*5 + 0] = double(5)*rho_y_TT + double(77)/double(2)*rho_y_T -
+                                            double(75)*V_ghost[(j + 4)*5 + 0] + double(50)*V_ghost[(j + 3)*5 + 0] -
+                                            double(25)*V_ghost[(j + 2)*5 + 0] + double(15)/double(2)*V_ghost[(j + 1)*5 + 0] -
+                                            double(30)*dx[1]*dV_dy[0];
+                                        
+                                        V_ghost[j*5 + 1] = double(5)*u_y_TT + double(77)/double(2)*u_y_T -
+                                            double(75)*V_ghost[(j + 4)*5 + 1] + double(50)*V_ghost[(j + 3)*5 + 1] -
+                                            double(25)*V_ghost[(j + 2)*5 + 1] + double(15)/double(2)*V_ghost[(j + 1)*5 + 1] -
+                                            double(30)*dx[1]*dV_dy[1];
+                                        
+                                        V_ghost[j*5 + 2] = double(5)*v_y_TT + double(77)/double(2)*v_y_T -
+                                            double(75)*V_ghost[(j + 4)*5 + 2] + double(50)*V_ghost[(j + 3)*5 + 2] -
+                                            double(25)*V_ghost[(j + 2)*5 + 2] + double(15)/double(2)*V_ghost[(j + 1)*5 + 2] -
+                                            double(30)*dx[1]*dV_dy[2];
+                                        
+                                        V_ghost[j*5 + 3] = double(5)*w_y_TT + double(77)/double(2)*w_y_T -
+                                            double(75)*V_ghost[(j + 4)*5 + 3] + double(50)*V_ghost[(j + 3)*5 + 3] -
+                                            double(25)*V_ghost[(j + 2)*5 + 3] + double(15)/double(2)*V_ghost[(j + 1)*5 + 3] -
+                                            double(30)*dx[1]*dV_dy[3];
+                                        
+                                        V_ghost[j*5 + 4] = double(5)*p_y_TT + double(77)/double(2)*p_y_T -
+                                            double(75)*V_ghost[(j + 4)*5 + 4] + double(50)*V_ghost[(j + 3)*5 + 4] -
+                                            double(25)*V_ghost[(j + 2)*5 + 4] + double(15)/double(2)*V_ghost[(j + 1)*5 + 4] -
+                                            double(30)*dx[1]*dV_dy[4];
+                                    }
+                                    else if (j == num_ghosts_to_fill - 6)
+                                    {
+                                        V_ghost[j*5 + 0] = -double(6)*rho_y_TT - double(609)/double(10)*rho_y_T +
+                                            double(126)*V_ghost[(j + 5)*5 + 0] - double(105)*V_ghost[(j + 4)*5 + 0] +
+                                            double(70)*V_ghost[(j + 3)*5 + 0] - double(63)/double(2)*V_ghost[(j + 2)*5 + 0] +
+                                            double(42)/double(5)*V_ghost[(j + 1)*5 + 0] + double(42)*dx[1]*dV_dy[0];
+                                        
+                                        V_ghost[j*5 + 1] = -double(6)*u_y_TT - double(609)/double(10)*u_y_T +
+                                            double(126)*V_ghost[(j + 5)*5 + 1] - double(105)*V_ghost[(j + 4)*5 + 1] +
+                                            double(70)*V_ghost[(j + 3)*5 + 1] - double(63)/double(2)*V_ghost[(j + 2)*5 + 1] +
+                                            double(42)/double(5)*V_ghost[(j + 1)*5 + 1] + double(42)*dx[1]*dV_dy[1];
+                                        
+                                        V_ghost[j*5 + 2] = -double(6)*v_y_TT - double(609)/double(10)*v_y_T +
+                                            double(126)*V_ghost[(j + 5)*5 + 2] - double(105)*V_ghost[(j + 4)*5 + 2] +
+                                            double(70)*V_ghost[(j + 3)*5 + 2] - double(63)/double(2)*V_ghost[(j + 2)*5 + 2] +
+                                            double(42)/double(5)*V_ghost[(j + 1)*5 + 2] + double(42)*dx[1]*dV_dy[2];
+                                        
+                                        V_ghost[j*5 + 3] = -double(6)*w_y_TT - double(609)/double(10)*w_y_T +
+                                            double(126)*V_ghost[(j + 5)*5 + 3] - double(105)*V_ghost[(j + 4)*5 + 3] +
+                                            double(70)*V_ghost[(j + 3)*5 + 3] - double(63)/double(2)*V_ghost[(j + 2)*5 + 3] +
+                                            double(42)/double(5)*V_ghost[(j + 1)*5 + 3] + double(42)*dx[1]*dV_dy[3];
+                                        
+                                        V_ghost[j*5 + 4] = -double(6)*p_y_TT - double(609)/double(10)*p_y_T +
+                                            double(126)*V_ghost[(j + 5)*5 + 4] - double(105)*V_ghost[(j + 4)*5 + 4] +
+                                            double(70)*V_ghost[(j + 3)*5 + 4] - double(63)/double(2)*V_ghost[(j + 2)*5 + 4] +
+                                            double(42)/double(5)*V_ghost[(j + 1)*5 + 4] + double(42)*dx[1]*dV_dy[4];
+                                    }
                                     
                                     Q[0][idx_cell_rho] = V_ghost[j*5 + 0];
                                     Q[1][idx_cell_mom] = V_ghost[j*5 + 0]*V_ghost[j*5 + 1];
@@ -5662,11 +6000,11 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                     {
                         const int num_ghosts_to_fill = fill_box_hi_idx[1] - fill_box_lo_idx[1] + 1;
                         TBOX_ASSERT(fill_box_lo_idx[1] == interior_box_hi_idx[1] + 1);
-                        if (num_ghosts_to_fill > 4)
+                        if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData()\n"
-                                << "Non-reflecting outflow BC doesn't support more than four ghost cells yet!");
+                                << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         
                         for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
@@ -6208,6 +6546,60 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                             double(40)*V_ghost[(j - 3)*5 + 4] - double(20)*V_ghost[(j - 2)*5 + 4] +
                                             double(20)/double(3)*V_ghost[(j - 1)*5 + 4] - double(20)*dx[1]*dV_dy[4];
                                     }
+                                    else if (j == 4)
+                                    {
+                                        V_ghost[j*5 + 0] = double(5)*rho_y_BB + double(77)/double(2)*rho_y_B -
+                                            double(75)*V_ghost[(j - 4)*5 + 0] + double(50)*V_ghost[(j - 3)*5 + 0] -
+                                            double(25)*V_ghost[(j - 2)*5 + 0] + double(15)/double(2)*V_ghost[(j - 1)*5 + 0] +
+                                            double(30)*dx[1]*dV_dy[0];
+                                        
+                                        V_ghost[j*5 + 1] = double(5)*u_y_BB + double(77)/double(2)*u_y_B -
+                                            double(75)*V_ghost[(j - 4)*5 + 1] + double(50)*V_ghost[(j - 3)*5 + 1] -
+                                            double(25)*V_ghost[(j - 2)*5 + 1] + double(15)/double(2)*V_ghost[(j - 1)*5 + 1] +
+                                            double(30)*dx[1]*dV_dy[1];
+                                        
+                                        V_ghost[j*5 + 2] = double(5)*v_y_BB + double(77)/double(2)*v_y_B -
+                                            double(75)*V_ghost[(j - 4)*5 + 2] + double(50)*V_ghost[(j - 3)*5 + 2] -
+                                            double(25)*V_ghost[(j - 2)*5 + 2] + double(15)/double(2)*V_ghost[(j - 1)*5 + 2] +
+                                            double(30)*dx[1]*dV_dy[2];
+                                        
+                                        V_ghost[j*5 + 3] = double(5)*w_y_BB + double(77)/double(2)*w_y_B -
+                                            double(75)*V_ghost[(j - 4)*5 + 3] + double(50)*V_ghost[(j - 3)*5 + 3] -
+                                            double(25)*V_ghost[(j - 2)*5 + 3] + double(15)/double(2)*V_ghost[(j - 1)*5 + 3] +
+                                            double(30)*dx[1]*dV_dy[3];
+                                        
+                                        V_ghost[j*5 + 4] = double(5)*p_y_BB + double(77)/double(2)*p_y_B -
+                                            double(75)*V_ghost[(j - 4)*5 + 4] + double(50)*V_ghost[(j - 3)*5 + 4] -
+                                            double(25)*V_ghost[(j - 2)*5 + 4] + double(15)/double(2)*V_ghost[(j - 1)*5 + 4] +
+                                            double(30)*dx[1]*dV_dy[4];
+                                    }
+                                    else if (j == 5)
+                                    {
+                                        V_ghost[j*5 + 0] = -double(6)*rho_y_BB - double(609)/double(10)*rho_y_B +
+                                            double(126)*V_ghost[(j - 5)*5 + 0] - double(105)*V_ghost[(j - 4)*5 + 0] +
+                                            double(70)*V_ghost[(j - 3)*5 + 0] - double(63)/double(2)*V_ghost[(j - 2)*5 + 0] +
+                                            double(42)/double(5)*V_ghost[(j - 1)*5 + 0] - double(42)*dx[1]*dV_dy[0];
+                                        
+                                        V_ghost[j*5 + 1] = -double(6)*u_y_BB - double(609)/double(10)*u_y_B +
+                                            double(126)*V_ghost[(j - 5)*5 + 1] - double(105)*V_ghost[(j - 4)*5 + 1] +
+                                            double(70)*V_ghost[(j - 3)*5 + 1] - double(63)/double(2)*V_ghost[(j - 2)*5 + 1] +
+                                            double(42)/double(5)*V_ghost[(j - 1)*5 + 1] - double(42)*dx[1]*dV_dy[1];
+                                        
+                                        V_ghost[j*5 + 2] = -double(6)*v_y_BB - double(609)/double(10)*v_y_B +
+                                            double(126)*V_ghost[(j - 5)*5 + 2] - double(105)*V_ghost[(j - 4)*5 + 2] +
+                                            double(70)*V_ghost[(j - 3)*5 + 2] - double(63)/double(2)*V_ghost[(j - 2)*5 + 2] +
+                                            double(42)/double(5)*V_ghost[(j - 1)*5 + 2] - double(42)*dx[1]*dV_dy[2];
+                                        
+                                        V_ghost[j*5 + 3] = -double(6)*w_y_BB - double(609)/double(10)*w_y_B +
+                                            double(126)*V_ghost[(j - 5)*5 + 3] - double(105)*V_ghost[(j - 4)*5 + 3] +
+                                            double(70)*V_ghost[(j - 3)*5 + 3] - double(63)/double(2)*V_ghost[(j - 2)*5 + 3] +
+                                            double(42)/double(5)*V_ghost[(j - 1)*5 + 3] - double(42)*dx[1]*dV_dy[3];
+                                        
+                                        V_ghost[j*5 + 4] = -double(6)*p_y_BB - double(609)/double(10)*p_y_B +
+                                            double(126)*V_ghost[(j - 5)*5 + 4] - double(105)*V_ghost[(j - 4)*5 + 4] +
+                                            double(70)*V_ghost[(j - 3)*5 + 4] - double(63)/double(2)*V_ghost[(j - 2)*5 + 4] +
+                                            double(42)/double(5)*V_ghost[(j - 1)*5 + 4] - double(42)*dx[1]*dV_dy[4];
+                                    }
                                     
                                     Q[0][idx_cell_rho] = V_ghost[j*5 + 0];
                                     Q[1][idx_cell_mom] = V_ghost[j*5 + 0]*V_ghost[j*5 + 1];
@@ -6233,11 +6625,11 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                     {
                         const int num_ghosts_to_fill = fill_box_hi_idx[2] - fill_box_lo_idx[2] + 1;
                         TBOX_ASSERT(fill_box_hi_idx[2] == interior_box_lo_idx[2] - 1);
-                        if (num_ghosts_to_fill > 4)
+                        if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData()\n"
-                                << "Non-reflecting outflow BC doesn't support more than four ghost cells yet!");
+                                << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         
                         for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
@@ -6779,6 +7171,60 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                             double(40)*V_ghost[(k + 3)*5 + 4] - double(20)*V_ghost[(k + 2)*5 + 4] +
                                             double(20)/double(3)*V_ghost[(k + 1)*5 + 4] + double(20)*dx[2]*dV_dz[4];
                                     }
+                                    else if (k == num_ghosts_to_fill - 5)
+                                    {
+                                        V_ghost[k*5 + 0] = double(5)*rho_z_FF + double(77)/double(2)*rho_z_F -
+                                            double(75)*V_ghost[(k + 4)*5 + 0] + double(50)*V_ghost[(k + 3)*5 + 0] -
+                                            double(25)*V_ghost[(k + 2)*5 + 0] + double(15)/double(2)*V_ghost[(k + 1)*5 + 0] -
+                                            double(30)*dx[2]*dV_dz[0];
+                                        
+                                        V_ghost[k*5 + 1] = double(5)*u_z_FF + double(77)/double(2)*u_z_F -
+                                            double(75)*V_ghost[(k + 4)*5 + 1] + double(50)*V_ghost[(k + 3)*5 + 1] -
+                                            double(25)*V_ghost[(k + 2)*5 + 1] + double(15)/double(2)*V_ghost[(k + 1)*5 + 1] -
+                                            double(30)*dx[2]*dV_dz[1];
+                                        
+                                        V_ghost[k*5 + 2] = double(5)*v_z_FF + double(77)/double(2)*v_z_F -
+                                            double(75)*V_ghost[(k + 4)*5 + 2] + double(50)*V_ghost[(k + 3)*5 + 2] -
+                                            double(25)*V_ghost[(k + 2)*5 + 2] + double(15)/double(2)*V_ghost[(k + 1)*5 + 2] -
+                                            double(30)*dx[2]*dV_dz[2];
+                                        
+                                        V_ghost[k*5 + 3] = double(5)*w_z_FF + double(77)/double(2)*w_z_F -
+                                            double(75)*V_ghost[(k + 4)*5 + 3] + double(50)*V_ghost[(k + 3)*5 + 3] -
+                                            double(25)*V_ghost[(k + 2)*5 + 3] + double(15)/double(2)*V_ghost[(k + 1)*5 + 3] -
+                                            double(30)*dx[2]*dV_dz[3];
+                                        
+                                        V_ghost[k*5 + 4] = double(5)*p_z_FF + double(77)/double(2)*p_z_F -
+                                            double(75)*V_ghost[(k + 4)*5 + 4] + double(50)*V_ghost[(k + 3)*5 + 4] -
+                                            double(25)*V_ghost[(k + 2)*5 + 4] + double(15)/double(2)*V_ghost[(k + 1)*5 + 4] -
+                                            double(30)*dx[2]*dV_dz[4];
+                                    }
+                                    else if (k == num_ghosts_to_fill - 6)
+                                    {
+                                        V_ghost[k*5 + 0] = -double(6)*rho_z_FF - double(609)/double(10)*rho_z_F +
+                                            double(126)*V_ghost[(k + 5)*5 + 0] - double(105)*V_ghost[(k + 4)*5 + 0] +
+                                            double(70)*V_ghost[(k + 3)*5 + 0] - double(63)/double(2)*V_ghost[(k + 2)*5 + 0] +
+                                            double(42)/double(5)*V_ghost[(k + 1)*5 + 0] + double(42)*dx[2]*dV_dz[0];
+                                        
+                                        V_ghost[k*5 + 1] = -double(6)*u_z_FF - double(609)/double(10)*u_z_F +
+                                            double(126)*V_ghost[(k + 5)*5 + 1] - double(105)*V_ghost[(k + 4)*5 + 1] +
+                                            double(70)*V_ghost[(k + 3)*5 + 1] - double(63)/double(2)*V_ghost[(k + 2)*5 + 1] +
+                                            double(42)/double(5)*V_ghost[(k + 1)*5 + 1] + double(42)*dx[2]*dV_dz[1];
+                                        
+                                        V_ghost[k*5 + 2] = -double(6)*v_z_FF - double(609)/double(10)*v_z_F +
+                                            double(126)*V_ghost[(k + 5)*5 + 2] - double(105)*V_ghost[(k + 4)*5 + 2] +
+                                            double(70)*V_ghost[(k + 3)*5 + 2] - double(63)/double(2)*V_ghost[(k + 2)*5 + 2] +
+                                            double(42)/double(5)*V_ghost[(k + 1)*5 + 2] + double(42)*dx[2]*dV_dz[2];
+                                        
+                                        V_ghost[k*5 + 3] = -double(6)*w_z_FF - double(609)/double(10)*w_z_F +
+                                            double(126)*V_ghost[(k + 5)*5 + 3] - double(105)*V_ghost[(k + 4)*5 + 3] +
+                                            double(70)*V_ghost[(k + 3)*5 + 3] - double(63)/double(2)*V_ghost[(k + 2)*5 + 3] +
+                                            double(42)/double(5)*V_ghost[(k + 1)*5 + 3] + double(42)*dx[2]*dV_dz[3];
+                                        
+                                        V_ghost[k*5 + 4] = -double(6)*p_z_FF - double(609)/double(10)*p_z_F +
+                                            double(126)*V_ghost[(k + 5)*5 + 4] - double(105)*V_ghost[(k + 4)*5 + 4] +
+                                            double(70)*V_ghost[(k + 3)*5 + 4] - double(63)/double(2)*V_ghost[(k + 2)*5 + 4] +
+                                            double(42)/double(5)*V_ghost[(k + 1)*5 + 4] + double(42)*dx[2]*dV_dz[4];
+                                    }
                                     
                                     Q[0][idx_cell_rho] = V_ghost[k*5 + 0];
                                     Q[1][idx_cell_mom] = V_ghost[k*5 + 0]*V_ghost[k*5 + 1];
@@ -6804,11 +7250,11 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                     {
                         const int num_ghosts_to_fill = fill_box_hi_idx[2] - fill_box_lo_idx[2] + 1;
                         TBOX_ASSERT(fill_box_lo_idx[2] == interior_box_hi_idx[2] + 1);
-                        if (num_ghosts_to_fill > 4)
+                        if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData()\n"
-                                << "Non-reflecting outflow BC doesn't support more than four ghost cells yet!");
+                                << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         
                         for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
@@ -7349,6 +7795,60 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                         V_ghost[k*5 + 4] = -double(4)*p_z_BB - double(65)/double(3)*p_z_B +
                                             double(40)*V_ghost[(k - 3)*5 + 4] - double(20)*V_ghost[(k - 2)*5 + 4] +
                                             double(20)/double(3)*V_ghost[(k - 1)*5 + 4] - double(20)*dx[2]*dV_dz[4];
+                                    }
+                                    else if (k == 4)
+                                    {
+                                        V_ghost[k*5 + 0] = double(5)*rho_z_BB + double(77)/double(2)*rho_z_B -
+                                            double(75)*V_ghost[(k - 4)*5 + 0] + double(50)*V_ghost[(k - 3)*5 + 0] -
+                                            double(25)*V_ghost[(k - 2)*5 + 0] + double(15)/double(2)*V_ghost[(k - 1)*5 + 0] +
+                                            double(30)*dx[2]*dV_dz[0];
+                                        
+                                        V_ghost[k*5 + 1] = double(5)*u_z_BB + double(77)/double(2)*u_z_B -
+                                            double(75)*V_ghost[(k - 4)*5 + 1] + double(50)*V_ghost[(k - 3)*5 + 1] -
+                                            double(25)*V_ghost[(k - 2)*5 + 1] + double(15)/double(2)*V_ghost[(k - 1)*5 + 1] +
+                                            double(30)*dx[2]*dV_dz[1];
+                                        
+                                        V_ghost[k*5 + 2] = double(5)*v_z_BB + double(77)/double(2)*v_z_B -
+                                            double(75)*V_ghost[(k - 4)*5 + 2] + double(50)*V_ghost[(k - 3)*5 + 2] -
+                                            double(25)*V_ghost[(k - 2)*5 + 2] + double(15)/double(2)*V_ghost[(k - 1)*5 + 2] +
+                                            double(30)*dx[2]*dV_dz[2];
+                                        
+                                        V_ghost[k*5 + 3] = double(5)*w_z_BB + double(77)/double(2)*w_z_B -
+                                            double(75)*V_ghost[(k - 4)*5 + 3] + double(50)*V_ghost[(k - 3)*5 + 3] -
+                                            double(25)*V_ghost[(k - 2)*5 + 3] + double(15)/double(2)*V_ghost[(k - 1)*5 + 3] +
+                                            double(30)*dx[2]*dV_dz[3];
+                                        
+                                        V_ghost[k*5 + 4] = double(5)*p_z_BB + double(77)/double(2)*p_z_B -
+                                            double(75)*V_ghost[(k - 4)*5 + 4] + double(50)*V_ghost[(k - 3)*5 + 4] -
+                                            double(25)*V_ghost[(k - 2)*5 + 4] + double(15)/double(2)*V_ghost[(k - 1)*5 + 4] +
+                                            double(30)*dx[2]*dV_dz[4];
+                                    }
+                                    else if (k == 5)
+                                    {
+                                        V_ghost[k*5 + 0] = -double(6)*rho_z_BB - double(609)/double(10)*rho_z_B +
+                                            double(126)*V_ghost[(k - 5)*5 + 0] - double(105)*V_ghost[(k - 4)*5 + 0] +
+                                            double(70)*V_ghost[(k - 3)*5 + 0] - double(63)/double(2)*V_ghost[(k - 2)*5 + 0] +
+                                            double(42)/double(5)*V_ghost[(k - 1)*5 + 0] - double(42)*dx[2]*dV_dz[0];
+                                        
+                                        V_ghost[k*5 + 1] = -double(6)*u_z_BB - double(609)/double(10)*u_z_B +
+                                            double(126)*V_ghost[(k - 5)*5 + 1] - double(105)*V_ghost[(k - 4)*5 + 1] +
+                                            double(70)*V_ghost[(k - 3)*5 + 1] - double(63)/double(2)*V_ghost[(k - 2)*5 + 1] +
+                                            double(42)/double(5)*V_ghost[(k - 1)*5 + 1] - double(42)*dx[2]*dV_dz[1];
+                                        
+                                        V_ghost[k*5 + 2] = -double(6)*v_z_BB - double(609)/double(10)*v_z_B +
+                                            double(126)*V_ghost[(k - 5)*5 + 2] - double(105)*V_ghost[(k - 4)*5 + 2] +
+                                            double(70)*V_ghost[(k - 3)*5 + 2] - double(63)/double(2)*V_ghost[(k - 2)*5 + 2] +
+                                            double(42)/double(5)*V_ghost[(k - 1)*5 + 2] - double(42)*dx[2]*dV_dz[2];
+                                        
+                                        V_ghost[k*5 + 3] = -double(6)*w_z_BB - double(609)/double(10)*w_z_B +
+                                            double(126)*V_ghost[(k - 5)*5 + 3] - double(105)*V_ghost[(k - 4)*5 + 3] +
+                                            double(70)*V_ghost[(k - 3)*5 + 3] - double(63)/double(2)*V_ghost[(k - 2)*5 + 3] +
+                                            double(42)/double(5)*V_ghost[(k - 1)*5 + 3] - double(42)*dx[2]*dV_dz[3];
+                                        
+                                        V_ghost[k*5 + 4] = -double(6)*p_z_BB - double(609)/double(10)*p_z_B +
+                                            double(126)*V_ghost[(k - 5)*5 + 4] - double(105)*V_ghost[(k - 4)*5 + 4] +
+                                            double(70)*V_ghost[(k - 3)*5 + 4] - double(63)/double(2)*V_ghost[(k - 2)*5 + 4] +
+                                            double(42)/double(5)*V_ghost[(k - 1)*5 + 4] - double(42)*dx[2]*dV_dz[4];
                                     }
                                     
                                     Q[0][idx_cell_rho] = V_ghost[k*5 + 0];
