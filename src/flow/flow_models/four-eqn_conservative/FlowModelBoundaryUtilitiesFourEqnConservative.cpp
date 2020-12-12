@@ -6992,8 +6992,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 1] +
                                             double(20)*dx[0]*dV_dx[d_num_species + 1];
                                         
-                                        V_ghost[i*(d_num_species + 4) + d_num_species + 2] = -double(4)*v_x_LL -
-                                            double(65)/double(3)*v_x_L +
+                                        V_ghost[i*(d_num_species + 4) + d_num_species + 2] = -double(4)*w_x_LL -
+                                            double(65)/double(3)*w_x_L +
                                             double(40)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 2] -
                                             double(20)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 2] +
                                             double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 2] +
