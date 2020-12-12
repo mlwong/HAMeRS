@@ -8330,7 +8330,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     dV_dy[si] = half*c_sq_inv*Y_y_T[si]*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]) +
                                         c_sq_inv*Lambda_inv_L[si + 2];
                                 }
-                                dV_dy[d_num_species]     = Lambda_inv_L[d_num_species];
+                                dV_dy[d_num_species]     = Lambda_inv_L[1];
                                 dV_dy[d_num_species + 1] = half*rho_c_inv*(-Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]);
                                 dV_dy[d_num_species + 2] = Lambda_inv_L[d_num_species + 2];
                                 dV_dy[d_num_species + 3] = half*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]);
@@ -8616,7 +8616,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                     }
                     else if (face_loc == BDRY_LOC::YHI)
                     {
-                        
                         const int num_ghosts_to_fill = fill_box_hi_idx[1] - fill_box_lo_idx[1] + 1;
                         TBOX_ASSERT(fill_box_lo_idx[1] == interior_box_hi_idx[1] + 1);
                         if (num_ghosts_to_fill > 6)
@@ -9355,7 +9354,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     dV_dy[si] = half*c_sq_inv*Y_y_B[si]*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]) +
                                         c_sq_inv*Lambda_inv_L[si + 2];
                                 }
-                                dV_dy[d_num_species]     = Lambda_inv_L[d_num_species];
+                                dV_dy[d_num_species]     = Lambda_inv_L[1];
                                 dV_dy[d_num_species + 1] = half*rho_c_inv*(-Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]);
                                 dV_dy[d_num_species + 2] = Lambda_inv_L[d_num_species + 2];
                                 dV_dy[d_num_species + 3] = half*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]);
@@ -10379,8 +10378,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     dV_dz[si] = half*c_sq_inv*Y_z_F[si]*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]) +
                                         c_sq_inv*Lambda_inv_L[si + 3];
                                 }
-                                dV_dz[d_num_species]     = Lambda_inv_L[d_num_species];
-                                dV_dz[d_num_species + 1] = Lambda_inv_L[d_num_species + 1];
+                                dV_dz[d_num_species]     = Lambda_inv_L[1];
+                                dV_dz[d_num_species + 1] = Lambda_inv_L[2];
                                 dV_dz[d_num_species + 2] = half*rho_c_inv*(-Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]);
                                 dV_dz[d_num_species + 3] = half*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]);
 
@@ -11404,8 +11403,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     dV_dz[si] = half*c_sq_inv*Y_z_B[si]*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]) +
                                         c_sq_inv*Lambda_inv_L[si + 3];
                                 }
-                                dV_dz[d_num_species]     = Lambda_inv_L[d_num_species];
-                                dV_dz[d_num_species + 1] = Lambda_inv_L[d_num_species + 1];
+                                dV_dz[d_num_species]     = Lambda_inv_L[1];
+                                dV_dz[d_num_species + 1] = Lambda_inv_L[2];
                                 dV_dz[d_num_species + 2] = half*rho_c_inv*(-Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]);
                                 dV_dz[d_num_species + 3] = half*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]);
 
