@@ -1347,11 +1347,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                         // number of ghostcells START
                         const int num_ghosts_to_fill = fill_box_hi_idx[0] - fill_box_lo_idx[0] + 1;
                         TBOX_ASSERT(fill_box_hi_idx[0] == interior_box_lo_idx[0] - 1);
-                        if (num_ghosts_to_fill > 4)
+                        if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData()\n"
-                                << "Non-reflecting outflow BC doesn't support more than four ghost cells yet!");
+                                << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         // number of ghostcells END
                          
@@ -1799,7 +1799,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 
                                 if (i == num_ghosts_to_fill - 1)
                                 {
-                                    for (int si = 0; si < d_num_species; si ++)
+                                    for (int si = 0; si < d_num_species; si++)
                                     {
                                         V_ghost[i*(d_num_species + 3) + si] = rho_Y_x_RR[si] - double(2)*dx[0]*dV_dx[si];
                                     }
@@ -1809,7 +1809,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 }
                                 else if (i == num_ghosts_to_fill - 2)
                                 {
-                                    for (int si = 0; si < d_num_species; si ++)
+                                    for (int si = 0; si < d_num_species; si++)
                                     {
                                         V_ghost[i*(d_num_species + 3) + si] = -double(2)*rho_Y_x_RR[si] - double(3)*rho_Y_x_R[si] +
                                         double(6)*V_ghost[(i + 1)*(d_num_species + 3) + si] + double(6)*dx[0]*dV_dx[si];
@@ -1853,7 +1853,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                         double(6)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 2] -
                                         double(12)*dx[0]*dV_dx[d_num_species + 2];
                                 }
-                                else if (i == num_ghosts_to_fill - 4)  
+                                else if (i == num_ghosts_to_fill - 4)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
@@ -1861,7 +1861,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                             double(65)/double(3)*rho_Y_x_R[si] +
                                             double(40)*V_ghost[(i + 3)*(d_num_species + 3) + si] -
                                             double(20)*V_ghost[(i + 2)*(d_num_species + 3) + si] +
-                                            double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 3) + si] -
+                                            double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 3) + si] +
                                             double(20)*dx[0]*dV_dx[si];
                                     }
                                     
@@ -1869,24 +1869,102 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                         double(65)/double(3)*u_x_R +
                                         double(40)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species] -
                                         double(20)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species] +
-                                        double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species] -
+                                        double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species] +
                                         double(20)*dx[0]*dV_dx[d_num_species];
                                     
                                     V_ghost[i*(d_num_species + 3) + d_num_species + 1] = -double(4)*v_x_RR -
                                         double(65)/double(3)*v_x_R +
                                         double(40)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species + 1] -
                                         double(20)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 1] +
-                                        double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 1] -
+                                        double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 1] +
                                         double(20)*dx[0]*dV_dx[d_num_species + 1];
                                     
                                     V_ghost[i*(d_num_species + 3) + d_num_species + 2] = -double(4)*p_x_RR -
                                         double(65)/double(3)*p_x_R +
                                         double(40)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species + 2] -
                                         double(20)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 2] +
-                                        double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 2] -
+                                        double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 2] +
                                         double(20)*dx[0]*dV_dx[d_num_species + 2];
                                 }
-
+                                else if (i == num_ghosts_to_fill - 5)
+                                {
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        V_ghost[i*(d_num_species + 3) + si] = double(5)*rho_Y_x_RR[si] +
+                                            double(77)/double(2)*rho_Y_x_R[si] -
+                                            double(75)*V_ghost[(i + 4)*(d_num_species + 3) + si] +
+                                            double(50)*V_ghost[(i + 3)*(d_num_species + 3) + si] -
+                                            double(25)*V_ghost[(i + 2)*(d_num_species + 3) + si] +
+                                            double(15)/double(2)*V_ghost[(i + 1)*(d_num_species + 3) + si] -
+                                            double(30)*dx[0]*dV_dx[si];
+                                    }
+                                    
+                                    V_ghost[i*(d_num_species + 3) + d_num_species] = double(5)*u_x_RR +
+                                        double(77)/double(2)*u_x_R -
+                                        double(75)*V_ghost[(i + 4)*(d_num_species + 3) + d_num_species] +
+                                        double(50)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species] -
+                                        double(25)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species] +
+                                        double(15)/double(2)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species] -
+                                        double(30)*dx[0]*dV_dx[d_num_species];
+                                    
+                                    V_ghost[i*(d_num_species + 3) + d_num_species + 1] = double(5)*v_x_RR +
+                                        double(77)/double(2)*v_x_R -
+                                        double(75)*V_ghost[(i + 4)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(50)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species + 1] -
+                                        double(25)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(15)/double(2)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 1] -
+                                        double(30)*dx[0]*dV_dx[d_num_species + 1];
+                                    
+                                    V_ghost[i*(d_num_species + 3) + d_num_species + 2] = double(5)*p_x_RR +
+                                        double(77)/double(2)*p_x_R -
+                                        double(75)*V_ghost[(i + 4)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(50)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species + 2] -
+                                        double(25)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(15)/double(2)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 2] -
+                                        double(30)*dx[0]*dV_dx[d_num_species + 2];
+                                }
+                                else if (i == num_ghosts_to_fill - 6)
+                                {
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        V_ghost[i*(d_num_species + 3) + si] = -double(6)*rho_Y_x_RR[si] -
+                                            double(609)/double(10)*rho_Y_x_R[si] +
+                                            double(126)*V_ghost[(i + 5)*(d_num_species + 3) + si] -
+                                            double(105)*V_ghost[(i + 4)*(d_num_species + 3) + si] +
+                                            double(70)*V_ghost[(i + 3)*(d_num_species + 3) + si] -
+                                            double(63)/double(2)*V_ghost[(i + 2)*(d_num_species + 3) + si] +
+                                            double(42)/double(5)*V_ghost[(i + 1)*(d_num_species + 3) + si] +
+                                            double(42)*dx[0]*dV_dx[si];
+                                    }
+                                    
+                                    V_ghost[i*(d_num_species + 3) + d_num_species] = -double(6)*u_x_RR -
+                                        double(609)/double(10)*u_x_R +
+                                        double(126)*V_ghost[(i + 5)*(d_num_species + 3) + d_num_species] -
+                                        double(105)*V_ghost[(i + 4)*(d_num_species + 3) + d_num_species] +
+                                        double(70)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species] -
+                                        double(63)/double(2)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species] +
+                                        double(42)/double(5)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species] +
+                                        double(42)*dx[0]*dV_dx[d_num_species];
+                                    
+                                    V_ghost[i*(d_num_species + 3) + d_num_species + 1] = -double(6)*v_x_RR -
+                                        double(609)/double(10)*v_x_R +
+                                        double(126)*V_ghost[(i + 5)*(d_num_species + 3) + d_num_species + 1] -
+                                        double(105)*V_ghost[(i + 4)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(70)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species + 1] -
+                                        double(63)/double(2)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(42)/double(5)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(42)*dx[0]*dV_dx[d_num_species + 1];
+                                    
+                                    V_ghost[i*(d_num_species + 3) + d_num_species + 2] = -double(6)*p_x_RR -
+                                        double(609)/double(10)*p_x_R +
+                                        double(126)*V_ghost[(i + 5)*(d_num_species + 3) + d_num_species + 2] -
+                                        double(105)*V_ghost[(i + 4)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(70)*V_ghost[(i + 3)*(d_num_species + 3) + d_num_species + 2] -
+                                        double(63)/double(2)*V_ghost[(i + 2)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(42)/double(5)*V_ghost[(i + 1)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(42)*dx[0]*dV_dx[d_num_species + 2];
+                                }
+                                
                                 /*
                                  * Compute the mixture density.
                                  */
@@ -1946,11 +2024,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                     {
                     const int num_ghosts_to_fill = fill_box_hi_idx[0] - fill_box_lo_idx[0] + 1;
                         TBOX_ASSERT(fill_box_lo_idx[0] == interior_box_hi_idx[0] + 1);
-                        if (num_ghosts_to_fill > 4)
+                        if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData()\n"
-                                << "Non-reflecting outflow BC doesn't support more than four ghost cells yet!");
+                                << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         
                         for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
@@ -2393,7 +2471,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 
                                 if (i == 0)
                                 {
-                                    for (int si = 0; si < d_num_species; si ++)
+                                    for (int si = 0; si < d_num_species; si++)
                                     {
                                         V_ghost[i*(d_num_species + 3) + si] = rho_Y_x_LL[si] + double(2)*dx[0]*dV_dx[si];
                                     }
@@ -2403,7 +2481,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 }
                                 else if (i == 1)
                                 {
-                                    for (int si = 0; si < d_num_species; si ++)
+                                    for (int si = 0; si < d_num_species; si++)
                                     {
                                         V_ghost[i*(d_num_species + 3) + si] = -double(2)*rho_Y_x_LL[si] - double(3)*rho_Y_x_L[si] +
                                         double(6)*V_ghost[(i - 1)*(d_num_species + 3) + si] - double(6)*dx[0]*dV_dx[si];
@@ -2429,7 +2507,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                             double(18)*V_ghost[(i - 2)*(d_num_species + 3) + si] +
                                             double(6)*V_ghost[(i - 1)*(d_num_species + 3) + si] +
                                             double(12)*dx[0]*dV_dx[si];
-                
                                     }
                                     
                                     V_ghost[i*(d_num_species + 3) + d_num_species] = double(3)*u_x_LL + double(10)*u_x_L -
@@ -2455,7 +2532,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                             double(65)/double(3)*rho_Y_x_L[si] +
                                             double(40)*V_ghost[(i - 3)*(d_num_species + 3) + si] -
                                             double(20)*V_ghost[(i - 2)*(d_num_species + 3) + si] +
-                                            double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 3) + si] +
+                                            double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 3) + si] -
                                             double(20)*dx[0]*dV_dx[si];
                                     }
                                     
@@ -2463,22 +2540,100 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                         double(65)/double(3)*u_x_L +
                                         double(40)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species] -
                                         double(20)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species] +
-                                        double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species] +
+                                        double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species] -
                                         double(20)*dx[0]*dV_dx[d_num_species];
                                     
                                     V_ghost[i*(d_num_species + 3) + d_num_species + 1] = -double(4)*v_x_LL -
                                         double(65)/double(3)*v_x_L +
                                         double(40)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species + 1] -
                                         double(20)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species + 1] +
-                                        double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 1] -
                                         double(20)*dx[0]*dV_dx[d_num_species + 1];
                                     
                                     V_ghost[i*(d_num_species + 3) + d_num_species + 2] = -double(4)*p_x_LL -
                                         double(65)/double(3)*p_x_L +
                                         double(40)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species + 2] -
                                         double(20)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species + 2] +
-                                        double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 2] -
                                         double(20)*dx[0]*dV_dx[d_num_species + 2];
+                                }
+                                else if (i == 4)
+                                {
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        V_ghost[i*(d_num_species + 3) + si] = double(5)*rho_Y_x_LL[si] +
+                                            double(77)/double(2)*rho_Y_x_L[si] -
+                                            double(75)*V_ghost[(i - 4)*(d_num_species + 3) + si] +
+                                            double(50)*V_ghost[(i - 3)*(d_num_species + 3) + si] -
+                                            double(25)*V_ghost[(i - 2)*(d_num_species + 3) + si] +
+                                            double(15)/double(2)*V_ghost[(i - 1)*(d_num_species + 3) + si] +
+                                            double(30)*dx[0]*dV_dx[si];
+                                    }
+                                    
+                                    V_ghost[i*(d_num_species + 3) + d_num_species] = double(5)*u_x_LL +
+                                        double(77)/double(2)*u_x_L -
+                                        double(75)*V_ghost[(i - 4)*(d_num_species + 3) + d_num_species] +
+                                        double(50)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species] -
+                                        double(25)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species] +
+                                        double(15)/double(2)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species] +
+                                        double(30)*dx[0]*dV_dx[d_num_species];
+                                    
+                                    V_ghost[i*(d_num_species + 3) + d_num_species + 1] = double(5)*v_x_LL +
+                                        double(77)/double(2)*v_x_L -
+                                        double(75)*V_ghost[(i - 4)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(50)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species + 1] -
+                                        double(25)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(15)/double(2)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(30)*dx[0]*dV_dx[d_num_species + 1];
+                                    
+                                    V_ghost[i*(d_num_species + 3) + d_num_species + 2] = double(5)*p_x_LL +
+                                        double(77)/double(2)*p_x_L -
+                                        double(75)*V_ghost[(i - 4)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(50)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species + 2] -
+                                        double(25)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(15)/double(2)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(30)*dx[0]*dV_dx[d_num_species + 2];
+                                }
+                                else if (i == 5)
+                                {
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        V_ghost[i*(d_num_species + 3) + si] = -double(6)*rho_Y_x_LL[si] -
+                                            double(609)/double(10)*rho_Y_x_L[si] +
+                                            double(126)*V_ghost[(i - 5)*(d_num_species + 3) + si] -
+                                            double(105)*V_ghost[(i - 4)*(d_num_species + 3) + si] +
+                                            double(70)*V_ghost[(i - 3)*(d_num_species + 3) + si] -
+                                            double(63)/double(2)*V_ghost[(i - 2)*(d_num_species + 3) + si] +
+                                            double(42)/double(5)*V_ghost[(i - 1)*(d_num_species + 3) + si] -
+                                            double(42)*dx[0]*dV_dx[si];
+                                    }
+                                    
+                                    V_ghost[i*(d_num_species + 3) + d_num_species] = -double(6)*u_x_LL -
+                                        double(609)/double(10)*u_x_L +
+                                        double(126)*V_ghost[(i - 5)*(d_num_species + 3) + d_num_species] -
+                                        double(105)*V_ghost[(i - 4)*(d_num_species + 3) + d_num_species] +
+                                        double(70)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species] -
+                                        double(63)/double(2)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species] +
+                                        double(42)/double(5)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species] -
+                                        double(42)*dx[0]*dV_dx[d_num_species];
+                                    
+                                    V_ghost[i*(d_num_species + 3) + d_num_species + 1] = -double(6)*v_x_LL -
+                                        double(609)/double(10)*v_x_L +
+                                        double(126)*V_ghost[(i - 5)*(d_num_species + 3) + d_num_species + 1] -
+                                        double(105)*V_ghost[(i - 4)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(70)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species + 1] -
+                                        double(63)/double(2)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(42)/double(5)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 1] -
+                                        double(42)*dx[0]*dV_dx[d_num_species + 1];
+                                    
+                                    V_ghost[i*(d_num_species + 3) + d_num_species + 2] = -double(6)*p_x_LL -
+                                        double(609)/double(10)*p_x_L +
+                                        double(126)*V_ghost[(i - 5)*(d_num_species + 3) + d_num_species + 2] -
+                                        double(105)*V_ghost[(i - 4)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(70)*V_ghost[(i - 3)*(d_num_species + 3) + d_num_species + 2] -
+                                        double(63)/double(2)*V_ghost[(i - 2)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(42)/double(5)*V_ghost[(i - 1)*(d_num_species + 3) + d_num_species + 2] -
+                                        double(42)*dx[0]*dV_dx[d_num_species + 2];
                                 }
                                 
                                 /*
@@ -2540,11 +2695,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                     {
                          const int num_ghosts_to_fill = fill_box_hi_idx[1] - fill_box_lo_idx[1] + 1;
                         TBOX_ASSERT(fill_box_hi_idx[1] == interior_box_lo_idx[1] - 1);
-                        if (num_ghosts_to_fill > 4)
+                        if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData()\n"
-                                << "Non-reflecting outflow BC doesn't support more than four ghost cells yet!");
+                                << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
 
                         for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
@@ -2901,7 +3056,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                         &rho_x_R,
                                         &epsilon_x_R,
                                         Y_x_R_ptr);
-
+                                
                                 // Central derivatives.
                                 du_dx = (u_x_R - u_x_L)/(double(2)*dx[0]);
                                 dv_dx = (v_x_R - v_x_L)/(double(2)*dx[0]);
@@ -2926,7 +3081,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 c_y_T += Y_y_T[si]*Psi_y_T[si];
                             }
                             c_y_T = sqrt(c_y_T);
-
+                            
                             const double lambda_last = v_y_T + c_y_T;
                             
                             // Compute vector Lambda^(-1) * L.
@@ -2950,7 +3105,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 Lambda_inv_L[si + 2] = c_y_T*c_y_T*drho_Y_dy[si] - Y_y_T[si]*dp_dy;
                             }
                             Lambda_inv_L[d_num_species + 2] = (double(1)/lambda_last)*(K*(p_y_T - p_t) - (double(1) - beta)*T_last);
-
+                            
                             // Compute dV_dx.
                             
                             const double c_sq_inv  = double(1)/(c_y_T*c_y_T);
@@ -2966,9 +3121,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             dV_dy[d_num_species]     = Lambda_inv_L[1];
                             dV_dy[d_num_species + 1] = half*rho_c_inv*(-Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 2]);
                             dV_dy[d_num_species + 2] = half*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 2]);
-
+                            
                             double V_ghost[(d_num_species + 3)*num_ghosts_to_fill];
-
+                            
                             for (int j = num_ghosts_to_fill - 1; j >= 0; j--)
                             {
                                 const int idx_cell_rho_Y = (i + num_subghosts_conservative_var[0][0]) +
@@ -2982,13 +3137,14 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 const int idx_cell_E = (i + num_subghosts_conservative_var[2][0]) +
                                     (j + fill_box_lo_idx[1] + num_subghosts_conservative_var[2][1])*
                                         subghostcell_dims_conservative_var[2][0];
-
+                                
                                 if (j == num_ghosts_to_fill - 1)
                                 {
-                                    for (int si = 0; si < d_num_species; si ++)
+                                    for (int si = 0; si < d_num_species; si++)
                                     {
-                                    V_ghost[j*(d_num_species + 3) + si] = rho_Y_y_TT[si] - double(2)*dx[1]*dV_dy[si];
+                                        V_ghost[j*(d_num_species + 3) + si] = rho_Y_y_TT[si] - double(2)*dx[1]*dV_dy[si];
                                     }
+                                    
                                     V_ghost[j*(d_num_species + 3) + d_num_species]     = u_y_TT   - double(2)*dx[1]*dV_dy[d_num_species];
                                     V_ghost[j*(d_num_species + 3) + d_num_species + 1] = v_y_TT   - double(2)*dx[1]*dV_dy[d_num_species + 1];
                                     V_ghost[j*(d_num_species + 3) + d_num_species + 2] = p_y_TT   - double(2)*dx[1]*dV_dy[d_num_species + 2];
@@ -2996,11 +3152,12 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
 
                                 else if (j == num_ghosts_to_fill - 2)
                                 {
-                                    for (int si = 0; si < d_num_species; si ++)
+                                    for (int si = 0; si < d_num_species; si++)
                                     {
-                                    V_ghost[j*(d_num_species + 3) + si] = -double(2)*rho_Y_y_TT[si] - double(3)*rho_Y_y_T[si] +
-                                        double(6)*V_ghost[(j + 1)*(d_num_species + 3) + si] + double(6)*dx[1]*dV_dy[si];
+                                        V_ghost[j*(d_num_species + 3) + si] = -double(2)*rho_Y_y_TT[si] - double(3)*rho_Y_y_T[si] +
+                                            double(6)*V_ghost[(j + 1)*(d_num_species + 3) + si] + double(6)*dx[1]*dV_dy[si];
                                     }
+                                    
                                     V_ghost[j*(d_num_species + 3) + d_num_species] = -double(2)*u_y_TT - double(3)*u_y_T +
                                         double(6)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species] + double(6)*dx[1]*dV_dy[d_num_species];
                                     
@@ -3013,13 +3170,14 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
 
                                 else if (j == num_ghosts_to_fill - 3)
                                 {
-                                    for (int si = 0; si < d_num_species; si ++)
+                                    for (int si = 0; si < d_num_species; si++)
                                     {
                                         V_ghost[j*(d_num_species + 3) + si] = double(3)*rho_Y_y_TT[si] + double(10)*rho_Y_y_T[si] -
                                         double(18)*V_ghost[(j + 2)*(d_num_species + 3) + si] +
                                         double(6)*V_ghost[(j + 1)*(d_num_species + 3) + si] -
                                         double(12)*dx[1]*dV_dy[si];
                                     }
+                                    
                                     V_ghost[j*(d_num_species + 3) + d_num_species] = double(3)*u_y_TT + double(10)*u_y_T -
                                         double(18)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species] +
                                         double(6)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species] -
@@ -3035,30 +3193,116 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                         double(6)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 2] -
                                         double(12)*dx[1]*dV_dy[d_num_species + 2];
                                 }
-                                else if (j == num_ghosts_to_fill - 4)  
+                                else if (j == num_ghosts_to_fill - 4)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                    V_ghost[j*(d_num_species + 3) + si] = -double(4)*rho_Y_y_TT[si] - double(65)/double(3)*rho_Y_y_T[si] +
-                                        double(40)*V_ghost[(j + 3)*(d_num_species + 3) + si] -
-                                        double(20)*V_ghost[(j + 2)*(d_num_species + 3) + si] +
-                                        double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 3) + si] - double(20)*dx[1]*dV_dy[si];
+                                        V_ghost[j*(d_num_species + 3) + si] = -double(4)*rho_Y_y_TT[si] -
+                                            double(65)/double(3)*rho_Y_y_T[si] +
+                                            double(40)*V_ghost[(j + 3)*(d_num_species + 3) + si] -
+                                            double(20)*V_ghost[(j + 2)*(d_num_species + 3) + si] +
+                                            double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 3) + si] +
+                                            double(20)*dx[1]*dV_dy[si];
                                     } 
                                     
-                                    V_ghost[j*(d_num_species + 3) + d_num_species] = -double(4)*u_y_TT - double(65)/double(3)*u_y_T +
+                                    V_ghost[j*(d_num_species + 3) + d_num_species] = -double(4)*u_y_TT -
+                                        double(65)/double(3)*u_y_T +
                                         double(40)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species] -
                                         double(20)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species] +
-                                        double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species] - double(20)*dx[1]*dV_dy[d_num_species];
+                                        double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species] +
+                                        double(20)*dx[1]*dV_dy[d_num_species];
                                     
-                                    V_ghost[j*(d_num_species + 3) + d_num_species + 1] = -double(4)*v_y_TT - double(65)/double(3)*v_y_T +
+                                    V_ghost[j*(d_num_species + 3) + d_num_species + 1] = -double(4)*v_y_TT -
+                                        double(65)/double(3)*v_y_T +
                                         double(40)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species + 1] -
                                         double(20)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 1] +
-                                        double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 1] - double(20)*dx[1]*dV_dy[d_num_species + 1];
+                                        double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(20)*dx[1]*dV_dy[d_num_species + 1];
                                     
-                                    V_ghost[j*(d_num_species + 3) + d_num_species + 2] = -double(4)*p_y_TT - double(65)/double(3)*p_y_T +
+                                    V_ghost[j*(d_num_species + 3) + d_num_species + 2] = -double(4)*p_y_TT -
+                                        double(65)/double(3)*p_y_T +
                                         double(40)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species + 2] -
                                         double(20)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 2] +
-                                        double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 2] - double(20)*dx[1]*dV_dy[d_num_species + 2];
+                                        double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(20)*dx[1]*dV_dy[d_num_species + 2];
+                                }
+                                else if (j == num_ghosts_to_fill - 5)
+                                {
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        V_ghost[j*(d_num_species + 3) + si] = double(5)*rho_Y_y_TT[si] +
+                                            double(77)/double(2)*rho_Y_y_T[si] -
+                                            double(75)*V_ghost[(j + 4)*(d_num_species + 3) + si] +
+                                            double(50)*V_ghost[(j + 3)*(d_num_species + 3) + si] -
+                                            double(25)*V_ghost[(j + 2)*(d_num_species + 3) + si] +
+                                            double(15)/double(2)*V_ghost[(j + 1)*(d_num_species + 3) + si] -
+                                            double(30)*dx[1]*dV_dy[si];
+                                    }
+                                    
+                                    V_ghost[j*(d_num_species + 3) + d_num_species] = double(5)*u_y_TT +
+                                        double(77)/double(2)*u_y_T -
+                                        double(75)*V_ghost[(j + 4)*(d_num_species + 3) + d_num_species] +
+                                        double(50)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species] -
+                                        double(25)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species] +
+                                        double(15)/double(2)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species] -
+                                        double(30)*dx[1]*dV_dy[d_num_species];
+                                    
+                                    V_ghost[j*(d_num_species + 3) + d_num_species + 1] = double(5)*v_y_TT +
+                                        double(77)/double(2)*v_y_T -
+                                        double(75)*V_ghost[(j + 4)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(50)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species + 1] -
+                                        double(25)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(15)/double(2)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 1] -
+                                        double(30)*dx[1]*dV_dy[d_num_species + 1];
+                                    
+                                    V_ghost[j*(d_num_species + 3) + d_num_species + 2] = double(5)*p_y_TT +
+                                        double(77)/double(2)*p_y_T -
+                                        double(75)*V_ghost[(j + 4)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(50)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species + 2] -
+                                        double(25)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(15)/double(2)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 2] -
+                                        double(30)*dx[1]*dV_dy[d_num_species + 2];
+                                }
+                                else if (j == num_ghosts_to_fill - 6)
+                                {
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        V_ghost[j*(d_num_species + 3) + si] = -double(6)*rho_Y_y_TT[si] -
+                                            double(609)/double(10)*rho_Y_y_T[si] +
+                                            double(126)*V_ghost[(j + 5)*(d_num_species + 3) + si] -
+                                            double(105)*V_ghost[(j + 4)*(d_num_species + 3) + si] +
+                                            double(70)*V_ghost[(j + 3)*(d_num_species + 3) + si] -
+                                            double(63)/double(2)*V_ghost[(j + 2)*(d_num_species + 3) + si] +
+                                            double(42)/double(5)*V_ghost[(j + 1)*(d_num_species + 3) + si] +
+                                            double(42)*dx[1]*dV_dy[si];
+                                    }
+                                    
+                                    V_ghost[j*(d_num_species + 3) + d_num_species] = -double(6)*u_y_TT -
+                                        double(609)/double(10)*u_y_T +
+                                        double(126)*V_ghost[(j + 5)*(d_num_species + 3) + d_num_species] -
+                                        double(105)*V_ghost[(j + 4)*(d_num_species + 3) + d_num_species] +
+                                        double(70)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species] -
+                                        double(63)/double(2)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species] +
+                                        double(42)/double(5)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species] +
+                                        double(42)*dx[1]*dV_dy[d_num_species];
+                                    
+                                    V_ghost[j*(d_num_species + 3) + d_num_species + 1] = -double(6)*v_y_TT -
+                                        double(609)/double(10)*v_y_T +
+                                        double(126)*V_ghost[(j + 5)*(d_num_species + 3) + d_num_species + 1] -
+                                        double(105)*V_ghost[(j + 4)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(70)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species + 1] -
+                                        double(63)/double(2)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(42)/double(5)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(42)*dx[1]*dV_dy[d_num_species + 1];
+                                    
+                                    V_ghost[j*(d_num_species + 3) + d_num_species + 2] = -double(6)*p_y_TT -
+                                        double(609)/double(10)*p_y_T +
+                                        double(126)*V_ghost[(j + 5)*(d_num_species + 3) + d_num_species + 2] -
+                                        double(105)*V_ghost[(j + 4)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(70)*V_ghost[(j + 3)*(d_num_species + 3) + d_num_species + 2] -
+                                        double(63)/double(2)*V_ghost[(j + 2)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(42)/double(5)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(42)*dx[1]*dV_dy[d_num_species + 2];
                                 }
                                 
                                 /*
@@ -3120,11 +3364,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                     {
                         const int num_ghosts_to_fill = fill_box_hi_idx[1] - fill_box_lo_idx[1] + 1;
                         TBOX_ASSERT(fill_box_lo_idx[1] == interior_box_hi_idx[1] + 1);
-                        if (num_ghosts_to_fill > 4)
+                        if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData()\n"
-                                << "Non-reflecting outflow BC doesn't support more than four ghost cells yet!");
+                                << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         
                         for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
@@ -3544,7 +3788,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                     c_sq_inv*Lambda_inv_L[si+2];
                             }
                             dV_dy[d_num_species] = Lambda_inv_L[1];
-                            dV_dy[d_num_species + 1] = half*rho_c_inv*(-Lambda_inv_L[0] + Lambda_inv_L[d_num_species +2]);
+                            dV_dy[d_num_species + 1] = half*rho_c_inv*(-Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 2]);
                             dV_dy[d_num_species + 2] = half*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 2]); 
 
                             double V_ghost[(d_num_species + 3)*num_ghosts_to_fill];
@@ -3565,21 +3809,23 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
 
                                 if (j == 0)
                                 {
-                                    for (int si = 0; si < d_num_species; si ++)
+                                    for (int si = 0; si < d_num_species; si++)
                                     {
-                                    V_ghost[j*(d_num_species + 3) + si] = rho_Y_y_BB[si] + double(2)*dx[1]*dV_dy[si];
+                                        V_ghost[j*(d_num_species + 3) + si] = rho_Y_y_BB[si] + double(2)*dx[1]*dV_dy[si];
                                     }
+                                    
                                     V_ghost[j*(d_num_species + 3) + d_num_species]     = u_y_BB   + double(2)*dx[1]*dV_dy[d_num_species];
                                     V_ghost[j*(d_num_species + 3) + d_num_species + 1] = v_y_BB   + double(2)*dx[1]*dV_dy[d_num_species + 1];
                                     V_ghost[j*(d_num_species + 3) + d_num_species + 2] = p_y_BB   + double(2)*dx[1]*dV_dy[d_num_species + 2];
                                 }
                                 else if (j == 1)
                                 {
-                                    for (int si = 0; si < d_num_species; si ++)
+                                    for (int si = 0; si < d_num_species; si++)
                                     {
                                     V_ghost[j*(d_num_species + 3) + si] = -double(2)*rho_Y_y_BB[si] - double(3)*rho_Y_y_B[si] +
                                         double(6)*V_ghost[(j - 1)*(d_num_species + 3) + si] - double(6)*dx[1]*dV_dy[si];
                                     }
+                                    
                                     V_ghost[j*(d_num_species + 3) + d_num_species] = -double(2)*u_y_BB - double(3)*u_y_B +
                                         double(6)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species] - double(6)*dx[1]*dV_dy[d_num_species];
                                     
@@ -3591,13 +3837,14 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 }
                                 else if (j == 2)
                                 {
-                                    for (int si = 0; si < d_num_species; si ++)
+                                    for (int si = 0; si < d_num_species; si++)
                                     {
                                         V_ghost[j*(d_num_species + 3) + si] = double(3)*rho_Y_y_BB[si] + double(10)*rho_Y_y_B[si] -
                                         double(18)*V_ghost[(j - 2)*(d_num_species + 3) + si] +
                                         double(6)*V_ghost[(j - 1)*(d_num_species + 3) + si] +
                                         double(12)*dx[1]*dV_dy[si];
                                     }
+                                    
                                     V_ghost[j*(d_num_species + 3) + d_num_species] = double(3)*u_y_BB + double(10)*u_y_B -
                                         double(18)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species] +
                                         double(6)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species] +
@@ -3617,26 +3864,112 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                    V_ghost[j*(d_num_species + 3) + si] = -double(4)*rho_Y_y_BB[si] - double(65)/double(3)*rho_Y_y_B[si] +
-                                        double(40)*V_ghost[(j - 3)*(d_num_species + 3) + si] -
-                                        double(20)*V_ghost[(j - 2)*(d_num_species + 3) + si] +
-                                        double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 3) + si] + double(20)*dx[1]*dV_dy[si];
+                                        V_ghost[j*(d_num_species + 3) + si] = -double(4)*rho_Y_y_BB[si] -
+                                            double(65)/double(3)*rho_Y_y_B[si] +
+                                            double(40)*V_ghost[(j - 3)*(d_num_species + 3) + si] -
+                                            double(20)*V_ghost[(j - 2)*(d_num_species + 3) + si] +
+                                            double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 3) + si] -
+                                            double(20)*dx[1]*dV_dy[si];
                                     } 
                                     
-                                    V_ghost[j*(d_num_species + 3) + d_num_species] = -double(4)*u_y_BB - double(65)/double(3)*u_y_B +
+                                    V_ghost[j*(d_num_species + 3) + d_num_species] = -double(4)*u_y_BB -
+                                        double(65)/double(3)*u_y_B +
                                         double(40)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species] -
                                         double(20)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species] +
-                                        double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species] + double(20)*dx[1]*dV_dy[d_num_species];
+                                        double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species] -
+                                        double(20)*dx[1]*dV_dy[d_num_species];
                                     
-                                    V_ghost[j*(d_num_species + 3) + d_num_species + 1] = -double(4)*v_y_BB - double(65)/double(3)*v_y_B +
+                                    V_ghost[j*(d_num_species + 3) + d_num_species + 1] = -double(4)*v_y_BB -
+                                        double(65)/double(3)*v_y_B +
                                         double(40)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species + 1] -
                                         double(20)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species + 1] +
-                                        double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 1] + double(20)*dx[1]*dV_dy[d_num_species + 1];
+                                        double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 1] -
+                                        double(20)*dx[1]*dV_dy[d_num_species + 1];
                                     
-                                    V_ghost[j*(d_num_species + 3) + d_num_species + 2] = -double(4)*p_y_BB - double(65)/double(3)*p_y_B +
+                                    V_ghost[j*(d_num_species + 3) + d_num_species + 2] = -double(4)*p_y_BB -
+                                        double(65)/double(3)*p_y_B +
                                         double(40)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species + 2] -
                                         double(20)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species + 2] +
-                                        double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 2] + double(20)*dx[1]*dV_dy[d_num_species + 2];
+                                        double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 2] -
+                                        double(20)*dx[1]*dV_dy[d_num_species + 2];
+                                }
+                                else if (j == 4)
+                                {
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        V_ghost[j*(d_num_species + 3) + si] = double(5)*rho_Y_y_BB[si] +
+                                            double(77)/double(2)*rho_Y_y_B[si] -
+                                            double(75)*V_ghost[(j - 4)*(d_num_species + 3) + si] +
+                                            double(50)*V_ghost[(j - 3)*(d_num_species + 3) + si] -
+                                            double(25)*V_ghost[(j - 2)*(d_num_species + 3) + si] +
+                                            double(15)/double(2)*V_ghost[(j - 1)*(d_num_species + 3) + si] +
+                                            double(30)*dx[1]*dV_dy[si];
+                                    }
+                                    
+                                    V_ghost[j*(d_num_species + 3) + d_num_species] = double(5)*u_y_BB +
+                                        double(77)/double(2)*u_y_B -
+                                        double(75)*V_ghost[(j - 4)*(d_num_species + 3) + d_num_species] +
+                                        double(50)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species] -
+                                        double(25)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species] +
+                                        double(15)/double(2)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species] +
+                                        double(30)*dx[1]*dV_dy[d_num_species];
+                                    
+                                    V_ghost[j*(d_num_species + 3) + d_num_species + 1] = double(5)*v_y_BB +
+                                        double(77)/double(2)*v_y_B -
+                                        double(75)*V_ghost[(j - 4)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(50)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species + 1] -
+                                        double(25)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(15)/double(2)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(30)*dx[1]*dV_dy[d_num_species + 1];
+                                    
+                                    V_ghost[j*(d_num_species + 3) + d_num_species + 2] = double(5)*p_y_BB +
+                                        double(77)/double(2)*p_y_B -
+                                        double(75)*V_ghost[(j - 4)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(50)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species + 2] -
+                                        double(25)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(15)/double(2)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(30)*dx[1]*dV_dy[d_num_species + 2];
+                                }
+                                else if (j == 5)
+                                {
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        V_ghost[j*(d_num_species + 3) + si] = -double(6)*rho_Y_y_BB[si] -
+                                            double(609)/double(10)*rho_Y_y_B[si] +
+                                            double(126)*V_ghost[(j - 5)*(d_num_species + 3) + si] -
+                                            double(105)*V_ghost[(j - 4)*(d_num_species + 3) + si] +
+                                            double(70)*V_ghost[(j - 3)*(d_num_species + 3) + si] -
+                                            double(63)/double(2)*V_ghost[(j - 2)*(d_num_species + 3) + si] +
+                                            double(42)/double(5)*V_ghost[(j - 1)*(d_num_species + 3) + si] -
+                                            double(42)*dx[1]*dV_dy[si];
+                                    }
+                                    
+                                    V_ghost[j*(d_num_species + 3) + d_num_species] = -double(6)*u_y_BB -
+                                        double(609)/double(10)*u_y_B +
+                                        double(126)*V_ghost[(j - 5)*(d_num_species + 3) + d_num_species] -
+                                        double(105)*V_ghost[(j - 4)*(d_num_species + 3) + d_num_species] +
+                                        double(70)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species] -
+                                        double(63)/double(2)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species] +
+                                        double(42)/double(5)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species] -
+                                        double(42)*dx[1]*dV_dy[d_num_species];
+                                    
+                                    V_ghost[j*(d_num_species + 3) + d_num_species + 1] = -double(6)*v_y_BB -
+                                        double(609)/double(10)*v_y_B +
+                                        double(126)*V_ghost[(j - 5)*(d_num_species + 3) + d_num_species + 1] -
+                                        double(105)*V_ghost[(j - 4)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(70)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species + 1] -
+                                        double(63)/double(2)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species + 1] +
+                                        double(42)/double(5)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 1] -
+                                        double(42)*dx[1]*dV_dy[d_num_species + 1];
+                                    
+                                    V_ghost[j*(d_num_species + 3) + d_num_species + 2] = -double(6)*p_y_BB -
+                                        double(609)/double(10)*p_y_B +
+                                        double(126)*V_ghost[(j - 5)*(d_num_species + 3) + d_num_species + 2] -
+                                        double(105)*V_ghost[(j - 4)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(70)*V_ghost[(j - 3)*(d_num_species + 3) + d_num_species + 2] -
+                                        double(63)/double(2)*V_ghost[(j - 2)*(d_num_species + 3) + d_num_species + 2] +
+                                        double(42)/double(5)*V_ghost[(j - 1)*(d_num_species + 3) + d_num_species + 2] -
+                                        double(42)*dx[1]*dV_dy[d_num_species + 2];
                                 }
                                 
                                 /*
@@ -5213,11 +5546,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                     {
                         const int num_ghosts_to_fill = fill_box_hi_idx[0] - fill_box_lo_idx[0] + 1;
                         TBOX_ASSERT(fill_box_hi_idx[0] == interior_box_lo_idx[0] - 1);
-                        if (num_ghosts_to_fill > 4)
+                        if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData()\n"
-                                << "Non-reflecting outflow BC doesn't support more than four ghost cells yet!");
+                                << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         
                         for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
@@ -5974,10 +6307,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
 
                                     if (i == num_ghosts_to_fill - 1)
                                     {
-                                        for (int si = 0; si < d_num_species; si ++)
+                                        for (int si = 0; si < d_num_species; si++)
                                         {
                                             V_ghost[i*(d_num_species + 4) + si] = rho_Y_x_RR[si] - double(2)*dx[0]*dV_dx[si];
                                         }
+                                        
                                         V_ghost[i*(d_num_species + 4) + d_num_species]     = u_x_RR - double(2)*dx[0]*dV_dx[d_num_species];
                                         V_ghost[i*(d_num_species + 4) + d_num_species + 1] = v_x_RR - double(2)*dx[0]*dV_dx[d_num_species + 1];
                                         V_ghost[i*(d_num_species + 4) + d_num_species + 2] = w_x_RR - double(2)*dx[0]*dV_dx[d_num_species + 2];
@@ -5985,7 +6319,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     }
                                     else if (i == num_ghosts_to_fill - 2)
                                     {
-                                        for (int si = 0; si < d_num_species; si ++)
+                                        for (int si = 0; si < d_num_species; si++)
                                         {
                                             V_ghost[i*(d_num_species + 4) + si] = -double(2)*rho_Y_x_RR[si] - double(3)*rho_Y_x_R[si] +
                                                 double(6)*V_ghost[(i + 1)*(d_num_species + 4) + si] + double(6)*dx[0]*dV_dx[si];
@@ -6015,7 +6349,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                                 double(18)*V_ghost[(i + 2)*(d_num_species + 4) + si] +
                                                 double(6)*V_ghost[(i + 1)*(d_num_species + 4) + si] -
                                                 double(12)*dx[0]*dV_dx[si];
-                                        
                                         }
                                         
                                         V_ghost[i*(d_num_species + 4) + d_num_species] = double(3)*u_x_RR + double(10)*u_x_R -
@@ -6038,7 +6371,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             double(6)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 3] -
                                             double(12)*dx[0]*dV_dx[d_num_species + 3];
                                     }
-                                    else if (i == num_ghosts_to_fill - 4)  
+                                    else if (i == num_ghosts_to_fill - 4)
                                     {
                                         for (int si = 0; si < d_num_species; si++)
                                         {
@@ -6046,7 +6379,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                                 double(65)/double(3)*rho_Y_x_R[si] +
                                                 double(40)*V_ghost[(i + 3)*(d_num_species + 4) + si] -
                                                 double(20)*V_ghost[(i + 2)*(d_num_species + 4) + si] +
-                                                double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 4) + si] -
+                                                double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 4) + si] +
                                                 double(20)*dx[0]*dV_dx[si];
                                         }
                                         
@@ -6054,29 +6387,124 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             double(65)/double(3)*u_x_R +
                                             double(40)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species] -
                                             double(20)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species] +
-                                            double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species] -
+                                            double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species] +
                                             double(20)*dx[0]*dV_dx[d_num_species];
                                         
                                         V_ghost[i*(d_num_species + 4) + d_num_species + 1] = -double(4)*v_x_RR -
                                             double(65)/double(3)*v_x_R +
                                             double(40)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 1] -
                                             double(20)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 1] +
-                                            double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 1] +
                                             double(20)*dx[0]*dV_dx[d_num_species + 1];
                                         
                                         V_ghost[i*(d_num_species + 4) + d_num_species + 2] = -double(4)*w_x_RR -
                                             double(65)/double(3)*w_x_R +
                                             double(40)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 2] -
                                             double(20)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 2] +
-                                            double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 2] +
                                             double(20)*dx[0]*dV_dx[d_num_species + 2];
                                         
                                         V_ghost[i*(d_num_species + 4) + d_num_species + 3] = -double(4)*p_x_RR -
                                             double(65)/double(3)*p_x_R +
                                             double(40)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 3] -
                                             double(20)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 3] +
-                                            double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(20)/double(3)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 3] +
                                             double(20)*dx[0]*dV_dx[d_num_species + 3];
+                                    }
+                                    else if (i == num_ghosts_to_fill - 5)
+                                    {
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            V_ghost[i*(d_num_species + 4) + si] = double(5)*rho_Y_x_RR[si] +
+                                                double(77)/double(2)*rho_Y_x_R[si] -
+                                                double(75)*V_ghost[(i + 4)*(d_num_species + 4) + si] +
+                                                double(50)*V_ghost[(i + 3)*(d_num_species + 4) + si] -
+                                                double(25)*V_ghost[(i + 2)*(d_num_species + 4) + si] +
+                                                double(15)/double(2)*V_ghost[(i + 1)*(d_num_species + 4) + si] -
+                                                double(30)*dx[0]*dV_dx[si];
+                                        }
+                                        
+                                        V_ghost[i*(d_num_species + 4) + d_num_species] = double(5)*u_x_RR +
+                                            double(77)/double(2)*u_x_R -
+                                            double(75)*V_ghost[(i + 4)*(d_num_species + 4) + d_num_species] +
+                                            double(50)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species] -
+                                            double(25)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species] +
+                                            double(15)/double(2)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species] -
+                                            double(30)*dx[0]*dV_dx[d_num_species];
+                                        
+                                        V_ghost[i*(d_num_species + 4) + d_num_species + 1] = double(5)*v_x_RR +
+                                            double(77)/double(2)*v_x_R -
+                                            double(75)*V_ghost[(i + 4)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(50)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(25)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(15)/double(2)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(30)*dx[0]*dV_dx[d_num_species + 1];
+                                        
+                                        V_ghost[i*(d_num_species + 4) + d_num_species + 2] = double(5)*w_x_RR +
+                                            double(77)/double(2)*w_x_R -
+                                            double(75)*V_ghost[(i + 4)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(50)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(25)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(15)/double(2)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(30)*dx[0]*dV_dx[d_num_species + 2];
+                                        
+                                        V_ghost[i*(d_num_species + 4) + d_num_species + 3] = double(5)*p_x_RR +
+                                            double(77)/double(2)*p_x_R -
+                                            double(75)*V_ghost[(i + 4)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(50)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(25)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(15)/double(2)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(30)*dx[0]*dV_dx[d_num_species + 3];
+                                    }
+                                    else if (i == num_ghosts_to_fill - 6)
+                                    {
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            V_ghost[i*(d_num_species + 4) + si] = -double(6)*rho_Y_x_RR[si] -
+                                                double(609)/double(10)*rho_Y_x_R[si] +
+                                                double(126)*V_ghost[(i + 5)*(d_num_species + 4) + si] -
+                                                double(105)*V_ghost[(i + 4)*(d_num_species + 4) + si] +
+                                                double(70)*V_ghost[(i + 3)*(d_num_species + 4) + si] -
+                                                double(63)/double(2)*V_ghost[(i + 2)*(d_num_species + 4) + si] +
+                                                double(42)/double(5)*V_ghost[(i + 1)*(d_num_species + 4) + si] +
+                                                double(42)*dx[0]*dV_dx[si];
+                                        }
+                                        
+                                        V_ghost[i*(d_num_species + 4) + d_num_species] = -double(6)*u_x_RR -
+                                            double(609)/double(10)*u_x_R +
+                                            double(126)*V_ghost[(i + 5)*(d_num_species + 4) + d_num_species] -
+                                            double(105)*V_ghost[(i + 4)*(d_num_species + 4) + d_num_species] +
+                                            double(70)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species] -
+                                            double(63)/double(2)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species] +
+                                            double(42)/double(5)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species] +
+                                            double(42)*dx[0]*dV_dx[d_num_species];
+                                        
+                                        V_ghost[i*(d_num_species + 4) + d_num_species + 1] = -double(6)*v_x_RR -
+                                            double(609)/double(10)*v_x_R +
+                                            double(126)*V_ghost[(i + 5)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(105)*V_ghost[(i + 4)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(70)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(63)/double(2)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(42)/double(5)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(42)*dx[0]*dV_dx[d_num_species + 1];
+                                        
+                                        V_ghost[i*(d_num_species + 4) + d_num_species + 2] = -double(6)*w_x_RR -
+                                            double(609)/double(10)*w_x_R +
+                                            double(126)*V_ghost[(i + 5)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(105)*V_ghost[(i + 4)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(70)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(63)/double(2)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(42)/double(5)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(42)*dx[0]*dV_dx[d_num_species + 2];
+                                        
+                                        V_ghost[i*(d_num_species + 4) + d_num_species + 3] = -double(6)*p_x_RR -
+                                            double(609)/double(10)*p_x_R +
+                                            double(126)*V_ghost[(i + 5)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(105)*V_ghost[(i + 4)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(70)*V_ghost[(i + 3)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(63)/double(2)*V_ghost[(i + 2)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(42)/double(5)*V_ghost[(i + 1)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(42)*dx[0]*dV_dx[d_num_species + 3];
                                     }
                                     
                                     /*
@@ -6141,11 +6569,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                     {
                         const int num_ghosts_to_fill = fill_box_hi_idx[0] - fill_box_lo_idx[0] + 1;
                         TBOX_ASSERT(fill_box_lo_idx[0] == interior_box_hi_idx[0] + 1);
-                        if (num_ghosts_to_fill > 4)
+                        if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData()\n"
-                                << "Non-reflecting outflow BC doesn't support more than four ghost cells yet!");
+                                << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         
                         for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
@@ -6903,10 +7331,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
 
                                     if (i == 0)
                                     {
-                                        for (int si = 0; si < d_num_species; si ++)
+                                        for (int si = 0; si < d_num_species; si++)
                                         {
                                             V_ghost[i*(d_num_species + 4) + si] = rho_Y_x_LL[si] + double(2)*dx[0]*dV_dx[si];
                                         }
+                                        
                                         V_ghost[i*(d_num_species + 4) + d_num_species]     = u_x_LL + double(2)*dx[0]*dV_dx[d_num_species];
                                         V_ghost[i*(d_num_species + 4) + d_num_species + 1] = v_x_LL + double(2)*dx[0]*dV_dx[d_num_species + 1];
                                         V_ghost[i*(d_num_species + 4) + d_num_species + 2] = w_x_LL + double(2)*dx[0]*dV_dx[d_num_species + 2];
@@ -6914,7 +7343,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         }
                                     else if (i == 1)
                                     {
-                                        for (int si = 0; si < d_num_species; si ++)
+                                        for (int si = 0; si < d_num_species; si++)
                                         {
                                             V_ghost[i*(d_num_species + 4) + si] = -double(2)*rho_Y_x_LL[si] - double(3)*rho_Y_x_L[si] +
                                                 double(6)*V_ghost[(i - 1)*(d_num_species + 4) + si] - double(6)*dx[0]*dV_dx[si];
@@ -6966,46 +7395,142 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             double(6)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 3] +
                                             double(12)*dx[0]*dV_dx[d_num_species + 3];
                                         }
-                                        else if (i == 3)  
+                                        else if (i == 3)
                                         {
                                             for (int si = 0; si < d_num_species; si++)
+                                            {
+                                                V_ghost[i*(d_num_species + 4) + si] = -double(4)*rho_Y_x_LL[si] -
+                                                    double(65)/double(3)*rho_Y_x_L[si] +
+                                                    double(40)*V_ghost[(i - 3)*(d_num_species + 4) + si] -
+                                                    double(20)*V_ghost[(i - 2)*(d_num_species + 4) + si] +
+                                                    double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + si] -
+                                                    double(20)*dx[0]*dV_dx[si];
+                                            }
+                                            
+                                            V_ghost[i*(d_num_species + 4) + d_num_species] = -double(4)*u_x_LL -
+                                                double(65)/double(3)*u_x_L +
+                                                double(40)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species] -
+                                                double(20)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species] +
+                                                double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species] -
+                                                double(20)*dx[0]*dV_dx[d_num_species];
+                                            
+                                            V_ghost[i*(d_num_species + 4) + d_num_species + 1] = -double(4)*v_x_LL -
+                                                double(65)/double(3)*v_x_L +
+                                                double(40)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 1] -
+                                                double(20)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 1] +
+                                                double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 1] -
+                                                double(20)*dx[0]*dV_dx[d_num_species + 1];
+                                            
+                                            V_ghost[i*(d_num_species + 4) + d_num_species + 2] = -double(4)*v_x_LL -
+                                                double(65)/double(3)*v_x_L +
+                                                double(40)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 2] -
+                                                double(20)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 2] +
+                                                double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 2] -
+                                                double(20)*dx[0]*dV_dx[d_num_species + 2];
+                                            
+                                            V_ghost[i*(d_num_species + 4) + d_num_species + 3] = -double(4)*p_x_LL -
+                                                double(65)/double(3)*p_x_L +
+                                                double(40)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 3] -
+                                                double(20)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 3] +
+                                                double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 3] -
+                                                double(20)*dx[0]*dV_dx[d_num_species + 3];
+                                    }
+                                    else if (i == 4)
+                                    {
+                                        for (int si = 0; si < d_num_species; si++)
                                         {
-                                            V_ghost[i*(d_num_species + 4) + si] = -double(4)*rho_Y_x_LL[si] -
-                                                double(65)/double(3)*rho_Y_x_L[si] +
-                                                double(40)*V_ghost[(i - 3)*(d_num_species + 4) + si] -
-                                                double(20)*V_ghost[(i - 2)*(d_num_species + 4) + si] +
-                                                double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + si] +
-                                                double(20)*dx[0]*dV_dx[si];
+                                            V_ghost[i*(d_num_species + 4) + si] = double(5)*rho_Y_x_LL[si] +
+                                                double(77)/double(2)*rho_Y_x_L[si] -
+                                                double(75)*V_ghost[(i - 4)*(d_num_species + 4) + si] +
+                                                double(50)*V_ghost[(i - 3)*(d_num_species + 4) + si] -
+                                                double(25)*V_ghost[(i - 2)*(d_num_species + 4) + si] +
+                                                double(15)/double(2)*V_ghost[(i - 1)*(d_num_species + 4) + si] +
+                                                double(30)*dx[0]*dV_dx[si];
                                         }
                                         
-                                        V_ghost[i*(d_num_species + 4) + d_num_species] = -double(4)*u_x_LL -
-                                            double(65)/double(3)*u_x_L +
-                                            double(40)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species] -
-                                            double(20)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species] +
-                                            double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species] +
-                                            double(20)*dx[0]*dV_dx[d_num_species];
+                                        V_ghost[i*(d_num_species + 4) + d_num_species] = double(5)*u_x_LL +
+                                            double(77)/double(2)*u_x_L -
+                                            double(75)*V_ghost[(i - 4)*(d_num_species + 4) + d_num_species] +
+                                            double(50)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species] -
+                                            double(25)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species] +
+                                            double(15)/double(2)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species] +
+                                            double(30)*dx[0]*dV_dx[d_num_species];
                                         
-                                        V_ghost[i*(d_num_species + 4) + d_num_species + 1] = -double(4)*v_x_LL -
-                                            double(65)/double(3)*v_x_L +
-                                            double(40)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 1] -
-                                            double(20)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 1] +
-                                            double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 1] +
-                                            double(20)*dx[0]*dV_dx[d_num_species + 1];
+                                        V_ghost[i*(d_num_species + 4) + d_num_species + 1] = double(5)*v_x_LL +
+                                            double(77)/double(2)*v_x_L -
+                                            double(75)*V_ghost[(i - 4)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(50)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(25)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(15)/double(2)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(30)*dx[0]*dV_dx[d_num_species + 1];
                                         
-                                        V_ghost[i*(d_num_species + 4) + d_num_species + 2] = -double(4)*w_x_LL -
-                                            double(65)/double(3)*w_x_L +
-                                            double(40)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 2] -
-                                            double(20)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 2] +
-                                            double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 2] +
-                                            double(20)*dx[0]*dV_dx[d_num_species + 2];
+                                        V_ghost[i*(d_num_species + 4) + d_num_species + 2] = double(5)*w_x_LL +
+                                            double(77)/double(2)*w_x_L -
+                                            double(75)*V_ghost[(i - 4)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(50)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(25)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(15)/double(2)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(30)*dx[0]*dV_dx[d_num_species + 2];
                                         
-                                        V_ghost[i*(d_num_species + 4) + d_num_species + 3] = -double(4)*p_x_LL -
-                                            double(65)/double(3)*p_x_L +
-                                            double(40)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 3] -
-                                            double(20)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 3] +
-                                            double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 3] +
-                                            double(20)*dx[0]*dV_dx[d_num_species + 3];
+                                        V_ghost[i*(d_num_species + 4) + d_num_species + 3] = double(5)*p_x_LL +
+                                            double(77)/double(2)*p_x_L -
+                                            double(75)*V_ghost[(i - 4)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(50)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(25)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(15)/double(2)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(30)*dx[0]*dV_dx[d_num_species + 3];
                                     }
+                                    else if (i == 5)
+                                    {
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            V_ghost[i*(d_num_species + 4) + si] = -double(6)*rho_Y_x_LL[si] -
+                                                double(609)/double(10)*rho_Y_x_L[si] +
+                                                double(126)*V_ghost[(i - 5)*(d_num_species + 4) + si] -
+                                                double(105)*V_ghost[(i - 4)*(d_num_species + 4) + si] +
+                                                double(70)*V_ghost[(i - 3)*(d_num_species + 4) + si] -
+                                                double(63)/double(2)*V_ghost[(i - 2)*(d_num_species + 4) + si] +
+                                                double(42)/double(5)*V_ghost[(i - 1)*(d_num_species + 4) + si] -
+                                                double(42)*dx[0]*dV_dx[si];
+                                        }
+                                        
+                                        V_ghost[i*(d_num_species + 4) + d_num_species] = -double(6)*u_x_LL -
+                                            double(609)/double(10)*u_x_L +
+                                            double(126)*V_ghost[(i - 5)*(d_num_species + 4) + d_num_species] -
+                                            double(105)*V_ghost[(i - 4)*(d_num_species + 4) + d_num_species] +
+                                            double(70)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species] -
+                                            double(63)/double(2)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species] +
+                                            double(42)/double(5)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species] -
+                                            double(42)*dx[0]*dV_dx[d_num_species];
+                                        
+                                        V_ghost[i*(d_num_species + 4) + d_num_species + 1] = -double(6)*v_x_LL -
+                                            double(609)/double(10)*v_x_L +
+                                            double(126)*V_ghost[(i - 5)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(105)*V_ghost[(i - 4)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(70)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(63)/double(2)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(42)/double(5)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(42)*dx[0]*dV_dx[d_num_species + 1];
+                                        
+                                        V_ghost[i*(d_num_species + 4) + d_num_species + 2] = -double(6)*w_x_LL -
+                                            double(609)/double(10)*w_x_L +
+                                            double(126)*V_ghost[(i - 5)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(105)*V_ghost[(i - 4)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(70)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(63)/double(2)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(42)/double(5)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(42)*dx[0]*dV_dx[d_num_species + 2];
+                                        
+                                        V_ghost[i*(d_num_species + 4) + d_num_species + 3] = -double(6)*p_x_LL -
+                                            double(609)/double(10)*p_x_L +
+                                            double(126)*V_ghost[(i - 5)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(105)*V_ghost[(i - 4)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(70)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(63)/double(2)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(42)/double(5)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(42)*dx[0]*dV_dx[d_num_species + 3];
+                                    }
+                                    
                                     /*
                                      * Compute the mixture density.
                                      */
@@ -7068,11 +7593,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                     {
                         const int num_ghosts_to_fill = fill_box_hi_idx[1] - fill_box_lo_idx[1] + 1;
                         TBOX_ASSERT(fill_box_hi_idx[1] == interior_box_lo_idx[1] - 1);
-                        if (num_ghosts_to_fill > 4)
+                        if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData()\n"
-                                << "Non-reflecting outflow BC doesn't support more than four ghost cells yet!");
+                                << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         
                         for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
@@ -7831,10 +8356,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
 
                                     if (j == num_ghosts_to_fill - 1)
                                     {
-                                        for (int si = 0; si < d_num_species; si ++)
+                                        for (int si = 0; si < d_num_species; si++)
                                         {
                                             V_ghost[j*(d_num_species + 4) + si] = rho_Y_y_TT[si] - double(2)*dx[1]*dV_dy[si];
                                         }
+                                        
                                         V_ghost[j*(d_num_species + 4) + d_num_species]     = u_y_TT - double(2)*dx[1]*dV_dy[d_num_species];
                                         V_ghost[j*(d_num_species + 4) + d_num_species + 1] = v_y_TT - double(2)*dx[1]*dV_dy[d_num_species + 1];
                                         V_ghost[j*(d_num_species + 4) + d_num_species + 2] = w_y_TT - double(2)*dx[1]*dV_dy[d_num_species + 2];
@@ -7842,7 +8368,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     }
                                     else if (j == num_ghosts_to_fill - 2)
                                     {
-                                        for (int si = 0; si < d_num_species; si ++)
+                                        for (int si = 0; si < d_num_species; si++)
                                         {
                                             V_ghost[j*(d_num_species + 4) + si] = -double(2)*rho_Y_y_TT[si] - double(3)*rho_Y_y_T[si] +
                                                 double(6)*V_ghost[(j + 1)*(d_num_species + 4) + si] + double(6)*dx[1]*dV_dy[si];
@@ -7894,7 +8420,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             double(6)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 3] -
                                             double(12)*dx[1]*dV_dy[d_num_species + 3];
                                     }
-                                    else if (j == num_ghosts_to_fill - 4)  
+                                    else if (j == num_ghosts_to_fill - 4)
                                     {
                                         for (int si = 0; si < d_num_species; si++)
                                         {
@@ -7902,7 +8428,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                                 double(65)/double(3)*rho_Y_y_T[si] +
                                                 double(40)*V_ghost[(j + 3)*(d_num_species + 4) + si] -
                                                 double(20)*V_ghost[(j + 2)*(d_num_species + 4) + si] +
-                                                double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 4) + si] -
+                                                double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 4) + si] +
                                                 double(20)*dx[1]*dV_dy[si];
                                         }
                                         
@@ -7910,31 +8436,126 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             double(65)/double(3)*u_y_T +
                                             double(40)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species] -
                                             double(20)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species] +
-                                            double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species] -
+                                            double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species] +
                                             double(20)*dx[1]*dV_dy[d_num_species];
                                         
                                         V_ghost[j*(d_num_species + 4) + d_num_species + 1] = -double(4)*v_y_TT -
                                             double(65)/double(3)*v_y_T +
                                             double(40)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 1] -
                                             double(20)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 1] +
-                                            double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 1] +
                                             double(20)*dx[1]*dV_dy[d_num_species + 1];
                                         
                                         V_ghost[j*(d_num_species + 4) + d_num_species + 2] = -double(4)*w_y_TT -
                                             double(65)/double(3)*w_y_T +
                                             double(40)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 2] -
                                             double(20)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 2] +
-                                            double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 2] +
                                             double(20)*dx[1]*dV_dy[d_num_species + 2];
                                         
                                         V_ghost[j*(d_num_species + 4) + d_num_species + 3] = -double(4)*p_y_TT -
                                             double(65)/double(3)*p_y_T +
                                             double(40)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 3] -
                                             double(20)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 3] +
-                                            double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(20)/double(3)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 3] +
                                             double(20)*dx[1]*dV_dy[d_num_species + 3];
                                     }
-
+                                    else if (j == num_ghosts_to_fill - 5)
+                                    {
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            V_ghost[j*(d_num_species + 4) + si] = double(5)*rho_Y_y_TT[si] +
+                                                double(77)/double(2)*rho_Y_y_T[si] -
+                                                double(75)*V_ghost[(j + 4)*(d_num_species + 4) + si] +
+                                                double(50)*V_ghost[(j + 3)*(d_num_species + 4) + si] -
+                                                double(25)*V_ghost[(j + 2)*(d_num_species + 4) + si] +
+                                                double(15)/double(2)*V_ghost[(j + 1)*(d_num_species + 4) + si] -
+                                                double(30)*dx[1]*dV_dy[si];
+                                        }
+                                        
+                                        V_ghost[j*(d_num_species + 4) + d_num_species] = double(5)*u_y_TT +
+                                            double(77)/double(2)*u_y_T -
+                                            double(75)*V_ghost[(j + 4)*(d_num_species + 4) + d_num_species] +
+                                            double(50)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species] -
+                                            double(25)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species] +
+                                            double(15)/double(2)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species] -
+                                            double(30)*dx[1]*dV_dy[d_num_species];
+                                        
+                                        V_ghost[j*(d_num_species + 4) + d_num_species + 1] = double(5)*v_y_TT +
+                                            double(77)/double(2)*v_y_T -
+                                            double(75)*V_ghost[(j + 4)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(50)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(25)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(15)/double(2)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(30)*dx[1]*dV_dy[d_num_species + 1];
+                                        
+                                        V_ghost[j*(d_num_species + 4) + d_num_species + 2] = double(5)*w_y_TT +
+                                            double(77)/double(2)*w_y_T -
+                                            double(75)*V_ghost[(j + 4)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(50)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(25)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(15)/double(2)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(30)*dx[1]*dV_dy[d_num_species + 2];
+                                        
+                                        V_ghost[j*(d_num_species + 4) + d_num_species + 3] = double(5)*p_y_TT +
+                                            double(77)/double(2)*p_y_T -
+                                            double(75)*V_ghost[(j + 4)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(50)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(25)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(15)/double(2)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(30)*dx[1]*dV_dy[d_num_species + 3];
+                                    }
+                                    else if (j == num_ghosts_to_fill - 6)
+                                    {
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            V_ghost[j*(d_num_species + 4) + si] = -double(6)*rho_Y_y_TT[si] -
+                                                double(609)/double(10)*rho_Y_y_T[si] +
+                                                double(126)*V_ghost[(j + 5)*(d_num_species + 4) + si] -
+                                                double(105)*V_ghost[(j + 4)*(d_num_species + 4) + si] +
+                                                double(70)*V_ghost[(j + 3)*(d_num_species + 4) + si] -
+                                                double(63)/double(2)*V_ghost[(j + 2)*(d_num_species + 4) + si] +
+                                                double(42)/double(5)*V_ghost[(j + 1)*(d_num_species + 4) + si] +
+                                                double(42)*dx[1]*dV_dy[si];
+                                        }
+                                        
+                                        V_ghost[j*(d_num_species + 4) + d_num_species] = -double(6)*u_y_TT -
+                                            double(609)/double(10)*u_y_T +
+                                            double(126)*V_ghost[(j + 5)*(d_num_species + 4) + d_num_species] -
+                                            double(105)*V_ghost[(j + 4)*(d_num_species + 4) + d_num_species] +
+                                            double(70)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species] -
+                                            double(63)/double(2)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species] +
+                                            double(42)/double(5)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species] +
+                                            double(42)*dx[1]*dV_dy[d_num_species];
+                                        
+                                        V_ghost[j*(d_num_species + 4) + d_num_species + 1] = -double(6)*v_y_TT -
+                                            double(609)/double(10)*v_y_T +
+                                            double(126)*V_ghost[(j + 5)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(105)*V_ghost[(j + 4)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(70)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(63)/double(2)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(42)/double(5)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(42)*dx[1]*dV_dy[d_num_species + 1];
+                                        
+                                        V_ghost[j*(d_num_species + 4) + d_num_species + 2] = -double(6)*w_y_TT -
+                                            double(609)/double(10)*w_y_T +
+                                            double(126)*V_ghost[(j + 5)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(105)*V_ghost[(j + 4)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(70)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(63)/double(2)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(42)/double(5)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(42)*dx[1]*dV_dy[d_num_species + 2];
+                                        
+                                        V_ghost[j*(d_num_species + 4) + d_num_species + 3] = -double(6)*p_y_TT -
+                                            double(609)/double(10)*p_y_T +
+                                            double(126)*V_ghost[(j + 5)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(105)*V_ghost[(j + 4)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(70)*V_ghost[(j + 3)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(63)/double(2)*V_ghost[(j + 2)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(42)/double(5)*V_ghost[(j + 1)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(42)*dx[1]*dV_dy[d_num_species + 3];
+                                    }
+                                    
                                     /*
                                      * Compute the mixture density.
                                      */
@@ -7998,11 +8619,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                         
                         const int num_ghosts_to_fill = fill_box_hi_idx[1] - fill_box_lo_idx[1] + 1;
                         TBOX_ASSERT(fill_box_lo_idx[1] == interior_box_hi_idx[1] + 1);
-                        if (num_ghosts_to_fill > 4)
+                        if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData()\n"
-                                << "Non-reflecting outflow BC doesn't support more than four ghost cells yet!");
+                                << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         
                         for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
@@ -8760,10 +9381,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     
                                     if (j == 0)
                                     {
-                                        for (int si = 0; si < d_num_species; si ++)
+                                        for (int si = 0; si < d_num_species; si++)
                                         {
                                             V_ghost[j*(d_num_species + 4) + si] = rho_Y_y_BB[si] + double(2)*dx[1]*dV_dy[si];
                                         }
+                                        
                                         V_ghost[j*(d_num_species + 4) + d_num_species]     = u_y_BB + double(2)*dx[1]*dV_dy[d_num_species];
                                         V_ghost[j*(d_num_species + 4) + d_num_species + 1] = v_y_BB + double(2)*dx[1]*dV_dy[d_num_species + 1];
                                         V_ghost[j*(d_num_species + 4) + d_num_species + 2] = w_y_BB + double(2)*dx[1]*dV_dy[d_num_species + 2];
@@ -8771,7 +9393,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     }
                                     else if (j == 1)
                                     {
-                                        for (int si = 0; si < d_num_species; si ++)
+                                        for (int si = 0; si < d_num_species; si++)
                                         {
                                             V_ghost[j*(d_num_species + 4) + si] = -double(2)*rho_Y_y_BB[si] - double(3)*rho_Y_y_B[si] +
                                                 double(6)*V_ghost[(j - 1)*(d_num_species + 4) + si] - double(6)*dx[1]*dV_dy[si];
@@ -8801,7 +9423,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                                 double(18)*V_ghost[(j - 2)*(d_num_species + 4) + si] +
                                                 double(6)*V_ghost[(j - 1)*(d_num_species + 4) + si] +
                                                 double(12)*dx[1]*dV_dy[si];
-                                        
                                         }
                                         
                                         V_ghost[j*(d_num_species + 4) + d_num_species] = double(3)*u_y_BB + double(10)*u_y_B -
@@ -8824,7 +9445,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             double(6)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 3] +
                                             double(12)*dx[1]*dV_dy[d_num_species + 3];
                                     }
-                                    else if (j == 3)  
+                                    else if (j == 3)
                                     {
                                         for (int si = 0; si < d_num_species; si++)
                                         {
@@ -8832,7 +9453,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                                 double(65)/double(3)*rho_Y_y_B[si] +
                                                 double(40)*V_ghost[(j - 3)*(d_num_species + 4) + si] -
                                                 double(20)*V_ghost[(j - 2)*(d_num_species + 4) + si] +
-                                                double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 4) + si] +
+                                                double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 4) + si] -
                                                 double(20)*dx[1]*dV_dy[si];
                                         }
                                         
@@ -8840,30 +9461,126 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             double(65)/double(3)*u_y_B +
                                             double(40)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species] -
                                             double(20)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species] +
-                                            double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species] +
+                                            double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species] -
                                             double(20)*dx[1]*dV_dy[d_num_species];
                                         
                                         V_ghost[j*(d_num_species + 4) + d_num_species + 1] = -double(4)*v_y_BB -
                                             double(65)/double(3)*v_y_B +
                                             double(40)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 1] -
                                             double(20)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 1] +
-                                            double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 1] -
                                             double(20)*dx[1]*dV_dy[d_num_species + 1];
                                         
                                         V_ghost[j*(d_num_species + 4) + d_num_species + 2] = -double(4)*w_y_BB -
                                             double(65)/double(3)*w_y_B +
                                             double(40)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 2] -
                                             double(20)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 2] +
-                                            double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 2] -
                                             double(20)*dx[1]*dV_dy[d_num_species + 2];
                                         
                                         V_ghost[j*(d_num_species + 4) + d_num_species + 3] = -double(4)*p_y_BB -
                                             double(65)/double(3)*p_y_B +
                                             double(40)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 3] -
                                             double(20)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 3] +
-                                            double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(20)/double(3)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 3] -
                                             double(20)*dx[1]*dV_dy[d_num_species + 3];
                                     }
+                                    else if (j == 4)
+                                    {
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            V_ghost[j*(d_num_species + 4) + si] = double(5)*rho_Y_y_BB[si] +
+                                                double(77)/double(2)*rho_Y_y_B[si] -
+                                                double(75)*V_ghost[(j - 4)*(d_num_species + 4) + si] +
+                                                double(50)*V_ghost[(j - 3)*(d_num_species + 4) + si] -
+                                                double(25)*V_ghost[(j - 2)*(d_num_species + 4) + si] +
+                                                double(15)/double(2)*V_ghost[(j - 1)*(d_num_species + 4) + si] +
+                                                double(30)*dx[1]*dV_dy[si];
+                                        }
+                                        
+                                        V_ghost[j*(d_num_species + 4) + d_num_species] = double(5)*u_y_BB +
+                                            double(77)/double(2)*u_y_B -
+                                            double(75)*V_ghost[(j - 4)*(d_num_species + 4) + d_num_species] +
+                                            double(50)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species] -
+                                            double(25)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species] +
+                                            double(15)/double(2)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species] +
+                                            double(30)*dx[1]*dV_dy[d_num_species];
+                                        
+                                        V_ghost[j*(d_num_species + 4) + d_num_species + 1] = double(5)*v_y_BB +
+                                            double(77)/double(2)*v_y_B -
+                                            double(75)*V_ghost[(j - 4)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(50)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(25)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(15)/double(2)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(30)*dx[1]*dV_dy[d_num_species + 1];
+                                        
+                                        V_ghost[j*(d_num_species + 4) + d_num_species + 2] = double(5)*w_y_BB +
+                                            double(77)/double(2)*w_y_B -
+                                            double(75)*V_ghost[(j - 4)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(50)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(25)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(15)/double(2)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(30)*dx[1]*dV_dy[d_num_species + 2];
+                                        
+                                        V_ghost[j*(d_num_species + 4) + d_num_species + 3] = double(5)*p_y_BB +
+                                            double(77)/double(2)*p_y_B -
+                                            double(75)*V_ghost[(j - 4)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(50)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(25)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(15)/double(2)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(30)*dx[1]*dV_dy[d_num_species + 3];
+                                    }
+                                    else if (j == 5)
+                                    {
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            V_ghost[j*(d_num_species + 4) + si] = -double(6)*rho_Y_y_BB[si] -
+                                                double(609)/double(10)*rho_Y_y_B[si] +
+                                                double(126)*V_ghost[(j - 5)*(d_num_species + 4) + si] -
+                                                double(105)*V_ghost[(j - 4)*(d_num_species + 4) + si] +
+                                                double(70)*V_ghost[(j - 3)*(d_num_species + 4) + si] -
+                                                double(63)/double(2)*V_ghost[(j - 2)*(d_num_species + 4) + si] +
+                                                double(42)/double(5)*V_ghost[(j - 1)*(d_num_species + 4) + si] -
+                                                double(42)*dx[1]*dV_dy[si];
+                                        }
+                                        
+                                        V_ghost[j*(d_num_species + 4) + d_num_species] = -double(6)*u_y_BB -
+                                            double(609)/double(10)*u_y_B +
+                                            double(126)*V_ghost[(j - 5)*(d_num_species + 4) + d_num_species] -
+                                            double(105)*V_ghost[(j - 4)*(d_num_species + 4) + d_num_species] +
+                                            double(70)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species] -
+                                            double(63)/double(2)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species] +
+                                            double(42)/double(5)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species] -
+                                            double(42)*dx[1]*dV_dy[d_num_species];
+                                        
+                                        V_ghost[j*(d_num_species + 4) + d_num_species + 1] = -double(6)*v_y_BB -
+                                            double(609)/double(10)*v_y_B +
+                                            double(126)*V_ghost[(j - 5)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(105)*V_ghost[(j - 4)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(70)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(63)/double(2)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(42)/double(5)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(42)*dx[1]*dV_dy[d_num_species + 1];
+                                        
+                                        V_ghost[j*(d_num_species + 4) + d_num_species + 2] = -double(6)*w_y_BB -
+                                            double(609)/double(10)*w_y_B +
+                                            double(126)*V_ghost[(j - 5)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(105)*V_ghost[(j - 4)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(70)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(63)/double(2)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(42)/double(5)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(42)*dx[1]*dV_dy[d_num_species + 2];
+                                        
+                                        V_ghost[j*(d_num_species + 4) + d_num_species + 3] = -double(6)*p_y_BB -
+                                            double(609)/double(10)*p_y_B +
+                                            double(126)*V_ghost[(j - 5)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(105)*V_ghost[(j - 4)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(70)*V_ghost[(j - 3)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(63)/double(2)*V_ghost[(j - 2)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(42)/double(5)*V_ghost[(j - 1)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(42)*dx[1]*dV_dy[d_num_species + 3];
+                                    }
+                                    
                                     /*
                                      * Compute the mixture density.
                                      */
@@ -8926,11 +9643,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                     {
                         const int num_ghosts_to_fill = fill_box_hi_idx[2] - fill_box_lo_idx[2] + 1;
                         TBOX_ASSERT(fill_box_hi_idx[2] == interior_box_lo_idx[2] - 1);
-                        if (num_ghosts_to_fill > 4)
+                        if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData()\n"
-                                << "Non-reflecting outflow BC doesn't support more than four ghost cells yet!");
+                                << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         
                         for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
@@ -9688,10 +10405,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
 
                                     if (k == num_ghosts_to_fill - 1)
                                     {
-                                        for (int si = 0; si < d_num_species; si ++)
+                                        for (int si = 0; si < d_num_species; si++)
                                         {
                                             V_ghost[k*(d_num_species + 4) + si] = rho_Y_z_FF[si] - double(2)*dx[2]*dV_dz[si];
                                         }
+                                        
                                         V_ghost[k*(d_num_species + 4) + d_num_species]     = u_z_FF - double(2)*dx[2]*dV_dz[d_num_species];
                                         V_ghost[k*(d_num_species + 4) + d_num_species + 1] = v_z_FF - double(2)*dx[2]*dV_dz[d_num_species + 1];
                                         V_ghost[k*(d_num_species + 4) + d_num_species + 2] = w_z_FF - double(2)*dx[2]*dV_dz[d_num_species + 2];
@@ -9699,7 +10417,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     }
                                     else if (k == num_ghosts_to_fill - 2)
                                     {
-                                        for (int si = 0; si < d_num_species; si ++)
+                                        for (int si = 0; si < d_num_species; si++)
                                         {
                                             V_ghost[k*(d_num_species + 4) + si] = -double(2)*rho_Y_z_FF[si] - double(3)*rho_Y_z_F[si] +
                                                 double(6)*V_ghost[(k + 1)*(d_num_species + 4) + si] + double(6)*dx[2]*dV_dz[si];
@@ -9751,7 +10469,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             double(6)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 3] -
                                             double(12)*dx[2]*dV_dz[d_num_species + 3];
                                     }
-                                    else if (k == num_ghosts_to_fill - 4)  
+                                    else if (k == num_ghosts_to_fill - 4)
                                     {
                                         for (int si = 0; si < d_num_species; si++)
                                         {
@@ -9759,7 +10477,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                                 double(65)/double(3)*rho_Y_z_F[si] +
                                                 double(40)*V_ghost[(k + 3)*(d_num_species + 4) + si] -
                                                 double(20)*V_ghost[(k + 2)*(d_num_species + 4) + si] +
-                                                double(20)/double(3)*V_ghost[(k + 1)*(d_num_species + 4) + si] -
+                                                double(20)/double(3)*V_ghost[(k + 1)*(d_num_species + 4) + si] +
                                                 double(20)*dx[2]*dV_dz[si];
                                         }
                                         
@@ -9767,30 +10485,126 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             double(65)/double(3)*u_z_F +
                                             double(40)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species] -
                                             double(20)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species] +
-                                            double(20)/double(3)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species] -
+                                            double(20)/double(3)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species] +
                                             double(20)*dx[2]*dV_dz[d_num_species];
                                         
                                         V_ghost[k*(d_num_species + 4) + d_num_species + 1] = -double(4)*v_z_FF -
                                             double(65)/double(3)*v_z_F +
                                             double(40)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 1] -
                                             double(20)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 1] +
-                                            double(20)/double(3)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(20)/double(3)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 1] +
                                             double(20)*dx[2]*dV_dz[d_num_species + 1];
                                         
                                         V_ghost[k*(d_num_species + 4) + d_num_species + 2] = -double(4)*w_z_FF -
                                             double(65)/double(3)*w_z_F +
                                             double(40)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 2] -
                                             double(20)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 2] +
-                                            double(20)/double(3)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(20)/double(3)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 2] +
                                             double(20)*dx[2]*dV_dz[d_num_species + 2];
                                         
                                         V_ghost[k*(d_num_species + 4) + d_num_species + 3] = -double(4)*p_z_FF -
                                             double(65)/double(3)*p_z_F +
                                             double(40)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 3] -
                                             double(20)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 3] +
-                                            double(20)/double(3)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(20)/double(3)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 3] +
                                             double(20)*dx[2]*dV_dz[d_num_species + 3];
                                     }
+                                    else if (k == num_ghosts_to_fill - 5)
+                                    {
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            V_ghost[k*(d_num_species + 4) + si] = double(5)*rho_Y_z_FF[si] +
+                                                double(77)/double(2)*rho_Y_z_F[si] -
+                                                double(75)*V_ghost[(k + 4)*(d_num_species + 4) + si] +
+                                                double(50)*V_ghost[(k + 3)*(d_num_species + 4) + si] -
+                                                double(25)*V_ghost[(k + 2)*(d_num_species + 4) + si] +
+                                                double(15)/double(2)*V_ghost[(k + 1)*(d_num_species + 4) + si] -
+                                                double(30)*dx[2]*dV_dz[si];
+                                        }
+                                        
+                                        V_ghost[k*(d_num_species + 4) + d_num_species] = double(5)*u_z_FF +
+                                            double(77)/double(2)*u_z_F -
+                                            double(75)*V_ghost[(k + 4)*(d_num_species + 4) + d_num_species] +
+                                            double(50)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species] -
+                                            double(25)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species] +
+                                            double(15)/double(2)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species] -
+                                            double(30)*dx[2]*dV_dz[d_num_species];
+                                        
+                                        V_ghost[k*(d_num_species + 4) + d_num_species + 1] = double(5)*v_z_FF +
+                                            double(77)/double(2)*v_z_F -
+                                            double(75)*V_ghost[(k + 4)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(50)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(25)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(15)/double(2)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(30)*dx[2]*dV_dz[d_num_species + 1];
+                                        
+                                        V_ghost[k*(d_num_species + 4) + d_num_species + 2] = double(5)*w_z_FF +
+                                            double(77)/double(2)*w_z_F -
+                                            double(75)*V_ghost[(k + 4)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(50)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(25)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(15)/double(2)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(30)*dx[2]*dV_dz[d_num_species + 2];
+                                        
+                                        V_ghost[k*(d_num_species + 4) + d_num_species + 3] = double(5)*p_z_FF +
+                                            double(77)/double(2)*p_z_F -
+                                            double(75)*V_ghost[(k + 4)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(50)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(25)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(15)/double(2)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(30)*dx[2]*dV_dz[d_num_species + 3];
+                                    }
+                                    else if (k == num_ghosts_to_fill - 6)
+                                    {
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            V_ghost[k*(d_num_species + 4) + si] = -double(6)*rho_Y_z_FF[si] -
+                                                double(609)/double(10)*rho_Y_z_F[si] +
+                                                double(126)*V_ghost[(k + 5)*(d_num_species + 4) + si] -
+                                                double(105)*V_ghost[(k + 4)*(d_num_species + 4) + si] +
+                                                double(70)*V_ghost[(k + 3)*(d_num_species + 4) + si] -
+                                                double(63)/double(2)*V_ghost[(k + 2)*(d_num_species + 4) + si] +
+                                                double(42)/double(5)*V_ghost[(k + 1)*(d_num_species + 4) + si] +
+                                                double(42)*dx[2]*dV_dz[si];
+                                        }
+                                        
+                                        V_ghost[k*(d_num_species + 4) + d_num_species] = -double(6)*u_z_FF -
+                                            double(609)/double(10)*u_z_F +
+                                            double(126)*V_ghost[(k + 5)*(d_num_species + 4) + d_num_species] -
+                                            double(105)*V_ghost[(k + 4)*(d_num_species + 4) + d_num_species] +
+                                            double(70)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species] -
+                                            double(63)/double(2)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species] +
+                                            double(42)/double(5)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species] +
+                                            double(42)*dx[2]*dV_dz[d_num_species];
+                                        
+                                        V_ghost[k*(d_num_species + 4) + d_num_species + 1] = -double(6)*v_z_FF -
+                                            double(609)/double(10)*v_z_F +
+                                            double(126)*V_ghost[(k + 5)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(105)*V_ghost[(k + 4)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(70)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(63)/double(2)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(42)/double(5)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(42)*dx[2]*dV_dz[d_num_species + 1];
+                                        
+                                        V_ghost[k*(d_num_species + 4) + d_num_species + 2] = -double(6)*w_z_FF -
+                                            double(609)/double(10)*w_z_F +
+                                            double(126)*V_ghost[(k + 5)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(105)*V_ghost[(k + 4)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(70)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(63)/double(2)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(42)/double(5)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(42)*dx[2]*dV_dz[d_num_species + 2];
+                                        
+                                        V_ghost[k*(d_num_species + 4) + d_num_species + 3] = -double(6)*p_z_FF -
+                                            double(609)/double(10)*p_z_F +
+                                            double(126)*V_ghost[(k + 5)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(105)*V_ghost[(k + 4)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(70)*V_ghost[(k + 3)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(63)/double(2)*V_ghost[(k + 2)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(42)/double(5)*V_ghost[(k + 1)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(42)*dx[2]*dV_dz[d_num_species + 3];
+                                    }
+                                    
                                     /*
                                      * Compute the mixture density.
                                      */
@@ -9853,11 +10667,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                     {
                         const int num_ghosts_to_fill = fill_box_hi_idx[2] - fill_box_lo_idx[2] + 1;
                         TBOX_ASSERT(fill_box_lo_idx[2] == interior_box_hi_idx[2] + 1);
-                        if (num_ghosts_to_fill > 4)
+                        if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData()\n"
-                                << "Non-reflecting outflow BC doesn't support more than four ghost cells yet!");
+                                << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         
                         for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
@@ -10616,10 +11430,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     
                                     if (k == 0)
                                     {
-                                        for (int si = 0; si < d_num_species; si ++)
+                                        for (int si = 0; si < d_num_species; si++)
                                         {
                                             V_ghost[k*(d_num_species + 4) + si] = rho_Y_z_BB[si] + double(2)*dx[2]*dV_dz[si];
                                         }
+                                        
                                         V_ghost[k*(d_num_species + 4) + d_num_species]     = u_z_BB + double(2)*dx[2]*dV_dz[d_num_species];
                                         V_ghost[k*(d_num_species + 4) + d_num_species + 1] = v_z_BB + double(2)*dx[2]*dV_dz[d_num_species + 1];
                                         V_ghost[k*(d_num_species + 4) + d_num_species + 2] = w_z_BB + double(2)*dx[2]*dV_dz[d_num_species + 2];
@@ -10627,7 +11442,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     }
                                     else if (k == 1)
                                     {
-                                        for (int si = 0; si < d_num_species; si ++)
+                                        for (int si = 0; si < d_num_species; si++)
                                         {
                                             V_ghost[k*(d_num_species + 4) + si] = -double(2)*rho_Y_z_BB[si] - double(3)*rho_Y_z_B[si] +
                                                 double(6)*V_ghost[(k - 1)*(d_num_species + 4) + si] - double(6)*dx[2]*dV_dz[si];
@@ -10679,7 +11494,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             double(6)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 3] +
                                             double(12)*dx[2]*dV_dz[d_num_species + 3];
                                     }
-                                    else if (k == 3)  
+                                    else if (k == 3)
                                     {
                                         for (int si = 0; si < d_num_species; si++)
                                         {
@@ -10687,37 +11502,134 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                                 double(65)/double(3)*rho_Y_z_B[si] +
                                                 double(40)*V_ghost[(k - 3)*(d_num_species + 4) + si] -
                                                 double(20)*V_ghost[(k - 2)*(d_num_species + 4) + si] +
-                                                double(20)/double(3)*V_ghost[(k - 1)*(d_num_species + 4) + si] +
+                                                double(20)/double(3)*V_ghost[(k - 1)*(d_num_species + 4) + si] -
                                                 double(20)*dx[2]*dV_dz[si];
                                         }
+                                        
                                         V_ghost[k*(d_num_species + 4) + d_num_species] = -double(4)*u_z_BB -
                                             double(65)/double(3)*u_z_B +
                                             double(40)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species] -
                                             double(20)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species] +
-                                            double(20)/double(3)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species] +
+                                            double(20)/double(3)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species] -
                                             double(20)*dx[2]*dV_dz[d_num_species];
                                         
                                         V_ghost[k*(d_num_species + 4) + d_num_species + 1] = -double(4)*v_z_BB -
                                             double(65)/double(3)*v_z_B +
                                             double(40)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 1] -
                                             double(20)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 1] +
-                                            double(20)/double(3)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(20)/double(3)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 1] -
                                             double(20)*dx[2]*dV_dz[d_num_species + 1];
                                         
                                         V_ghost[k*(d_num_species + 4) + d_num_species + 2] = -double(4)*w_z_BB -
                                             double(65)/double(3)*w_z_B +
                                             double(40)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 2] -
                                             double(20)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 2] +
-                                            double(20)/double(3)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(20)/double(3)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 2] -
                                             double(20)*dx[2]*dV_dz[d_num_species + 2];
                                         
                                         V_ghost[k*(d_num_species + 4) + d_num_species + 3] = -double(4)*p_z_BB -
                                             double(65)/double(3)*p_z_B +
                                             double(40)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 3] -
                                             double(20)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 3] +
-                                            double(20)/double(3)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(20)/double(3)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 3] -
                                             double(20)*dx[2]*dV_dz[d_num_species + 3];
                                     }
+                                    else if (k == 4)
+                                    {
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            V_ghost[k*(d_num_species + 4) + si] = double(5)*rho_Y_z_BB[si] +
+                                                double(77)/double(2)*rho_Y_z_B[si] -
+                                                double(75)*V_ghost[(k - 4)*(d_num_species + 4) + si] +
+                                                double(50)*V_ghost[(k - 3)*(d_num_species + 4) + si] -
+                                                double(25)*V_ghost[(k - 2)*(d_num_species + 4) + si] +
+                                                double(15)/double(2)*V_ghost[(k - 1)*(d_num_species + 4) + si] +
+                                                double(30)*dx[2]*dV_dz[si];
+                                        }
+                                        
+                                        V_ghost[k*(d_num_species + 4) + d_num_species] = double(5)*u_z_BB +
+                                            double(77)/double(2)*u_z_B -
+                                            double(75)*V_ghost[(k - 4)*(d_num_species + 4) + d_num_species] +
+                                            double(50)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species] -
+                                            double(25)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species] +
+                                            double(15)/double(2)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species] +
+                                            double(30)*dx[2]*dV_dz[d_num_species];
+                                        
+                                        V_ghost[k*(d_num_species + 4) + d_num_species + 1] = double(5)*v_z_BB +
+                                            double(77)/double(2)*v_z_B -
+                                            double(75)*V_ghost[(k - 4)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(50)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(25)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(15)/double(2)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(30)*dx[2]*dV_dz[d_num_species + 1];
+                                        
+                                        V_ghost[k*(d_num_species + 4) + d_num_species + 2] = double(5)*w_z_BB +
+                                            double(77)/double(2)*w_z_B -
+                                            double(75)*V_ghost[(k - 4)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(50)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(25)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(15)/double(2)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(30)*dx[2]*dV_dz[d_num_species + 2];
+                                        
+                                        V_ghost[k*(d_num_species + 4) + d_num_species + 3] = double(5)*p_z_BB +
+                                            double(77)/double(2)*p_z_B -
+                                            double(75)*V_ghost[(k - 4)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(50)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(25)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(15)/double(2)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(30)*dx[2]*dV_dz[d_num_species + 3];
+                                    }
+                                    else if (k == 5)
+                                    {
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            V_ghost[k*(d_num_species + 4) + si] = -double(6)*rho_Y_z_BB[si] -
+                                                double(609)/double(10)*rho_Y_z_B[si] +
+                                                double(126)*V_ghost[(k - 5)*(d_num_species + 4) + si] -
+                                                double(105)*V_ghost[(k - 4)*(d_num_species + 4) + si] +
+                                                double(70)*V_ghost[(k - 3)*(d_num_species + 4) + si] -
+                                                double(63)/double(2)*V_ghost[(k - 2)*(d_num_species + 4) + si] +
+                                                double(42)/double(5)*V_ghost[(k - 1)*(d_num_species + 4) + si] -
+                                                double(42)*dx[2]*dV_dz[si];
+                                        }
+                                        
+                                        V_ghost[k*(d_num_species + 4) + d_num_species] = -double(6)*u_z_BB -
+                                            double(609)/double(10)*u_z_B +
+                                            double(126)*V_ghost[(k - 5)*(d_num_species + 4) + d_num_species] -
+                                            double(105)*V_ghost[(k - 4)*(d_num_species + 4) + d_num_species] +
+                                            double(70)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species] -
+                                            double(63)/double(2)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species] +
+                                            double(42)/double(5)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species] -
+                                            double(42)*dx[2]*dV_dz[d_num_species];
+                                        
+                                        V_ghost[k*(d_num_species + 4) + d_num_species + 1] = -double(6)*v_z_BB -
+                                            double(609)/double(10)*v_z_B +
+                                            double(126)*V_ghost[(k - 5)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(105)*V_ghost[(k - 4)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(70)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(63)/double(2)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(42)/double(5)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(42)*dx[2]*dV_dz[d_num_species + 1];
+                                        
+                                        V_ghost[k*(d_num_species + 4) + d_num_species + 2] = -double(6)*w_z_BB -
+                                            double(609)/double(10)*w_z_B +
+                                            double(126)*V_ghost[(k - 5)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(105)*V_ghost[(k - 4)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(70)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(63)/double(2)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(42)/double(5)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(42)*dx[2]*dV_dz[d_num_species + 2];
+                                        
+                                        V_ghost[k*(d_num_species + 4) + d_num_species + 3] = -double(6)*p_z_BB -
+                                            double(609)/double(10)*p_z_B +
+                                            double(126)*V_ghost[(k - 5)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(105)*V_ghost[(k - 4)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(70)*V_ghost[(k - 3)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(63)/double(2)*V_ghost[(k - 2)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(42)/double(5)*V_ghost[(k - 1)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(42)*dx[2]*dV_dz[d_num_species + 3];
+                                    }
+                                    
                                     /*
                                      * Compute the mixture density.
                                      */
@@ -13643,6 +14555,14 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read2dBdryEdges(
                         s);
                     
                     edge_locs[ei] = BOGUS_BDRY_LOC;
+                    
+                    if (d_bdry_edge_nonreflecting_outflow_beta[s] != double(1))
+                    {
+                        d_use_transverse_derivatives_bc |= true;
+                        d_num_ghosts_transverse_derivatives_bc = hier::IntVector::max(
+                            d_num_ghosts_transverse_derivatives_bc,
+                            hier::IntVector::getOne(d_dim));
+                    }
                 }
             } // if (need_data_read)
        } // for (int ei = 0 ...
@@ -13954,6 +14874,14 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read3dBdryFaces(
                         s);
                     
                     face_locs[fi] = BOGUS_BDRY_LOC;
+                    
+                    if (d_bdry_face_nonreflecting_outflow_beta[s] != double(1))
+                    {
+                        d_use_transverse_derivatives_bc |= true;
+                        d_num_ghosts_transverse_derivatives_bc = hier::IntVector::max(
+                            d_num_ghosts_transverse_derivatives_bc,
+                            hier::IntVector::getOne(d_dim));
+                    }
                 }
             } // if (need_data_read)
         } // for (int fi = 0 ...
@@ -14745,7 +15673,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::readNonreflectingOutflow(
     TBOX_ASSERT(!db_name.empty());
 
     double p_t = 0.0;
-    double sigma = 0.25;
+    double sigma = double(1)/double(4); // 0.25
     double beta = 0.0;
     double length_char = 0.0;
 
