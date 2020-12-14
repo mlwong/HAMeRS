@@ -75,7 +75,7 @@ Please have a look at the [Wiki page](https://github.com/mlwong/HAMeRS/wiki).
 
 ### Who do I talk to? ###
 
-The code is managed by Man-Long Wong (wongml@stanford.edu) of the [Flow Physics and Aeroacoustics Laboratory](https://fpal.stanford.edu/) (FPAL)  at the [Department of Aeronautics and Astronautics](https://aa.stanford.edu/) of [Stanford University](https://www.stanford.edu/).
+The code is managed by previous PhD student Man-Long Wong (mlwong@alumni.stanford.edu) of the [Flow Physics and Aeroacoustics Laboratory](https://fpal.stanford.edu/) (FPAL)  at the [Department of Aeronautics and Astronautics](https://aa.stanford.edu/) of [Stanford University](https://www.stanford.edu/).
 
 ### Copyright ###
 HAMeRS is licensed under a GNU Lesser General Public License v3.0.
