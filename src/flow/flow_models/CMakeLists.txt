@@ -5,6 +5,8 @@ set(flow_models_source_files
     FlowModel.cpp
     FlowModelDiffusiveFluxUtilities.cpp
     FlowModelSourceUtilities.cpp
+    ./helpers/FlowModelHelper.cpp
+    ./helpers/FlowModelHelperAverage.cpp
     ./single-species/FlowModelSingleSpecies.cpp
     ./single-species/FlowModelBasicUtilitiesSingleSpecies.cpp
     ./single-species/FlowModelBoundaryUtilitiesSingleSpecies.cpp
