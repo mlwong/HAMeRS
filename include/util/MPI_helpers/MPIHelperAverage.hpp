@@ -1,47 +1,43 @@
-#ifndef FLOW_MODEL_HELPER_AVERAGE_HPP
-#define FLOW_MODEL_HELPER_AVERAGE_HPP
+#ifndef MPI_HELPER_AVERAGE_HPP
+#define MPI_HELPER_AVERAGE_HPP
 
-#include "flow/flow_models/FlowModel.hpp"
+#include "util/MPI_helpers/MPIHelper.hpp"
 
-#include "flow/flow_models/helpers/FlowModelHelper.hpp"
+#include "SAMRAI/pdat/CellVariable.h"
 
-#include <string>
-
-class FlowModelHelperAverage: public FlowModelHelper
+class MPIHelperAverage: public MPIHelper
 {
     public:
-        FlowModelHelperAverage(
+        MPIHelperAverage(
             const std::string& object_name,
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
-            const HAMERS_SHARED_PTR<FlowModel>& flow_model):
-                FlowModelHelper(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy):
+                MPIHelper(
                     object_name,
                     dim,
                     grid_geometry,
-                    flow_model)
+                    patch_hierarchy)
         {}
         
         /*
          * Compute averaged value with only x direction as inhomogeneous direction.
          */
         std::vector<double> getAveragedQuantityWithInhomogeneousXDirection(
-            const std::string quantity_name,
+            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
             const int component_idx,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Compute averaged value (on product of variables) with only x direction as inhomogeneous direction.
          */
         std::vector<double> getAveragedQuantityWithInhomogeneousXDirection(
-            const std::vector<std::string>& quantity_names,
+            std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > >& variable_quantities,
             const std::vector<int>& component_indices,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
     private:
         
 };
 
-#endif /* FLOW_MODEL_HELPER_AVERAGE_HPP */
+#endif /* MPI_HELPER_AVERAGE_HPP */

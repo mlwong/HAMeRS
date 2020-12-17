@@ -1,37 +1,44 @@
-#ifndef FLOW_MODEL_HELPER_HPP
-#define FLOW_MODEL_HELPER_HPP
+#ifndef MPI_HELPER_HPP
+#define MPI_HELPER_HPP
 
-#include "flow/flow_models/FlowModel.hpp"
+#include "HAMeRS_config.hpp"
+
+#include "HAMeRS_memory.hpp"
+
+#include "SAMRAI/geom/CartesianGridGeometry.h"
+#include "SAMRAI/hier/PatchHierarchy.h"
+#include "SAMRAI/tbox/Dimension.h"
 
 #include <string>
 
-class FlowModelHelper
+using namespace SAMRAI;
+
+class MPIHelper
 {
     public:
-        FlowModelHelper(
+        MPIHelper(
             const std::string& object_name,
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
-            const HAMERS_SHARED_PTR<FlowModel>& flow_model):
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy):
                 d_object_name(object_name),
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
-                d_flow_model(flow_model)
+                d_patch_hierarchy(patch_hierarchy),
+                d_mpi(tbox::SAMRAI_MPI::getSAMRAIWorld())
         {}
         
         /*
          * Get number of points in the x-direction of the refined domain.
          */
         int
-        getRefinedDomainNumberOfPointsX(
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
+        getRefinedDomainNumberOfPointsX() const;
         
         /*
          * Get grid spacing in the x-direction of the refined domain.
          */
         double
-        getRefinedDomainGridSpacingX(
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
+        getRefinedDomainGridSpacingX() const;
         
     protected:
         /*
@@ -50,10 +57,15 @@ class FlowModelHelper
         const HAMERS_SHARED_PTR<geom::CartesianGridGeometry> d_grid_geometry;
         
         /*
-         * HAMERS_SHARED_PTR to FlowModel.
+         * HAMERS_SHARED_PTR to patch hierarchy.
          */
-        HAMERS_SHARED_PTR<FlowModel> d_flow_model;
+        HAMERS_SHARED_PTR<hier::PatchHierarchy> d_patch_hierarchy;
+        
+        /*
+         * MPI communication object.
+         */
+        const tbox::SAMRAI_MPI& d_mpi;
         
 };
 
-#endif /* FLOW_MODEL_HELPER_HPP */
+#endif /* MPI_HELPER_HPP */

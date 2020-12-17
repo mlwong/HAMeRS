@@ -1,23 +1,22 @@
-#include "flow/flow_models/helpers/FlowModelHelper.hpp"
+#include "util/MPI_helpers/MPIHelper.hpp"
 
 /*
  * Get number of points in the x-direction of the refined domain.
  */
 int
-FlowModelHelper::getRefinedDomainNumberOfPointsX(
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
+MPIHelper::getRefinedDomainNumberOfPointsX() const
 {
     /*
      * Get the refinement ratio from the finest level to the coarest level.
      */
     
-    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
     hier::IntVector ratioFinestLevelToCoarestLevel =
-        patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
+        d_patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratioFinestLevelToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -38,20 +37,19 @@ FlowModelHelper::getRefinedDomainNumberOfPointsX(
  * Get grid spacing in the x-direction of the refined domain.
  */
 double
-FlowModelHelper::getRefinedDomainGridSpacingX(
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
+MPIHelper::getRefinedDomainGridSpacingX() const
 {
     /*
      * Get the refinement ratio from the finest level to the coarest level.
      */
     
-    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
     hier::IntVector ratioFinestLevelToCoarestLevel =
-        patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
+        d_patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratioFinestLevelToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     const double* dx = d_grid_geometry->getDx();

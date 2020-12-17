@@ -1,31 +1,28 @@
-#include "flow/flow_models/helpers/FlowModelHelperAverage.hpp"
+#include "flow/flow_models/MPI_helpers/FlowModelMPIHelperAverage.hpp"
 
 #include "extn/patch_hierarchies/ExtendedFlattenedHierarchy.hpp"
 
 /*
  * Compute averaged value with only x direction as inhomogeneous direction.
  */
-std::vector<double> FlowModelHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
+std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
     const std::string quantity_name,
     const int component_idx,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
     std::vector<double> averaged_quantity;
-    
-    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     /*
      * Get the refinement ratio from the finest level to the coarest level.
      */
     
-    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
     hier::IntVector ratioFinestLevelToCoarestLevel =
-        patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
+        d_patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratioFinestLevelToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -35,7 +32,7 @@ std::vector<double> FlowModelHelperAverage::getAveragedQuantityWithInhomogeneous
     
     HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
-            *patch_hierarchy,
+            *d_patch_hierarchy,
             0,
             num_levels - 1));
     
@@ -77,18 +74,18 @@ std::vector<double> FlowModelHelperAverage::getAveragedQuantityWithInhomogeneous
              */
             
             HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
-                patch_hierarchy->getPatchLevel(li));
+                d_patch_hierarchy->getPatchLevel(li));
             
             /*
              * Get the refinement ratio from current level to the finest level.
              */
             
             hier::IntVector ratioToCoarestLevel =
-                patch_hierarchy->getRatioToCoarserLevel(li);
+                d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
             hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
@@ -218,7 +215,7 @@ std::vector<double> FlowModelHelperAverage::getAveragedQuantityWithInhomogeneous
          * Reduction to get the global average.
          */
         
-        mpi.Allreduce(
+        d_mpi.Allreduce(
             u_avg_local,
             u_avg_global,
             finest_level_dim_0,
@@ -255,18 +252,18 @@ std::vector<double> FlowModelHelperAverage::getAveragedQuantityWithInhomogeneous
              */
             
             HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
-                patch_hierarchy->getPatchLevel(li));
+                d_patch_hierarchy->getPatchLevel(li));
             
             /*
              * Get the refinement ratio from current level to the finest level.
              */
             
             hier::IntVector ratioToCoarestLevel =
-                patch_hierarchy->getRatioToCoarserLevel(li);
+                d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
             hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
@@ -414,7 +411,7 @@ std::vector<double> FlowModelHelperAverage::getAveragedQuantityWithInhomogeneous
          * Reduction to get the global average.
          */
         
-        mpi.Allreduce(
+        d_mpi.Allreduce(
             u_avg_local,
             u_avg_global,
             finest_level_dim_0,
@@ -452,18 +449,18 @@ std::vector<double> FlowModelHelperAverage::getAveragedQuantityWithInhomogeneous
              */
             
             HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
-                patch_hierarchy->getPatchLevel(li));
+                d_patch_hierarchy->getPatchLevel(li));
             
             /*
              * Get the refinement ratio from current level to the finest level.
              */
             
             hier::IntVector ratioToCoarestLevel =
-                patch_hierarchy->getRatioToCoarserLevel(li);
+                d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
             hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
@@ -621,7 +618,7 @@ std::vector<double> FlowModelHelperAverage::getAveragedQuantityWithInhomogeneous
          * Reduction to get the global average.
          */
         
-        mpi.Allreduce(
+        d_mpi.Allreduce(
             u_avg_local,
             u_avg_global,
             finest_level_dim_0,
@@ -639,10 +636,9 @@ std::vector<double> FlowModelHelperAverage::getAveragedQuantityWithInhomogeneous
  * Compute averaged value (on product of variables) with only x direction as inhomogeneous direction.
  */
 std::vector<double>
-FlowModelHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
+FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
     int num_quantities = static_cast<int>(quantity_names.size());
@@ -651,19 +647,17 @@ FlowModelHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
     
     std::vector<double> averaged_quantity;
     
-    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
-    
     /*
      * Get the refinement ratio from the finest level to the coarest level.
      */
     
-    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
     hier::IntVector ratioFinestLevelToCoarestLevel =
-        patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
+        d_patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+        ratioFinestLevelToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
@@ -673,7 +667,7 @@ FlowModelHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
     
     HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
-            *patch_hierarchy,
+            *d_patch_hierarchy,
             0,
             num_levels - 1));
     
@@ -715,18 +709,18 @@ FlowModelHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
              */
             
             HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
-                patch_hierarchy->getPatchLevel(li));
+                d_patch_hierarchy->getPatchLevel(li));
             
             /*
              * Get the refinement ratio from current level to the finest level.
              */
             
             hier::IntVector ratioToCoarestLevel =
-                patch_hierarchy->getRatioToCoarserLevel(li);
+                d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
             hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
@@ -880,7 +874,7 @@ FlowModelHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
          * Reduction to get the global average.
          */
         
-        mpi.Allreduce(
+        d_mpi.Allreduce(
             avg_local,
             avg_global,
             finest_level_dim_0,
@@ -917,18 +911,18 @@ FlowModelHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
              */
             
             HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
-                patch_hierarchy->getPatchLevel(li));
+                d_patch_hierarchy->getPatchLevel(li));
             
             /*
              * Get the refinement ratio from current level to the finest level.
              */
             
             hier::IntVector ratioToCoarestLevel =
-                patch_hierarchy->getRatioToCoarserLevel(li);
+                d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
             hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
@@ -950,7 +944,7 @@ FlowModelHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
                 const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
-                    HAMERS_SHARED_PTR<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -1106,7 +1100,7 @@ FlowModelHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
          * Reduction to get the global average.
          */
         
-        mpi.Allreduce(
+        d_mpi.Allreduce(
             avg_local,
             avg_global,
             finest_level_dim_0,
@@ -1144,18 +1138,18 @@ FlowModelHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
              */
             
             HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
-                patch_hierarchy->getPatchLevel(li));
+                d_patch_hierarchy->getPatchLevel(li));
             
             /*
              * Get the refinement ratio from current level to the finest level.
              */
             
             hier::IntVector ratioToCoarestLevel =
-                patch_hierarchy->getRatioToCoarserLevel(li);
+                d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratioToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
             hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
@@ -1177,7 +1171,7 @@ FlowModelHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
                 const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
-                    HAMERS_SHARED_PTR<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                         patch->getPatchGeometry()));
                 
                 const double* const dx = patch_geom->getDx();
@@ -1349,7 +1343,7 @@ FlowModelHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
          * Reduction to get the global average.
          */
         
-        mpi.Allreduce(
+        d_mpi.Allreduce(
             avg_local,
             avg_global,
             finest_level_dim_0,
