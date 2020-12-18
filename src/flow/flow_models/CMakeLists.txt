@@ -6,6 +6,7 @@ set(flow_models_source_files
     FlowModelDiffusiveFluxUtilities.cpp
     FlowModelSourceUtilities.cpp
     ./MPI_helpers/FlowModelMPIHelperAverage.cpp
+    ./MPI_helpers/FlowModelMPIHelperCorrelation.cpp
     ./single-species/FlowModelSingleSpecies.cpp
     ./single-species/FlowModelBasicUtilitiesSingleSpecies.cpp
     ./single-species/FlowModelBoundaryUtilitiesSingleSpecies.cpp

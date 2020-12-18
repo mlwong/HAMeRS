@@ -3,6 +3,7 @@
 set(MPI_helpers_source_files
     MPIHelper.cpp
     MPIHelperAverage.cpp
+    MPIHelperCorrelation.cpp
     )
 
 # Create a library called MPI_helpers which includes the 
