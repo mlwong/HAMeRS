@@ -21,18 +21,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
     
     std::vector<double> correlation;
     
-    /*
-     * Get the refinement ratio from the finest level to the coarest level.
-     */
-    
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
-    
-    hier::IntVector ratioFinestLevelToCoarestLevel =
-        d_patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
-    for (int li = num_levels - 2; li > 0 ; li--)
-    {
-        ratioFinestLevelToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(li);
-    }
     
     /*
      * Get the flattened hierarchy where only the finest existing grid is visible at any given
@@ -44,15 +33,6 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
             *d_patch_hierarchy,
             0,
             num_levels - 1));
-    
-    /*
-     * Get the number of cells of physical domain refined to the finest level.
-     */
-    
-    const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
-    const hier::Box& physical_domain_box = physical_domain.front();
-    const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
     
     /*
      * Get the indices of the physical domain.
@@ -71,7 +51,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        const int finest_level_dim_0 = finest_level_dims[0];
+        const int finest_level_dim_0 = d_finest_level_dims[0];
         
         /*
          * Get the size of the physical domain.
@@ -118,7 +98,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
                 ratioToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = d_ratio_finest_level_to_coarest_level/ratioToCoarestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -272,7 +252,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        const int finest_level_dim_0 = finest_level_dims[0];
+        const int finest_level_dim_0 = d_finest_level_dims[0];
         
         /*
          * Get the size of the physical domain.
@@ -320,7 +300,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
                 ratioToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = d_ratio_finest_level_to_coarest_level/ratioToCoarestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -511,18 +491,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
     
     std::vector<double> correlation;
     
-    /*
-     * Get the refinement ratio from the finest level to the coarest level.
-     */
-    
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
-    
-    hier::IntVector ratioFinestLevelToCoarestLevel =
-        d_patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
-    for (int li = num_levels - 2; li > 0 ; li--)
-    {
-        ratioFinestLevelToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(li);
-    }
     
     /*
      * Get the flattened hierarchy where only the finest existing grid is visible at any given
@@ -534,15 +503,6 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
             *d_patch_hierarchy,
             0,
             num_levels - 1));
-    
-    /*
-     * Get the number of cells of physical domain refined to the finest level.
-     */
-    
-    const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
-    const hier::Box& physical_domain_box = physical_domain.front();
-    const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
     
     /*
      * Get the indices of the physical domain.
@@ -561,7 +521,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        const int finest_level_dim_0 = finest_level_dims[0];
+        const int finest_level_dim_0 = d_finest_level_dims[0];
         
         /*
          * Get the size of the physical domain.
@@ -608,7 +568,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
                 ratioToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = d_ratio_finest_level_to_coarest_level/ratioToCoarestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
@@ -777,7 +737,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        const int finest_level_dim_0 = finest_level_dims[0];
+        const int finest_level_dim_0 = d_finest_level_dims[0];
         
         /*
          * Get the size of the physical domain.
@@ -825,7 +785,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
                 ratioToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            hier::IntVector ratioToFinestLevel = d_ratio_finest_level_to_coarest_level/ratioToCoarestLevel;
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             

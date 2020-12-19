@@ -1,58 +1,49 @@
 #include "util/MPI_helpers/MPIHelper.hpp"
 
-/*
- * Get number of points in the x-direction of the refined domain.
- */
-int
-MPIHelper::getRefinedDomainNumberOfPointsX() const
+MPIHelper::MPIHelper(
+    const std::string& object_name,
+    const tbox::Dimension& dim,
+    const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy):
+        d_object_name(object_name),
+        d_dim(dim),
+        d_grid_geometry(grid_geometry),
+        d_patch_hierarchy(patch_hierarchy),
+        d_mpi(tbox::SAMRAI_MPI::getSAMRAIWorld()),
+        d_ratio_finest_level_to_coarest_level(dim),
+        d_finest_level_dims(dim),
+        dx_finest_level_dims(dim.getValue())
 {
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Compute the refinement ratio from the finest level to the coarest level.
      */
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
-    hier::IntVector ratioFinestLevelToCoarestLevel =
+    d_ratio_finest_level_to_coarest_level =
         d_patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
     for (int li = num_levels - 2; li > 0 ; li--)
     {
-        ratioFinestLevelToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(li);
+        d_ratio_finest_level_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(li);
     }
     
     /*
-     * Get the number of cells of physical domain refined to the finest level.
+     * Compute the number of cells of physical domain refined to the finest level.
      */
     
     const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
     const hier::Box& physical_domain_box = physical_domain.front();
     const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    d_finest_level_dims = physical_domain_dims*d_ratio_finest_level_to_coarest_level;
     
-    const int finest_level_dim_0 = finest_level_dims[0];
-    return finest_level_dim_0;
-}
-
-
-/*
- * Get grid spacing in the x-direction of the refined domain.
- */
-double
-MPIHelper::getRefinedDomainGridSpacingX() const
-{
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
+     * Compute grid spacing of the finest refined domain.
      */
     
-    const int num_levels = d_patch_hierarchy->getNumberOfLevels();
+    const double* dx_tmp = d_grid_geometry->getDx();
     
-    hier::IntVector ratioFinestLevelToCoarestLevel =
-        d_patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
-    for (int li = num_levels - 2; li > 0 ; li--)
+    for (int di = 0; di < d_dim.getValue(); di++)
     {
-        ratioFinestLevelToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(li);
+        dx_finest_level_dims[di] = dx_tmp[di]/d_ratio_finest_level_to_coarest_level[di];
     }
-    
-    const double* dx = d_grid_geometry->getDx();
-    
-    return dx[0]/ratioFinestLevelToCoarestLevel[0];
 }

@@ -20,25 +20,34 @@ class MPIHelper
             const std::string& object_name,
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy):
-                d_object_name(object_name),
-                d_dim(dim),
-                d_grid_geometry(grid_geometry),
-                d_patch_hierarchy(patch_hierarchy),
-                d_mpi(tbox::SAMRAI_MPI::getSAMRAIWorld())
-        {}
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy);
         
         /*
-         * Get number of points in the x-direction of the refined domain.
+         * Get refinement ratio from the finest level to the coarsest level.
          */
-        int
-        getRefinedDomainNumberOfPointsX() const;
+        const hier::IntVector&
+        getRatioFinestLevelToCoarestLevel() const
+        {
+            return d_ratio_finest_level_to_coarest_level;
+        }
         
         /*
-         * Get grid spacing in the x-direction of the refined domain.
+         * Get number of points in the finest refined domain.
          */
-        double
-        getRefinedDomainGridSpacingX() const;
+        const hier::IntVector&
+        getFinestRefinedDomainNumberOfPoints() const
+        {
+            return d_finest_level_dims;
+        }
+        
+        /*
+         * Get grid spacing of the finest refined domain.
+         */
+        const std::vector<double>&
+        getFinestRefinedDomainGridSpacing() const
+        {
+            return dx_finest_level_dims;
+        }
         
     protected:
         /*
@@ -65,6 +74,21 @@ class MPIHelper
          * MPI communication object.
          */
         const tbox::SAMRAI_MPI& d_mpi;
+        
+        /*
+         * Refinement ratio from the finest level to the coarsest level.
+         */
+        hier::IntVector d_ratio_finest_level_to_coarest_level;
+        
+        /*
+         * Number of points in the finest refined domain.
+         */
+        hier::IntVector d_finest_level_dims;
+        
+        /*
+         * Grid spacing of the finest refined domain.
+         */
+        std::vector<double> dx_finest_level_dims;
         
 };
 
