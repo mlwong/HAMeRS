@@ -60,17 +60,17 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratio_to_coarest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = d_ratio_finest_level_to_coarest_level/ratioToCoarestLevel;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
             
-            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
@@ -174,9 +174,9 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                         
                         const double value_to_add = u[idx]/((double) n_overlapped);
                         
-                        for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                        for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
                         {
-                            const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                            const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                             
                             u_avg_local[idx_fine] += value_to_add;
                         }
@@ -238,17 +238,17 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratio_to_coarest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = d_ratio_finest_level_to_coarest_level/ratioToCoarestLevel;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
             
-            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
@@ -369,9 +369,9 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                             
                             const double value_to_add = u[idx]*weight/((double) n_overlapped);
                             
-                            for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                            for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
                             {
-                                const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                 
                                 u_avg_local[idx_fine] += value_to_add;
                             }
@@ -435,17 +435,17 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratio_to_coarest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = d_ratio_finest_level_to_coarest_level/ratioToCoarestLevel;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
             
-            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
@@ -575,9 +575,9 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                                 
                                 const double value_to_add = u[idx]*weight/((double) n_overlapped);
                                 
-                                for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                                for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
                                 {
-                                    const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                    const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                     
                                     u_avg_local[idx_fine] += value_to_add;
                                 }
@@ -671,17 +671,17 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratio_to_coarest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = d_ratio_finest_level_to_coarest_level/ratioToCoarestLevel;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
             
-            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
@@ -785,9 +785,9 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
                         
                         const double value_to_add = (double(1)/u[idx])/((double) n_overlapped);
                         
-                        for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                        for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
                         {
-                            const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                            const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                             
                             u_inv_avg_local[idx_fine] += value_to_add;
                         }
@@ -849,17 +849,17 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratio_to_coarest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = d_ratio_finest_level_to_coarest_level/ratioToCoarestLevel;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
             
-            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
@@ -980,9 +980,9 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
                             
                             const double value_to_add = (double(1)/u[idx])*weight/((double) n_overlapped);
                             
-                            for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                            for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
                             {
-                                const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                 
                                 u_inv_avg_local[idx_fine] += value_to_add;
                             }
@@ -1046,17 +1046,17 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratio_to_coarest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = d_ratio_finest_level_to_coarest_level/ratioToCoarestLevel;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
             
-            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
@@ -1186,9 +1186,9 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
                                 
                                 const double value_to_add = (double(1)/u[idx])*weight/((double) n_overlapped);
                                 
-                                for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                                for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
                                 {
-                                    const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                    const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                     
                                     u_inv_avg_local[idx_fine] += value_to_add;
                                 }
@@ -1286,17 +1286,17 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratio_to_coarest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = d_ratio_finest_level_to_coarest_level/ratioToCoarestLevel;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
             
-            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
@@ -1413,9 +1413,9 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                          * Compute the linear indices and the data to add.
                          */
                         
-                        for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                        for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
                         {
-                            const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                            const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                             
                             const int idx_q0 = relative_idx_lo_0 + i + num_ghosts_0_u_qi[0];
                             
@@ -1488,17 +1488,17 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratio_to_coarest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = d_ratio_finest_level_to_coarest_level/ratioToCoarestLevel;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
             
-            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
@@ -1636,9 +1636,9 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                              * Compute the linear indices and the data to add.
                              */
                             
-                            for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                            for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
                             {
-                                const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                 
                                 const int idx_q0 = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0];
@@ -1715,17 +1715,17 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratio_to_coarest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = d_ratio_finest_level_to_coarest_level/ratioToCoarestLevel;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
             
-            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
@@ -1874,9 +1874,9 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                                  * Compute the linear index and the data to add.
                                  */
                                 
-                                for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                                for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
                                 {
-                                    const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                    const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                     
                                     const int idx_q0 = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[0]) +
                                         (relative_idx_lo_1 + j + num_ghosts_1_u_qi[0])*ghostcell_dim_0_u_qi[0] +
@@ -1992,17 +1992,17 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratio_to_coarest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = d_ratio_finest_level_to_coarest_level/ratioToCoarestLevel;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
             
-            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
@@ -2119,9 +2119,9 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                          * Compute the linear indices and the data to add.
                          */
                         
-                        for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                        for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
                         {
-                            const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                            const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                             
                             double avg = double(1);
                             
@@ -2199,17 +2199,17 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratio_to_coarest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = d_ratio_finest_level_to_coarest_level/ratioToCoarestLevel;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
             
-            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
@@ -2347,9 +2347,9 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                              * Compute the linear indices and the data to add.
                              */
                             
-                            for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                            for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
                             {
-                                const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                 
                                 double avg = double(1);
                                 
@@ -2430,17 +2430,17 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
              * Get the refinement ratio from current level to the finest level.
              */
             
-            hier::IntVector ratioToCoarestLevel =
+            hier::IntVector ratio_to_coarest_level =
                 d_patch_hierarchy->getRatioToCoarserLevel(li);
             
             for (int lii = li - 1; lii > 0 ; lii--)
             {
-                ratioToCoarestLevel *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
+                ratio_to_coarest_level *= d_patch_hierarchy->getRatioToCoarserLevel(lii);
             }
             
-            hier::IntVector ratioToFinestLevel = d_ratio_finest_level_to_coarest_level/ratioToCoarestLevel;
+            hier::IntVector ratio_to_finest_level = d_ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
             
-            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
@@ -2589,9 +2589,9 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                                  * Compute the linear index and the data to add.
                                  */
                                 
-                                for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                                for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
                                 {
-                                    const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                    const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
                                     
                                     double avg = double(1);
                                     
