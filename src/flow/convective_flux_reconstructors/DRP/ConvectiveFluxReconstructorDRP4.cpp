@@ -1,4 +1,4 @@
-#include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorDRP4.hpp"
+#include "flow/convective_flux_reconstructors/DRP/ConvectiveFluxReconstructorDRP4.hpp"
 
 /*
  * Timers interspersed throughout the class.
