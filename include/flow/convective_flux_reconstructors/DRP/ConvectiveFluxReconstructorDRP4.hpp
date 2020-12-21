@@ -7,6 +7,11 @@
 
 #include "SAMRAI/pdat/SideVariable.h"
 
+// Follow the DRP schemes in
+// Bogey, Christophe, and Christophe Bailly.
+// "A family of low dispersive and low dissipative explicit schemes for flow and noise computations."
+// Journal of Computational physics 194.1 (2004): 194-214.
+
 class ConvectiveFluxReconstructorDRP4: public ConvectiveFluxReconstructor
 {
     public:
