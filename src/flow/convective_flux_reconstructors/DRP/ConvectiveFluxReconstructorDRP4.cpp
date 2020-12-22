@@ -137,7 +137,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
     double e_m = double(0);
     double f_m = double(0);
     
-    if (d_stencil_width = 9)
+    if (d_stencil_width == 9)
     {
         a_n = double( 0.841570125482);
         b_n = double(-0.244678631765);
@@ -149,7 +149,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         c_m = c_n + d_n;
         d_m = d_n;
     }
-    else if (d_stencil_width = 11)
+    else if (d_stencil_width == 11)
     {
         a_n = double( 0.872756993962);
         b_n = double(-0.286511173973);
@@ -163,7 +163,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         d_m = d_n + e_n;
         e_m = e_n;
     }
-    else if (d_stencil_width = 13)
+    else if (d_stencil_width == 13)
     {
         a_n = double( 0.907646591371);
         b_n = double(-0.337048393268);
@@ -220,15 +220,6 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
     TBOX_ASSERT(source->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
 #endif
     
-    // // Allocate temporary patch data.
-    // HAMERS_SHARED_PTR<pdat::SideData<double> > velocity_midpoint;
-    
-    // if (d_has_advective_eqn_form)
-    // {
-    //     velocity_midpoint.reset(new pdat::SideData<double>(
-    //         interior_box, d_dim.getValue(), hier::IntVector::getOne(d_dim)));
-    // }
-    
     if (d_dim == tbox::Dimension(1))
     {
         /*
@@ -246,6 +237,11 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
         
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("CONVECTIVE_FLUX_X", d_num_conv_ghosts));
+        
+        if (d_has_advective_eqn_form)
+        {
+            num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("VELOCITY", d_num_conv_ghosts));
+        }
         
         d_flow_model->registerDerivedVariables(num_subghosts_of_data);
         
@@ -271,11 +267,13 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
             F_node_x.push_back(convective_flux_node[0]->getPointer(ei));
         }
         
-       /*
+        t_reconstruct_flux->start();
+        
+        /*
          * Reconstruct the flux in the x-direction.
          */
         
-        if (d_stencil_width = 9)
+        if (d_stencil_width == 9)
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
@@ -307,7 +305,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                 }
             }
         }
-        else if (d_stencil_width = 11)
+        else if (d_stencil_width == 11)
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
@@ -342,7 +340,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                 }
             }
         }
-        else if (d_stencil_width = 13)
+        else if (d_stencil_width == 13)
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
@@ -381,6 +379,165 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
             }
         }
         
+        t_reconstruct_flux->stop();
+        
+        /*
+         * Compute the source.
+         */
+        
+        t_compute_source->start();
+        
+        if (d_has_advective_eqn_form)
+        {
+            HAMERS_SHARED_PTR<pdat::CellData<double> > velocity= d_flow_model->getCellData("VELOCITY");
+            
+            hier::IntVector num_subghosts_velocity = velocity->getGhostCellWidth();
+            const int num_subghosts_0_velocity = num_subghosts_velocity[0];
+            
+            double* u = velocity->getPointer(0);
+            
+            std::vector<hier::IntVector> num_subghosts_conservative_var;
+            num_subghosts_conservative_var.reserve(d_num_eqn);
+            
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables =
+                d_flow_model->getCellDataOfConservativeVariables();
+            
+            std::vector<double*> Q;
+            Q.reserve(d_num_eqn);
+            
+            int count_eqn = 0;
+            
+            for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
+            {
+                int depth = conservative_variables[vi]->getDepth();
+                
+                for (int di = 0; di < depth; di++)
+                {
+                    // If the last element of the conservative variable vector is not in the system of equations,
+                    // ignore it.
+                    if (count_eqn >= d_num_eqn)
+                        break;
+                    
+                    Q.push_back(conservative_variables[vi]->getPointer(di));
+                    num_subghosts_conservative_var.push_back(conservative_variables[vi]->getGhostCellWidth());
+                    
+                    count_eqn++;
+                }
+            }
+            
+            for (int ei = 0; ei < d_num_eqn; ei ++)
+            {
+                if (d_eqn_form[ei] == EQN_FORM::ADVECTIVE)
+                {
+                    double* S = source->getPointer(ei);
+                    
+                    const int num_subghosts_0_conservative_var = num_subghosts_conservative_var[ei][0];
+                    
+                    if (d_stencil_width == 9)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices. 
+                            const int idx_cell_wghost = i + num_subghosts_0_conservative_var;
+                            
+                            const int idx_cell_wghost_x_LLLL = i - 4 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_LLL  = i - 3 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_LL   = i - 2 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_L    = i - 1 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_R    = i + 1 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_RR   = i + 2 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_RRR  = i + 3 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_RRRR = i + 4 + num_subghosts_0_velocity;
+                            
+                            const int idx_cell_nghost = i;
+                            
+                            S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
+                                (
+                                a_n*(u[idx_cell_wghost_x_R]    - u[idx_cell_wghost_x_L]) +
+                                b_n*(u[idx_cell_wghost_x_RR]   - u[idx_cell_wghost_x_LL]) +
+                                c_n*(u[idx_cell_wghost_x_RRR]  - u[idx_cell_wghost_x_LLL]) +
+                                d_n*(u[idx_cell_wghost_x_RRRR] - u[idx_cell_wghost_x_LLLL])
+                                )/dx[0]);
+                        }
+                    }
+                    else if (d_stencil_width == 11)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices. 
+                            const int idx_cell_wghost = i + num_subghosts_0_conservative_var;
+                            
+                            const int idx_cell_wghost_x_LLLLL = i - 5 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_LLLL  = i - 4 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_LLL   = i - 3 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_LL    = i - 2 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_L     = i - 1 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_R     = i + 1 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_RR    = i + 2 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_RRR   = i + 3 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_RRRR  = i + 4 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_RRRRR = i + 5 + num_subghosts_0_velocity;
+                            
+                            const int idx_cell_nghost = i;
+                            
+                            S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
+                                (
+                                a_n*(u[idx_cell_wghost_x_R]     - u[idx_cell_wghost_x_L]) +
+                                b_n*(u[idx_cell_wghost_x_RR]    - u[idx_cell_wghost_x_LL]) +
+                                c_n*(u[idx_cell_wghost_x_RRR]   - u[idx_cell_wghost_x_LLL]) +
+                                d_n*(u[idx_cell_wghost_x_RRRR]  - u[idx_cell_wghost_x_LLLL]) +
+                                e_n*(u[idx_cell_wghost_x_RRRRR] - u[idx_cell_wghost_x_LLLLL])
+                                )/dx[0]);
+                        }
+                    }
+                    else if (d_stencil_width == 13)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices. 
+                            const int idx_cell_wghost = i + num_subghosts_0_conservative_var;
+                            
+                            const int idx_cell_wghost_x_LLLLLL = i - 6 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_LLLLL  = i - 5 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_LLLL   = i - 4 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_LLL    = i - 3 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_LL     = i - 2 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_L      = i - 1 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_R      = i + 1 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_RR     = i + 2 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_RRR    = i + 3 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_RRRR   = i + 4 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_RRRRR  = i + 5 + num_subghosts_0_velocity;
+                            const int idx_cell_wghost_x_RRRRRR = i + 6 + num_subghosts_0_velocity;
+                            
+                            const int idx_cell_nghost = i;
+                            
+                            S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
+                                (
+                                a_n*(u[idx_cell_wghost_x_R]      - u[idx_cell_wghost_x_L]) +
+                                b_n*(u[idx_cell_wghost_x_RR]     - u[idx_cell_wghost_x_LL]) +
+                                c_n*(u[idx_cell_wghost_x_RRR]    - u[idx_cell_wghost_x_LLL]) +
+                                d_n*(u[idx_cell_wghost_x_RRRR]   - u[idx_cell_wghost_x_LLLL]) +
+                                e_n*(u[idx_cell_wghost_x_RRRRR]  - u[idx_cell_wghost_x_LLLLL]) +
+                                f_n*(u[idx_cell_wghost_x_RRRRRR] - u[idx_cell_wghost_x_LLLLLL])
+                                )/dx[0]);
+                        }
+                    }
+                }
+            }
+        }
+        
+        t_compute_source->stop();
+        
         /*
          * Unregister the patch and data of all registered derived cell variables in the flow model.
          */
@@ -407,6 +564,11 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("CONVECTIVE_FLUX_X", d_num_conv_ghosts));
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("CONVECTIVE_FLUX_Y", d_num_conv_ghosts));
+        
+        if (d_has_advective_eqn_form)
+        {
+            num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("VELOCITY", d_num_conv_ghosts));
+        }
         
         d_flow_model->registerDerivedVariables(num_subghosts_of_data);
         
@@ -447,11 +609,13 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
             F_node_y.push_back(convective_flux_node[1]->getPointer(ei));
         }
         
+        t_reconstruct_flux->start();
+        
         /*
          * Reconstruct the flux in the x-direction.
          */
         
-        if (d_stencil_width = 9)
+        if (d_stencil_width == 9)
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
@@ -502,7 +666,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                 }
             }
         }
-        else if (d_stencil_width = 11)
+        else if (d_stencil_width == 11)
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
@@ -560,7 +724,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                 }
             }
         }
-        else if (d_stencil_width = 13)
+        else if (d_stencil_width == 13)
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
@@ -630,7 +794,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
          * Reconstruct the flux in the y-direction.
          */
         
-        if (d_stencil_width = 9)
+        if (d_stencil_width == 9)
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
@@ -681,7 +845,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                 }
             }
         }
-        else if (d_stencil_width = 11)
+        else if (d_stencil_width == 11)
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
@@ -739,7 +903,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                 }
             }
         }
-        else if (d_stencil_width = 13)
+        else if (d_stencil_width == 13)
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
@@ -805,6 +969,360 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
             }
         }
         
+        t_reconstruct_flux->stop();
+        
+        /*
+         * Compute the source.
+         */
+        
+        t_compute_source->start();
+        
+        if (d_has_advective_eqn_form)
+        {
+            HAMERS_SHARED_PTR<pdat::CellData<double> > velocity= d_flow_model->getCellData("VELOCITY");
+            
+            hier::IntVector num_subghosts_velocity = velocity->getGhostCellWidth();
+            hier::IntVector subghostcell_dims_velocity = velocity->getGhostBox().numberCells();
+            
+            const int num_subghosts_0_velocity = num_subghosts_velocity[0];
+            const int num_subghosts_1_velocity = num_subghosts_velocity[1];
+            const int subghostcell_dim_0_velocity = subghostcell_dims_velocity[0];
+            
+            double* u = velocity->getPointer(0);
+            double* v = velocity->getPointer(1);
+            
+            std::vector<hier::IntVector> num_subghosts_conservative_var;
+            num_subghosts_conservative_var.reserve(d_num_eqn);
+            
+            std::vector<hier::IntVector> subghostcell_dims_conservative_var;
+            subghostcell_dims_conservative_var.reserve(d_num_eqn);
+            
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables =
+                d_flow_model->getCellDataOfConservativeVariables();
+            
+            std::vector<double*> Q;
+            Q.reserve(d_num_eqn);
+            
+            int count_eqn = 0;
+            
+            for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
+            {
+                int depth = conservative_variables[vi]->getDepth();
+                
+                for (int di = 0; di < depth; di++)
+                {
+                    // If the last element of the conservative variable vector is not in the system of equations,
+                    // ignore it.
+                    if (count_eqn >= d_num_eqn)
+                        break;
+                    
+                    Q.push_back(conservative_variables[vi]->getPointer(di));
+                    num_subghosts_conservative_var.push_back(conservative_variables[vi]->getGhostCellWidth());
+                    subghostcell_dims_conservative_var.push_back(
+                        conservative_variables[vi]->getGhostBox().numberCells());
+                    
+                    count_eqn++;
+                }
+            }
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                if (d_eqn_form[ei] == EQN_FORM::ADVECTIVE)
+                {
+                    double* S = source->getPointer(ei);
+                    
+                    const int num_subghosts_0_conservative_var = num_subghosts_conservative_var[ei][0];
+                    const int num_subghosts_1_conservative_var = num_subghosts_conservative_var[ei][1];
+                    const int subghostcell_dim_0_conservative_var = subghostcell_dims_conservative_var[ei][0];
+                    
+                    if (d_stencil_width == 9)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                // Compute the linear indices.
+                                const int idx_cell_wghost = (i + num_subghosts_0_conservative_var) +
+                                    (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var;
+                                
+                                const int idx_cell_wghost_x_LLLL = (i - 4 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_LLL  = (i - 3 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_LL   = (i - 2 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_L    = (i - 1 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_R    = (i + 1 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_RR   = (i + 2 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_RRR  = (i + 3 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_RRRR = (i + 4 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_BBBB = (i + num_subghosts_0_velocity) +
+                                    (j - 4 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_BBB  = (i + num_subghosts_0_velocity) +
+                                    (j - 3 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_BB   = (i + num_subghosts_0_velocity) +
+                                    (j - 2 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_B    = (i + num_subghosts_0_velocity) +
+                                    (j - 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_T    = (i + num_subghosts_0_velocity) +
+                                    (j + 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_TT   = (i + num_subghosts_0_velocity) +
+                                    (j + 2 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_TTT  = (i + num_subghosts_0_velocity) +
+                                    (j + 3 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_TTTT = (i + num_subghosts_0_velocity) +
+                                    (j + 4 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_nghost = i + j*interior_dim_0;
+                                
+                                S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
+                                    (
+                                    a_n*(u[idx_cell_wghost_x_R]    - u[idx_cell_wghost_x_L]) +
+                                    b_n*(u[idx_cell_wghost_x_RR]   - u[idx_cell_wghost_x_LL]) +
+                                    c_n*(u[idx_cell_wghost_x_RRR]  - u[idx_cell_wghost_x_LLL]) +
+                                    d_n*(u[idx_cell_wghost_x_RRRR] - u[idx_cell_wghost_x_LLLL])
+                                    )/dx[0] +
+                                    (
+                                    a_n*(v[idx_cell_wghost_y_T]    - v[idx_cell_wghost_y_B]) +
+                                    b_n*(v[idx_cell_wghost_y_TT]   - v[idx_cell_wghost_y_BB]) +
+                                    c_n*(v[idx_cell_wghost_y_TTT]  - v[idx_cell_wghost_y_BBB]) +
+                                    d_n*(v[idx_cell_wghost_y_TTTT] - v[idx_cell_wghost_y_BBBB])
+                                    )/dx[1]
+                                    );
+                            }
+                        }
+                    }
+                    else if (d_stencil_width == 11)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                // Compute the linear indices.
+                                const int idx_cell_wghost = (i + num_subghosts_0_conservative_var) +
+                                    (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var;
+                                
+                                const int idx_cell_wghost_x_LLLLL = (i - 5 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_LLLL  = (i - 4 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_LLL   = (i - 3 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_LL    = (i - 2 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_L     = (i - 1 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_R     = (i + 1 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_RR    = (i + 2 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_RRR   = (i + 3 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_RRRR  = (i + 4 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_RRRRR = (i + 5 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_BBBBB = (i + num_subghosts_0_velocity) +
+                                    (j - 5 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_BBBB  = (i + num_subghosts_0_velocity) +
+                                    (j - 4 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_BBB   = (i + num_subghosts_0_velocity) +
+                                    (j - 3 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_BB    = (i + num_subghosts_0_velocity) +
+                                    (j - 2 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_B     = (i + num_subghosts_0_velocity) +
+                                    (j - 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_T     = (i + num_subghosts_0_velocity) +
+                                    (j + 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_TT    = (i + num_subghosts_0_velocity) +
+                                    (j + 2 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_TTT   = (i + num_subghosts_0_velocity) +
+                                    (j + 3 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_TTTT  = (i + num_subghosts_0_velocity) +
+                                    (j + 4 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_TTTTT = (i + num_subghosts_0_velocity) +
+                                    (j + 5 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_nghost = i + j*interior_dim_0;
+                                
+                                S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
+                                    (
+                                    a_n*(u[idx_cell_wghost_x_R]     - u[idx_cell_wghost_x_L]) +
+                                    b_n*(u[idx_cell_wghost_x_RR]    - u[idx_cell_wghost_x_LL]) +
+                                    c_n*(u[idx_cell_wghost_x_RRR]   - u[idx_cell_wghost_x_LLL]) +
+                                    d_n*(u[idx_cell_wghost_x_RRRR]  - u[idx_cell_wghost_x_LLLL]) +
+                                    e_n*(u[idx_cell_wghost_x_RRRRR] - u[idx_cell_wghost_x_LLLLL])
+                                    )/dx[0] +
+                                    (
+                                    a_n*(v[idx_cell_wghost_y_T]     - v[idx_cell_wghost_y_B]) +
+                                    b_n*(v[idx_cell_wghost_y_TT]    - v[idx_cell_wghost_y_BB]) +
+                                    c_n*(v[idx_cell_wghost_y_TTT]   - v[idx_cell_wghost_y_BBB]) +
+                                    d_n*(v[idx_cell_wghost_y_TTTT]  - v[idx_cell_wghost_y_BBBB]) +
+                                    e_n*(v[idx_cell_wghost_y_TTTTT] - v[idx_cell_wghost_y_BBBBB])
+                                    )/dx[1]
+                                    );
+                            }
+                        }
+                    }
+                    else if (d_stencil_width == 13)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                // Compute the linear indices.
+                                const int idx_cell_wghost = (i + num_subghosts_0_conservative_var) +
+                                    (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var;
+                                
+                                const int idx_cell_wghost_x_LLLLLL = (i - 6 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_LLLLL  = (i - 5 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_LLLL   = (i - 4 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_LLL    = (i - 3 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_LL     = (i - 2 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_L      = (i - 1 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_R      = (i + 1 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_RR     = (i + 2 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_RRR    = (i + 3 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_RRRR   = (i + 4 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_RRRRR  = (i + 5 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_x_RRRRRR = (i + 6 + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_BBBBBB = (i + num_subghosts_0_velocity) +
+                                    (j - 6 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_BBBBB  = (i + num_subghosts_0_velocity) +
+                                    (j - 5 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_BBBB   = (i + num_subghosts_0_velocity) +
+                                    (j - 4 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_BBB    = (i + num_subghosts_0_velocity) +
+                                    (j - 3 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_BB     = (i + num_subghosts_0_velocity) +
+                                    (j - 2 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_B      = (i + num_subghosts_0_velocity) +
+                                    (j - 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_T      = (i + num_subghosts_0_velocity) +
+                                    (j + 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_TT     = (i + num_subghosts_0_velocity) +
+                                    (j + 2 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_TTT    = (i + num_subghosts_0_velocity) +
+                                    (j + 3 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_TTTT   = (i + num_subghosts_0_velocity) +
+                                    (j + 4 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_TTTTT  = (i + num_subghosts_0_velocity) +
+                                    (j + 5 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_wghost_y_TTTTTT = (i + num_subghosts_0_velocity) +
+                                    (j + 6 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                                
+                                const int idx_cell_nghost = i + j*interior_dim_0;
+                                
+                                S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
+                                    (
+                                    a_n*(u[idx_cell_wghost_x_R]      - u[idx_cell_wghost_x_L]) +
+                                    b_n*(u[idx_cell_wghost_x_RR]     - u[idx_cell_wghost_x_LL]) +
+                                    c_n*(u[idx_cell_wghost_x_RRR]    - u[idx_cell_wghost_x_LLL]) +
+                                    d_n*(u[idx_cell_wghost_x_RRRR]   - u[idx_cell_wghost_x_LLLL]) +
+                                    e_n*(u[idx_cell_wghost_x_RRRRR]  - u[idx_cell_wghost_x_LLLLL]) +
+                                    f_n*(u[idx_cell_wghost_x_RRRRRR] - u[idx_cell_wghost_x_LLLLLL])
+                                    )/dx[0] +
+                                    (
+                                    a_n*(v[idx_cell_wghost_y_T]      - v[idx_cell_wghost_y_B]) +
+                                    b_n*(v[idx_cell_wghost_y_TT]     - v[idx_cell_wghost_y_BB]) +
+                                    c_n*(v[idx_cell_wghost_y_TTT]    - v[idx_cell_wghost_y_BBB]) +
+                                    d_n*(v[idx_cell_wghost_y_TTTT]   - v[idx_cell_wghost_y_BBBB]) +
+                                    e_n*(v[idx_cell_wghost_y_TTTTT]  - v[idx_cell_wghost_y_BBBBB]) +
+                                    f_n*(v[idx_cell_wghost_y_TTTTTT] - v[idx_cell_wghost_y_BBBBBB])
+                                    )/dx[1]
+                                    );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        t_compute_source->stop();
+        
         /*
          * Unregister the patch and data of all registered derived cell variables in the flow model.
          */
@@ -833,6 +1351,11 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("CONVECTIVE_FLUX_X", d_num_conv_ghosts));
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("CONVECTIVE_FLUX_Y", d_num_conv_ghosts));
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("CONVECTIVE_FLUX_Z", d_num_conv_ghosts));
+        
+        if (d_has_advective_eqn_form)
+        {
+            num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("VELOCITY", d_num_conv_ghosts));
+        }
         
         d_flow_model->registerDerivedVariables(num_subghosts_of_data);
         
@@ -890,11 +1413,13 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
             F_node_z.push_back(convective_flux_node[2]->getPointer(ei));
         }
         
+        t_reconstruct_flux->start();
+        
         /*
          * Reconstruct the flux in the x-direction.
          */
         
-        if (d_stencil_width = 9)
+        if (d_stencil_width == 9)
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
@@ -965,7 +1490,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                 }
             }
         }
-        else if (d_stencil_width = 11)
+        else if (d_stencil_width == 11)
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
@@ -1047,7 +1572,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                 }
             }
         }
-        else if (d_stencil_width = 13)
+        else if (d_stencil_width == 13)
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
@@ -1145,7 +1670,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
          * Reconstruct the flux in the y-direction.
          */
         
-        if (d_stencil_width = 9)
+        if (d_stencil_width == 9)
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
@@ -1216,7 +1741,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                 }
             }
         }
-        else if (d_stencil_width = 11)
+        else if (d_stencil_width == 11)
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
@@ -1298,7 +1823,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                 }
             }
         }
-        else if (d_stencil_width = 13)
+        else if (d_stencil_width == 13)
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
@@ -1396,7 +1921,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
          * Reconstruct the flux in the z-direction.
          */
         
-        if (d_stencil_width = 9)
+        if (d_stencil_width == 9)
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
@@ -1467,7 +1992,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                 }
             }
         }
-        else if (d_stencil_width = 11)
+        else if (d_stencil_width == 11)
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
@@ -1549,7 +2074,7 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                 }
             }
         }
-        else if (d_stencil_width = 13)
+        else if (d_stencil_width == 13)
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
@@ -1642,6 +2167,680 @@ ConvectiveFluxReconstructorDRP4::computeConvectiveFluxAndSourceOnPatch(
                 }
             }
         }
+        
+        t_reconstruct_flux->stop();
+        
+        /*
+         * Compute the source.
+         */
+        
+        t_compute_source->start();
+        
+        if (d_has_advective_eqn_form)
+        {
+            HAMERS_SHARED_PTR<pdat::CellData<double> > velocity= d_flow_model->getCellData("VELOCITY");
+            
+            hier::IntVector num_subghosts_velocity = velocity->getGhostCellWidth();
+            hier::IntVector subghostcell_dims_velocity = velocity->getGhostBox().numberCells();
+            
+            const int num_subghosts_0_velocity = num_subghosts_velocity[0];
+            const int num_subghosts_1_velocity = num_subghosts_velocity[1];
+            const int num_subghosts_2_velocity = num_subghosts_velocity[2];
+            const int subghostcell_dim_0_velocity = subghostcell_dims_velocity[0];
+            const int subghostcell_dim_1_velocity = subghostcell_dims_velocity[1];
+            
+            double* u = velocity->getPointer(0);
+            double* v = velocity->getPointer(1);
+            double* w = velocity->getPointer(2);
+            
+            std::vector<hier::IntVector> num_subghosts_conservative_var;
+            num_subghosts_conservative_var.reserve(d_num_eqn);
+            
+            std::vector<hier::IntVector> subghostcell_dims_conservative_var;
+            subghostcell_dims_conservative_var.reserve(d_num_eqn);
+            
+            std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_variables =
+                d_flow_model->getCellDataOfConservativeVariables();
+            
+            std::vector<double*> Q;
+            Q.reserve(d_num_eqn);
+            
+            int count_eqn = 0;
+            
+            for (int vi = 0; vi < static_cast<int>(conservative_variables.size()); vi++)
+            {
+                int depth = conservative_variables[vi]->getDepth();
+                
+                for (int di = 0; di < depth; di++)
+                {
+                    // If the last element of the conservative variable vector is not in the system of equations,
+                    // ignore it.
+                    if (count_eqn >= d_num_eqn)
+                        break;
+                    
+                    Q.push_back(conservative_variables[vi]->getPointer(di));
+                    num_subghosts_conservative_var.push_back(conservative_variables[vi]->getGhostCellWidth());
+                    subghostcell_dims_conservative_var.push_back(
+                        conservative_variables[vi]->getGhostBox().numberCells());
+                    
+                    count_eqn++;
+                }
+            }
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                if (d_eqn_form[ei] == EQN_FORM::ADVECTIVE)
+                {
+                    double* S = source->getPointer(ei);
+                    
+                    const int num_subghosts_0_conservative_var = num_subghosts_conservative_var[ei][0];
+                    const int num_subghosts_1_conservative_var = num_subghosts_conservative_var[ei][1];
+                    const int num_subghosts_2_conservative_var = num_subghosts_conservative_var[ei][2];
+                    const int subghostcell_dim_0_conservative_var = subghostcell_dims_conservative_var[ei][0];
+                    const int subghostcell_dim_1_conservative_var = subghostcell_dims_conservative_var[ei][1];
+                    
+                    if (d_stencil_width == 9)
+                    {
+                        for (int k = 0; k < interior_dim_2; k++)
+                        {
+                            for (int j = 0; j < interior_dim_1; j++)
+                            {
+#ifdef HAMERS_ENABLE_SIMD
+                                #pragma omp simd
+#endif
+                                for (int i = 0; i < interior_dim_0; i++)
+                                {
+                                    // Compute the linear indices. 
+                                    const int idx_cell_wghost = (i + num_subghosts_0_conservative_var) +
+                                        (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                        (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                            subghostcell_dim_1_conservative_var;
+                                    
+                                    const int idx_cell_wghost_x_LLLL = (i - 4 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_LLL  = (i - 3 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_LL   = (i - 2 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_L    = (i - 1 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_R    = (i + 1 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_RR   = (i + 2 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_RRR  = (i + 3 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_RRRR = (i + 4 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_BBBB = (i + num_subghosts_0_velocity) +
+                                        (j - 4 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_BBB  = (i + num_subghosts_0_velocity) +
+                                        (j - 3 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_BB   = (i + num_subghosts_0_velocity) +
+                                        (j - 2 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_B    = (i + num_subghosts_0_velocity) +
+                                        (j - 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_T    = (i + num_subghosts_0_velocity) +
+                                        (j + 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_TT   = (i + num_subghosts_0_velocity) +
+                                        (j + 2 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_TTT  = (i + num_subghosts_0_velocity) +
+                                        (j + 3 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_TTTT = (i + num_subghosts_0_velocity) +
+                                        (j + 4 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_BBBB = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k - 4 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_BBB  = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k - 3 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_BB   = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k - 2 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_B    = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k - 1 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_F    = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + 1 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_FF   = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + 2 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_FFF  = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + 3 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_FFFF = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + 4 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_nghost = i +
+                                        j*interior_dim_0 +
+                                        k*interior_dim_0*
+                                            interior_dim_1;
+                                    
+                                    S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
+                                        (
+                                        a_n*(u[idx_cell_wghost_x_R]    - u[idx_cell_wghost_x_L]) +
+                                        b_n*(u[idx_cell_wghost_x_RR]   - u[idx_cell_wghost_x_LL]) +
+                                        c_n*(u[idx_cell_wghost_x_RRR]  - u[idx_cell_wghost_x_LLL]) +
+                                        d_n*(u[idx_cell_wghost_x_RRRR] - u[idx_cell_wghost_x_LLLL])
+                                        )/dx[0] +
+                                        (
+                                        a_n*(v[idx_cell_wghost_y_T]    - v[idx_cell_wghost_y_B]) +
+                                        b_n*(v[idx_cell_wghost_y_TT]   - v[idx_cell_wghost_y_BB]) +
+                                        c_n*(v[idx_cell_wghost_y_TTT]  - v[idx_cell_wghost_y_BBB]) +
+                                        d_n*(v[idx_cell_wghost_y_TTTT] - v[idx_cell_wghost_y_BBBB])
+                                        )/dx[1] +
+                                        (
+                                        a_n*(w[idx_cell_wghost_z_F]    - w[idx_cell_wghost_z_B]) +
+                                        b_n*(w[idx_cell_wghost_z_FF]   - w[idx_cell_wghost_z_BB]) +
+                                        c_n*(w[idx_cell_wghost_z_FFF]  - w[idx_cell_wghost_z_BBB]) +
+                                        d_n*(w[idx_cell_wghost_z_FFFF] - w[idx_cell_wghost_z_BBBB])
+                                        )/dx[2]
+                                        );
+                                }
+                            }
+                        }
+                    }
+                    else if (d_stencil_width == 11)
+                    {
+                        for (int k = 0; k < interior_dim_2; k++)
+                        {
+                            for (int j = 0; j < interior_dim_1; j++)
+                            {
+#ifdef HAMERS_ENABLE_SIMD
+                                #pragma omp simd
+#endif
+                                for (int i = 0; i < interior_dim_0; i++)
+                                {
+                                    // Compute the linear indices. 
+                                    const int idx_cell_wghost = (i + num_subghosts_0_conservative_var) +
+                                        (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                        (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                            subghostcell_dim_1_conservative_var;
+                                    
+                                    const int idx_cell_wghost_x_LLLLL = (i - 5 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_LLLL  = (i - 4 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_LLL   = (i - 3 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_LL    = (i - 2 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_L     = (i - 1 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_R     = (i + 1 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_RR    = (i + 2 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_RRR   = (i + 3 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_RRRR  = (i + 4 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_RRRRR = (i + 5 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_BBBBB = (i + num_subghosts_0_velocity) +
+                                        (j - 5 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_BBBB  = (i + num_subghosts_0_velocity) +
+                                        (j - 4 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_BBB   = (i + num_subghosts_0_velocity) +
+                                        (j - 3 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_BB    = (i + num_subghosts_0_velocity) +
+                                        (j - 2 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_B     = (i + num_subghosts_0_velocity) +
+                                        (j - 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_T     = (i + num_subghosts_0_velocity) +
+                                        (j + 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_TT    = (i + num_subghosts_0_velocity) +
+                                        (j + 2 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_TTT   = (i + num_subghosts_0_velocity) +
+                                        (j + 3 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_TTTT  = (i + num_subghosts_0_velocity) +
+                                        (j + 4 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_TTTTT = (i + num_subghosts_0_velocity) +
+                                        (j + 5 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_BBBBB = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k - 5 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_BBBB  = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k - 4 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_BBB   = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k - 3 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_BB    = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k - 2 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_B     = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k - 1 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_F     = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + 1 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_FF    = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + 2 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_FFF   = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + 3 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_FFFF  = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + 4 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_FFFFF = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + 5 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_nghost = i +
+                                        j*interior_dim_0 +
+                                        k*interior_dim_0*
+                                            interior_dim_1;
+                                    
+                                    S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
+                                        (
+                                        a_n*(u[idx_cell_wghost_x_R]     - u[idx_cell_wghost_x_L]) +
+                                        b_n*(u[idx_cell_wghost_x_RR]    - u[idx_cell_wghost_x_LL]) +
+                                        c_n*(u[idx_cell_wghost_x_RRR]   - u[idx_cell_wghost_x_LLL]) +
+                                        d_n*(u[idx_cell_wghost_x_RRRR]  - u[idx_cell_wghost_x_LLLL]) +
+                                        e_n*(u[idx_cell_wghost_x_RRRRR] - u[idx_cell_wghost_x_LLLLL])
+                                        )/dx[0] +
+                                        (
+                                        a_n*(v[idx_cell_wghost_y_T]     - v[idx_cell_wghost_y_B]) +
+                                        b_n*(v[idx_cell_wghost_y_TT]    - v[idx_cell_wghost_y_BB]) +
+                                        c_n*(v[idx_cell_wghost_y_TTT]   - v[idx_cell_wghost_y_BBB]) +
+                                        d_n*(v[idx_cell_wghost_y_TTTT]  - v[idx_cell_wghost_y_BBBB]) +
+                                        e_n*(v[idx_cell_wghost_y_TTTTT] - v[idx_cell_wghost_y_BBBBB])
+                                        )/dx[1] +
+                                        (
+                                        a_n*(w[idx_cell_wghost_z_F]     - w[idx_cell_wghost_z_B]) +
+                                        b_n*(w[idx_cell_wghost_z_FF]    - w[idx_cell_wghost_z_BB]) +
+                                        c_n*(w[idx_cell_wghost_z_FFF]   - w[idx_cell_wghost_z_BBB]) +
+                                        d_n*(w[idx_cell_wghost_z_FFFF]  - w[idx_cell_wghost_z_BBBB]) +
+                                        e_n*(w[idx_cell_wghost_z_FFFFF] - w[idx_cell_wghost_z_BBBBB])
+                                        )/dx[2]
+                                        );
+                                }
+                            }
+                        }
+                    }
+                    else if (d_stencil_width == 13)
+                    {
+                       for (int k = 0; k < interior_dim_2; k++)
+                        {
+                            for (int j = 0; j < interior_dim_1; j++)
+                            {
+#ifdef HAMERS_ENABLE_SIMD
+                                #pragma omp simd
+#endif
+                                for (int i = 0; i < interior_dim_0; i++)
+                                {
+                                    // Compute the linear indices. 
+                                    const int idx_cell_wghost = (i + num_subghosts_0_conservative_var) +
+                                        (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                        (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                            subghostcell_dim_1_conservative_var;
+                                    
+                                    const int idx_cell_wghost_x_LLLLLL = (i - 6 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_LLLLL  = (i - 5 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_LLLL   = (i - 4 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_LLL    = (i - 3 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_LL     = (i - 2 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_L      = (i - 1 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_R      = (i + 1 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_RR     = (i + 2 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_RRR    = (i + 3 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_RRRR   = (i + 4 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_RRRRR  = (i + 5 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_x_RRRRRR = (i + 6 + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_BBBBBB = (i + num_subghosts_0_velocity) +
+                                        (j - 6 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_BBBBB  = (i + num_subghosts_0_velocity) +
+                                        (j - 5 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_BBBB   = (i + num_subghosts_0_velocity) +
+                                        (j - 4 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_BBB    = (i + num_subghosts_0_velocity) +
+                                        (j - 3 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_BB     = (i + num_subghosts_0_velocity) +
+                                        (j - 2 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_B      = (i + num_subghosts_0_velocity) +
+                                        (j - 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_T      = (i + num_subghosts_0_velocity) +
+                                        (j + 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_TT     = (i + num_subghosts_0_velocity) +
+                                        (j + 2 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_TTT    = (i + num_subghosts_0_velocity) +
+                                        (j + 3 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_TTTT   = (i + num_subghosts_0_velocity) +
+                                        (j + 4 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_TTTTT  = (i + num_subghosts_0_velocity) +
+                                        (j + 5 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_y_TTTTTT = (i + num_subghosts_0_velocity) +
+                                        (j + 6 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_BBBBBB = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k - 6 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_BBBBB  = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k - 5 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_BBBB   = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k - 4 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_BBB    = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k - 3 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_BB     = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k - 2 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_B      = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k - 1 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_F      = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + 1 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_FF     = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + 2 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_FFF    = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + 3 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_FFFF   = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + 4 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_FFFFF  = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + 5 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_wghost_z_FFFFFF = (i + num_subghosts_0_velocity) +
+                                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                        (k + 6 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                            subghostcell_dim_1_velocity;
+                                    
+                                    const int idx_cell_nghost = i +
+                                        j*interior_dim_0 +
+                                        k*interior_dim_0*
+                                            interior_dim_1;
+                                    
+                                    S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
+                                        (
+                                        a_n*(u[idx_cell_wghost_x_R]      - u[idx_cell_wghost_x_L]) +
+                                        b_n*(u[idx_cell_wghost_x_RR]     - u[idx_cell_wghost_x_LL]) +
+                                        c_n*(u[idx_cell_wghost_x_RRR]    - u[idx_cell_wghost_x_LLL]) +
+                                        d_n*(u[idx_cell_wghost_x_RRRR]   - u[idx_cell_wghost_x_LLLL]) +
+                                        e_n*(u[idx_cell_wghost_x_RRRRR]  - u[idx_cell_wghost_x_LLLLL]) +
+                                        f_n*(u[idx_cell_wghost_x_RRRRRR] - u[idx_cell_wghost_x_LLLLLL])
+                                        )/dx[0] +
+                                        (
+                                        a_n*(v[idx_cell_wghost_y_T]      - v[idx_cell_wghost_y_B]) +
+                                        b_n*(v[idx_cell_wghost_y_TT]     - v[idx_cell_wghost_y_BB]) +
+                                        c_n*(v[idx_cell_wghost_y_TTT]    - v[idx_cell_wghost_y_BBB]) +
+                                        d_n*(v[idx_cell_wghost_y_TTTT]   - v[idx_cell_wghost_y_BBBB]) +
+                                        e_n*(v[idx_cell_wghost_y_TTTTT]  - v[idx_cell_wghost_y_BBBBB]) +
+                                        f_n*(v[idx_cell_wghost_y_TTTTTT] - v[idx_cell_wghost_y_BBBBBB])
+                                        )/dx[1] +
+                                        (
+                                        a_n*(w[idx_cell_wghost_z_F]      - w[idx_cell_wghost_z_B]) +
+                                        b_n*(w[idx_cell_wghost_z_FF]     - w[idx_cell_wghost_z_BB]) +
+                                        c_n*(w[idx_cell_wghost_z_FFF]    - w[idx_cell_wghost_z_BBB]) +
+                                        d_n*(w[idx_cell_wghost_z_FFFF]   - w[idx_cell_wghost_z_BBBB]) +
+                                        e_n*(w[idx_cell_wghost_z_FFFFF]  - w[idx_cell_wghost_z_BBBBB]) +
+                                        f_n*(w[idx_cell_wghost_z_FFFFFF] - w[idx_cell_wghost_z_BBBBBB])
+                                        )/dx[2]
+                                        );
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        t_compute_source->stop();
         
         /*
          * Unregister the patch and data of all registered derived cell variables in the flow model.
