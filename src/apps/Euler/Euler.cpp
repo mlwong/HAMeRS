@@ -2458,7 +2458,7 @@ Euler::printErrorStatistics(
     std::ostream& os,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
 {
-    d_Euler_error_statistics->printErrorStatistics(os, patch_hierarchy);
+    d_Euler_error_statistics->printErrorStatistics(os, patch_hierarchy, d_plot_context);
 }
 
 

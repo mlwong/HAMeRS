@@ -1,12 +1,15 @@
 #include "apps/Euler/EulerErrorStatistics.hpp"
 
+#include "SAMRAI/math/HierarchyCellDataOpsReal.h"
+
 /*
  * Set the data on the patch interior to some initial values.
  */
 void
 EulerErrorStatistics::printErrorStatistics(
     std::ostream& os,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& variable_context) const
 {
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -49,7 +52,7 @@ EulerErrorStatistics::printErrorStatistics(
                     
                     HAMERS_SHARED_PTR<pdat::CellData<double> > volume_fraction(
                         HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch->getPatchData(variables[vi], d_plot_context)));
+                            patch->getPatchData(variables[vi], variable_context)));
                     
                     double* Z_1 = volume_fraction->getPointer(0);
                     
