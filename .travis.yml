@@ -1,9 +1,4 @@
-language:
-  - cpp
-  - python
-
-python:
-  - "3.9"
+language: cpp
 
 sudo: enabled
 
@@ -17,6 +12,7 @@ addons:
     packages:
       - gfortran 
       - libboost-all-dev
+      - python3
 
 compiler:
   - gcc
