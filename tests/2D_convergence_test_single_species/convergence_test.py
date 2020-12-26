@@ -36,6 +36,7 @@ Euler
 
     Convective_flux_reconstructor
     {{
+        stencil_width = {:d}
     }}
 
     Boundary_data
@@ -133,7 +134,8 @@ TimerManager
 """
 numpy.set_printoptions(formatter={'float': '{:24.16e}'.format})
 
-convective_flux_schemes = ["WCNS5_JS_HLLC_HLL", "WCNS5_Z_HLLC_HLL", "WCNS6_LD_HLLC_HLL", "DRP4"]
+convective_flux_schemes = ["WCNS5_JS_HLLC_HLL", "WCNS5_Z_HLLC_HLL", "WCNS6_LD_HLLC_HLL", "DRP4_9pt", "DRP4_11pt", "DRP4_13pt"]
+L2_convergence_rates_schemes_expected = [4.8, 4.8, 5.8, 3.8, 3.8, 3.8]
 num_grid_levels = 4
 
 N_base  = 8
@@ -152,6 +154,13 @@ L2_convergence_rates_schemes   = []
 Linf_convergence_rates_schemes = []
 
 for scheme in convective_flux_schemes:
+    stencil_width = 0
+    if scheme.find("DRP4_") != -1:
+        stencil_width_str = scheme.split("_")[1]
+        stencil_width = int(stencil_width_str.split("pt")[0])
+        
+        scheme = scheme.split("_")[0]
+
     L1_errors   = []
     L2_errors   = []
     Linf_errors = []
@@ -175,7 +184,7 @@ for scheme in convective_flux_schemes:
 
         input_file = open(level_dir + "/input_2D_convergence_single_species.txt", "w")
 
-        input_file.write(input_file_template.format(scheme, (N_x_level - 1), (N_y_level - 1), dt_level, num_steps_level))
+        input_file.write(input_file_template.format(scheme, stencil_width, (N_x_level - 1), (N_y_level - 1), dt_level, num_steps_level))
 
         input_file.close()
 
@@ -239,4 +248,5 @@ for scheme in convective_flux_schemes:
         else:
             print("  %21s %24.16e %24.16e %24.16e %24.16e %24.16e %24.16e" % ( str(N_x_level) + "^2        ", L1_errors[level], L2_errors[level], Linf_errors[level], L1_convergence_rates[level], L2_convergence_rates[level], Linf_convergence_rates[level] ) )
 
+    assert L2_convergence_rates[num_grid_levels - 1] > L2_convergence_rates_schemes_expected[count]
     count += 1
