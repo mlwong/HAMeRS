@@ -30,9 +30,6 @@ before_install:
   - export CC=mpicc
   - export CXX=mpicxx
   - export F77=mpif77
-  - sh travis/install-hdf5.sh
-  - sh travis/install-SAMRAI_with_Boost.sh
-  - sh travis/install-SAMRAI.sh
 
 install:
   - pip3 install numpy
