@@ -40,7 +40,7 @@ EulerErrorStatistics::printErrorStatistics(
                 HAMERS_SHARED_PTR<hier::PatchLevel> level_root(
                     patch_hierarchy->getPatchLevel(0));
                 
-                double dx_sum_local = double(0);
+                double dvol_sum_local = double(0);
                 
                 double error_sum_local         = double(0);
                 double error_squared_sum_local = double(0);
@@ -81,10 +81,12 @@ EulerErrorStatistics::printErrorStatistics(
                             x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
                             x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
                             
-                            const double rho_exact = double(1) + double(1)/double(2)*sin(M_PI*(x[0] + x[1] - double(2)*time));
+                            const double rho_exact =
+                                double(1) + double(1)/double(2)*sin(M_PI*(x[0] + x[1] - double(2)*time));
+                            
                             const double error = fabs(rho_exact - rho[idx_cell]);
                             
-                            dx_sum_local += dx[0]*dx[1];
+                            dvol_sum_local += dx[0]*dx[1];
                             
                             error_sum_local         += dx[0]*dx[1]*error;
                             error_squared_sum_local += dx[0]*dx[1]*error*error;
@@ -93,15 +95,15 @@ EulerErrorStatistics::printErrorStatistics(
                     }
                 }
                 
-                double dx_sum_global = double(0);
+                double dvol_sum_global = double(0);
                 
                 double error_sum_global         = double(0);
                 double error_squared_sum_global = double(0);
                 double error_max_global         = double(0);
                 
                 mpi.Allreduce(
-                    &dx_sum_local,
-                    &dx_sum_global,
+                    &dvol_sum_local,
+                    &dvol_sum_global,
                     1,
                     MPI_DOUBLE,
                     MPI_SUM);
@@ -127,8 +129,8 @@ EulerErrorStatistics::printErrorStatistics(
                     MPI_DOUBLE,
                     MPI_MAX);
                 
-                const double L1_error   = error_sum_global/dx_sum_global;
-                const double L2_error   = sqrt(error_squared_sum_global/dx_sum_global);
+                const double L1_error   = error_sum_global/dvol_sum_global;
+                const double L2_error   = sqrt(error_squared_sum_global/dvol_sum_global);
                 const double Linf_error = error_max_global;
                 
                 os.precision(17);
@@ -147,7 +149,7 @@ EulerErrorStatistics::printErrorStatistics(
                 HAMERS_SHARED_PTR<hier::PatchLevel> level_root(
                     patch_hierarchy->getPatchLevel(0));
                 
-                double dx_sum_local = double(0);
+                double dvol_sum_local = double(0);
                 
                 double error_sum_local         = double(0);
                 double error_squared_sum_local = double(0);
@@ -195,9 +197,10 @@ EulerErrorStatistics::printErrorStatistics(
                                 
                                 const double rho_exact =
                                     double(1) + double(1)/double(2)*sin(M_PI*(x[0] + x[1] + x[2] - double(3)*time));
+                                
                                 const double error = fabs(rho_exact - rho[idx_cell]);
                                 
-                                dx_sum_local += dx[0]*dx[1]*dx[2];
+                                dvol_sum_local += dx[0]*dx[1]*dx[2];
                                 
                                 error_sum_local         += dx[0]*dx[1]*dx[2]*error;
                                 error_squared_sum_local += dx[0]*dx[1]*dx[2]*error*error;
@@ -207,15 +210,15 @@ EulerErrorStatistics::printErrorStatistics(
                     }
                 }
                 
-                double dx_sum_global = double(0);
+                double dvol_sum_global = double(0);
                 
                 double error_sum_global         = double(0);
                 double error_squared_sum_global = double(0);
                 double error_max_global         = double(0);
                 
                 mpi.Allreduce(
-                    &dx_sum_local,
-                    &dx_sum_global,
+                    &dvol_sum_local,
+                    &dvol_sum_global,
                     1,
                     MPI_DOUBLE,
                     MPI_SUM);
@@ -241,8 +244,8 @@ EulerErrorStatistics::printErrorStatistics(
                     MPI_DOUBLE,
                     MPI_MAX);
                 
-                const double L1_error   = error_sum_global/dx_sum_global;
-                const double L2_error   = sqrt(error_squared_sum_global/dx_sum_global);
+                const double L1_error   = error_sum_global/dvol_sum_global;
+                const double L2_error   = sqrt(error_squared_sum_global/dvol_sum_global);
                 const double Linf_error = error_max_global;
                 
                 os.precision(17);

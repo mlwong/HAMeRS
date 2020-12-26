@@ -11,13 +11,13 @@ Application = "Euler"
 Euler
 {{
     // Name of project
-    project_name = "2D convergence test single-species"
+    project_name = "2D convergence test five-eqn by Allaire"
 
     // Number of species
-    num_species = 1
+    num_species = 2
 
     // Flow model to use
-    flow_model = "SINGLE_SPECIES"
+    flow_model = "FIVE_EQN_ALLAIRE"
 
     Flow_model
     {{
@@ -26,8 +26,8 @@ Euler
 
         Equation_of_state_mixing_rules
         {{
-            species_gamma = 1.4
-            species_R     = 1.0
+            species_gamma = 1.6, 1.4
+            species_R     = 1.0, 1.0
         }}
     }}
 
@@ -50,7 +50,7 @@ Main
     dim = 2
 
     // Base name of log file
-    base_name = "2D_convergence_test_single_species"
+    base_name = "2D_convergence_test_five_eqn_allaire"
 
     // Whether all nodes log to individual files,
     // if false only node 0 will log
@@ -62,7 +62,7 @@ Main
     // Frequency at which to dump viz output (0 to turn off)
     viz_dump_interval = 0.02
     // Name of directory in which to place viz output
-    viz_dump_dirname = "viz_2D_convergence_test_single_species"
+    viz_dump_dirname = "viz_2D_convergence_test_five_eqn_allaire"
     // Number of processors which write to each viz file
     visit_number_procs_per_file = 1
 
@@ -134,6 +134,7 @@ TimerManager
 """
 numpy.set_printoptions(formatter={'float': '{:24.16e}'.format})
 
+convective_flux_schemes = ["WCNS5_JS_HLLC_HLL"]
 convective_flux_schemes = ["WCNS5_JS_HLLC_HLL", "WCNS5_Z_HLLC_HLL", "WCNS6_LD_HLLC_HLL", "DRP4_9pt", "DRP4_11pt", "DRP4_13pt"]
 L2_convergence_rates_schemes_expected = [4.8, 4.8, 5.8, 3.8, 3.8, 3.8]
 num_grid_levels = 4
@@ -190,9 +191,9 @@ for scheme in convective_flux_schemes:
 
         os.chdir(level_dir)
         os.system(executable_path + " input_2D_convergence_single_species.txt")
-        output_L1 = subprocess.check_output('grep "L1_error" 2D_convergence_test_single_species.log.0000000', shell=True)
-        output_L2 = subprocess.check_output('grep "L2_error" 2D_convergence_test_single_species.log.0000000', shell=True)
-        output_Linf = subprocess.check_output('grep "Linf_error" 2D_convergence_test_single_species.log.0000000', shell=True)
+        output_L1 = subprocess.check_output('grep "L1_error" 2D_convergence_test_five_eqn_allaire.log.0000000', shell=True)
+        output_L2 = subprocess.check_output('grep "L2_error" 2D_convergence_test_five_eqn_allaire.log.0000000', shell=True)
+        output_Linf = subprocess.check_output('grep "Linf_error" 2D_convergence_test_five_eqn_allaire.log.0000000', shell=True)
 
         L1_error = float(output_L1.split()[1])
         L1_errors.append(L1_error)
