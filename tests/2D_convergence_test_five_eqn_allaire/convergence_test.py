@@ -5,6 +5,17 @@ import subprocess
 import sys
 import os
 
+convective_flux_schemes = ["WCNS5_JS_HLLC_HLL", "WCNS5_Z_HLLC_HLL", "WCNS6_LD_HLLC_HLL", "DRP4_9pt", "DRP4_11pt", "DRP4_13pt"]
+L2_convergence_rates_schemes_expected = [4.8, 4.8, 5.8, 3.8, 3.8, 3.8]
+num_grid_levels = 4
+
+N_base  = 8
+dx_base = 2.0/N_base
+dt_base = 0.005*dx_base
+num_steps_base = 16
+
+executable_path = "../../../build_convergence_test_five_eqn_allaire/src/exec/main"
+
 input_file_template = """
 Application = "Euler"
 
@@ -75,8 +86,8 @@ Main
 CartesianGeometry
 {{
     domain_boxes = [(0, 0), ({:d}, {:d})] // Lower and upper indices of compuational domain
-    x_lo         = -1.0, -1.0         // Lower end of computational domain
-    x_up         =  1.0,  1.0         // Upper end of computational domain
+    x_lo         = -1.0, -1.0 // Lower end of computational domain
+    x_up         =  1.0,  1.0 // Upper end of computational domain
 
     // Periodic_dimension. A non-zero value indicates that the direction is periodic
     periodic_dimension = 1, 1
@@ -133,18 +144,6 @@ TimerManager
 }}
 """
 numpy.set_printoptions(formatter={'float': '{:24.16e}'.format})
-
-convective_flux_schemes = ["WCNS5_JS_HLLC_HLL"]
-convective_flux_schemes = ["WCNS5_JS_HLLC_HLL", "WCNS5_Z_HLLC_HLL", "WCNS6_LD_HLLC_HLL", "DRP4_9pt", "DRP4_11pt", "DRP4_13pt"]
-L2_convergence_rates_schemes_expected = [4.8, 4.8, 5.8, 3.8, 3.8, 3.8]
-num_grid_levels = 4
-
-N_base  = 8
-dx_base = 2.0/N_base
-dt_base = 0.005*dx_base
-num_steps_base = 16
-
-executable_path = "../../../build/src/exec/main"
 
 L1_errors_schemes   = []
 L2_errors_schemes   = []
