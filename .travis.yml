@@ -35,14 +35,15 @@ before_install:
   - sh travis/install-SAMRAI.sh
 
 install:
+  - export HAMERS_ROOT=$PWD
   - mkdir build_with_boost
   - cd build_with_boost
   - export SAMRAI_ROOT=$SAMRAI_ROOT_WITH_BOOST; cmake .. -DHAMERS_USE_BOOST=ON
   - make
   - cd ..
   - cd src/apps/Euler
-  - ln -sf ${HOME}/problems/Euler/initial_conditions/ConvergenceSingleSpecies.cpp EulerInitialConditions.cpp 
-  - ln -sf ${HOME}/problems/Euler/error_statistics/ConvergenceSingleSpecies.cpp EulerErrorStatistics.cpp
+  - ln -sf ${HAMERS_ROOT}/problems/Euler/initial_conditions/ConvergenceSingleSpecies.cpp EulerInitialConditions.cpp 
+  - ln -sf ${HAMERS_ROOT}/problems/Euler/error_statistics/ConvergenceSingleSpecies.cpp EulerErrorStatistics.cpp
   - cd ../../..
   - mkdir build
   - cd build
