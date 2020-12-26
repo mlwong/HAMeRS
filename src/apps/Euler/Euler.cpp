@@ -2456,9 +2456,10 @@ void Euler::printClassData(std::ostream& os) const
 void
 Euler::printErrorStatistics(
     std::ostream& os,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const double time) const
 {
-    d_Euler_error_statistics->printErrorStatistics(os, patch_hierarchy, d_plot_context);
+    d_Euler_error_statistics->printErrorStatistics(os, patch_hierarchy, d_plot_context, time);
 }
 
 

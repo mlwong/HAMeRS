@@ -3420,10 +3420,12 @@ void NavierStokes::printClassData(std::ostream& os) const
 void
 NavierStokes::printErrorStatistics(
     std::ostream& os,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const double time) const
 {
     NULL_USE(os);
     NULL_USE(patch_hierarchy);
+    NULL_USE(time);
 }
 
 

@@ -2,9 +2,6 @@
 
 #include "SAMRAI/math/HierarchyCellDataOpsReal.h"
 
-/*
- * Set the data on the patch interior to some initial values.
- */
 void
 EulerErrorStatistics::printErrorStatistics(
     std::ostream& os,
@@ -29,9 +26,9 @@ EulerErrorStatistics::printErrorStatistics(
                 HAMERS_SHARED_PTR<hier::PatchLevel> level_root(
                 patch_hierarchy->getPatchLevel(0));
                 
-                double error_sum_local = 0.0;
-                double error_squared_sum_local = 0.0;
-                double error_max_local = 0.0;
+                double error_sum_local         = double(0);
+                double error_squared_sum_local = double(0);
+                double error_max_local         = double(0);
                 
                 for (hier::PatchLevel::iterator ip(level_root->begin());
                      ip != level_root->end();
@@ -65,22 +62,22 @@ EulerErrorStatistics::printErrorStatistics(
                             
                             // Compute the coordinates.
                             double x[2];
-                            x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
-                            x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                            x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
+                            x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
                             
-                            const double Z_1_exact   = 0.5 + 0.25*sin(M_PI*(x[0] + x[1]));
+                            const double Z_1_exact = double(1)/double(2) + double(1)/double(4)*sin(M_PI*(x[0] + x[1]));
                             const double error = fabs(Z_1_exact - Z_1[idx_cell]);
                             
-                            error_sum_local += dx[0]*dx[0]*error;
+                            error_sum_local         += dx[0]*dx[0]*error;
                             error_squared_sum_local += dx[0]*dx[0]*error*error;
-                            error_max_local = fmax(error, error_max_local);
+                            error_max_local         = fmax(error, error_max_local);
                         }
-                    }        
+                    }
                 }
                 
-                double error_sum_global = 0.0;
-                double error_squared_sum_global = 0.0;
-                double error_max_global = 0.0;
+                double error_sum_global         = double(0);
+                double error_squared_sum_global = double(0);
+                double error_max_global         = double(0);
                 
                 mpi.Allreduce(
                     &error_sum_local,
@@ -102,7 +99,6 @@ EulerErrorStatistics::printErrorStatistics(
                     1,
                     MPI_DOUBLE,
                     MPI_MAX);
-                
                 
                 os.precision(17);
                 os << "L1_error: " << std::scientific << error_sum_global << std::endl;

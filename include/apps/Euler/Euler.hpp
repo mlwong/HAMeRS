@@ -426,7 +426,8 @@ class Euler:
         void
         printErrorStatistics(
             std::ostream& os,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const double time) const;
         
         /**
          * Compute variables for computing the statistics of data.

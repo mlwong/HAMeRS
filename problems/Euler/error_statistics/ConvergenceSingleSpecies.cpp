@@ -2,14 +2,12 @@
 
 #include "SAMRAI/math/HierarchyCellDataOpsReal.h"
 
-/*
- * Set the data on the patch interior to some initial values.
- */
 void
 EulerErrorStatistics::printErrorStatistics(
     std::ostream& os,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& variable_context) const
+    const HAMERS_SHARED_PTR<hier::VariableContext>& variable_context,
+    const double time) const
 {
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -29,9 +27,11 @@ EulerErrorStatistics::printErrorStatistics(
                 HAMERS_SHARED_PTR<hier::PatchLevel> level_root(
                     patch_hierarchy->getPatchLevel(0));
                 
-                double error_sum_local = 0.0;
-                double error_squared_sum_local = 0.0;
-                double error_max_local = 0.0;
+                double dx_sum_local = double(0);
+                
+                double error_sum_local         = double(0);
+                double error_squared_sum_local = double(0);
+                double error_max_local         = double(0);
                 
                 for (hier::PatchLevel::iterator ip(level_root->begin());
                      ip != level_root->end();
@@ -65,22 +65,33 @@ EulerErrorStatistics::printErrorStatistics(
                             
                             // Compute the coordinates.
                             double x[2];
-                            x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
-                            x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                            x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
+                            x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
                             
-                            const double rho_exact   = 1.0 + 0.5*sin(M_PI*(x[0] + x[1]));
+                            const double rho_exact = double(1) + double(1)/double(2)*sin(M_PI*(x[0] + x[1] - double(2)*time));
                             const double error = fabs(rho_exact - rho[idx_cell]);
                             
-                            error_sum_local += dx[0]*dx[0]*error;
-                            error_squared_sum_local += dx[0]*dx[0]*error*error;
-                            error_max_local = fmax(error, error_max_local);
+                            dx_sum_local += dx[0]*dx[1];
+                            
+                            error_sum_local         += dx[0]*dx[1]*error;
+                            error_squared_sum_local += dx[0]*dx[1]*error*error;
+                            error_max_local         = fmax(error, error_max_local);
                         }
                     }
                 }
                 
-                double error_sum_global = 0.0;
-                double error_squared_sum_global = 0.0;
-                double error_max_global = 0.0;
+                double dx_sum_global = double(0);
+                
+                double error_sum_global         = double(0);
+                double error_squared_sum_global = double(0);
+                double error_max_global         = double(0);
+                
+                mpi.Allreduce(
+                    &dx_sum_local,
+                    &dx_sum_global,
+                    1,
+                    MPI_DOUBLE,
+                    MPI_SUM);
                 
                 mpi.Allreduce(
                     &error_sum_local,
@@ -103,11 +114,14 @@ EulerErrorStatistics::printErrorStatistics(
                     MPI_DOUBLE,
                     MPI_MAX);
                 
+                const double L1_error   = error_sum_global/dx_sum_global;
+                const double L2_error   = sqrt(error_squared_sum_global/dx_sum_global);
+                const double Linf_error = error_max_global;
                 
                 os.precision(17);
-                os << "L1_error: " << std::scientific << error_sum_global << std::endl;
-                os << "L2_error: " << std::scientific << sqrt(error_squared_sum_global) << std::endl;
-                os << "Linf_error: " << std::scientific << error_max_global << std::endl;
+                os << "L1_error: " << std::scientific << L1_error << std::endl;
+                os << "L2_error: " << std::scientific << L2_error << std::endl;
+                os << "Linf_error: " << std::scientific << Linf_error << std::endl;
             }
         }
     }

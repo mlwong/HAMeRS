@@ -44,7 +44,8 @@ class EulerErrorStatistics
         printErrorStatistics(
             std::ostream& os,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& variable_context) const;
+            const HAMERS_SHARED_PTR<hier::VariableContext>& variable_context,
+            const double time) const;
         
     private:
         /*
