@@ -22,7 +22,7 @@ compiler:
   - gcc
 
 env:
-  - HDF5_ROOT=${HOME}/hdf5 SAMRAI_ROOT_NO_BOOST=${HOME}/SAMRAI_NO_BOOST SAMRAI_ROOT_WITH_BOOST=${HOME}/SAMRAI_WITH_BOOST
+  - HDF5_ROOT=${HOME}/hdf5 SAMRAI_ROOT_NO_BOOST=${HOME}/SAMRAI_NO_BOOST SAMRAI_ROOT_WITH_BOOST=${HOME}/SAMRAI_WITH_BOOST NUMPY_VERSION=1.14.0
 
 before_install:
   - test -n $CC  && unset CC
@@ -50,7 +50,8 @@ install:
   - export SAMRAI_ROOT=$SAMRAI_ROOT_NO_BOOST; cmake .. -DHAMERS_USE_BOOST=OFF
   - make
   - cd ..
+  - pip install numpy
 
 script:
-  - ./src/test/test_mixing_rules
+  - ./build/src/test/test_mixing_rules
   - cd tests/2D_convergence_test_single_species/; python3 convergence_test.py
