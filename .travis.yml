@@ -28,10 +28,11 @@ before_install:
   - export CC=mpicc
   - export CXX=mpicxx
   - export F77=mpif77
-  - sh travis/install-hdf5.sh
 
 jobs:
   include:
+    - stage: install_HDF5
+      script: sh travis/install-hdf5.sh
     - stage: install_SAMRAI
       script: sh travis/install-SAMRAI_with_Boost.sh
     -
