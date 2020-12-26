@@ -1,4 +1,9 @@
-language: c++
+language:
+  - cpp
+  - python
+
+python:
+  - "3.9"
 
 sudo: enabled
 
@@ -35,9 +40,18 @@ install:
   - export SAMRAI_ROOT=$SAMRAI_ROOT_WITH_BOOST; cmake .. -DHAMERS_USE_BOOST=ON
   - make
   - cd ..
+  - cd src/apps/Euler
+  - ln -sf ${HOME}/problems/Euler/initial_conditions/ConvergenceSingleSpecies.cpp EulerInitialConditions.cpp 
+  - ln -sf ${HOME}/problems/Euler/error_statistics/ConvergenceSingleSpecies.cpp EulerErrorStatistics.cpp
+  - touch EulerInitialConditions.cpp 
+  - touch EulerErrorStatistics.cpp
+  - cd ../../..
   - mkdir build
   - cd build
   - export SAMRAI_ROOT=$SAMRAI_ROOT_NO_BOOST; cmake .. -DHAMERS_USE_BOOST=OFF
   - make
+  - cd ..
 
-script: ./src/test/test_mixing_rules
+script:
+  - ./src/test/test_mixing_rules
+  - cd tests/2D_convergence_test_single_species/; python3 convergence_test.py
