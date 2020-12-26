@@ -18,12 +18,6 @@ addons:
 compiler:
   - gcc
 
-stages:
-  - install_HDF5
-  - install_SAMRAI
-  - install_HAMeRS
-  - test
-
 env:
   - HDF5_ROOT=${TRAVIS_BUILD_DIR}/hdf5 SAMRAI_ROOT_NO_BOOST=${TRAVIS_BUILD_DIR}/SAMRAI_NO_BOOST SAMRAI_ROOT_WITH_BOOST=${TRAVIS_BUILD_DIR}/SAMRAI_WITH_BOOST HAMERS_ROOT=${TRAVIS_BUILD_DIR}
 
@@ -33,6 +27,22 @@ before_install:
   - export CC=mpicc
   - export CXX=mpicxx
   - export F77=mpif77
+
+stages:
+  - install_HDF5
+  - install_SAMRAI
+  - install_HAMeRS
+  - test
+
+cache:
+  directories:
+    - ${TRAVIS_BUILD_DIR}/hdf5
+    - ${TRAVIS_BUILD_DIR}/SAMRAI_NO_BOOST
+    - ${TRAVIS_BUILD_DIR}/SAMRAI_WITH_BOOST
+    - ${TRAVIS_BUILD_DIR}/build_with_boost
+    - ${TRAVIS_BUILD_DIR}/build_convergence_test_single_species
+    - ${TRAVIS_BUILD_DIR}/build_convergence_test_five_eqn_allaire
+    
 
 jobs:
   include:
