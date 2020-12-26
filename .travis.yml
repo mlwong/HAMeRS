@@ -43,8 +43,6 @@ install:
   - cd src/apps/Euler
   - ln -sf ${HOME}/problems/Euler/initial_conditions/ConvergenceSingleSpecies.cpp EulerInitialConditions.cpp 
   - ln -sf ${HOME}/problems/Euler/error_statistics/ConvergenceSingleSpecies.cpp EulerErrorStatistics.cpp
-  - touch EulerInitialConditions.cpp 
-  - touch EulerErrorStatistics.cpp
   - cd ../../..
   - mkdir build
   - cd build
