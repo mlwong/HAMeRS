@@ -13,6 +13,7 @@ addons:
       - gfortran 
       - libboost-all-dev
       - python3
+      - python3-numpy
 
 compiler:
   - gcc
@@ -28,7 +29,8 @@ before_install:
   - export F77=mpif77
 
 install:
-  - pip3 install numpy
+  - cd tests
+  - cd ..
 
 script:
   - cd tests/2D_convergence_test_single_species/; python3 convergence_test.py
