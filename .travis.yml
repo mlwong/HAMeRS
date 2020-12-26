@@ -18,6 +18,12 @@ addons:
 compiler:
   - gcc
 
+stages:
+  - install_HDF5
+  - install_SAMRAI
+  - install_HAMeRS
+  - test
+
 env:
   - HDF5_ROOT=${HOME}/hdf5 SAMRAI_ROOT_NO_BOOST=${HOME}/SAMRAI_NO_BOOST SAMRAI_ROOT_WITH_BOOST=${HOME}/SAMRAI_WITH_BOOST
 
