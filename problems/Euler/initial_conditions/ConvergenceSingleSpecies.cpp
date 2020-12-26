@@ -46,9 +46,6 @@ EulerInitialConditions::initializeDataOnPatch(
         
         if (initial_time)
         {
-            const double* const domain_xlo = d_grid_geometry->getXLower();
-            const double* const domain_xhi = d_grid_geometry->getXUpper();
-            
             const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
                 HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                     patch.getPatchGeometry()));
@@ -116,9 +113,6 @@ EulerInitialConditions::initializeDataOnPatch(
         
         if (initial_time)
         {
-            const double* const domain_xlo = d_grid_geometry->getXLower();
-            const double* const domain_xhi = d_grid_geometry->getXUpper();
-            
             const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
                 HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                     patch.getPatchGeometry()));
