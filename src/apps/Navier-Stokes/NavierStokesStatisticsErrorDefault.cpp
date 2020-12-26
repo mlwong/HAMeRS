@@ -1,7 +1,7 @@
-#include "apps/Euler/EulerErrorStatistics.hpp"
+#include "apps/Navier-Stokes/NavierStokesErrorStatistics.hpp"
 
 void
-EulerErrorStatistics::printErrorStatistics(
+NavierStokesErrorStatistics::printErrorStatistics(
     std::ostream& os,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& variable_context,

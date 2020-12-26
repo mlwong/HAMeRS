@@ -198,6 +198,18 @@ NavierStokes::NavierStokes(
         d_Navier_Stokes_boundary_conditions_db_is_from_restart));
     
     /*
+     * Initialize d_Navier_Stokes_error_statistics.
+     */
+    
+    d_Navier_Stokes_error_statistics.reset(new NavierStokesErrorStatistics(
+        "d_Navier_Stokes_error_statistics",
+        d_project_name,
+        d_dim,
+        d_grid_geometry,
+        d_flow_model_manager->getFlowModelType(),
+        d_flow_model));
+    
+    /*
      * Initialize d_value_tagger.
      */
     
@@ -3423,9 +3435,7 @@ NavierStokes::printErrorStatistics(
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const double time) const
 {
-    NULL_USE(os);
-    NULL_USE(patch_hierarchy);
-    NULL_USE(time);
+    d_Navier_Stokes_error_statistics->printErrorStatistics(os, patch_hierarchy, d_plot_context, time);
 }
 
 
