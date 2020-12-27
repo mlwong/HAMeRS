@@ -249,9 +249,9 @@ for scheme in convective_flux_schemes:
         N_x_level = N_base*factor
 
         if level == 0:
-            print("  %21s %24.16e %24.16e %24.16e" % ( str(N_x_level) + "^2        ", L1_errors[level], L2_errors[level], Linf_errors[level] ) )
+            print("  %21s %24.16e %24.16e %24.16e" % ( str(N_x_level) + "^3        ", L1_errors[level], L2_errors[level], Linf_errors[level] ) )
         else:
-            print("  %21s %24.16e %24.16e %24.16e %24.16e %24.16e %24.16e" % ( str(N_x_level) + "^2        ", L1_errors[level], L2_errors[level], Linf_errors[level], L1_convergence_rates[level], L2_convergence_rates[level], Linf_convergence_rates[level] ) )
+            print("  %21s %24.16e %24.16e %24.16e %24.16e %24.16e %24.16e" % ( str(N_x_level) + "^3        ", L1_errors[level], L2_errors[level], Linf_errors[level], L1_convergence_rates[level], L2_convergence_rates[level], Linf_convergence_rates[level] ) )
 
     assert L2_convergence_rates[num_grid_levels - 1] > L2_convergence_rates_schemes_expected[count]
     count += 1
