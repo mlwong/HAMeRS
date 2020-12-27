@@ -1,0 +1,208 @@
+Application = "Navier-Stokes"
+
+NavierStokes
+{
+    // Name of project
+    project_name = "2D vortex leaving domain in x-direction"
+
+    // Number of species
+    num_species = 1
+
+    // Flow model to use
+    flow_model = "SINGLE_SPECIES"
+
+    Flow_model
+    {
+        // Equation of state to use
+        equation_of_state = "IDEAL_GAS"
+
+        Equation_of_state_mixing_rules
+        {
+            species_gamma = 1.4
+            species_R = 1.0
+        }
+
+        has_source_terms = FALSE
+
+        // Equation of shear viscosity to use
+        equation_of_shear_viscosity = "CONSTANT"
+
+        Equation_of_shear_viscosity_mixing_rules
+        {
+            species_mu = 1.0e-5
+            species_M  = 1.0
+        }
+
+        // Equation of bulk viscosity to use
+        equation_of_bulk_viscosity = "CONSTANT"
+
+        Equation_of_bulk_viscosity_mixing_rules
+        {
+            species_mu_v = 0.0
+            species_M    = 1.0
+        }
+
+        // Equation of thermal conductivity to use
+        equation_of_thermal_conductivity = "PRANDTL"
+
+        Equation_of_thermal_conductivity_mixing_rules
+        {
+            species_c_p = 1005
+            species_Pr = 0.72
+            species_M = 1.0
+            species_mu = 1.0e-5
+
+            equation_of_shear_viscosity = "CONSTANT"
+        }
+    }
+
+    // Convective flux reconstructor to use
+    convective_flux_reconstructor = "WCNS6_LD_HLLC_HLL"
+
+    Convective_flux_reconstructor{}
+
+    use_conservative_form_diffusive_flux = FALSE
+    
+    // Non-conservative diffusive flux divergence operator to use
+    nonconservative_diffusive_flux_divergence_operator = "SIXTH_ORDER"
+    
+    Nonconservative_diffusive_flux_divergence_operator{
+    }
+
+    Boundary_data
+    {
+        boundary_edge_xlo
+        {
+            boundary_condition = "FLOW"
+        }
+
+        // Set the boundary conditions for edges
+        boundary_edge_xhi
+        {
+            boundary_condition = "NONREFLECTING_OUTFLOW"
+            pressure_target = 0.71428571428
+            sigma = 0.25
+            beta = 0.283
+            length_char = 1.0
+        }
+
+        // boundary_edge_xhi
+        // {
+        //     boundary_condition = "FLOW"
+        // }
+
+        // Set the boundary conditions for nodes
+        // boundary_node_xlo_ylo
+        // {
+        //     boundary_condition = "XREFLECT"
+        // }
+
+        // boundary_node_xhi_ylo
+        // {
+        //     boundary_condition = "XREFLECT"
+        // }
+
+        // boundary_node_xlo_yhi
+        // {
+        //     boundary_condition = "XREFLECT"
+        // }
+
+        // boundary_node_xhi_yhi
+        // {
+        //     boundary_condition = "XREFLECT"
+        // }
+    }
+}
+
+Main
+{
+    // Dimension of problem
+    dim = 2
+    
+    // Base name of log file
+    base_name = "2D_vortex_leaving_domain"
+    
+    // Whether all nodes log to individual files,
+    // if false only node 0 will log 
+    log_all_nodes = TRUE
+    
+    // Visualization dump parameters
+    // Setting to dump viz output: CONSTANT_TIME_INTERVAL, CONSTANT_TIMESTEP_INTERVAL
+    viz_dump_setting = "CONSTANT_TIME_INTERVAL"
+    // Frequency at which to dump viz output (0 to turn off)
+    viz_dump_interval = 3.5e-2
+    // Name of directory in which to place viz output
+    viz_dump_dirname = "viz_2D_vortex_leaving_domain"
+    // Number of processors which write to each viz file
+    visit_number_procs_per_file = 1
+    
+    // Restart dump parameters
+    // Frequency at which to dump restart output
+    // (-1 to be as same as viz_dump_interval, 0 to turn off)
+    restart_interval = -1
+}
+
+CartesianGeometry
+{
+    // Lower and upper indices of computational domain
+    domain_boxes = [(0, 0), (63, 63)]
+    x_lo         = -0.5, -0.5 // Lower end of computational domain
+    x_up         =  0.5,  0.5 // Upper end of computational domain
+
+    // Periodic dimension. A non-zero value indicates that the direction is periodic
+    periodic_dimension = 0, 1
+}
+
+ExtendedTagAndInitialize
+{
+}
+
+PatchHierarchy
+{
+    // Maximum number of levels in hierarchy
+    max_levels = 1
+
+    ratio_to_coarser
+    {
+        // Vector ratio to next coarser level
+        level_1 = 2, 2 // all finer levels will use same values as level_1...
+    }
+
+    largest_patch_size
+    {
+        level_0 = 128, 128 // all finer levels will use same values as level_0...
+    }
+
+    smallest_patch_size
+    {
+       level_0 = 8, 8 // all finer levels will use same values as level_0...
+    }
+}
+
+GriddingAlgorithm{}
+
+RungeKuttaLevelIntegrator
+{
+    cfl                      = 0.5e0 // Max cfl factor used in problem
+    cfl_init                 = 0.5e0 // Initial cfl factor
+    lag_dt_computation       = FALSE
+    use_ghosts_to_compute_dt = FALSE
+}
+
+TimeRefinementIntegrator
+{
+    start_time           = 0.0e0  // Initial simulation time
+    end_time             = 3.5e0  // Final simulation time
+    grow_dt              = 1.0e0  // Growth factor for timesteps
+    max_integrator_steps = 10000  // Max number of simulation timesteps
+    tag_buffer           = 2, 2   // array of integer values (one for each level that
+                                  // may be refined representing the number of cells
+                                  // by which tagged cells are buffered)
+}
+
+TimerManager
+{
+    print_threshold = 0.01
+    timer_list      = "apps::main::*"
+}
+

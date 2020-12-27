@@ -198,6 +198,18 @@ NavierStokes::NavierStokes(
         d_Navier_Stokes_boundary_conditions_db_is_from_restart));
     
     /*
+     * Initialize d_Navier_Stokes_error_statistics.
+     */
+    
+    d_Navier_Stokes_error_statistics.reset(new NavierStokesErrorStatistics(
+        "d_Navier_Stokes_error_statistics",
+        d_project_name,
+        d_dim,
+        d_grid_geometry,
+        d_flow_model_manager->getFlowModelType(),
+        d_flow_model));
+    
+    /*
      * Initialize d_value_tagger.
      */
     
@@ -340,7 +352,7 @@ NavierStokes::registerModelVariables(
 {
     TBOX_ASSERT(integrator != 0);
     
-  /*
+    /*
      * Determine the number of ghost cells needed.
      */
     
@@ -350,19 +362,31 @@ NavierStokes::registerModelVariables(
         num_ghosts_intermediate,
         d_convective_flux_reconstructor->getConvectiveFluxNumberOfGhostCells());
     
+    hier::IntVector num_ghosts_diffusive_flux = hier::IntVector::getZero(d_dim);
+    
     if (d_use_conservative_form_diffusive_flux)
     {
-        num_ghosts_intermediate = hier::IntVector::max(
-            num_ghosts_intermediate,
-            d_diffusive_flux_reconstructor->getDiffusiveFluxNumberOfGhostCells());
+        num_ghosts_diffusive_flux = d_diffusive_flux_reconstructor->getDiffusiveFluxNumberOfGhostCells();
     }
     else
     {
-        num_ghosts_intermediate = hier::IntVector::max(
-            num_ghosts_intermediate,
-            d_nonconservative_diffusive_flux_divergence_operator->
-                getNonconservativeDiffusiveFluxDivergenceOperatorNumberOfGhostCells());
+        num_ghosts_diffusive_flux = d_nonconservative_diffusive_flux_divergence_operator->
+            getNonconservativeDiffusiveFluxDivergenceOperatorNumberOfGhostCells();
     }
+    
+    bool use_transverse_derivatives_bc = d_Navier_Stokes_boundary_conditions->useTransverseDerivativesBoundaryConditions();
+    
+    // Increase the number of ghosts for computing transverse derivatives at corner ghost cells for diffusive/viscous flux.
+    // Euler assumes corner ghost cells are not used.
+    if (use_transverse_derivatives_bc)
+    {
+        hier::IntVector num_ghosts_transverse_derivatives_bc = d_Navier_Stokes_boundary_conditions->
+            getBoundaryConditionsTransverseDerivativesNumberOfGhostCells();
+        
+        num_ghosts_diffusive_flux = num_ghosts_diffusive_flux + num_ghosts_transverse_derivatives_bc;
+    }
+    
+    num_ghosts_intermediate = hier::IntVector::max(num_ghosts_intermediate, num_ghosts_diffusive_flux);
     
     hier::IntVector num_ghosts = num_ghosts_intermediate;
     
@@ -3408,10 +3432,10 @@ void NavierStokes::printClassData(std::ostream& os) const
 void
 NavierStokes::printErrorStatistics(
     std::ostream& os,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const double time) const
 {
-    NULL_USE(os);
-    NULL_USE(patch_hierarchy);
+    d_Navier_Stokes_error_statistics->printErrorStatistics(os, patch_hierarchy, d_plot_context, time);
 }
 
 
