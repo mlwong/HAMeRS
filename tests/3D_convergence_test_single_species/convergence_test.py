@@ -5,13 +5,21 @@ import subprocess
 import sys
 import os
 
-convective_flux_schemes = ["WCNS5_JS_HLLC_HLL", "WCNS5_Z_HLLC_HLL", "WCNS6_LD_HLLC_HLL", "DRP4_9pt", "DRP4_11pt", "DRP4_13pt"]
-L2_convergence_rates_schemes_expected = [4.8, 4.8, 5.8, 3.8, 3.8, 3.8]
+convective_flux_schemes = [
+    "WCNS5_JS_HLLC_HLL", "WCNS5_Z_HLLC_HLL", "WCNS6_LD_HLLC_HLL", \
+    "DRP4_9PT", "DRP4_11PT", "DRP4_13PT", \
+    "CENTRAL8", "CENTRAL10", "CENTRAL12"]
+
+L2_convergence_rates_schemes_expected = [
+    4.8, 4.8, 5.8, \
+    3.8, 3.8, 3.8, \
+    7.8, 9.8, 11.5]
+
 num_grid_levels = 4
 
 N_base  = 8
 dx_base = 2.0/N_base
-dt_base = 0.005*dx_base
+dt_base = 0.001*dx_base
 num_steps_base = 1
 
 executable_path = "../../../build_convergence_test_single_species/src/exec/main"
@@ -48,6 +56,7 @@ Euler
     Convective_flux_reconstructor
     {{
         stencil_width = {:d}
+        order = {:d}
     }}
 
     Boundary_data
@@ -155,11 +164,26 @@ Linf_convergence_rates_schemes = []
 
 for scheme in convective_flux_schemes:
     stencil_width = 0
+    order         = 0
+
+    scheme_name            = scheme
+    num_grid_levels_scheme = num_grid_levels
+
     if scheme.find("DRP4_") != -1:
         stencil_width_str = scheme.split("_")[1]
-        stencil_width = int(stencil_width_str.split("pt")[0])
-        
-        scheme = scheme.split("_")[0]
+        stencil_width = int(stencil_width_str.split("PT")[0])
+
+        scheme_name = scheme.split("_")[0]
+
+    if scheme.find("CENTRAL") != -1:
+        order = int(scheme.split("CENTRAL")[1])
+
+        scheme_name = "CENTRAL"
+
+        if order == 12:
+            num_grid_levels_scheme = 2
+        else:
+            num_grid_levels_scheme = 3
 
     L1_errors   = []
     L2_errors   = []
@@ -169,7 +193,7 @@ for scheme in convective_flux_schemes:
     L2_convergence_rates   = []
     Linf_convergence_rates = []
 
-    for level in range(num_grid_levels):
+    for level in range(num_grid_levels_scheme):
         factor = 2**level
 
         N_x_level       = N_base*factor
@@ -178,14 +202,14 @@ for scheme in convective_flux_schemes:
         dx_level        = dx_base/factor
         dt_level        = dt_base/factor
         num_steps_level = num_steps_base*factor
-        
+
         level_dir = "./" + scheme + "_N_" + str(N_x_level)
         if not os.path.isdir(level_dir):
             os.mkdir(level_dir)
 
         input_file = open(level_dir + "/input_3D_convergence_single_species.txt", "w")
 
-        input_file.write(input_file_template.format(scheme, stencil_width, (N_x_level - 1), (N_y_level - 1), (N_z_level - 1), dt_level, num_steps_level))
+        input_file.write(input_file_template.format(scheme_name, stencil_width, order, (N_x_level - 1), (N_y_level - 1), (N_z_level - 1), dt_level, num_steps_level))
 
         input_file.close()
 
@@ -234,17 +258,19 @@ print("-------------------------------------------------------------------------
 count = 0
 for scheme in convective_flux_schemes:
     print("Convergence test of scheme: " + scheme)
-    
+
     L1_errors   = L1_errors_schemes[count]
     L2_errors   = L2_errors_schemes[count]
     Linf_errors = Linf_errors_schemes[count]
-    
+
     L1_convergence_rates   = L1_convergence_rates_schemes[count]
     L2_convergence_rates   = L2_convergence_rates_schemes[count]
     Linf_convergence_rates = Linf_convergence_rates_schemes[count]
-    
+
+    num_grid_levels_scheme = len(L1_errors)
+
     print("  Number of grid points |        L1 error        |        L2 error        |       Linf error       |   L1 convergence rate  |   L2 convergence rate  |  Linf convergence rate ")
-    for level in range(num_grid_levels):
+    for level in range(num_grid_levels_scheme):
         factor = 2**level
         N_x_level = N_base*factor
 
@@ -253,5 +279,5 @@ for scheme in convective_flux_schemes:
         else:
             print("  %21s %24.16e %24.16e %24.16e %24.16e %24.16e %24.16e" % ( str(N_x_level) + "^3        ", L1_errors[level], L2_errors[level], Linf_errors[level], L1_convergence_rates[level], L2_convergence_rates[level], Linf_convergence_rates[level] ) )
 
-    assert L2_convergence_rates[num_grid_levels - 1] > L2_convergence_rates_schemes_expected[count]
+    assert L2_convergence_rates[num_grid_levels_scheme - 1] > L2_convergence_rates_schemes_expected[count]
     count += 1

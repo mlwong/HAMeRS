@@ -8,6 +8,7 @@
 #include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS6-CU-M2-HLLC-HLL.hpp"
 #include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS6-LD-HLLC-HLL.hpp"
 #include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS6-Test.hpp"
+#include "flow/convective_flux_reconstructors/central/ConvectiveFluxReconstructorCentral.hpp"
 #include "flow/convective_flux_reconstructors/DRP/ConvectiveFluxReconstructorDRP4.hpp"
 
 #include <map>
@@ -22,7 +23,8 @@ namespace CONVECTIVE_FLUX_RECONSTRUCTOR
                 WCNS6_CU_M2_HLLC_HLL,
                 WCNS6_LD_HLLC_HLL,
                 WCNS6_TEST,
-                DRP4};
+                CENTRAL,
+                DRP4 };
 }
 
 /*
@@ -42,6 +44,7 @@ inline std::ostream& operator<<(std::ostream& os, const CONVECTIVE_FLUX_RECONSTR
         INSERT_ELEMENT(CONVECTIVE_FLUX_RECONSTRUCTOR::WCNS6_CU_M2_HLLC_HLL);
         INSERT_ELEMENT(CONVECTIVE_FLUX_RECONSTRUCTOR::WCNS6_LD_HLLC_HLL);
         INSERT_ELEMENT(CONVECTIVE_FLUX_RECONSTRUCTOR::WCNS6_TEST);
+        INSERT_ELEMENT(CONVECTIVE_FLUX_RECONSTRUCTOR::CENTRAL);
         INSERT_ELEMENT(CONVECTIVE_FLUX_RECONSTRUCTOR::DRP4);
 #undef INSERT_ELEMENT
     }
