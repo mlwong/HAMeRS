@@ -1344,7 +1344,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                     
                     if (edge_loc == BDRY_LOC::XLO)
                     {
-                        // number of ghostcells START
                         const int num_ghosts_to_fill = fill_box_hi_idx[0] - fill_box_lo_idx[0] + 1;
                         TBOX_ASSERT(fill_box_hi_idx[0] == interior_box_lo_idx[0] - 1);
                         if (num_ghosts_to_fill > 6)
@@ -1353,16 +1352,12 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 << ": FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData()\n"
                                 << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
-                        // number of ghostcells END
                          
-                        // compute derivatives in x-direction START
-
                         for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
                         {
                             // Get the grid spacing.
                             const double* const dx = patch_geom->getDx();
                             
-                            // Set index for x-direction STARTI
                             const int idx_cell_rho_Y_x_R = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
                                 (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
                             
@@ -1389,8 +1384,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             
                             const int idx_cell_E_x_RRR = (interior_box_lo_idx[0] + 2 + num_subghosts_conservative_var[2][0]) +
                                 (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
-                            
-                            // Set index for x-direction END
                             
                             std::vector<double> rho_Y_x_R;
                             std::vector<double> rho_Y_x_RR;
@@ -1453,8 +1446,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 Y_x_RRR_ptr.push_back(&Y_x_RRR[si]);
                             }
                            
-                            // Set variables START
-                            
                             const double u_x_R   = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
                             const double u_x_RR  = Q[d_num_species][idx_cell_mom_x_RR]/rho_x_RR;
                             const double u_x_RRR = Q[d_num_species][idx_cell_mom_x_RRR]/rho_x_RRR;
@@ -1486,9 +1477,10 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                     &epsilon_x_RRR,
                                     Y_x_RRR_ptr);
                             
+                            /*
+                             * Compute derivatives in x-direction.
+                             */
                             
-                            // Set variables END
-                            // Compute derivatives at x-direction START
                             std::vector<double> drho_Y_dx;
                             drho_Y_dx.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
@@ -1499,15 +1491,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             const double du_dx = -(u_x_RRR - double(4)*u_x_RR + double(3)*u_x_R)/(double(2)*dx[0]);
                             const double dv_dx = -(v_x_RRR - double(4)*v_x_RR + double(3)*v_x_R)/(double(2)*dx[0]);
                             const double dp_dx = -(p_x_RRR - double(4)*p_x_RR + double(3)*p_x_R)/(double(2)*dx[0]);
-                            // Compute derivatives at x-direction END
                             
-                            
-                            // Compute derivatives in y-direction START
+                            /*
+                             * Compute derivatives in y-direction.
+                             */
                             
                             double du_dy = double(0);
                             double dv_dy = double(0);
                             double dp_dy = double(0);
-
+                            
                             if (((patch_geom->getTouchesRegularBoundary(1, 0)) && (j == interior_box_lo_idx[1])) ||
                                 ((j + num_subghosts_conservative_var[0][1] == 0) ||
                                  (j + num_subghosts_conservative_var[1][1] == 0) ||
@@ -1527,7 +1519,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 /*
                                  * Compute the mixture density.
                                  */
-                            
+                                
                                 double rho_y_T = double(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -1590,7 +1582,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 /*
                                  * Compute the mixture density.
                                  */
-                            
+                                
                                 double rho_y_B = double(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -1657,7 +1649,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 /*
                                  * Compute the mixture density.
                                  */
-                            
+                                
                                 double rho_y_B = double(0);
                                 double rho_y_T = double(0);
                                 for (int si = 0; si < d_num_species; si++)
@@ -1803,6 +1795,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                     {
                                         V_ghost[i*(d_num_species + 3) + si] = rho_Y_x_RR[si] - double(2)*dx[0]*dV_dx[si];
                                     }
+                                    
                                     V_ghost[i*(d_num_species + 3) + d_num_species]     = u_x_RR - double(2)*dx[0]*dV_dx[d_num_species];
                                     V_ghost[i*(d_num_species + 3) + d_num_species + 1] = v_x_RR - double(2)*dx[0]*dV_dx[d_num_species + 1];
                                     V_ghost[i*(d_num_species + 3) + d_num_species + 2] = p_x_RR - double(2)*dx[0]*dV_dx[d_num_species + 2];
@@ -1812,7 +1805,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                     for (int si = 0; si < d_num_species; si++)
                                     {
                                         V_ghost[i*(d_num_species + 3) + si] = -double(2)*rho_Y_x_RR[si] - double(3)*rho_Y_x_R[si] +
-                                        double(6)*V_ghost[(i + 1)*(d_num_species + 3) + si] + double(6)*dx[0]*dV_dx[si];
+                                            double(6)*V_ghost[(i + 1)*(d_num_species + 3) + si] + double(6)*dx[0]*dV_dx[si];
                                     }
                                     
                                     V_ghost[i*(d_num_species + 3) + d_num_species] = -double(2)*u_x_RR - double(3)*u_x_R +
@@ -1835,7 +1828,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                             double(18)*V_ghost[(i + 2)*(d_num_species + 3) + si] +
                                             double(6)*V_ghost[(i + 1)*(d_num_species + 3) + si] -
                                             double(12)*dx[0]*dV_dx[si];
-                                    
                                     }
                                     
                                     V_ghost[i*(d_num_species + 3) + d_num_species] = double(3)*u_x_RR + double(10)*u_x_R -
@@ -1968,7 +1960,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 /*
                                  * Compute the mixture density.
                                  */
-                            
+                                
                                 double rho_ghost = double(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -2036,7 +2028,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             // Get the grid spacing.
                             const double* const dx = patch_geom->getDx();
                             
-                            // Compute one-sided derivatives in x-direction.
                             const int idx_cell_rho_Y_x_L = (interior_box_hi_idx[0] + num_subghosts_conservative_var[0][0]) +
                                 (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
                             
@@ -2064,8 +2055,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             const int idx_cell_E_x_LLL = (interior_box_hi_idx[0] - 2 + num_subghosts_conservative_var[2][0]) +
                                 (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
 
-                            // Set index for x-direction END
-                            
                             std::vector<double> rho_Y_x_L;
                             std::vector<double> rho_Y_x_LL;
                             std::vector<double> rho_Y_x_LLL;
@@ -2082,6 +2071,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             /*
                              * Compute the mixture density.
                              */
+                            
                             double rho_x_L   = double(0);
                             double rho_x_LL  = double(0);
                             double rho_x_LLL = double(0);
@@ -2126,8 +2116,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 Y_x_LLL_ptr.push_back(&Y_x_LLL[si]);
                             }
                            
-                            // Set variables START
-                            
                             const double u_x_L   = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
                             const double u_x_LL  = Q[d_num_species][idx_cell_mom_x_LL]/rho_x_LL;
                             const double u_x_LLL = Q[d_num_species][idx_cell_mom_x_LLL]/rho_x_LLL;
@@ -2140,7 +2128,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             const double epsilon_x_L   = Q[d_num_species + 2][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L);
                             const double epsilon_x_LL  = Q[d_num_species + 2][idx_cell_E_x_LL]/rho_x_LL - half*(u_x_LL*u_x_LL + v_x_LL*v_x_LL);
                             const double epsilon_x_LLL = Q[d_num_species + 2][idx_cell_E_x_LLL]/rho_x_LLL - half*(u_x_LLL*u_x_LLL + v_x_LLL*v_x_LLL);
-                                                        
+                            
                             double p_x_L = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_x_L,
@@ -2159,9 +2147,10 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                     &epsilon_x_LLL,
                                     Y_x_LLL_ptr);
                             
+                            /*
+                             * Compute derivatives in x-direction.
+                             */
                             
-                            // Set variables END
-                            // Compute derivatives at x-direction START
                             std::vector<double> drho_Y_dx;
                             drho_Y_dx.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
@@ -2172,9 +2161,10 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             const double du_dx   = (u_x_LLL - double(4)*u_x_LL + double(3)*u_x_L)/(double(2)*dx[0]);
                             const double dv_dx   = (v_x_LLL - double(4)*v_x_LL + double(3)*v_x_L)/(double(2)*dx[0]);
                             const double dp_dx   = (p_x_LLL - double(4)*p_x_LL + double(3)*p_x_L)/(double(2)*dx[0]);
-                            // Compute derivatives at x-direction END
                             
-                            // Compute derivatives in y-direction.
+                            /*
+                             * Compute derivatives in y-direction.
+                             */
                             
                             double du_dy = double(0);
                             double dv_dy = double(0);
@@ -2196,10 +2186,10 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 const int idx_cell_E_y_T = (interior_box_hi_idx[0] + num_subghosts_conservative_var[2][0]) +
                                     (j + 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
                                 
-                                 /*
+                                /*
                                  * Compute the mixture density.
                                  */
-                            
+                                
                                 double rho_y_T = double(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -2261,7 +2251,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 /*
                                  * Compute the mixture density.
                                  */
-                            
+                                
                                 double rho_y_B = double(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -2328,7 +2318,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 /*
                                  * Compute the mixture density.
                                  */
-                            
+                                
                                 double rho_y_B = double(0);
                                 double rho_y_T = double(0);
                                 for (int si = 0; si < d_num_species; si++)
@@ -2412,7 +2402,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             }
                             c_x_L = sqrt(c_x_L);
                             
-                            
                             const double lambda_1 = u_x_L - c_x_L;
                             
                             // Compute vector Lambda^(-1) * L.
@@ -2475,6 +2464,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                     {
                                         V_ghost[i*(d_num_species + 3) + si] = rho_Y_x_LL[si] + double(2)*dx[0]*dV_dx[si];
                                     }
+                                    
                                     V_ghost[i*(d_num_species + 3) + d_num_species]     = u_x_LL + double(2)*dx[0]*dV_dx[d_num_species];
                                     V_ghost[i*(d_num_species + 3) + d_num_species + 1] = v_x_LL + double(2)*dx[0]*dV_dx[d_num_species + 1];
                                     V_ghost[i*(d_num_species + 3) + d_num_species + 2] = p_x_LL + double(2)*dx[0]*dV_dx[d_num_species + 2];
@@ -2484,7 +2474,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                     for (int si = 0; si < d_num_species; si++)
                                     {
                                         V_ghost[i*(d_num_species + 3) + si] = -double(2)*rho_Y_x_LL[si] - double(3)*rho_Y_x_L[si] +
-                                        double(6)*V_ghost[(i - 1)*(d_num_species + 3) + si] - double(6)*dx[0]*dV_dx[si];
+                                            double(6)*V_ghost[(i - 1)*(d_num_species + 3) + si] - double(6)*dx[0]*dV_dx[si];
                                     }
                                     
                                     V_ghost[i*(d_num_species + 3) + d_num_species] = -double(2)*u_x_LL - double(3)*u_x_L +
@@ -2639,7 +2629,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 /*
                                  * Compute the mixture density.
                                  */
-                            
+                                
                                 double rho_ghost = double(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -2701,13 +2691,12 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 << ": FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData()\n"
                                 << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
-
+                        
                         for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
                         {
                             // Get the grid spacing.
                             const double* const dx = patch_geom->getDx();
                             
-                            // Set index for y-direction START
                             const int idx_cell_rho_Y_y_T = (i + num_subghosts_conservative_var[0][0]) +
                                 (interior_box_lo_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
                             
@@ -2734,9 +2723,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             
                             const int idx_cell_E_y_TTT = (i + num_subghosts_conservative_var[2][0]) +
                                 (interior_box_lo_idx[1] + 2 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
-                            // Set index for x-direction END
-
-                            // Set index for y-direction END
                             
                             std::vector<double> rho_Y_y_T;
                             std::vector<double> rho_Y_y_TT;
@@ -2750,10 +2736,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 rho_Y_y_TT.push_back(Q[si][idx_cell_rho_Y_y_TT]);
                                 rho_Y_y_TTT.push_back(Q[si][idx_cell_rho_Y_y_TTT]);
                             }
-
+                            
                             /*
                              * Compute the mixture density.
                              */
+                            
                             double rho_y_T   = double(0);
                             double rho_y_TT  = double(0);
                             double rho_y_TTT = double(0);
@@ -2763,11 +2750,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 rho_y_TT  += Q[si][idx_cell_rho_Y_y_TT];
                                 rho_y_TTT += Q[si][idx_cell_rho_Y_y_TTT];
                             }
-
+                            
                             /*
                              * Compute the mass fractions.
                              */
-
+                            
                             std::vector<double> Y_y_T;
                             std::vector<double> Y_y_TT;
                             std::vector<double> Y_y_TTT;
@@ -2797,9 +2784,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 Y_y_TT_ptr.push_back(&Y_y_TT[si]);
                                 Y_y_TTT_ptr.push_back(&Y_y_TTT[si]);
                             }
-
-                            // Set variables START
-
+                            
                             const double u_y_T   = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
                             const double u_y_TT  = Q[d_num_species][idx_cell_mom_y_TT]/rho_y_TT;
                             const double u_y_TTT = Q[d_num_species][idx_cell_mom_y_TTT]/rho_y_TTT;
@@ -2812,7 +2797,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             const double epsilon_y_T   = Q[d_num_species + 2][idx_cell_E_y_T]/rho_y_T - half*(u_y_T*u_y_T + v_y_T*v_y_T);
                             const double epsilon_y_TT  = Q[d_num_species + 2][idx_cell_E_y_TT]/rho_y_TT - half*(u_y_TT*u_y_TT + v_y_TT*v_y_TT);
                             const double epsilon_y_TTT = Q[d_num_species + 2][idx_cell_E_y_TTT]/rho_y_TTT- half*(u_y_TTT*u_y_TTT + v_y_TTT*v_y_TTT);
-
+                            
                             double p_y_T = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_y_T,
@@ -2830,9 +2815,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                     &rho_y_TTT,
                                     &epsilon_y_TTT,
                                     Y_y_TTT_ptr);
-
-                            // Set variables END
-                            // Compute derivatives at y-direction START
+                            
+                            /*
+                             * Compute derivatives in y-direction.
+                             */
+                            
                             std::vector<double> drho_Y_dy;
                             drho_Y_dy.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
@@ -2843,8 +2830,10 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             const double du_dy   = -(u_y_TTT - double(4)*u_y_TT + double(3)*u_y_T)/(double(2)*dx[1]);
                             const double dv_dy   = -(v_y_TTT - double(4)*v_y_TT + double(3)*v_y_T)/(double(2)*dx[1]);
                             const double dp_dy   = -(p_y_TTT - double(4)*p_y_TT + double(3)*p_y_T)/(double(2)*dx[1]);
-                            // Compute derivatives at y-direction END
-                            // Compute derivatives in x-direction START
+                            
+                            /*
+                             * Compute derivatives in x-direction.
+                             */
                             
                             double du_dx = double(0);
                             double dv_dx = double(0);
@@ -2865,11 +2854,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 
                                 const int idx_cell_E_x_R = (i + 1 + num_subghosts_conservative_var[2][0]) +
                                     (interior_box_lo_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
-
-                                 /*
+                                
+                                /*
                                  * Compute the mixture density.
                                  */
-                            
+                                
                                 double rho_x_R = double(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -2886,7 +2875,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 {
                                     Y_x_R.push_back(Q[si][idx_cell_rho_Y_x_R]/rho_x_R);
                                 }
-
+                                
                                 /*
                                  * Get the pointers to the mass fractions.
                                  */
@@ -2897,17 +2886,17 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 {
                                     Y_x_R_ptr.push_back(&Y_x_R[si]);
                                 }
-
+                                
                                 const double u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
                                 const double v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
                                 const double epsilon_x_R = Q[d_num_species + 2][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R);
-
+                                
                                 double p_x_R = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_x_R,
                                         &epsilon_x_R,
                                         Y_x_R_ptr);
-
+                                
                                 // One-sided derivatives.
                                 du_dx = (u_x_R - u_y_T)/(dx[0]);
                                 dv_dx = (v_x_R - v_y_T)/(dx[0]);
@@ -2932,7 +2921,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 /*
                                  * Compute the mixture density.
                                  */
-                            
+                                
                                 double rho_x_L = double(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -2960,7 +2949,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 {
                                     Y_x_L_ptr.push_back(&Y_x_L[si]);
                                 }
-
+                                
                                 const double u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
                                 const double v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
                                 const double epsilon_x_L = Q[d_num_species + 2][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L);
@@ -2970,7 +2959,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                         &rho_x_L,
                                         &epsilon_x_L,
                                         Y_x_L_ptr);
-
+                                
                                 // One-sided derivatives.
                                 du_dx = (u_y_T - u_x_L)/(dx[0]);
                                 dv_dx = (v_y_T - v_x_L)/(dx[0]);
@@ -2995,11 +2984,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 
                                 const int idx_cell_E_x_R = (i + 1 + num_subghosts_conservative_var[2][0]) +
                                     (interior_box_lo_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
-
+                                
                                 /*
                                  * Compute the mixture density.
                                  */
-                            
+                                
                                 double rho_x_L = double(0);
                                 double rho_x_R = double(0);
                                 for (int si = 0; si < d_num_species; si++)
@@ -3035,7 +3024,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                     Y_x_L_ptr.push_back(&Y_x_L[si]);
                                     Y_x_R_ptr.push_back(&Y_x_R[si]);
                                 }
-
+                                
                                 const double u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
                                 const double u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
                                 
@@ -3062,6 +3051,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 dv_dx = (v_x_R - v_x_L)/(double(2)*dx[0]);
                                 dp_dx = (p_x_R - p_x_L)/(double(2)*dx[0]);
                             }
+                            
                             // Compute sound speed.
                             
                             const double Gamma_y_T = d_equation_of_state_mixing_rules->getGruneisenParameter(
@@ -3097,7 +3087,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             
                             const double M_sq = (v_y_T*v_y_T + u_y_T*u_y_T)/(c_y_T*c_y_T);
                             const double K = sigma*c_y_T*(double(1) - M_sq)/length_char;
-
+                            
                             Lambda_inv_L[0] = dp_dy - rho_y_T*c_y_T*dv_dy;
                             Lambda_inv_L[1] = du_dy;
                             for (int si = 0; si < d_num_species; si++)
@@ -3149,7 +3139,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                     V_ghost[j*(d_num_species + 3) + d_num_species + 1] = v_y_TT   - double(2)*dx[1]*dV_dy[d_num_species + 1];
                                     V_ghost[j*(d_num_species + 3) + d_num_species + 2] = p_y_TT   - double(2)*dx[1]*dV_dy[d_num_species + 2];
                                 }
-
                                 else if (j == num_ghosts_to_fill - 2)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
@@ -3167,7 +3156,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                     V_ghost[j*(d_num_species + 3) +d_num_species + 2] = -double(2)*p_y_TT - double(3)*p_y_T +
                                         double(6)*V_ghost[(j + 1)*(d_num_species + 3) + d_num_species + 2] + double(6)*dx[1]*dV_dy[d_num_species + 2];
                                 }
-
                                 else if (j == num_ghosts_to_fill - 3)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
@@ -3376,7 +3364,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             // Get the grid spacing.
                             const double* const dx = patch_geom->getDx();
                             
-                            // Compute one-sided derivatives in y-direction.
                             const int idx_cell_rho_Y_y_B = (i + num_subghosts_conservative_var[0][0]) +
                                 (interior_box_hi_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
                             
@@ -3404,8 +3391,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             const int idx_cell_E_y_BBB = (i + num_subghosts_conservative_var[2][0]) + 
                                 (interior_box_hi_idx[1] - 2 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
                             
-                            // Set index for y-direction END
-                            
                             std::vector<double> rho_Y_y_B;
                             std::vector<double> rho_Y_y_BB;
                             std::vector<double> rho_Y_y_BBB;
@@ -3418,10 +3403,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 rho_Y_y_BB.push_back(Q[si][idx_cell_rho_Y_y_BB]);
                                 rho_Y_y_BBB.push_back(Q[si][idx_cell_rho_Y_y_BBB]);
                             }
-
+                            
                             /*
                              * Compute the mixture density.
                              */
+                            
                             double rho_y_B   = double(0);
                             double rho_y_BB  = double(0);
                             double rho_y_BBB = double(0);
@@ -3431,11 +3417,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 rho_y_BB  += Q[si][idx_cell_rho_Y_y_BB];
                                 rho_y_BBB += Q[si][idx_cell_rho_Y_y_BBB];
                             }
-
+                            
                             /*
                              * Compute the mass fractions.
                              */
-
+                            
                             std::vector<double> Y_y_B;
                             std::vector<double> Y_y_BB;
                             std::vector<double> Y_y_BBB;
@@ -3466,8 +3452,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 Y_y_BBB_ptr.push_back(&Y_y_BBB[si]);
                             }
                            
-                            // Set variables START
-
                             const double u_y_B   = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
                             const double u_y_BB  = Q[d_num_species][idx_cell_mom_y_BB]/rho_y_BB;
                             const double u_y_BBB = Q[d_num_species][idx_cell_mom_y_BBB]/rho_y_BBB;
@@ -3480,7 +3464,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             const double epsilon_y_B   = Q[d_num_species + 2][idx_cell_E_y_B]/rho_y_B - half*(u_y_B*u_y_B + v_y_B*v_y_B);
                             const double epsilon_y_BB  = Q[d_num_species + 2][idx_cell_E_y_BB]/rho_y_BB - half*(u_y_BB*u_y_BB + v_y_BB*v_y_BB);
                             const double epsilon_y_BBB = Q[d_num_species + 2][idx_cell_E_y_BBB]/rho_y_BBB - half*(u_y_BBB*u_y_BBB + v_y_BBB*v_y_BBB);
-
+                            
                             double p_y_B = d_equation_of_state_mixing_rules->
                                 getPressure(
                                     &rho_y_B,
@@ -3498,9 +3482,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                     &rho_y_BBB,
                                     &epsilon_y_BBB,
                                     Y_y_BBB_ptr);
-
-                            // Set variables END
-                            // Compute derivatives at y-direction START
+                            
+                            /*
+                             * Compute derivatives in y-direction.
+                             */
+                            
                             std::vector<double> drho_Y_dy;
                             drho_Y_dy.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
@@ -3511,8 +3497,10 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             const double du_dy   = (u_y_BBB - double(4)*u_y_BB + double(3)*u_y_B)/(double(2)*dx[1]);
                             const double dv_dy   = (v_y_BBB - double(4)*v_y_BB + double(3)*v_y_B)/(double(2)*dx[1]);
                             const double dp_dy   = (p_y_BBB - double(4)*p_y_BB + double(3)*p_y_B)/(double(2)*dx[1]);
-
-                            // Compute derivatives in x-direction.
+                            
+                            /*
+                             * Compute derivatives in x-direction.
+                             */
                             
                             double du_dx = double(0);
                             double dv_dx = double(0);
@@ -3533,11 +3521,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 
                                 const int idx_cell_E_x_R = (i + 1 + num_subghosts_conservative_var[2][0]) +
                                     (interior_box_hi_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
-
-                                 /*
+                                
+                                /*
                                  * Compute the mixture density.
                                  */
-                            
+                                
                                 double rho_x_R = double(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -3554,7 +3542,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 {
                                     Y_x_R.push_back(Q[si][idx_cell_rho_Y_x_R]/rho_x_R);
                                 }
-
+                                
                                 /*
                                  * Get the pointers to the mass fractions.
                                  */
@@ -3565,17 +3553,17 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 {
                                     Y_x_R_ptr.push_back(&Y_x_R[si]);
                                 }
-
+                                
                                 const double u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
                                 const double v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
                                 const double epsilon_x_R = Q[d_num_species + 2][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R);
-
+                                
                                 double p_x_R = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_x_R,
                                         &epsilon_x_R,
                                         Y_x_R_ptr);
-
+                                
                                 // One-sided derivatives.
                                 du_dx = (u_x_R - u_y_B)/(dx[0]);
                                 dv_dx = (v_x_R - v_y_B)/(dx[0]);
@@ -3600,7 +3588,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 /*
                                  * Compute the mixture density.
                                  */
-                            
+                                
                                 double rho_x_L = double(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -3628,17 +3616,17 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 {
                                     Y_x_L_ptr.push_back(&Y_x_L[si]);
                                 }
-
+                                
                                 const double u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
                                 const double v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
                                 const double epsilon_x_L = Q[d_num_species + 2][idx_cell_E_x_L]/rho_x_L - half*(u_x_L*u_x_L + v_x_L*v_x_L);
-
+                                
                                 double p_x_L = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_x_L,
                                         &epsilon_x_L,
                                         Y_x_L_ptr);
-
+                                
                                 // One-sided derivatives.
                                 du_dx = (u_y_B - u_x_L)/(dx[0]);
                                 dv_dx = (v_y_B - v_x_L)/(dx[0]);
@@ -3663,11 +3651,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 
                                 const int idx_cell_E_x_R = (i + 1 + num_subghosts_conservative_var[2][0]) +
                                     (interior_box_hi_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
-
+                                
                                 /*
                                  * Compute the mixture density.
                                  */
-                            
+                                
                                 double rho_x_L = double(0);
                                 double rho_x_R = double(0);
                                 for (int si = 0; si < d_num_species; si++)
@@ -3703,7 +3691,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                     Y_x_L_ptr.push_back(&Y_x_L[si]);
                                     Y_x_R_ptr.push_back(&Y_x_R[si]);
                                 }
-
+                                
                                 const double u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
                                 const double u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
                                 
@@ -3724,13 +3712,13 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                         &rho_x_R,
                                         &epsilon_x_R,
                                         Y_x_R_ptr);
-
+                                
                                 // Central derivatives.
                                 du_dx = (u_x_R - u_x_L)/(double(2)*dx[0]);
                                 dv_dx = (v_x_R - v_x_L)/(double(2)*dx[0]);
                                 dp_dx = (p_x_R - p_x_L)/(double(2)*dx[0]);
                             }
-
+                            
                             // Compute sound speed.
                             
                             const double Gamma_y_B = d_equation_of_state_mixing_rules->getGruneisenParameter(
@@ -3750,7 +3738,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 c_y_B += Y_y_B[si]*Psi_y_B[si];
                             }
                             c_y_B = sqrt(c_y_B);
-
+                            
                             const double lambda_1 = v_y_B - c_y_B;
                             
                             // Compute vector Lambda^(-1) * L.
@@ -3766,7 +3754,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             
                             const double M_sq = (v_y_B*v_y_B + u_y_B*u_y_B)/(c_y_B*c_y_B);
                             const double K = sigma*c_y_B*(double(1) - M_sq)/length_char;
-
+                            
                             Lambda_inv_L[0] = (double(1)/lambda_1)*(K*(p_y_B - p_t) - (double(1) - beta)*T_1);
                             Lambda_inv_L[1] = du_dy;
                             for (int si = 0; si < d_num_species; si++)
@@ -3774,7 +3762,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 Lambda_inv_L[si + 2] = c_y_B*c_y_B*drho_Y_dy[si] - Y_y_B[si]*dp_dy;
                             }
                             Lambda_inv_L[d_num_species + 2] = dp_dy + rho_y_B*c_y_B*dv_dy;
-                        
+                            
                            // Compute dV_dy.
                             
                             const double c_sq_inv  = double(1)/(c_y_B*c_y_B);
@@ -3790,9 +3778,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             dV_dy[d_num_species] = Lambda_inv_L[1];
                             dV_dy[d_num_species + 1] = half*rho_c_inv*(-Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 2]);
                             dV_dy[d_num_species + 2] = half*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 2]); 
-
+                            
                             double V_ghost[(d_num_species + 3)*num_ghosts_to_fill];
-
+                            
                             for (int j = 0; j < num_ghosts_to_fill; j++)
                             {
                                 const int idx_cell_rho_Y = (i + num_subghosts_conservative_var[0][0]) +
@@ -3806,7 +3794,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 const int idx_cell_E = (i + num_subghosts_conservative_var[2][0]) +
                                     (j + fill_box_lo_idx[1] + num_subghosts_conservative_var[2][1])*
                                         subghostcell_dims_conservative_var[2][0];
-
+                                
                                 if (j == 0)
                                 {
                                     for (int si = 0; si < d_num_species; si++)
@@ -3822,8 +3810,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 {
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                    V_ghost[j*(d_num_species + 3) + si] = -double(2)*rho_Y_y_BB[si] - double(3)*rho_Y_y_B[si] +
-                                        double(6)*V_ghost[(j - 1)*(d_num_species + 3) + si] - double(6)*dx[1]*dV_dy[si];
+                                        V_ghost[j*(d_num_species + 3) + si] = -double(2)*rho_Y_y_BB[si] - double(3)*rho_Y_y_B[si] +
+                                            double(6)*V_ghost[(j - 1)*(d_num_species + 3) + si] - double(6)*dx[1]*dV_dy[si];
                                     }
                                     
                                     V_ghost[j*(d_num_species + 3) + d_num_species] = -double(2)*u_y_BB - double(3)*u_y_B +
@@ -3975,7 +3963,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                                 /*
                                  * Compute the mixture density.
                                  */
-                            
+                                
                                 double rho_ghost = double(0);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -5560,7 +5548,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 // Get the grid spacing.
                                 const double* const dx = patch_geom->getDx();
                                 
-                                // Set index for x-direction STARTI
                                 const int idx_cell_rho_Y_x_R = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
                                     (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
                                     (k + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
@@ -5605,8 +5592,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                     (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                         subghostcell_dims_conservative_var[2][1];
-                                
-                                // Set index for x-direction END
                                 
                                 std::vector<double> rho_Y_x_R;
                                 std::vector<double> rho_Y_x_RR;
@@ -5669,8 +5654,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     Y_x_RRR_ptr.push_back(&Y_x_RRR[si]);
                                 }
                                 
-                                // Set variables START
-                            
                                 const double u_x_R   = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
                                 const double u_x_RR  = Q[d_num_species][idx_cell_mom_x_RR]/rho_x_RR;
                                 const double u_x_RRR = Q[d_num_species][idx_cell_mom_x_RRR]/rho_x_RRR;
@@ -5706,8 +5689,10 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         &epsilon_x_RRR,
                                         Y_x_RRR_ptr);
                                 
-                                // Set variables END
-                                // Compute derivatives at x-direction START
+                                /*
+                                 * Compute derivatives in x-direction.
+                                 */
+                                
                                 std::vector<double> drho_Y_dx;
                                 drho_Y_dx.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -5719,21 +5704,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 const double dv_dx = -(v_x_RRR - double(4)*v_x_RR + double(3)*v_x_R)/(double(2)*dx[0]);
                                 const double dw_dx = -(w_x_RRR - double(4)*w_x_RR + double(3)*w_x_R)/(double(2)*dx[0]);
                                 const double dp_dx = -(p_x_RRR - double(4)*p_x_RR + double(3)*p_x_R)/(double(2)*dx[0]);
-                                // Compute derivatives at x-direction END
                                 
-                                // Compute derivatives in y-direction START
+                                /*
+                                 * Compute derivatives in y-direction.
+                                 */
                                 
                                 double du_dy = double(0);
                                 double dv_dy = double(0);
                                 // double dw_dy = double(0);
                                 double dp_dy = double(0);
-                                
-                                // Compute derivatives in z-direction START
-                                
-                                double du_dz = double(0);
-                                // double dv_dz = double(0);
-                                double dw_dz = double(0);
-                                double dp_dz = double(0);
                                 
                                 if (((patch_geom->getTouchesRegularBoundary(1, 0)) && (j == interior_box_lo_idx[1])) ||
                                     ((j + num_subghosts_conservative_var[0][1] == 0) ||
@@ -5760,7 +5739,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     /*
                                      * Compute the mixture density.
                                      */
-                                
+                                    
                                     double rho_y_T = double(0);
                                     for (int si = 0; si < d_num_species; si++)
                                     {
@@ -5978,6 +5957,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     // dw_dy = (w_y_T - w_y_B)/(double(2)*dx[1]);
                                     dp_dy = (p_y_T - p_y_B)/(double(2)*dx[1]);
                                 }
+                                
+                                /*
+                                 * Compute derivatives in z-direction.
+                                 */
+                                
+                                double du_dz = double(0);
+                                // double dv_dz = double(0);
+                                double dw_dz = double(0);
+                                double dp_dz = double(0);
                                 
                                 if (((patch_geom->getTouchesRegularBoundary(2, 0)) && (k == interior_box_lo_idx[2])) ||
                                     ((k + num_subghosts_conservative_var[0][2] == 0) ||
@@ -6583,7 +6571,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 // Get the grid spacing.
                                 const double* const dx = patch_geom->getDx();
                                 
-                                // Set index for x-direction STARTI
                                 const int idx_cell_rho_Y_x_L = (interior_box_hi_idx[0] + num_subghosts_conservative_var[0][0]) +
                                     (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
                                     (k + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
@@ -6628,8 +6615,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                     (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                         subghostcell_dims_conservative_var[2][1];
-                                // Set index for x-direction END
-
+                                
                                 std::vector<double> rho_Y_x_L;
                                 std::vector<double> rho_Y_x_LL;
                                 std::vector<double> rho_Y_x_LLL;
@@ -6691,8 +6677,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     Y_x_LLL_ptr.push_back(&Y_x_LLL[si]);
                                 }
                                 
-                                // Set variables START
-
                                 const double u_x_L   = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
                                 const double u_x_LL  = Q[d_num_species][idx_cell_mom_x_LL]/rho_x_LL;
                                 const double u_x_LLL = Q[d_num_species][idx_cell_mom_x_LLL]/rho_x_LLL;
@@ -6728,9 +6712,10 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         &epsilon_x_LLL,
                                         Y_x_LLL_ptr);
                                 
-                                // Set variables END
+                                /*
+                                 * Compute derivatives in x-direction.
+                                 */
                                 
-                                // Compute derivatives at x-direction START
                                 std::vector<double> drho_Y_dx;
                                 drho_Y_dx.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -6742,21 +6727,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 const double dv_dx   = (v_x_LLL - double(4)*v_x_LL + double(3)*v_x_L)/(double(2)*dx[0]);
                                 const double dw_dx   = (w_x_LLL - double(4)*w_x_LL + double(3)*w_x_L)/(double(2)*dx[0]);
                                 const double dp_dx   = (p_x_LLL - double(4)*p_x_LL + double(3)*p_x_L)/(double(2)*dx[0]);
-                                // Compute derivatives at x-direction END
-
-                                // Compute derivatives in y-direction START
+                                
+                                /*
+                                 * Compute derivatives in y-direction.
+                                 */
                                 
                                 double du_dy = double(0);
                                 double dv_dy = double(0);
                                 // double dw_dy = double(0);
                                 double dp_dy = double(0);
-                                
-                                // Compute derivatives in z-direction START
-                                
-                                double du_dz = double(0);
-                                // double dv_dz = double(0);
-                                double dw_dz = double(0);
-                                double dp_dz = double(0);
                                 
                                 if (((patch_geom->getTouchesRegularBoundary(1, 0)) && (j == interior_box_lo_idx[1])) ||
                                     ((j + num_subghosts_conservative_var[0][1] == 0) ||
@@ -6764,7 +6743,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                      (j + num_subghosts_conservative_var[2][1] == 0)))
                                 {
                                     // Patch is touching bottom physical or periodic boundary.
-
+                                    
                                     const int idx_cell_rho_Y_y_T = (interior_box_hi_idx[0] + num_subghosts_conservative_var[0][0]) +
                                         (j + 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
                                         (k + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
@@ -6779,11 +6758,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         (j + 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                         (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
-
+                                    
                                     /*
                                      * Compute the mixture density.
                                      */
-                                
+                                    
                                     double rho_y_T = double(0);
                                     for (int si = 0; si < d_num_species; si++)
                                     {
@@ -6835,6 +6814,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                           (j + num_subghosts_conservative_var[2][1] + 1 == subghostcell_dims_conservative_var[2][1])))
                                 {
                                     // Patch is touching top physical or periodIic boundary.
+                                    
                                     const int idx_cell_rho_Y_y_B = (interior_box_hi_idx[0] + num_subghosts_conservative_var[0][0]) +
                                         (j - 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
                                         (k + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
@@ -7001,14 +6981,23 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     // dw_dy = (w_y_T - w_y_B)/(double(2)*dx[1]);
                                     dp_dy = (p_y_T - p_y_B)/(double(2)*dx[1]);
                                 }
-
+                                
+                                /*
+                                 * Compute derivatives in z-direction.
+                                 */
+                                
+                                double du_dz = double(0);
+                                // double dv_dz = double(0);
+                                double dw_dz = double(0);
+                                double dp_dz = double(0);
+                                
                                 if (((patch_geom->getTouchesRegularBoundary(2, 0)) && (k == interior_box_lo_idx[2])) ||
                                     ((k + num_subghosts_conservative_var[0][2] == 0) ||
                                      (k + num_subghosts_conservative_var[1][2] == 0) ||
                                      (k + num_subghosts_conservative_var[2][2] == 0)))
                                 {
                                     // Patch is touching back physical or periodic boundary.
-
+                                    
                                     const int idx_cell_rho_Y_z_F = (interior_box_hi_idx[0] + num_subghosts_conservative_var[0][0]) +
                                         (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
                                         (k + 1 + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
@@ -7079,7 +7068,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                           (k + num_subghosts_conservative_var[2][2] + 1 == subghostcell_dims_conservative_var[2][2])))
                                 {
                                     // Patch is touching front physical or periodic boundary.
-
+                                    
                                     const int idx_cell_rho_Y_z_B = (interior_box_hi_idx[0] + num_subghosts_conservative_var[0][0]) +
                                         (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
                                         (k - 1 + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
@@ -7246,7 +7235,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     dw_dz = (w_z_F - w_z_B)/(double(2)*dx[2]);
                                     dp_dz = (p_z_F - p_z_B)/(double(2)*dx[2]);
                                 }
-
+                                
                                 // Compute sound speed.
                                 
                                 const double Gamma_x_L = d_equation_of_state_mixing_rules->getGruneisenParameter(
@@ -7277,13 +7266,13 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 const double& sigma       = d_bdry_face_nonreflecting_outflow_sigma[face_loc];
                                 const double& beta        = d_bdry_face_nonreflecting_outflow_beta[face_loc];
                                 const double& length_char = d_bdry_face_nonreflecting_outflow_length_char[face_loc];
-
+                                
                                 const double T_1 = v_x_L*(dp_dy - rho_x_L*c_x_L*du_dy) + rho_x_L*c_x_L*c_x_L*dv_dy +
-                                w_x_L*(dp_dz - rho_x_L*c_x_L*du_dz) + rho_x_L*c_x_L*c_x_L*dw_dz;
+                                    w_x_L*(dp_dz - rho_x_L*c_x_L*du_dz) + rho_x_L*c_x_L*c_x_L*dw_dz;
                                 
                                 const double M_sq = (u_x_L*u_x_L + v_x_L*v_x_L + w_x_L*w_x_L)/(c_x_L*c_x_L);
                                 const double K = sigma*c_x_L*(double(1) - M_sq)/length_char;
-
+                                
                                 Lambda_inv_L[0] = (double(1)/lambda_1)*(K*(p_x_L - p_t) - (double(1) - beta)*T_1);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
@@ -7292,7 +7281,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 Lambda_inv_L[d_num_species + 1] = dv_dx;
                                 Lambda_inv_L[d_num_species + 2] = dw_dx;
                                 Lambda_inv_L[d_num_species + 3] = dp_dx + rho_x_L*c_x_L*du_dx;
-
+                                
                                 // Compute dV_dx.
                                 
                                 const double c_sq_inv  = double(1)/(c_x_L*c_x_L);
@@ -7311,7 +7300,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 dV_dx[d_num_species + 3] = half*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]);
                                 
                                 double V_ghost[(d_num_species + 4)*num_ghosts_to_fill];
-
+                                
                                 for (int i = 0; i < num_ghosts_to_fill; i++)
                                 {
                                     const int idx_cell_rho_Y = (i + fill_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
@@ -7328,7 +7317,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0]+
                                         (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
-
+                                    
                                     if (i == 0)
                                     {
                                         for (int si = 0; si < d_num_species; si++)
@@ -7340,7 +7329,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         V_ghost[i*(d_num_species + 4) + d_num_species + 1] = v_x_LL + double(2)*dx[0]*dV_dx[d_num_species + 1];
                                         V_ghost[i*(d_num_species + 4) + d_num_species + 2] = w_x_LL + double(2)*dx[0]*dV_dx[d_num_species + 2];
                                         V_ghost[i*(d_num_species + 4) + d_num_species + 3] = p_x_LL + double(2)*dx[0]*dV_dx[d_num_species + 3];
-                                        }
+                                    }
                                     else if (i == 1)
                                     {
                                         for (int si = 0; si < d_num_species; si++)
@@ -7394,46 +7383,46 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             double(18)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 3] +
                                             double(6)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 3] +
                                             double(12)*dx[0]*dV_dx[d_num_species + 3];
-                                        }
-                                        else if (i == 3)
+                                    }
+                                    else if (i == 3)
+                                    {
+                                        for (int si = 0; si < d_num_species; si++)
                                         {
-                                            for (int si = 0; si < d_num_species; si++)
-                                            {
-                                                V_ghost[i*(d_num_species + 4) + si] = -double(4)*rho_Y_x_LL[si] -
-                                                    double(65)/double(3)*rho_Y_x_L[si] +
-                                                    double(40)*V_ghost[(i - 3)*(d_num_species + 4) + si] -
-                                                    double(20)*V_ghost[(i - 2)*(d_num_species + 4) + si] +
-                                                    double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + si] -
-                                                    double(20)*dx[0]*dV_dx[si];
-                                            }
-                                            
-                                            V_ghost[i*(d_num_species + 4) + d_num_species] = -double(4)*u_x_LL -
-                                                double(65)/double(3)*u_x_L +
-                                                double(40)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species] -
-                                                double(20)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species] +
-                                                double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species] -
-                                                double(20)*dx[0]*dV_dx[d_num_species];
-                                            
-                                            V_ghost[i*(d_num_species + 4) + d_num_species + 1] = -double(4)*v_x_LL -
-                                                double(65)/double(3)*v_x_L +
-                                                double(40)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 1] -
-                                                double(20)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 1] +
-                                                double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 1] -
-                                                double(20)*dx[0]*dV_dx[d_num_species + 1];
-                                            
-                                            V_ghost[i*(d_num_species + 4) + d_num_species + 2] = -double(4)*v_x_LL -
-                                                double(65)/double(3)*v_x_L +
-                                                double(40)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 2] -
-                                                double(20)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 2] +
-                                                double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 2] -
-                                                double(20)*dx[0]*dV_dx[d_num_species + 2];
-                                            
-                                            V_ghost[i*(d_num_species + 4) + d_num_species + 3] = -double(4)*p_x_LL -
-                                                double(65)/double(3)*p_x_L +
-                                                double(40)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 3] -
-                                                double(20)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 3] +
-                                                double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 3] -
-                                                double(20)*dx[0]*dV_dx[d_num_species + 3];
+                                            V_ghost[i*(d_num_species + 4) + si] = -double(4)*rho_Y_x_LL[si] -
+                                                double(65)/double(3)*rho_Y_x_L[si] +
+                                                double(40)*V_ghost[(i - 3)*(d_num_species + 4) + si] -
+                                                double(20)*V_ghost[(i - 2)*(d_num_species + 4) + si] +
+                                                double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + si] -
+                                                double(20)*dx[0]*dV_dx[si];
+                                        }
+                                        
+                                        V_ghost[i*(d_num_species + 4) + d_num_species] = -double(4)*u_x_LL -
+                                            double(65)/double(3)*u_x_L +
+                                            double(40)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species] -
+                                            double(20)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species] +
+                                            double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species] -
+                                            double(20)*dx[0]*dV_dx[d_num_species];
+                                        
+                                        V_ghost[i*(d_num_species + 4) + d_num_species + 1] = -double(4)*v_x_LL -
+                                            double(65)/double(3)*v_x_L +
+                                            double(40)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(20)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 1] +
+                                            double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 1] -
+                                            double(20)*dx[0]*dV_dx[d_num_species + 1];
+                                        
+                                        V_ghost[i*(d_num_species + 4) + d_num_species + 2] = -double(4)*v_x_LL -
+                                            double(65)/double(3)*v_x_L +
+                                            double(40)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(20)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 2] +
+                                            double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 2] -
+                                            double(20)*dx[0]*dV_dx[d_num_species + 2];
+                                        
+                                        V_ghost[i*(d_num_species + 4) + d_num_species + 3] = -double(4)*p_x_LL -
+                                            double(65)/double(3)*p_x_L +
+                                            double(40)*V_ghost[(i - 3)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(20)*V_ghost[(i - 2)*(d_num_species + 4) + d_num_species + 3] +
+                                            double(20)/double(3)*V_ghost[(i - 1)*(d_num_species + 4) + d_num_species + 3] -
+                                            double(20)*dx[0]*dV_dx[d_num_species + 3];
                                     }
                                     else if (i == 4)
                                     {
@@ -7571,7 +7560,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     Q[d_num_species][idx_cell_mom]     = rho_ghost*V_ghost[i*(d_num_species + 4) + d_num_species];
                                     Q[d_num_species + 1][idx_cell_mom] = rho_ghost*V_ghost[i*(d_num_species + 4) + d_num_species + 1];
                                     Q[d_num_species + 2][idx_cell_mom] = rho_ghost*V_ghost[i*(d_num_species + 4) + d_num_species + 2];
-
+                                    
                                     const double epsilon = d_equation_of_state_mixing_rules->
                                         getInternalEnergy(
                                             &rho_ghost,
@@ -7607,7 +7596,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 // Get the grid spacing.
                                 const double* const dx = patch_geom->getDx();
                                 
-                                // Set index for x-direction STARTI
                                 const int idx_cell_rho_Y_y_T = (i + num_subghosts_conservative_var[0][0]) +
                                     (interior_box_lo_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
                                     (k + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
@@ -7652,8 +7640,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     (interior_box_lo_idx[1] + 2 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                     (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                         subghostcell_dims_conservative_var[2][1];
-                                // Set index for x-direction END
-
+                                
                                 std::vector<double> rho_Y_y_T;
                                 std::vector<double> rho_Y_y_TT;
                                 std::vector<double> rho_Y_y_TTT;
@@ -7715,8 +7702,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     Y_y_TTT_ptr.push_back(&Y_y_TTT[si]);
                                 }
                                 
-                                // Set variables START
-
                                 const double u_y_T   = Q[d_num_species][idx_cell_mom_y_T]/rho_y_T;
                                 const double u_y_TT  = Q[d_num_species][idx_cell_mom_y_TT]/rho_y_TT;
                                 const double u_y_TTT = Q[d_num_species][idx_cell_mom_y_TTT]/rho_y_TTT;
@@ -7752,9 +7737,10 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         &epsilon_y_TTT,
                                         Y_y_TTT_ptr);
                                 
-                                // Set variables END
-
-                                // Compute derivatives at y-direction START
+                                /*
+                                 * Compute derivatives in y-direction.
+                                 */
+                                
                                 std::vector<double> drho_Y_dy;
                                 drho_Y_dy.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -7766,22 +7752,16 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 const double dv_dy   = -(v_y_TTT - double(4)*v_y_TT + double(3)*v_y_T)/(double(2)*dx[1]);
                                 const double dw_dy   = -(w_y_TTT - double(4)*w_y_TT + double(3)*w_y_T)/(double(2)*dx[1]);
                                 const double dp_dy   = -(p_y_TTT - double(4)*p_y_TT + double(3)*p_y_T)/(double(2)*dx[1]);
-                                // Compute derivatives at y-direction END
                                 
-                                // Compute derivatives in x-direction START
+                                /*
+                                 * Compute derivatives in x-direction.
+                                 */
                                 
                                 double du_dx = double(0);
                                 double dv_dx = double(0);
                                 // double dw_dx = double(0);
                                 double dp_dx = double(0);
                                 
-                                // Compute derivatives in z-direction START
-                                
-                                // double du_dz = double(0);
-                                double dv_dz = double(0);
-                                double dw_dz = double(0);
-                                double dp_dz = double(0);
-
                                 if (((patch_geom->getTouchesRegularBoundary(0, 0)) && (i == interior_box_lo_idx[0])) ||
                                     ((i + num_subghosts_conservative_var[0][0] == 0) ||
                                      (i + num_subghosts_conservative_var[1][0] == 0) ||
@@ -7803,11 +7783,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         (interior_box_lo_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                         (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
-
+                                    
                                     /*
                                      * Compute the mixture density.
                                      */
-                                
+                                    
                                     double rho_x_R = double(0);
                                     for (int si = 0; si < d_num_species; si++)
                                     {
@@ -7835,7 +7815,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     {
                                         Y_x_R_ptr.push_back(&Y_x_R[si]);
                                     }
-
+                                    
                                     const double u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
                                     const double v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
                                     const double w_x_R = Q[d_num_species + 2][idx_cell_mom_x_R]/rho_x_R;
@@ -7846,7 +7826,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             &rho_x_R,
                                             &epsilon_x_R,
                                             Y_x_R_ptr);
-
+                                    
                                     // One-sided derivatives.
                                     du_dx = (u_x_R - u_y_T)/(dx[0]);
                                     dv_dx = (v_x_R - v_y_T)/(dx[0]);
@@ -7874,11 +7854,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         (interior_box_lo_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                         (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
-
+                                    
                                     /*
                                      * Compute the mixture density.
                                      */
-                                
+                                    
                                     double rho_x_L = double(0);
                                     for (int si = 0; si < d_num_species; si++)
                                     {
@@ -7899,14 +7879,14 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     /*
                                      * Get the pointers to the mass fractions.
                                      */
-                                
+                                    
                                     std::vector<const double*> Y_x_L_ptr;
                                     Y_x_L_ptr.reserve(d_num_species);
                                     for (int si = 0; si < d_num_species; si++)
                                     {
                                         Y_x_L_ptr.push_back(&Y_x_L[si]);
                                     }
-
+                                    
                                     const double u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
                                     const double v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
                                     const double w_x_L = Q[d_num_species + 2][idx_cell_mom_x_L]/rho_x_L;
@@ -7917,8 +7897,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             &rho_x_L,
                                             &epsilon_x_L,
                                             Y_x_L_ptr);
-
-                                     // One-sided derivatives.
+                                    
+                                    // One-sided derivatives.
                                     du_dx = (u_y_T - u_x_L)/(dx[0]);
                                     dv_dx = (v_y_T - v_x_L)/(dx[0]);
                                     // dw_dx = (w_y_T - w_x_L)/(dx[0]);
@@ -7955,7 +7935,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         (interior_box_lo_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                         (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
-
+                                    
                                     /*
                                      * Compute the mixture density.
                                      */
@@ -7988,7 +7968,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     
                                     std::vector<const double*> Y_x_L_ptr;
                                     std::vector<const double*> Y_x_R_ptr;
-                                                                        
+                                    
                                     Y_x_L_ptr.reserve(d_num_species);
                                     Y_x_R_ptr.reserve(d_num_species);
                                     for (int si = 0; si < d_num_species; si++)
@@ -7999,10 +7979,10 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     
                                     const double u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
                                     const double u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
-
+                                    
                                     const double v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
                                     const double v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
-
+                                    
                                     const double w_x_L = Q[d_num_species + 2][idx_cell_mom_x_L]/rho_x_L;
                                     const double w_x_R = Q[d_num_species + 2][idx_cell_mom_x_R]/rho_x_R;
                                     
@@ -8014,19 +7994,28 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             &rho_x_L,
                                             &epsilon_x_L,
                                             Y_x_L_ptr);
-                                
+                                    
                                     double p_x_R = d_equation_of_state_mixing_rules->
                                         getPressure(
                                             &rho_x_R,
                                             &epsilon_x_R,
                                             Y_x_R_ptr);
-
+                                    
                                     // Central derivatives.
                                     du_dx = (u_x_R - u_x_L)/(double(2)*dx[0]);
                                     dv_dx = (v_x_R - v_x_L)/(double(2)*dx[0]);
                                     // dw_dx = (w_x_R - w_x_L)/(double(2)*dx[0]);
                                     dp_dx = (p_x_R - p_x_L)/(double(2)*dx[0]);
                                 }
+                                
+                                /*
+                                 * Compute derivatives in z-direction.
+                                 */
+                                
+                                // double du_dz = double(0);
+                                double dv_dz = double(0);
+                                double dw_dz = double(0);
+                                double dp_dz = double(0);
                                 
                                 if (((patch_geom->getTouchesRegularBoundary(2, 0)) && (k == interior_box_lo_idx[2])) ||
                                     ((k + num_subghosts_conservative_var[0][2] == 0) ||
@@ -8049,7 +8038,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         (interior_box_lo_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                         (k + 1 + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
-
+                                    
                                     /*
                                      * Compute the mixture density.
                                      */
@@ -8092,7 +8081,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             &rho_z_F,
                                             &epsilon_z_F,
                                             Y_z_F_ptr);
-
+                                    
                                     // One-sided derivatives.
                                     // du_dz = (u_z_F - u_y_T)/(dx[2]);
                                     dv_dz = (v_z_F - v_y_T)/(dx[2]);
@@ -8105,6 +8094,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                           (k + num_subghosts_conservative_var[2][2] + 1 == subghostcell_dims_conservative_var[2][2])))
                                 {
                                     // Patch is touching front physical or periodic boundary.
+                                    
                                     const int idx_cell_rho_Y_z_B = (i + num_subghosts_conservative_var[0][0]) +
                                         (interior_box_lo_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
                                         (k - 1 + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
@@ -8162,7 +8152,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             &rho_z_B,
                                             &epsilon_z_B,
                                             Y_z_B_ptr);
-
+                                    
                                     // One-sided derivatives.
                                     // du_dz = (u_y_T - u_z_B)/(dx[2]);
                                     dv_dz = (v_y_T - v_z_B)/(dx[2]);
@@ -8264,21 +8254,21 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             &rho_z_F,
                                             &epsilon_z_F,
                                             Y_z_F_ptr);
-
+                                    
                                     // Central derivatives.
                                     // du_dz = (u_z_F - u_z_B)/(double(2)*dx[2]);
                                     dv_dz = (v_z_F - v_z_B)/(double(2)*dx[2]);
                                     dw_dz = (w_z_F - w_z_B)/(double(2)*dx[2]);
                                     dp_dz = (p_z_F - p_z_B)/(double(2)*dx[2]);
                                 }
-
+                                
                                 // Compute sound speed.
                                 
                                 const double Gamma_y_T = d_equation_of_state_mixing_rules->getGruneisenParameter(
                                     &rho_y_T,
                                     &p_y_T,
                                     Y_y_T_ptr);
-
+                                
                                 const std::vector<double> Psi_y_T = d_equation_of_state_mixing_rules->
                                     getPressureDerivativeWithPartialDensities(
                                             &rho_y_T,
@@ -8293,7 +8283,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 c_y_T = sqrt(c_y_T);
                                 
                                 const double lambda_last = v_y_T + c_y_T;
-
+                                
                                 // Compute vector Lambda^(-1) * L.
                                 
                                 double Lambda_inv_L[d_num_species + 4];
@@ -8336,8 +8326,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 dV_dy[d_num_species + 3] = half*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]);
                                 
                                 double V_ghost[(d_num_species + 4)*num_ghosts_to_fill];
-
-                                 for (int j = num_ghosts_to_fill - 1; j >= 0; j--)
+                                
+                                for (int j = num_ghosts_to_fill - 1; j >= 0; j--)
                                 {
                                     const int idx_cell_rho_Y = (i + num_subghosts_conservative_var[0][0]) +
                                         (j + fill_box_lo_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -8353,7 +8343,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         (j + fill_box_lo_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                         (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
-
+                                    
                                     if (j == num_ghosts_to_fill - 1)
                                     {
                                         for (int si = 0; si < d_num_species; si++)
@@ -8632,7 +8622,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 // Get the grid spacing.
                                 const double* const dx = patch_geom->getDx();
                                 
-                                // Set index for x-direction STARTI
                                 const int idx_cell_rho_Y_y_B = (i + num_subghosts_conservative_var[0][0]) +
                                     (interior_box_hi_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
                                     (k + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
@@ -8677,8 +8666,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     (interior_box_hi_idx[1] - 2 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                     (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                         subghostcell_dims_conservative_var[2][1];
-                                // Set index for y-direction END
-
+                                
                                 std::vector<double> rho_Y_y_B;
                                 std::vector<double> rho_Y_y_BB;
                                 std::vector<double> rho_Y_y_BBB;
@@ -8740,8 +8728,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     Y_y_BBB_ptr.push_back(&Y_y_BBB[si]);
                                 }
                                 
-                                // Set variables START
-
                                 const double u_y_B   = Q[d_num_species][idx_cell_mom_y_B]/rho_y_B;
                                 const double u_y_BB  = Q[d_num_species][idx_cell_mom_y_BB]/rho_y_BB;
                                 const double u_y_BBB = Q[d_num_species][idx_cell_mom_y_BBB]/rho_y_BBB;
@@ -8777,9 +8763,10 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         &epsilon_y_BBB,
                                         Y_y_BBB_ptr);
                                 
-                                // Set variables END
-                                // Compute derivatives at y-direction START
-                                // Compute derivatives at y-direction START
+                                /*
+                                 * Compute derivatives in y-direction.
+                                 */
+                                
                                 std::vector<double> drho_Y_dy;
                                 drho_Y_dy.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -8791,21 +8778,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 const double dv_dy   = (v_y_BBB - double(4)*v_y_BB + double(3)*v_y_B)/(double(2)*dx[1]);
                                 const double dw_dy   = (w_y_BBB - double(4)*w_y_BB + double(3)*w_y_B)/(double(2)*dx[1]);
                                 const double dp_dy   = (p_y_BBB - double(4)*p_y_BB + double(3)*p_y_B)/(double(2)*dx[1]);
-                                // Compute derivatives at y-direction END
                                 
-                                // Compute derivatives in x-direction START
+                                /*
+                                 * Compute derivatives in x-direction.
+                                 */
                                 
                                 double du_dx = double(0);
                                 double dv_dx = double(0);
                                 // double dw_dx = double(0);
                                 double dp_dx = double(0);
-                                
-                                // Compute derivatives in z-direction START
-                                
-                                // double du_dz = double(0);
-                                double dv_dz = double(0);
-                                double dw_dz = double(0);
-                                double dp_dz = double(0);
                                 
                                 if (((patch_geom->getTouchesRegularBoundary(0, 0)) && (i == interior_box_lo_idx[0])) ||
                                     ((i + num_subghosts_conservative_var[0][0] == 0) ||
@@ -8828,11 +8809,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         (interior_box_hi_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                         (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
-
+                                    
                                     /*
                                      * Compute the mixture density.
                                      */
-                                
+                                    
                                     double rho_x_R = double(0);
                                     for (int si = 0; si < d_num_species; si++)
                                     {
@@ -8853,14 +8834,14 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     /*
                                      * Get the pointers to the mass fractions.
                                      */
-                                
+                                    
                                     std::vector<const double*> Y_x_R_ptr;
                                     Y_x_R_ptr.reserve(d_num_species);
                                     for (int si = 0; si < d_num_species; si++)
                                     {
                                         Y_x_R_ptr.push_back(&Y_x_R[si]);
                                     }
-
+                                    
                                     const double u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
                                     const double v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
                                     const double w_x_R = Q[d_num_species + 2][idx_cell_mom_x_R]/rho_x_R;
@@ -8871,7 +8852,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             &rho_x_R,
                                             &epsilon_x_R,
                                             Y_x_R_ptr);
-
+                                    
                                     // One-sided derivatives.
                                     du_dx = (u_x_R - u_y_B)/(dx[0]);
                                     dv_dx = (v_x_R - v_y_B)/(dx[0]);
@@ -8899,11 +8880,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         (interior_box_hi_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                         (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
-
+                                    
                                     /*
                                      * Compute the mixture density.
                                      */
-                                
+                                    
                                     double rho_x_L = double(0);
                                     for (int si = 0; si < d_num_species; si++)
                                     {
@@ -8931,7 +8912,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     {
                                         Y_x_L_ptr.push_back(&Y_x_L[si]);
                                     }
-
+                                    
                                     const double u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
                                     const double v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
                                     const double w_x_L = Q[d_num_species + 2][idx_cell_mom_x_L]/rho_x_L;
@@ -8942,8 +8923,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             &rho_x_L,
                                             &epsilon_x_L,
                                             Y_x_L_ptr);
-
-                                     // One-sided derivatives.
+                                    
+                                    // One-sided derivatives.
                                     du_dx = (u_y_B - u_x_L)/(dx[0]);
                                     dv_dx = (v_y_B - v_x_L)/(dx[0]);
                                     // dw_dx = (w_y_B - w_x_L)/(dx[0]);
@@ -8980,7 +8961,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         (interior_box_hi_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                         (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
-
+                                    
                                     /*
                                      * Compute the mixture density.
                                      */
@@ -9052,6 +9033,16 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     // dw_dx = (w_x_R - w_x_L)/(double(2)*dx[0]);
                                     dp_dx = (p_x_R - p_x_L)/(double(2)*dx[0]);
                                 }
+                                
+                                /*
+                                 * Compute derivatives in z-direction.
+                                 */
+                                
+                                // double du_dz = double(0);
+                                double dv_dz = double(0);
+                                double dw_dz = double(0);
+                                double dp_dz = double(0);
+                                
                                 if (((patch_geom->getTouchesRegularBoundary(2, 0)) && (k == interior_box_lo_idx[2])) ||
                                     ((k + num_subghosts_conservative_var[0][2] == 0) ||
                                      (k + num_subghosts_conservative_var[1][2] == 0) ||
@@ -9073,7 +9064,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         (interior_box_hi_idx[1] + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                         (k + 1 + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
-
+                                    
                                     /*
                                      * Compute the mixture density.
                                      */
@@ -9116,7 +9107,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             &rho_z_F,
                                             &epsilon_z_F,
                                             Y_z_F_ptr);
-
+                                    
                                     // One-sided derivatives.
                                     // du_dz = (u_z_F - u_y_B)/(dx[2]);
                                     dv_dz = (v_z_F - v_y_B)/(dx[2]);
@@ -9129,6 +9120,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                           (k + num_subghosts_conservative_var[2][2] + 1 == subghostcell_dims_conservative_var[2][2])))
                                 {
                                     // Patch is touching front physical or periodic boundary.
+                                    
                                     const int idx_cell_rho_Y_z_B = (i + num_subghosts_conservative_var[0][0]) +
                                         (interior_box_hi_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
                                         (k - 1 + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
@@ -9186,7 +9178,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             &rho_z_B,
                                             &epsilon_z_B,
                                             Y_z_B_ptr);
-
+                                    
                                     // One-sided derivatives.
                                     // du_dz = (u_y_B - u_z_B)/(dx[2]);
                                     dv_dz = (v_y_B - v_z_B)/(dx[2]);
@@ -9288,21 +9280,21 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             &rho_z_F,
                                             &epsilon_z_F,
                                             Y_z_F_ptr);
-
+                                    
                                     // Central derivatives.
                                     // du_dz = (u_z_F - u_z_B)/(double(2)*dx[2]);
                                     dv_dz = (v_z_F - v_z_B)/(double(2)*dx[2]);
                                     dw_dz = (w_z_F - w_z_B)/(double(2)*dx[2]);
                                     dp_dz = (p_z_F - p_z_B)/(double(2)*dx[2]);
                                 }
-
+                                
                                 // Compute sound speed.
                                 
                                 const double Gamma_y_B = d_equation_of_state_mixing_rules->getGruneisenParameter(
                                     &rho_y_B,
                                     &p_y_B,
                                     Y_y_B_ptr);
-
+                                
                                 const std::vector<double> Psi_y_B = d_equation_of_state_mixing_rules->
                                     getPressureDerivativeWithPartialDensities(
                                             &rho_y_B,
@@ -9341,14 +9333,14 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 }
                                 Lambda_inv_L[d_num_species + 2] = dw_dy;
                                 Lambda_inv_L[d_num_species + 3] = dp_dy + rho_y_B*c_y_B*dv_dy;
-
+                                
                                 // Compute dV_dy.
                                 
                                 const double c_sq_inv  = double(1)/(c_y_B*c_y_B);
                                 const double rho_c_inv = double(1)/(rho_y_B*c_y_B);
                                 
                                 double dV_dy[d_num_species + 4];
-
+                                
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     dV_dy[si] = half*c_sq_inv*Y_y_B[si]*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]) +
@@ -9360,7 +9352,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 dV_dy[d_num_species + 3] = half*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]);
                                 
                                 double V_ghost[(d_num_species + 4)*num_ghosts_to_fill];
-
+                                
                                 for (int j = 0; j < num_ghosts_to_fill; j++)
                                 {
                                     const int idx_cell_rho_Y = (i + num_subghosts_conservative_var[0][0]) +
@@ -9656,7 +9648,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 // Get the grid spacing.
                                 const double* const dx = patch_geom->getDx();
                                 
-                                // Set index for x-direction STARTI
                                 const int idx_cell_rho_Y_z_F = (i + num_subghosts_conservative_var[0][0]) +
                                     (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
                                     (interior_box_lo_idx[2] + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][1]*
@@ -9701,7 +9692,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                     (interior_box_lo_idx[2] + 2 + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                         subghostcell_dims_conservative_var[2][1];
-                                // Set index for x-direction END
                                 
                                 std::vector<double> rho_Y_z_F;
                                 std::vector<double> rho_Y_z_FF;
@@ -9763,8 +9753,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     Y_z_FF_ptr.push_back(&Y_z_FF[si]);
                                     Y_z_FFF_ptr.push_back(&Y_z_FFF[si]);
                                 }
-                                // Set variables START
-
+                                
                                 const double u_z_F   = Q[d_num_species][idx_cell_mom_z_F]/rho_z_F;
                                 const double u_z_FF  = Q[d_num_species][idx_cell_mom_z_FF]/rho_z_FF;
                                 const double u_z_FFF = Q[d_num_species][idx_cell_mom_z_FFF]/rho_z_FFF;
@@ -9781,7 +9770,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 const double epsilon_z_F   = Q[d_num_species + 3][idx_cell_E_z_F]/rho_z_F - half*(u_z_F*u_z_F + v_z_F*v_z_F + w_z_F*w_z_F);
                                 const double epsilon_z_FF  = Q[d_num_species + 3][idx_cell_E_z_FF]/rho_z_FF - half*(u_z_FF*u_z_FF + v_z_FF*v_z_FF + w_z_FF*w_z_FF);
                                 const double epsilon_z_FFF = Q[d_num_species + 3][idx_cell_E_z_FFF]/rho_z_FFF - half*(u_z_FFF*u_z_FFF + v_z_FFF*v_z_FFF + w_z_FFF*w_z_FFF);
-
+                                
                                 double p_z_F = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_z_F,
@@ -9800,8 +9789,10 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         &epsilon_z_FFF,
                                         Y_z_FFF_ptr);
                                 
-                                // Set variables END
-                                // Compute derivatives at z-direction START
+                                /*
+                                 * Compute derivatives in z-direction.
+                                 */
+                                
                                 std::vector<double> drho_Y_dz;
                                 drho_Y_dz.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -9813,21 +9804,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 const double dv_dz   = -(v_z_FFF - double(4)*v_z_FF + double(3)*v_z_F)/(double(2)*dx[2]);
                                 const double dw_dz   = -(w_z_FFF - double(4)*w_z_FF + double(3)*w_z_F)/(double(2)*dx[2]);
                                 const double dp_dz   = -(p_z_FFF - double(4)*p_z_FF + double(3)*p_z_F)/(double(2)*dx[2]);
-                                // Compute derivatives at y-direction END
-
-                                // Compute derivatives in x-direction START
+                                
+                                /*
+                                 * Compute derivatives in x-direction.
+                                 */
                                 
                                 double du_dx = double(0);
                                 // double dv_dx = double(0);
                                 double dw_dx = double(0);
                                 double dp_dx = double(0);
-                                
-                                // Compute derivatives in y-direction START
-                                
-                                // double du_dy = double(0);
-                                double dv_dy = double(0);
-                                double dw_dy = double(0);
-                                double dp_dy = double(0);
                                 
                                 if (((patch_geom->getTouchesRegularBoundary(0, 0)) && (i == interior_box_lo_idx[0])) ||
                                     ((i + num_subghosts_conservative_var[0][0] == 0) ||
@@ -9850,11 +9835,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                         (interior_box_lo_idx[2] + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
-
+                                    
                                     /*
                                      * Compute the mixture density.
                                      */
-                                
+                                    
                                     double rho_x_R = double(0);
                                     for (int si = 0; si < d_num_species; si++)
                                     {
@@ -9882,7 +9867,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     {
                                         Y_x_R_ptr.push_back(&Y_x_R[si]);
                                     }
-
+                                    
                                     const double u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
                                     const double v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
                                     const double w_x_R = Q[d_num_species + 2][idx_cell_mom_x_R]/rho_x_R;
@@ -9893,7 +9878,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             &rho_x_R,
                                             &epsilon_x_R,
                                             Y_x_R_ptr);
-
+                                    
                                     // One-sided derivatives.
                                     du_dx = (u_x_R - u_z_F)/(dx[0]);
                                     // dv_dx = (v_x_R - v_z_F)/(dx[0]);
@@ -9925,7 +9910,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     /*
                                      * Compute the mixture density.
                                      */
-                                
+                                    
                                     double rho_x_L = double(0);
                                     for (int si = 0; si < d_num_species; si++)
                                     {
@@ -9953,7 +9938,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     {
                                         Y_x_L_ptr.push_back(&Y_x_L[si]);
                                     }
-
+                                    
                                     const double u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
                                     const double v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
                                     const double w_x_L = Q[d_num_species + 2][idx_cell_mom_x_L]/rho_x_L;
@@ -10046,10 +10031,10 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     
                                     const double u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
                                     const double u_x_R = Q[d_num_species][idx_cell_mom_x_R]/rho_x_R;
-
+                                    
                                     const double v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
                                     const double v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
-
+                                    
                                     const double w_x_L = Q[d_num_species + 2][idx_cell_mom_x_L]/rho_x_L;
                                     const double w_x_R = Q[d_num_species + 2][idx_cell_mom_x_R]/rho_x_R;
                                     
@@ -10067,13 +10052,22 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             &rho_x_R,
                                             &epsilon_x_R,
                                             Y_x_R_ptr);
-
+                                    
                                     // Central derivatives.
                                     du_dx = (u_x_R - u_x_L)/(double(2)*dx[0]);
                                     // dv_dx = (v_x_R - v_x_L)/(double(2)*dx[0]);
                                     dw_dx = (w_x_R - w_x_L)/(double(2)*dx[0]);
                                     dp_dx = (p_x_R - p_x_L)/(double(2)*dx[0]);
                                 }
+                                
+                                /*
+                                 * Compute derivatives in y-direction.
+                                 */
+                                
+                                // double du_dy = double(0);
+                                double dv_dy = double(0);
+                                double dw_dy = double(0);
+                                double dp_dy = double(0);
                                 
                                 if (((patch_geom->getTouchesRegularBoundary(1, 0)) && (j == interior_box_lo_idx[1])) ||
                                     ((j + num_subghosts_conservative_var[0][1] == 0) ||
@@ -10096,11 +10090,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         (j + 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                         (interior_box_lo_idx[2] + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
-
+                                    
                                     /*
                                      * Compute the mixture density.
                                      */
-                                
+                                    
                                     double rho_y_T = double(0);
                                     for (int si = 0; si < d_num_species; si++)
                                     {
@@ -10121,7 +10115,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     /*
                                      * Get the pointers to the mass fractions.
                                      */
-                                
+                                    
                                     std::vector<const double*> Y_y_T_ptr;
                                     Y_y_T_ptr.reserve(d_num_species);
                                     for (int si = 0; si < d_num_species; si++)
@@ -10167,7 +10161,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         (j - 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                         (interior_box_lo_idx[2] + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
-
+                                    
                                     /*
                                      * Compute the mixture density.
                                      */
@@ -10248,7 +10242,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         (j + 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                         (interior_box_lo_idx[2] + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
-
+                                    
                                     /*
                                      * Compute the mixture density.
                                      */
@@ -10306,20 +10300,20 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             &rho_y_B,
                                             &epsilon_y_B,
                                             Y_y_B_ptr);
-                                
+                                    
                                     double p_y_T = d_equation_of_state_mixing_rules->
                                         getPressure(
                                             &rho_y_T,
                                             &epsilon_y_T,
                                             Y_y_T_ptr);
-
+                                    
                                     // Central derivatives.
                                     // du_dy = (u_y_T - u_y_B)/(double(2)*dx[1]);
                                     dv_dy = (v_y_T - v_y_B)/(double(2)*dx[1]);
                                     dw_dy = (w_y_T - w_y_B)/(double(2)*dx[1]);
                                     dp_dy = (p_y_T - p_y_B)/(double(2)*dx[1]);
                                 }
-
+                                
                                 // Compute sound speed.
                                 
                                 const double Gamma_z_F = d_equation_of_state_mixing_rules->getGruneisenParameter(
@@ -10341,7 +10335,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 c_z_F = sqrt(c_z_F);
                                 
                                 const double lambda_last = w_z_F + c_z_F;
-
+                                
                                 // Compute vector Lambda^(-1) * L.
                                 
                                 double Lambda_inv_L[d_num_species + 4];
@@ -10356,7 +10350,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 
                                 const double M_sq = (u_z_F*u_z_F + v_z_F*v_z_F + w_z_F*w_z_F)/(c_z_F*c_z_F);
                                 const double K = sigma*c_z_F*(double(1) - M_sq)/length_char;
-
+                                
                                 Lambda_inv_L[0] = dp_dz - rho_z_F*c_z_F*dw_dz;
                                 Lambda_inv_L[1] = du_dz;
                                 Lambda_inv_L[2] = dv_dz;
@@ -10365,14 +10359,14 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     Lambda_inv_L[si + 3] = c_z_F*c_z_F*drho_Y_dz[si] - Y_z_F[si]*dp_dz;
                                 }
                                 Lambda_inv_L[d_num_species + 3] = (double(1)/lambda_last)*(K*(p_z_F - p_t) - (double(1) - beta)*T_last);
-
+                                
                                 // Compute dV_dz.
                                 
                                 const double c_sq_inv  = double(1)/(c_z_F*c_z_F);
                                 const double rho_c_inv = double(1)/(rho_z_F*c_z_F);
                                 
                                 double dV_dz[d_num_species + 4];
-
+                                
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     dV_dz[si] = half*c_sq_inv*Y_z_F[si]*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]) +
@@ -10382,10 +10376,10 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 dV_dz[d_num_species + 1] = Lambda_inv_L[2];
                                 dV_dz[d_num_species + 2] = half*rho_c_inv*(-Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]);
                                 dV_dz[d_num_species + 3] = half*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]);
-
+                                
                                 double V_ghost[(d_num_species + 4)*num_ghosts_to_fill];
-
-                                 for (int k = num_ghosts_to_fill - 1; k >= 0; k--)
+                                
+                                for (int k = num_ghosts_to_fill - 1; k >= 0; k--)
                                 {
                                     const int idx_cell_rho_Y = (i + num_subghosts_conservative_var[0][0]) +
                                         (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -10401,7 +10395,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                         (k + fill_box_lo_idx[2] + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
-
+                                    
                                     if (k == num_ghosts_to_fill - 1)
                                     {
                                         for (int si = 0; si < d_num_species; si++)
@@ -10680,7 +10674,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 // Get the grid spacing.
                                 const double* const dx = patch_geom->getDx();
                                 
-                                // Set index for x-direction STARTI
                                 const int idx_cell_rho_Y_z_B = (i + num_subghosts_conservative_var[0][0]) +
                                     (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
                                     (interior_box_hi_idx[2] + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][1]*
@@ -10725,8 +10718,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                     (interior_box_hi_idx[2] - 2 + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                         subghostcell_dims_conservative_var[2][1];
-                                // Set index for x-direction END
-
+                                
                                 std::vector<double> rho_Y_z_B;
                                 std::vector<double> rho_Y_z_BB;
                                 std::vector<double> rho_Y_z_BBB;
@@ -10787,8 +10779,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     Y_z_BB_ptr.push_back(&Y_z_BB[si]);
                                     Y_z_BBB_ptr.push_back(&Y_z_BBB[si]);
                                 }
-                                // Set variables START
-
+                                
                                 const double u_z_B   = Q[d_num_species][idx_cell_mom_z_B]/rho_z_B;
                                 const double u_z_BB  = Q[d_num_species][idx_cell_mom_z_BB]/rho_z_BB;
                                 const double u_z_BBB = Q[d_num_species][idx_cell_mom_z_BBB]/rho_z_BBB;
@@ -10805,7 +10796,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 const double epsilon_z_B   = Q[d_num_species + 3][idx_cell_E_z_B]/rho_z_B - half*(u_z_B*u_z_B + v_z_B*v_z_B + w_z_B*w_z_B);
                                 const double epsilon_z_BB  = Q[d_num_species + 3][idx_cell_E_z_BB]/rho_z_BB - half*(u_z_BB*u_z_BB + v_z_BB*v_z_BB + w_z_BB*w_z_BB);
                                 const double epsilon_z_BBB = Q[d_num_species + 3][idx_cell_E_z_BBB]/rho_z_BBB - half*(u_z_BBB*u_z_BBB + v_z_BBB*v_z_BBB + w_z_BBB*w_z_BBB);
-
+                                
                                 double p_z_B = d_equation_of_state_mixing_rules->
                                     getPressure(
                                         &rho_z_B,
@@ -10824,8 +10815,10 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         &epsilon_z_BBB,
                                         Y_z_BBB_ptr);
                                 
-                                // Set variables END
-                                // Compute derivatives at z-direction START
+                                /*
+                                 * Compute derivatives in z-direction.
+                                 */
+                                
                                 std::vector<double> drho_Y_dz;
                                 drho_Y_dz.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
@@ -10837,22 +10830,16 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 const double dv_dz   = (v_z_BBB - double(4)*v_z_BB + double(3)*v_z_B)/(double(2)*dx[2]);
                                 const double dw_dz   = (w_z_BBB - double(4)*w_z_BB + double(3)*w_z_B)/(double(2)*dx[2]);
                                 const double dp_dz   = (p_z_BBB - double(4)*p_z_BB + double(3)*p_z_B)/(double(2)*dx[2]);
-                                // Compute derivatives at y-direction END
-
-                                // Compute derivatives in x-direction START
+                                
+                                /*
+                                 * Compute derivatives in x-direction.
+                                 */
                                 
                                 double du_dx = double(0);
                                 // double dv_dx = double(0);
                                 double dw_dx = double(0);
                                 double dp_dx = double(0);
                                 
-                                // Compute derivatives in y-direction START
-                                
-                                // double du_dy = double(0);
-                                double dv_dy = double(0);
-                                double dw_dy = double(0);
-                                double dp_dy = double(0);
-
                                 if (((patch_geom->getTouchesRegularBoundary(0, 0)) && (i == interior_box_lo_idx[0])) ||
                                     ((i + num_subghosts_conservative_var[0][0] == 0) ||
                                      (i + num_subghosts_conservative_var[1][0] == 0) ||
@@ -10878,7 +10865,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     /*
                                      * Compute the mixture density.
                                      */
-                                
+                                    
                                     double rho_x_R = double(0);
                                     for (int si = 0; si < d_num_species; si++)
                                     {
@@ -10899,7 +10886,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     /*
                                      * Get the pointers to the mass fractions.
                                      */
-                                
+                                    
                                     std::vector<const double*> Y_x_R_ptr;
                                     Y_x_R_ptr.reserve(d_num_species);
                                     for (int si = 0; si < d_num_species; si++)
@@ -10911,19 +10898,19 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     const double v_x_R = Q[d_num_species + 1][idx_cell_mom_x_R]/rho_x_R;
                                     const double w_x_R = Q[d_num_species + 2][idx_cell_mom_x_R]/rho_x_R;
                                     const double epsilon_x_R = Q[d_num_species + 3][idx_cell_E_x_R]/rho_x_R - half*(u_x_R*u_x_R + v_x_R*v_x_R + w_x_R*w_x_R);
-
+                                    
                                     double p_x_R = d_equation_of_state_mixing_rules->
                                         getPressure(
                                             &rho_x_R,
                                             &epsilon_x_R,
                                             Y_x_R_ptr);
-
+                                    
                                     // One-sided derivatives.
                                     du_dx = (u_x_R - u_z_B)/(dx[0]);
                                     // dv_dx = (v_x_R - v_z_B)/(dx[0]);
                                     dw_dx = (w_x_R - w_z_B)/(dx[0]);
                                     dp_dx = (p_x_R - p_z_B)/(dx[0]);
-                                    }
+                                }
                                 else if (((patch_geom->getTouchesRegularBoundary(0, 1)) && (i == interior_box_hi_idx[0])) ||
                                          ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
                                           (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
@@ -10945,11 +10932,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                         (interior_box_hi_idx[2] + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
-
+                                    
                                     /*
                                      * Compute the mixture density.
                                      */
-                                
+                                    
                                     double rho_x_L = double(0);
                                     for (int si = 0; si < d_num_species; si++)
                                     {
@@ -10977,7 +10964,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     {
                                         Y_x_L_ptr.push_back(&Y_x_L[si]);
                                     }
-
+                                    
                                     const double u_x_L = Q[d_num_species][idx_cell_mom_x_L]/rho_x_L;
                                     const double v_x_L = Q[d_num_species + 1][idx_cell_mom_x_L]/rho_x_L;
                                     const double w_x_L = Q[d_num_species + 2][idx_cell_mom_x_L]/rho_x_L;
@@ -10988,8 +10975,8 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             &rho_x_L,
                                             &epsilon_x_L,
                                             Y_x_L_ptr);
-
-                                            // One-sided derivatives.
+                                    
+                                    // One-sided derivatives.
                                     du_dx = (u_z_B - u_x_L)/(dx[0]);
                                     // dv_dx = (v_z_B - v_x_L)/(dx[0]);
                                     dw_dx = (w_z_B - w_x_L)/(dx[0]);
@@ -11026,7 +11013,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                         (interior_box_hi_idx[2] + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
-
                                     
                                     /*
                                      * Compute the mixture density.
@@ -11092,14 +11078,23 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             &rho_x_R,
                                             &epsilon_x_R,
                                             Y_x_R_ptr);
-
+                                    
                                     // Central derivatives.
                                     du_dx = (u_x_R - u_x_L)/(double(2)*dx[0]);
                                     // dv_dx = (v_x_R - v_x_L)/(double(2)*dx[0]);
                                     dw_dx = (w_x_R - w_x_L)/(double(2)*dx[0]);
                                     dp_dx = (p_x_R - p_x_L)/(double(2)*dx[0]);
                                 }
-
+                                
+                                /*
+                                 * Compute derivatives in y-direction.
+                                 */
+                                
+                                // double du_dy = double(0);
+                                double dv_dy = double(0);
+                                double dw_dy = double(0);
+                                double dp_dy = double(0);
+                                
                                 if (((patch_geom->getTouchesRegularBoundary(1, 0)) && (j == interior_box_lo_idx[1])) ||
                                     ((j + num_subghosts_conservative_var[0][1] == 0) ||
                                      (j + num_subghosts_conservative_var[1][1] == 0) ||
@@ -11125,7 +11120,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     /*
                                      * Compute the mixture density.
                                      */
-                                
+                                    
                                     double rho_y_T = double(0);
                                     for (int si = 0; si < d_num_species; si++)
                                     {
@@ -11146,7 +11141,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     /*
                                      * Get the pointers to the mass fractions.
                                      */
-                                
+                                    
                                     std::vector<const double*> Y_y_T_ptr;
                                     Y_y_T_ptr.reserve(d_num_species);
                                     for (int si = 0; si < d_num_species; si++)
@@ -11192,7 +11187,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         (j - 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                         (interior_box_hi_idx[2] + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
-
+                                    
                                     /*
                                      * Compute the mixture density.
                                      */
@@ -11273,7 +11268,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                         (j + 1 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                         (interior_box_hi_idx[2] + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                             subghostcell_dims_conservative_var[2][1];
-
+                                    
                                     /*
                                      * Compute the mixture density.
                                      */
@@ -11337,21 +11332,21 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                             &rho_y_T,
                                             &epsilon_y_T,
                                             Y_y_T_ptr);
-
+                                    
                                     // Central derivatives.
                                     // du_dy = (u_y_T - u_y_B)/(double(2)*dx[1]);
                                     dv_dy = (v_y_T - v_y_B)/(double(2)*dx[1]);
                                     dw_dy = (w_y_T - w_y_B)/(double(2)*dx[1]);
                                     dp_dy = (p_y_T - p_y_B)/(double(2)*dx[1]);
                                 }
-
+                                
                                 // Compute sound speed.
                                 
                                 const double Gamma_z_B = d_equation_of_state_mixing_rules->getGruneisenParameter(
                                     &rho_z_B,
                                     &p_z_B,
                                     Y_z_B_ptr);
-
+                                
                                 const std::vector<double> Psi_z_B = d_equation_of_state_mixing_rules->
                                     getPressureDerivativeWithPartialDensities(
                                             &rho_z_B,
@@ -11366,7 +11361,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 c_z_B = sqrt(c_z_B);
                                 
                                 const double lambda_1 = w_z_B - c_z_B;
-
+                                
                                 // Compute vector Lambda^(-1) * L.
                                 
                                 double Lambda_inv_L[d_num_species + 4];
@@ -11381,7 +11376,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 
                                 const double M_sq = (u_z_B*u_z_B + v_z_B*v_z_B + w_z_B*w_z_B)/(c_z_B*c_z_B);
                                 const double K = sigma*c_z_B*(double(1) - M_sq)/length_char;
-
+                                
                                 Lambda_inv_L[0] = (double(1)/lambda_1)*(K*(p_z_B - p_t) - (double(1) - beta)*T_1);
                                 Lambda_inv_L[1] = du_dz;
                                 Lambda_inv_L[2] = dv_dz;
@@ -11390,14 +11385,14 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                     Lambda_inv_L[si + 3] = c_z_B*c_z_B*drho_Y_dz[si] - Y_z_B[si]*dp_dz;
                                 }
                                 Lambda_inv_L[d_num_species + 3] = dp_dz + rho_z_B*c_z_B*dw_dz;
-
+                                
                                 // Compute dV_dz.
                                 
                                 const double c_sq_inv  = double(1)/(c_z_B*c_z_B);
                                 const double rho_c_inv = double(1)/(rho_z_B*c_z_B);
                                 
                                 double dV_dz[d_num_species + 4];
-
+                                
                                 for (int si = 0; si < d_num_species; si++)
                                 {
                                     dV_dz[si] = half*c_sq_inv*Y_z_B[si]*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]) +
@@ -11407,9 +11402,9 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 dV_dz[d_num_species + 1] = Lambda_inv_L[2];
                                 dV_dz[d_num_species + 2] = half*rho_c_inv*(-Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]);
                                 dV_dz[d_num_species + 3] = half*(Lambda_inv_L[0] + Lambda_inv_L[d_num_species + 3]);
-
+                                
                                 double V_ghost[(d_num_species + 4)*num_ghosts_to_fill];
-
+                                
                                 for (int k = 0; k < num_ghosts_to_fill; k++)
                                 {
                                     const int idx_cell_rho_Y = (i + num_subghosts_conservative_var[0][0]) +
@@ -11695,7 +11690,6 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
             }
         }
     }
-    
 }
 
 

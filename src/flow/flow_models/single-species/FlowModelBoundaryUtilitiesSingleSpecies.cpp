@@ -1240,13 +1240,6 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                     
                     if (edge_loc == BDRY_LOC::XLO)
                     {
-                        //////////////////////////////////////////////////////////////////////////////////
-                        //
-                        // Denis 06/22/2020
-                        //
-                        //////////////////////////////////////////////////////////////////////////////////
-                        
-                        // number of ghostcells START
                         const int num_ghosts_to_fill = fill_box_hi_idx[0] - fill_box_lo_idx[0] + 1;
                         TBOX_ASSERT(fill_box_hi_idx[0] == interior_box_lo_idx[0] - 1);
                         if (num_ghosts_to_fill > 6)
@@ -1255,16 +1248,12 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                 << ": FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData()\n"
                                 << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
-                        // number of ghostcells END
-
-                        // compute derivatives in x-direction START
                         
                         for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
                         {
                             // Get the grid spacing.
                             const double* const dx = patch_geom->getDx();
                             
-                            // Set index for x-direction STARTI
                             const int idx_cell_rho_x_R = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
                                 (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
                             
@@ -1291,9 +1280,6 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                             
                             const int idx_cell_E_x_RRR = (interior_box_lo_idx[0] + 2 + num_subghosts_conservative_var[2][0]) +
                                 (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
-                            // Set index for x-direction END
-
-                            // Set variables START
                             
                             const double& rho_x_R   = Q[0][idx_cell_rho_x_R];
                             const double& rho_x_RR  = Q[0][idx_cell_rho_x_RR];
@@ -1329,17 +1315,19 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                     &rho_x_RRR,
                                     &epsilon_x_RRR,
                                     thermo_properties_ptr);
-
-                            // Set variables END
-                            // Compute derivatives at x-direction START
+                            
+                            /*
+                             * Compute derivatives in x-direction.
+                             */
+                            
                             const double drho_dx = -(rho_x_RRR - double(4)*rho_x_RR + double(3)*rho_x_R)/(double(2)*dx[0]);
                             const double du_dx   = -(u_x_RRR - double(4)*u_x_RR + double(3)*u_x_R)/(double(2)*dx[0]);
                             const double dv_dx   = -(v_x_RRR - double(4)*v_x_RR + double(3)*v_x_R)/(double(2)*dx[0]);
                             const double dp_dx   = -(p_x_RRR - double(4)*p_x_RR + double(3)*p_x_R)/(double(2)*dx[0]);
-                            // Compute derivatives at x-direction END
                             
-                            
-                            // Compute derivatives in y-direction START
+                            /*
+                             * Compute derivatives in y-direction.
+                             */
                             
                             double du_dy = double(0);
                             double dv_dy = double(0);
@@ -1634,12 +1622,6 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                             }
                         }
                     }
-                    /////////////////////////////////////////////////////////////////////////////////////
-                    //
-                    // Denis 06/22/2020
-                    //
-                    /////////////////////////////////////////////////////////////////////////////////////
-                    
                     else if (edge_loc == BDRY_LOC::XHI)
                     {
                         const int num_ghosts_to_fill = fill_box_hi_idx[0] - fill_box_lo_idx[0] + 1;
@@ -1719,12 +1701,18 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                     &epsilon_x_LLL,
                                     thermo_properties_ptr);
                             
+                            /*
+                             * Compute derivatives in x-direction.
+                             */
+                            
                             const double drho_dx = (rho_x_LLL - double(4)*rho_x_LL + double(3)*rho_x_L)/(double(2)*dx[0]);
                             const double du_dx   = (u_x_LLL - double(4)*u_x_LL + double(3)*u_x_L)/(double(2)*dx[0]);
                             const double dv_dx   = (v_x_LLL - double(4)*v_x_LL + double(3)*v_x_L)/(double(2)*dx[0]);
                             const double dp_dx   = (p_x_LLL - double(4)*p_x_LL + double(3)*p_x_L)/(double(2)*dx[0]);
                             
-                            // Compute derivatives in y-direction.
+                            /*
+                             * Compute derivatives in y-direction.
+                             */
                             
                             double du_dy = double(0);
                             double dv_dy = double(0);
@@ -2023,13 +2011,6 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                     }
                     else if (edge_loc == BDRY_LOC::YLO)
                      {
-                        //////////////////////////////////////////////////////////////////////////////////
-                        //
-                        // Denis 07/03/2020
-                        //
-                        //////////////////////////////////////////////////////////////////////////////////
-                        
-                        // number of ghostcells START
                         const int num_ghosts_to_fill = fill_box_hi_idx[1] - fill_box_lo_idx[1] + 1;
                         TBOX_ASSERT(fill_box_hi_idx[1] == interior_box_lo_idx[1] - 1);
                         if (num_ghosts_to_fill > 6)
@@ -2038,16 +2019,12 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                 << ": FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData()\n"
                                 << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
-                        // number of ghostcells END
-
-                        // compute derivatives in y-direction START
                         
                         for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
                         {
                             // Get the grid spacing.
                             const double* const dx = patch_geom->getDx();
                             
-                            // Set index for y-direction START
                             const int idx_cell_rho_y_T = (i + num_subghosts_conservative_var[0][0]) +
                                 (interior_box_lo_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
                             
@@ -2074,9 +2051,6 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                             
                             const int idx_cell_E_y_TTT = (i + num_subghosts_conservative_var[2][0]) +
                                 (interior_box_lo_idx[1] + 2 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0];
-                            // Set index for x-direction END
-
-                            // Set variables START
                             
                             const double& rho_y_T   = Q[0][idx_cell_rho_y_T];
                             const double& rho_y_TT  = Q[0][idx_cell_rho_y_TT];
@@ -2113,14 +2087,18 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                     &epsilon_y_TTT,
                                     thermo_properties_ptr);
 
-                            // Set variables END
-                            // Compute derivatives at y-direction START
+                            /*
+                             * Compute derivatives in y-direction.
+                             */
+                            
                             const double drho_dy = -(rho_y_TTT - double(4)*rho_y_TT + double(3)*rho_y_T)/(double(2)*dx[1]);
                             const double du_dy   = -(u_y_TTT - double(4)*u_y_TT + double(3)*u_y_T)/(double(2)*dx[1]);
                             const double dv_dy   = -(v_y_TTT - double(4)*v_y_TT + double(3)*v_y_T)/(double(2)*dx[1]);
                             const double dp_dy   = -(p_y_TTT - double(4)*p_y_TT + double(3)*p_y_T)/(double(2)*dx[1]);
-                            // Compute derivatives at y-direction END
-                            // Compute derivatives in x-direction START
+                            
+                            /*
+                             * Compute derivatives in x-direction.
+                             */
                             
                             double du_dx = double(0);
                             double dv_dx = double(0);
@@ -2153,7 +2131,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                         &epsilon_x_R,
                                         thermo_properties_ptr);
                                 
-                                // One-sided derivatives.!!!
+                                // One-sided derivatives.
                                 du_dx = (u_x_R - u_y_T)/(dx[0]);
                                 dv_dx = (v_x_R - v_y_T)/(dx[0]);
                                 dp_dx = (p_x_R - p_y_T)/(dx[0]);
@@ -2185,7 +2163,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                         &epsilon_x_L,
                                         thermo_properties_ptr);
                                 
-                                // One-sided derivatives.!!!
+                                // One-sided derivatives.
                                 du_dx = (u_y_T - u_x_L)/(dx[0]);
                                 dv_dx = (v_y_T - v_x_L)/(dx[0]);
                                 dp_dx = (p_y_T - p_x_L)/(dx[0]);
@@ -2496,12 +2474,18 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                     &epsilon_y_BBB,
                                     thermo_properties_ptr);
                             
+                            /*
+                             * Compute derivatives in y-direction.
+                             */
+                            
                             const double drho_dy = (rho_y_BBB - double(4)*rho_y_BB + double(3)*rho_y_B)/(double(2)*dx[1]);
                             const double du_dy   = (u_y_BBB - double(4)*u_y_BB + double(3)*u_y_B)/(double(2)*dx[1]);
                             const double dv_dy   = (v_y_BBB - double(4)*v_y_BB + double(3)*v_y_B)/(double(2)*dx[1]);
                             const double dp_dy   = (p_y_BBB - double(4)*p_y_BB + double(3)*p_y_B)/(double(2)*dx[1]);
                             
-                            // Compute derivatives in x-direction.
+                            /*
+                             * Compute derivatives in x-direction.
+                             */
                             
                             double du_dx = double(0);
                             double dv_dx = double(0);
@@ -4135,7 +4119,6 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                 // Get the grid spacing.
                                 const double* const dx = patch_geom->getDx();
                                 
-                                // Set index for x-direction STARTI
                                 const int idx_cell_rho_x_R = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
                                     (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
                                     (k + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
@@ -4180,8 +4163,6 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                     (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                     (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                         subghostcell_dims_conservative_var[2][1];
-                                // Set index for x-direction END
-                                // Set variables START
                                 
                                 const double& rho_x_R   = Q[0][idx_cell_rho_x_R];
                                 const double& rho_x_RR  = Q[0][idx_cell_rho_x_RR];
@@ -4222,28 +4203,24 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                         &epsilon_x_RRR,
                                         thermo_properties_ptr);
                                 
-                                // Set variables END
-                                // Compute derivatives at x-direction START
+                                /*
+                                 * Compute derivatives in x-direction.
+                                 */
+                                
                                 const double drho_dx = -(rho_x_RRR - double(4)*rho_x_RR + double(3)*rho_x_R)/(double(2)*dx[0]);
                                 const double du_dx   = -(u_x_RRR - double(4)*u_x_RR + double(3)*u_x_R)/(double(2)*dx[0]);
                                 const double dv_dx   = -(v_x_RRR - double(4)*v_x_RR + double(3)*v_x_R)/(double(2)*dx[0]);
                                 const double dw_dx   = -(w_x_RRR - double(4)*w_x_RR + double(3)*w_x_R)/(double(2)*dx[0]);
                                 const double dp_dx   = -(p_x_RRR - double(4)*p_x_RR + double(3)*p_x_R)/(double(2)*dx[0]);
-                                // Compute derivatives at x-direction END
                                 
-                                // Compute derivatives in y-direction START
+                                /*
+                                 * Compute derivatives in y-direction.
+                                 */
                                 
                                 double du_dy = double(0);
                                 double dv_dy = double(0);
                                 // double dw_dy = double(0);
                                 double dp_dy = double(0);
-                                
-                                // Compute derivatives in z-direction START
-                                
-                                double du_dz = double(0);
-                                // double dv_dz = double(0);
-                                double dw_dz = double(0);
-                                double dp_dz = double(0);
                                 
                                 if (((patch_geom->getTouchesRegularBoundary(1, 0)) && (j == interior_box_lo_idx[1])) ||
                                     ((j + num_subghosts_conservative_var[0][1] == 0) ||
@@ -4390,6 +4367,15 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                     // dw_dy = (w_y_T - w_y_B)/(double(2)*dx[1]);
                                     dp_dy = (p_y_T - p_y_B)/(double(2)*dx[1]);
                                 }
+                                
+                                /*
+                                 * Compute derivatives in z-direction.
+                                 */
+                                
+                                double du_dz = double(0);
+                                // double dv_dz = double(0);
+                                double dw_dz = double(0);
+                                double dp_dz = double(0);
                                 
                                 if (((patch_geom->getTouchesRegularBoundary(2, 0)) && (k == interior_box_lo_idx[2])) ||
                                     ((k + num_subghosts_conservative_var[0][2] == 0) ||
@@ -4742,7 +4728,6 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                             }
                         }
                     }
-                    // Denis 09/05/2020 start
                     else if (face_loc == BDRY_LOC::XHI)
                     {
                         const int num_ghosts_to_fill = fill_box_hi_idx[0] - fill_box_lo_idx[0] + 1;
@@ -4761,7 +4746,6 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                 // Get the grid spacing.
                                 const double* const dx = patch_geom->getDx();
                                 
-                                // Set index for x-direction STARTI
                                 const int idx_cell_rho_x_L = (interior_box_hi_idx[0] + num_subghosts_conservative_var[0][0]) +
                                     (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
                                     (k + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
@@ -4806,8 +4790,6 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                     (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                     (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                         subghostcell_dims_conservative_var[2][1];
-                                // Set index for x-direction END
-                                // Set variables START
                                 
                                 const double& rho_x_L   = Q[0][idx_cell_rho_x_L];
                                 const double& rho_x_LL  = Q[0][idx_cell_rho_x_LL];
@@ -4848,28 +4830,24 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                         &epsilon_x_LLL,
                                         thermo_properties_ptr);
                                 
-                                // Set variables END
-                                // Compute derivatives at x-direction START
+                                /*
+                                 * Compute derivatives at x-direction.
+                                 */
+                                
                                 const double drho_dx = (rho_x_LLL - double(4)*rho_x_LL + double(3)*rho_x_L)/(double(2)*dx[0]);
                                 const double du_dx   = (u_x_LLL - double(4)*u_x_LL + double(3)*u_x_L)/(double(2)*dx[0]);
                                 const double dv_dx   = (v_x_LLL - double(4)*v_x_LL + double(3)*v_x_L)/(double(2)*dx[0]);
                                 const double dw_dx   = (w_x_LLL - double(4)*w_x_LL + double(3)*w_x_L)/(double(2)*dx[0]);
                                 const double dp_dx   = (p_x_LLL - double(4)*p_x_LL + double(3)*p_x_L)/(double(2)*dx[0]);
-                                // Compute derivatives at x-direction END
                                 
-                                // Compute derivatives in y-direction START
+                                /*
+                                 * Compute derivatives in y-direction.
+                                 */
                                 
                                 double du_dy = double(0);
                                 double dv_dy = double(0);
                                 // double dw_dy = double(0);
                                 double dp_dy = double(0);
-                                
-                                // Compute derivatives in z-direction START
-                                
-                                double du_dz = double(0);
-                                // double dv_dz = double(0);
-                                double dw_dz = double(0);
-                                double dp_dz = double(0);
                                 
                                 if (((patch_geom->getTouchesRegularBoundary(1, 0)) && (j == interior_box_lo_idx[1])) ||
                                     ((j + num_subghosts_conservative_var[0][1] == 0) ||
@@ -5016,6 +4994,15 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                     // dw_dy = (w_y_T - w_y_B)/(double(2)*dx[1]);
                                     dp_dy = (p_y_T - p_y_B)/(double(2)*dx[1]);
                                 }
+                                
+                                /*
+                                 * Compute derivatives in z-direction.
+                                 */
+                                
+                                double du_dz = double(0);
+                                // double dv_dz = double(0);
+                                double dw_dz = double(0);
+                                double dp_dz = double(0);
                                 
                                 if (((patch_geom->getTouchesRegularBoundary(2, 0)) && (k == interior_box_lo_idx[2])) ||
                                     ((k + num_subghosts_conservative_var[0][2] == 0) ||
@@ -5368,8 +5355,6 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                             }
                         }
                     }
-                    // Denis 09/05/2020 end
-                    // Denis 09/05/2020 start
                     else if (face_loc == BDRY_LOC::YLO)
                     {
                         const int num_ghosts_to_fill = fill_box_hi_idx[1] - fill_box_lo_idx[1] + 1;
@@ -5388,7 +5373,6 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                 // Get the grid spacing.
                                 const double* const dx = patch_geom->getDx();
                                 
-                                // Set index for x-direction STARTI
                                 const int idx_cell_rho_y_T = (i + num_subghosts_conservative_var[0][0]) +
                                     (interior_box_lo_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
                                     (k + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
@@ -5433,8 +5417,6 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                     (interior_box_lo_idx[1] + 2 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                     (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                         subghostcell_dims_conservative_var[2][1];
-                                // Set index for x-direction END
-                                // Set variables START
                                 
                                 const double& rho_y_T   = Q[0][idx_cell_rho_y_T];
                                 const double& rho_y_TT  = Q[0][idx_cell_rho_y_TT];
@@ -5475,28 +5457,24 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                         &epsilon_y_TTT,
                                         thermo_properties_ptr);
                                 
-                                // Set variables END
-                                // Compute derivatives at y-direction START
+                                /*
+                                 * Compute derivatives at y-direction.
+                                 */
+                                
                                 const double drho_dy = -(rho_y_TTT - double(4)*rho_y_TT + double(3)*rho_y_T)/(double(2)*dx[1]);
                                 const double du_dy   = -(u_y_TTT - double(4)*u_y_TT + double(3)*u_y_T)/(double(2)*dx[1]);
                                 const double dv_dy   = -(v_y_TTT - double(4)*v_y_TT + double(3)*v_y_T)/(double(2)*dx[1]);
                                 const double dw_dy   = -(w_y_TTT - double(4)*w_y_TT + double(3)*w_y_T)/(double(2)*dx[1]);
                                 const double dp_dy   = -(p_y_TTT - double(4)*p_y_TT + double(3)*p_y_T)/(double(2)*dx[1]);
-                                // Compute derivatives at y-direction END
                                 
-                                // Compute derivatives in x-direction START
+                                /*
+                                 * Compute derivatives in x-direction.
+                                 */
                                 
                                 double du_dx = double(0);
                                 double dv_dx = double(0);
                                 // double dw_dx = double(0);
                                 double dp_dx = double(0);
-                                
-                                // Compute derivatives in z-direction START
-                                
-                                // double du_dz = double(0);
-                                double dv_dz = double(0);
-                                double dw_dz = double(0);
-                                double dp_dz = double(0);
                                 
                                 if (((patch_geom->getTouchesRegularBoundary(0, 0)) && (i == interior_box_lo_idx[0])) ||
                                     ((i + num_subghosts_conservative_var[0][0] == 0) ||
@@ -5643,6 +5621,15 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                     // dw_dx = (w_x_R - w_x_L)/(double(2)*dx[0]);
                                     dp_dx = (p_x_R - p_x_L)/(double(2)*dx[0]);
                                 }
+                                
+                                /*
+                                 * Compute derivatives in z-direction.
+                                 */
+                                
+                                // double du_dz = double(0);
+                                double dv_dz = double(0);
+                                double dw_dz = double(0);
+                                double dp_dz = double(0);
                                 
                                 if (((patch_geom->getTouchesRegularBoundary(2, 0)) && (k == interior_box_lo_idx[2])) ||
                                     ((k + num_subghosts_conservative_var[0][2] == 0) ||
@@ -5995,7 +5982,6 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                             }
                         }
                     }
-                    // Denis 09/05/2020 end
                     else if (face_loc == BDRY_LOC::YHI)
                     {
                         const int num_ghosts_to_fill = fill_box_hi_idx[1] - fill_box_lo_idx[1] + 1;
@@ -6014,7 +6000,6 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                 // Get the grid spacing.
                                 const double* const dx = patch_geom->getDx();
                                 
-                                // Set index for x-direction STARTI
                                 const int idx_cell_rho_y_B = (i + num_subghosts_conservative_var[0][0]) +
                                     (interior_box_hi_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
                                     (k + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
@@ -6059,8 +6044,6 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                     (interior_box_hi_idx[1] - 2 + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                     (k + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                         subghostcell_dims_conservative_var[2][1];
-                                // Set index for x-direction END
-                                // Set variables START
                                 
                                 const double& rho_y_B   = Q[0][idx_cell_rho_y_B];
                                 const double& rho_y_BB  = Q[0][idx_cell_rho_y_BB];
@@ -6101,28 +6084,24 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                         &epsilon_y_BBB,
                                         thermo_properties_ptr);
                                 
-                                // Set variables END
-                                // Compute derivatives at y-direction START
+                                /*
+                                 * Compute derivatives at y-direction.
+                                 */
+                                
                                 const double drho_dy = (rho_y_BBB - double(4)*rho_y_BB + double(3)*rho_y_B)/(double(2)*dx[1]);
                                 const double du_dy   = (u_y_BBB - double(4)*u_y_BB + double(3)*u_y_B)/(double(2)*dx[1]);
                                 const double dv_dy   = (v_y_BBB - double(4)*v_y_BB + double(3)*v_y_B)/(double(2)*dx[1]);
                                 const double dw_dy   = (w_y_BBB - double(4)*w_y_BB + double(3)*w_y_B)/(double(2)*dx[1]);
                                 const double dp_dy   = (p_y_BBB - double(4)*p_y_BB + double(3)*p_y_B)/(double(2)*dx[1]);
-                                // Compute derivatives at y-direction END
                                 
-                                // Compute derivatives in x-direction START
+                                /*
+                                 * Compute derivatives in x-direction.
+                                 */
                                 
                                 double du_dx = double(0);
                                 double dv_dx = double(0);
                                 // double dw_dx = double(0);
                                 double dp_dx = double(0);
-                                
-                                // Compute derivatives in z-direction START
-                                
-                                // double du_dz = double(0);
-                                double dv_dz = double(0);
-                                double dw_dz = double(0);
-                                double dp_dz = double(0);
                                 
                                 if (((patch_geom->getTouchesRegularBoundary(0, 0)) && (i == interior_box_lo_idx[0])) ||
                                     ((i + num_subghosts_conservative_var[0][0] == 0) ||
@@ -6269,6 +6248,15 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                     // dw_dx = (w_x_R - w_x_L)/(double(2)*dx[0]);
                                     dp_dx = (p_x_R - p_x_L)/(double(2)*dx[0]);
                                 }
+                                
+                                /*
+                                 * Compute derivatives in z-direction.
+                                 */
+                                
+                                // double du_dz = double(0);
+                                double dv_dz = double(0);
+                                double dw_dz = double(0);
+                                double dp_dz = double(0);
                                 
                                 if (((patch_geom->getTouchesRegularBoundary(2, 0)) && (k == interior_box_lo_idx[2])) ||
                                     ((k + num_subghosts_conservative_var[0][2] == 0) ||
@@ -6639,7 +6627,6 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                 // Get the grid spacing.
                                 const double* const dx = patch_geom->getDx();
                                 
-                                // Set index for x-direction STARTI
                                 const int idx_cell_rho_z_F = (i + num_subghosts_conservative_var[0][0]) +
                                     (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
                                     (interior_box_lo_idx[2] + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][1]*
@@ -6684,8 +6671,6 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                     (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                     (interior_box_lo_idx[2] + 2 + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                         subghostcell_dims_conservative_var[2][1];
-                                // Set index for x-direction END
-                                // Set variables START
                                 
                                 const double& rho_z_F   = Q[0][idx_cell_rho_z_F];
                                 const double& rho_z_FF  = Q[0][idx_cell_rho_z_FF];
@@ -6726,28 +6711,24 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                         &epsilon_z_FFF,
                                         thermo_properties_ptr);
                                 
-                                // Set variables END
-                                // Compute derivatives at y-direction START
+                                /*
+                                 * Compute derivatives at z-direction.
+                                 */
+                                
                                 const double drho_dz = -(rho_z_FFF - double(4)*rho_z_FF + double(3)*rho_z_F)/(double(2)*dx[2]);
                                 const double du_dz   = -(u_z_FFF - double(4)*u_z_FF + double(3)*u_z_F)/(double(2)*dx[2]);
                                 const double dv_dz   = -(v_z_FFF - double(4)*v_z_FF + double(3)*v_z_F)/(double(2)*dx[2]);
                                 const double dw_dz   = -(w_z_FFF - double(4)*w_z_FF + double(3)*w_z_F)/(double(2)*dx[2]);
                                 const double dp_dz   = -(p_z_FFF - double(4)*p_z_FF + double(3)*p_z_F)/(double(2)*dx[2]);
-                                // Compute derivatives at y-direction END
                                 
-                                // Compute derivatives in x-direction START
+                                /*
+                                 * Compute derivatives in x-direction.
+                                 */
                                 
                                 double du_dx = double(0);
                                 // double dv_dx = double(0);
                                 double dw_dx = double(0);
                                 double dp_dx = double(0);
-                                
-                                // Compute derivatives in y-direction START
-                                
-                                // double du_dy = double(0);
-                                double dv_dy = double(0);
-                                double dw_dy = double(0);
-                                double dp_dy = double(0);
                                 
                                 if (((patch_geom->getTouchesRegularBoundary(0, 0)) && (i == interior_box_lo_idx[0])) ||
                                     ((i + num_subghosts_conservative_var[0][0] == 0) ||
@@ -6895,6 +6876,15 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                     dp_dx = (p_x_R - p_x_L)/(double(2)*dx[0]);
                                 }
                                 
+                                /*
+                                 * Compute derivatives in y-direction.
+                                 */
+                                
+                                // double du_dy = double(0);
+                                double dv_dy = double(0);
+                                double dw_dy = double(0);
+                                double dp_dy = double(0);
+                                
                                 if (((patch_geom->getTouchesRegularBoundary(1, 0)) && (j == interior_box_lo_idx[1])) ||
                                     ((j + num_subghosts_conservative_var[0][1] == 0) ||
                                      (j + num_subghosts_conservative_var[1][1] == 0) ||
@@ -7040,7 +7030,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                     dw_dy = (w_y_T - w_y_B)/(double(2)*dx[1]);
                                     dp_dy = (p_y_T - p_y_B)/(double(2)*dx[1]);
                                 }
-                            
+                                
                                 const double c_z_F = d_equation_of_state_mixing_rules->getEquationOfState()->
                                     getSoundSpeed(
                                         &rho_z_F,
@@ -7264,7 +7254,6 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                 // Get the grid spacing.
                                 const double* const dx = patch_geom->getDx();
                                 
-                                // Set index for x-direction STARTI
                                 const int idx_cell_rho_z_B = (i + num_subghosts_conservative_var[0][0]) +
                                     (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
                                     (interior_box_hi_idx[2] + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][1]*
@@ -7309,8 +7298,6 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                     (j + num_subghosts_conservative_var[2][1])*subghostcell_dims_conservative_var[2][0] +
                                     (interior_box_hi_idx[2] - 2 + num_subghosts_conservative_var[2][2])*subghostcell_dims_conservative_var[2][0]*
                                         subghostcell_dims_conservative_var[2][1];
-                                // Set index for x-direction END
-                                // Set variables START
                                 
                                 const double& rho_z_B   = Q[0][idx_cell_rho_z_B];
                                 const double& rho_z_BB  = Q[0][idx_cell_rho_z_BB];
@@ -7351,28 +7338,24 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                         &epsilon_z_BBB,
                                         thermo_properties_ptr);
                                 
-                                // Set variables END
-                                // Compute derivatives at y-direction START
+                                /*
+                                 * Compute derivatives at z-direction.
+                                 */
+                                
                                 const double drho_dz = (rho_z_BBB - double(4)*rho_z_BB + double(3)*rho_z_B)/(double(2)*dx[2]);
                                 const double du_dz   = (u_z_BBB - double(4)*u_z_BB + double(3)*u_z_B)/(double(2)*dx[2]);
                                 const double dv_dz   = (v_z_BBB - double(4)*v_z_BB + double(3)*v_z_B)/(double(2)*dx[2]);
                                 const double dw_dz   = (w_z_BBB - double(4)*w_z_BB + double(3)*w_z_B)/(double(2)*dx[2]);
                                 const double dp_dz   = (p_z_BBB - double(4)*p_z_BB + double(3)*p_z_B)/(double(2)*dx[2]);
-                                // Compute derivatives at y-direction END
                                 
-                                // Compute derivatives in x-direction START
+                                /*
+                                 * Compute derivatives in x-direction.
+                                 */
                                 
                                 double du_dx = double(0);
                                 // double dv_dx = double(0);
                                 double dw_dx = double(0);
                                 double dp_dx = double(0);
-                                
-                                // Compute derivatives in y-direction START
-                                
-                                // double du_dy = double(0);
-                                double dv_dy = double(0);
-                                double dw_dy = double(0);
-                                double dp_dy = double(0);
                                 
                                 if (((patch_geom->getTouchesRegularBoundary(0, 0)) && (i == interior_box_lo_idx[0])) ||
                                     ((i + num_subghosts_conservative_var[0][0] == 0) ||
@@ -7519,6 +7502,15 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                     dw_dx = (w_x_R - w_x_L)/(double(2)*dx[0]);
                                     dp_dx = (p_x_R - p_x_L)/(double(2)*dx[0]);
                                 }
+                                
+                                /*
+                                 * Compute derivatives in y-direction.
+                                 */
+                                
+                                // double du_dy = double(0);
+                                double dv_dy = double(0);
+                                double dw_dy = double(0);
+                                double dp_dy = double(0);
                                 
                                 if (((patch_geom->getTouchesRegularBoundary(1, 0)) && (j == interior_box_lo_idx[1])) ||
                                     ((j + num_subghosts_conservative_var[0][1] == 0) ||
