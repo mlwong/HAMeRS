@@ -70,7 +70,7 @@ NavierStokes
     }
 
     // Convective flux reconstructor to use
-    convective_flux_reconstructor = "DRP4"
+    convective_flux_reconstructor = "WCNS6_LD_HLLC_HLL"
 
     Convective_flux_reconstructor{}
 
@@ -141,32 +141,6 @@ NavierStokes
         //     boundary_condition = "XREFLECT"
         // }
     }
-
-    Value_tagger
-    {
-        variables = "MASS_FRACTION"
-
-        uses_global_tol_up = FALSE
-        uses_global_tol_lo = FALSE
-
-        uses_local_tol_up = TRUE
-        uses_local_tol_lo = TRUE
-
-        local_tol_up = 0.999
-        local_tol_lo = 0.001
-    }
-
-    Gradient_tagger
-    {
-        gradient_sensors = "JAMESON_GRADIENT"
-
-        JAMESON_GRADIENT
-        {
-            Jameson_gradient_variables = "PRESSURE"
-
-            Jameson_gradient_tol = 0.002
-        }
-    }
 }
 
 Main
@@ -201,7 +175,7 @@ Main
 CartesianGeometry
 {
     // Lower and upper indices of computational domain
-    domain_boxes = [(0, 0), (1023, 127)]
+    domain_boxes = [(0, 0), (479, 59)]
     x_lo         = -2806.13113362672,  0.0     // Lower end of computational domain
     x_up         =  2806.13113362672,  701.53278340668 // Upper end of computational domain
 
@@ -211,26 +185,12 @@ CartesianGeometry
 
 ExtendedTagAndInitialize
 {
-    at_0
-    {
-        cycle = 0
-        // First tagging method for refinement to use
-        tag_0
-        {
-            tagging_method = "VALUE_DETECTOR"
-        }
-        // Second tagging method for refinement to use
-        tag_1
-        {
-            tagging_method = "GRADIENT_DETECTOR"
-        }
-    }
 }
 
 PatchHierarchy
 {
     // Maximum number of levels in hierarchy
-    max_levels = 3
+    max_levels = 1
 
     ratio_to_coarser
     {
@@ -262,7 +222,7 @@ RungeKuttaLevelIntegrator
 TimeRefinementIntegrator
 {
     start_time           = 0.0e0  // Initial simulation time
-    end_time             = 500.0e0 // Final simulation time
+    end_time             = 5.0e0 // Final simulation time
     grow_dt              = 1.0e0  // Growth factor for timesteps
     max_integrator_steps = 10000  // Max number of simulation timesteps
 }
