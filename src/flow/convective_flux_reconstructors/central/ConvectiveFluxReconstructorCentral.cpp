@@ -103,7 +103,7 @@ void
 ConvectiveFluxReconstructorCentral::putToRestart(
    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
-    restart_db->putDouble("d_order", d_order);
+    restart_db->putInteger("d_order", d_order);
 }
 
 
