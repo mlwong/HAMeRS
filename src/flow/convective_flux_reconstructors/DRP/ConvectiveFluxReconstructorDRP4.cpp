@@ -103,7 +103,7 @@ void
 ConvectiveFluxReconstructorDRP4::putToRestart(
    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
-    restart_db->putDouble("d_stencil_width", d_stencil_width);
+    restart_db->putInteger("d_stencil_width", d_stencil_width);
 }
 
 
