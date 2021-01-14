@@ -1,7 +1,6 @@
 #include "flow/flow_models/four-eqn_conservative/FlowModelStatisticsUtilitiesFourEqnConservative.hpp"
 
 #include "extn/patch_hierarchies/ExtendedFlattenedHierarchy.hpp"
-#include "flow/flow_models/MPI_helpers/FlowModelMPIHelperAverage.hpp"
 
 #include <fstream>
 
@@ -243,6 +242,8 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
             << std::endl);
     }
     
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     std::ofstream f_out;
@@ -259,42 +260,701 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
         }
     }
     
-    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    /*
+     * Get the refinement ratio from the finest level to the coarest level.
+     */
     
-    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
-        "MPI_helper_average",
-        d_dim,
-        d_grid_geometry,
-        patch_hierarchy,
-        flow_model_tmp);
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
     
-    const std::vector<double>& dx_finest = MPI_helper_average.getFinestRefinedDomainGridSpacing();
-    
-    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
-        
-    std::vector<double> Y_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
-            "MASS_FRACTIONS",
-            0,
-            data_context);
+    hier::IntVector ratioFinestLevelToCoarestLevel =
+        patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
+    for (int li = num_levels - 2; li > 0 ; li--)
+    {
+        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+    }
     
     /*
-     * Compute and output the mixing width (only done by process 0).
+     * Get the flattened hierarchy where only the finest existing grid is visible at any given
+     * location in the problem space.
      */
+    
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
+            *patch_hierarchy,
+            0,
+            num_levels - 1));
+    
+    /*
+     * Get the number of cells of physical domain refined to the finest level.
+     */
+    
+    const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
+    const hier::Box& physical_domain_box = physical_domain.front();
+    const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    
+    /*
+     * Get the indices of the physical domain.
+     */
+    
+    const double* x_lo = d_grid_geometry->getXLower();
+    const double* x_hi = d_grid_geometry->getXUpper();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        const int finest_level_dim_0 = finest_level_dims[0];
+        
+        /*
+         * Get the size of the physical domain.
+         */
+        
+        const double L_x = x_hi[0] - x_lo[0];
+        
+        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            Y_avg_local[i] = 0.0;
+            Y_avg_global[i] = 0.0;
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratioToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            
+            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower index.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                /*
+                 * Register the patch and mass fractions in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
+                
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
+                
+                /*
+                 * Get the pointer to first mass fraction data inside the flow model.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
+                
+                double* Y = data_mass_fractions->getPointer(0);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
+                
+                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        /*
+                         * Compute the index of the data point and count how many times the data is repeated.
+                         */
+                        
+                        const hier::Index idx_pt(tbox::Dimension(1), idx_lo_0 + i);
+                        
+                        int n_overlapped = 1;
+                        
+                        for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                patch_overlapped_visible_boxes.begin());
+                             iob != patch_overlapped_visible_boxes.end();
+                             iob++)
+                        {
+                            const hier::Box& patch_overlapped_visible_box = *iob;
+                            
+                            if (patch_overlapped_visible_box.contains(idx_pt))
+                            {
+                                n_overlapped++;
+                            }
+                        }
+                        
+                        /*
+                         * Compute the linear index and the data to add.
+                         */
+                        
+                        const int idx = relative_idx_lo_0 + i + num_ghosts_0_mass_fractions;
+                        
+                        const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)/((double) n_overlapped);
+                        
+                        for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                        {
+                            const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                            
+                            Y_avg_local[idx_fine] += value_to_add;
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        /*
+         * Reduction to get the global average.
+         */
+        
+        mpi.Reduce(
+            Y_avg_local,
+            Y_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM,
+            0);
+        
+        /*
+         * Compute and output the mixing width (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            double W = 0.0;
+            
+            for (int i = 0; i < finest_level_dim_0; i++)
+            {
+                W += Y_avg_global[i]*(1.0 - Y_avg_global[i]);
+            }
+            
+            const double dx_finest = L_x/finest_level_dim_0;
+            
+            W = 4.0*W*dx_finest;
+            
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << W;
+        }
+        
+        std::free(Y_avg_local);
+        std::free(Y_avg_global);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        const int finest_level_dim_0 = finest_level_dims[0];
+        
+        /*
+         * Get the size of the physical domain.
+         */
+        
+        const double L_x = x_hi[0] - x_lo[0];
+        const double L_y = x_hi[1] - x_lo[1];
+        
+        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            Y_avg_local[i] = 0.0;
+            Y_avg_global[i] = 0.0;
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratioToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            
+            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower index and grid spacing.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch and mass fractions in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
+                
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
+                
+                /*
+                 * Get the pointer to first mass fraction data inside the flow model.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
+                
+                double* Y = data_mass_fractions->getPointer(0);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
+                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
+                
+                const double weight = dx[1]/L_y;
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            /*
+                             * Compute the index of the data point and count how many times the data is repeated.
+                             */
+                            
+                            const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j);
+                            
+                            int n_overlapped = 1;
+                            
+                            for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                    patch_overlapped_visible_boxes.begin());
+                                 iob != patch_overlapped_visible_boxes.end();
+                                 iob++)
+                            {
+                                const hier::Box& patch_overlapped_visible_box = *iob;
+                                
+                                if (patch_overlapped_visible_box.contains(idx_pt))
+                                {
+                                    n_overlapped++;
+                                }
+                            }
+                            
+                            /*
+                             * Compute the linear index and the data to add.
+                             */
+                            
+                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
+                            
+                            const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)*weight/((double) n_overlapped);
+                            
+                            for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                            {
+                                const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                
+                                Y_avg_local[idx_fine] += value_to_add;
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        /*
+         * Reduction to get the global average.
+         */
+        
+        mpi.Reduce(
+            Y_avg_local,
+            Y_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM,
+            0);
+        
+        /*
+         * Compute and output the mixing width (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            double W = 0.0;
+            
+            for (int i = 0; i < finest_level_dim_0; i++)
+            {
+                W += Y_avg_global[i]*(1.0 - Y_avg_global[i]);
+            }
+            
+            const double dx_finest = L_x/finest_level_dim_0;
+            
+            W = 4.0*W*dx_finest;
+            
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << W;
+        }
+        
+        std::free(Y_avg_local);
+        std::free(Y_avg_global);
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const int finest_level_dim_0 = finest_level_dims[0];
+        
+        /*
+         * Get the size of the physical domain.
+         */
+        
+        const double L_x = x_hi[0] - x_lo[0];
+        const double L_y = x_hi[1] - x_lo[1];
+        const double L_z = x_hi[2] - x_lo[2];
+        
+        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            Y_avg_local[i] = 0.0;
+            Y_avg_global[i] = 0.0;
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratioToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            
+            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower index and grid spacing.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch and mass fractions in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
+                
+                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                flow_model_tmp->computeDerivedCellData();
+                
+                /*
+                 * Get the pointer to first mass fraction data inside the flow model.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
+                    flow_model_tmp->getCellData("MASS_FRACTIONS");
+                
+                double* Y = data_mass_fractions->getPointer(0);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
+                const int num_ghosts_2_mass_fractions = num_ghosts_mass_fractions[2];
+                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
+                const int ghostcell_dim_1_mass_fractions = ghostcell_dims_mass_fractions[1];
+                
+                const double weight = (dx[1]*dx[2])/(L_y*L_z);
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    const int relative_idx_lo_2 = relative_index_lo[2];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear index and the data to add.
+                                 */
+                                
+                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                        ghostcell_dim_1_mass_fractions;
+                                
+                                const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)*weight/((double) n_overlapped);
+                                
+                                for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                                {
+                                    const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                    
+                                    Y_avg_local[idx_fine] += value_to_add;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        /*
+         * Reduction to get the global average.
+         */
+        
+        mpi.Reduce(
+            Y_avg_local,
+            Y_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM,
+            0);
+        
+        /*
+         * Compute and output the mixing width (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            double W = 0.0;
+            
+            for (int i = 0; i < finest_level_dim_0; i++)
+            {
+                W += Y_avg_global[i]*(1.0 - Y_avg_global[i]);
+            }
+            
+            const double dx_finest = L_x/finest_level_dim_0;
+            
+            W = 4.0*W*dx_finest;
+            
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << W;
+        }
+        
+        std::free(Y_avg_local);
+        std::free(Y_avg_global);
+    }
     
     if (mpi.getRank() == 0)
     {
-        double W = 0.0;
-        
-        for (int i = 0; i < finest_level_dims[0]; i++)
-        {
-            W += Y_avg_global[i]*(1.0 - Y_avg_global[i]);
-        }
-        
-        W = 4.0*W*dx_finest[0];
-        
-        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-              << "\t" << W;
-        
         f_out.close();
     }
 }
