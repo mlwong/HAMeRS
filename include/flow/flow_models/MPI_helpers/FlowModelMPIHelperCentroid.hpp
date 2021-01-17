@@ -1,5 +1,5 @@
-#ifndef FLOW_MODEL_HELPER_MAX_MIN_HPP
-#define FLOW_MODEL_HELPER_MAX_MIN_HPP
+#ifndef FLOW_MODEL_HELPER_CENTROID_HPP
+#define FLOW_MODEL_HELPER_CENTROID_HPP
 
 #include "flow/flow_models/FlowModel.hpp"
 
@@ -7,10 +7,10 @@
 
 #include <string>
 
-class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
+class FlowModelMPIHelperCentroid: public FlowModelMPIHelper
 {
     public:
-        FlowModelMPIHelperMaxMin(
+        FlowModelMPIHelperCentroid(
             const std::string& object_name,
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
@@ -25,17 +25,9 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         {}
         
         /*
-         * Compute maximum value with only x direction as inhomogeneous direction.
+         * Compute centroid in x-direction.
          */
-        std::vector<double> getMaxQuantityWithInhomogeneousXDirection(
-            const std::string quantity_name,
-            const int component_idx,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
-        
-        /*
-         * Compute minimum value with only x direction as inhomogeneous direction.
-         */
-        std::vector<double> getMinQuantityWithInhomogeneousXDirection(
+        double getCentroidInXDirection(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
@@ -44,4 +36,4 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         
 };
 
-#endif /* FLOW_MODEL_HELPER_MAX_MIN_HPP */
+#endif /* FLOW_MODEL_HELPER_CENTROID_HPP */

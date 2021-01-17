@@ -5,6 +5,7 @@ set(MPI_helpers_source_files
     MPIHelperMaxMin.cpp
     MPIHelperAverage.cpp
     MPIHelperCorrelation.cpp
+    MPIHelperCentroid.cpp
     )
 
 # Create a library called MPI_helpers which includes the 

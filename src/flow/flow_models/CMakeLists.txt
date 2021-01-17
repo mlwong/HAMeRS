@@ -8,6 +8,7 @@ set(flow_models_source_files
     ./MPI_helpers/FlowModelMPIHelperMaxMin.cpp
     ./MPI_helpers/FlowModelMPIHelperAverage.cpp
     ./MPI_helpers/FlowModelMPIHelperCorrelation.cpp
+    ./MPI_helpers/FlowModelMPIHelperCentroid.cpp
     ./single-species/FlowModelSingleSpecies.cpp
     ./single-species/FlowModelBasicUtilitiesSingleSpecies.cpp
     ./single-species/FlowModelBoundaryUtilitiesSingleSpecies.cpp
