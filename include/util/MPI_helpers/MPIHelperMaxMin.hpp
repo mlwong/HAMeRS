@@ -37,7 +37,7 @@ class MPIHelperMaxMin: public MPIHelper
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
-         * Compute maximum location within bounds in x-direction.
+         * Compute maximum location within quantity bounds in x-direction.
          */
         double getMaxLocationWithinBoundsInXDirection(
             HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
@@ -47,7 +47,7 @@ class MPIHelperMaxMin: public MPIHelper
             const double bound_hi) const;
         
         /*
-         * Compute minimum location within bounds in x-direction..
+         * Compute minimum location within quantity bounds in x-direction..
          */
         double getMinLocationWithinBoundsInXDirection(
             HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,

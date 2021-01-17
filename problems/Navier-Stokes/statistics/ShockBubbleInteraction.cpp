@@ -436,7 +436,7 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
             num_levels - 1));
     
     /*
-     * Get the upper index of the physical domain.
+     * Get the upper indices of the physical domain.
      */
     
     const double* x_hi = d_grid_geometry->getXUpper();
@@ -462,7 +462,7 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
+                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -610,7 +610,7 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
+                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -767,7 +767,7 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
+                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -976,7 +976,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
             num_levels - 1));
     
     /*
-     * Get the lower index of the physical domain.
+     * Get the lower indices of the physical domain.
      */
     
     const double* x_lo = d_grid_geometry->getXLower();
@@ -1002,7 +1002,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
+                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -1150,7 +1150,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
+                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -1307,7 +1307,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
+                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -1516,7 +1516,7 @@ SBIStatisticsUtilities::outputInterfaceMinInYDirection(
             num_levels - 1));
     
     /*
-     * Get the upper index of the physical domain.
+     * Get the upper indices of the physical domain.
      */
     
     const double* x_hi = d_grid_geometry->getXUpper();
@@ -1549,7 +1549,7 @@ SBIStatisticsUtilities::outputInterfaceMinInYDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
+                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -1706,7 +1706,7 @@ SBIStatisticsUtilities::outputInterfaceMinInYDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
+                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -1915,7 +1915,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInYDirection(
             num_levels - 1));
     
     /*
-     * Get the lower index of the physical domain.
+     * Get the lower indices of the physical domain.
      */
     
     const double* x_lo = d_grid_geometry->getXLower();
@@ -1948,7 +1948,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInYDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
+                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -2105,7 +2105,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInYDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
+                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -2314,7 +2314,7 @@ SBIStatisticsUtilities::outputInterfaceMinInZDirection(
             num_levels - 1));
     
     /*
-     * Get the upper index of the physical domain.
+     * Get the upper indices of the physical domain.
      */
     
     const double* x_hi = d_grid_geometry->getXUpper();
@@ -2354,7 +2354,7 @@ SBIStatisticsUtilities::outputInterfaceMinInZDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
+                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -2563,7 +2563,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInZDirection(
             num_levels - 1));
     
     /*
-     * Get the lower index of the physical domain.
+     * Get the lower indices of the physical domain.
      */
     
     const double* x_lo = d_grid_geometry->getXLower();
@@ -2603,7 +2603,7 @@ SBIStatisticsUtilities::outputInterfaceMaxInZDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
+                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();

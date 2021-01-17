@@ -51,7 +51,7 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
+                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -224,7 +224,7 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
+                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -407,7 +407,7 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
+                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();

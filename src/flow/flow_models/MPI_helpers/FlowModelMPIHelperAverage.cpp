@@ -79,7 +79,7 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index.
+                 * Get the patch lower indices.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -257,7 +257,7 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index and grid spacing.
+                 * Get the patch lower indices and grid spacings.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -454,7 +454,7 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index and grid spacing.
+                 * Get the patch lower indices and grid spacings.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -690,7 +690,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index.
+                 * Get the patch lower indices.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -868,7 +868,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index and grid spacing.
+                 * Get the patch lower indices and grid spacings.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -1065,7 +1065,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index and grid spacing.
+                 * Get the patch lower indices and grid spacings.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -1305,7 +1305,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index.
+                 * Get the patch lower indices.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -1507,7 +1507,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index and grid spacing.
+                 * Get the patch lower indices and grid spacings.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -1734,7 +1734,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index and grid spacing.
+                 * Get the patch lower indices and grid spacings.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -2011,7 +2011,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index.
+                 * Get the patch lower indices.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -2218,7 +2218,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index and grid spacing.
+                 * Get the patch lower indices and grid spacings.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -2449,7 +2449,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index and grid spacing.
+                 * Get the patch lower indices and grid spacings.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();

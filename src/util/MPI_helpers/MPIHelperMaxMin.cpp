@@ -77,7 +77,7 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index.
+                 * Get the patch lower indices.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -194,7 +194,7 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index.
+                 * Get the patch lower indices.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -487,7 +487,7 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index.
+                 * Get the patch lower indices.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -604,7 +604,7 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index.
+                 * Get the patch lower indices.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -731,7 +731,7 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index.
+                 * Get the patch lower indices.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -827,7 +827,7 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
 
 
 /*
- * Compute maximum location within bounds in x-direction.
+ * Compute maximum location within quantity bounds in x-direction.
  */
 double
 MPIHelperMaxMin::getMaxLocationWithinBoundsInXDirection(
@@ -853,7 +853,7 @@ MPIHelperMaxMin::getMaxLocationWithinBoundsInXDirection(
             num_levels - 1));
     
     /*
-     * Get the lower index of the physical domain.
+     * Get the lower indices of the physical domain.
      */
     
     const double* x_lo = d_grid_geometry->getXLower();
@@ -879,7 +879,7 @@ MPIHelperMaxMin::getMaxLocationWithinBoundsInXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
+                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -893,8 +893,6 @@ MPIHelperMaxMin::getMaxLocationWithinBoundsInXDirection(
                 const double* const dx = patch_geom->getDx();
                 
                 const double* const x_lo_patch = patch_geom->getXLower();
-                
-                const double x_lo_patch_0 = x_lo_patch[0];
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
                     HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -935,7 +933,7 @@ MPIHelperMaxMin::getMaxLocationWithinBoundsInXDirection(
                         
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_quantity;
                         
-                        const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch_0;
+                        const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch[0];
                         
                         if (u[idx] > bound_lo && u[idx] < bound_hi)
                         {
@@ -981,7 +979,7 @@ MPIHelperMaxMin::getMaxLocationWithinBoundsInXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
+                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -995,8 +993,6 @@ MPIHelperMaxMin::getMaxLocationWithinBoundsInXDirection(
                 const double* const dx = patch_geom->getDx();
                 
                 const double* const x_lo_patch = patch_geom->getXLower();
-                
-                const double x_lo_patch_0 = x_lo_patch[0];
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
                     HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -1046,7 +1042,7 @@ MPIHelperMaxMin::getMaxLocationWithinBoundsInXDirection(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch_0;
+                            const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch[0];
                             
                             if (u[idx] > bound_lo && u[idx] < bound_hi)
                             {
@@ -1093,7 +1089,7 @@ MPIHelperMaxMin::getMaxLocationWithinBoundsInXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
+                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -1107,8 +1103,6 @@ MPIHelperMaxMin::getMaxLocationWithinBoundsInXDirection(
                 const double* const dx = patch_geom->getDx();
                 
                 const double* const x_lo_patch = patch_geom->getXLower();
-                
-                const double x_lo_patch_0 = x_lo_patch[0];
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
                     HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -1167,7 +1161,7 @@ MPIHelperMaxMin::getMaxLocationWithinBoundsInXDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch_0;
+                                const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch[0];
                                 
                                 if (u[idx] > bound_lo && u[idx] < bound_hi)
                                 {
@@ -1200,7 +1194,7 @@ MPIHelperMaxMin::getMaxLocationWithinBoundsInXDirection(
 
 
 /*
- * Compute minimum location within bounds in x-direction.
+ * Compute minimum location within quantity bounds in x-direction.
  */
 double
 MPIHelperMaxMin::getMinLocationWithinBoundsInXDirection(
@@ -1226,7 +1220,7 @@ MPIHelperMaxMin::getMinLocationWithinBoundsInXDirection(
             num_levels - 1));
     
     /*
-     * Get the upper index of the physical domain.
+     * Get the upper indices of the physical domain.
      */
     
     const double* x_hi = d_grid_geometry->getXUpper();
@@ -1252,7 +1246,7 @@ MPIHelperMaxMin::getMinLocationWithinBoundsInXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
+                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -1266,8 +1260,6 @@ MPIHelperMaxMin::getMinLocationWithinBoundsInXDirection(
                 const double* const dx = patch_geom->getDx();
                 
                 const double* const x_lo_patch = patch_geom->getXLower();
-                
-                const double x_lo_patch_0 = x_lo_patch[0];
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
                     HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -1308,7 +1300,7 @@ MPIHelperMaxMin::getMinLocationWithinBoundsInXDirection(
                         
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_quantity;
                         
-                        const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch_0;
+                        const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch[0];
                         
                         if (u[idx] > bound_lo && u[idx] < bound_hi)
                         {
@@ -1354,7 +1346,7 @@ MPIHelperMaxMin::getMinLocationWithinBoundsInXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
+                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -1368,8 +1360,6 @@ MPIHelperMaxMin::getMinLocationWithinBoundsInXDirection(
                 const double* const dx = patch_geom->getDx();
                 
                 const double* const x_lo_patch = patch_geom->getXLower();
-                
-                const double x_lo_patch_0 = x_lo_patch[0];
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
                     HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -1419,7 +1409,7 @@ MPIHelperMaxMin::getMinLocationWithinBoundsInXDirection(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch_0;
+                            const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch[0];
                             
                             if (u[idx] > bound_lo && u[idx] < bound_hi)
                             {
@@ -1466,7 +1456,7 @@ MPIHelperMaxMin::getMinLocationWithinBoundsInXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
+                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -1480,8 +1470,6 @@ MPIHelperMaxMin::getMinLocationWithinBoundsInXDirection(
                 const double* const dx = patch_geom->getDx();
                 
                 const double* const x_lo_patch = patch_geom->getXLower();
-                
-                const double x_lo_patch_0 = x_lo_patch[0];
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity(
                     HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -1540,7 +1528,7 @@ MPIHelperMaxMin::getMinLocationWithinBoundsInXDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch_0;
+                                const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch[0];
                                 
                                 if (u[idx] > bound_lo && u[idx] < bound_hi)
                                 {
