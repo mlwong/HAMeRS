@@ -23,18 +23,12 @@ class MPIHelperNumberOfCells: public MPIHelper
         /*
          * Compute number of cells.
          */
-        double getNumberOfCells(
-            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
-            const int component_idx,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        double getNumberOfCells() const;
         
         /*
          * Compute weighted number of cells.
          */
-        double getWeightedNumberOfCells(
-            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
-            const int component_idx,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        double getWeightedNumberOfCells() const;
         
     private:
         

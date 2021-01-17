@@ -6,10 +6,7 @@
  * Compute number of cells.
  */
 double
-MPIHelperNumberOfCells::getNumberOfCells(
-    HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
-    const int component_idx,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+MPIHelperNumberOfCells::getNumberOfCells() const
 {
     double num_cells_global;
     
@@ -153,10 +150,7 @@ MPIHelperNumberOfCells::getNumberOfCells(
  * Compute weighted number of cells.
  */
 double
-MPIHelperNumberOfCells::getWeightedNumberOfCells(
-    HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
-    const int component_idx,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+MPIHelperNumberOfCells::getWeightedNumberOfCells() const
 {
     double weighted_num_cells_global;
     
