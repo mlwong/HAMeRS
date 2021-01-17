@@ -5,7 +5,7 @@
 #include <limits>
 
 /*
- * Compute maximum value with only x direction as inhomogeneous direction.
+ * Compute maximum value with only x-direction as inhomogeneous direction.
  */
 std::vector<double> FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
     const std::string quantity_name,
@@ -218,16 +218,12 @@ std::vector<double> FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDi
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index and grid spacing.
+                 * Get the patch lower index.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
-                
-                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
-                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                        patch->getPatchGeometry()));
                 
                 /*
                  * Register the patch and the quantity in the flow model and compute the
@@ -376,16 +372,12 @@ std::vector<double> FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDi
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index and grid spacing.
+                 * Get the patch lower index.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
-                
-                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
-                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                        patch->getPatchGeometry()));
                 
                 /*
                  * Register the patch and the quantity in the flow model and compute the
@@ -503,7 +495,7 @@ std::vector<double> FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDi
 
 
 /*
- * Compute minimum value with only x direction as inhomogeneous direction.
+ * Compute minimum value with only x-direction as inhomogeneous direction.
  */
 std::vector<double> FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
     const std::string quantity_name,
@@ -716,16 +708,12 @@ std::vector<double> FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDi
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index and grid spacing.
+                 * Get the patch lower index.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
-                
-                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
-                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                        patch->getPatchGeometry()));
                 
                 /*
                  * Register the patch and the quantity in the flow model and compute the
@@ -874,16 +862,12 @@ std::vector<double> FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDi
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index and grid spacing.
+                 * Get the patch lower index.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
                 
                 const hier::Index& patch_index_lo = patch_box.lower();
-                
-                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
-                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                        patch->getPatchGeometry()));
                 
                 /*
                  * Register the patch and the quantity in the flow model and compute the
@@ -997,4 +981,910 @@ std::vector<double> FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDi
     }
     
     return min_quantity;
+}
+
+
+/*
+ * Compute maximum location within bounds in x-direction.
+ */
+double FlowModelMPIHelperMaxMin::getMaxLocationWithinBoundsInXDirection(
+    const std::string quantity_name,
+    const int component_idx,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double bound_lo,
+    const double bound_hi) const
+{
+    double location_x_max_global;
+    
+    const int num_levels = d_patch_hierarchy->getNumberOfLevels();
+    
+    /*
+     * Get the flattened hierarchy where only the finest existing grid is visible at any given
+     * location in the problem space.
+     */
+    
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
+            *d_patch_hierarchy,
+            0,
+            num_levels - 1));
+    
+    /*
+     * Get the lower index of the physical domain.
+     */
+    
+    const double* x_lo = d_grid_geometry->getXLower();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        double location_x_max_local = x_lo[0];
+        location_x_max_global       = x_lo[0];
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                d_patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower index and grid spacing.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                const double* const x_lo_patch = patch_geom->getXLower();
+                
+                const double x_lo_patch_0 = x_lo_patch[0];
+                
+                /*
+                 * Register the patch and the quantity in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>(quantity_name, hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                
+                d_flow_model->allocateMemoryForDerivedCellData();
+                
+                d_flow_model->computeDerivedCellData();
+                
+                /*
+                 * Get the pointer to data inside the flow model.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                    d_flow_model->getCellData(quantity_name);
+                
+                double* u = data_quantity->getPointer(component_idx);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_quantity = data_quantity->getGhostCellWidth();
+                
+                const int num_ghosts_0_quantity = num_ghosts_quantity[0];
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        /*
+                         * Compute the linear index and update the max.
+                         */
+                        
+                        const int idx = relative_idx_lo_0 + i + num_ghosts_0_quantity;
+                        
+                        const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch_0;
+                        
+                        if (u[idx] > bound_lo && u[idx] < bound_hi)
+                        {
+                            if (x > location_x_max_local)
+                            {
+                                location_x_max_local = x;
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model->unregisterPatch();
+            }
+        }
+        
+        /*
+         * Reduction to get the global max.
+         */
+        
+        d_mpi.Allreduce(
+            &location_x_max_local,
+            &location_x_max_global,
+            1,
+            MPI_DOUBLE,
+            MPI_MAX);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        double location_x_max_local = x_lo[0];
+        location_x_max_global       = x_lo[0];
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                d_patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower index and grid spacing.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                const double* const x_lo_patch = patch_geom->getXLower();
+                
+                const double x_lo_patch_0 = x_lo_patch[0];
+                
+                /*
+                 * Register the patch and the quantity in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>(quantity_name, hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                
+                d_flow_model->allocateMemoryForDerivedCellData();
+                
+                d_flow_model->computeDerivedCellData();
+                
+                /*
+                 * Get the pointer to data inside the flow model.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                    d_flow_model->getCellData(quantity_name);
+                
+                double* u = data_quantity->getPointer(component_idx);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_quantity = data_quantity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_quantity = data_quantity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_quantity = num_ghosts_quantity[0];
+                const int num_ghosts_1_quantity = num_ghosts_quantity[1];
+                const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            /*
+                             * Compute the linear index and update the max.
+                             */
+                            
+                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
+                            
+                            const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch_0;
+                            
+                            if (u[idx] > bound_lo && u[idx] < bound_hi)
+                            {
+                                if (x > location_x_max_local)
+                                {
+                                    location_x_max_local = x;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model->unregisterPatch();
+            }
+        }
+        
+        /*
+         * Reduction to get the global max.
+         */
+        
+        d_mpi.Allreduce(
+            &location_x_max_local,
+            &location_x_max_global,
+            1,
+            MPI_DOUBLE,
+            MPI_MAX);
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        double location_x_max_local = x_lo[0];
+        location_x_max_global       = x_lo[0];
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                d_patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower index and grid spacing.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                const double* const x_lo_patch = patch_geom->getXLower();
+                
+                const double x_lo_patch_0 = x_lo_patch[0];
+                
+                /*
+                 * Register the patch and the quantity in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>(quantity_name, hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                
+                d_flow_model->allocateMemoryForDerivedCellData();
+                
+                d_flow_model->computeDerivedCellData();
+                
+                /*
+                 * Get the pointer to data inside the flow model.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                    d_flow_model->getCellData(quantity_name);
+                
+                double* u = data_quantity->getPointer(component_idx);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_quantity = data_quantity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_quantity = data_quantity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_quantity = num_ghosts_quantity[0];
+                const int num_ghosts_1_quantity = num_ghosts_quantity[1];
+                const int num_ghosts_2_quantity = num_ghosts_quantity[2];
+                const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
+                const int ghostcell_dim_1_quantity = ghostcell_dims_quantity[1];
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    const int relative_idx_lo_2 = relative_index_lo[2];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                /*
+                                 * Compute the linear index and update the max.
+                                 */
+                                
+                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
+                                        ghostcell_dim_1_quantity;
+                                
+                                const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch_0;
+                                
+                                if (u[idx] > bound_lo && u[idx] < bound_hi)
+                                {
+                                    if (x > location_x_max_local)
+                                    {
+                                        location_x_max_local = x;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model->unregisterPatch();
+            }
+        }
+        
+        /*
+         * Reduction to get the global max.
+         */
+        
+        d_mpi.Allreduce(
+            &location_x_max_local,
+            &location_x_max_global,
+            1,
+            MPI_DOUBLE,
+            MPI_MAX);
+    }
+    
+    return location_x_max_global;
+}
+
+
+/*
+ * Compute minimum location within bounds in x-direction..
+ */
+double FlowModelMPIHelperMaxMin::getMinLocationWithinBoundsInXDirection(
+    const std::string quantity_name,
+    const int component_idx,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double bound_lo,
+    const double bound_hi) const
+{
+    double location_x_min_global;
+    
+    const int num_levels = d_patch_hierarchy->getNumberOfLevels();
+    
+    /*
+     * Get the flattened hierarchy where only the finest existing grid is visible at any given
+     * location in the problem space.
+     */
+    
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
+            *d_patch_hierarchy,
+            0,
+            num_levels - 1));
+    
+    /*
+     * Get the upper index of the physical domain.
+     */
+    
+    const double* x_hi = d_grid_geometry->getXUpper();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        double location_x_min_local = x_hi[0];
+        location_x_min_global       = x_hi[0];
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                d_patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower index and grid spacing.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                const double* const x_lo_patch = patch_geom->getXLower();
+                
+                const double x_lo_patch_0 = x_lo_patch[0];
+                
+                /*
+                 * Register the patch and the quantity in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>(quantity_name, hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                
+                d_flow_model->allocateMemoryForDerivedCellData();
+                
+                d_flow_model->computeDerivedCellData();
+                
+                /*
+                 * Get the pointer to data inside the flow model.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                    d_flow_model->getCellData(quantity_name);
+                
+                double* u = data_quantity->getPointer(component_idx);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_quantity = data_quantity->getGhostCellWidth();
+                
+                const int num_ghosts_0_quantity = num_ghosts_quantity[0];
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        /*
+                         * Compute the linear index and update the min.
+                         */
+                        
+                        const int idx = relative_idx_lo_0 + i + num_ghosts_0_quantity;
+                        
+                        const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch_0;
+                        
+                        if (u[idx] > bound_lo && u[idx] < bound_hi)
+                        {
+                            if (x < location_x_min_local)
+                            {
+                                location_x_min_local = x;
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model->unregisterPatch();
+            }
+        }
+        
+        /*
+         * Reduction to get the global min.
+         */
+        
+        d_mpi.Allreduce(
+            &location_x_min_local,
+            &location_x_min_global,
+            1,
+            MPI_DOUBLE,
+            MPI_MIN);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        double location_x_min_local = x_hi[0];
+        location_x_min_global       = x_hi[0];
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                d_patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower index and grid spacing.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                const double* const x_lo_patch = patch_geom->getXLower();
+                
+                const double x_lo_patch_0 = x_lo_patch[0];
+                
+                /*
+                 * Register the patch and the quantity in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>(quantity_name, hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                
+                d_flow_model->allocateMemoryForDerivedCellData();
+                
+                d_flow_model->computeDerivedCellData();
+                
+                /*
+                 * Get the pointer to data inside the flow model.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                    d_flow_model->getCellData(quantity_name);
+                
+                double* u = data_quantity->getPointer(component_idx);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_quantity = data_quantity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_quantity = data_quantity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_quantity = num_ghosts_quantity[0];
+                const int num_ghosts_1_quantity = num_ghosts_quantity[1];
+                const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            /*
+                             * Compute the linear index and update the min.
+                             */
+                            
+                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
+                            
+                            const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch_0;
+                            
+                            if (u[idx] > bound_lo && u[idx] < bound_hi)
+                            {
+                                if (x < location_x_min_local)
+                                {
+                                    location_x_min_local = x;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model->unregisterPatch();
+            }
+        }
+        
+        /*
+         * Reduction to get the global min.
+         */
+        
+        d_mpi.Allreduce(
+            &location_x_min_local,
+            &location_x_min_global,
+            1,
+            MPI_DOUBLE,
+            MPI_MIN);
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        double location_x_min_local = x_hi[0];
+        location_x_min_global       = x_hi[0];
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                d_patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower index and grid spacing.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                const double* const x_lo_patch = patch_geom->getXLower();
+                
+                const double x_lo_patch_0 = x_lo_patch[0];
+                
+                /*
+                 * Register the patch and the quantity in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>(quantity_name, hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                
+                d_flow_model->allocateMemoryForDerivedCellData();
+                
+                d_flow_model->computeDerivedCellData();
+                
+                /*
+                 * Get the pointer to data inside the flow model.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
+                    d_flow_model->getCellData(quantity_name);
+                
+                double* u = data_quantity->getPointer(component_idx);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_quantity = data_quantity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_quantity = data_quantity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_quantity = num_ghosts_quantity[0];
+                const int num_ghosts_1_quantity = num_ghosts_quantity[1];
+                const int num_ghosts_2_quantity = num_ghosts_quantity[2];
+                const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
+                const int ghostcell_dim_1_quantity = ghostcell_dims_quantity[1];
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    const int relative_idx_lo_2 = relative_index_lo[2];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                /*
+                                 * Compute the linear index and update the min.
+                                 */
+                                
+                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
+                                        ghostcell_dim_1_quantity;
+                                
+                                const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch_0;
+                                
+                                if (u[idx] > bound_lo && u[idx] < bound_hi)
+                                {
+                                    if (x < location_x_min_local)
+                                    {
+                                        location_x_min_local = x;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model->unregisterPatch();
+            }
+        }
+        
+        /*
+         * Reduction to get the global min.
+         */
+        
+        d_mpi.Allreduce(
+            &location_x_min_local,
+            &location_x_min_global,
+            1,
+            MPI_DOUBLE,
+            MPI_MIN);
+    }
+    
+    return location_x_min_global;
 }
