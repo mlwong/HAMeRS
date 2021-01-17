@@ -879,7 +879,7 @@ MPIHelperMaxMin::getMaxLocationWithinBoundsInXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index and grid spacing.
+                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -981,7 +981,7 @@ MPIHelperMaxMin::getMaxLocationWithinBoundsInXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index and grid spacing.
+                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -1093,7 +1093,7 @@ MPIHelperMaxMin::getMaxLocationWithinBoundsInXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index and grid spacing.
+                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -1252,7 +1252,7 @@ MPIHelperMaxMin::getMinLocationWithinBoundsInXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index and grid spacing.
+                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -1354,7 +1354,7 @@ MPIHelperMaxMin::getMinLocationWithinBoundsInXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index and grid spacing.
+                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -1466,7 +1466,7 @@ MPIHelperMaxMin::getMinLocationWithinBoundsInXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index and grid spacing.
+                 * Get the patch lower index, grid spacing and the lower spatial coordinate.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
