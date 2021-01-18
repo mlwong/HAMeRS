@@ -5,7 +5,7 @@
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 
 /*
- * Compute averaged value with only x direction as inhomogeneous direction.
+ * Compute averaged value with only x-direction as inhomogeneous direction.
  */
 std::vector<double>
 MPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
@@ -535,7 +535,7 @@ MPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
 
 
 /*
- * Compute averaged value (on product of variables) with only x direction as inhomogeneous direction.
+ * Compute averaged value (on product of variables) with only x-direction as inhomogeneous direction.
  */
 std::vector<double>
 MPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(

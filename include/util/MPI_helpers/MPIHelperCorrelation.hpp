@@ -21,7 +21,7 @@ class MPIHelperCorrelation: public MPIHelper
         {}
         
         /*
-         * Compute correlation with only x direction as inhomogeneous direction.
+         * Compute correlation with only x-direction as inhomogeneous direction.
          */
         std::vector<double> getQuantityCorrelationWithInhomogeneousXDirection(
             std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > >& variable_quantities,
@@ -30,7 +30,7 @@ class MPIHelperCorrelation: public MPIHelper
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
-         * Compute correlation with only x direction as inhomogeneous direction.
+         * Compute correlation with only x-direction as inhomogeneous direction.
          */
         std::vector<double> getQuantityCorrelationWithInhomogeneousXDirection(
             std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > >& variable_quantities,

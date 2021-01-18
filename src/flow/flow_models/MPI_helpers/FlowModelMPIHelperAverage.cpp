@@ -3,7 +3,7 @@
 #include "extn/patch_hierarchies/ExtendedFlattenedHierarchy.hpp"
 
 /*
- * Compute averaged value with only x direction as inhomogeneous direction.
+ * Compute averaged value with only x-direction as inhomogeneous direction.
  */
 std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
     const std::string quantity_name,
@@ -613,7 +613,7 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
 
 
 /*
- * Compute averaged reciprocal of value with only x direction as inhomogeneous direction.
+ * Compute averaged reciprocal of value with only x-direction as inhomogeneous direction.
  */
 std::vector<double>
 FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDirection(
@@ -1224,7 +1224,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
 
 
 /*
- * Compute averaged value (on product of variables) with only x direction as inhomogeneous direction.
+ * Compute averaged value (on product of variables) with only x-direction as inhomogeneous direction.
  */
 std::vector<double>
 FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
@@ -1929,7 +1929,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
 
 
 /*
- * Compute averaged value (on product of variables) with only x direction as inhomogeneous direction.
+ * Compute averaged value (on product of variables) with only x-direction as inhomogeneous direction.
  */
 std::vector<double>
 FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(

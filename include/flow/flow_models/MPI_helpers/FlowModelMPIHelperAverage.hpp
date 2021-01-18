@@ -25,7 +25,7 @@ class FlowModelMPIHelperAverage: public FlowModelMPIHelper
         {}
         
         /*
-         * Compute averaged value with only x direction as inhomogeneous direction.
+         * Compute averaged value with only x-direction as inhomogeneous direction.
          */
         std::vector<double> getAveragedQuantityWithInhomogeneousXDirection(
             const std::string quantity_name,
@@ -33,7 +33,7 @@ class FlowModelMPIHelperAverage: public FlowModelMPIHelper
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
-         * Compute averaged reciprocal of value with only x direction as inhomogeneous direction.
+         * Compute averaged reciprocal of value with only x-direction as inhomogeneous direction.
          */
         std::vector<double> getAveragedReciprocalOfQuantityWithInhomogeneousXDirection(
             const std::string quantity_name,
@@ -41,7 +41,7 @@ class FlowModelMPIHelperAverage: public FlowModelMPIHelper
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
-         * Compute averaged value (on product of variables) with only x direction as inhomogeneous direction.
+         * Compute averaged value (on product of variables) with only x-direction as inhomogeneous direction.
          */
         std::vector<double> getAveragedQuantityWithInhomogeneousXDirection(
             const std::vector<std::string>& quantity_names,
@@ -49,7 +49,7 @@ class FlowModelMPIHelperAverage: public FlowModelMPIHelper
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
-         * Compute averaged value (on product of variables) with only x direction as inhomogeneous direction.
+         * Compute averaged value (on product of variables) with only x-direction as inhomogeneous direction.
          */
         std::vector<double> getAveragedQuantityWithInhomogeneousXDirection(
             const std::vector<std::string>& quantity_names,

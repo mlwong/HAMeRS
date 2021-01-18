@@ -21,7 +21,7 @@ class MPIHelperAverage: public MPIHelper
         {}
         
         /*
-         * Compute averaged value with only x direction as inhomogeneous direction.
+         * Compute averaged value with only x-direction as inhomogeneous direction.
          */
         std::vector<double> getAveragedQuantityWithInhomogeneousXDirection(
             HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
@@ -29,7 +29,7 @@ class MPIHelperAverage: public MPIHelper
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
-         * Compute averaged value (on product of variables) with only x direction as inhomogeneous direction.
+         * Compute averaged value (on product of variables) with only x-direction as inhomogeneous direction.
          */
         std::vector<double> getAveragedQuantityWithInhomogeneousXDirection(
             std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > >& variable_quantities,

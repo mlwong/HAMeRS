@@ -5,7 +5,7 @@
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 
 /*
- * Compute correlation with only x direction as inhomogeneous direction.
+ * Compute correlation with only x-direction as inhomogeneous direction.
  */
 std::vector<double>
 MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
@@ -473,7 +473,7 @@ MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
 
 
 /*
- * Compute correlation with only x direction as inhomogeneous direction.
+ * Compute correlation with only x-direction as inhomogeneous direction.
  */
 std::vector<double>
 MPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(

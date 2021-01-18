@@ -3,7 +3,7 @@
 #include "extn/patch_hierarchies/ExtendedFlattenedHierarchy.hpp"
 
 /*
- * Compute correlation with only x direction as inhomogeneous direction.
+ * Compute correlation with only x-direction as inhomogeneous direction.
  */
 std::vector<double>
 FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
@@ -523,7 +523,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection
 
 
 /*
- * Compute correlation with only x direction as inhomogeneous direction.
+ * Compute correlation with only x-direction as inhomogeneous direction.
  */
 std::vector<double>
 FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection(
