@@ -3,6 +3,7 @@
 #include "extn/patch_hierarchies/ExtendedFlattenedHierarchy.hpp"
 #include "flow/flow_models/MPI_helpers/FlowModelMPIHelperAverage.hpp"
 #include "flow/flow_models/MPI_helpers/FlowModelMPIHelperCentroid.hpp"
+#include "flow/flow_models/MPI_helpers/FlowModelMPIHelperMaxMin.hpp"
 #include "util/MPI_helpers/MPIHelperNumberOfCells.hpp"
 
 #include <fstream>
@@ -404,8 +405,6 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
             << std::endl);
     }
     
-    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
-    
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     std::ofstream f_out;
@@ -422,495 +421,32 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
         }
     }
     
-    /*
-     * Get the flattened hierarchy where only the finest existing grid is visible at any given
-     * location in the problem space.
-     */
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
-    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    FlowModelMPIHelperMaxMin MPI_helper_max_min = FlowModelMPIHelperMaxMin(
+        "MPI_helper_max_min",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
     
-    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
-        new ExtendedFlattenedHierarchy(
-            *patch_hierarchy,
+    const double interface_x_min_global = MPI_helper_max_min.getMinLocationWithinQuantityBoundsInXDirection(
+            "MASS_FRACTIONS",
             0,
-            num_levels - 1));
+            data_context,
+            0.01,
+            0.99);
     
     /*
-     * Get the upper indices of the physical domain.
+     * Compute and output the value (only done by process 0).
      */
     
-    const double* x_hi = d_grid_geometry->getXUpper();
-    
-    if (d_dim == tbox::Dimension(1))
+    if (mpi.getRank() == 0)
     {
-        double interface_x_min_local = x_hi[0];
-        double interface_x_min_global = x_hi[0];
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << interface_x_min_global;
         
-        for (int li = 0; li < num_levels; li++)
-        {
-            /*
-             * Get the current patch level.
-             */
-            
-            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
-                patch_hierarchy->getPatchLevel(li));
-            
-            for (hier::PatchLevel::iterator ip(patch_level->begin());
-                 ip != patch_level->end();
-                 ip++)
-            {
-                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
-                
-                /*
-                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
-                 */
-                
-                const hier::Box& patch_box = patch->getBox();
-                
-                const hier::Index& patch_index_lo = patch_box.lower();
-                
-                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
-                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                        patch->getPatchGeometry()));
-                
-                const double* const dx = patch_geom->getDx();
-                
-                const double dx_0 = dx[0];
-                
-                const double* const x_lo_patch = patch_geom->getXLower();
-                
-                const double x_lo_patch_0 = x_lo_patch[0];
-                
-                /*
-                 * Register the patch and mass fractions in the flow model and compute the
-                 * corresponding cell data.
-                 */
-                
-                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
-                
-                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
-                
-                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
-                
-                num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
-                
-                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
-                
-                flow_model_tmp->allocateMemoryForDerivedCellData();
-                
-                flow_model_tmp->computeDerivedCellData();
-                
-                /*
-                 * Get the pointer to first mass fraction data inside the flow model.
-                 */
-                
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
-                    flow_model_tmp->getCellData("MASS_FRACTIONS");
-                
-                double* Y = data_mass_fractions->getPointer(0);
-                
-                const hier::BoxContainer& patch_visible_boxes =
-                    flattened_hierarchy->getVisibleBoxes(
-                        patch_box,
-                        li);
-                
-                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
-                
-                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
-                
-                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
-                     ib != patch_visible_boxes.end();
-                     ib++)
-                {
-                    const hier::Box& patch_visible_box = *ib;
-                    
-                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
-                    
-                    const int interior_dim_0 = interior_dims[0];
-                    
-                    const hier::Index& index_lo = patch_visible_box.lower();
-                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
-                    
-                    const int relative_idx_lo_0 = relative_index_lo[0];
-                    
-                    for (int i = 0; i < interior_dim_0; i++)
-                    {
-                        /*
-                         * Compute the linear index and the data to add.
-                         */
-                        
-                        const int idx = relative_idx_lo_0 + i + num_ghosts_0_mass_fractions;
-                        
-                        const double x = (relative_idx_lo_0 + i + 0.5)*dx_0 + x_lo_patch_0;
-                        
-                        if (Y[idx] > 0.01 && Y[idx] < 0.99)
-                        {
-                            if (x < interface_x_min_local)
-                            {
-                                interface_x_min_local = x;
-                            }
-                        }
-                    }
-                }
-                
-                /*
-                 * Unregister the patch and data of all registered derived cell variables in the flow model.
-                 */
-                
-                flow_model_tmp->unregisterPatch();
-            }
-        }
-        
-        /*
-         * Reduction to get the minimum value.
-         */
-        
-        mpi.Reduce(
-            &interface_x_min_local,
-            &interface_x_min_global,
-            1,
-            MPI_DOUBLE,
-            MPI_MIN,
-            0);
-        
-        /*
-         * Compute and output the value (only done by process 0).
-         */
-        
-        if (mpi.getRank() == 0)
-        {
-            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << interface_x_min_global;
-        }
-        
-        if (mpi.getRank() == 0)
-        {
-            f_out.close();
-        }
-    }
-    else if (d_dim == tbox::Dimension(2))
-    {
-        double interface_x_min_local = x_hi[0];
-        double interface_x_min_global = x_hi[0];
-        
-        for (int li = 0; li < num_levels; li++)
-        {
-            /*
-             * Get the current patch level.
-             */
-            
-            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
-                patch_hierarchy->getPatchLevel(li));
-            
-            for (hier::PatchLevel::iterator ip(patch_level->begin());
-                 ip != patch_level->end();
-                 ip++)
-            {
-                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
-                
-                /*
-                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
-                 */
-                
-                const hier::Box& patch_box = patch->getBox();
-                
-                const hier::Index& patch_index_lo = patch_box.lower();
-                
-                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
-                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                        patch->getPatchGeometry()));
-                
-                const double* const dx = patch_geom->getDx();
-                
-                const double dx_0 = dx[0];
-                
-                const double* const x_lo_patch = patch_geom->getXLower();
-                
-                const double x_lo_patch_0 = x_lo_patch[0];
-                
-                /*
-                 * Register the patch and mass fractions in the flow model and compute the
-                 * corresponding cell data.
-                 */
-                
-                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
-                
-                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
-                
-                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
-                
-                num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
-                
-                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
-                
-                flow_model_tmp->allocateMemoryForDerivedCellData();
-                
-                flow_model_tmp->computeDerivedCellData();
-                
-                /*
-                 * Get the pointer to first mass fraction data inside the flow model.
-                 */
-                
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
-                    flow_model_tmp->getCellData("MASS_FRACTIONS");
-                
-                double* Y = data_mass_fractions->getPointer(0);
-                
-                const hier::BoxContainer& patch_visible_boxes =
-                    flattened_hierarchy->getVisibleBoxes(
-                        patch_box,
-                        li);
-                
-                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
-                
-                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
-                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
-                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
-                
-                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
-                     ib != patch_visible_boxes.end();
-                     ib++)
-                {
-                    const hier::Box& patch_visible_box = *ib;
-                    
-                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
-                    
-                    const int interior_dim_0 = interior_dims[0];
-                    const int interior_dim_1 = interior_dims[1];
-                    
-                    const hier::Index& index_lo = patch_visible_box.lower();
-                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
-                    
-                    const int relative_idx_lo_0 = relative_index_lo[0];
-                    const int relative_idx_lo_1 = relative_index_lo[1];
-                    
-                    for (int j = 0; j < interior_dim_1; j++)
-                    {
-                        for (int i = 0; i < interior_dim_0; i++)
-                        {
-                            /*
-                             * Compute the linear index and the data to add.
-                             */
-                            
-                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
-                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
-                            
-                            const double x = (relative_idx_lo_0 + i + 0.5)*dx_0 + x_lo_patch_0;
-                            
-                            if (Y[idx] > 0.01 && Y[idx] < 0.99)
-                            {
-                                if (x < interface_x_min_local)
-                                {
-                                    interface_x_min_local = x;
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                /*
-                 * Unregister the patch and data of all registered derived cell variables in the flow model.
-                 */
-                
-                flow_model_tmp->unregisterPatch();
-            }
-        }
-        
-        /*
-         * Reduction to get the minimum value.
-         */
-        
-        mpi.Reduce(
-            &interface_x_min_local,
-            &interface_x_min_global,
-            1,
-            MPI_DOUBLE,
-            MPI_MIN,
-            0);
-        
-        /*
-         * Compute and output the value (only done by process 0).
-         */
-        
-        if (mpi.getRank() == 0)
-        {
-            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << interface_x_min_global;
-        }
-        
-        if (mpi.getRank() == 0)
-        {
-            f_out.close();
-        }
-    }
-    else if (d_dim == tbox::Dimension(3))
-    {
-        double interface_x_min_local = x_hi[0];
-        double interface_x_min_global = x_hi[0];
-        
-        for (int li = 0; li < num_levels; li++)
-        {
-            /*
-             * Get the current patch level.
-             */
-            
-            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
-                patch_hierarchy->getPatchLevel(li));
-            
-            for (hier::PatchLevel::iterator ip(patch_level->begin());
-                 ip != patch_level->end();
-                 ip++)
-            {
-                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
-                
-                /*
-                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
-                 */
-                
-                const hier::Box& patch_box = patch->getBox();
-                
-                const hier::Index& patch_index_lo = patch_box.lower();
-                
-                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
-                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                        patch->getPatchGeometry()));
-                
-                const double* const dx = patch_geom->getDx();
-                
-                const double dx_0 = dx[0];
-                
-                const double* const x_lo_patch = patch_geom->getXLower();
-                
-                const double x_lo_patch_0 = x_lo_patch[0];
-                
-                /*
-                 * Register the patch and mass fractions in the flow model and compute the
-                 * corresponding cell data.
-                 */
-                
-                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
-                
-                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
-                
-                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
-                
-                num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
-                
-                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
-                
-                flow_model_tmp->allocateMemoryForDerivedCellData();
-                
-                flow_model_tmp->computeDerivedCellData();
-                
-                /*
-                 * Get the pointer to first mass fraction data inside the flow model.
-                 */
-                
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
-                    flow_model_tmp->getCellData("MASS_FRACTIONS");
-                
-                double* Y = data_mass_fractions->getPointer(0);
-                
-                const hier::BoxContainer& patch_visible_boxes =
-                    flattened_hierarchy->getVisibleBoxes(
-                        patch_box,
-                        li);
-                
-                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
-                
-                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
-                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
-                const int num_ghosts_2_mass_fractions = num_ghosts_mass_fractions[2];
-                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
-                const int ghostcell_dim_1_mass_fractions = ghostcell_dims_mass_fractions[1];
-                
-                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
-                     ib != patch_visible_boxes.end();
-                     ib++)
-                {
-                    const hier::Box& patch_visible_box = *ib;
-                    
-                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
-                    
-                    const int interior_dim_0 = interior_dims[0];
-                    const int interior_dim_1 = interior_dims[1];
-                    const int interior_dim_2 = interior_dims[2];
-                    
-                    const hier::Index& index_lo = patch_visible_box.lower();
-                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
-                    
-                    const int relative_idx_lo_0 = relative_index_lo[0];
-                    const int relative_idx_lo_1 = relative_index_lo[1];
-                    const int relative_idx_lo_2 = relative_index_lo[2];
-                    
-                    for (int k = 0; k < interior_dim_2; k++)
-                    {
-                        for (int j = 0; j < interior_dim_1; j++)
-                        {
-                            for (int i = 0; i < interior_dim_0; i++)
-                            {
-                                /*
-                                 * Compute the linear index and the data to add.
-                                 */
-                                
-                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
-                                        ghostcell_dim_1_mass_fractions;
-                                
-                                const double x = (relative_idx_lo_0 + i + 0.5)*dx_0 + x_lo_patch_0;
-                                
-                                if (Y[idx] > 0.01 && Y[idx] < 0.99)
-                                {
-                                    if (x < interface_x_min_local)
-                                    {
-                                        interface_x_min_local = x;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                /*
-                 * Unregister the patch and data of all registered derived cell variables in the flow model.
-                 */
-                
-                flow_model_tmp->unregisterPatch();
-            }
-        }
-        
-        /*
-         * Reduction to get the minimum value.
-         */
-        
-        mpi.Reduce(
-            &interface_x_min_local,
-            &interface_x_min_global,
-            1,
-            MPI_DOUBLE,
-            MPI_MIN,
-            0);
-        
-        /*
-         * Compute and output the value (only done by process 0).
-         */
-        
-        if (mpi.getRank() == 0)
-        {
-            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << interface_x_min_global;
-        }
-        
-        if (mpi.getRank() == 0)
-        {
-            f_out.close();
-        }
+        f_out.close();
     }
 }
 
@@ -944,8 +480,6 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
             << std::endl);
     }
     
-    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
-    
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     std::ofstream f_out;
@@ -962,495 +496,32 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
         }
     }
     
-    /*
-     * Get the flattened hierarchy where only the finest existing grid is visible at any given
-     * location in the problem space.
-     */
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
-    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    FlowModelMPIHelperMaxMin MPI_helper_max_min = FlowModelMPIHelperMaxMin(
+        "MPI_helper_max_min",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
     
-    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
-        new ExtendedFlattenedHierarchy(
-            *patch_hierarchy,
+    const double interface_x_max_global = MPI_helper_max_min.getMaxLocationWithinQuantityBoundsInXDirection(
+            "MASS_FRACTIONS",
             0,
-            num_levels - 1));
+            data_context,
+            0.01,
+            0.99);
     
     /*
-     * Get the lower indices of the physical domain.
+     * Compute and output the value (only done by process 0).
      */
     
-    const double* x_lo = d_grid_geometry->getXLower();
-    
-    if (d_dim == tbox::Dimension(1))
+    if (mpi.getRank() == 0)
     {
-        double interface_x_max_local = x_lo[0];
-        double interface_x_max_global = x_lo[0];
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << interface_x_max_global;
         
-        for (int li = 0; li < num_levels; li++)
-        {
-            /*
-             * Get the current patch level.
-             */
-            
-            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
-                patch_hierarchy->getPatchLevel(li));
-            
-            for (hier::PatchLevel::iterator ip(patch_level->begin());
-                 ip != patch_level->end();
-                 ip++)
-            {
-                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
-                
-                /*
-                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
-                 */
-                
-                const hier::Box& patch_box = patch->getBox();
-                
-                const hier::Index& patch_index_lo = patch_box.lower();
-                
-                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
-                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                        patch->getPatchGeometry()));
-                
-                const double* const dx = patch_geom->getDx();
-                
-                const double dx_0 = dx[0];
-                
-                const double* const x_lo_patch = patch_geom->getXLower();
-                
-                const double x_lo_patch_0 = x_lo_patch[0];
-                
-                /*
-                 * Register the patch and mass fractions in the flow model and compute the
-                 * corresponding cell data.
-                 */
-                
-                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
-                
-                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
-                
-                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
-                
-                num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
-                
-                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
-                
-                flow_model_tmp->allocateMemoryForDerivedCellData();
-                
-                flow_model_tmp->computeDerivedCellData();
-                
-                /*
-                 * Get the pointer to first mass fraction data inside the flow model.
-                 */
-                
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
-                    flow_model_tmp->getCellData("MASS_FRACTIONS");
-                
-                double* Y = data_mass_fractions->getPointer(0);
-                
-                const hier::BoxContainer& patch_visible_boxes =
-                    flattened_hierarchy->getVisibleBoxes(
-                        patch_box,
-                        li);
-                
-                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
-                
-                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
-                
-                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
-                     ib != patch_visible_boxes.end();
-                     ib++)
-                {
-                    const hier::Box& patch_visible_box = *ib;
-                    
-                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
-                    
-                    const int interior_dim_0 = interior_dims[0];
-                    
-                    const hier::Index& index_lo = patch_visible_box.lower();
-                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
-                    
-                    const int relative_idx_lo_0 = relative_index_lo[0];
-                    
-                    for (int i = 0; i < interior_dim_0; i++)
-                    {
-                        /*
-                         * Compute the linear index and the data to add.
-                         */
-                        
-                        const int idx = relative_idx_lo_0 + i + num_ghosts_0_mass_fractions;
-                        
-                        const double x = (relative_idx_lo_0 + i + 0.5)*dx_0 + x_lo_patch_0;
-                        
-                        if (Y[idx] > 0.01 && Y[idx] < 0.99)
-                        {
-                            if (x > interface_x_max_local)
-                            {
-                                interface_x_max_local = x;
-                            }
-                        }
-                    }
-                }
-                
-                /*
-                 * Unregister the patch and data of all registered derived cell variables in the flow model.
-                 */
-                
-                flow_model_tmp->unregisterPatch();
-            }
-        }
-        
-        /*
-         * Reduction to get the maximum value.
-         */
-        
-        mpi.Reduce(
-            &interface_x_max_local,
-            &interface_x_max_global,
-            1,
-            MPI_DOUBLE,
-            MPI_MAX,
-            0);
-        
-        /*
-         * Compute and output the value (only done by process 0).
-         */
-        
-        if (mpi.getRank() == 0)
-        {
-            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << interface_x_max_global;
-        }
-        
-        if (mpi.getRank() == 0)
-        {
-            f_out.close();
-        }
-    }
-    else if (d_dim == tbox::Dimension(2))
-    {
-        double interface_x_max_local = x_lo[0];
-        double interface_x_max_global = x_lo[0];
-        
-        for (int li = 0; li < num_levels; li++)
-        {
-            /*
-             * Get the current patch level.
-             */
-            
-            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
-                patch_hierarchy->getPatchLevel(li));
-            
-            for (hier::PatchLevel::iterator ip(patch_level->begin());
-                 ip != patch_level->end();
-                 ip++)
-            {
-                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
-                
-                /*
-                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
-                 */
-                
-                const hier::Box& patch_box = patch->getBox();
-                
-                const hier::Index& patch_index_lo = patch_box.lower();
-                
-                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
-                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                        patch->getPatchGeometry()));
-                
-                const double* const dx = patch_geom->getDx();
-                
-                const double dx_0 = dx[0];
-                
-                const double* const x_lo_patch = patch_geom->getXLower();
-                
-                const double x_lo_patch_0 = x_lo_patch[0];
-                
-                /*
-                 * Register the patch and mass fractions in the flow model and compute the
-                 * corresponding cell data.
-                 */
-                
-                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
-                
-                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
-                
-                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
-                
-                num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
-                
-                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
-                
-                flow_model_tmp->allocateMemoryForDerivedCellData();
-                
-                flow_model_tmp->computeDerivedCellData();
-                
-                /*
-                 * Get the pointer to first mass fraction data inside the flow model.
-                 */
-                
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
-                    flow_model_tmp->getCellData("MASS_FRACTIONS");
-                
-                double* Y = data_mass_fractions->getPointer(0);
-                
-                const hier::BoxContainer& patch_visible_boxes =
-                    flattened_hierarchy->getVisibleBoxes(
-                        patch_box,
-                        li);
-                
-                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
-                
-                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
-                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
-                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
-                
-                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
-                     ib != patch_visible_boxes.end();
-                     ib++)
-                {
-                    const hier::Box& patch_visible_box = *ib;
-                    
-                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
-                    
-                    const int interior_dim_0 = interior_dims[0];
-                    const int interior_dim_1 = interior_dims[1];
-                    
-                    const hier::Index& index_lo = patch_visible_box.lower();
-                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
-                    
-                    const int relative_idx_lo_0 = relative_index_lo[0];
-                    const int relative_idx_lo_1 = relative_index_lo[1];
-                    
-                    for (int j = 0; j < interior_dim_1; j++)
-                    {
-                        for (int i = 0; i < interior_dim_0; i++)
-                        {
-                            /*
-                             * Compute the linear index and the data to add.
-                             */
-                            
-                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
-                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
-                            
-                            const double x = (relative_idx_lo_0 + i + 0.5)*dx_0 + x_lo_patch_0;
-                            
-                            if (Y[idx] > 0.01 && Y[idx] < 0.99)
-                            {
-                                if (x > interface_x_max_local)
-                                {
-                                    interface_x_max_local = x;
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                /*
-                 * Unregister the patch and data of all registered derived cell variables in the flow model.
-                 */
-                
-                flow_model_tmp->unregisterPatch();
-            }
-        }
-        
-        /*
-         * Reduction to get the maximum value.
-         */
-        
-        mpi.Reduce(
-            &interface_x_max_local,
-            &interface_x_max_global,
-            1,
-            MPI_DOUBLE,
-            MPI_MAX,
-            0);
-        
-        /*
-         * Compute and output the value (only done by process 0).
-         */
-        
-        if (mpi.getRank() == 0)
-        {
-            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << interface_x_max_global;
-        }
-        
-        if (mpi.getRank() == 0)
-        {
-            f_out.close();
-        }
-    }
-    else if (d_dim == tbox::Dimension(3))
-    {
-        double interface_x_max_local = x_lo[0];
-        double interface_x_max_global = x_lo[0];
-        
-        for (int li = 0; li < num_levels; li++)
-        {
-            /*
-             * Get the current patch level.
-             */
-            
-            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
-                patch_hierarchy->getPatchLevel(li));
-            
-            for (hier::PatchLevel::iterator ip(patch_level->begin());
-                 ip != patch_level->end();
-                 ip++)
-            {
-                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
-                
-                /*
-                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
-                 */
-                
-                const hier::Box& patch_box = patch->getBox();
-                
-                const hier::Index& patch_index_lo = patch_box.lower();
-                
-                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
-                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                        patch->getPatchGeometry()));
-                
-                const double* const dx = patch_geom->getDx();
-                
-                const double dx_0 = dx[0];
-                
-                const double* const x_lo_patch = patch_geom->getXLower();
-                
-                const double x_lo_patch_0 = x_lo_patch[0];
-                
-                /*
-                 * Register the patch and mass fractions in the flow model and compute the
-                 * corresponding cell data.
-                 */
-                
-                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
-                
-                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
-                
-                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
-                
-                num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
-                
-                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
-                
-                flow_model_tmp->allocateMemoryForDerivedCellData();
-                
-                flow_model_tmp->computeDerivedCellData();
-                
-                /*
-                 * Get the pointer to first mass fraction data inside the flow model.
-                 */
-                
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
-                    flow_model_tmp->getCellData("MASS_FRACTIONS");
-                
-                double* Y = data_mass_fractions->getPointer(0);
-                
-                const hier::BoxContainer& patch_visible_boxes =
-                    flattened_hierarchy->getVisibleBoxes(
-                        patch_box,
-                        li);
-                
-                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
-                
-                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
-                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
-                const int num_ghosts_2_mass_fractions = num_ghosts_mass_fractions[2];
-                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
-                const int ghostcell_dim_1_mass_fractions = ghostcell_dims_mass_fractions[1];
-                
-                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
-                     ib != patch_visible_boxes.end();
-                     ib++)
-                {
-                    const hier::Box& patch_visible_box = *ib;
-                    
-                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
-                    
-                    const int interior_dim_0 = interior_dims[0];
-                    const int interior_dim_1 = interior_dims[1];
-                    const int interior_dim_2 = interior_dims[2];
-                    
-                    const hier::Index& index_lo = patch_visible_box.lower();
-                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
-                    
-                    const int relative_idx_lo_0 = relative_index_lo[0];
-                    const int relative_idx_lo_1 = relative_index_lo[1];
-                    const int relative_idx_lo_2 = relative_index_lo[2];
-                    
-                    for (int k = 0; k < interior_dim_2; k++)
-                    {
-                        for (int j = 0; j < interior_dim_1; j++)
-                        {
-                            for (int i = 0; i < interior_dim_0; i++)
-                            {
-                                /*
-                                 * Compute the linear index and the data to add.
-                                 */
-                                
-                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
-                                        ghostcell_dim_1_mass_fractions;
-                                
-                                const double x = (relative_idx_lo_0 + i + 0.5)*dx_0 + x_lo_patch_0;
-                                
-                                if (Y[idx] > 0.01 && Y[idx] < 0.99)
-                                {
-                                    if (x > interface_x_max_local)
-                                    {
-                                        interface_x_max_local = x;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                /*
-                 * Unregister the patch and data of all registered derived cell variables in the flow model.
-                 */
-                
-                flow_model_tmp->unregisterPatch();
-            }
-        }
-        
-        /*
-         * Reduction to get the maximum value.
-         */
-        
-        mpi.Reduce(
-            &interface_x_max_local,
-            &interface_x_max_global,
-            1,
-            MPI_DOUBLE,
-            MPI_MAX,
-            0);
-        
-        /*
-         * Compute and output the value (only done by process 0).
-         */
-        
-        if (mpi.getRank() == 0)
-        {
-            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << interface_x_max_global;
-        }
-        
-        if (mpi.getRank() == 0)
-        {
-            f_out.close();
-        }
+        f_out.close();
     }
 }
 
@@ -1484,8 +555,6 @@ SBIStatisticsUtilities::outputInterfaceMinInYDirection(
             << std::endl);
     }
     
-    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
-    
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     std::ofstream f_out;
@@ -1502,354 +571,32 @@ SBIStatisticsUtilities::outputInterfaceMinInYDirection(
         }
     }
     
-    /*
-     * Get the flattened hierarchy where only the finest existing grid is visible at any given
-     * location in the problem space.
-     */
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
-    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    FlowModelMPIHelperMaxMin MPI_helper_max_min = FlowModelMPIHelperMaxMin(
+        "MPI_helper_max_min",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
     
-    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
-        new ExtendedFlattenedHierarchy(
-            *patch_hierarchy,
+    const double interface_y_min_global = MPI_helper_max_min.getMinLocationWithinQuantityBoundsInYDirection(
+            "MASS_FRACTIONS",
             0,
-            num_levels - 1));
+            data_context,
+            0.01,
+            0.99);
     
     /*
-     * Get the upper indices of the physical domain.
+     * Compute and output the value (only done by process 0).
      */
     
-    const double* x_hi = d_grid_geometry->getXUpper();
-    
-    if (d_dim == tbox::Dimension(1))
+    if (mpi.getRank() == 0)
     {
-        TBOX_ERROR(d_object_name
-            << ": "
-            << "There is no 'INTERFACE_MIN_Y' for one-dimensional problem."
-            << std::endl);
-    }
-    else if (d_dim == tbox::Dimension(2))
-    {
-        double interface_y_min_local = x_hi[1];
-        double interface_y_min_global = x_hi[1];
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << interface_y_min_global;
         
-        for (int li = 0; li < num_levels; li++)
-        {
-            /*
-             * Get the current patch level.
-             */
-            
-            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
-                patch_hierarchy->getPatchLevel(li));
-            
-            for (hier::PatchLevel::iterator ip(patch_level->begin());
-                 ip != patch_level->end();
-                 ip++)
-            {
-                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
-                
-                /*
-                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
-                 */
-                
-                const hier::Box& patch_box = patch->getBox();
-                
-                const hier::Index& patch_index_lo = patch_box.lower();
-                
-                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
-                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                        patch->getPatchGeometry()));
-                
-                const double* const dx = patch_geom->getDx();
-                
-                const double dx_1 = dx[1];
-                
-                const double* const x_lo_patch = patch_geom->getXLower();
-                
-                const double x_lo_patch_1 = x_lo_patch[1];
-                
-                /*
-                 * Register the patch and mass fractions in the flow model and compute the
-                 * corresponding cell data.
-                 */
-                
-                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
-                
-                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
-                
-                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
-                
-                num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
-                
-                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
-                
-                flow_model_tmp->allocateMemoryForDerivedCellData();
-                
-                flow_model_tmp->computeDerivedCellData();
-                
-                /*
-                 * Get the pointer to first mass fraction data inside the flow model.
-                 */
-                
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
-                    flow_model_tmp->getCellData("MASS_FRACTIONS");
-                
-                double* Y = data_mass_fractions->getPointer(0);
-                
-                const hier::BoxContainer& patch_visible_boxes =
-                    flattened_hierarchy->getVisibleBoxes(
-                        patch_box,
-                        li);
-                
-                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
-                
-                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
-                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
-                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
-                
-                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
-                     ib != patch_visible_boxes.end();
-                     ib++)
-                {
-                    const hier::Box& patch_visible_box = *ib;
-                    
-                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
-                    
-                    const int interior_dim_0 = interior_dims[0];
-                    const int interior_dim_1 = interior_dims[1];
-                    
-                    const hier::Index& index_lo = patch_visible_box.lower();
-                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
-                    
-                    const int relative_idx_lo_0 = relative_index_lo[0];
-                    const int relative_idx_lo_1 = relative_index_lo[1];
-                    
-                    for (int j = 0; j < interior_dim_1; j++)
-                    {
-                        for (int i = 0; i < interior_dim_0; i++)
-                        {
-                            /*
-                             * Compute the linear index and the data to add.
-                             */
-                            
-                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
-                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
-                            
-                            const double y = (relative_idx_lo_1 + j + 0.5)*dx_1 + x_lo_patch_1;
-                            
-                            if (Y[idx] > 0.01 && Y[idx] < 0.99)
-                            {
-                                if (y < interface_y_min_local)
-                                {
-                                    interface_y_min_local = y;
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                /*
-                 * Unregister the patch and data of all registered derived cell variables in the flow model.
-                 */
-                
-                flow_model_tmp->unregisterPatch();
-            }
-        }
-        
-        /*
-         * Reduction to get the minimum value.
-         */
-        
-        mpi.Reduce(
-            &interface_y_min_local,
-            &interface_y_min_global,
-            1,
-            MPI_DOUBLE,
-            MPI_MIN,
-            0);
-        
-        /*
-         * Compute and output the value (only done by process 0).
-         */
-        
-        if (mpi.getRank() == 0)
-        {
-            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << interface_y_min_global;
-        }
-        
-        if (mpi.getRank() == 0)
-        {
-            f_out.close();
-        }
-    }
-    else if (d_dim == tbox::Dimension(3))
-    {
-        double interface_y_min_local = x_hi[1];
-        double interface_y_min_global = x_hi[1];
-        
-        for (int li = 0; li < num_levels; li++)
-        {
-            /*
-             * Get the current patch level.
-             */
-            
-            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
-                patch_hierarchy->getPatchLevel(li));
-            
-            for (hier::PatchLevel::iterator ip(patch_level->begin());
-                 ip != patch_level->end();
-                 ip++)
-            {
-                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
-                
-                /*
-                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
-                 */
-                
-                const hier::Box& patch_box = patch->getBox();
-                
-                const hier::Index& patch_index_lo = patch_box.lower();
-                
-                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
-                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                        patch->getPatchGeometry()));
-                
-                const double* const dx = patch_geom->getDx();
-                
-                const double dx_1 = dx[1];
-                
-                const double* const x_lo_patch = patch_geom->getXLower();
-                
-                const double x_lo_patch_1 = x_lo_patch[1];
-                
-                /*
-                 * Register the patch and mass fractions in the flow model and compute the
-                 * corresponding cell data.
-                 */
-                
-                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
-                
-                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
-                
-                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
-                
-                num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
-                
-                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
-                
-                flow_model_tmp->allocateMemoryForDerivedCellData();
-                
-                flow_model_tmp->computeDerivedCellData();
-                
-                /*
-                 * Get the pointer to first mass fraction data inside the flow model.
-                 */
-                
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
-                    flow_model_tmp->getCellData("MASS_FRACTIONS");
-                
-                double* Y = data_mass_fractions->getPointer(0);
-                
-                const hier::BoxContainer& patch_visible_boxes =
-                    flattened_hierarchy->getVisibleBoxes(
-                        patch_box,
-                        li);
-                
-                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
-                
-                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
-                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
-                const int num_ghosts_2_mass_fractions = num_ghosts_mass_fractions[2];
-                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
-                const int ghostcell_dim_1_mass_fractions = ghostcell_dims_mass_fractions[1];
-                
-                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
-                     ib != patch_visible_boxes.end();
-                     ib++)
-                {
-                    const hier::Box& patch_visible_box = *ib;
-                    
-                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
-                    
-                    const int interior_dim_0 = interior_dims[0];
-                    const int interior_dim_1 = interior_dims[1];
-                    const int interior_dim_2 = interior_dims[2];
-                    
-                    const hier::Index& index_lo = patch_visible_box.lower();
-                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
-                    
-                    const int relative_idx_lo_0 = relative_index_lo[0];
-                    const int relative_idx_lo_1 = relative_index_lo[1];
-                    const int relative_idx_lo_2 = relative_index_lo[2];
-                    
-                    for (int k = 0; k < interior_dim_2; k++)
-                    {
-                        for (int j = 0; j < interior_dim_1; j++)
-                        {
-                            for (int i = 0; i < interior_dim_0; i++)
-                            {
-                                /*
-                                 * Compute the linear index and the data to add.
-                                 */
-                                
-                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
-                                        ghostcell_dim_1_mass_fractions;
-                                
-                                const double y = (relative_idx_lo_1 + j + 0.5)*dx_1 + x_lo_patch_1;
-                                
-                                if (Y[idx] > 0.01 && Y[idx] < 0.99)
-                                {
-                                    if (y < interface_y_min_local)
-                                    {
-                                        interface_y_min_local = y;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                /*
-                 * Unregister the patch and data of all registered derived cell variables in the flow model.
-                 */
-                
-                flow_model_tmp->unregisterPatch();
-            }
-        }
-        
-        /*
-         * Reduction to get the minimum value.
-         */
-        
-        mpi.Reduce(
-            &interface_y_min_local,
-            &interface_y_min_global,
-            1,
-            MPI_DOUBLE,
-            MPI_MIN,
-            0);
-        
-        /*
-         * Compute and output the value (only done by process 0).
-         */
-        
-        if (mpi.getRank() == 0)
-        {
-            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << interface_y_min_global;
-        }
-        
-        if (mpi.getRank() == 0)
-        {
-            f_out.close();
-        }
+        f_out.close();
     }
 }
 
@@ -1883,8 +630,6 @@ SBIStatisticsUtilities::outputInterfaceMaxInYDirection(
             << std::endl);
     }
     
-    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
-    
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     std::ofstream f_out;
@@ -1901,354 +646,32 @@ SBIStatisticsUtilities::outputInterfaceMaxInYDirection(
         }
     }
     
-    /*
-     * Get the flattened hierarchy where only the finest existing grid is visible at any given
-     * location in the problem space.
-     */
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
-    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    FlowModelMPIHelperMaxMin MPI_helper_max_min = FlowModelMPIHelperMaxMin(
+        "MPI_helper_max_min",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
     
-    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
-        new ExtendedFlattenedHierarchy(
-            *patch_hierarchy,
+    const double interface_y_max_global = MPI_helper_max_min.getMaxLocationWithinQuantityBoundsInYDirection(
+            "MASS_FRACTIONS",
             0,
-            num_levels - 1));
+            data_context,
+            0.01,
+            0.99);
     
     /*
-     * Get the lower indices of the physical domain.
+     * Compute and output the value (only done by process 0).
      */
     
-    const double* x_lo = d_grid_geometry->getXLower();
-    
-    if (d_dim == tbox::Dimension(1))
+    if (mpi.getRank() == 0)
     {
-        TBOX_ERROR(d_object_name
-            << ": "
-            << "There is no 'INTERFACE_MIN_Y' for one-dimensional problem."
-            << std::endl);
-    }
-    else if (d_dim == tbox::Dimension(2))
-    {
-        double interface_y_max_local = x_lo[1];
-        double interface_y_max_global = x_lo[1];
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << interface_y_max_global;
         
-        for (int li = 0; li < num_levels; li++)
-        {
-            /*
-             * Get the current patch level.
-             */
-            
-            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
-                patch_hierarchy->getPatchLevel(li));
-            
-            for (hier::PatchLevel::iterator ip(patch_level->begin());
-                 ip != patch_level->end();
-                 ip++)
-            {
-                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
-                
-                /*
-                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
-                 */
-                
-                const hier::Box& patch_box = patch->getBox();
-                
-                const hier::Index& patch_index_lo = patch_box.lower();
-                
-                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
-                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                        patch->getPatchGeometry()));
-                
-                const double* const dx = patch_geom->getDx();
-                
-                const double dx_1 = dx[1];
-                
-                const double* const x_lo_patch = patch_geom->getXLower();
-                
-                const double x_lo_patch_1 = x_lo_patch[1];
-                
-                /*
-                 * Register the patch and mass fractions in the flow model and compute the
-                 * corresponding cell data.
-                 */
-                
-                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
-                
-                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
-                
-                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
-                
-                num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
-                
-                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
-                
-                flow_model_tmp->allocateMemoryForDerivedCellData();
-                
-                flow_model_tmp->computeDerivedCellData();
-                
-                /*
-                 * Get the pointer to first mass fraction data inside the flow model.
-                 */
-                
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
-                    flow_model_tmp->getCellData("MASS_FRACTIONS");
-                
-                double* Y = data_mass_fractions->getPointer(0);
-                
-                const hier::BoxContainer& patch_visible_boxes =
-                    flattened_hierarchy->getVisibleBoxes(
-                        patch_box,
-                        li);
-                
-                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
-                
-                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
-                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
-                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
-                
-                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
-                     ib != patch_visible_boxes.end();
-                     ib++)
-                {
-                    const hier::Box& patch_visible_box = *ib;
-                    
-                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
-                    
-                    const int interior_dim_0 = interior_dims[0];
-                    const int interior_dim_1 = interior_dims[1];
-                    
-                    const hier::Index& index_lo = patch_visible_box.lower();
-                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
-                    
-                    const int relative_idx_lo_0 = relative_index_lo[0];
-                    const int relative_idx_lo_1 = relative_index_lo[1];
-                    
-                    for (int j = 0; j < interior_dim_1; j++)
-                    {
-                        for (int i = 0; i < interior_dim_0; i++)
-                        {
-                            /*
-                             * Compute the linear index and the data to add.
-                             */
-                            
-                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
-                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
-                            
-                            const double y = (relative_idx_lo_1 + j + 0.5)*dx_1 + x_lo_patch_1;
-                            
-                            if (Y[idx] > 0.01 && Y[idx] < 0.99)
-                            {
-                                if (y > interface_y_max_local)
-                                {
-                                    interface_y_max_local = y;
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                /*
-                 * Unregister the patch and data of all registered derived cell variables in the flow model.
-                 */
-                
-                flow_model_tmp->unregisterPatch();
-            }
-        }
-        
-        /*
-         * Reduction to get the maximum value.
-         */
-        
-        mpi.Reduce(
-            &interface_y_max_local,
-            &interface_y_max_global,
-            1,
-            MPI_DOUBLE,
-            MPI_MAX,
-            0);
-        
-        /*
-         * Compute and output the value (only done by process 0).
-         */
-        
-        if (mpi.getRank() == 0)
-        {
-            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << interface_y_max_global;
-        }
-        
-        if (mpi.getRank() == 0)
-        {
-            f_out.close();
-        }
-    }
-    else if (d_dim == tbox::Dimension(3))
-    {
-        double interface_y_max_local = x_lo[1];
-        double interface_y_max_global = x_lo[1];
-        
-        for (int li = 0; li < num_levels; li++)
-        {
-            /*
-             * Get the current patch level.
-             */
-            
-            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
-                patch_hierarchy->getPatchLevel(li));
-            
-            for (hier::PatchLevel::iterator ip(patch_level->begin());
-                 ip != patch_level->end();
-                 ip++)
-            {
-                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
-                
-                /*
-                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
-                 */
-                
-                const hier::Box& patch_box = patch->getBox();
-                
-                const hier::Index& patch_index_lo = patch_box.lower();
-                
-                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
-                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                        patch->getPatchGeometry()));
-                
-                const double* const dx = patch_geom->getDx();
-                
-                const double dx_1 = dx[1];
-                
-                const double* const x_lo_patch = patch_geom->getXLower();
-                
-                const double x_lo_patch_1 = x_lo_patch[1];
-                
-                /*
-                 * Register the patch and mass fractions in the flow model and compute the
-                 * corresponding cell data.
-                 */
-                
-                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
-                
-                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
-                
-                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
-                
-                num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
-                
-                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
-                
-                flow_model_tmp->allocateMemoryForDerivedCellData();
-                
-                flow_model_tmp->computeDerivedCellData();
-                
-                /*
-                 * Get the pointer to first mass fraction data inside the flow model.
-                 */
-                
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
-                    flow_model_tmp->getCellData("MASS_FRACTIONS");
-                
-                double* Y = data_mass_fractions->getPointer(0);
-                
-                const hier::BoxContainer& patch_visible_boxes =
-                    flattened_hierarchy->getVisibleBoxes(
-                        patch_box,
-                        li);
-                
-                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
-                
-                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
-                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
-                const int num_ghosts_2_mass_fractions = num_ghosts_mass_fractions[2];
-                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
-                const int ghostcell_dim_1_mass_fractions = ghostcell_dims_mass_fractions[1];
-                
-                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
-                     ib != patch_visible_boxes.end();
-                     ib++)
-                {
-                    const hier::Box& patch_visible_box = *ib;
-                    
-                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
-                    
-                    const int interior_dim_0 = interior_dims[0];
-                    const int interior_dim_1 = interior_dims[1];
-                    const int interior_dim_2 = interior_dims[2];
-                    
-                    const hier::Index& index_lo = patch_visible_box.lower();
-                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
-                    
-                    const int relative_idx_lo_0 = relative_index_lo[0];
-                    const int relative_idx_lo_1 = relative_index_lo[1];
-                    const int relative_idx_lo_2 = relative_index_lo[2];
-                    
-                    for (int k = 0; k < interior_dim_2; k++)
-                    {
-                        for (int j = 0; j < interior_dim_1; j++)
-                        {
-                            for (int i = 0; i < interior_dim_0; i++)
-                            {
-                                /*
-                                 * Compute the linear index and the data to add.
-                                 */
-                                
-                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
-                                        ghostcell_dim_1_mass_fractions;
-                                
-                                const double y = (relative_idx_lo_1 + j + 0.5)*dx_1 + x_lo_patch_1;
-                                
-                                if (Y[idx] > 0.01 && Y[idx] < 0.99)
-                                {
-                                    if (y > interface_y_max_local)
-                                    {
-                                        interface_y_max_local = y;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                /*
-                 * Unregister the patch and data of all registered derived cell variables in the flow model.
-                 */
-                
-                flow_model_tmp->unregisterPatch();
-            }
-        }
-        
-        /*
-         * Reduction to get the maximum value.
-         */
-        
-        mpi.Reduce(
-            &interface_y_max_local,
-            &interface_y_max_global,
-            1,
-            MPI_DOUBLE,
-            MPI_MAX,
-            0);
-        
-        /*
-         * Compute and output the value (only done by process 0).
-         */
-        
-        if (mpi.getRank() == 0)
-        {
-            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << interface_y_max_global;
-        }
-        
-        if (mpi.getRank() == 0)
-        {
-            f_out.close();
-        }
+        f_out.close();
     }
 }
 
@@ -2282,8 +705,6 @@ SBIStatisticsUtilities::outputInterfaceMinInZDirection(
             << std::endl);
     }
     
-    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
-    
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     std::ofstream f_out;
@@ -2300,204 +721,32 @@ SBIStatisticsUtilities::outputInterfaceMinInZDirection(
         }
     }
     
-    /*
-     * Get the flattened hierarchy where only the finest existing grid is visible at any given
-     * location in the problem space.
-     */
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
-    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    FlowModelMPIHelperMaxMin MPI_helper_max_min = FlowModelMPIHelperMaxMin(
+        "MPI_helper_max_min",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
     
-    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
-        new ExtendedFlattenedHierarchy(
-            *patch_hierarchy,
+    const double interface_z_min_global = MPI_helper_max_min.getMinLocationWithinQuantityBoundsInZDirection(
+            "MASS_FRACTIONS",
             0,
-            num_levels - 1));
+            data_context,
+            0.01,
+            0.99);
     
     /*
-     * Get the upper indices of the physical domain.
+     * Compute and output the value (only done by process 0).
      */
     
-    const double* x_hi = d_grid_geometry->getXUpper();
-    
-    if (d_dim == tbox::Dimension(1))
+    if (mpi.getRank() == 0)
     {
-        TBOX_ERROR(d_object_name
-            << ": "
-            << "There is no 'INTERFACE_MIN_Z' for one-dimensional problem."
-            << std::endl);
-    }
-    else if (d_dim == tbox::Dimension(2))
-    {
-        TBOX_ERROR(d_object_name
-            << ": "
-            << "There is no 'INTERFACE_MIN_Z' for two-dimensional problem."
-            << std::endl);
-    }
-    else if (d_dim == tbox::Dimension(3))
-    {
-        double interface_z_min_local = x_hi[2];
-        double interface_z_min_global = x_hi[2];
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << interface_z_min_global;
         
-        for (int li = 0; li < num_levels; li++)
-        {
-            /*
-             * Get the current patch level.
-             */
-            
-            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
-                patch_hierarchy->getPatchLevel(li));
-            
-            for (hier::PatchLevel::iterator ip(patch_level->begin());
-                 ip != patch_level->end();
-                 ip++)
-            {
-                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
-                
-                /*
-                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
-                 */
-                
-                const hier::Box& patch_box = patch->getBox();
-                
-                const hier::Index& patch_index_lo = patch_box.lower();
-                
-                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
-                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                        patch->getPatchGeometry()));
-                
-                const double* const dx = patch_geom->getDx();
-                
-                const double dx_2 = dx[2];
-                
-                const double* const x_lo_patch = patch_geom->getXLower();
-                
-                const double x_lo_patch_2 = x_lo_patch[2];
-                
-                /*
-                 * Register the patch and mass fractions in the flow model and compute the
-                 * corresponding cell data.
-                 */
-                
-                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
-                
-                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
-                
-                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
-                
-                num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
-                
-                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
-                
-                flow_model_tmp->allocateMemoryForDerivedCellData();
-                
-                flow_model_tmp->computeDerivedCellData();
-                
-                /*
-                 * Get the pointer to first mass fraction data inside the flow model.
-                 */
-                
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
-                    flow_model_tmp->getCellData("MASS_FRACTIONS");
-                
-                double* Y = data_mass_fractions->getPointer(0);
-                
-                const hier::BoxContainer& patch_visible_boxes =
-                    flattened_hierarchy->getVisibleBoxes(
-                        patch_box,
-                        li);
-                
-                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
-                
-                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
-                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
-                const int num_ghosts_2_mass_fractions = num_ghosts_mass_fractions[2];
-                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
-                const int ghostcell_dim_1_mass_fractions = ghostcell_dims_mass_fractions[1];
-                
-                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
-                     ib != patch_visible_boxes.end();
-                     ib++)
-                {
-                    const hier::Box& patch_visible_box = *ib;
-                    
-                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
-                    
-                    const int interior_dim_0 = interior_dims[0];
-                    const int interior_dim_1 = interior_dims[1];
-                    const int interior_dim_2 = interior_dims[2];
-                    
-                    const hier::Index& index_lo = patch_visible_box.lower();
-                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
-                    
-                    const int relative_idx_lo_0 = relative_index_lo[0];
-                    const int relative_idx_lo_1 = relative_index_lo[1];
-                    const int relative_idx_lo_2 = relative_index_lo[2];
-                    
-                    for (int k = 0; k < interior_dim_2; k++)
-                    {
-                        for (int j = 0; j < interior_dim_1; j++)
-                        {
-                            for (int i = 0; i < interior_dim_0; i++)
-                            {
-                                /*
-                                 * Compute the linear index and the data to add.
-                                 */
-                                
-                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
-                                        ghostcell_dim_1_mass_fractions;
-                                
-                                const double z = (relative_idx_lo_2 + k + 0.5)*dx_2 + x_lo_patch_2;
-                                
-                                if (Y[idx] > 0.01 && Y[idx] < 0.99)
-                                {
-                                    if (z < interface_z_min_local)
-                                    {
-                                        interface_z_min_local = z;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                /*
-                 * Unregister the patch and data of all registered derived cell variables in the flow model.
-                 */
-                
-                flow_model_tmp->unregisterPatch();
-            }
-        }
-        
-        /*
-         * Reduction to get the minimum value.
-         */
-        
-        mpi.Reduce(
-            &interface_z_min_local,
-            &interface_z_min_global,
-            1,
-            MPI_DOUBLE,
-            MPI_MIN,
-            0);
-        
-        /*
-         * Compute and output the value (only done by process 0).
-         */
-        
-        if (mpi.getRank() == 0)
-        {
-            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << interface_z_min_global;
-        }
-        
-        if (mpi.getRank() == 0)
-        {
-            f_out.close();
-        }
+        f_out.close();
     }
 }
 
@@ -2531,8 +780,6 @@ SBIStatisticsUtilities::outputInterfaceMaxInZDirection(
             << std::endl);
     }
     
-    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
-    
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     std::ofstream f_out;
@@ -2549,204 +796,32 @@ SBIStatisticsUtilities::outputInterfaceMaxInZDirection(
         }
     }
     
-    /*
-     * Get the flattened hierarchy where only the finest existing grid is visible at any given
-     * location in the problem space.
-     */
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
-    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    FlowModelMPIHelperMaxMin MPI_helper_max_min = FlowModelMPIHelperMaxMin(
+        "MPI_helper_max_min",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
     
-    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
-        new ExtendedFlattenedHierarchy(
-            *patch_hierarchy,
+    const double interface_z_max_global = MPI_helper_max_min.getMaxLocationWithinQuantityBoundsInZDirection(
+            "MASS_FRACTIONS",
             0,
-            num_levels - 1));
+            data_context,
+            0.01,
+            0.99);
     
     /*
-     * Get the lower indices of the physical domain.
+     * Compute and output the value (only done by process 0).
      */
     
-    const double* x_lo = d_grid_geometry->getXLower();
-    
-    if (d_dim == tbox::Dimension(1))
+    if (mpi.getRank() == 0)
     {
-        TBOX_ERROR(d_object_name
-            << ": "
-            << "There is no 'INTERFACE_MIN_Z' for one-dimensional problem."
-            << std::endl);
-    }
-    else if (d_dim == tbox::Dimension(2))
-    {
-        TBOX_ERROR(d_object_name
-            << ": "
-            << "There is no 'INTERFACE_MIN_Z' for two-dimensional problem."
-            << std::endl);
-    }
-    else if (d_dim == tbox::Dimension(3))
-    {
-        double interface_z_max_local = x_lo[2];
-        double interface_z_max_global = x_lo[2];
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << interface_z_max_global;
         
-        for (int li = 0; li < num_levels; li++)
-        {
-            /*
-             * Get the current patch level.
-             */
-            
-            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
-                patch_hierarchy->getPatchLevel(li));
-            
-            for (hier::PatchLevel::iterator ip(patch_level->begin());
-                 ip != patch_level->end();
-                 ip++)
-            {
-                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
-                
-                /*
-                 * Get the patch lower indices, grid spacings and the lower spatial coordinates.
-                 */
-                
-                const hier::Box& patch_box = patch->getBox();
-                
-                const hier::Index& patch_index_lo = patch_box.lower();
-                
-                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
-                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                        patch->getPatchGeometry()));
-                
-                const double* const dx = patch_geom->getDx();
-                
-                const double dx_2 = dx[2];
-                
-                const double* const x_lo_patch = patch_geom->getXLower();
-                
-                const double x_lo_patch_2 = x_lo_patch[2];
-                
-                /*
-                 * Register the patch and mass fractions in the flow model and compute the
-                 * corresponding cell data.
-                 */
-                
-                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
-                
-                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
-                
-                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
-                
-                num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
-                
-                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
-                
-                flow_model_tmp->allocateMemoryForDerivedCellData();
-                
-                flow_model_tmp->computeDerivedCellData();
-                
-                /*
-                 * Get the pointer to first mass fraction data inside the flow model.
-                 */
-                
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fractions =
-                    flow_model_tmp->getCellData("MASS_FRACTIONS");
-                
-                double* Y = data_mass_fractions->getPointer(0);
-                
-                const hier::BoxContainer& patch_visible_boxes =
-                    flattened_hierarchy->getVisibleBoxes(
-                        patch_box,
-                        li);
-                
-                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
-                
-                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
-                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
-                const int num_ghosts_2_mass_fractions = num_ghosts_mass_fractions[2];
-                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
-                const int ghostcell_dim_1_mass_fractions = ghostcell_dims_mass_fractions[1];
-                
-                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
-                     ib != patch_visible_boxes.end();
-                     ib++)
-                {
-                    const hier::Box& patch_visible_box = *ib;
-                    
-                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
-                    
-                    const int interior_dim_0 = interior_dims[0];
-                    const int interior_dim_1 = interior_dims[1];
-                    const int interior_dim_2 = interior_dims[2];
-                    
-                    const hier::Index& index_lo = patch_visible_box.lower();
-                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
-                    
-                    const int relative_idx_lo_0 = relative_index_lo[0];
-                    const int relative_idx_lo_1 = relative_index_lo[1];
-                    const int relative_idx_lo_2 = relative_index_lo[2];
-                    
-                    for (int k = 0; k < interior_dim_2; k++)
-                    {
-                        for (int j = 0; j < interior_dim_1; j++)
-                        {
-                            for (int i = 0; i < interior_dim_0; i++)
-                            {
-                                /*
-                                 * Compute the linear index and the data to add.
-                                 */
-                                
-                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
-                                        ghostcell_dim_1_mass_fractions;
-                                
-                                const double z = (relative_idx_lo_2 + k + 0.5)*dx_2 + x_lo_patch_2;
-                                
-                                if (Y[idx] > 0.01 && Y[idx] < 0.99)
-                                {
-                                    if (z > interface_z_max_local)
-                                    {
-                                        interface_z_max_local = z;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                /*
-                 * Unregister the patch and data of all registered derived cell variables in the flow model.
-                 */
-                
-                flow_model_tmp->unregisterPatch();
-            }
-        }
-        
-        /*
-         * Reduction to get the maximum value.
-         */
-        
-        mpi.Reduce(
-            &interface_z_max_local,
-            &interface_z_max_global,
-            1,
-            MPI_DOUBLE,
-            MPI_MAX,
-            0);
-        
-        /*
-         * Compute and output the value (only done by process 0).
-         */
-        
-        if (mpi.getRank() == 0)
-        {
-            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << interface_z_max_global;
-        }
-        
-        if (mpi.getRank() == 0)
-        {
-            f_out.close();
-        }
+        f_out.close();
     }
 }
 
