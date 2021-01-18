@@ -43,7 +43,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute maximum location within quantity bounds in x-direction.
          */
-        double getMaxLocationWithinBoundsInXDirection(
+        double getMaxLocationWithinQuantityBoundsInXDirection(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -53,7 +53,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute minimum location within quantity bounds in x-direction.
          */
-        double getMinLocationWithinBoundsInXDirection(
+        double getMinLocationWithinQuantityBoundsInXDirection(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -63,7 +63,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute maximum location within quantity bounds in y-direction.
          */
-        double getMaxLocationWithinBoundsInYDirection(
+        double getMaxLocationWithinQuantityBoundsInYDirection(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -73,7 +73,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute minimum location within quantity bounds in y-direction.
          */
-        double getMinLocationWithinBoundsInYDirection(
+        double getMinLocationWithinQuantityBoundsInYDirection(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -83,7 +83,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute maximum location within quantity bounds in z-direction.
          */
-        double getMaxLocationWithinBoundsInZDirection(
+        double getMaxLocationWithinQuantityBoundsInZDirection(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -93,7 +93,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         /*
          * Compute minimum location within quantity bounds in z-direction.
          */
-        double getMinLocationWithinBoundsInZDirection(
+        double getMinLocationWithinQuantityBoundsInZDirection(
             const std::string quantity_name,
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,

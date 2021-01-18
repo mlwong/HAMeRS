@@ -7,7 +7,8 @@
 /*
  * Compute maximum value with only x-direction as inhomogeneous direction.
  */
-std::vector<double> FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
+std::vector<double>
+FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
@@ -497,7 +498,8 @@ std::vector<double> FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDi
 /*
  * Compute minimum value with only x-direction as inhomogeneous direction.
  */
-std::vector<double> FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
+std::vector<double>
+FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
@@ -987,7 +989,8 @@ std::vector<double> FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDi
 /*
  * Compute maximum location within quantity bounds in x-direction.
  */
-double FlowModelMPIHelperMaxMin::getMaxLocationWithinBoundsInXDirection(
+double
+FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -1434,7 +1437,8 @@ double FlowModelMPIHelperMaxMin::getMaxLocationWithinBoundsInXDirection(
 /*
  * Compute minimum location within quantity bounds in x-direction.
  */
-double FlowModelMPIHelperMaxMin::getMinLocationWithinBoundsInXDirection(
+double
+FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -1881,7 +1885,8 @@ double FlowModelMPIHelperMaxMin::getMinLocationWithinBoundsInXDirection(
 /*
  * Compute maximum location within quantity bounds in y-direction.
  */
-double FlowModelMPIHelperMaxMin::getMaxLocationWithinBoundsInYDirection(
+double
+FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -1912,7 +1917,7 @@ double FlowModelMPIHelperMaxMin::getMaxLocationWithinBoundsInYDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getMaxLocationWithinBoundsInYDirection()\n"
+            << ": getMaxLocationWithinQuantityBoundsInYDirection()\n"
             << "Cannot compute maximum location within quantity bounds in y-direction for one-dimensional problem."
             << std::endl);
     }
@@ -2208,7 +2213,8 @@ double FlowModelMPIHelperMaxMin::getMaxLocationWithinBoundsInYDirection(
 /*
  * Compute minimum location within quantity bounds in y-direction.
  */
-double FlowModelMPIHelperMaxMin::getMinLocationWithinBoundsInYDirection(
+double
+FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -2239,7 +2245,7 @@ double FlowModelMPIHelperMaxMin::getMinLocationWithinBoundsInYDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getMinLocationWithinBoundsInYDirection()\n"
+            << ": getMinLocationWithinQuantityBoundsInYDirection()\n"
             << "Cannot compute maximum location within quantity bounds in y-direction for one-dimensional problem."
             << std::endl);
     }
@@ -2535,7 +2541,8 @@ double FlowModelMPIHelperMaxMin::getMinLocationWithinBoundsInYDirection(
 /*
  * Compute maximum location within quantity bounds in z-direction.
  */
-double FlowModelMPIHelperMaxMin::getMaxLocationWithinBoundsInZDirection(
+double
+FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInZDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -2566,15 +2573,15 @@ double FlowModelMPIHelperMaxMin::getMaxLocationWithinBoundsInZDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getMaxLocationWithinBoundsInZDirection()\n"
+            << ": getMaxLocationWithinQuantityBoundsInZDirection()\n"
             << "Cannot compute maximum location within quantity bounds in z-direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
     {
         TBOX_ERROR(d_object_name
-            << ": getMaxLocationWithinBoundsInZDirection()\n"
-            << "Cannot compute maximum location within quantity bounds in z-direction for one-dimensional problem."
+            << ": getMaxLocationWithinQuantityBoundsInZDirection()\n"
+            << "Cannot compute maximum location within quantity bounds in z-direction for two-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(3))
@@ -2732,7 +2739,8 @@ double FlowModelMPIHelperMaxMin::getMaxLocationWithinBoundsInZDirection(
 /*
  * Compute minimum location within quantity bounds in z-direction.
  */
-double FlowModelMPIHelperMaxMin::getMinLocationWithinBoundsInZDirection(
+double
+FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInZDirection(
     const std::string quantity_name,
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -2763,15 +2771,15 @@ double FlowModelMPIHelperMaxMin::getMinLocationWithinBoundsInZDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getMinLocationWithinBoundsInZDirection()\n"
+            << ": getMinLocationWithinQuantityBoundsInZDirection()\n"
             << "Cannot compute maximum location within quantity bounds in z-direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
     {
         TBOX_ERROR(d_object_name
-            << ": getMinLocationWithinBoundsInZDirection()\n"
-            << "Cannot compute maximum location within quantity bounds in z-direction for one-dimensional problem."
+            << ": getMinLocationWithinQuantityBoundsInZDirection()\n"
+            << "Cannot compute maximum location within quantity bounds in z-direction for two-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(3))
