@@ -84,6 +84,18 @@ class NavierStokesBoundaryConditions:
             const hier::IntVector& ghost_width_to_fill,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
+        bool
+        useTransverseDerivativesBoundaryConditions()
+        {
+            return d_use_transverse_derivatives_bc;
+        }
+        
+        hier::IntVector
+        getBoundaryConditionsTransverseDerivativesNumberOfGhostCells()
+        {
+            return d_num_ghosts_transverse_derivatives_bc;
+        }
+        
     private:
         std::vector<double>
         readPrimitiveDataEntry(
@@ -165,6 +177,16 @@ class NavierStokesBoundaryConditions:
          * HAMERS_SHARED_PTR to the special boundary conditions.
          */
         HAMERS_SHARED_PTR<NavierStokesSpecialBoundaryConditions> d_Navier_Stokes_special_boundary_conditions;
+        
+        /*
+         * Whether transverse derivatives are used in boundary conditions.
+         */
+        bool d_use_transverse_derivatives_bc;
+        
+        /*
+         * Number of ghost cells used for transverse derivatives in boundary conditions.
+         */
+        hier::IntVector d_num_ghosts_transverse_derivatives_bc;
         
 };
 

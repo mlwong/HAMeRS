@@ -94,6 +94,30 @@ ConvectiveFluxReconstructorManager::ConvectiveFluxReconstructorManager(
             flow_model,
             convective_flux_reconstructor_db));
     }
+    else if (convective_flux_reconstructor_str == "DRP4")
+    {
+        d_convective_flux_reconstructor_type = CONVECTIVE_FLUX_RECONSTRUCTOR::DRP4;
+        
+        d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorDRP4(
+            "d_convective_flux_reconstructor",
+            dim,
+            grid_geometry,
+            flow_model->getNumberOfEquations(),
+            flow_model,
+            convective_flux_reconstructor_db));
+    }
+    else if (convective_flux_reconstructor_str == "CENTRAL")
+    {
+        d_convective_flux_reconstructor_type = CONVECTIVE_FLUX_RECONSTRUCTOR::CENTRAL;
+        
+        d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorCentral(
+            "d_convective_flux_reconstructor",
+            dim,
+            grid_geometry,
+            flow_model->getNumberOfEquations(),
+            flow_model,
+            convective_flux_reconstructor_db));
+    }
     else
     {
         TBOX_ERROR(d_object_name
@@ -101,7 +125,7 @@ ConvectiveFluxReconstructorManager::ConvectiveFluxReconstructorManager(
             << "Unknown convective_flux_reconstructor string = '"
             << convective_flux_reconstructor_str
             << "' found in input."
-            << std::endl);        
+            << std::endl);
     }
 }
 

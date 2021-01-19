@@ -8,6 +8,7 @@
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
 #include "algs/patch_strategy/RungeKuttaPatchStrategy.hpp"
 #include "apps/Navier-Stokes/NavierStokesBoundaryConditions.hpp"
+#include "apps/Navier-Stokes/NavierStokesErrorStatistics.hpp"
 #include "apps/Navier-Stokes/NavierStokesInitialConditions.hpp"
 #include "extn/visit_data_writer/ExtendedVisItDataWriter.hpp"
 #include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorManager.hpp"
@@ -428,7 +429,8 @@ class NavierStokes:
         void
         printErrorStatistics(
             std::ostream& os,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const double time) const;
         
         /**
          * Compute variables for computing the statistics of data.
@@ -583,6 +585,11 @@ class NavierStokes:
         HAMERS_SHARED_PTR<NavierStokesBoundaryConditions> d_Navier_Stokes_boundary_conditions;
         HAMERS_SHARED_PTR<tbox::Database> d_Navier_Stokes_boundary_conditions_db;
         bool d_Navier_Stokes_boundary_conditions_db_is_from_restart;
+        
+        /*
+         * HAMERS_SHARED_PTR to NavierStokesErrorStatistics.
+         */
+        HAMERS_SHARED_PTR<NavierStokesErrorStatistics> d_Navier_Stokes_error_statistics;
         
         /*
          * HAMERS_SHARED_PTR to ValueTagger and its database.

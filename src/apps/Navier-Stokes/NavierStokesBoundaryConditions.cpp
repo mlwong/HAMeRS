@@ -22,7 +22,9 @@ NavierStokesBoundaryConditions::NavierStokesBoundaryConditions(
         d_dim(dim),
         d_grid_geometry(grid_geometry),
         d_flow_model_type(flow_model_type),
-        d_flow_model(flow_model)
+        d_flow_model(flow_model),
+        d_use_transverse_derivatives_bc(false),
+        d_num_ghosts_transverse_derivatives_bc(hier::IntVector::getZero(d_dim))
 {
     /*
      * Defaults for boundary conditions. Set to bogus values for error checking.
@@ -368,6 +370,11 @@ NavierStokesBoundaryConditions::NavierStokesBoundaryConditions(
             }
         }
     }
+    
+    d_use_transverse_derivatives_bc = flow_model_boundary_utilities->useTransverseDerivativesBoundaryConditions();
+    
+    d_num_ghosts_transverse_derivatives_bc = flow_model_boundary_utilities->
+        getBoundaryConditionsTransverseDerivativesNumberOfGhostCells();
     
     d_Navier_Stokes_special_boundary_conditions.reset(new NavierStokesSpecialBoundaryConditions(
         "d_Navier_Stokes_special_boundary_conditions",
