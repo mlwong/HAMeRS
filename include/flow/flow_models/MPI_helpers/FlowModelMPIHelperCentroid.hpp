@@ -32,6 +32,22 @@ class FlowModelMPIHelperCentroid: public FlowModelMPIHelper
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
+        /*
+         * Compute centroid in y-direction.
+         */
+        double getCentroidInYDirection(
+            const std::string quantity_name,
+            const int component_idx,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute centroid in z-direction.
+         */
+        double getCentroidInZDirection(
+            const std::string quantity_name,
+            const int component_idx,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
     private:
         
 };

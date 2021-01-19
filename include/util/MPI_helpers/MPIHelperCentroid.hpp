@@ -28,6 +28,22 @@ class MPIHelperCentroid: public MPIHelper
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
+        /*
+         * Compute centroid in y-direction.
+         */
+        double getCentroidInYDirection(
+            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+            const int component_idx,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute centroid in z-direction.
+         */
+        double getCentroidInZDirection(
+            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+            const int component_idx,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
     private:
         
 };
