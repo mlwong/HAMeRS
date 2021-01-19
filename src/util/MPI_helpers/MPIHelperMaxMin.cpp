@@ -321,7 +321,7 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index and grid.
+                 * Get the patch lower indices.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -1032,7 +1032,7 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index and grid.
+                 * Get the patch lower indices.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -1333,7 +1333,7 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index and grid.
+                 * Get the patch lower indices.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -1515,7 +1515,7 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index and grid.
+                 * Get the patch lower indices.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
@@ -1697,7 +1697,7 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
                 const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
                 
                 /*
-                 * Get the patch lower index and grid.
+                 * Get the patch lower indices.
                  */
                 
                 const hier::Box& patch_box = patch->getBox();
