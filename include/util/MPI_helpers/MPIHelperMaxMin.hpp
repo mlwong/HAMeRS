@@ -37,6 +37,38 @@ class MPIHelperMaxMin: public MPIHelper
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
+         * Compute maximum value with only y-direction as inhomogeneous direction.
+         */
+        std::vector<double> getMaxQuantityWithInhomogeneousYDirection(
+            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+            const int component_idx,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute minimum value with only y-direction as inhomogeneous direction.
+         */
+        std::vector<double> getMinQuantityWithInhomogeneousYDirection(
+            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+            const int component_idx,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute maximum value with only z-direction as inhomogeneous direction.
+         */
+        std::vector<double> getMaxQuantityWithInhomogeneousZDirection(
+            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+            const int component_idx,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute minimum value with only z-direction as inhomogeneous direction.
+         */
+        std::vector<double> getMinQuantityWithInhomogeneousZDirection(
+            HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_quantity,
+            const int component_idx,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
          * Compute maximum location within quantity bounds in x-direction.
          */
         double getMaxLocationWithinQuantityBoundsInXDirection(
