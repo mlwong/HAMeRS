@@ -2151,6 +2151,8 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
         double location_x_max_local = x_lo[0];
         location_x_max_global       = x_lo[0];
         
+        const double half = double(1)/double(2);
+        
         for (int li = 0; li < num_levels; li++)
         {
             /*
@@ -2242,7 +2244,7 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
                         
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_quantity;
                         
-                        const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch[0];
+                        const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
                         
                         if (u[idx] > bound_lo && u[idx] < bound_hi)
                         {
@@ -2277,6 +2279,8 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
     {
         double location_x_max_local = x_lo[0];
         location_x_max_global       = x_lo[0];
+        
+        const double half = double(1)/double(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -2378,7 +2382,7 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch[0];
+                            const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
                             
                             if (u[idx] > bound_lo && u[idx] < bound_hi)
                             {
@@ -2414,6 +2418,8 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
     {
         double location_x_max_local = x_lo[0];
         location_x_max_global       = x_lo[0];
+        
+        const double half = double(1)/double(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -2524,7 +2530,7 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch[0];
+                                const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
                                 
                                 if (u[idx] > bound_lo && u[idx] < bound_hi)
                                 {
@@ -2598,6 +2604,8 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
     {
         double location_x_min_local = x_hi[0];
         location_x_min_global       = x_hi[0];
+        
+        const double half = double(1)/double(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -2690,7 +2698,7 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
                         
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_quantity;
                         
-                        const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch[0];
+                        const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
                         
                         if (u[idx] > bound_lo && u[idx] < bound_hi)
                         {
@@ -2725,6 +2733,8 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
     {
         double location_x_min_local = x_hi[0];
         location_x_min_global       = x_hi[0];
+        
+        const double half = double(1)/double(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -2826,7 +2836,7 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch[0];
+                            const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
                             
                             if (u[idx] > bound_lo && u[idx] < bound_hi)
                             {
@@ -2862,6 +2872,8 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
     {
         double location_x_min_local = x_hi[0];
         location_x_min_global       = x_hi[0];
+        
+        const double half = double(1)/double(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -2972,7 +2984,7 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch[0];
+                                const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
                                 
                                 if (u[idx] > bound_lo && u[idx] < bound_hi)
                                 {
@@ -3054,6 +3066,8 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
         double location_y_max_local = x_lo[1];
         location_y_max_global       = x_lo[1];
         
+        const double half = double(1)/double(2);
+        
         for (int li = 0; li < num_levels; li++)
         {
             /*
@@ -3154,7 +3168,7 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            const double y = (relative_idx_lo_1 + j + 0.5)*dx[1] + x_lo_patch[1];
+                            const double y = (relative_idx_lo_1 + j + half)*dx[1] + x_lo_patch[1];
                             
                             if (u[idx] > bound_lo && u[idx] < bound_hi)
                             {
@@ -3190,6 +3204,8 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
     {
         double location_y_max_local = x_lo[1];
         location_y_max_global       = x_lo[1];
+        
+        const double half = double(1)/double(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -3300,7 +3316,7 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double y = (relative_idx_lo_1 + j + 0.5)*dx[1] + x_lo_patch[1];
+                                const double y = (relative_idx_lo_1 + j + half)*dx[1] + x_lo_patch[1];
                                 
                                 if (u[idx] > bound_lo && u[idx] < bound_hi)
                                 {
@@ -3382,6 +3398,8 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
         double location_y_min_local = x_hi[1];
         location_y_min_global       = x_hi[1];
         
+        const double half = double(1)/double(2);
+        
         for (int li = 0; li < num_levels; li++)
         {
             /*
@@ -3482,7 +3500,7 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            const double y = (relative_idx_lo_1 + j + 0.5)*dx[1] + x_lo_patch[1];
+                            const double y = (relative_idx_lo_1 + j + half)*dx[1] + x_lo_patch[1];
                             
                             if (u[idx] > bound_lo && u[idx] < bound_hi)
                             {
@@ -3518,6 +3536,8 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
     {
         double location_y_min_local = x_hi[1];
         location_y_min_global       = x_hi[1];
+        
+        const double half = double(1)/double(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -3628,7 +3648,7 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double y = (relative_idx_lo_1 + j + 0.5)*dx[1] + x_lo_patch[1];
+                                const double y = (relative_idx_lo_1 + j + half)*dx[1] + x_lo_patch[1];
                                 
                                 if (u[idx] > bound_lo && u[idx] < bound_hi)
                                 {
@@ -3717,6 +3737,8 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInZDirection(
         double location_z_max_local = x_lo[2];
         location_z_max_global       = x_lo[2];
         
+        const double half = double(1)/double(2);
+        
         for (int li = 0; li < num_levels; li++)
         {
             /*
@@ -3826,7 +3848,7 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInZDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double z = (relative_idx_lo_2 + k + 0.5)*dx[2] + x_lo_patch[2];
+                                const double z = (relative_idx_lo_2 + k + half)*dx[2] + x_lo_patch[2];
                                 
                                 if (u[idx] > bound_lo && u[idx] < bound_hi)
                                 {
@@ -3915,6 +3937,8 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInZDirection(
         double location_z_min_local = x_hi[2];
         location_z_min_global       = x_hi[2];
         
+        const double half = double(1)/double(2);
+        
         for (int li = 0; li < num_levels; li++)
         {
             /*
@@ -4024,7 +4048,7 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInZDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double z = (relative_idx_lo_2 + k + 0.5)*dx[2] + x_lo_patch[2];
+                                const double z = (relative_idx_lo_2 + k + half)*dx[2] + x_lo_patch[2];
                                 
                                 if (u[idx] > bound_lo && u[idx] < bound_hi)
                                 {

@@ -35,6 +35,8 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
         double den_local  = double(0);
         double den_global = double(0);
         
+        const double half = double(1)/double(2);
+        
         for (int li = 0; li < num_levels; li++)
         {
             /*
@@ -155,7 +157,7 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
                         
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_quantity;
                         
-                        const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch[0];
+                        const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
                         
                         num_to_add += x*u[idx]/((double) n_overlapped);
                         den_to_add += u[idx]/((double) n_overlapped);
@@ -203,6 +205,8 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
         
         double den_local  = double(0);
         double den_global = double(0);
+        
+        const double half = double(1)/double(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -333,7 +337,7 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch[0];
+                            const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
                             
                             num_to_add += x*u[idx]/((double) n_overlapped);
                             den_to_add += u[idx]/((double) n_overlapped);
@@ -382,6 +386,8 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
         
         double den_local  = double(0);
         double den_global = double(0);
+        
+        const double half = double(1)/double(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -521,7 +527,7 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double x = (relative_idx_lo_0 + i + 0.5)*dx[0] + x_lo_patch[0];
+                                const double x = (relative_idx_lo_0 + i + half)*dx[0] + x_lo_patch[0];
                                 
                                 num_to_add += x*u[idx]/((double) n_overlapped);
                                 den_to_add += u[idx]/((double) n_overlapped);
@@ -607,6 +613,8 @@ double FlowModelMPIHelperCentroid::getCentroidInYDirection(
         double den_local  = double(0);
         double den_global = double(0);
         
+        const double half = double(1)/double(2);
+        
         for (int li = 0; li < num_levels; li++)
         {
             /*
@@ -736,7 +744,7 @@ double FlowModelMPIHelperCentroid::getCentroidInYDirection(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_quantity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_quantity)*ghostcell_dim_0_quantity;
                             
-                            const double y = (relative_idx_lo_1 + j + 0.5)*dx[1] + x_lo_patch[1];
+                            const double y = (relative_idx_lo_1 + j + half)*dx[1] + x_lo_patch[1];
                             
                             num_to_add += y*u[idx]/((double) n_overlapped);
                             den_to_add += u[idx]/((double) n_overlapped);
@@ -785,6 +793,8 @@ double FlowModelMPIHelperCentroid::getCentroidInYDirection(
         
         double den_local  = double(0);
         double den_global = double(0);
+        
+        const double half = double(1)/double(2);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -924,7 +934,7 @@ double FlowModelMPIHelperCentroid::getCentroidInYDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double y = (relative_idx_lo_1 + j + 0.5)*dx[1] + x_lo_patch[1];
+                                const double y = (relative_idx_lo_1 + j + half)*dx[1] + x_lo_patch[1];
                                 
                                 num_to_add += y*u[idx]/((double) n_overlapped);
                                 den_to_add += u[idx]/((double) n_overlapped);
@@ -1017,6 +1027,8 @@ double FlowModelMPIHelperCentroid::getCentroidInZDirection(
         double den_local  = double(0);
         double den_global = double(0);
         
+        const double half = double(1)/double(2);
+        
         for (int li = 0; li < num_levels; li++)
         {
             /*
@@ -1155,7 +1167,7 @@ double FlowModelMPIHelperCentroid::getCentroidInZDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_quantity)*ghostcell_dim_0_quantity*
                                         ghostcell_dim_1_quantity;
                                 
-                                const double z = (relative_idx_lo_2 + k + 0.5)*dx[2] + x_lo_patch[2];
+                                const double z = (relative_idx_lo_2 + k + half)*dx[2] + x_lo_patch[2];
                                 
                                 num_to_add += z*u[idx]/((double) n_overlapped);
                                 den_to_add += u[idx]/((double) n_overlapped);
