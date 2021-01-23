@@ -5,15 +5,15 @@ import subprocess
 import sys
 import os
 
-convective_flux_schemes = [
-    "WCNS5_JS_HLLC_HLL", "WCNS5_Z_HLLC_HLL", "WCNS6_LD_HLLC_HLL", \
-    "DRP4_9PT", "DRP4_11PT", "DRP4_13PT", \
-    "CENTRAL8", "CENTRAL10", "CENTRAL12"]
+convective_flux_schemes = ["WCNS6_TEST"]
+    #"WCNS5_JS_HLLC_HLL", "WCNS5_Z_HLLC_HLL", "WCNS6_LD_HLLC_HLL", \
+    #"DRP4_9PT", "DRP4_11PT", "DRP4_13PT", \
+    #"CENTRAL8", "CENTRAL10", "CENTRAL12"]
 
-L2_convergence_rates_schemes_expected = [
-    4.8, 4.8, 5.8, \
-    3.8, 3.8, 3.8, \
-    7.8, 9.8, 11.5]
+L2_convergence_rates_schemes_expected = [4.8]
+    #4.8, 4.8, 5.8, \
+    #3.8, 3.8, 3.8, \
+    #7.8, 9.8, 11.5]
 
 num_grid_levels = 4
 
@@ -22,7 +22,8 @@ dx_base = 2.0/N_base
 dt_base = 0.001*dx_base
 num_steps_base = 8
 
-executable_path = "../../../build_convergence_test_single_species/src/exec/main"
+executable_path = "../../../build/src/exec/main"
+#executable_path = "../../../build_convergence_test_single_species/src/exec/main"
 
 input_file_template = """
 Application = "Euler"

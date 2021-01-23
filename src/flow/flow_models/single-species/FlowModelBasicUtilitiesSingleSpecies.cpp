@@ -6191,12 +6191,17 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
                 const int idx_p = (i + idx_offset_p + num_ghosts_0_p) +
                     (j + num_ghosts_1_p)*ghostcell_dim_0_p;
                 
-                W[0][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*V[1][idx_vel] +
-                    double(1)/double(2)*V[3][idx_p];
-                W[1][idx_face] = V[0][idx_rho] - double(1)/(c_average[idx_face]*c_average[idx_face])*V[3][idx_p];
+                W[0][idx_face] = V[0][idx_rho];
+                W[1][idx_face] = V[1][idx_vel];
                 W[2][idx_face] = V[2][idx_vel];
-                W[3][idx_face] = double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*V[1][idx_vel] +
-                    double(1)/double(2)*V[3][idx_p];
+                W[3][idx_face] = V[3][idx_p];
+                
+                //W[0][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*V[1][idx_vel] +
+                //    double(1)/double(2)*V[3][idx_p];
+                //W[1][idx_face] = V[0][idx_rho] - double(1)/(c_average[idx_face]*c_average[idx_face])*V[3][idx_p];
+                //W[2][idx_face] = V[2][idx_vel];
+                //W[3][idx_face] = double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*V[1][idx_vel] +
+                //    double(1)/double(2)*V[3][idx_p];
             }
         }
         
@@ -6234,12 +6239,17 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfCharacteristicVariablesFr
                 const int idx_p = (i + num_ghosts_0_p) +
                     (j + idx_offset_p + num_ghosts_1_p)*ghostcell_dim_0_p;
                 
-                W[0][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*V[2][idx_vel] +
-                    double(1)/double(2)*V[3][idx_p];
-                W[1][idx_face] = V[0][idx_rho] - double(1)/(c_average[idx_face]*c_average[idx_face])*V[3][idx_p];
-                W[2][idx_face] = V[1][idx_vel];
-                W[3][idx_face] = double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*V[2][idx_vel] +
-                    double(1)/double(2)*V[3][idx_p];
+                W[0][idx_face] = V[0][idx_rho];
+                W[1][idx_face] = V[1][idx_vel];
+                W[2][idx_face] = V[2][idx_vel];
+                W[3][idx_face] = V[3][idx_p];
+                
+                // W[0][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*V[2][idx_vel] +
+                //     double(1)/double(2)*V[3][idx_p];
+                // W[1][idx_face] = V[0][idx_rho] - double(1)/(c_average[idx_face]*c_average[idx_face])*V[3][idx_p];
+                // W[2][idx_face] = V[1][idx_vel];
+                // W[3][idx_face] = double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*V[2][idx_vel] +
+                //     double(1)/double(2)*V[3][idx_p];
             }
         }
     }
@@ -7276,12 +7286,17 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfPrimitiveVariablesFromCha
                 const int idx_face = (i + num_ghosts_0_characteristic_var) +
                     (j + num_ghosts_1_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1);
                 
-                V[0][idx_face] = double(1)/(c_average[idx_face]*c_average[idx_face])*W[0][idx_face] +
-                    W[1][idx_face] + double(1)/(c_average[idx_face]*c_average[idx_face])*W[3][idx_face];
-                V[1][idx_face] = -double(1)/(rho_average[idx_face]*c_average[idx_face])*W[0][idx_face] +
-                    double(1)/(rho_average[idx_face]*c_average[idx_face])*W[3][idx_face];
+                V[0][idx_face] = W[0][idx_face];
+                V[1][idx_face] = W[1][idx_face];
                 V[2][idx_face] = W[2][idx_face];
-                V[3][idx_face] = W[0][idx_face] + W[3][idx_face];
+                V[3][idx_face] = W[3][idx_face];
+                
+                // V[0][idx_face] = double(1)/(c_average[idx_face]*c_average[idx_face])*W[0][idx_face] +
+                //     W[1][idx_face] + double(1)/(c_average[idx_face]*c_average[idx_face])*W[3][idx_face];
+                // V[1][idx_face] = -double(1)/(rho_average[idx_face]*c_average[idx_face])*W[0][idx_face] +
+                //     double(1)/(rho_average[idx_face]*c_average[idx_face])*W[3][idx_face];
+                // V[2][idx_face] = W[2][idx_face];
+                // V[3][idx_face] = W[0][idx_face] + W[3][idx_face];
             }
         }
         
@@ -7315,12 +7330,17 @@ FlowModelBasicUtilitiesSingleSpecies::computeSideDataOfPrimitiveVariablesFromCha
                 const int idx_face = (i + num_ghosts_0_characteristic_var) +
                     (j + num_ghosts_1_characteristic_var)*ghostcell_dim_0_characteristic_var;
                 
-                V[0][idx_face] = double(1)/(c_average[idx_face]*c_average[idx_face])*W[0][idx_face] + W[1][idx_face] +
-                    double(1)/(c_average[idx_face]*c_average[idx_face])*W[3][idx_face];
-                V[1][idx_face] = W[2][idx_face];
-                V[2][idx_face] = -double(1)/(rho_average[idx_face]*c_average[idx_face])*W[0][idx_face] +
-                    double(1)/(rho_average[idx_face]*c_average[idx_face])*W[3][idx_face];
-                V[3][idx_face] = W[0][idx_face] + W[3][idx_face];
+                V[0][idx_face] = W[0][idx_face];
+                V[1][idx_face] = W[1][idx_face];
+                V[2][idx_face] = W[2][idx_face];
+                V[3][idx_face] = W[3][idx_face];
+                
+                // V[0][idx_face] = double(1)/(c_average[idx_face]*c_average[idx_face])*W[0][idx_face] + W[1][idx_face] +
+                //     double(1)/(c_average[idx_face]*c_average[idx_face])*W[3][idx_face];
+                // V[1][idx_face] = W[2][idx_face];
+                // V[2][idx_face] = -double(1)/(rho_average[idx_face]*c_average[idx_face])*W[0][idx_face] +
+                //     double(1)/(rho_average[idx_face]*c_average[idx_face])*W[3][idx_face];
+                // V[3][idx_face] = W[0][idx_face] + W[3][idx_face];
             }
         }
     }
