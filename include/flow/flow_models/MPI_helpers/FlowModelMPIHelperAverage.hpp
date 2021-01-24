@@ -57,6 +57,39 @@ class FlowModelMPIHelperAverage: public FlowModelMPIHelper
             const std::vector<bool>& use_reciprocal,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
+        /*
+         * Compute averaged value with only y-direction as inhomogeneous direction.
+         */
+        std::vector<double> getAveragedQuantityWithInhomogeneousYDirection(
+            const std::string quantity_name,
+            const int component_idx,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute averaged reciprocal of value with only y-direction as inhomogeneous direction.
+         */
+        std::vector<double> getAveragedReciprocalOfQuantityWithInhomogeneousYDirection(
+            const std::string quantity_name,
+            const int component_idx,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute averaged value (on product of variables) with only y-direction as inhomogeneous direction.
+         */
+        std::vector<double> getAveragedQuantityWithInhomogeneousYDirection(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute averaged value (on product of variables) with only y-direction as inhomogeneous direction.
+         */
+        std::vector<double> getAveragedQuantityWithInhomogeneousYDirection(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const std::vector<bool>& use_reciprocal,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
     private:
         
 };
