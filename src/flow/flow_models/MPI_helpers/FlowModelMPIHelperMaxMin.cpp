@@ -1013,7 +1013,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getMaxQuantityWithInhomogeneousYDirection()\n"
+            << ": FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection():\n"
             << "Cannot compute maximum value with only y-direction as inhomogeneous direction for"
             << " one-dimensional problem."
             << std::endl);
@@ -1368,7 +1368,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getMinQuantityWithInhomogeneousYDirection()\n"
+            << ": FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection():\n"
             << "Cannot compute minimum value with only y-direction as inhomogeneous direction for"
             << " one-dimensional problem."
             << std::endl);
@@ -1723,7 +1723,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getMaxQuantityWithInhomogeneousZDirection()\n"
+            << ": FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection():\n"
             << "Cannot compute maximum value with only z-direction as inhomogeneous direction for"
             << " one-dimensional problem."
             << std::endl);
@@ -1731,7 +1731,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
     else if (d_dim == tbox::Dimension(2))
     {
         TBOX_ERROR(d_object_name
-            << ": getMaxQuantityWithInhomogeneousZDirection()\n"
+            << ": FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection():\n"
             << "Cannot compute maximum value with only z-direction as inhomogeneous direction for"
             << " two-dimensional problem."
             << std::endl);
@@ -1932,7 +1932,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getMinQuantityWithInhomogeneousZDirection()\n"
+            << ": FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection():\n"
             << "Cannot compute minimum value with only z-direction as inhomogeneous direction for"
             << " one-dimensional problem."
             << std::endl);
@@ -1940,7 +1940,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
     else if (d_dim == tbox::Dimension(2))
     {
         TBOX_ERROR(d_object_name
-            << ": getMinQuantityWithInhomogeneousZDirection()\n"
+            << ": FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection():\n"
             << "Cannot compute minimum value with only z-direction as inhomogeneous direction for"
             << " two-dimensional problem."
             << std::endl);
@@ -3057,7 +3057,7 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getMaxLocationWithinQuantityBoundsInYDirection()\n"
+            << ": FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection():\n"
             << "Cannot compute maximum location within quantity bounds in y-direction for one-dimensional problem."
             << std::endl);
     }
@@ -3389,7 +3389,7 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getMinLocationWithinQuantityBoundsInYDirection()\n"
+            << ": FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection():\n"
             << "Cannot compute maximum location within quantity bounds in y-direction for one-dimensional problem."
             << std::endl);
     }
@@ -3721,14 +3721,14 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInZDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getMaxLocationWithinQuantityBoundsInZDirection()\n"
+            << ": FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInZDirection():\n"
             << "Cannot compute maximum location within quantity bounds in z-direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
     {
         TBOX_ERROR(d_object_name
-            << ": getMaxLocationWithinQuantityBoundsInZDirection()\n"
+            << ": FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInZDirection():\n"
             << "Cannot compute maximum location within quantity bounds in z-direction for two-dimensional problem."
             << std::endl);
     }
@@ -3921,14 +3921,14 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInZDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getMinLocationWithinQuantityBoundsInZDirection()\n"
+            << ": FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInZDirection():\n"
             << "Cannot compute maximum location within quantity bounds in z-direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
     {
         TBOX_ERROR(d_object_name
-            << ": getMinLocationWithinQuantityBoundsInZDirection()\n"
+            << ": FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInZDirection():\n"
             << "Cannot compute maximum location within quantity bounds in z-direction for two-dimensional problem."
             << std::endl);
     }

@@ -1195,7 +1195,7 @@ MPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getAveragedQuantityWithInhomogeneousYDirection()\n"
+            << ": MPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection():\n"
             << "Cannot compute averaged value with only y-direction as inhomogeneous direction for"
             << " one-dimensional problem."
             << std::endl);
@@ -1592,7 +1592,7 @@ MPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getAveragedQuantityWithInhomogeneousYDirection()\n"
+            << ": MPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection():\n"
             << "Cannot compute averaged value with only y-direction as inhomogeneous direction for"
             << " one-dimensional problem."
             << std::endl);
@@ -2053,7 +2053,7 @@ MPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getAveragedQuantityWithInhomogeneousZDirection()\n"
+            << ": MPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection():\n"
             << "Cannot compute averaged value with only z-direction as inhomogeneous direction for"
             << " one-dimensional problem."
             << std::endl);
@@ -2061,7 +2061,7 @@ MPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
     else if (d_dim == tbox::Dimension(2))
     {
         TBOX_ERROR(d_object_name
-            << ": getAveragedQuantityWithInhomogeneousZDirection()\n"
+            << ": MPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection():\n"
             << "Cannot compute averaged value with only z-direction as inhomogeneous direction for"
             << " two-dimensional problem."
             << std::endl);
@@ -2289,7 +2289,7 @@ MPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getAveragedQuantityWithInhomogeneousZDirection()\n"
+            << ": MPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection():\n"
             << "Cannot compute averaged value with only z-direction as inhomogeneous direction for"
             << " one-dimensional problem."
             << std::endl);
@@ -2297,7 +2297,7 @@ MPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
     else if (d_dim == tbox::Dimension(2))
     {
         TBOX_ERROR(d_object_name
-            << ": getAveragedQuantityWithInhomogeneousZDirection()\n"
+            << ": MPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection():\n"
             << "Cannot compute averaged value with only z-direction as inhomogeneous direction for"
             << " one-dimensional problem."
             << std::endl);

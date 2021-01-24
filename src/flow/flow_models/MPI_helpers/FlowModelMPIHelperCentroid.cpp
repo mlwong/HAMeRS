@@ -601,7 +601,7 @@ double FlowModelMPIHelperCentroid::getCentroidInYDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getCentroidInYDirection()\n"
+            << ": FlowModelMPIHelperCentroid::getCentroidInYDirection():\n"
             << "Cannot compute centroid in y-direction for one-dimensional problem."
             << std::endl);
     }
@@ -1008,14 +1008,14 @@ double FlowModelMPIHelperCentroid::getCentroidInZDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getCentroidInZDirection()\n"
+            << ": FlowModelMPIHelperCentroid::getCentroidInZDirection():\n"
             << "Cannot compute centroid in z-direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
     {
         TBOX_ERROR(d_object_name
-            << ": getCentroidInZDirection()\n"
+            << ": FlowModelMPIHelperCentroid::getCentroidInZDirection():\n"
             << "Cannot compute centroid in z-direction for two-dimensional problem."
             << std::endl);
     }

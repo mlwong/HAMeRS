@@ -2678,7 +2678,7 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getAveragedQuantityWithInhomogeneousYDirection()\n"
+            << ": FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection():\n"
             << "Cannot compute averaged value with only y-direction as inhomogeneous direction for"
             << " one-dimensional problem."
             << std::endl);
@@ -3125,7 +3125,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousYDire
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getAveragedReciprocalOfQuantityWithInhomogeneousYDirection()\n"
+            << ": FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousYDirection():\n"
             << "Cannot compute averaged value with only y-direction as inhomogeneous direction for"
             << " one-dimensional problem."
             << std::endl);
@@ -3576,7 +3576,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getAveragedQuantityWithInhomogeneousYDirection()\n"
+            << ": FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection():\n"
             << "Cannot compute averaged value with only y-direction as inhomogeneous direction for"
             << " one-dimensional problem."
             << std::endl);
@@ -4094,7 +4094,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getAveragedQuantityWithInhomogeneousYDirection()\n"
+            << ": FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection():\n"
             << "Cannot compute averaged value with only y-direction as inhomogeneous direction for"
             << " one-dimensional problem."
             << std::endl);
@@ -4612,7 +4612,7 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getAveragedQuantityWithInhomogeneousZDirection()\n"
+            << ": FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection():\n"
             << "Cannot compute averaged value with only z-direction as inhomogeneous direction for"
             << " one-dimensional problem."
             << std::endl);
@@ -4620,7 +4620,7 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
     else if (d_dim == tbox::Dimension(2))
     {
         TBOX_ERROR(d_object_name
-            << ": getAveragedQuantityWithInhomogeneousZDirection()\n"
+            << ": FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection():\n"
             << "Cannot compute averaged value with only z-direction as inhomogeneous direction for"
             << " two-dimensional problem."
             << std::endl);
@@ -4871,7 +4871,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousZDire
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getAveragedReciprocalOfQuantityWithInhomogeneousZDirection()\n"
+            << ": FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousZDirection():\n"
             << "Cannot compute averaged value with only z-direction as inhomogeneous direction for"
             << " one-dimensional problem."
             << std::endl);
@@ -4879,7 +4879,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousZDire
     else if (d_dim == tbox::Dimension(2))
     {
         TBOX_ERROR(d_object_name
-            << ": getAveragedReciprocalOfQuantityWithInhomogeneousZDirection()\n"
+            << ": FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousZDirection():\n"
             << "Cannot compute averaged value with only z-direction as inhomogeneous direction for"
             << " two-dimensional problem."
             << std::endl);
@@ -5134,7 +5134,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getAveragedQuantityWithInhomogeneousZDirection()\n"
+            << ": FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection():\n"
             << "Cannot compute averaged value with only z-direction as inhomogeneous direction for"
             << " one-dimensional problem."
             << std::endl);
@@ -5142,7 +5142,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
     else if (d_dim == tbox::Dimension(2))
     {
         TBOX_ERROR(d_object_name
-            << ": getAveragedQuantityWithInhomogeneousZDirection()\n"
+            << ": FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection():\n"
             << "Cannot compute averaged value with only z-direction as inhomogeneous direction for"
             << " two-dimensional problem."
             << std::endl);
@@ -5434,7 +5434,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getAveragedQuantityWithInhomogeneousZDirection()\n"
+            << ": FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection():\n"
             << "Cannot compute averaged value with only z-direction as inhomogeneous direction for"
             << " one-dimensional problem."
             << std::endl);
@@ -5442,7 +5442,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
     else if (d_dim == tbox::Dimension(2))
     {
         TBOX_ERROR(d_object_name
-            << ": getAveragedQuantityWithInhomogeneousZDirection()\n"
+            << ": FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection():\n"
             << "Cannot compute averaged value with only z-direction as inhomogeneous direction for"
             << " two-dimensional problem."
             << std::endl);

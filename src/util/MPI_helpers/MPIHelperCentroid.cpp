@@ -522,7 +522,7 @@ MPIHelperCentroid::getCentroidInYDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getCentroidInYDirection()\n"
+            << ": MPIHelperCentroid::getCentroidInYDirection():\n"
             << "Cannot compute centroid in y-direction for one-dimensional problem."
             << std::endl);
     }
@@ -876,14 +876,14 @@ MPIHelperCentroid::getCentroidInZDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getCentroidInZDirection()\n"
+            << ": MPIHelperCentroid::getCentroidInZDirection():\n"
             << "Cannot compute centroid in z-direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
     {
         TBOX_ERROR(d_object_name
-            << ": getCentroidInZDirection()\n"
+            << ": MPIHelperCentroid::getCentroidInZDirection():\n"
             << "Cannot compute centroid in z-direction for two-dimensional problem."
             << std::endl);
     }

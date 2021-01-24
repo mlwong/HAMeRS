@@ -853,7 +853,7 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getMaxQuantityWithInhomogeneousYDirection()\n"
+            << ": MPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection():\n"
             << "Cannot compute maximum value with only y-direction as inhomogeneous direction for"
             << " one-dimensional problem."
             << std::endl);
@@ -1154,7 +1154,7 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getMinQuantityWithInhomogeneousYDirection()\n"
+            << ": MPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection():\n"
             << "Cannot compute minimum value with only y-direction as inhomogeneous direction for"
             << " one-dimensional problem."
             << std::endl);
@@ -1455,7 +1455,7 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getMaxQuantityWithInhomogeneousZDirection()\n"
+            << ": MPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection():\n"
             << "Cannot compute maximum value with only z-direction as inhomogeneous direction for"
             << " one-dimensional problem."
             << std::endl);
@@ -1463,7 +1463,7 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
     else if (d_dim == tbox::Dimension(2))
     {
         TBOX_ERROR(d_object_name
-            << ": getMaxQuantityWithInhomogeneousZDirection()\n"
+            << ": MPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection():\n"
             << "Cannot compute maximum value with only z-direction as inhomogeneous direction for"
             << " two-dimensional problem."
             << std::endl);
@@ -1637,7 +1637,7 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getMinQuantityWithInhomogeneousZDirection()\n"
+            << ": MPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection():\n"
             << "Cannot compute minimum value with only z-direction as inhomogeneous direction for"
             << " one-dimensional problem."
             << std::endl);
@@ -1645,7 +1645,7 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
     else if (d_dim == tbox::Dimension(2))
     {
         TBOX_ERROR(d_object_name
-            << ": getMinQuantityWithInhomogeneousZDirection()\n"
+            << ": MPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection():\n"
             << "Cannot compute minimum value with only z-direction as inhomogeneous direction for"
             << " two-dimensional problem."
             << std::endl);
@@ -2573,7 +2573,7 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getMaxLocationWithinQuantityBoundsInYDirection()\n"
+            << ": MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection():\n"
             << "Cannot compute maximum location within quantity bounds in y-direction for one-dimensional problem."
             << std::endl);
     }
@@ -2851,7 +2851,7 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getMinLocationWithinQuantityBoundsInYDirection()\n"
+            << ": MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection():\n"
             << "Cannot compute maximum location within quantity bounds in y-direction for one-dimensional problem."
             << std::endl);
     }
@@ -3129,14 +3129,14 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInZDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getMaxLocationWithinQuantityBoundsInZDirection()\n"
+            << ": MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInZDirection():\n"
             << "Cannot compute maximum location within quantity bounds in z-direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
     {
         TBOX_ERROR(d_object_name
-            << ": getMaxLocationWithinQuantityBoundsInZDirection()\n"
+            << ": MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInZDirection():\n"
             << "Cannot compute maximum location within quantity bounds in z-direction for two-dimensional problem."
             << std::endl);
     }
@@ -3302,14 +3302,14 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInZDirection(
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
-            << ": getMinLocationWithinQuantityBoundsInZDirection()\n"
+            << ": MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInZDirection():\n"
             << "Cannot compute maximum location within quantity bounds in z-direction for one-dimensional problem."
             << std::endl);
     }
     else if (d_dim == tbox::Dimension(2))
     {
         TBOX_ERROR(d_object_name
-            << ": getMinLocationWithinQuantityBoundsInZDirection()\n"
+            << ": MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInZDirection():\n"
             << "Cannot compute maximum location within quantity bounds in z-direction for two-dimensional problem."
             << std::endl);
     }
