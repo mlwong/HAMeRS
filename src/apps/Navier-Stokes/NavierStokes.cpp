@@ -660,8 +660,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
     if (d_dim == tbox::Dimension(1))
     {
         spectral_radiuses_and_dt.resize(2, 0.0);
-        double& spectral_radiuses_and_dt_0 = spectral_radiuses_and_dt[0];
-        double& spectral_radiuses_and_dt_1 = spectral_radiuses_and_dt[1];
+        double* spectral_radiuses_and_dt_ptr = spectral_radiuses_and_dt.data();
         
         /*
          * Get the dimension and grid spacing.
@@ -734,7 +733,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
         double* max_D = max_diffusivity->getPointer(0);
         
 #ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1)
+        #pragma omp simd reduction(max: spectral_radiuses_and_dt_ptr[:2])
 #endif
         for (int i = -num_ghosts_0;
              i < interior_dim_0 + num_ghosts_0;
@@ -745,13 +744,13 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
             
             const double spectral_radius_acoustic_x = max_lambda_x[idx]/dx_0;
             
-            spectral_radiuses_and_dt_0 = fmax(spectral_radiuses_and_dt_0, spectral_radius_acoustic_x);
+            spectral_radiuses_and_dt_ptr[0] = fmax(spectral_radiuses_and_dt_ptr[0], spectral_radius_acoustic_x);
             
-            spectral_radiuses_and_dt_1 = fmax(spectral_radiuses_and_dt_1, spectral_radius_acoustic_x);
+            spectral_radiuses_and_dt_ptr[1] = fmax(spectral_radiuses_and_dt_ptr[1], spectral_radius_acoustic_x);
         }
         
 #ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd reduction(max: spectral_radiuses_and_dt_1)
+        #pragma omp simd reduction(max: spectral_radiuses_and_dt_ptr[1])
 #endif
         for (int i = -num_ghosts_0;
              i < interior_dim_0 + num_ghosts_0;
@@ -762,7 +761,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
             
             const double spectral_radius_diffusive = 2.0*max_D[idx]/(dx_0*dx_0);
             
-            spectral_radiuses_and_dt_1 = fmax(spectral_radiuses_and_dt_1, spectral_radius_diffusive);
+            spectral_radiuses_and_dt_ptr[1] = fmax(spectral_radiuses_and_dt_ptr[1], spectral_radius_diffusive);
         }
         
         spectral_radiuses_and_dt[1] = double(1)/spectral_radiuses_and_dt[1];
@@ -783,9 +782,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
     else if (d_dim == tbox::Dimension(2))
     {
         spectral_radiuses_and_dt.resize(3, 0.0);
-        double& spectral_radiuses_and_dt_0 = spectral_radiuses_and_dt[0];
-        double& spectral_radiuses_and_dt_1 = spectral_radiuses_and_dt[1];
-        double& spectral_radiuses_and_dt_2 = spectral_radiuses_and_dt[2];
+        double* spectral_radiuses_and_dt_ptr = spectral_radiuses_and_dt.data();
         
         /*
          * Get the dimensions and grid spacings.
@@ -877,7 +874,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
              j++)
         {
 #ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2)
+            #pragma omp simd reduction(max: spectral_radiuses_and_dt_ptr[:3])
 #endif
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + num_ghosts_0;
@@ -890,10 +887,10 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                 const double spectral_radius_acoustic_x = max_lambda_x[idx]/dx_0;
                 const double spectral_radius_acoustic_y = max_lambda_y[idx]/dx_1;
                 
-                spectral_radiuses_and_dt_0 = fmax(spectral_radiuses_and_dt_0, spectral_radius_acoustic_x);
-                spectral_radiuses_and_dt_1 = fmax(spectral_radiuses_and_dt_1, spectral_radius_acoustic_y);
+                spectral_radiuses_and_dt_ptr[0] = fmax(spectral_radiuses_and_dt_ptr[0], spectral_radius_acoustic_x);
+                spectral_radiuses_and_dt_ptr[1] = fmax(spectral_radiuses_and_dt_ptr[1], spectral_radius_acoustic_y);
                 
-                spectral_radiuses_and_dt_2 = fmax(spectral_radiuses_and_dt_2,
+                spectral_radiuses_and_dt_ptr[2] = fmax(spectral_radiuses_and_dt_ptr[2],
                     spectral_radius_acoustic_x + spectral_radius_acoustic_y);
             }
         }
@@ -903,7 +900,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
              j++)
         {
 #ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(max: spectral_radiuses_and_dt_2)
+            #pragma omp simd reduction(max: spectral_radiuses_and_dt_ptr[2])
 #endif
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + num_ghosts_0;
@@ -917,7 +914,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                     max_D[idx]/(dx_0*dx_0),
                     max_D[idx]/(dx_1*dx_1));
                 
-                spectral_radiuses_and_dt_2 = fmax(spectral_radiuses_and_dt_2, spectral_radius_diffusive);
+                spectral_radiuses_and_dt_ptr[2] = fmax(spectral_radiuses_and_dt_ptr[2], spectral_radius_diffusive);
             }
         }
         
@@ -939,10 +936,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
     else if (d_dim == tbox::Dimension(3))
     {
         spectral_radiuses_and_dt.resize(4, 0.0);
-        double& spectral_radiuses_and_dt_0 = spectral_radiuses_and_dt[0];
-        double& spectral_radiuses_and_dt_1 = spectral_radiuses_and_dt[1];
-        double& spectral_radiuses_and_dt_2 = spectral_radiuses_and_dt[2];
-        double& spectral_radiuses_and_dt_3 = spectral_radiuses_and_dt[3];
+        double* spectral_radiuses_and_dt_ptr = spectral_radiuses_and_dt.data();
         
         /*
          * Get the dimensions and grid spacings.
@@ -1049,7 +1043,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                  j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3)
+                #pragma omp simd reduction(max: spectral_radiuses_and_dt_ptr[:4])
 #endif
                 for (int i = -num_ghosts_0;
                      i < interior_dim_0 + num_ghosts_0;
@@ -1065,11 +1059,11 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                     const double spectral_radius_acoustic_y = max_lambda_y[idx]/dx_1;
                     const double spectral_radius_acoustic_z = max_lambda_z[idx]/dx_2;
                     
-                    spectral_radiuses_and_dt_0 = fmax(spectral_radiuses_and_dt_0, spectral_radius_acoustic_x);
-                    spectral_radiuses_and_dt_1 = fmax(spectral_radiuses_and_dt_1, spectral_radius_acoustic_y);
-                    spectral_radiuses_and_dt_2 = fmax(spectral_radiuses_and_dt_2, spectral_radius_acoustic_z);
+                    spectral_radiuses_and_dt_ptr[0] = fmax(spectral_radiuses_and_dt_ptr[0], spectral_radius_acoustic_x);
+                    spectral_radiuses_and_dt_ptr[1] = fmax(spectral_radiuses_and_dt_ptr[1], spectral_radius_acoustic_y);
+                    spectral_radiuses_and_dt_ptr[2] = fmax(spectral_radiuses_and_dt_ptr[2], spectral_radius_acoustic_z);
                 
-                    spectral_radiuses_and_dt_3 = fmax(spectral_radiuses_and_dt_3,
+                    spectral_radiuses_and_dt_ptr[3] = fmax(spectral_radiuses_and_dt_ptr[3],
                         spectral_radius_acoustic_x + spectral_radius_acoustic_y + spectral_radius_acoustic_z);
                 }
             }
@@ -1084,7 +1078,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                  j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd reduction(max: spectral_radiuses_and_dt_3)
+                #pragma omp simd reduction(max: spectral_radiuses_and_dt_ptr[3])
 #endif
                 for (int i = -num_ghosts_0;
                      i < interior_dim_0 + num_ghosts_0;
@@ -1101,7 +1095,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                         fmax(max_D[idx]/(dx_1*dx_1),
                             max_D[idx]/(dx_2*dx_2)));
                     
-                    spectral_radiuses_and_dt_3 = fmax(spectral_radiuses_and_dt_3, spectral_radius_diffusive);
+                    spectral_radiuses_and_dt_ptr[3] = fmax(spectral_radiuses_and_dt_ptr[3], spectral_radius_diffusive);
                 }
             }
         }
