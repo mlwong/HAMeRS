@@ -1094,12 +1094,12 @@ int main(int argc, char *argv[])
     {
         case EULER:
         {
-            Euler_app->printErrorStatistics(tbox::pout, patch_hierarchy);
+            Euler_app->printErrorStatistics(tbox::pout, patch_hierarchy, time_integrator->getIntegratorTime());
             break;
         }
         case NAVIER_STOKES:
         {
-            Navier_Stokes_app->printErrorStatistics(tbox::pout, patch_hierarchy);
+            Navier_Stokes_app->printErrorStatistics(tbox::pout, patch_hierarchy, time_integrator->getIntegratorTime());
             break;
         }
     }

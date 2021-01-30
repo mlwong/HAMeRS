@@ -8,6 +8,7 @@
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
 #include "algs/patch_strategy/RungeKuttaPatchStrategy.hpp"
 #include "apps/Euler/EulerBoundaryConditions.hpp"
+#include "apps/Euler/EulerErrorStatistics.hpp"
 #include "apps/Euler/EulerInitialConditions.hpp"
 #include "extn/visit_data_writer/ExtendedVisItDataWriter.hpp"
 #include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorManager.hpp"
@@ -425,7 +426,8 @@ class Euler:
         void
         printErrorStatistics(
             std::ostream& os,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const double time) const;
         
         /**
          * Compute variables for computing the statistics of data.
@@ -552,6 +554,11 @@ class Euler:
         HAMERS_SHARED_PTR<EulerBoundaryConditions> d_Euler_boundary_conditions;
         HAMERS_SHARED_PTR<tbox::Database> d_Euler_boundary_conditions_db;
         bool d_Euler_boundary_conditions_db_is_from_restart;
+        
+        /*
+         * HAMERS_SHARED_PTR to EulerErrorStatistics.
+         */
+        HAMERS_SHARED_PTR<EulerErrorStatistics> d_Euler_error_statistics;
         
         /*
          * HAMERS_SHARED_PTR to ValueTagger and its database.

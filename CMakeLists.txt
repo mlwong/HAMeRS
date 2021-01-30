@@ -42,7 +42,7 @@ link_directories(${SAMRAI_LIBRARY_DIRS})
 message(STATUS "SAMRAI_INCLUDE_DIR: " ${SAMRAI_INCLUDE_DIR})
 
 # Set the preprocessor variables
-option(HAMERS_ENABLE_SIMD "HAMERS_ENABLE_SIMD" OFF)
+option(HAMERS_ENABLE_SIMD "HAMERS_ENABLE_SIMD" ON)
 option(HAMERS_DEBUG_CHECK_ASSERTIONS "HAMERS_DEBUG_CHECK_ASSERTIONS" ON)
 option(HAMERS_DEBUG_CHECK_DEV_ASSERTIONS "HAMERS_DEBUG_CHECK_DEV_ASSERTIONS" ON)
 
@@ -112,7 +112,8 @@ link_directories(${HAMeRS_BINARY_DIR}/algs/patch_strategy
                  ${HAMeRS_BINARY_DIR}/util/gradient_sensors
                  ${HAMeRS_BINARY_DIR}/util/mixing_rules
                  ${HAMeRS_BINARY_DIR}/util/mixing_rules/equations_of_state
-                 ${HAMeRS_BINARY_DIR}/util/wavelet_transform)
+                 ${HAMeRS_BINARY_DIR}/util/wavelet_transform
+                 ${HAMeRS_BINARY_DIR}/util/MPI_helpers)
 
 add_subdirectory(src/algs/patch_strategy)
 add_subdirectory(src/algs/integrator)
@@ -136,3 +137,4 @@ add_subdirectory(src/util/gradient_sensors)
 add_subdirectory(src/util/mixing_rules)
 add_subdirectory(src/util/mixing_rules/equations_of_state)
 add_subdirectory(src/util/wavelet_transform)
+add_subdirectory(src/util/MPI_helpers)

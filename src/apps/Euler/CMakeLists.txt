@@ -5,6 +5,7 @@ set(Euler_source_files
     EulerBoundaryConditions.cpp
     EulerInitialConditions.cpp
     EulerSpecialBoundaryConditions.cpp
+    EulerErrorStatistics.cpp
 )
 
 # Create a library called Euler which includes the source files defined

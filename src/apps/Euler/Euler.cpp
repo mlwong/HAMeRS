@@ -160,6 +160,18 @@ Euler::Euler(
         d_Euler_boundary_conditions_db_is_from_restart));
     
     /*
+     * Initialize d_Euler_error_statistics.
+     */
+    
+    d_Euler_error_statistics.reset(new EulerErrorStatistics(
+        "d_Euler_error_statistics",
+        d_project_name,
+        d_dim,
+        d_grid_geometry,
+        d_flow_model_manager->getFlowModelType(),
+        d_flow_model));
+    
+    /*
      * Initialize d_value_tagger.
      */
     
@@ -542,8 +554,7 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
     if (d_dim == tbox::Dimension(1))
     {
         spectral_radiuses_and_dt.resize(2, double(0));
-        double& spectral_radiuses_and_dt_0 = spectral_radiuses_and_dt[0];
-        double& spectral_radiuses_and_dt_1 = spectral_radiuses_and_dt[1];
+        double* spectral_radiuses_and_dt_ptr = spectral_radiuses_and_dt.data();
         
         /*
          * Get the dimension and grid spacing.
@@ -608,7 +619,7 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
         double* max_lambda_x = max_wave_speed_x->getPointer(0);
         
 #ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1)
+        #pragma omp simd reduction(max: spectral_radiuses_and_dt_ptr[:2])
 #endif
         for (int i = -num_ghosts_0;
              i < interior_dim_0 + num_ghosts_0;
@@ -619,9 +630,9 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
             
             const double spectral_radius_x = max_lambda_x[idx]/dx_0;
             
-            spectral_radiuses_and_dt_0 = fmax(spectral_radiuses_and_dt_0, spectral_radius_x);
+            spectral_radiuses_and_dt_ptr[0] = fmax(spectral_radiuses_and_dt_ptr[0], spectral_radius_x);
              
-            spectral_radiuses_and_dt_1 = fmax(spectral_radiuses_and_dt_1, spectral_radius_x);
+            spectral_radiuses_and_dt_ptr[1] = fmax(spectral_radiuses_and_dt_ptr[1], spectral_radius_x);
         }
         
         spectral_radiuses_and_dt[1] = double(1)/spectral_radiuses_and_dt[1];
@@ -642,9 +653,7 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
     else if (d_dim == tbox::Dimension(2))
     {
         spectral_radiuses_and_dt.resize(3, double(0));
-        double& spectral_radiuses_and_dt_0 = spectral_radiuses_and_dt[0];
-        double& spectral_radiuses_and_dt_1 = spectral_radiuses_and_dt[1];
-        double& spectral_radiuses_and_dt_2 = spectral_radiuses_and_dt[2];
+        double* spectral_radiuses_and_dt_ptr = spectral_radiuses_and_dt.data();
         
         /*
          * Get the dimensions and grid spacings.
@@ -728,7 +737,7 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
              j++)
         {
 #ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2)
+            #pragma omp simd reduction(max: spectral_radiuses_and_dt_ptr[:3])
 #endif
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + num_ghosts_0;
@@ -741,10 +750,11 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
                 const double spectral_radius_x = max_lambda_x[idx]/dx_0;
                 const double spectral_radius_y = max_lambda_y[idx]/dx_1;
                 
-                spectral_radiuses_and_dt_0 = fmax(spectral_radiuses_and_dt_0, spectral_radius_x);
-                spectral_radiuses_and_dt_1 = fmax(spectral_radiuses_and_dt_1, spectral_radius_y);
+                spectral_radiuses_and_dt_ptr[0] = fmax(spectral_radiuses_and_dt_ptr[0], spectral_radius_x);
+                spectral_radiuses_and_dt_ptr[1] = fmax(spectral_radiuses_and_dt_ptr[1], spectral_radius_y);
                 
-                spectral_radiuses_and_dt_2 = fmax(spectral_radiuses_and_dt_2, spectral_radius_x + spectral_radius_y);
+                spectral_radiuses_and_dt_ptr[2] = fmax(spectral_radiuses_and_dt_ptr[2],
+                    spectral_radius_x + spectral_radius_y);
             }
         }
         
@@ -766,10 +776,7 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
     else if (d_dim == tbox::Dimension(3))
     {
         spectral_radiuses_and_dt.resize(4, double(0));
-        double& spectral_radiuses_and_dt_0 = spectral_radiuses_and_dt[0];
-        double& spectral_radiuses_and_dt_1 = spectral_radiuses_and_dt[1];
-        double& spectral_radiuses_and_dt_2 = spectral_radiuses_and_dt[2];
-        double& spectral_radiuses_and_dt_3 = spectral_radiuses_and_dt[3];
+        double* spectral_radiuses_and_dt_ptr = spectral_radiuses_and_dt.data();
         
         /*
          * Get the dimensions and grid spacings.
@@ -869,7 +876,7 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
                  j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3)
+                #pragma omp simd reduction(max: spectral_radiuses_and_dt_ptr[:4])
 #endif
                 for (int i = -num_ghosts_0;
                      i < interior_dim_0 + num_ghosts_0;
@@ -885,11 +892,11 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
                     const double spectral_radius_y = max_lambda_y[idx]/dx_1;
                     const double spectral_radius_z = max_lambda_z[idx]/dx_2;
                     
-                    spectral_radiuses_and_dt_0 = fmax(spectral_radiuses_and_dt_0, spectral_radius_x);
-                    spectral_radiuses_and_dt_1 = fmax(spectral_radiuses_and_dt_1, spectral_radius_y);
-                    spectral_radiuses_and_dt_2 = fmax(spectral_radiuses_and_dt_2, spectral_radius_z);
+                    spectral_radiuses_and_dt_ptr[0] = fmax(spectral_radiuses_and_dt_ptr[0], spectral_radius_x);
+                    spectral_radiuses_and_dt_ptr[1] = fmax(spectral_radiuses_and_dt_ptr[1], spectral_radius_y);
+                    spectral_radiuses_and_dt_ptr[2] = fmax(spectral_radiuses_and_dt_ptr[2], spectral_radius_z);
                 
-                    spectral_radiuses_and_dt_3 = fmax(spectral_radiuses_and_dt_3,
+                    spectral_radiuses_and_dt_ptr[3] = fmax(spectral_radiuses_and_dt_ptr[3],
                         spectral_radius_x + spectral_radius_y + spectral_radius_z);
                 }
             }
@@ -2444,199 +2451,10 @@ void Euler::printClassData(std::ostream& os) const
 void
 Euler::printErrorStatistics(
     std::ostream& os,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const double time) const
 {
-    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
-    
-    math::HierarchyCellDataOpsReal<double> cell_double_operator(patch_hierarchy, 0, 0);
-    
-    std::vector<std::string> variable_names = d_flow_model->getNamesOfConservativeVariables();
-    
-    std::vector<HAMERS_SHARED_PTR<pdat::CellVariable<double> > > variables =
-        d_flow_model->getConservativeVariables();
-    
-   if (d_project_name == "2D single-species convergence test")
-   {
-        for (int vi = 0; vi < static_cast<int>(variables.size()); vi++)
-        {
-            if (variable_names[vi] == "density")
-            {
-                HAMERS_SHARED_PTR<hier::PatchLevel> level_root(
-                    patch_hierarchy->getPatchLevel(0));
-                
-                double error_sum_local = 0.0;
-                double error_squared_sum_local = 0.0;
-                double error_max_local = 0.0;
-                
-                for (hier::PatchLevel::iterator ip(level_root->begin());
-                     ip != level_root->end();
-                     ip++)
-                {
-                    const HAMERS_SHARED_PTR<hier::Patch>& patch = *ip;
-                    
-                    // Get the dimensions of box that covers the interior of Patch.
-                    hier::Box patch_box = patch->getBox();
-                    const hier::IntVector patch_dims = patch_box.numberCells();
-                    
-                    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
-                        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                            patch->getPatchGeometry()));
-                    
-                    const double* const dx = patch_geom->getDx();
-                    const double* const patch_xlo = patch_geom->getXLower();
-                    
-                    HAMERS_SHARED_PTR<pdat::CellData<double> > density(
-                        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch->getPatchData(variables[vi], d_plot_context)));
-                    
-                    double* rho = density->getPointer(0);
-                    
-                    for (int j = 0; j < patch_dims[1]; j++)
-                    {
-                        for (int i = 0; i < patch_dims[0]; i++)
-                        {
-                            // Compute index into linear data array.
-                            int idx_cell = i + j*patch_dims[0];
-                            
-                            // Compute the coordinates.
-                            double x[2];
-                            x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
-                            x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
-                            
-                            const double rho_exact   = 1.0 + 0.5*sin(M_PI*(x[0] + x[1]));
-                            const double error = fabs(rho_exact - rho[idx_cell]);
-                            
-                            error_sum_local += dx[0]*dx[0]*error;
-                            error_squared_sum_local += dx[0]*dx[0]*error*error;
-                            error_max_local = fmax(error, error_max_local);
-                        }
-                    }
-                }
-                
-                double error_sum_global = 0.0;
-                double error_squared_sum_global = 0.0;
-                double error_max_global = 0.0;
-                
-                mpi.Allreduce(
-                    &error_sum_local,
-                    &error_sum_global,
-                    1,
-                    MPI_DOUBLE,
-                    MPI_SUM);
-                
-                mpi.Allreduce(
-                    &error_squared_sum_local,
-                    &error_squared_sum_global,
-                    1,
-                    MPI_DOUBLE,
-                    MPI_SUM);
-                
-                mpi.Allreduce(
-                    &error_max_local,
-                    &error_max_global,
-                    1,
-                    MPI_DOUBLE,
-                    MPI_MAX);
-                
-                
-                os.precision(17);
-                os << "L1_error: " << std::scientific << error_sum_global << std::endl;
-                os << "L2_error: " << std::scientific << sqrt(error_squared_sum_global) << std::endl;
-                os << "Linf_error: " << std::scientific << error_max_global << std::endl;
-            }
-        }
-    }
-    else if (d_project_name == "2D multi-species convergence test")
-    {
-        for (int vi = 0; vi < static_cast<int>(variables.size()); vi++)
-        {
-            if (variable_names[vi] == "volume fraction")
-            {
-                HAMERS_SHARED_PTR<hier::PatchLevel> level_root(
-                patch_hierarchy->getPatchLevel(0));
-                
-                double error_sum_local = 0.0;
-                double error_squared_sum_local = 0.0;
-                double error_max_local = 0.0;
-                
-                for (hier::PatchLevel::iterator ip(level_root->begin());
-                     ip != level_root->end();
-                     ip++)
-                {
-                    const HAMERS_SHARED_PTR<hier::Patch>& patch = *ip;
-                    
-                    // Get the dimensions of box that covers the interior of Patch.
-                    hier::Box patch_box = patch->getBox();
-                    const hier::IntVector patch_dims = patch_box.numberCells();
-                    
-                    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
-                        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                            patch->getPatchGeometry()));
-                    
-                    const double* const dx = patch_geom->getDx();
-                    const double* const patch_xlo = patch_geom->getXLower();
-                    
-                    HAMERS_SHARED_PTR<pdat::CellData<double> > volume_fraction(
-                        HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch->getPatchData(variables[vi], d_plot_context)));
-                    
-                    double* Z_1 = volume_fraction->getPointer(0);
-                    
-                    for (int j = 0; j < patch_dims[1]; j++)
-                    {
-                        for (int i = 0; i < patch_dims[0]; i++)
-                        {
-                            // Compute index into linear data array.
-                            int idx_cell = i + j*patch_dims[0];
-                            
-                            // Compute the coordinates.
-                            double x[2];
-                            x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
-                            x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
-                            
-                            const double Z_1_exact   = 0.5 + 0.25*sin(M_PI*(x[0] + x[1]));
-                            const double error = fabs(Z_1_exact - Z_1[idx_cell]);
-                            
-                            error_sum_local += dx[0]*dx[0]*error;
-                            error_squared_sum_local += dx[0]*dx[0]*error*error;
-                            error_max_local = fmax(error, error_max_local);
-                        }
-                    }        
-                }
-                
-                double error_sum_global = 0.0;
-                double error_squared_sum_global = 0.0;
-                double error_max_global = 0.0;
-                
-                mpi.Allreduce(
-                    &error_sum_local,
-                    &error_sum_global,
-                    1,
-                    MPI_DOUBLE,
-                    MPI_SUM);
-                
-                mpi.Allreduce(
-                    &error_squared_sum_local,
-                    &error_squared_sum_global,
-                    1,
-                    MPI_DOUBLE,
-                    MPI_SUM);
-                
-                mpi.Allreduce(
-                    &error_max_local,
-                    &error_max_global,
-                    1,
-                    MPI_DOUBLE,
-                    MPI_MAX);
-                
-                
-                os.precision(17);
-                os << "L1_error: " << std::scientific << error_sum_global << std::endl;
-                os << "L2_error: " << std::scientific << sqrt(error_squared_sum_global) << std::endl;
-                os << "Linf_error: " << std::scientific << error_max_global << std::endl;
-            }
-        }
-    }
+    d_Euler_error_statistics->printErrorStatistics(os, patch_hierarchy, d_plot_context, time);
 }
 
 
