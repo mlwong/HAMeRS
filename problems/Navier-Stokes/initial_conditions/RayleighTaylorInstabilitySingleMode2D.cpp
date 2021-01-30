@@ -88,7 +88,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         // const double gamma_1 = double(7)/double(5);
         
         const double lambda = 701.53278340668; // wavelength of single-mode perturbation
-        const double eta_0  = 0.01*lambda;     // 1% perturbation
+        const double eta_0  = 0.1*lambda;      // 10% perturbation
         // const double eta_0  = 0.0*lambda;      // no perturbation
         
         const double W_1 = 0.03328; // molecular weight of heavier gas
