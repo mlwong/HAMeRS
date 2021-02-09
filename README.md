@@ -24,6 +24,13 @@ cmake ..
 make
 ```
 
+The compilers to be used to compile C, C++ and Fortran parts of HAMeRS can be chosen by setting the environment variables `CC`, `CXX` and `F77` respectively before running CMake. For example, to use the default MPI compilers, you can run:
+```
+export CC=mpicc
+export CXX=mpicxx
+export F77=mpif77
+```
+
 To run the code, you need to provide the input file:
 
 ```
@@ -75,7 +82,7 @@ Please have a look at the [Wiki page](https://github.com/mlwong/HAMeRS/wiki).
 
 ### Who do I talk to? ###
 
-The code is managed by previous PhD student Man-Long Wong (mlwong@alumni.stanford.edu) of the [Flow Physics and Aeroacoustics Laboratory](https://fpal.stanford.edu/) (FPAL)  at the [Department of Aeronautics and Astronautics](https://aa.stanford.edu/) of [Stanford University](https://www.stanford.edu/).
+The code is managed by the previous PhD graduate Man-Long Wong (mlwong@alumni.stanford.edu) of the [Flow Physics and Aeroacoustics Laboratory](https://fpal.stanford.edu/) (FPAL)  at the [Department of Aeronautics and Astronautics](https://aa.stanford.edu/) of [Stanford University](https://www.stanford.edu/).
 
 ### Copyright ###
 HAMeRS is licensed under a GNU Lesser General Public License v3.0.
