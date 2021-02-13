@@ -162,7 +162,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         TBOX_ASSERT(static_cast<int>(diffusivities_data_x.size()) == d_num_eqn);
         TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_x.size()) == d_num_eqn);
         
-        //Compute the first derivatives of variables in x-direction.
+        // Compute the first derivatives of variables in x-direction.
         computeFirstDerivativesInX(
             patch,
             var_derivative_x,
@@ -187,7 +187,6 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_component_idx_x);
         
         // Add the derivatives to the divergence of diffusive flux.
-        
         addDerivativeToDivergence(
             patch,
             diffusive_flux_divergence,
@@ -292,7 +291,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         TBOX_ASSERT(static_cast<int>(diffusivities_data_x.size()) == d_num_eqn);
         TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_x.size()) == d_num_eqn);
         
-        //Compute the first derivatives of variables in x-direction.
+        // Compute the first derivatives of variables in x-direction.
         computeFirstDerivativesInX(
             patch,
             var_derivative_x,
@@ -317,7 +316,6 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_component_idx_x);
         
         // Add the derivatives to the divergence of diffusive flux.
-        
         addDerivativeToDivergence(
             patch,
             diffusive_flux_divergence,
@@ -360,7 +358,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         TBOX_ASSERT(static_cast<int>(diffusivities_data_y.size()) == d_num_eqn);
         TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_y.size()) == d_num_eqn);
         
-        //Compute the first derivatives of variables in y-direction.
+        // Compute the first derivatives of variables in y-direction.
         computeFirstDerivativesInY(
             patch,
             var_derivative_y,
@@ -395,7 +393,6 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_derivative_component_idx_y);
         
         // Add the derivatives to the divergence of diffusive flux.
-        
         addDerivativeToDivergence(
             patch,
             diffusive_flux_divergence,
@@ -444,7 +441,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         TBOX_ASSERT(static_cast<int>(diffusivities_data_x.size()) == d_num_eqn);
         TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_x.size()) == d_num_eqn);
         
-        //Compute the first derivatives of variables in x-direction.
+        // Compute the first derivatives of variables in x-direction.
         computeFirstDerivativesInX(
             patch,
             var_derivative_x,
@@ -479,7 +476,6 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_derivative_component_idx_x);
         
         // Add the derivatives to the divergence of diffusive flux.
-        
         addDerivativeToDivergence(
             patch,
             diffusive_flux_divergence,
@@ -524,7 +520,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         TBOX_ASSERT(static_cast<int>(diffusivities_data_y.size()) == d_num_eqn);
         TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_y.size()) == d_num_eqn);
         
-        //Compute the first derivatives of variables in y-direction.
+        // Compute the first derivatives of variables in y-direction.
         computeFirstDerivativesInY(
             patch,
             var_derivative_y,
@@ -549,7 +545,6 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_component_idx_y);
         
         // Add the derivatives to the divergence of diffusive flux.
-        
         addDerivativeToDivergence(
             patch,
             diffusive_flux_divergence,
@@ -672,7 +667,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         TBOX_ASSERT(static_cast<int>(diffusivities_data_x.size()) == d_num_eqn);
         TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_x.size()) == d_num_eqn);
         
-        //Compute the first derivatives of variables in x-direction.
+        // Compute the first derivatives of variables in x-direction.
         computeFirstDerivativesInX(
             patch,
             var_derivative_x,
@@ -697,7 +692,6 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_component_idx_x);
         
         // Add the derivatives to the divergence of diffusive flux.
-        
         addDerivativeToDivergence(
             patch,
             diffusive_flux_divergence,
@@ -740,7 +734,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         TBOX_ASSERT(static_cast<int>(diffusivities_data_y.size()) == d_num_eqn);
         TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_y.size()) == d_num_eqn);
         
-        //Compute the first derivatives of variables in y-direction.
+        // Compute the first derivatives of variables in y-direction.
         computeFirstDerivativesInY(
             patch,
             var_derivative_y,
@@ -775,7 +769,6 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_derivative_component_idx_y);
         
         // Add the derivatives to the divergence of diffusive flux.
-        
         addDerivativeToDivergence(
             patch,
             diffusive_flux_divergence,
@@ -820,7 +813,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         TBOX_ASSERT(static_cast<int>(diffusivities_data_z.size()) == d_num_eqn);
         TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_z.size()) == d_num_eqn);
         
-        //Compute the first derivatives of variables in z-direction.
+        // Compute the first derivatives of variables in z-direction.
         computeFirstDerivativesInZ(
             patch,
             var_derivative_z,
@@ -855,7 +848,6 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_derivative_component_idx_z);
         
         // Add the derivatives to the divergence of diffusive flux.
-        
         addDerivativeToDivergence(
             patch,
             diffusive_flux_divergence,
@@ -904,7 +896,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         TBOX_ASSERT(static_cast<int>(diffusivities_data_x.size()) == d_num_eqn);
         TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_x.size()) == d_num_eqn);
         
-        //Compute the first derivatives of variables in x-direction.
+        // Compute the first derivatives of variables in x-direction.
         computeFirstDerivativesInX(
             patch,
             var_derivative_x,
@@ -939,7 +931,6 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_derivative_component_idx_x);
         
         // Add the derivatives to the divergence of diffusive flux.
-        
         addDerivativeToDivergence(
             patch,
             diffusive_flux_divergence,
@@ -984,7 +975,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         TBOX_ASSERT(static_cast<int>(diffusivities_data_y.size()) == d_num_eqn);
         TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_y.size()) == d_num_eqn);
         
-        //Compute the first derivatives of variables in y-direction.
+        // Compute the first derivatives of variables in y-direction.
         computeFirstDerivativesInY(
             patch,
             var_derivative_y,
@@ -1009,7 +1000,6 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_component_idx_y);
         
         // Add the derivatives to the divergence of diffusive flux.
-        
         addDerivativeToDivergence(
             patch,
             diffusive_flux_divergence,
@@ -1052,7 +1042,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         TBOX_ASSERT(static_cast<int>(diffusivities_data_z.size()) == d_num_eqn);
         TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_z.size()) == d_num_eqn);
         
-        //Compute the first derivatives of variables in z-direction.
+        // Compute the first derivatives of variables in z-direction.
         computeFirstDerivativesInZ(
             patch,
             var_derivative_z,
@@ -1087,7 +1077,6 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_derivative_component_idx_z);
         
         // Add the derivatives to the divergence of diffusive flux.
-        
         addDerivativeToDivergence(
             patch,
             diffusive_flux_divergence,
@@ -1136,7 +1125,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         TBOX_ASSERT(static_cast<int>(diffusivities_data_x.size()) == d_num_eqn);
         TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_x.size()) == d_num_eqn);
         
-        //Compute the first derivatives of variables in x-direction.
+        // Compute the first derivatives of variables in x-direction.
         computeFirstDerivativesInX(
             patch,
             var_derivative_x,
@@ -1171,7 +1160,6 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_derivative_component_idx_x);
         
         // Add the derivatives to the divergence of diffusive flux.
-        
         addDerivativeToDivergence(
             patch,
             diffusive_flux_divergence,
@@ -1216,7 +1204,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         TBOX_ASSERT(static_cast<int>(diffusivities_data_y.size()) == d_num_eqn);
         TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_y.size()) == d_num_eqn);
         
-        //Compute the first derivatives of variables in y-direction.
+        // Compute the first derivatives of variables in y-direction.
         computeFirstDerivativesInY(
             patch,
             var_derivative_y,
@@ -1251,7 +1239,6 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_derivative_component_idx_y);
         
         // Add the derivatives to the divergence of diffusive flux.
-        
         addDerivativeToDivergence(
             patch,
             diffusive_flux_divergence,
@@ -1296,7 +1283,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         TBOX_ASSERT(static_cast<int>(diffusivities_data_z.size()) == d_num_eqn);
         TBOX_ASSERT(static_cast<int>(diffusivities_component_idx_z.size()) == d_num_eqn);
         
-        //Compute the first derivatives of variables in z-direction.
+        // Compute the first derivatives of variables in z-direction.
         computeFirstDerivativesInZ(
             patch,
             var_derivative_z,
@@ -1321,7 +1308,6 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
             var_component_idx_z);
         
         // Add the derivatives to the divergence of diffusive flux.
-        
         addDerivativeToDivergence(
             patch,
             diffusive_flux_divergence,
@@ -1416,7 +1402,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::addDerivativeToDiverge
                 // Get the pointer to diffusivity.
                 double* mu = diffusivities_data[ei][vi]->getPointer(mu_idx);
                 
-                // Get the pointer to derivatives.
+                // Get the pointers to derivatives.
                 double* dudx = var_first_derivative[ei][vi]->getPointer(0);
                 double* d2udxdy = var_derivative_cross_derivative[ei][vi]->getPointer(0);
                 double* dmudy = diffusivities_first_derivative[ei][vi]->getPointer(0);
@@ -1492,7 +1478,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::addDerivativeToDiverge
                 // Get the pointer to diffusivity.
                 double* mu = diffusivities_data[ei][vi]->getPointer(mu_idx);
                 
-                // Get the pointer to derivatives.
+                // Get the pointers to derivatives.
                 double* dudx = var_first_derivative[ei][vi]->getPointer(0);
                 double* d2udxdy = var_derivative_cross_derivative[ei][vi]->getPointer(0);
                 double* dmudy = diffusivities_first_derivative[ei][vi]->getPointer(0);
@@ -1578,7 +1564,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::addDerivativeToDiverge
                 // Get the pointer to diffusivity.
                 double* mu = diffusivities_data[ei][vi]->getPointer(mu_idx);
                 
-                // Get the pointer to derivatives.
+                // Get the pointers to derivatives.
                 double* dudx = var_first_derivative[ei][vi]->getPointer(0);
                 double* d2udxdy = var_derivative_cross_derivative[ei][vi]->getPointer(0);
                 double* dmudy = diffusivities_first_derivative[ei][vi]->getPointer(0);
@@ -1646,7 +1632,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
     const std::vector<std::vector<int> >& data_component_idx_x)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    for (int ei = 0; ei < d_num_eqn; ei ++)
+    for (int ei = 0; ei < d_num_eqn; ei++)
     {
         TBOX_ASSERT(static_cast<int>(data_x[ei].size()) ==
                     static_cast<int>(data_component_idx_x[ei].size()));
@@ -1684,7 +1670,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
         
         const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
         
-        for (int ei = 0; ei < d_num_eqn; ei ++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             derivative_x[ei].reserve(static_cast<int>(data_x[ei].size()));
             
@@ -1764,7 +1750,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
         
         const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
         
-        for (int ei = 0; ei < d_num_eqn; ei ++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             derivative_x[ei].reserve(static_cast<int>(data_x[ei].size()));
             
@@ -1867,7 +1853,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
         const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
         const int diff_ghostcell_dim_1 = diff_ghostcell_dims[1];
         
-        for (int ei = 0; ei < d_num_eqn; ei ++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             derivative_x[ei].reserve(static_cast<int>(data_x[ei].size()));
             
@@ -1987,7 +1973,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
     const std::vector<std::vector<int> >& data_component_idx_y)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    for (int ei = 0; ei < d_num_eqn; ei ++)
+    for (int ei = 0; ei < d_num_eqn; ei++)
     {
         TBOX_ASSERT(static_cast<int>(data_y[ei].size()) ==
                     static_cast<int>(data_component_idx_y[ei].size()));
@@ -2037,7 +2023,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
         
         const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
         
-        for (int ei = 0; ei < d_num_eqn; ei ++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             derivative_y[ei].reserve(static_cast<int>(data_y[ei].size()));
             
@@ -2140,7 +2126,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
         const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
         const int diff_ghostcell_dim_1 = diff_ghostcell_dims[1];
         
-        for (int ei = 0; ei < d_num_eqn; ei ++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             derivative_y[ei].reserve(static_cast<int>(data_y[ei].size()));
             
@@ -2260,7 +2246,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
     const std::vector<std::vector<int> >& data_component_idx_z)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    for (int ei = 0; ei < d_num_eqn; ei ++)
+    for (int ei = 0; ei < d_num_eqn; ei++)
     {
         TBOX_ASSERT(static_cast<int>(data_z[ei].size()) ==
                     static_cast<int>(data_component_idx_z[ei].size()));
@@ -2321,7 +2307,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
         const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
         const int diff_ghostcell_dim_1 = diff_ghostcell_dims[1];
         
-        for (int ei = 0; ei < d_num_eqn; ei ++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             derivative_z[ei].reserve(static_cast<int>(data_z[ei].size()));
             
@@ -2441,7 +2427,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
     const std::vector<std::vector<int> >& data_component_idx_x)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    for (int ei = 0; ei < d_num_eqn; ei ++)
+    for (int ei = 0; ei < d_num_eqn; ei++)
     {
         TBOX_ASSERT(static_cast<int>(data_x[ei].size()) ==
                     static_cast<int>(data_component_idx_x[ei].size()));
@@ -2479,7 +2465,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
         
         const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
         
-        for (int ei = 0; ei < d_num_eqn; ei ++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             derivative_x[ei].reserve(static_cast<int>(data_x[ei].size()));
             
@@ -2561,7 +2547,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
         
         const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
         
-        for (int ei = 0; ei < d_num_eqn; ei ++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             derivative_x[ei].reserve(static_cast<int>(data_x[ei].size()));
             
@@ -2668,7 +2654,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
         const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
         const int diff_ghostcell_dim_1 = diff_ghostcell_dims[1];
         
-        for (int ei = 0; ei < d_num_eqn; ei ++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             derivative_x[ei].reserve(static_cast<int>(data_x[ei].size()));
             
@@ -2794,7 +2780,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
     const std::vector<std::vector<int> >& data_component_idx_y)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    for (int ei = 0; ei < d_num_eqn; ei ++)
+    for (int ei = 0; ei < d_num_eqn; ei++)
     {
         TBOX_ASSERT(static_cast<int>(data_y[ei].size()) ==
                     static_cast<int>(data_component_idx_y[ei].size()));
@@ -2844,7 +2830,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
         
         const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
         
-        for (int ei = 0; ei < d_num_eqn; ei ++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             derivative_y[ei].reserve(static_cast<int>(data_y[ei].size()));
             
@@ -2951,7 +2937,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
         const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
         const int diff_ghostcell_dim_1 = diff_ghostcell_dims[1];
         
-        for (int ei = 0; ei < d_num_eqn; ei ++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             derivative_y[ei].reserve(static_cast<int>(data_y[ei].size()));
             
@@ -3077,7 +3063,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
     const std::vector<std::vector<int> >& data_component_idx_z)
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    for (int ei = 0; ei < d_num_eqn; ei ++)
+    for (int ei = 0; ei < d_num_eqn; ei++)
     {
         TBOX_ASSERT(static_cast<int>(data_z[ei].size()) ==
                     static_cast<int>(data_component_idx_z[ei].size()));
@@ -3138,7 +3124,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
         const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
         const int diff_ghostcell_dim_1 = diff_ghostcell_dims[1];
         
-        for (int ei = 0; ei < d_num_eqn; ei ++)
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
             derivative_z[ei].reserve(static_cast<int>(data_z[ei].size()));
             
