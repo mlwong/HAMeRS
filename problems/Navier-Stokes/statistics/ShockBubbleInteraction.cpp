@@ -434,8 +434,8 @@ SBIStatisticsUtilities::outputInterfaceMinInXDirection(
             "MASS_FRACTIONS",
             0,
             data_context,
-            0.01,
-            0.99);
+            double(0.01),
+            double(0.99));
     
     /*
      * Compute and output the value (only done by process 0).
@@ -509,8 +509,8 @@ SBIStatisticsUtilities::outputInterfaceMaxInXDirection(
             "MASS_FRACTIONS",
             0,
             data_context,
-            0.01,
-            0.99);
+            double(0.01),
+            double(0.99));
     
     /*
      * Compute and output the value (only done by process 0).
@@ -584,8 +584,8 @@ SBIStatisticsUtilities::outputInterfaceMinInYDirection(
             "MASS_FRACTIONS",
             0,
             data_context,
-            0.01,
-            0.99);
+            double(0.01),
+            double(0.99));
     
     /*
      * Compute and output the value (only done by process 0).
@@ -659,8 +659,8 @@ SBIStatisticsUtilities::outputInterfaceMaxInYDirection(
             "MASS_FRACTIONS",
             0,
             data_context,
-            0.01,
-            0.99);
+            double(0.01),
+            double(0.99));
     
     /*
      * Compute and output the value (only done by process 0).
@@ -734,8 +734,8 @@ SBIStatisticsUtilities::outputInterfaceMinInZDirection(
             "MASS_FRACTIONS",
             0,
             data_context,
-            0.01,
-            0.99);
+            double(0.01),
+            double(0.99));
     
     /*
      * Compute and output the value (only done by process 0).
@@ -809,8 +809,8 @@ SBIStatisticsUtilities::outputInterfaceMaxInZDirection(
             "MASS_FRACTIONS",
             0,
             data_context,
-            0.01,
-            0.99);
+            double(0.01),
+            double(0.99));
     
     /*
      * Compute and output the value (only done by process 0).

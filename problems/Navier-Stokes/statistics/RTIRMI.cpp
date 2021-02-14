@@ -377,8 +377,8 @@ RTIRMIStatisticsUtilities::outputMixednessInXDirection(
     
     if (mpi.getRank() == 0)
     {
-        double num = 0.0;
-        double den = 0.0;
+        double num = double(0);
+        double den = double(0);
         
         for (int i = 0; i < finest_level_dims[0]; i++)
         {
@@ -387,7 +387,7 @@ RTIRMIStatisticsUtilities::outputMixednessInXDirection(
         
         for (int i = 0; i < finest_level_dims[0]; i++)
         {
-            den += Y_avg_global[i]*(1.0 - Y_avg_global[i]);
+            den += Y_avg_global[i]*(double(1) - Y_avg_global[i]);
         }
         
         const double Theta = num/den;
@@ -1326,8 +1326,8 @@ RTIRMIStatisticsUtilities::outputEnstrophyIntegrated(
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        double Omega_integrated_local = 0.0;
-        double Omega_integrated_global = 0.0;
+        double Omega_integrated_local  = double(0);
+        double Omega_integrated_global = double(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -1420,7 +1420,7 @@ RTIRMIStatisticsUtilities::outputEnstrophyIntegrated(
                 TBOX_ASSERT(num_ghosts_velocity >= hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative);
 #endif
                 
-                double Omega_to_add = 0.0;
+                double Omega_to_add = double(0);
                 
                 /*
                  * Initialize cell data for velocity derivatives and get pointers to the derivatives.
@@ -1557,8 +1557,8 @@ RTIRMIStatisticsUtilities::outputEnstrophyIntegrated(
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        double Omega_integrated_local = 0.0;
-        double Omega_integrated_global = 0.0;
+        double Omega_integrated_local  = double(0);
+        double Omega_integrated_global = double(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -1654,7 +1654,7 @@ RTIRMIStatisticsUtilities::outputEnstrophyIntegrated(
                 TBOX_ASSERT(num_ghosts_velocity >= hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative);
 #endif
                 
-                double Omega_to_add = 0.0;
+                double Omega_to_add = double(0);
                 
                 /*
                  * Initialize cell data for velocity derivatives and get pointers to the derivatives.
@@ -1920,8 +1920,8 @@ RTIRMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
     
     if (d_dim == tbox::Dimension(1))
     {
-        double Chi_integrated_local = 0.0;
-        double Chi_integrated_global = 0.0;
+        double Chi_integrated_local  = double(0);
+        double Chi_integrated_global = double(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -2022,7 +2022,7 @@ RTIRMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                 TBOX_ASSERT(num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative);
 #endif
                 
-                double Chi_to_add = 0.0;
+                double Chi_to_add = double(0);
                 
                 /*
                  * Initialize cell data for mass fraction derivatives and get pointers to the derivatives.
@@ -2157,8 +2157,8 @@ RTIRMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        double Chi_integrated_local = 0.0;
-        double Chi_integrated_global = 0.0;
+        double Chi_integrated_local  = double(0);
+        double Chi_integrated_global = double(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -2276,7 +2276,7 @@ RTIRMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                 TBOX_ASSERT(num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative);
 #endif
                 
-                double Chi_to_add = 0.0;
+                double Chi_to_add = double(0);
                 
                 /*
                  * Initialize cell data for mass fraction derivatives and get pointers to the derivatives.
@@ -2441,8 +2441,8 @@ RTIRMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        double Chi_integrated_local = 0.0;
-        double Chi_integrated_global = 0.0;
+        double Chi_integrated_local  = double(0);
+        double Chi_integrated_global = double(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -2567,7 +2567,7 @@ RTIRMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                 TBOX_ASSERT(num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative);
 #endif
                 
-                double Chi_to_add = 0.0;
+                double Chi_to_add = double(0);
                 
                 /*
                  * Initialize cell data for mass fraction derivatives and get pointers to the derivatives.
@@ -2844,8 +2844,8 @@ RTIRMIStatisticsUtilities::outputNumericalInterfaceThickness(
     
     if (d_dim == tbox::Dimension(1))
     {
-        double grad_mag_max_local = 0.0;
-        double grad_mag_max_global = 0.0;
+        double grad_mag_max_local  = double(0);
+        double grad_mag_max_global = double(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -3072,13 +3072,13 @@ RTIRMIStatisticsUtilities::outputNumericalInterfaceThickness(
             const double dx_finest = L_x/finest_level_dims[0];
             
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << 1.0/(dx_finest*grad_mag_max_global);
+                  << "\t" << double(1)/(dx_finest*grad_mag_max_global);
         }
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        double grad_mag_max_local = 0.0;
-        double grad_mag_max_global = 0.0;
+        double grad_mag_max_local  = double(0);
+        double grad_mag_max_global = double(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -3460,13 +3460,13 @@ RTIRMIStatisticsUtilities::outputNumericalInterfaceThickness(
             dx_finest = fmax(dx_finest, L_y/finest_level_dims[1]);
             
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << 1.0/(dx_finest*grad_mag_max_global);
+                  << "\t" << double(1)/(dx_finest*grad_mag_max_global);
         }
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        double grad_mag_max_local = 0.0;
-        double grad_mag_max_global = 0.0;
+        double grad_mag_max_local  = double(0);
+        double grad_mag_max_global = double(0);
         
         for (int li = 0; li < num_levels; li++)
         {
@@ -4095,7 +4095,7 @@ RTIRMIStatisticsUtilities::outputNumericalInterfaceThickness(
             dx_finest = fmax(dx_finest, L_z/finest_level_dims[2]);
             
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << 1.0/(dx_finest*grad_mag_max_global);
+                  << "\t" << double(1)/(dx_finest*grad_mag_max_global);
         }
     }
     
