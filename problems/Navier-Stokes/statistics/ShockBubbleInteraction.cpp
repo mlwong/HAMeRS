@@ -286,14 +286,14 @@ SBIStatisticsUtilities::outputMixingWidthInXDirection(
     
     if (mpi.getRank() == 0)
     {
-        double W = 0.0;
+        double W = double(0);
         
         for (int i = 0; i < finest_level_dims[0]; i++)
         {
-            W += Y_avg_global[i]*(1.0 - Y_avg_global[i]);
+            W += Y_avg_global[i]*(double(1) - Y_avg_global[i]);
         }
         
-        W = 4.0*W*dx_finest[0];
+        W = double(4)*W*dx_finest[0];
         
         f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
               << "\t" << W;
