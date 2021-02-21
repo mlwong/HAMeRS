@@ -132,6 +132,25 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
             const double bound_lo,
             const double bound_hi) const;
         
+        /*
+         * Compute maximum value of absolute value of gradient with only x-direction as inhomogeneous direction.
+         */
+        std::vector<double> getMaxAbsoluteGradientWithInhomogeneousXDirection(
+            const std::string quantity_name,
+            const int component_idx,
+            const int derivative_direction,
+            const int num_ghosts_derivative,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute maximum value of magnitude of gradient with only x-direction as inhomogeneous direction.
+         */
+        std::vector<double> getMaxMagnitudeGradientWithInhomogeneousXDirection(
+            const std::string quantity_name,
+            const int component_idx,
+            const int num_ghosts_derivative,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
     private:
         
 };
