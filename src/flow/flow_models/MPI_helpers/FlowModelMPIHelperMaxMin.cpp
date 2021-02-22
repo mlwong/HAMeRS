@@ -4098,7 +4098,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
     const int num_ghosts_derivative,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
-    if (d_dim == tbox::Dimension(1) && derivative_direction > 0)
+    if (d_dim == tbox::Dimension(1) && (derivative_direction < 0 || derivative_direction > 0))
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection():\n"
@@ -4106,7 +4106,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
             << "derivative_direction = " << derivative_direction << " given!\n"
             << std::endl);
     }
-    else if (d_dim == tbox::Dimension(2) && derivative_direction > 1)
+    else if (d_dim == tbox::Dimension(2) && (derivative_direction < 0 || derivative_direction > 1))
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection():\n"
@@ -4114,7 +4114,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
             << "derivative_direction = " << derivative_direction << " given!\n"
             << std::endl);
     }
-    else if (d_dim == tbox::Dimension(3) && derivative_direction > 2)
+    else if (d_dim == tbox::Dimension(3) && (derivative_direction < 0 || derivative_direction > 2))
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection():\n"
@@ -4229,23 +4229,13 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                 
                 d_flow_model->computeDerivedCellData();
                 
-                /*
-                 * Get the pointer to data inside the flow model.
-                 */
-                
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
                     d_flow_model->getCellData(quantity_name);
-                
-                double* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
                         patch_box,
                         li);
-                
-                const hier::IntVector num_ghosts_quantity = data_quantity->getGhostCellWidth();
-                
-                const int num_ghosts_0_quantity = num_ghosts_quantity[0];
                 
                 /*
                  * Initialize cell data for the derivative and get pointer to the cell data.
@@ -4270,7 +4260,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                             dx[0],
                             patch_visible_box,
                             0,
-                            0);
+                            component_idx);
                     }
                     
                     const hier::IntVector interior_dims = patch_visible_box.numberCells();
@@ -4416,26 +4406,13 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                 
                 d_flow_model->computeDerivedCellData();
                 
-                /*
-                 * Get the pointer to data inside the flow model.
-                 */
-                
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
                     d_flow_model->getCellData(quantity_name);
-                
-                double* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
                         patch_box,
                         li);
-                
-                const hier::IntVector num_ghosts_quantity = data_quantity->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_quantity = data_quantity->getGhostBox().numberCells();
-                
-                const int num_ghosts_0_quantity = num_ghosts_quantity[0];
-                const int num_ghosts_1_quantity = num_ghosts_quantity[1];
-                const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 
                 /*
                  * Initialize cell data for the derivative and get pointer to the cell data.
@@ -4463,7 +4440,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                             dx[0],
                             patch_visible_box,
                             0,
-                            0);
+                            component_idx);
                     }
                     else if (derivative_direction == 1)
                     {
@@ -4473,7 +4450,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                             dx[1],
                             patch_visible_box,
                             0,
-                            0);
+                            component_idx);
                     }
                     
                     const hier::IntVector interior_dims = patch_visible_box.numberCells();
@@ -4633,28 +4610,13 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                 
                 d_flow_model->computeDerivedCellData();
                 
-                /*
-                 * Get the pointer to data inside the flow model.
-                 */
-                
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
                     d_flow_model->getCellData(quantity_name);
-                
-                double* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
                         patch_box,
                         li);
-                
-                const hier::IntVector num_ghosts_quantity = data_quantity->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_quantity = data_quantity->getGhostBox().numberCells();
-                
-                const int num_ghosts_0_quantity = num_ghosts_quantity[0];
-                const int num_ghosts_1_quantity = num_ghosts_quantity[1];
-                const int num_ghosts_2_quantity = num_ghosts_quantity[2];
-                const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
-                const int ghostcell_dim_1_quantity = ghostcell_dims_quantity[1];
                 
                 /*
                  * Initialize cell data for the derivative and get pointer to the cell data.
@@ -4683,7 +4645,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                             dx[0],
                             patch_visible_box,
                             0,
-                            0);
+                            component_idx);
                     }
                     else if (derivative_direction == 1)
                     {
@@ -4693,7 +4655,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                             dx[1],
                             patch_visible_box,
                             0,
-                            0);
+                            component_idx);
                     }
                     else if (derivative_direction == 2)
                     {
@@ -4703,7 +4665,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                             dx[2],
                             patch_visible_box,
                             0,
-                            0);
+                            component_idx);
                     }
                     
                     const hier::IntVector interior_dims = patch_visible_box.numberCells();
@@ -4890,23 +4852,13 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                 
                 d_flow_model->computeDerivedCellData();
                 
-                /*
-                 * Get the pointer to data inside the flow model.
-                 */
-                
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
                     d_flow_model->getCellData(quantity_name);
-                
-                double* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
                         patch_box,
                         li);
-                
-                const hier::IntVector num_ghosts_quantity = data_quantity->getGhostCellWidth();
-                
-                const int num_ghosts_0_quantity = num_ghosts_quantity[0];
                 
                 /*
                  * Initialize cell data for the derivative and get pointer to the cell data.
@@ -4929,7 +4881,7 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                         dx[0],
                         patch_visible_box,
                         0,
-                        0);
+                        component_idx);
                     
                     const hier::IntVector interior_dims = patch_visible_box.numberCells();
                     
@@ -5076,26 +5028,13 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                 
                 d_flow_model->computeDerivedCellData();
                 
-                /*
-                 * Get the pointer to data inside the flow model.
-                 */
-                
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
                     d_flow_model->getCellData(quantity_name);
-                
-                double* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
                         patch_box,
                         li);
-                
-                const hier::IntVector num_ghosts_quantity = data_quantity->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_quantity = data_quantity->getGhostBox().numberCells();
-                
-                const int num_ghosts_0_quantity = num_ghosts_quantity[0];
-                const int num_ghosts_1_quantity = num_ghosts_quantity[1];
-                const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
                 
                 /*
                  * Initialize cell data for the derivatives and get pointers to the cell data.
@@ -5122,7 +5061,7 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                         dx[0],
                         patch_visible_box,
                         0,
-                        0);
+                        component_idx);
                     
                     derivative_first_order_y->computeDerivative(
                         data_derivatives,
@@ -5130,7 +5069,7 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                         dx[1],
                         patch_visible_box,
                         1,
-                        0);
+                        component_idx);
                     
                     const hier::IntVector interior_dims = patch_visible_box.numberCells();
                     
@@ -5291,28 +5230,13 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                 
                 d_flow_model->computeDerivedCellData();
                 
-                /*
-                 * Get the pointer to data inside the flow model.
-                 */
-                
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
                     d_flow_model->getCellData(quantity_name);
-                
-                double* u = data_quantity->getPointer(component_idx);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
                         patch_box,
                         li);
-                
-                const hier::IntVector num_ghosts_quantity = data_quantity->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_quantity = data_quantity->getGhostBox().numberCells();
-                
-                const int num_ghosts_0_quantity = num_ghosts_quantity[0];
-                const int num_ghosts_1_quantity = num_ghosts_quantity[1];
-                const int num_ghosts_2_quantity = num_ghosts_quantity[2];
-                const int ghostcell_dim_0_quantity = ghostcell_dims_quantity[0];
-                const int ghostcell_dim_1_quantity = ghostcell_dims_quantity[1];
                 
                 /*
                  * Initialize cell data for the derivatives and get pointers to the cell data.
@@ -5341,7 +5265,7 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                         dx[0],
                         patch_visible_box,
                         0,
-                        0);
+                        component_idx);
                     
                     derivative_first_order_y->computeDerivative(
                         data_derivatives,
@@ -5349,7 +5273,7 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                         dx[1],
                         patch_visible_box,
                         1,
-                        0);
+                        component_idx);
                     
                      derivative_first_order_z->computeDerivative(
                         data_derivatives,
@@ -5357,7 +5281,7 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                         dx[2],
                         patch_visible_box,
                         2,
-                        0);
+                        component_idx);
                     
                     const hier::IntVector interior_dims = patch_visible_box.numberCells();
                     
