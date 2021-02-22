@@ -133,7 +133,7 @@ class FlowModelMPIHelperAverage: public FlowModelMPIHelper
             const std::vector<std::string>& quantity_names,
             const std::vector<int>& component_indices,
             const std::vector<bool>& use_derivative,
-            const std::vector<bool>& derivative_directions,
+            const std::vector<int>& derivative_directions,
             const int num_ghosts_derivative,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         

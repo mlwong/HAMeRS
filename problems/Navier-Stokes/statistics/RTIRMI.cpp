@@ -1287,8 +1287,6 @@ RTIRMIStatisticsUtilities::outputEnstrophyIntegrated(
             << std::endl);
     }
     
-    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
-    
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     std::ofstream f_out;
@@ -1305,18 +1303,18 @@ RTIRMIStatisticsUtilities::outputEnstrophyIntegrated(
         }
     }
     
-    /*
-     * Get the flattened hierarchy where only the finest existing grid is visible at any given
-     * location in the problem space.
-     */
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
     
-    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
     
-    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
-        new ExtendedFlattenedHierarchy(
-            *patch_hierarchy,
-            0,
-            num_levels - 1));
+    const std::vector<double>& dx_finest = MPI_helper_average.getFinestRefinedDomainGridSpacing();
+    
+    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -1327,224 +1325,90 @@ RTIRMIStatisticsUtilities::outputEnstrophyIntegrated(
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        double Omega_integrated_local  = double(0);
-        double Omega_integrated_global = double(0);
+        const int num_ghosts_derivative = 3; // assume we have at least three ghost cells
         
-        for (int li = 0; li < num_levels; li++)
-        {
-            /*
-             * Get the current patch level.
-             */
-            
-            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
-                patch_hierarchy->getPatchLevel(li));
-            
-            for (hier::PatchLevel::iterator ip(patch_level->begin());
-                 ip != patch_level->end();
-                 ip++)
-            {
-                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
-                
-                /*
-                 * Get the patch geometry.
-                 */
-                
-                const hier::Box& patch_box = patch->getBox();
-                
-                const hier::IntVector patch_dims = patch_box.numberCells();
-                
-                const int patch_dim_0 = patch_dims[0];
-                
-                const hier::Index& patch_index_lo = patch_box.lower();
-                
-                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
-                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                        patch->getPatchGeometry()));
-                
-                const double* const dx = patch_geom->getDx();
-                
-                /*
-                 * Register the patch, density and velocity in the flow model and compute the
-                 * corresponding cell data.
-                 */
-                
-                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
-                
-                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
-                
-                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
-                
-                num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("DENSITY", num_ghosts));
-                
-                num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
-                
-                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
-                
-                flow_model_tmp->allocateMemoryForDerivedCellData();
-                
-                flow_model_tmp->computeDerivedCellData();
-                
-                /*
-                 * Get the pointers to density and velocity data inside the flow model.
-                 */
-                
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
-                    flow_model_tmp->getCellData("DENSITY");
-                
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
-                    flow_model_tmp->getCellData("VELOCITY");
-                
-                double* rho = data_density->getPointer(0);
-                
-                const hier::BoxContainer& patch_visible_boxes =
-                    flattened_hierarchy->getVisibleBoxes(
-                        patch_box,
-                        li);
-                
-                const hier::BoxContainer& patch_overlapped_visible_boxes =
-                    flattened_hierarchy->getOverlappedVisibleBoxes(
-                        patch_box,
-                        li);
-                
-                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
-                
-                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
-                
-                const int num_ghosts_0_density = num_ghosts_density[0];
-                const int num_ghosts_1_density = num_ghosts_density[1];
-                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
-                
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-                TBOX_ASSERT(num_ghosts_velocity >= hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative);
-#endif
-                
-                double Omega_to_add = double(0);
-                
-                /*
-                 * Initialize cell data for velocity derivatives and get pointers to the derivatives.
-                 */
-                
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity_derivatives(
-                    new pdat::CellData<double>(patch_box, d_dim.getValue()*d_dim.getValue() - d_dim.getValue(),
-                        hier::IntVector::getZero(d_dim)));
-                
-                double* dudy = data_velocity_derivatives->getPointer(0);
-                double* dvdx = data_velocity_derivatives->getPointer(1);
-                
-                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
-                     ib != patch_visible_boxes.end();
-                     ib++)
-                {
-                    const hier::Box& patch_visible_box = *ib;
-                    
-                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
-                    
-                    const int interior_dim_0 = interior_dims[0];
-                    const int interior_dim_1 = interior_dims[1];
-                    
-                    const hier::Index& index_lo = patch_visible_box.lower();
-                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
-                    
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
-                    const int relative_idx_lo_0 = relative_index_lo[0];
-                    const int relative_idx_lo_1 = relative_index_lo[1];
-                    
-                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
-                        new DerivativeFirstOrder(
-                            "first order derivative in x-direction",
-                            d_dim,
-                            DIRECTION::X_DIRECTION,
-                            d_num_ghosts_derivative));
-                    
-                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_y(
-                        new DerivativeFirstOrder(
-                            "first order derivative in y-direction",
-                            d_dim,
-                            DIRECTION::Y_DIRECTION,
-                            d_num_ghosts_derivative));
-                    
-                    // Compute dudy.
-                    derivative_first_order_y->computeDerivative(
-                        data_velocity_derivatives,
-                        data_velocity,
-                        dx[1],
-                        patch_visible_box,
-                        0,
-                        0);
-                    
-                    // Compute dvdx.
-                    derivative_first_order_x->computeDerivative(
-                        data_velocity_derivatives,
-                        data_velocity,
-                        dx[0],
-                        patch_visible_box,
-                        1,
-                        1);
-                    
-                    for (int j = 0; j < interior_dim_1; j++)
-                    {
-                        for (int i = 0; i < interior_dim_0; i++)
-                        {
-                            /*
-                             * Compute the index of the data point and count how many times the data is repeated.
-                             */
-                            
-                            const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j);
-                            
-                            int n_overlapped = 1;
-                            
-                            for (hier::BoxContainer::BoxContainerConstIterator iob(
-                                    patch_overlapped_visible_boxes.begin());
-                                 iob != patch_overlapped_visible_boxes.end();
-                                 iob++)
-                            {
-                                const hier::Box& patch_overlapped_visible_box = *iob;
-                                
-                                if (patch_overlapped_visible_box.contains(idx_pt))
-                                {
-                                    n_overlapped++;
-                                }
-                            }
-                            
-                            // Compute linear indices.
-                            const int idx = (relative_idx_lo_0 + i) +
-                                (relative_idx_lo_1 + j)*patch_dim_0;
-                            
-                            const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
-                                (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
-                            
-                            const double omega = dvdx[idx] - dudy[idx];
-                            Omega_to_add += rho[idx_density]*omega*omega/((double) n_overlapped);
-                        }
-                    }
-                }
-                
-                Omega_to_add = Omega_to_add*dx[0]*dx[1];
-                Omega_integrated_local += Omega_to_add;
-                
-                /*
-                 * Unregister the patch and data of all registered derived cell variables in the flow model.
-                 */
-                
-                flow_model_tmp->unregisterPatch();
-            }
-        }
+        std::vector<std::string> quantity_names;
+        std::vector<int> component_indices;
+        std::vector<bool> use_derivative;
+        std::vector<int> derivative_directions;
         
-        /*
-         * Reduction to get the global integral.
-         */
+        quantity_names.push_back("DENSITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
         
-        mpi.Reduce(
-            &Omega_integrated_local,
-            &Omega_integrated_global,
-            1,
-            MPI_DOUBLE,
-            MPI_SUM,
-            0);
+        std::vector<double> enstrophy_part_1 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("DENSITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        
+        std::vector<double> enstrophy_part_2 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("DENSITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        
+        std::vector<double> enstrophy_part_3 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
         
         /*
          * Output the enstrophy integral (only done by process 0).
@@ -1552,294 +1416,269 @@ RTIRMIStatisticsUtilities::outputEnstrophyIntegrated(
         
         if (mpi.getRank() == 0)
         {
+            std::vector<double> enstrophy_full(finest_level_dims[0], double(0));
+            for (int i = 0; i < finest_level_dims[0]; i++)
+            {
+                enstrophy_full[i] = enstrophy_part_1[i] + enstrophy_part_2[i] - double(2)*enstrophy_part_3[i];
+            }
+            
+            double Omega_integrated_global = double(0);
+            for (int i = 0; i < finest_level_dims[0]; i++)
+            {
+                Omega_integrated_global += enstrophy_full[i]*dx_finest[0];
+            }
+            
+            const double* x_lo = d_grid_geometry->getXLower();
+            const double* x_hi = d_grid_geometry->getXUpper();
+            const double L_y = x_hi[1] - x_lo[1];
+            Omega_integrated_global *= L_y;
+            
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
                   << "\t" << Omega_integrated_global;
         }
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        double Omega_integrated_local  = double(0);
-        double Omega_integrated_global = double(0);
+        const int num_ghosts_derivative = 3; // assume we have at least three ghost cells
         
-        for (int li = 0; li < num_levels; li++)
-        {
-            /*
-             * Get the current patch level.
-             */
-            
-            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
-                patch_hierarchy->getPatchLevel(li));
-            
-            for (hier::PatchLevel::iterator ip(patch_level->begin());
-                 ip != patch_level->end();
-                 ip++)
-            {
-                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
-                
-                /*
-                 * Get the patch geometry.
-                 */
-                
-                const hier::Box& patch_box = patch->getBox();
-                
-                const hier::IntVector patch_dims = patch_box.numberCells();
-                
-                const int patch_dim_0 = patch_dims[0];
-                const int patch_dim_1 = patch_dims[1];
-                
-                const hier::Index& patch_index_lo = patch_box.lower();
-                
-                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
-                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                        patch->getPatchGeometry()));
-                
-                const double* const dx = patch_geom->getDx();
-                
-                /*
-                 * Register the patch, density and velocity in the flow model and compute the
-                 * corresponding cell data.
-                 */
-                
-                flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
-                
-                hier::IntVector num_ghosts = flow_model_tmp->getNumberOfGhostCells();
-                
-                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
-                
-                num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("DENSITY", num_ghosts));
-                
-                num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
-                
-                flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
-                
-                flow_model_tmp->allocateMemoryForDerivedCellData();
-                
-                flow_model_tmp->computeDerivedCellData();
-                
-                /*
-                 * Get the pointers to density and velocity data inside the flow model.
-                 */
-                
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_density =
-                    flow_model_tmp->getCellData("DENSITY");
-                
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
-                    flow_model_tmp->getCellData("VELOCITY");
-                
-                double* rho = data_density->getPointer(0);
-                
-                const hier::BoxContainer& patch_visible_boxes =
-                    flattened_hierarchy->getVisibleBoxes(
-                        patch_box,
-                        li);
-                
-                const hier::BoxContainer& patch_overlapped_visible_boxes =
-                    flattened_hierarchy->getOverlappedVisibleBoxes(
-                        patch_box,
-                        li);
-                
-                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
-                
-                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
-                
-                const int num_ghosts_0_density = num_ghosts_density[0];
-                const int num_ghosts_1_density = num_ghosts_density[1];
-                const int num_ghosts_2_density = num_ghosts_density[2];
-                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
-                const int ghostcell_dim_1_density = ghostcell_dims_density[1];
-                
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-                TBOX_ASSERT(num_ghosts_velocity >= hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative);
-#endif
-                
-                double Omega_to_add = double(0);
-                
-                /*
-                 * Initialize cell data for velocity derivatives and get pointers to the derivatives.
-                 */
-                
-                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity_derivatives(
-                    new pdat::CellData<double>(patch_box, d_dim.getValue()*d_dim.getValue() - d_dim.getValue(),
-                        hier::IntVector::getZero(d_dim)));
-                
-                double* dudy = data_velocity_derivatives->getPointer(0);
-                double* dudz = data_velocity_derivatives->getPointer(1);
-                double* dvdx = data_velocity_derivatives->getPointer(2);
-                double* dvdz = data_velocity_derivatives->getPointer(3);
-                double* dwdx = data_velocity_derivatives->getPointer(4);
-                double* dwdy = data_velocity_derivatives->getPointer(5);
-                
-                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
-                     ib != patch_visible_boxes.end();
-                     ib++)
-                {
-                    const hier::Box& patch_visible_box = *ib;
-                    
-                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
-                    
-                    const int interior_dim_0 = interior_dims[0];
-                    const int interior_dim_1 = interior_dims[1];
-                    const int interior_dim_2 = interior_dims[2];
-                    
-                    const hier::Index& index_lo = patch_visible_box.lower();
-                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
-                    
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
-                    const int idx_lo_2 = index_lo[2];
-                    const int relative_idx_lo_0 = relative_index_lo[0];
-                    const int relative_idx_lo_1 = relative_index_lo[1];
-                    const int relative_idx_lo_2 = relative_index_lo[2];
-                    
-                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
-                        new DerivativeFirstOrder(
-                            "first order derivative in x-direction",
-                            d_dim,
-                            DIRECTION::X_DIRECTION,
-                            d_num_ghosts_derivative));
-                    
-                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_y(
-                        new DerivativeFirstOrder(
-                            "first order derivative in y-direction",
-                            d_dim,
-                            DIRECTION::Y_DIRECTION,
-                            d_num_ghosts_derivative));
-                    
-                    HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_z(
-                        new DerivativeFirstOrder(
-                            "first order derivative in z-direction",
-                            d_dim,
-                            DIRECTION::Z_DIRECTION,
-                            d_num_ghosts_derivative));
-                    
-                    // Compute dudy.
-                    derivative_first_order_y->computeDerivative(
-                        data_velocity_derivatives,
-                        data_velocity,
-                        dx[1],
-                        patch_visible_box,
-                        0,
-                        0);
-                    
-                    // Compute dudz.
-                    derivative_first_order_z->computeDerivative(
-                        data_velocity_derivatives,
-                        data_velocity,
-                        dx[2],
-                        patch_visible_box,
-                        1,
-                        0);
-                    
-                    // Compute dvdx.
-                    derivative_first_order_x->computeDerivative(
-                        data_velocity_derivatives,
-                        data_velocity,
-                        dx[0],
-                        patch_visible_box,
-                        2,
-                        1);
-                    
-                    // Compute dvdz.
-                    derivative_first_order_z->computeDerivative(
-                        data_velocity_derivatives,
-                        data_velocity,
-                        dx[2],
-                        patch_visible_box,
-                        3,
-                        1);
-                    
-                    // Compute dwdx.
-                    derivative_first_order_x->computeDerivative(
-                        data_velocity_derivatives,
-                        data_velocity,
-                        dx[0],
-                        patch_visible_box,
-                        4,
-                        2);
-                    
-                    // Compute dwdy.
-                    derivative_first_order_y->computeDerivative(
-                        data_velocity_derivatives,
-                        data_velocity,
-                        dx[1],
-                        patch_visible_box,
-                        5,
-                        2);
-                    
-                    for (int k = 0; k < interior_dim_2; k++)
-                    {
-                        for (int j = 0; j < interior_dim_1; j++)
-                        {
-                            for (int i = 0; i < interior_dim_0; i++)
-                            {
-                                /*
-                                 * Compute the index of the data point and count how many times the data is repeated.
-                                 */
-                                
-                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
-                                
-                                int n_overlapped = 1;
-                                
-                                for (hier::BoxContainer::BoxContainerConstIterator iob(
-                                        patch_overlapped_visible_boxes.begin());
-                                     iob != patch_overlapped_visible_boxes.end();
-                                     iob++)
-                                {
-                                    const hier::Box& patch_overlapped_visible_box = *iob;
-                                    
-                                    if (patch_overlapped_visible_box.contains(idx_pt))
-                                    {
-                                        n_overlapped++;
-                                    }
-                                }
-                                
-                                // Compute the linear indices.
-                                const int idx = (relative_idx_lo_0 + i) +
-                                    (relative_idx_lo_1 + j)*patch_dim_0 +
-                                    (relative_idx_lo_2 + k)*patch_dim_0*
-                                        patch_dim_1;
-                                
-                                const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
-                                        ghostcell_dim_1_density;
-                                
-                                const double omega_x = dwdy[idx] - dvdz[idx];
-                                const double omega_y = dudz[idx] - dwdx[idx];
-                                const double omega_z = dvdx[idx] - dudy[idx];
-                                
-                                Omega_to_add += rho[idx_density]*(
-                                    omega_x*omega_x + omega_y*omega_y + omega_z*omega_z)/((double) n_overlapped);
-                            }
-                        }
-                    }
-                }
-                
-                Omega_to_add = Omega_to_add*dx[0]*dx[1]*dx[2];
-                Omega_integrated_local += Omega_to_add;
-                
-                /*
-                 * Unregister the patch and data of all registered derived cell variables in the flow model.
-                 */
-                
-                flow_model_tmp->unregisterPatch();
-            }
-        }
+        std::vector<std::string> quantity_names;
+        std::vector<int> component_indices;
+        std::vector<bool> use_derivative;
+        std::vector<int> derivative_directions;
         
-        /*
-         * Reduction to get the global integral.
-         */
+        quantity_names.push_back("DENSITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(2);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(2);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
         
-        mpi.Reduce(
-            &Omega_integrated_local,
-            &Omega_integrated_global,
-            1,
-            MPI_DOUBLE,
-            MPI_SUM,
-            0);
+        std::vector<double> enstrophy_part_1 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("DENSITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(2);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(2);
+        
+        std::vector<double> enstrophy_part_2 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("DENSITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(2);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(2);
+        
+        std::vector<double> enstrophy_part_3 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("DENSITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(2);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(2);
+        
+        std::vector<double> enstrophy_part_4 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("DENSITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(2);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(2);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        
+        std::vector<double> enstrophy_part_5 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("DENSITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(2);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(2);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        
+        std::vector<double> enstrophy_part_6 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("DENSITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        
+        std::vector<double> enstrophy_part_7 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("DENSITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        
+        std::vector<double> enstrophy_part_8 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        quantity_names.push_back("DENSITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        
+        std::vector<double> enstrophy_part_9 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
         
         /*
          * Output the enstrophy integral (only done by process 0).
@@ -1847,6 +1686,26 @@ RTIRMIStatisticsUtilities::outputEnstrophyIntegrated(
         
         if (mpi.getRank() == 0)
         {
+            std::vector<double> enstrophy_full(finest_level_dims[0], double(0));
+            for (int i = 0; i < finest_level_dims[0]; i++)
+            {
+                enstrophy_full[i] = enstrophy_part_1[i] + enstrophy_part_2[i] - double(2)*enstrophy_part_3[i] +
+                    enstrophy_part_4[i] + enstrophy_part_5[i] - double(2)*enstrophy_part_6[i] +
+                    enstrophy_part_7[i] + enstrophy_part_8[i] - double(2)*enstrophy_part_9[i];
+            }
+            
+            double Omega_integrated_global = double(0);
+            for (int i = 0; i < finest_level_dims[0]; i++)
+            {
+                Omega_integrated_global += enstrophy_full[i]*dx_finest[0];
+            }
+            
+            const double* x_lo = d_grid_geometry->getXLower();
+            const double* x_hi = d_grid_geometry->getXUpper();
+            const double L_y = x_hi[1] - x_lo[1];
+            const double L_z = x_hi[2] - x_lo[2];
+            Omega_integrated_global *= (L_y*L_z);
+            
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
                   << "\t" << Omega_integrated_global;
         }
