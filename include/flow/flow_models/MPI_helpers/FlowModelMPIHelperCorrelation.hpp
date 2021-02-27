@@ -25,7 +25,7 @@ class FlowModelMPIHelperCorrelation: public FlowModelMPIHelper
         {}
         
         /*
-         * Compute correlation with only x direction as inhomogeneous direction.
+         * Compute correlation with only x-direction as inhomogeneous direction.
          */
         std::vector<double> getQuantityCorrelationWithInhomogeneousXDirection(
             const std::vector<std::string>& quantity_names,
@@ -34,9 +34,47 @@ class FlowModelMPIHelperCorrelation: public FlowModelMPIHelper
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
-         * Compute correlation with only x direction as inhomogeneous direction.
+         * Compute correlation with only x-direction as inhomogeneous direction.
          */
         std::vector<double> getQuantityCorrelationWithInhomogeneousXDirection(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const std::vector<bool>& use_reciprocal,
+            const std::vector<std::vector<double> >& averaged_quantities,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute correlation with only y-direction as inhomogeneous direction.
+         */
+        std::vector<double> getQuantityCorrelationWithInhomogeneousYDirection(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const std::vector<std::vector<double> >& averaged_quantities,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute correlation with only y-direction as inhomogeneous direction.
+         */
+        std::vector<double> getQuantityCorrelationWithInhomogeneousYDirection(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const std::vector<bool>& use_reciprocal,
+            const std::vector<std::vector<double> >& averaged_quantities,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute correlation with only z-direction as inhomogeneous direction.
+         */
+        std::vector<double> getQuantityCorrelationWithInhomogeneousZDirection(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const std::vector<std::vector<double> >& averaged_quantities,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute correlation with only z-direction as inhomogeneous direction.
+         */
+        std::vector<double> getQuantityCorrelationWithInhomogeneousZDirection(
             const std::vector<std::string>& quantity_names,
             const std::vector<int>& component_indices,
             const std::vector<bool>& use_reciprocal,

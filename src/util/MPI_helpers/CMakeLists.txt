@@ -2,8 +2,11 @@
 # a list of the source files for the MPI helpers library
 set(MPI_helpers_source_files
     MPIHelper.cpp
+    MPIHelperNumberOfCells.cpp
+    MPIHelperMaxMin.cpp
     MPIHelperAverage.cpp
     MPIHelperCorrelation.cpp
+    MPIHelperCentroid.cpp
     )
 
 # Create a library called MPI_helpers which includes the 

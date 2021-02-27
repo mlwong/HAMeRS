@@ -25,7 +25,7 @@ class FlowModelMPIHelperAverage: public FlowModelMPIHelper
         {}
         
         /*
-         * Compute averaged value with only x direction as inhomogeneous direction.
+         * Compute averaged value with only x-direction as inhomogeneous direction.
          */
         std::vector<double> getAveragedQuantityWithInhomogeneousXDirection(
             const std::string quantity_name,
@@ -33,7 +33,7 @@ class FlowModelMPIHelperAverage: public FlowModelMPIHelper
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
-         * Compute averaged reciprocal of value with only x direction as inhomogeneous direction.
+         * Compute averaged reciprocal of value with only x-direction as inhomogeneous direction.
          */
         std::vector<double> getAveragedReciprocalOfQuantityWithInhomogeneousXDirection(
             const std::string quantity_name,
@@ -41,7 +41,7 @@ class FlowModelMPIHelperAverage: public FlowModelMPIHelper
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
-         * Compute averaged value (on product of variables) with only x direction as inhomogeneous direction.
+         * Compute averaged value (on product of variables) with only x-direction as inhomogeneous direction.
          */
         std::vector<double> getAveragedQuantityWithInhomogeneousXDirection(
             const std::vector<std::string>& quantity_names,
@@ -49,13 +49,107 @@ class FlowModelMPIHelperAverage: public FlowModelMPIHelper
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
-         * Compute averaged value (on product of variables) with only x direction as inhomogeneous direction.
+         * Compute averaged value (on product of variables) with only x-direction as inhomogeneous direction.
          */
         std::vector<double> getAveragedQuantityWithInhomogeneousXDirection(
             const std::vector<std::string>& quantity_names,
             const std::vector<int>& component_indices,
             const std::vector<bool>& use_reciprocal,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute averaged value with only y-direction as inhomogeneous direction.
+         */
+        std::vector<double> getAveragedQuantityWithInhomogeneousYDirection(
+            const std::string quantity_name,
+            const int component_idx,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute averaged reciprocal of value with only y-direction as inhomogeneous direction.
+         */
+        std::vector<double> getAveragedReciprocalOfQuantityWithInhomogeneousYDirection(
+            const std::string quantity_name,
+            const int component_idx,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute averaged value (on product of variables) with only y-direction as inhomogeneous direction.
+         */
+        std::vector<double> getAveragedQuantityWithInhomogeneousYDirection(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute averaged value (on product of variables) with only y-direction as inhomogeneous direction.
+         */
+        std::vector<double> getAveragedQuantityWithInhomogeneousYDirection(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const std::vector<bool>& use_reciprocal,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute averaged value with only z-direction as inhomogeneous direction.
+         */
+        std::vector<double> getAveragedQuantityWithInhomogeneousZDirection(
+            const std::string quantity_name,
+            const int component_idx,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute averaged reciprocal of value with only z-direction as inhomogeneous direction.
+         */
+        std::vector<double> getAveragedReciprocalOfQuantityWithInhomogeneousZDirection(
+            const std::string quantity_name,
+            const int component_idx,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute averaged value (on product of variables) with only z-direction as inhomogeneous direction.
+         */
+        std::vector<double> getAveragedQuantityWithInhomogeneousZDirection(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute averaged value (on product of variables) with only z-direction as inhomogeneous direction.
+         */
+        std::vector<double> getAveragedQuantityWithInhomogeneousZDirection(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const std::vector<bool>& use_reciprocal,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        
+        
+        
+        /*
+         * Compute averaged value (on product of variables) with only x direction as inhomogeneous direction.
+         */
+        std::vector<double> getAveragedQuantityWithInhomogeneousXDirection(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const std::vector<bool>& use_derivative,
+            const std::vector<int>& derivative_directions,
+            const int num_ghosts_derivative,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute averaged derivative of value (on product of variables) with only x direction as inhomogeneous direction.
+         */
+        std::vector<double> getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const std::vector<bool>& use_reciprocal,
+            const int derivative_direction,
+            const int num_ghosts_derivative,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        
+        
         
     private:
         
