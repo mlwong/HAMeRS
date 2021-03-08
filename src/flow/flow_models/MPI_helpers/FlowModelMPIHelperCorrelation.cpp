@@ -10,7 +10,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
     const std::vector<std::vector<double> >& averaged_quantities,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     int num_quantities = static_cast<int>(quantity_names.size());
     
@@ -121,7 +121,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection
                  * correlation.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -131,11 +131,11 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection
                         std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -145,7 +145,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -259,7 +259,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -348,7 +348,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection
                  * correlation.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -358,11 +358,11 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection
                         std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -372,7 +372,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -502,7 +502,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -529,7 +529,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection
     const std::vector<int>& component_indices,
     const std::vector<bool>& use_reciprocal,
     const std::vector<std::vector<double> >& averaged_quantities,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     int num_quantities = static_cast<int>(quantity_names.size());
     
@@ -641,7 +641,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection
                  * correlation.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -651,11 +651,11 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection
                         std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -665,7 +665,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -794,7 +794,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -883,7 +883,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection
                  * correlation.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -893,11 +893,11 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection
                         std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -907,7 +907,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -1052,7 +1052,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousXDirection
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -1078,7 +1078,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
     const std::vector<std::vector<double> >& averaged_quantities,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     int num_quantities = static_cast<int>(quantity_names.size());
     
@@ -1190,7 +1190,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection
                  * correlation.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -1200,11 +1200,11 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection
                         std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -1214,7 +1214,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -1328,7 +1328,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -1417,7 +1417,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection
                  * correlation.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -1427,11 +1427,11 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection
                         std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -1441,7 +1441,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -1571,7 +1571,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -1598,7 +1598,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection
     const std::vector<int>& component_indices,
     const std::vector<bool>& use_reciprocal,
     const std::vector<std::vector<double> >& averaged_quantities,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     int num_quantities = static_cast<int>(quantity_names.size());
     
@@ -1711,7 +1711,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection
                  * correlation.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -1721,11 +1721,11 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection
                         std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -1735,7 +1735,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -1864,7 +1864,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -1953,7 +1953,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection
                  * correlation.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -1963,11 +1963,11 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection
                         std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -1977,7 +1977,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -2122,7 +2122,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousYDirection
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -2148,7 +2148,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
     const std::vector<std::vector<double> >& averaged_quantities,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     int num_quantities = static_cast<int>(quantity_names.size());
     
@@ -2269,7 +2269,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection
                  * correlation.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -2279,11 +2279,11 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection
                         std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -2293,7 +2293,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -2423,7 +2423,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -2450,7 +2450,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection
     const std::vector<int>& component_indices,
     const std::vector<bool>& use_reciprocal,
     const std::vector<std::vector<double> >& averaged_quantities,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     int num_quantities = static_cast<int>(quantity_names.size());
     
@@ -2572,7 +2572,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection
                  * correlation.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -2582,11 +2582,11 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection
                         std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -2596,7 +2596,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -2741,7 +2741,7 @@ FlowModelMPIHelperCorrelation::getQuantityCorrelationWithInhomogeneousZDirection
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         

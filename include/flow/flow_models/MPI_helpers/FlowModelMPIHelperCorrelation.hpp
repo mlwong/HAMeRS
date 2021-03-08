@@ -15,13 +15,15 @@ class FlowModelMPIHelperCorrelation: public FlowModelMPIHelper
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<FlowModel>& flow_model):
+            const HAMERS_SHARED_PTR<FlowModel>& flow_model,
+            const bool use_diffusive_flux_utilities = false):
                 FlowModelMPIHelper(
                     object_name,
                     dim,
                     grid_geometry,
                     patch_hierarchy,
-                    flow_model)
+                    flow_model,
+                    use_diffusive_flux_utilities)
         {}
         
         /*
@@ -31,7 +33,7 @@ class FlowModelMPIHelperCorrelation: public FlowModelMPIHelper
             const std::vector<std::string>& quantity_names,
             const std::vector<int>& component_indices,
             const std::vector<std::vector<double> >& averaged_quantities,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Compute correlation with only x-direction as inhomogeneous direction.
@@ -41,7 +43,7 @@ class FlowModelMPIHelperCorrelation: public FlowModelMPIHelper
             const std::vector<int>& component_indices,
             const std::vector<bool>& use_reciprocal,
             const std::vector<std::vector<double> >& averaged_quantities,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Compute correlation with only y-direction as inhomogeneous direction.
@@ -50,7 +52,7 @@ class FlowModelMPIHelperCorrelation: public FlowModelMPIHelper
             const std::vector<std::string>& quantity_names,
             const std::vector<int>& component_indices,
             const std::vector<std::vector<double> >& averaged_quantities,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Compute correlation with only y-direction as inhomogeneous direction.
@@ -60,7 +62,7 @@ class FlowModelMPIHelperCorrelation: public FlowModelMPIHelper
             const std::vector<int>& component_indices,
             const std::vector<bool>& use_reciprocal,
             const std::vector<std::vector<double> >& averaged_quantities,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Compute correlation with only z-direction as inhomogeneous direction.
@@ -69,7 +71,7 @@ class FlowModelMPIHelperCorrelation: public FlowModelMPIHelper
             const std::vector<std::string>& quantity_names,
             const std::vector<int>& component_indices,
             const std::vector<std::vector<double> >& averaged_quantities,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Compute correlation with only z-direction as inhomogeneous direction.
@@ -79,7 +81,7 @@ class FlowModelMPIHelperCorrelation: public FlowModelMPIHelper
             const std::vector<int>& component_indices,
             const std::vector<bool>& use_reciprocal,
             const std::vector<std::vector<double> >& averaged_quantities,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
     private:
         

@@ -9,7 +9,7 @@
 std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
     const std::string quantity_name,
     const int component_idx,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     std::vector<double> averaged_quantity;
     
@@ -92,25 +92,25 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                  * corresponding cell data.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>(quantity_name, hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointer to data inside the flow model.
                  */
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
-                    d_flow_model->getCellData(quantity_name);
+                    getCellData(quantity_name);
                 
                 double* u = data_quantity->getPointer(component_idx);
                 
@@ -188,7 +188,7 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -276,25 +276,25 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                  * corresponding cell data.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>(quantity_name, hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointer to data inside the flow model.
                  */
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
-                    d_flow_model->getCellData(quantity_name);
+                    getCellData(quantity_name);
                 
                 double* u = data_quantity->getPointer(component_idx);
                 
@@ -384,7 +384,7 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -473,25 +473,25 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                  * corresponding cell data.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>(quantity_name, hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointer to data inside the flow model.
                  */
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
-                    d_flow_model->getCellData(quantity_name);
+                    getCellData(quantity_name);
                 
                 double* u = data_quantity->getPointer(component_idx);
                 
@@ -591,7 +591,7 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -620,7 +620,7 @@ std::vector<double>
 FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDirection(
     const std::string quantity_name,
     const int component_idx,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     std::vector<double> averaged_reciprocal_quantity;
     
@@ -703,25 +703,25 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
                  * corresponding cell data.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>(quantity_name, hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointer to data inside the flow model.
                  */
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
-                    d_flow_model->getCellData(quantity_name);
+                    getCellData(quantity_name);
                 
                 double* u = data_quantity->getPointer(component_idx);
                 
@@ -799,7 +799,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -887,25 +887,25 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
                  * corresponding cell data.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>(quantity_name, hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointer to data inside the flow model.
                  */
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
-                    d_flow_model->getCellData(quantity_name);
+                    getCellData(quantity_name);
                 
                 double* u = data_quantity->getPointer(component_idx);
                 
@@ -995,7 +995,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -1084,25 +1084,25 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
                  * corresponding cell data.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>(quantity_name, hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointer to data inside the flow model.
                  */
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
-                    d_flow_model->getCellData(quantity_name);
+                    getCellData(quantity_name);
                 
                 double* u = data_quantity->getPointer(component_idx);
                 
@@ -1202,7 +1202,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousXDire
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -1231,7 +1231,7 @@ std::vector<double>
 FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     int num_quantities = static_cast<int>(quantity_names.size());
     
@@ -1318,7 +1318,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * average.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -1328,11 +1328,11 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                         std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -1342,7 +1342,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -1438,7 +1438,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -1526,7 +1526,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * average.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -1536,11 +1536,11 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                         std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -1550,7 +1550,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -1664,7 +1664,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -1753,7 +1753,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * average.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -1763,11 +1763,11 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                         std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -1777,7 +1777,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -1907,7 +1907,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -1937,7 +1937,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
     const std::vector<bool>& use_reciprocal,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     int num_quantities = static_cast<int>(quantity_names.size());
     
@@ -2024,7 +2024,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * average.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -2034,11 +2034,11 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                         std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -2048,7 +2048,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -2149,7 +2149,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -2237,7 +2237,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * average.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -2247,11 +2247,11 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                         std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -2261,7 +2261,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -2379,7 +2379,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -2468,7 +2468,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * average.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -2478,11 +2478,11 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                         std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -2492,7 +2492,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -2624,7 +2624,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -2652,7 +2652,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
 std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
     const std::string quantity_name,
     const int component_idx,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     std::vector<double> averaged_quantity;
     
@@ -2755,25 +2755,25 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                  * corresponding cell data.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>(quantity_name, hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointer to data inside the flow model.
                  */
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
-                    d_flow_model->getCellData(quantity_name);
+                    getCellData(quantity_name);
                 
                 double* u = data_quantity->getPointer(component_idx);
                 
@@ -2863,7 +2863,7 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -2952,25 +2952,25 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                  * corresponding cell data.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>(quantity_name, hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointer to data inside the flow model.
                  */
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
-                    d_flow_model->getCellData(quantity_name);
+                    getCellData(quantity_name);
                 
                 double* u = data_quantity->getPointer(component_idx);
                 
@@ -3070,7 +3070,7 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -3099,7 +3099,7 @@ std::vector<double>
 FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousYDirection(
     const std::string quantity_name,
     const int component_idx,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     std::vector<double> averaged_reciprocal_quantity;
     
@@ -3202,25 +3202,25 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousYDire
                  * corresponding cell data.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>(quantity_name, hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointer to data inside the flow model.
                  */
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
-                    d_flow_model->getCellData(quantity_name);
+                    getCellData(quantity_name);
                 
                 double* u = data_quantity->getPointer(component_idx);
                 
@@ -3310,7 +3310,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousYDire
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -3399,25 +3399,25 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousYDire
                  * corresponding cell data.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>(quantity_name, hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointer to data inside the flow model.
                  */
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
-                    d_flow_model->getCellData(quantity_name);
+                    getCellData(quantity_name);
                 
                 double* u = data_quantity->getPointer(component_idx);
                 
@@ -3517,7 +3517,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousYDire
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -3546,7 +3546,7 @@ std::vector<double>
 FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     int num_quantities = static_cast<int>(quantity_names.size());
     
@@ -3653,7 +3653,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                  * average.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -3663,11 +3663,11 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                         std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -3677,7 +3677,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -3791,7 +3791,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -3880,7 +3880,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                  * average.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -3890,11 +3890,11 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                         std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -3904,7 +3904,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -4034,7 +4034,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -4064,7 +4064,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
     const std::vector<bool>& use_reciprocal,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     int num_quantities = static_cast<int>(quantity_names.size());
     
@@ -4171,7 +4171,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                  * average.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -4181,11 +4181,11 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                         std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -4195,7 +4195,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -4313,7 +4313,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -4402,7 +4402,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                  * average.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -4412,11 +4412,11 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                         std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -4426,7 +4426,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -4558,7 +4558,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -4586,7 +4586,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
 std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
     const std::string quantity_name,
     const int component_idx,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     std::vector<double> averaged_quantity;
     
@@ -4698,25 +4698,25 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                  * corresponding cell data.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>(quantity_name, hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointer to data inside the flow model.
                  */
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
-                    d_flow_model->getCellData(quantity_name);
+                    getCellData(quantity_name);
                 
                 double* u = data_quantity->getPointer(component_idx);
                 
@@ -4816,7 +4816,7 @@ std::vector<double> FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogene
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -4845,7 +4845,7 @@ std::vector<double>
 FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousZDirection(
     const std::string quantity_name,
     const int component_idx,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     std::vector<double> averaged_reciprocal_quantity;
     
@@ -4957,25 +4957,25 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousZDire
                  * corresponding cell data.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>(quantity_name, hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointer to data inside the flow model.
                  */
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
-                    d_flow_model->getCellData(quantity_name);
+                    getCellData(quantity_name);
                 
                 double* u = data_quantity->getPointer(component_idx);
                 
@@ -5075,7 +5075,7 @@ FlowModelMPIHelperAverage::getAveragedReciprocalOfQuantityWithInhomogeneousZDire
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -5104,7 +5104,7 @@ std::vector<double>
 FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     int num_quantities = static_cast<int>(quantity_names.size());
     
@@ -5220,7 +5220,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
                  * average.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -5230,11 +5230,11 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
                         std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -5244,7 +5244,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -5374,7 +5374,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -5404,7 +5404,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
     const std::vector<std::string>& quantity_names,
     const std::vector<int>& component_indices,
     const std::vector<bool>& use_reciprocal,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     int num_quantities = static_cast<int>(quantity_names.size());
     
@@ -5520,7 +5520,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
                  * average.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -5530,11 +5530,11 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
                         std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -5544,7 +5544,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -5676,7 +5676,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -5708,7 +5708,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
             const std::vector<bool>& use_derivative,
             const std::vector<int>& derivative_directions,
             const int num_ghosts_derivative,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     int num_quantities = static_cast<int>(quantity_names.size());
     
@@ -5869,7 +5869,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * average.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -5887,11 +5887,11 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                     }
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -5901,7 +5901,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -6044,7 +6044,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -6148,7 +6148,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * average.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -6166,11 +6166,11 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                     }
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -6180,7 +6180,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -6358,7 +6358,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -6470,7 +6470,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * average.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
@@ -6488,11 +6488,11 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                     }
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -6502,7 +6502,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -6709,7 +6709,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -6741,7 +6741,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
     const std::vector<bool>& use_reciprocal,
     const int derivative_direction,
     const int num_ghosts_derivative,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     int num_quantities = static_cast<int>(quantity_names.size());
     
@@ -6870,7 +6870,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                  * corresponding product.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 hier::IntVector num_ghosts = d_flow_model->getNumberOfGhostCells();
                 TBOX_ASSERT(num_ghosts >= num_ghosts_der);
@@ -6883,11 +6883,11 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                         std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -6897,7 +6897,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -7048,7 +7048,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -7150,7 +7150,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                  * corresponding product.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 hier::IntVector num_ghosts = d_flow_model->getNumberOfGhostCells();
                 TBOX_ASSERT(num_ghosts >= num_ghosts_der);
@@ -7163,11 +7163,11 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                         std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -7177,7 +7177,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -7371,7 +7371,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -7481,7 +7481,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                  * corresponding product.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 hier::IntVector num_ghosts = d_flow_model->getNumberOfGhostCells();
                 TBOX_ASSERT(num_ghosts >= num_ghosts_der);
@@ -7494,11 +7494,11 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                         std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts));
                 }
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointers to data inside the flow model.
@@ -7508,7 +7508,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                 data_quantities.resize(num_quantities);
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    data_quantities[qi] = d_flow_model->getCellData(quantity_names[qi]);
+                    data_quantities[qi] = getCellData(quantity_names[qi]);
                 }
                 
                 std::vector<double*> u_qi;
@@ -7743,7 +7743,7 @@ FlowModelMPIHelperAverage::getAveragedDerivativeOfQuantityWithInhomogeneousXDire
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
