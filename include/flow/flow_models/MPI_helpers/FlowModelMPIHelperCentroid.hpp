@@ -1,5 +1,5 @@
-#ifndef FLOW_MODEL_HELPER_CENTROID_HPP
-#define FLOW_MODEL_HELPER_CENTROID_HPP
+#ifndef FLOW_MODEL_MPI_HELPER_CENTROID_HPP
+#define FLOW_MODEL_MPI_HELPER_CENTROID_HPP
 
 #include "flow/flow_models/FlowModel.hpp"
 
@@ -54,4 +54,4 @@ class FlowModelMPIHelperCentroid: public FlowModelMPIHelper
         
 };
 
-#endif /* FLOW_MODEL_HELPER_CENTROID_HPP */
+#endif /* FLOW_MODEL_MPI_HELPER_CENTROID_HPP */

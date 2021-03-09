@@ -1,5 +1,5 @@
-#ifndef FLOW_MODEL_HELPER_HPP
-#define FLOW_MODEL_HELPER_HPP
+#ifndef FLOW_MODEL_MPI_HELPER_HPP
+#define FLOW_MODEL_MPI_HELPER_HPP
 
 #include "HAMeRS_config.hpp"
 
@@ -33,18 +33,27 @@ class FlowModelMPIHelper: public MPIHelper
         
     protected:
         /*
-         * Register the patch and data in the flow model and compute the corresponding
-         * average.
+         * Register the patch and data in the flow model. Also, set up the diffusive flux utilities object if needed.
          */
         void setupFlowModelAndRegisterPatchWithDataContext(
             const hier::Patch& patch,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
+        /*
+         * Register different derived variables in the flow model with the registered patch. 
+         */
         void registerDerivedVariables(
             const std::unordered_map<std::string, hier::IntVector>& num_subghosts_of_data);
         
+        /*
+         * Allocate memory in the flow model for cell data of different registered derived variables.
+         */
         void allocateMemoryForDerivedCellData();
         
+        /*
+         * Compute the cell data of different registered derived variables in the flow model with the registered data
+         * context.
+         */
         void computeDerivedCellData();
         
         /*
@@ -52,6 +61,9 @@ class FlowModelMPIHelper: public MPIHelper
          */
         HAMERS_SHARED_PTR<pdat::CellData<double> > getCellData(const std::string& variable_key);
         
+        /*
+         * Unregister the registered patch in the flow model.
+         */
         void unregisterPatch();
         
         /*
@@ -64,8 +76,11 @@ class FlowModelMPIHelper: public MPIHelper
          */
         const bool d_use_diffusive_flux_utilities;
         
+        /*
+         * HAMERS_SHARED_PTR to the diffusive flux utilities object.
+         */
         HAMERS_SHARED_PTR<FlowModelDiffusiveFluxUtilities> d_diffusive_flux_utilities;
         
 };
 
-#endif /* FLOW_MODEL_HELPER_HPP */
+#endif /* FLOW_MODEL_MPI_HELPER_HPP */

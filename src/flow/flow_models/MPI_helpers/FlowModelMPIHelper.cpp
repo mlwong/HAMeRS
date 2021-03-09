@@ -1,5 +1,8 @@
 #include "flow/flow_models/MPI_helpers/FlowModelMPIHelper.hpp"
 
+/*
+ * Register the patch and data in the flow model. Also, set up the diffusive flux utilities object if needed.
+ */
 void FlowModelMPIHelper::setupFlowModelAndRegisterPatchWithDataContext(
     const hier::Patch& patch,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
@@ -14,6 +17,9 @@ void FlowModelMPIHelper::setupFlowModelAndRegisterPatchWithDataContext(
 }
 
 
+/*
+ * Register different derived variables in the flow model with the registered patch. 
+ */
 void FlowModelMPIHelper::registerDerivedVariables(
     const std::unordered_map<std::string, hier::IntVector>& num_subghosts_of_data)
 {
@@ -26,6 +32,9 @@ void FlowModelMPIHelper::registerDerivedVariables(
 }
 
 
+/*
+ * Allocate memory in the flow model for cell data of different registered derived variables.
+ */
 void FlowModelMPIHelper::allocateMemoryForDerivedCellData()
 {
     d_flow_model->allocateMemoryForDerivedCellData();
@@ -37,6 +46,10 @@ void FlowModelMPIHelper::allocateMemoryForDerivedCellData()
 }
 
 
+/*
+ * Compute the cell data of different registered derived variables in the flow model with the registered data
+ * context.
+ */
 void FlowModelMPIHelper::computeDerivedCellData()
 {
     d_flow_model->computeDerivedCellData();
@@ -70,6 +83,9 @@ FlowModelMPIHelper::getCellData(const std::string& variable_key)
 }
 
 
+/*
+ * Unregister the registered patch in the flow model.
+ */
 void FlowModelMPIHelper::unregisterPatch()
 {
     d_flow_model->unregisterPatch();

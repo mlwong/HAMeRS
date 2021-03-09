@@ -1,5 +1,5 @@
-#ifndef FLOW_MODEL_HELPER_CORRELATION_HPP
-#define FLOW_MODEL_HELPER_CORRELATION_HPP
+#ifndef FLOW_MODEL_MPI_HELPER_CORRELATION_HPP
+#define FLOW_MODEL_MPI_HELPER_CORRELATION_HPP
 
 #include "flow/flow_models/FlowModel.hpp"
 
@@ -87,4 +87,4 @@ class FlowModelMPIHelperCorrelation: public FlowModelMPIHelper
         
 };
 
-#endif /* FLOW_MODEL_HELPER_CORRELATION_HPP */
+#endif /* FLOW_MODEL_MPI_HELPER_CORRELATION_HPP */

@@ -1,5 +1,5 @@
-#ifndef FLOW_MODEL_HELPER_MAX_MIN_HPP
-#define FLOW_MODEL_HELPER_MAX_MIN_HPP
+#ifndef FLOW_MODEL_MPI_HELPER_MAX_MIN_HPP
+#define FLOW_MODEL_MPI_HELPER_MAX_MIN_HPP
 
 #include "flow/flow_models/FlowModel.hpp"
 
@@ -157,4 +157,4 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         
 };
 
-#endif /* FLOW_MODEL_HELPER_MAX_MIN_HPP */
+#endif /* FLOW_MODEL_MPI_HELPER_MAX_MIN_HPP */
