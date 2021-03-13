@@ -142,6 +142,24 @@ class RTIRMIStatisticsUtilities
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+
+        /*
+         * Output minimum interface location in x-direction to a file.
+         */
+        void
+        outputInterfaceMinInXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Output maximum interface location in x-direction to a file.
+         */
+        void
+        outputInterfaceMaxInXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
     private:
         /*
@@ -2209,6 +2227,155 @@ RTIRMIStatisticsUtilities::outputWeightedNumberOfCells(
     }
 }
 
+/*
+ * Output minimum interface location in x-direction to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputInterfaceMinInXDirection(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'INTERFACE_MIN_X' can be computed with two species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperMaxMin MPI_helper_max_min = FlowModelMPIHelperMaxMin(
+        "MPI_helper_max_min",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    const double interface_x_min_global = MPI_helper_max_min.getMinLocationWithinQuantityBoundsInXDirection(
+            "MASS_FRACTIONS",
+            0,
+            data_context,
+            double(0.01),
+            double(0.99));
+    
+    /*
+     * Compute and output the value (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << interface_x_min_global;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output maximum interface location in x-direction to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputInterfaceMaxInXDirection(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'INTERFACE_MAX_X' can be computed with two species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperMaxMin MPI_helper_max_min = FlowModelMPIHelperMaxMin(
+        "MPI_helper_max_min",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    const double interface_x_max_global = MPI_helper_max_min.getMaxLocationWithinQuantityBoundsInXDirection(
+            "MASS_FRACTIONS",
+            0,
+            data_context,
+            double(0.01),
+            double(0.99));
+    
+    /*
+     * Compute and output the value (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << interface_x_max_global;
+        
+        f_out.close();
+    }
+}
+
 
 /*
  * Output names of statistical quantities to output to a file.
@@ -2296,6 +2463,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             else if (statistical_quantity_key == "WEIGHTED_NUM_CELLS")
             {
                 f_out << "\t" << "WEIGHTED_NUM_CELLS   ";
+            }
+            else if (statistical_quantity_key == "INTERFACE_MIN_X")
+            {
+                f_out << "\t" << "INTERFACE_MIN_X      ";
+            }
+            else if (statistical_quantity_key == "INTERFACE_MAX_X")
+            {
+                f_out << "\t" << "INTERFACE_MAX_X      ";
             }
         }
         
@@ -2416,6 +2591,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "WEIGHTED_NUM_CELLS")
         {
             rti_rmi_statistics_utilities->outputWeightedNumberOfCells(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "INTERFACE_MIN_X")
+        {
+            rti_rmi_statistics_utilities->outputInterfaceMinInXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "INTERFACE_MAX_X")
+        {
+            rti_rmi_statistics_utilities->outputInterfaceMaxInXDirection(
                 stat_dump_filename,
                 patch_hierarchy,
                 data_context);
