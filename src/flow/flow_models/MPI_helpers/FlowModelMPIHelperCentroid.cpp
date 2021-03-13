@@ -10,7 +10,7 @@
 double FlowModelMPIHelperCentroid::getCentroidInXDirection(
     const std::string quantity_name,
     const int component_idx,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     double x_c;
     
@@ -73,25 +73,25 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>(quantity_name, hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointer to data inside the flow model.
                  */
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
-                    d_flow_model->getCellData(quantity_name);
+                    getCellData(quantity_name);
                 
                 double* u = data_quantity->getPointer(component_idx);
                 
@@ -174,7 +174,7 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -244,25 +244,25 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>(quantity_name, hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointer to data inside the flow model.
                  */
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
-                    d_flow_model->getCellData(quantity_name);
+                    getCellData(quantity_name);
                 
                 double* u = data_quantity->getPointer(component_idx);
                 
@@ -355,7 +355,7 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -425,25 +425,25 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>(quantity_name, hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointer to data inside the flow model.
                  */
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
-                    d_flow_model->getCellData(quantity_name);
+                    getCellData(quantity_name);
                 
                 double* u = data_quantity->getPointer(component_idx);
                 
@@ -546,7 +546,7 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -581,7 +581,7 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
 double FlowModelMPIHelperCentroid::getCentroidInYDirection(
     const std::string quantity_name,
     const int component_idx,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     double y_c;
     
@@ -651,25 +651,25 @@ double FlowModelMPIHelperCentroid::getCentroidInYDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>(quantity_name, hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointer to data inside the flow model.
                  */
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
-                    d_flow_model->getCellData(quantity_name);
+                    getCellData(quantity_name);
                 
                 double* u = data_quantity->getPointer(component_idx);
                 
@@ -762,7 +762,7 @@ double FlowModelMPIHelperCentroid::getCentroidInYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -832,25 +832,25 @@ double FlowModelMPIHelperCentroid::getCentroidInYDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>(quantity_name, hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointer to data inside the flow model.
                  */
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
-                    d_flow_model->getCellData(quantity_name);
+                    getCellData(quantity_name);
                 
                 double* u = data_quantity->getPointer(component_idx);
                 
@@ -953,7 +953,7 @@ double FlowModelMPIHelperCentroid::getCentroidInYDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         
@@ -988,7 +988,7 @@ double FlowModelMPIHelperCentroid::getCentroidInYDirection(
 double FlowModelMPIHelperCentroid::getCentroidInZDirection(
     const std::string quantity_name,
     const int component_idx,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
     double z_c;
     
@@ -1065,25 +1065,25 @@ double FlowModelMPIHelperCentroid::getCentroidInZDirection(
                  * corresponding cell data.
                  */
                 
-                d_flow_model->registerPatchWithDataContext(*patch, data_context);
+                setupFlowModelAndRegisterPatchWithDataContext(*patch, data_context);
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>(quantity_name, hier::IntVector::getZero(d_dim)));
                 
-                d_flow_model->registerDerivedVariables(num_subghosts_of_data);
+                registerDerivedVariables(num_subghosts_of_data);
                 
-                d_flow_model->allocateMemoryForDerivedCellData();
+                allocateMemoryForDerivedCellData();
                 
-                d_flow_model->computeDerivedCellData();
+                computeDerivedCellData();
                 
                 /*
                  * Get the pointer to data inside the flow model.
                  */
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_quantity =
-                    d_flow_model->getCellData(quantity_name);
+                    getCellData(quantity_name);
                 
                 double* u = data_quantity->getPointer(component_idx);
                 
@@ -1186,7 +1186,7 @@ double FlowModelMPIHelperCentroid::getCentroidInZDirection(
                  * Unregister the patch and data of all registered derived cell variables in the flow model.
                  */
                 
-                d_flow_model->unregisterPatch();
+                unregisterPatch();
             }
         }
         

@@ -1,5 +1,5 @@
-#ifndef FLOW_MODEL_HELPER_MAX_MIN_HPP
-#define FLOW_MODEL_HELPER_MAX_MIN_HPP
+#ifndef FLOW_MODEL_MPI_HELPER_MAX_MIN_HPP
+#define FLOW_MODEL_MPI_HELPER_MAX_MIN_HPP
 
 #include "flow/flow_models/FlowModel.hpp"
 
@@ -15,13 +15,15 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<FlowModel>& flow_model):
+            const HAMERS_SHARED_PTR<FlowModel>& flow_model,
+            const bool use_diffusive_flux_utilities = false):
                 FlowModelMPIHelper(
                     object_name,
                     dim,
                     grid_geometry,
                     patch_hierarchy,
-                    flow_model)
+                    flow_model,
+                    use_diffusive_flux_utilities)
         {}
         
         /*
@@ -30,7 +32,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         std::vector<double> getMaxQuantityWithInhomogeneousXDirection(
             const std::string quantity_name,
             const int component_idx,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Compute minimum value with only x-direction as inhomogeneous direction.
@@ -38,7 +40,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         std::vector<double> getMinQuantityWithInhomogeneousXDirection(
             const std::string quantity_name,
             const int component_idx,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Compute maximum value with only y-direction as inhomogeneous direction.
@@ -46,7 +48,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         std::vector<double> getMaxQuantityWithInhomogeneousYDirection(
             const std::string quantity_name,
             const int component_idx,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Compute minimum value with only y-direction as inhomogeneous direction.
@@ -54,7 +56,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         std::vector<double> getMinQuantityWithInhomogeneousYDirection(
             const std::string quantity_name,
             const int component_idx,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Compute maximum value with only z-direction as inhomogeneous direction.
@@ -62,7 +64,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         std::vector<double> getMaxQuantityWithInhomogeneousZDirection(
             const std::string quantity_name,
             const int component_idx,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Compute minimum value with only z-direction as inhomogeneous direction.
@@ -70,7 +72,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
         std::vector<double> getMinQuantityWithInhomogeneousZDirection(
             const std::string quantity_name,
             const int component_idx,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Compute maximum location within quantity bounds in x-direction.
@@ -80,7 +82,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double bound_lo,
-            const double bound_hi) const;
+            const double bound_hi);
         
         /*
          * Compute minimum location within quantity bounds in x-direction.
@@ -90,7 +92,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double bound_lo,
-            const double bound_hi) const;
+            const double bound_hi);
         
         /*
          * Compute maximum location within quantity bounds in y-direction.
@@ -100,7 +102,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double bound_lo,
-            const double bound_hi) const;
+            const double bound_hi);
         
         /*
          * Compute minimum location within quantity bounds in y-direction.
@@ -110,7 +112,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double bound_lo,
-            const double bound_hi) const;
+            const double bound_hi);
         
         /*
          * Compute maximum location within quantity bounds in z-direction.
@@ -120,7 +122,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double bound_lo,
-            const double bound_hi) const;
+            const double bound_hi);
         
         /*
          * Compute minimum location within quantity bounds in z-direction.
@@ -130,7 +132,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
             const int component_idx,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double bound_lo,
-            const double bound_hi) const;
+            const double bound_hi);
         
         /*
          * Compute maximum value of absolute value of gradient with only x-direction as inhomogeneous direction.
@@ -140,7 +142,7 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
             const int component_idx,
             const int derivative_direction,
             const int num_ghosts_derivative,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
          * Compute maximum value of magnitude of gradient with only x-direction as inhomogeneous direction.
@@ -149,10 +151,10 @@ class FlowModelMPIHelperMaxMin: public FlowModelMPIHelper
             const std::string quantity_name,
             const int component_idx,
             const int num_ghosts_derivative,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
     private:
         
 };
 
-#endif /* FLOW_MODEL_HELPER_MAX_MIN_HPP */
+#endif /* FLOW_MODEL_MPI_HELPER_MAX_MIN_HPP */
