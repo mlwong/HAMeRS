@@ -13,7 +13,7 @@
 #cmakedefine HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
 
 /* Define epsilon to prevent divisoin by zero */
-#define HAMERS_EPSILON 1.0e-40
+#define HAMERS_EPSILON 1.0e-15
 
 /* Enable compilation with Boost library */
 #cmakedefine HAMERS_USE_BOOST
