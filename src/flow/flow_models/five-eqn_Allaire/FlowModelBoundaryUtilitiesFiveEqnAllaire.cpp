@@ -8,6 +8,8 @@
 #include "SAMRAI/tbox/Utilities.h"
 #include "SAMRAI/tbox/MathUtilities.h"
 
+#include <algorithm>
+
 /*
  * Function to read 1d boundary data from input database.
  * Node locations that have boundary conditions identified are removed from the container.
