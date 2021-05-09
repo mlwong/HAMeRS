@@ -281,7 +281,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
                     const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
+                    // const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
@@ -438,8 +438,8 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
                     const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
-                    const int idx_lo_2 = index_lo[2];
+                    // const int idx_lo_1 = index_lo[1];
+                    // const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -772,7 +772,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
                     const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
+                    // const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
@@ -929,8 +929,8 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
                     const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
-                    const int idx_lo_2 = index_lo[2];
+                    // const int idx_lo_1 = index_lo[1];
+                    // const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -1126,7 +1126,7 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
+                    // const int idx_lo_0 = index_lo[0];
                     const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
@@ -1283,9 +1283,9 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
+                    // const int idx_lo_0 = index_lo[0];
                     const int idx_lo_1 = index_lo[1];
-                    const int idx_lo_2 = index_lo[2];
+                    // const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -1481,7 +1481,7 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
+                    // const int idx_lo_0 = index_lo[0];
                     const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
@@ -1638,9 +1638,9 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
+                    // const int idx_lo_0 = index_lo[0];
                     const int idx_lo_1 = index_lo[1];
-                    const int idx_lo_2 = index_lo[2];
+                    // const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -1847,8 +1847,8 @@ FlowModelMPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
+                    // const int idx_lo_0 = index_lo[0];
+                    // const int idx_lo_1 = index_lo[1];
                     const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
@@ -2056,8 +2056,8 @@ FlowModelMPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
+                    // const int idx_lo_0 = index_lo[0];
+                    // const int idx_lo_1 = index_lo[1];
                     const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
@@ -2234,7 +2234,6 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     
                     for (int i = 0; i < interior_dim_0; i++)
@@ -2367,8 +2366,6 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
@@ -2509,9 +2506,6 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
-                    const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -2688,7 +2682,6 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     
                     for (int i = 0; i < interior_dim_0; i++)
@@ -2821,8 +2814,6 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
@@ -2963,9 +2954,6 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
-                    const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -3153,8 +3141,6 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
@@ -3295,9 +3281,6 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
-                    const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -3485,8 +3468,6 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
@@ -3627,9 +3608,6 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
-                    const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -3827,9 +3805,6 @@ FlowModelMPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInZDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
-                    const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -4027,9 +4002,6 @@ FlowModelMPIHelperMaxMin::getMinLocationWithinQuantityBoundsInZDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
-                    const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -4462,7 +4434,7 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
                     const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
+                    // const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
@@ -4678,8 +4650,8 @@ FlowModelMPIHelperMaxMin::getMaxAbsoluteGradientWithInhomogeneousXDirection(
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
                     const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
-                    const int idx_lo_2 = index_lo[2];
+                    // const int idx_lo_1 = index_lo[1];
+                    // const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -5080,7 +5052,7 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
                     const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
+                    // const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
@@ -5293,8 +5265,8 @@ FlowModelMPIHelperMaxMin::getMaxMagnitudeGradientWithInhomogeneousXDirection(
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
                     const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
-                    const int idx_lo_2 = index_lo[2];
+                    // const int idx_lo_1 = index_lo[1];
+                    // const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];

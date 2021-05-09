@@ -12,7 +12,7 @@ double FlowModelMPIHelperCentroid::getCentroidInXDirection(
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    double x_c;
+    double x_c = tbox::MathUtilities<double>::getMax();
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -583,7 +583,7 @@ double FlowModelMPIHelperCentroid::getCentroidInYDirection(
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    double y_c;
+    double y_c = tbox::MathUtilities<double>::getMax();
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -990,7 +990,7 @@ double FlowModelMPIHelperCentroid::getCentroidInZDirection(
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
-    double z_c;
+    double z_c = tbox::MathUtilities<double>::getMax();
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     

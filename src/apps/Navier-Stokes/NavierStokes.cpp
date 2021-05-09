@@ -659,7 +659,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
     
     if (d_dim == tbox::Dimension(1))
     {
-        spectral_radiuses_and_dt.resize(2, 0.0);
+        spectral_radiuses_and_dt.resize(2, double(0));
         double* spectral_radiuses_and_dt_ptr = spectral_radiuses_and_dt.data();
         
         /*
@@ -749,8 +749,9 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
             spectral_radiuses_and_dt_ptr[1] = fmax(spectral_radiuses_and_dt_ptr[1], spectral_radius_acoustic_x);
         }
         
+        double& dt_tmp = spectral_radiuses_and_dt[1];
 #ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd reduction(max: spectral_radiuses_and_dt_ptr[1])
+        #pragma omp simd reduction(max: dt_tmp)
 #endif
         for (int i = -num_ghosts_0;
              i < interior_dim_0 + num_ghosts_0;
@@ -759,9 +760,9 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
             // Compute the linear index.
             const int idx = i + num_ghosts_0;
             
-            const double spectral_radius_diffusive = 2.0*max_D[idx]/(dx_0*dx_0);
+            const double spectral_radius_diffusive = double(2)*max_D[idx]/(dx_0*dx_0);
             
-            spectral_radiuses_and_dt_ptr[1] = fmax(spectral_radiuses_and_dt_ptr[1], spectral_radius_diffusive);
+            dt_tmp = fmax(dt_tmp, spectral_radius_diffusive);
         }
         
         spectral_radiuses_and_dt[1] = double(1)/spectral_radiuses_and_dt[1];
@@ -781,7 +782,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        spectral_radiuses_and_dt.resize(3, 0.0);
+        spectral_radiuses_and_dt.resize(3, double(0));
         double* spectral_radiuses_and_dt_ptr = spectral_radiuses_and_dt.data();
         
         /*
@@ -895,12 +896,13 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
             }
         }
         
+        double& dt_tmp = spectral_radiuses_and_dt[2];
         for (int j = -num_ghosts_1;
              j < interior_dim_1 + num_ghosts_1;
              j++)
         {
 #ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(max: spectral_radiuses_and_dt_ptr[2])
+            #pragma omp simd reduction(max: dt_tmp)
 #endif
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + num_ghosts_0;
@@ -910,11 +912,11 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                 const int idx = (i + num_ghosts_0) +
                     (j + num_ghosts_1)*ghostcell_dim_0;
                 
-                const double spectral_radius_diffusive = 2.0*fmax(
+                const double spectral_radius_diffusive = double(2)*fmax(
                     max_D[idx]/(dx_0*dx_0),
                     max_D[idx]/(dx_1*dx_1));
                 
-                spectral_radiuses_and_dt_ptr[2] = fmax(spectral_radiuses_and_dt_ptr[2], spectral_radius_diffusive);
+                dt_tmp = fmax(dt_tmp, spectral_radius_diffusive);
             }
         }
         
@@ -935,7 +937,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        spectral_radiuses_and_dt.resize(4, 0.0);
+        spectral_radiuses_and_dt.resize(4, double(0));
         double* spectral_radiuses_and_dt_ptr = spectral_radiuses_and_dt.data();
         
         /*
@@ -1069,6 +1071,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
             }
         }
         
+        double& dt_tmp = spectral_radiuses_and_dt[3];
         for (int k = -num_ghosts_2;
              k < interior_dim_2 + num_ghosts_2;
              k++)
@@ -1078,7 +1081,7 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                  j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd reduction(max: spectral_radiuses_and_dt_ptr[3])
+                #pragma omp simd reduction(max: dt_tmp)
 #endif
                 for (int i = -num_ghosts_0;
                      i < interior_dim_0 + num_ghosts_0;
@@ -1090,12 +1093,12 @@ NavierStokes::computeSpectralRadiusesAndStableDtOnPatch(
                         (k + num_ghosts_2)*ghostcell_dim_0*
                             ghostcell_dim_1;
                     
-                    const double spectral_radius_diffusive = 2.0*fmax(
+                    const double spectral_radius_diffusive = double(2)*fmax(
                         max_D[idx]/(dx_0*dx_0),
                         fmax(max_D[idx]/(dx_1*dx_1),
                             max_D[idx]/(dx_2*dx_2)));
                     
-                    spectral_radiuses_and_dt_ptr[3] = fmax(spectral_radiuses_and_dt_ptr[3], spectral_radius_diffusive);
+                    dt_tmp = fmax(dt_tmp, spectral_radius_diffusive);
                 }
             }
         }

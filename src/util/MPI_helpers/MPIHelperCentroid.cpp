@@ -13,7 +13,7 @@ MPIHelperCentroid::getCentroidInXDirection(
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
-    double x_c;
+    double x_c = tbox::MathUtilities<double>::getMax();
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -504,7 +504,7 @@ MPIHelperCentroid::getCentroidInYDirection(
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
-    double y_c;
+    double y_c = tbox::MathUtilities<double>::getMax();
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
@@ -858,7 +858,7 @@ MPIHelperCentroid::getCentroidInZDirection(
     const int component_idx,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
-    double z_c;
+    double z_c = tbox::MathUtilities<double>::getMax();
     
     const int num_levels = d_patch_hierarchy->getNumberOfLevels();
     
