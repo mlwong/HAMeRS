@@ -347,8 +347,6 @@ RTIRMIStatisticsUtilities::outputMixednessInXDirection(
         patch_hierarchy,
         flow_model_tmp);
     
-    const std::vector<double>& dx_finest = MPI_helper_average.getFinestRefinedDomainGridSpacing();
-    
     const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
     
     std::vector<double> Y_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
