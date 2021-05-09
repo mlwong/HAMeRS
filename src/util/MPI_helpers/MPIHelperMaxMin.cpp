@@ -234,7 +234,7 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
                     const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
+                    // const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
@@ -364,8 +364,8 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousXDirection(
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
                     const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
-                    const int idx_lo_2 = index_lo[2];
+                    // const int idx_lo_1 = index_lo[1];
+                    // const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -644,7 +644,7 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
                     const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
+                    // const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
@@ -774,8 +774,8 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousXDirection(
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
                     const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
-                    const int idx_lo_2 = index_lo[2];
+                    // const int idx_lo_1 = index_lo[1];
+                    // const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -944,7 +944,7 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
+                    // const int idx_lo_0 = index_lo[0];
                     const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
@@ -1074,9 +1074,9 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousYDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
+                    // const int idx_lo_0 = index_lo[0];
                     const int idx_lo_1 = index_lo[1];
-                    const int idx_lo_2 = index_lo[2];
+                    // const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -1245,7 +1245,7 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
+                    // const int idx_lo_0 = index_lo[0];
                     const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
@@ -1375,9 +1375,9 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousYDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
+                    // const int idx_lo_0 = index_lo[0];
                     const int idx_lo_1 = index_lo[1];
-                    const int idx_lo_2 = index_lo[2];
+                    // const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -1557,8 +1557,8 @@ MPIHelperMaxMin::getMaxQuantityWithInhomogeneousZDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
+                    // const int idx_lo_0 = index_lo[0];
+                    // const int idx_lo_1 = index_lo[1];
                     const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
@@ -1739,8 +1739,8 @@ MPIHelperMaxMin::getMinQuantityWithInhomogeneousZDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
+                    // const int idx_lo_0 = index_lo[0];
+                    // const int idx_lo_1 = index_lo[1];
                     const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
@@ -1890,7 +1890,6 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     
                     for (int i = 0; i < interior_dim_0; i++)
@@ -1996,8 +1995,6 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
@@ -2111,9 +2108,6 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInXDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
-                    const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -2263,7 +2257,6 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     
                     for (int i = 0; i < interior_dim_0; i++)
@@ -2369,8 +2362,6 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
@@ -2484,9 +2475,6 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInXDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
-                    const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -2647,8 +2635,6 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
@@ -2762,9 +2748,6 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInYDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
-                    const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -2925,8 +2908,6 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
@@ -3040,9 +3021,6 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInYDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
-                    const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -3213,9 +3191,6 @@ MPIHelperMaxMin::getMaxLocationWithinQuantityBoundsInZDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
-                    const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -3386,9 +3361,6 @@ MPIHelperMaxMin::getMinLocationWithinQuantityBoundsInZDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
-                    const int idx_lo_0 = index_lo[0];
-                    const int idx_lo_1 = index_lo[1];
-                    const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
