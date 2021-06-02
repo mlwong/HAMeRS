@@ -1,8 +1,8 @@
 #!/bin/sh
 
 cd ${HOME}
-wget https://computation.llnl.gov/projects/samrai/download/SAMRAI-v3.11.2.tar.gz
-gunzip SAMRAI-v3.11.2.tar.gz
+wget https://github.com/LLNL/SAMRAI/archive/refs/tags/v-3-11-2.tar.gz
+gunzip v-3-11-2.tar.gz
 mkdir SAMRAI-v3.11.2
 cd SAMRAI-v3.11.2
 tar xvf ../SAMRAI-v3.11.2.tar > /dev/null 2>&1
