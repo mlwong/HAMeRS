@@ -580,6 +580,11 @@ class NavierStokes:
         HAMERS_SHARED_PTR<NavierStokesInitialConditions> d_Navier_Stokes_initial_conditions;
         
         /*
+         * HAMERS_SHARED_PTR to database of initial conditions.
+         */
+        HAMERS_SHARED_PTR<tbox::Database> d_Navier_Stokes_initial_conditions_db;
+        
+        /*
          * HAMERS_SHARED_PTR to NavierStokesBoundaryConditions and its database.
          */
         HAMERS_SHARED_PTR<NavierStokesBoundaryConditions> d_Navier_Stokes_boundary_conditions;

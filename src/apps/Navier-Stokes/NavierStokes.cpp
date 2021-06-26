@@ -181,7 +181,8 @@ NavierStokes::NavierStokes(
         d_dim,
         d_grid_geometry,
         d_flow_model_manager->getFlowModelType(),
-        d_flow_model));
+        d_flow_model,
+        d_Navier_Stokes_initial_conditions_db));
     
     /*
      * Initialize d_Navier_Stokes_boundary_conditions.
@@ -3661,7 +3662,7 @@ NavierStokes::getFromInput(
                 << ": "
                 << "Key data 'flow_model' not found in input database."
                 << " Compressible flow model is unknown."
-                << std::endl);            
+                << std::endl);
         }
         
         /*
@@ -3691,7 +3692,7 @@ NavierStokes::getFromInput(
             TBOX_ERROR(d_object_name
                 << ": "
                 << "Key data 'convective_flux_reconstructor' not found in input database."
-                << std::endl);            
+                << std::endl);
         }
         
         /*
@@ -3726,7 +3727,7 @@ NavierStokes::getFromInput(
                 TBOX_ERROR(d_object_name
                     << ": "
                     << "Key data 'diffusive_flux_reconstructor' not found in input database."
-                    << std::endl);            
+                    << std::endl);
             }
             
             /*
@@ -3759,7 +3760,7 @@ NavierStokes::getFromInput(
                 TBOX_ERROR(d_object_name
                     << ": "
                     << "Key data 'nonconservative_diffusive_flux_divergence_operator' not found in input database."
-                    << std::endl);            
+                    << std::endl);
             }
             
             /*
@@ -3796,6 +3797,15 @@ NavierStokes::getFromInput(
             d_multiresolution_tagger_db =
                 input_db->getDatabase("Multiresolution_tagger");
         }
+    }
+    
+    /*
+     * Get the initial conditions from the input database.
+     */
+    if (input_db->keyExists("Initial_conditions"))
+    {
+        d_Navier_Stokes_initial_conditions_db = input_db->getDatabase(
+            "Initial_conditions");
     }
     
     /*

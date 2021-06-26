@@ -4,6 +4,6 @@ ln -sf ${HAMERS_ROOT}/problems/Euler/error_statistics/ConvergenceSingleSpecies.c
 cd ../../..
 mkdir build_convergence_test_single_species
 cd build_convergence_test_single_species
-export SAMRAI_ROOT=$SAMRAI_ROOT_NO_BOOST; cmake .. -DHAMERS_USE_BOOST=OFF
+export SAMRAI_ROOT=$SAMRAI_ROOT_NO_BOOST; cmake .. -DHAMERS_USE_BOOST=OFF -DHAMERS_ENABLE_SIMD=OFF
 make
 cd ..
