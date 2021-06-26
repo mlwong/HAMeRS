@@ -98,7 +98,11 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         const double p_i = 100000.0; // interface pressure
         const double T_0 = 300.0;    // background temperature
         
-        const double g   = 90.0; // gravity
+        TBOX_ASSERT(d_initial_conditions_db != nullptr);
+        TBOX_ASSERT(d_initial_conditions_db->keyExists("gravity"));
+        
+        std::vector<double> gravity_vector = d_initial_conditions_db->getDoubleVector("gravity");
+        const double g = gravity_vector[0]; // gravity
         
         const double R_u = 8.31446261815324; // universal gas constant
         const double R_1 = R_u/W_1;          // gas constant of heavier gas
