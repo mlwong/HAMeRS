@@ -549,6 +549,11 @@ class Euler:
         HAMERS_SHARED_PTR<EulerInitialConditions> d_Euler_initial_conditions;
         
         /*
+         * HAMERS_SHARED_PTR to database of initial conditions.
+         */
+        HAMERS_SHARED_PTR<tbox::Database> d_Euler_initial_conditions_db;
+        
+        /*
          * HAMERS_SHARED_PTR to EulerBoundaryConditions and its database.
          */
         HAMERS_SHARED_PTR<EulerBoundaryConditions> d_Euler_boundary_conditions;
