@@ -286,7 +286,7 @@ int main(int argc, char *argv[])
             TBOX_ERROR("Unknown viz_dump_setting string = "
                 << viz_dump_setting
                 << " found in input."
-                << std::endl);   
+                << std::endl);
         }
         
         is_viz_dumping = true;
@@ -489,7 +489,7 @@ int main(int argc, char *argv[])
        TBOX_ERROR("Unkonwn application string = '"
             << app_string
             << "' found in input database."
-            << std::endl); 
+            << std::endl);
     }
     
     Euler* Euler_app = nullptr;
@@ -646,6 +646,47 @@ int main(int argc, char *argv[])
         cascade_partitioner0->setSAMRAI_MPI(tbox::SAMRAI_MPI::getSAMRAIWorld());
         
         load_balancer0 = cascade_partitioner0;
+    }
+    
+    /*
+     * Check whether to use fixed patch size.
+     */
+    
+    const bool use_fixed_patch_size = main_db->getBoolWithDefault("use_fixed_patch_size", false);
+    
+    if (use_fixed_patch_size)
+    {
+        const hier::IntVector& smallest_patch_size_level_0 = patch_hierarchy->getSmallestPatchSize(0);
+        const hier::IntVector& largest_patch_size_level_0  = patch_hierarchy->getLargestPatchSize(0);
+        
+        if (smallest_patch_size_level_0 != largest_patch_size_level_0)
+        {
+            TBOX_ERROR("The smallest patch size and the largest patch size on level 0 in patch hierarchy section are different"
+                << " while 'use_fixed_patch_size' is true!"
+                << std::endl);
+        }
+        
+        const int max_num_levels = patch_hierarchy->getMaxNumberOfLevels();
+        
+        for (int li = 1; li < max_num_levels; li++)
+        {
+            const hier::IntVector& smallest_patch_size_level = patch_hierarchy->getSmallestPatchSize(li);
+            const hier::IntVector& largest_patch_size_level  = patch_hierarchy->getLargestPatchSize(li);
+            
+            if (smallest_patch_size_level_0 != smallest_patch_size_level)
+            {
+                TBOX_ERROR("The smallest patch size on level 0 and that on level " << li << " are different"
+                    << " while 'use_fixed_patch_size' is true!"
+                    << std::endl);
+            }
+            
+            if (largest_patch_size_level_0 != largest_patch_size_level)
+            {
+                TBOX_ERROR("The largest patch size on level 0 and that on level " << li << " are different"
+                    << " while 'use_fixed_patch_size' is true!"
+                    << std::endl);
+            }
+        }
     }
     
     HAMERS_SHARED_PTR<mesh::GriddingAlgorithm> gridding_algorithm(
@@ -970,7 +1011,7 @@ int main(int argc, char *argv[])
                 TBOX_ERROR("Unknown viz_dump_setting = "
                     << viz_dump_setting
                     << "."
-                    << std::endl); 
+                    << std::endl);
             }
         }
 #endif
@@ -1010,7 +1051,7 @@ int main(int argc, char *argv[])
                 TBOX_ERROR("Unknown stat_dump_setting = "
                     << stat_dump_setting
                     << "."
-                    << std::endl); 
+                    << std::endl);
             }
         }
         
