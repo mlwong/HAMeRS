@@ -71,6 +71,8 @@ class NavierStokes:
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<tbox::Database>& input_db,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const bool& use_fixed_patch_size,
             const std::string& stat_dump_filename = "");
         
         /**

@@ -14,11 +14,55 @@
 
 #include "SAMRAI/tbox/Utilities.h"
 
-RungeKuttaPatchStrategy::RungeKuttaPatchStrategy():
-    xfer::RefinePatchStrategy(),
-    xfer::CoarsenPatchStrategy(),
-    d_data_context()
+RungeKuttaPatchStrategy::RungeKuttaPatchStrategy(
+    const tbox::Dimension& dim,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const bool& use_fixed_patch_size):
+        d_use_fixed_patch_size(use_fixed_patch_size),
+        d_fixed_patch_size(hier::IntVector::getZero(dim)),
+        xfer::RefinePatchStrategy(),
+        xfer::CoarsenPatchStrategy(),
+        d_data_context()
 {
+    if (d_use_fixed_patch_size)
+    {
+        const hier::IntVector& smallest_patch_size_level_0 = patch_hierarchy->getSmallestPatchSize(0);
+        const hier::IntVector& largest_patch_size_level_0  = patch_hierarchy->getLargestPatchSize(0);
+    
+        if (smallest_patch_size_level_0 != largest_patch_size_level_0)
+        {
+            TBOX_ERROR("RungeKuttaPatchStrategy::RungeKuttaPatchStrategy: "
+                << "The smallest patch size and the largest patch size on level 0 in patch hierarchy section are different"
+                << " while 'use_fixed_patch_size' is true!"
+                << std::endl);
+        }
+        
+        const int max_num_levels = patch_hierarchy->getMaxNumberOfLevels();
+        
+        for (int li = 1; li < max_num_levels; li++)
+        {
+            const hier::IntVector& smallest_patch_size_level = patch_hierarchy->getSmallestPatchSize(li);
+            const hier::IntVector& largest_patch_size_level  = patch_hierarchy->getLargestPatchSize(li);
+            
+            if (smallest_patch_size_level_0 != smallest_patch_size_level)
+            {
+                TBOX_ERROR("RungeKuttaPatchStrategy::RungeKuttaPatchStrategy: "
+                    << "The smallest patch size on level 0 and that on level " << li << " are different"
+                    << " while 'use_fixed_patch_size' is true!"
+                    << std::endl);
+            }
+            
+            if (largest_patch_size_level_0 != largest_patch_size_level)
+            {
+                TBOX_ERROR("RungeKuttaPatchStrategy::RungeKuttaPatchStrategy: "
+                    << "The largest patch size on level 0 and that on level " << li << " are different"
+                    << " while 'use_fixed_patch_size' is true!"
+                    << std::endl);
+            }
+        }
+        
+        d_fixed_patch_size = smallest_patch_size_level_0;
+    }
 }
 
 

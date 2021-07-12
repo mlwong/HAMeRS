@@ -56,8 +56,13 @@ Euler::Euler(
     const tbox::Dimension& dim,
     const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const bool& use_fixed_patch_size,
     const std::string& stat_dump_filename):
-        RungeKuttaPatchStrategy(),
+        RungeKuttaPatchStrategy(
+            dim,
+            patch_hierarchy,
+            use_fixed_patch_size),
         d_object_name(object_name),
         d_dim(dim),
         d_grid_geometry(grid_geometry),
@@ -117,6 +122,11 @@ Euler::Euler(
         d_flow_model_str));
     
     d_flow_model = d_flow_model_manager->getFlowModel();
+    
+    if (d_use_fixed_patch_size)
+    {
+        d_flow_model->setFixedPatchSize(d_fixed_patch_size);
+    }
     
     /*
      * Initialize d_convective_flux_reconstructor_manager and get the convective flux reconstructor object.

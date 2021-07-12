@@ -69,6 +69,8 @@ class FlowModel:
                 d_object_name(object_name),
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
+                d_use_fixed_patch_size(false),
+                d_fixed_patch_size(hier::IntVector::getZero(d_dim)),
                 d_num_species(num_species),
                 d_num_eqn(num_eqn),
                 d_num_ghosts(-hier::IntVector::getOne(d_dim)),
@@ -84,6 +86,34 @@ class FlowModel:
         }
         
         virtual ~FlowModel() {}
+        
+        /*
+         * Get whether to use fixed patch size.
+         */
+        
+        bool getUseFixedPatchSize() const
+        {
+            return d_use_fixed_patch_size;
+        }
+        
+        /*
+         * Get fixed patch size.
+         */
+        
+        const hier::IntVector& getFixedPatchSize() const
+        {
+            return d_fixed_patch_size;
+        }
+        
+        /*
+         * Set whether to use fixed patch size.
+         */
+        
+        void setFixedPatchSize(const hier::IntVector& fixed_patch_size)
+        {
+            d_use_fixed_patch_size = true;
+            d_fixed_patch_size = fixed_patch_size;
+        }
         
         /*
          * Get the total number of species.
@@ -433,6 +463,13 @@ class FlowModel:
          * HAMERS_SHARED_PTR to the grid geometry.
          */
         const HAMERS_SHARED_PTR<geom::CartesianGridGeometry> d_grid_geometry;
+        
+        /*
+         * Whether to use fixed patch size.
+         */
+        bool d_use_fixed_patch_size;
+        
+        hier::IntVector d_fixed_patch_size;
         
         /*
          * A string variable to describe the equation of state used.

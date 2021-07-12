@@ -63,12 +63,33 @@ class RungeKuttaPatchStrategy:
         /**
          * Blank constructor for RungeKuttaPatchStrategy.
          */
-        RungeKuttaPatchStrategy();
+        RungeKuttaPatchStrategy(
+            const tbox::Dimension& dim,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const bool& use_fixed_patch_size);
         
         /**
          * Virtual destructor for RungeKuttaPatchStrategy.
          */
         virtual ~RungeKuttaPatchStrategy();
+        
+        /**
+         * Get whether to use fixed patch size.
+         */
+        
+        bool getUseFixedPatchSize() const
+        {
+            return d_use_fixed_patch_size;
+        }
+        
+        /**
+         * Get fixed patch size.
+         */
+        
+        const hier::IntVector& getFixedPatchSize() const
+        {
+            return d_fixed_patch_size;
+        }
         
         /**
          * Register specific variables needed in the numerical routines with the Runge-Kutta level
@@ -611,7 +632,14 @@ class RungeKuttaPatchStrategy:
            d_data_context.reset();
         }
         
-    private:
+    protected:
+        /*
+         * Whether to use fixed patch size.
+         */
+        const bool d_use_fixed_patch_size;
+        
+        hier::IntVector d_fixed_patch_size;
+        
         HAMERS_SHARED_PTR<hier::VariableContext> d_data_context;
         
 };
