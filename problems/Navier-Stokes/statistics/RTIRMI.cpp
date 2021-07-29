@@ -99,6 +99,26 @@ class RTIRMIStatisticsUtilities
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
+         * Output mean velocity associated with turbulent mass flux component in x-direction with assumed homogeneity
+         * in y-direction (2D) or * yz-plane (3D) to a file.
+         */
+        void
+        outputTurbMassFluxVelocityXWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Output density-specific volume covariance with assumed homogeneity in y-direction (2D) or yz-plane (3D)
+         * to a file.
+         */
+        void
+        outputDensitySpecificVolumeCovarianceWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
          * Output enstrophy integrated to a file.
          */
         void
@@ -1283,6 +1303,253 @@ outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
 
 
 /*
+ * Output mean velocity associated with turbulent mass flux component in x-direction with assumed homogeneity
+ * in y-direction (2D) or * yz-plane (3D) to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputTurbMassFluxVelocityXWithInhomogeneousXDirection(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    FlowModelMPIHelperCorrelation MPI_helper_correlation = FlowModelMPIHelperCorrelation(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
+    
+    std::vector<double> Y_mean = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "MASS_FRACTIONS",
+        0,
+        data_context);
+    
+    std::vector<double> rho_mean = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        data_context);
+    
+    std::vector<double> u_mean = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
+        0,
+        data_context);
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    std::vector<std::vector<double> > averaged_quantities;
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(rho_mean);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(u_mean);
+    
+    std::vector<double> rho_p_u_p = MPI_helper_correlation.getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        averaged_quantities,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    averaged_quantities.clear();
+    
+    /*
+     * Compute and output the mean of a_1 inside mixing layer (only done by process 0).
+     */
+    if (mpi.getRank() == 0)
+    {
+        double a_sum = double(0);
+        int count = 0;
+        
+        for (int i = 0; i < finest_level_dims[0]; i++)
+        {
+            const double mixing_metric = double(4)*Y_mean[i]*(double(1) - Y_mean[i]);
+            if (mixing_metric > double(9)/double(10))
+            {
+                a_sum += rho_p_u_p[i]/rho_mean[i];
+                count++;
+            }
+        }
+        
+        const double a_mean = a_sum/count;
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << a_mean;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output density-specific volume covariance with assumed homogeneity in y-direction (2D) or yz-plane (3D)
+ * to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputDensitySpecificVolumeCovarianceWithInhomogeneousXDirection(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    FlowModelMPIHelperCorrelation MPI_helper_correlation = FlowModelMPIHelperCorrelation(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
+    
+    std::vector<double> Y_mean = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "MASS_FRACTIONS",
+        0,
+        data_context);
+    
+    std::vector<double> rho_mean = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        data_context);
+    
+    std::vector<double> v_mean = MPI_helper_average.getAveragedReciprocalOfQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        data_context);
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    std::vector<bool> use_reciprocal;
+    std::vector<std::vector<double> > averaged_quantities;
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_reciprocal.push_back(false);
+    averaged_quantities.push_back(rho_mean);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_reciprocal.push_back(true);
+    averaged_quantities.push_back(v_mean);
+    
+    std::vector<double> rho_p_v_p = MPI_helper_correlation.getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_reciprocal,
+        averaged_quantities,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_reciprocal.clear();
+    averaged_quantities.clear();
+    
+    /*
+     * Compute and output the mean of b inside mixing layer (only done by process 0).
+     */
+    if (mpi.getRank() == 0)
+    {
+        double b_sum = double(0);
+        int count = 0;
+        
+        for (int i = 0; i < finest_level_dims[0]; i++)
+        {
+            const double mixing_metric = double(4)*Y_mean[i]*(double(1) - Y_mean[i]);
+            if (mixing_metric > double(9)/double(10))
+            {
+                b_sum += (-rho_p_v_p[i]);
+                count++;
+            }
+        }
+        
+        const double b_mean = b_sum/count;
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << b_mean;
+        
+        f_out.close();
+    }
+}
+
+
+/*
  * Output enstrophy integrated to a file.
  */
 void
@@ -2442,6 +2709,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             {
                 f_out << "\t" << "TKE_Z_INT_HOME_YZ    ";
             }
+            else if (statistical_quantity_key == "a1_MEAN_INHOMO_X")
+            {
+                f_out << "\t" << "a1_MEAN_INHOMO_X     ";
+            }
+            else if (statistical_quantity_key == "b_MEAN_INHOMO_X")
+            {
+                f_out << "\t" << "b_MEAN_INHOMO_X      ";
+            }
             else if (statistical_quantity_key == "ENSTROPHY_INT")
             {
                 f_out << "\t" << "ENSTROPHY_INT        ";
@@ -2554,6 +2829,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "TKE_Z_INT_HOMO_YZ")
         {
             rti_rmi_statistics_utilities->outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "a1_MEAN_INHOMO_X")
+        {
+            rti_rmi_statistics_utilities->outputTurbMassFluxVelocityXWithInhomogeneousXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "b_MEAN_INHOMO_X")
+        {
+            rti_rmi_statistics_utilities->outputDensitySpecificVolumeCovarianceWithInhomogeneousXDirection(
                 stat_dump_filename,
                 patch_hierarchy,
                 data_context);
