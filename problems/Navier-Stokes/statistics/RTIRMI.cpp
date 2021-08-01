@@ -3045,24 +3045,22 @@ RTIRMIStatisticsUtilities::outputInterfaceMinInXDirection(
     
     if (mpi.getRank() == 0)
     {
-
         const double* x_lo = d_grid_geometry->getXLower();
         const double* x_hi = d_grid_geometry->getXUpper();
         double interface_min = x_hi[0];
-
-        for (int i = finest_level_dims[0]-1; i>=0;  i--)
+        
+        for (int i = finest_level_dims[0]-1; i >= 0;  i--)
         {
-	    if (Y_avg_global[i] > 0.01 && Y_avg_global[i] < 0.99)
+            if (Y_avg_global[i] > 0.01 && Y_avg_global[i] < 0.99)
             {
-	        const double x_loca = x_lo[0]+0.5*dx_finest[0]+i*dx_finest[0];
+                const double x_loca = x_lo[0] + 0.5*dx_finest[0] + i*dx_finest[0];
                 if (x_loca < interface_min)
-		{
+                {
                    interface_min = x_loca;
-		}
+                }
             }
         }
-
-
+        
         f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
               << "\t" << interface_min;
         
@@ -3117,54 +3115,52 @@ RTIRMIStatisticsUtilities::outputInterfaceMaxInXDirection(
     }
     
     HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
-
+    
     FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
         "MPI_helper_average",
         d_dim,
         d_grid_geometry,
         patch_hierarchy,
         flow_model_tmp);
-
+    
     const std::vector<double>& dx_finest = MPI_helper_average.getFinestRefinedDomainGridSpacing();
-
+    
     const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
-
+    
     std::vector<double> Y_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
         "MASS_FRACTIONS",
         0,
         data_context);
-
+    
     /*
      * Compute and output the value (only done by process 0).
      */
-
+    
     if (mpi.getRank() == 0)
     {
-
         const double* x_lo = d_grid_geometry->getXLower();
         const double* x_hi = d_grid_geometry->getXUpper();
         double interface_max = x_lo[0];
-
+        
         for (int i = 0; i < finest_level_dims[0]; i++)
         {
             if (Y_avg_global[i] > 0.01 && Y_avg_global[i] < 0.99)
             {
-                const double x_loca = x_lo[0]+0.5*dx_finest[0]+i*dx_finest[0];
+                const double x_loca = x_lo[0] + 0.5*dx_finest[0] + i*dx_finest[0];
                 if (x_loca > interface_max)
                 {
                    interface_max = x_loca;
                 }
             }
         }
-
-
+        
         f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
               << "\t" << interface_max;
-
+        
         f_out.close();
     }
 }
-    
+
 
 /*
  * Output names of statistical quantities to output to a file.
