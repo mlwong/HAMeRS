@@ -143,7 +143,8 @@ Euler::Euler(
         d_dim,
         d_grid_geometry,
         d_flow_model_manager->getFlowModelType(),
-        d_flow_model));
+        d_flow_model,
+        d_Euler_initial_conditions_db));
     
     /*
      * Initialize d_Euler_boundary_conditions.
@@ -2682,7 +2683,7 @@ Euler::getFromInput(
                 << ": "
                 << "Key data 'flow_model' not found in input database."
                 << " Compressible flow model is unknown."
-                << std::endl);            
+                << std::endl);
         }
         
         /*
@@ -2712,7 +2713,7 @@ Euler::getFromInput(
             TBOX_ERROR(d_object_name
                 << ": "
                 << "Key data 'convective_flux_reconstructor' not found in input database."
-                << std::endl);            
+                << std::endl);
         }
         
         /*
@@ -2747,6 +2748,15 @@ Euler::getFromInput(
             d_multiresolution_tagger_db =
                 input_db->getDatabase("Multiresolution_tagger");
         }
+    }
+    
+    /*
+     * Get the initial conditions from the input database.
+     */
+    if (input_db->keyExists("Initial_conditions"))
+    {
+        d_Euler_initial_conditions_db = input_db->getDatabase(
+            "Initial_conditions");
     }
     
     /*
