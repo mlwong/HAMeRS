@@ -659,7 +659,7 @@ FlowModelSourceUtilitiesSingleSpecies::getStableDtOnPatch()
                     }
                 }
             }
-            else if (d_dim == tbox::Dimension(2))
+            else if (d_dim == tbox::Dimension(3))
             {
                 const double g_mag = sqrt(d_gravity[0]*d_gravity[0] + d_gravity[1]*d_gravity[1] + d_gravity[2]*d_gravity[2]);
                 

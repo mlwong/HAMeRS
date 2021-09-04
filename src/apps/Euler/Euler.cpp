@@ -2645,7 +2645,9 @@ Euler::getFromInput(
         }
     }
     
-    if (!is_from_restart)
+    const bool read_on_restart = input_db->getBoolWithDefault("read_on_restart", false);
+    
+    if (!is_from_restart || read_on_restart)
     {
         if (input_db->keyExists("project_name"))
         {
