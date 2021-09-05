@@ -70,7 +70,9 @@ class FlowModel:
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
                 d_use_fixed_patch_size(false),
+                d_has_correct_fixed_patch_size(false),
                 d_fixed_patch_size(hier::IntVector::getZero(d_dim)),
+                d_fixed_patch_box(hier::Box::getEmptyBox(d_dim)),
                 d_num_species(num_species),
                 d_num_eqn(num_eqn),
                 d_num_ghosts(-hier::IntVector::getOne(d_dim)),
@@ -111,8 +113,15 @@ class FlowModel:
         
         void setFixedPatchSize(const hier::IntVector& fixed_patch_size)
         {
+            TBOX_ASSERT(fixed_patch_size.getDim() == d_dim);
+            
             d_use_fixed_patch_size = true;
             d_fixed_patch_size = fixed_patch_size;
+            for (int di = 0; di < d_dim.getValue(); di++)
+            {
+                d_fixed_patch_box.setLower(di, 0);
+                d_fixed_patch_box.setUpper(di, d_fixed_patch_size[di] - 1);
+            }
         }
         
         /*
@@ -468,8 +477,10 @@ class FlowModel:
          * Whether to use fixed patch size.
          */
         bool d_use_fixed_patch_size;
+        bool d_has_correct_fixed_patch_size;
         
         hier::IntVector d_fixed_patch_size;
+        hier::Box d_fixed_patch_box;
         
         /*
          * A string variable to describe the equation of state used.

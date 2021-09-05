@@ -29,10 +29,10 @@ RungeKuttaPatchStrategy::RungeKuttaPatchStrategy(
         const hier::IntVector& smallest_patch_size_level_0 = patch_hierarchy->getSmallestPatchSize(0);
         const hier::IntVector& largest_patch_size_level_0  = patch_hierarchy->getLargestPatchSize(0);
     
-        if (smallest_patch_size_level_0 != largest_patch_size_level_0)
+        if (smallest_patch_size_level_0 > largest_patch_size_level_0)
         {
             TBOX_ERROR("RungeKuttaPatchStrategy::RungeKuttaPatchStrategy: "
-                << "The smallest patch size and the largest patch size on level 0 in patch hierarchy section are different"
+                << "The smallest patch size is greater than the largest patch size on level 0 in patch hierarchy section"
                 << " while 'use_fixed_patch_size' is true!"
                 << std::endl);
         }
@@ -61,7 +61,7 @@ RungeKuttaPatchStrategy::RungeKuttaPatchStrategy(
             }
         }
         
-        d_fixed_patch_size = smallest_patch_size_level_0;
+        d_fixed_patch_size = largest_patch_size_level_0;
     }
 }
 
