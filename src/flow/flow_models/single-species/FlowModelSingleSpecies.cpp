@@ -709,29 +709,40 @@ FlowModelSingleSpecies::registerPatchWithDataContext(
     d_ghost_box.grow(d_num_ghosts);
     d_ghostcell_dims = d_ghost_box.numberCells();
     
-    if (d_use_fixed_patch_size)
+    // if (d_interior_dims[0] != 32 && d_interior_dims[1] != 32)
+    // {
+    //     std::cout << "hi" << std::endl;
+    //     TBOX_WARNING(d_object_name
+    //         << ": FlowModelSingleSpecies::registerPatchWithDataContext()\n"
+    //         << "The patch does not have the right size while fixed patch size is used!\n"
+    //         << "d_interior_dims = " << d_interior_dims << ";\n"
+    //         << "d_assumed_largest_patch_size = " << d_assumed_largest_patch_size << ".\n"
+    //         << std::endl);
+    // }
+    
+    if (d_bounded_patch_size_assumed)
     {
         TBOX_WARNING(d_object_name
             << ": FlowModelSingleSpecies::registerPatchWithDataContext()\n"
             << "Debugging!\n"
             << "d_interior_dims = " << d_interior_dims << ";\n"
-            << "d_fixed_patch_size = " << d_fixed_patch_size << ".\n"
+            << "d_assumed_largest_patch_size = " << d_assumed_largest_patch_size << ".\n"
             << std::endl);
         
-        if (d_interior_dims > d_fixed_patch_size)
+        if (d_interior_dims > d_assumed_largest_patch_size)
         {
-            d_has_correct_fixed_patch_size = false;
+            d_has_boundead_patch_size = false;
             
             TBOX_WARNING(d_object_name
                 << ": FlowModelSingleSpecies::registerPatchWithDataContext()\n"
                 << "The patch does not have the right size while fixed patch size is used!\n"
                 << "d_interior_dims = " << d_interior_dims << ";\n"
-                << "d_fixed_patch_size = " << d_fixed_patch_size << ".\n"
+                << "d_assumed_largest_patch_size = " << d_assumed_largest_patch_size << ".\n"
                 << std::endl);
         }
         else
         {
-            d_has_correct_fixed_patch_size = true;
+            d_has_boundead_patch_size = true;
         }
     }
 }
@@ -948,25 +959,20 @@ FlowModelSingleSpecies::unregisterPatch()
     d_subghostcell_dims_max_wave_speed_z  = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_max_diffusivity   = hier::IntVector::getZero(d_dim);
     
-    if (!d_use_fixed_patch_size ||
-        (d_use_fixed_patch_size && !d_has_correct_fixed_patch_size)
-       )
-    {
-        d_data_velocity.reset();
-        d_data_internal_energy.reset();
-        d_data_pressure.reset();
-        d_data_sound_speed.reset();
-        d_data_temperature.reset();
-        d_data_convective_flux_x.reset();
-        d_data_convective_flux_y.reset();
-        d_data_convective_flux_z.reset();
-        d_data_max_wave_speed_x.reset();
-        d_data_max_wave_speed_y.reset();
-        d_data_max_wave_speed_z.reset();
-        d_data_max_diffusivity.reset();
-    }
+    d_data_velocity.reset();
+    d_data_internal_energy.reset();
+    d_data_pressure.reset();
+    d_data_sound_speed.reset();
+    d_data_temperature.reset();
+    d_data_convective_flux_x.reset();
+    d_data_convective_flux_y.reset();
+    d_data_convective_flux_z.reset();
+    d_data_max_wave_speed_x.reset();
+    d_data_max_wave_speed_y.reset();
+    d_data_max_wave_speed_z.reset();
+    d_data_max_diffusivity.reset();
     
-    d_has_correct_fixed_patch_size = false;
+    d_has_boundead_patch_size = false;
     
     d_cell_data_computed_velocity          = false;
     d_cell_data_computed_internal_energy   = false;
@@ -998,16 +1004,16 @@ void
 FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
 {
     hier::Box cell_data_box(d_interior_box);
-    if (d_use_fixed_patch_size &&  d_has_correct_fixed_patch_size)
+    if (d_bounded_patch_size_assumed &&  d_has_boundead_patch_size)
     {
-        cell_data_box = d_fixed_patch_box;
+        cell_data_box = d_assumed_largest_patch_box;
     }
     
-    TBOX_WARNING(d_object_name
-        << ": FlowModelSingleSpecies::allocateMemoryForDerivedCellData()\n"
-        << "Debugging!\n"
-        << "d_fixed_patch_box = " << d_fixed_patch_box << ";\n"
-        << std::endl);
+    // TBOX_WARNING(d_object_name
+    //     << ": FlowModelSingleSpecies::allocateMemoryForDerivedCellData()\n"
+    //     << "Debugging!\n"
+    //     << "d_assumed_largest_patch_box = " << d_assumed_largest_patch_box << ";\n"
+    //     << std::endl);
     
     if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
     {
@@ -1018,10 +1024,10 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
             {
                 need_data_allocation = true;
             }
-            else if (d_use_fixed_patch_size)
+            else if (d_bounded_patch_size_assumed)
             {
                 if ((d_num_subghosts_velocity != d_data_velocity->getGhostCellWidth()) ||
-                    !d_has_correct_fixed_patch_size)
+                    !d_has_boundead_patch_size)
                 {
                     need_data_allocation = true;
                 }
@@ -1052,10 +1058,10 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
             {
                 need_data_allocation = true;
             }
-            else if (d_use_fixed_patch_size)
+            else if (d_bounded_patch_size_assumed)
             {
                 if ((d_num_subghosts_internal_energy != d_data_internal_energy->getGhostCellWidth()) ||
-                    !d_has_correct_fixed_patch_size)
+                    !d_has_boundead_patch_size)
                 {
                     need_data_allocation = true;
                 }
@@ -1089,7 +1095,7 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
             else
             {
                 if ((d_num_subghosts_pressure != d_data_pressure->getGhostCellWidth()) ||
-                    !d_has_correct_fixed_patch_size)
+                    !d_has_boundead_patch_size)
                 {
                     need_data_allocation = true;
                 }
@@ -1120,10 +1126,10 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
             {
                 need_data_allocation = true;
             }
-            else if (d_use_fixed_patch_size)
+            else if (d_bounded_patch_size_assumed)
             {
                 if ((d_num_subghosts_sound_speed != d_data_sound_speed->getGhostCellWidth()) ||
-                    !d_has_correct_fixed_patch_size)
+                    !d_has_boundead_patch_size)
                 {
                     need_data_allocation = true;
                 }
@@ -1154,10 +1160,10 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
             {
                 need_data_allocation = true;
             }
-            else if (d_use_fixed_patch_size)
+            else if (d_bounded_patch_size_assumed)
             {
                 if ((d_num_subghosts_temperature != d_data_temperature->getGhostCellWidth()) ||
-                    !d_has_correct_fixed_patch_size)
+                    !d_has_boundead_patch_size)
                 {
                     need_data_allocation = true;
                 }
@@ -1188,10 +1194,10 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
             {
                 need_data_allocation = true;
             }
-            else if (d_use_fixed_patch_size)
+            else if (d_bounded_patch_size_assumed)
             {
                 if ((d_num_subghosts_convective_flux_x != d_data_convective_flux_x->getGhostCellWidth()) ||
-                    !d_has_correct_fixed_patch_size)
+                    !d_has_boundead_patch_size)
                 {
                     need_data_allocation = true;
                 }
@@ -1222,10 +1228,10 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
             {
                 need_data_allocation = true;
             }
-            else if (d_use_fixed_patch_size)
+            else if (d_bounded_patch_size_assumed)
             {
                 if ((d_num_subghosts_convective_flux_y != d_data_convective_flux_y->getGhostCellWidth()) ||
-                    !d_has_correct_fixed_patch_size)
+                    !d_has_boundead_patch_size)
                 {
                     need_data_allocation = true;
                 }
@@ -1256,10 +1262,10 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
             {
                 need_data_allocation = true;
             }
-            else if (d_use_fixed_patch_size)
+            else if (d_bounded_patch_size_assumed)
             {
                 if ((d_num_subghosts_convective_flux_z != d_data_convective_flux_z->getGhostCellWidth()) ||
-                    !d_has_correct_fixed_patch_size)
+                    !d_has_boundead_patch_size)
                 {
                     need_data_allocation = true;
                 }
@@ -1290,10 +1296,10 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
             {
                 need_data_allocation = true;
             }
-            else if (d_use_fixed_patch_size)
+            else if (d_bounded_patch_size_assumed)
             {
                 if ((d_num_subghosts_max_wave_speed_x != d_data_max_wave_speed_x->getGhostCellWidth()) ||
-                    !d_has_correct_fixed_patch_size)
+                    !d_has_boundead_patch_size)
                 {
                     need_data_allocation = true;
                 }
@@ -1324,10 +1330,10 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
             {
                 need_data_allocation = true;
             }
-            else if (d_use_fixed_patch_size)
+            else if (d_bounded_patch_size_assumed)
             {
                 if ((d_num_subghosts_max_wave_speed_y != d_data_max_wave_speed_y->getGhostCellWidth()) ||
-                    !d_has_correct_fixed_patch_size)
+                    !d_has_boundead_patch_size)
                 {
                     need_data_allocation = true;
                 }
@@ -1358,10 +1364,10 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
             {
                 need_data_allocation = true;
             }
-            else if (d_use_fixed_patch_size)
+            else if (d_bounded_patch_size_assumed)
             {
                 if ((d_num_subghosts_max_wave_speed_z != d_data_max_wave_speed_z->getGhostCellWidth()) ||
-                    !d_has_correct_fixed_patch_size)
+                    !d_has_boundead_patch_size)
                 {
                     need_data_allocation = true;
                 }
@@ -1392,10 +1398,10 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
             {
                 need_data_allocation = true;
             }
-            else if (d_use_fixed_patch_size)
+            else if (d_bounded_patch_size_assumed)
             {
                 if ((d_num_subghosts_max_diffusivity != d_data_max_diffusivity->getGhostCellWidth()) ||
-                    !d_has_correct_fixed_patch_size)
+                    !d_has_boundead_patch_size)
                 {
                     need_data_allocation = true;
                 }

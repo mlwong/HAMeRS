@@ -320,6 +320,22 @@ class FlowModelSingleSpecies: public FlowModel
         HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_max_diffusivity;
         
         /*
+         * HAMERS_SHARED_PTR to derived cell data on a scratch patch with assumed largest patch size.
+         */
+        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_scratch_velocity;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_scratch_internal_energy;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_scratch_pressure;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_scratch_sound_speed;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_scratch_temperature;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_scratch_convective_flux_x;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_scratch_convective_flux_y;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_scratch_convective_flux_z;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_scratch_max_wave_speed_x;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_scratch_max_wave_speed_y;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_scratch_max_wave_speed_z;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_scratch_max_diffusivity;
+        
+        /*
          * Whether derived cell data is computed.
          */
         bool d_cell_data_computed_velocity;

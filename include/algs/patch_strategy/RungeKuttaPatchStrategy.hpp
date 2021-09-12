@@ -66,7 +66,7 @@ class RungeKuttaPatchStrategy:
         RungeKuttaPatchStrategy(
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const bool& use_fixed_patch_size);
+            const bool& bounded_patch_size_assumed);
         
         /**
          * Virtual destructor for RungeKuttaPatchStrategy.
@@ -74,21 +74,19 @@ class RungeKuttaPatchStrategy:
         virtual ~RungeKuttaPatchStrategy();
         
         /**
-         * Get whether to use fixed patch size.
+         * Get whether bounded patch size is assumed.
          */
-        
-        bool getUseFixedPatchSize() const
+        bool getBoundedPatchSizeAssumed() const
         {
-            return d_use_fixed_patch_size;
+            return d_bounded_patch_size_assumed;
         }
         
         /**
-         * Get fixed patch size.
+         * Get assumed largest patch size.
          */
-        
-        const hier::IntVector& getFixedPatchSize() const
+        const hier::IntVector& getAssumedLargestPatchSize() const
         {
-            return d_fixed_patch_size;
+            return d_assumed_largest_patch_size;
         }
         
         /**
@@ -634,11 +632,11 @@ class RungeKuttaPatchStrategy:
         
     protected:
         /*
-         * Whether to use fixed patch size.
+         * Whether bounded patch size is assumed.
          */
-        const bool d_use_fixed_patch_size;
+        const bool d_bounded_patch_size_assumed;
         
-        hier::IntVector d_fixed_patch_size;
+        hier::IntVector d_assumed_largest_patch_size;
         
         HAMERS_SHARED_PTR<hier::VariableContext> d_data_context;
         

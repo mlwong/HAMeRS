@@ -57,12 +57,12 @@ Euler::Euler(
     const HAMERS_SHARED_PTR<tbox::Database>& input_db,
     const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const bool& use_fixed_patch_size,
+    const bool& bounded_patch_size_assumed,
     const std::string& stat_dump_filename):
         RungeKuttaPatchStrategy(
             dim,
             patch_hierarchy,
-            use_fixed_patch_size),
+            bounded_patch_size_assumed),
         d_object_name(object_name),
         d_dim(dim),
         d_grid_geometry(grid_geometry),
@@ -123,9 +123,9 @@ Euler::Euler(
     
     d_flow_model = d_flow_model_manager->getFlowModel();
     
-    if (d_use_fixed_patch_size)
+    if (d_bounded_patch_size_assumed)
     {
-        d_flow_model->setFixedPatchSize(d_fixed_patch_size);
+        d_flow_model->setAssumedLargestPatchSize(d_assumed_largest_patch_size);
     }
     
     /*

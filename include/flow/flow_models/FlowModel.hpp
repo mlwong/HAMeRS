@@ -69,10 +69,10 @@ class FlowModel:
                 d_object_name(object_name),
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
-                d_use_fixed_patch_size(false),
-                d_has_correct_fixed_patch_size(false),
-                d_fixed_patch_size(hier::IntVector::getZero(d_dim)),
-                d_fixed_patch_box(hier::Box::getEmptyBox(d_dim)),
+                d_bounded_patch_size_assumed(false),
+                d_has_boundead_patch_size(false),
+                d_assumed_largest_patch_size(hier::IntVector::getZero(d_dim)),
+                d_assumed_largest_patch_box(hier::Box::getEmptyBox(d_dim)),
                 d_num_species(num_species),
                 d_num_eqn(num_eqn),
                 d_num_ghosts(-hier::IntVector::getOne(d_dim)),
@@ -90,37 +90,34 @@ class FlowModel:
         virtual ~FlowModel() {}
         
         /*
-         * Get whether to use fixed patch size.
+         * Get whether bounded patch size is assumed.
          */
-        
-        bool getUseFixedPatchSize() const
+        bool getBoundedPatchSizeAssumed() const
         {
-            return d_use_fixed_patch_size;
+            return d_bounded_patch_size_assumed;
         }
         
         /*
-         * Get fixed patch size.
+         * Get assumed largest patch size.
          */
-        
-        const hier::IntVector& getFixedPatchSize() const
+        const hier::IntVector& getAssumedLargestPatchSize() const
         {
-            return d_fixed_patch_size;
+            return d_assumed_largest_patch_size;
         }
         
         /*
-         * Set whether to use fixed patch size.
+         * Set assumed largest patch size.
          */
-        
-        void setFixedPatchSize(const hier::IntVector& fixed_patch_size)
+        void setAssumedLargestPatchSize(const hier::IntVector& assumed_largest_patch_size)
         {
-            TBOX_ASSERT(fixed_patch_size.getDim() == d_dim);
+            TBOX_ASSERT(assumed_largest_patch_size.getDim() == d_dim);
             
-            d_use_fixed_patch_size = true;
-            d_fixed_patch_size = fixed_patch_size;
+            d_bounded_patch_size_assumed = true;
+            d_assumed_largest_patch_size = assumed_largest_patch_size;
             for (int di = 0; di < d_dim.getValue(); di++)
             {
-                d_fixed_patch_box.setLower(di, 0);
-                d_fixed_patch_box.setUpper(di, d_fixed_patch_size[di] - 1);
+                d_assumed_largest_patch_box.setLower(di, 0);
+                d_assumed_largest_patch_box.setUpper(di, d_assumed_largest_patch_size[di] - 1);
             }
         }
         
@@ -474,13 +471,13 @@ class FlowModel:
         const HAMERS_SHARED_PTR<geom::CartesianGridGeometry> d_grid_geometry;
         
         /*
-         * Whether to use fixed patch size.
+         * Whether bounded patch size is assumed.
          */
-        bool d_use_fixed_patch_size;
-        bool d_has_correct_fixed_patch_size;
+        bool d_bounded_patch_size_assumed;
+        bool d_has_boundead_patch_size;
         
-        hier::IntVector d_fixed_patch_size;
-        hier::Box d_fixed_patch_box;
+        hier::IntVector d_assumed_largest_patch_size;
+        hier::Box d_assumed_largest_patch_box;
         
         /*
          * A string variable to describe the equation of state used.

@@ -17,23 +17,31 @@
 RungeKuttaPatchStrategy::RungeKuttaPatchStrategy(
     const tbox::Dimension& dim,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const bool& use_fixed_patch_size):
-        d_use_fixed_patch_size(use_fixed_patch_size),
-        d_fixed_patch_size(hier::IntVector::getZero(dim)),
+    const bool& bounded_patch_size_assumed):
+        d_bounded_patch_size_assumed(bounded_patch_size_assumed),
+        d_assumed_largest_patch_size(hier::IntVector::getZero(dim)),
         xfer::RefinePatchStrategy(),
         xfer::CoarsenPatchStrategy(),
         d_data_context()
 {
-    if (d_use_fixed_patch_size)
+    if (d_bounded_patch_size_assumed)
     {
         const hier::IntVector& smallest_patch_size_level_0 = patch_hierarchy->getSmallestPatchSize(0);
         const hier::IntVector& largest_patch_size_level_0  = patch_hierarchy->getLargestPatchSize(0);
-    
+        
         if (smallest_patch_size_level_0 > largest_patch_size_level_0)
         {
             TBOX_ERROR("RungeKuttaPatchStrategy::RungeKuttaPatchStrategy: "
                 << "The smallest patch size is greater than the largest patch size on level 0 in patch hierarchy section"
-                << " while 'use_fixed_patch_size' is true!"
+                << " while 'bounded_patch_size_assumed' is true!"
+                << std::endl);
+        }
+        
+        if (smallest_patch_size_level_0 > hier::IntVector::getOne(dim))
+        {
+            TBOX_ERROR("RungeKuttaPatchStrategy::RungeKuttaPatchStrategy: "
+                << "The smallest patch size on level 0 is greater than one"
+                << " while 'bounded_patch_size_assumed' is true!"
                 << std::endl);
         }
         
@@ -44,11 +52,11 @@ RungeKuttaPatchStrategy::RungeKuttaPatchStrategy(
             const hier::IntVector& smallest_patch_size_level = patch_hierarchy->getSmallestPatchSize(li);
             const hier::IntVector& largest_patch_size_level  = patch_hierarchy->getLargestPatchSize(li);
             
-            if (smallest_patch_size_level_0 != smallest_patch_size_level)
+            if (smallest_patch_size_level > hier::IntVector::getOne(dim))
             {
                 TBOX_ERROR("RungeKuttaPatchStrategy::RungeKuttaPatchStrategy: "
-                    << "The smallest patch size on level 0 and that on level " << li << " are different"
-                    << " while 'use_fixed_patch_size' is true!"
+                    << "The smallest patch size on level " << li << " is greater than one"
+                    << " while 'bounded_patch_size_assumed' is true!"
                     << std::endl);
             }
             
@@ -56,12 +64,12 @@ RungeKuttaPatchStrategy::RungeKuttaPatchStrategy(
             {
                 TBOX_ERROR("RungeKuttaPatchStrategy::RungeKuttaPatchStrategy: "
                     << "The largest patch size on level 0 and that on level " << li << " are different"
-                    << " while 'use_fixed_patch_size' is true!"
+                    << " while 'bounded_patch_size_assumed' is true!"
                     << std::endl);
             }
         }
         
-        d_fixed_patch_size = largest_patch_size_level_0;
+        d_assumed_largest_patch_size = largest_patch_size_level_0;
     }
 }
 

@@ -472,10 +472,10 @@ int main(int argc, char *argv[])
             input_db->getDatabase("PatchHierarchy")));
     
     /*
-     * Check whether to use fixed patch size.
+     * Check whether to assume largest patch size.
      */
     
-    const bool use_fixed_patch_size = main_db->getBoolWithDefault("use_fixed_patch_size", false);
+    const bool bounded_patch_size_assumed = main_db->getBoolWithDefault("bounded_patch_size_assumed", false);
     
     APPLICATION_LABEL app_label = EULER;
     
@@ -512,7 +512,7 @@ int main(int argc, char *argv[])
                 input_db->getDatabase("Euler"),
                 grid_geometry,
                 patch_hierarchy,
-                use_fixed_patch_size,
+                bounded_patch_size_assumed,
                 stat_dump_filename);
             
             RK_level_integrator.reset(new RungeKuttaLevelIntegrator(
@@ -531,7 +531,7 @@ int main(int argc, char *argv[])
                 input_db->getDatabase("NavierStokes"),
                 grid_geometry,
                 patch_hierarchy,
-                use_fixed_patch_size,
+                bounded_patch_size_assumed,
                 stat_dump_filename);
             
             RK_level_integrator.reset(
