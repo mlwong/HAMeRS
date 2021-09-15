@@ -70,7 +70,7 @@ class FlowModel:
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
                 d_bounded_patch_size_assumed(false),
-                d_has_boundead_patch_size(false),
+                d_has_bounded_patch_size(false),
                 d_assumed_largest_patch_size(hier::IntVector::getZero(d_dim)),
                 d_assumed_largest_patch_box(hier::Box::getEmptyBox(d_dim)),
                 d_num_species(num_species),
@@ -474,7 +474,7 @@ class FlowModel:
          * Whether bounded patch size is assumed.
          */
         bool d_bounded_patch_size_assumed;
-        bool d_has_boundead_patch_size;
+        bool d_has_bounded_patch_size;
         
         hier::IntVector d_assumed_largest_patch_size;
         hier::Box d_assumed_largest_patch_box;

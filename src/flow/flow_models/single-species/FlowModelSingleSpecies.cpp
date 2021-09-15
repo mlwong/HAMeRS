@@ -722,16 +722,9 @@ FlowModelSingleSpecies::registerPatchWithDataContext(
     
     if (d_bounded_patch_size_assumed)
     {
-        TBOX_WARNING(d_object_name
-            << ": FlowModelSingleSpecies::registerPatchWithDataContext()\n"
-            << "Debugging!\n"
-            << "d_interior_dims = " << d_interior_dims << ";\n"
-            << "d_assumed_largest_patch_size = " << d_assumed_largest_patch_size << ".\n"
-            << std::endl);
-        
         if (d_interior_dims > d_assumed_largest_patch_size)
         {
-            d_has_boundead_patch_size = false;
+            d_has_bounded_patch_size = false;
             
             TBOX_WARNING(d_object_name
                 << ": FlowModelSingleSpecies::registerPatchWithDataContext()\n"
@@ -742,7 +735,7 @@ FlowModelSingleSpecies::registerPatchWithDataContext(
         }
         else
         {
-            d_has_boundead_patch_size = true;
+            d_has_bounded_patch_size = true;
         }
     }
 }
@@ -972,7 +965,7 @@ FlowModelSingleSpecies::unregisterPatch()
     d_data_max_wave_speed_z.reset();
     d_data_max_diffusivity.reset();
     
-    d_has_boundead_patch_size = false;
+    d_has_bounded_patch_size = false;
     
     d_cell_data_computed_velocity          = false;
     d_cell_data_computed_internal_energy   = false;
@@ -1003,11 +996,11 @@ FlowModelSingleSpecies::unregisterPatch()
 void
 FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
 {
-    hier::Box cell_data_box(d_interior_box);
-    if (d_bounded_patch_size_assumed &&  d_has_boundead_patch_size)
-    {
-        cell_data_box = d_assumed_largest_patch_box;
-    }
+    // hier::Box cell_data_box(d_interior_box);
+    // if (d_bounded_patch_size_assumed &&  d_has_bounded_patch_size)
+    // {
+    //     cell_data_box = d_assumed_largest_patch_box;
+    // }
     
     // TBOX_WARNING(d_object_name
     //     << ": FlowModelSingleSpecies::allocateMemoryForDerivedCellData()\n"
@@ -1019,25 +1012,38 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
     {
         if (!d_cell_data_computed_velocity)
         {
-            bool need_data_allocation = false;
             if (!d_data_velocity)
             {
-                need_data_allocation = true;
-            }
-            else if (d_bounded_patch_size_assumed)
-            {
-                if ((d_num_subghosts_velocity != d_data_velocity->getGhostCellWidth()) ||
-                    !d_has_boundead_patch_size)
+                if (d_has_bounded_patch_size)
                 {
-                    need_data_allocation = true;
+                    bool need_data_allocation = false;
+                    if (!d_data_scratch_velocity)
+                    {
+                        need_data_allocation = true;
+                    }
+                    else
+                    {
+                        if (d_num_subghosts_velocity != d_data_scratch_velocity->getGhostCellWidth())
+                        {
+                            need_data_allocation = true;
+                        }
+                    }
+                    
+                    if (need_data_allocation)
+                    {
+                        // Create the cell data of velocity with assumed largest patch box.
+                        d_data_scratch_velocity.reset(
+                            new pdat::CellData<double>(d_assumed_largest_patch_box, d_dim.getValue(), d_num_subghosts_velocity));
+                    }
+                    
+                    d_data_velocity = d_data_scratch_velocity;
                 }
-            }
-            
-            if (need_data_allocation)
-            {
-                // Create the cell data of velocity.
-                d_data_velocity.reset(
-                    new pdat::CellData<double>(cell_data_box, d_dim.getValue(), d_num_subghosts_velocity));
+                else
+                {
+                    // Create the cell data of velocity.
+                    d_data_velocity.reset(
+                        new pdat::CellData<double>(d_interior_box, d_dim.getValue(), d_num_subghosts_velocity));
+                }
             }
         }
         else
@@ -1053,25 +1059,38 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
     {
         if (!d_cell_data_computed_internal_energy)
         {
-            bool need_data_allocation = false;
             if (!d_data_internal_energy)
             {
-                need_data_allocation = true;
-            }
-            else if (d_bounded_patch_size_assumed)
-            {
-                if ((d_num_subghosts_internal_energy != d_data_internal_energy->getGhostCellWidth()) ||
-                    !d_has_boundead_patch_size)
+                if (d_has_bounded_patch_size)
                 {
-                    need_data_allocation = true;
+                    bool need_data_allocation = false;
+                    if (!d_data_scratch_internal_energy)
+                    {
+                        need_data_allocation = true;
+                    }
+                    else
+                    {
+                        if (d_num_subghosts_internal_energy != d_data_scratch_internal_energy->getGhostCellWidth())
+                        {
+                            need_data_allocation = true;
+                        }
+                    }
+                    
+                    if (need_data_allocation)
+                    {
+                        // Create the cell data of internal energy with assumed largest patch box.
+                        d_data_scratch_internal_energy.reset(
+                            new pdat::CellData<double>(d_assumed_largest_patch_box, 1, d_num_subghosts_internal_energy));
+                    }
+                    
+                    d_data_internal_energy = d_data_scratch_internal_energy;
                 }
-            }
-            
-            if (need_data_allocation)
-            {
-                // Create the cell data of internal energy.
-                d_data_internal_energy.reset(
-                    new pdat::CellData<double>(cell_data_box, 1, d_num_subghosts_internal_energy));
+                else
+                {
+                    // Create the cell data of internal energy.
+                    d_data_internal_energy.reset(
+                        new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_internal_energy));
+                }
             }
         }
         else
@@ -1087,25 +1106,38 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
     {
         if (!d_cell_data_computed_pressure)
         {
-            bool need_data_allocation = false;
             if (!d_data_pressure)
             {
-                need_data_allocation = true;
-            }
-            else
-            {
-                if ((d_num_subghosts_pressure != d_data_pressure->getGhostCellWidth()) ||
-                    !d_has_boundead_patch_size)
+                if (d_has_bounded_patch_size)
                 {
-                    need_data_allocation = true;
+                    bool need_data_allocation = false;
+                    if (!d_data_scratch_pressure)
+                    {
+                        need_data_allocation = true;
+                    }
+                    else
+                    {
+                        if (d_num_subghosts_pressure != d_data_scratch_pressure->getGhostCellWidth())
+                        {
+                            need_data_allocation = true;
+                        }
+                    }
+                    
+                    if (need_data_allocation)
+                    {
+                        // Create the cell data of pressure with assumed largest patch box.
+                        d_data_scratch_pressure.reset(
+                            new pdat::CellData<double>(d_assumed_largest_patch_box, 1, d_num_subghosts_pressure));
+                    }
+                    
+                    d_data_pressure = d_data_scratch_pressure;
                 }
-            }
-            
-            if (need_data_allocation)
-            {
-                // Create the cell data of pressure.
-                d_data_pressure.reset(
-                    new pdat::CellData<double>(cell_data_box, 1, d_num_subghosts_pressure));
+                else
+                {
+                    // Create the cell data of pressure.
+                    d_data_pressure.reset(
+                        new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_pressure));
+                }
             }
         }
         else
@@ -1121,25 +1153,38 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
     {
         if (!d_cell_data_computed_sound_speed)
         {
-            bool need_data_allocation = false;
             if (!d_data_sound_speed)
             {
-                need_data_allocation = true;
-            }
-            else if (d_bounded_patch_size_assumed)
-            {
-                if ((d_num_subghosts_sound_speed != d_data_sound_speed->getGhostCellWidth()) ||
-                    !d_has_boundead_patch_size)
+                bool need_data_allocation = false;
+                if (d_has_bounded_patch_size)
                 {
-                    need_data_allocation = true;
+                    if (!d_data_scratch_sound_speed)
+                    {
+                        need_data_allocation = true;
+                    }
+                    else
+                    {
+                        if (d_num_subghosts_sound_speed != d_data_scratch_sound_speed->getGhostCellWidth())
+                        {
+                            need_data_allocation = true;
+                        }
+                    }
+                    
+                    if (need_data_allocation)
+                    {
+                        // Create the cell data of sound speed with assumed largest patch box.
+                        d_data_scratch_sound_speed.reset(
+                            new pdat::CellData<double>(d_assumed_largest_patch_box, 1, d_num_subghosts_sound_speed));
+                    }
+                    
+                    d_data_sound_speed = d_data_scratch_sound_speed;
                 }
-            }
-            
-            if (need_data_allocation)
-            {
-                // Create the cell data of sound speed.
-                d_data_sound_speed.reset(
-                    new pdat::CellData<double>(cell_data_box, 1, d_num_subghosts_sound_speed));
+                else
+                {
+                    // Create the cell data of sound speed.
+                    d_data_sound_speed.reset(
+                        new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_sound_speed));
+                }
             }
         }
         else
@@ -1155,25 +1200,38 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
     {
         if (!d_cell_data_computed_temperature)
         {
-            bool need_data_allocation = false;
             if (!d_data_temperature)
             {
-                need_data_allocation = true;
-            }
-            else if (d_bounded_patch_size_assumed)
-            {
-                if ((d_num_subghosts_temperature != d_data_temperature->getGhostCellWidth()) ||
-                    !d_has_boundead_patch_size)
+                if (d_has_bounded_patch_size)
                 {
-                    need_data_allocation = true;
+                    bool need_data_allocation = false;
+                    if (!d_data_scratch_temperature)
+                    {
+                        need_data_allocation = true;
+                    }
+                    else
+                    {
+                        if (d_num_subghosts_temperature != d_data_scratch_temperature->getGhostCellWidth())
+                        {
+                            need_data_allocation = true;
+                        }
+                    }
+                    
+                    if (need_data_allocation)
+                    {
+                        // Create the cell data of temperature with assumed largest patch box.
+                        d_data_scratch_temperature.reset(
+                            new pdat::CellData<double>(d_assumed_largest_patch_box, 1, d_num_subghosts_temperature));
+                    }
+                    
+                    d_data_temperature = d_data_scratch_temperature;
                 }
-            }
-            
-            if (need_data_allocation)
-            {
-                // Create the cell data of temperature.
-                d_data_temperature.reset(
-                    new pdat::CellData<double>(cell_data_box, 1, d_num_subghosts_temperature));
+                else
+                {
+                    // Create the cell data of temperature.
+                    d_data_temperature.reset(
+                        new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_temperature));
+                }
             }
         }
         else
@@ -1189,25 +1247,38 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
     {
         if (!d_cell_data_computed_convective_flux_x)
         {
-            bool need_data_allocation = false;
             if (!d_data_convective_flux_x)
             {
-                need_data_allocation = true;
-            }
-            else if (d_bounded_patch_size_assumed)
-            {
-                if ((d_num_subghosts_convective_flux_x != d_data_convective_flux_x->getGhostCellWidth()) ||
-                    !d_has_boundead_patch_size)
+                if (d_has_bounded_patch_size)
                 {
-                    need_data_allocation = true;
+                    bool need_data_allocation = false;
+                    if (!d_data_scratch_convective_flux_x)
+                    {
+                        need_data_allocation = true;
+                    }
+                    else
+                    {
+                        if (d_num_subghosts_convective_flux_x != d_data_scratch_convective_flux_x->getGhostCellWidth())
+                        {
+                            need_data_allocation = true;
+                        }
+                    }
+                    
+                    if (need_data_allocation)
+                    {
+                        // Create the cell data of convective flux in the x-direction with assumed largest patch box.
+                        d_data_scratch_convective_flux_x.reset(
+                            new pdat::CellData<double>(d_assumed_largest_patch_box, d_num_eqn, d_num_subghosts_convective_flux_x));
+                    }
+                    
+                    d_data_convective_flux_x = d_data_scratch_convective_flux_x;
                 }
-            }
-            
-            if (need_data_allocation)
-            {
-                // Create the cell data of convective flux in the x-direction.
-                d_data_convective_flux_x.reset(
-                    new pdat::CellData<double>(cell_data_box, d_num_eqn, d_num_subghosts_convective_flux_x));
+                else
+                {
+                    // Create the cell data of convective flux in the x-direction.
+                    d_data_convective_flux_x.reset(
+                        new pdat::CellData<double>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_x));
+                }
             }
         }
         else
@@ -1223,25 +1294,38 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
     {
         if (!d_cell_data_computed_convective_flux_y)
         {
-            bool need_data_allocation = false;
             if (!d_data_convective_flux_y)
             {
-                need_data_allocation = true;
-            }
-            else if (d_bounded_patch_size_assumed)
-            {
-                if ((d_num_subghosts_convective_flux_y != d_data_convective_flux_y->getGhostCellWidth()) ||
-                    !d_has_boundead_patch_size)
+                if (d_has_bounded_patch_size)
                 {
-                    need_data_allocation = true;
+                    bool need_data_allocation = false;
+                    if (!d_data_scratch_convective_flux_y)
+                    {
+                        need_data_allocation = true;
+                    }
+                    else
+                    {
+                        if (d_num_subghosts_convective_flux_y != d_data_scratch_convective_flux_y->getGhostCellWidth())
+                        {
+                            need_data_allocation = true;
+                        }
+                    }
+                    
+                    if (need_data_allocation)
+                    {
+                        // Create the cell data of convective flux in the y-direction with assumed largest patch box.
+                        d_data_scratch_convective_flux_y.reset(
+                            new pdat::CellData<double>(d_assumed_largest_patch_box, d_num_eqn, d_num_subghosts_convective_flux_y));
+                    }
+                    
+                    d_data_convective_flux_y = d_data_scratch_convective_flux_y;
                 }
-            }
-            
-            if (need_data_allocation)
-            {
-                // Create the cell data of convective flux in the y-direction.
-                d_data_convective_flux_y.reset(
-                    new pdat::CellData<double>(cell_data_box, d_num_eqn, d_num_subghosts_convective_flux_y));
+                else
+                {
+                    // Create the cell data of convective flux in the y-direction.
+                    d_data_convective_flux_y.reset(
+                        new pdat::CellData<double>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_y));
+                }
             }
         }
         else
@@ -1257,25 +1341,38 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
     {
         if (!d_cell_data_computed_convective_flux_z)
         {
-            bool need_data_allocation = false;
             if (!d_data_convective_flux_z)
             {
-                need_data_allocation = true;
-            }
-            else if (d_bounded_patch_size_assumed)
-            {
-                if ((d_num_subghosts_convective_flux_z != d_data_convective_flux_z->getGhostCellWidth()) ||
-                    !d_has_boundead_patch_size)
+                if (d_has_bounded_patch_size)
                 {
-                    need_data_allocation = true;
+                    bool need_data_allocation = false;
+                    if (!d_data_scratch_convective_flux_z)
+                    {
+                        need_data_allocation = true;
+                    }
+                    else
+                    {
+                        if (d_num_subghosts_convective_flux_z != d_data_scratch_convective_flux_z->getGhostCellWidth())
+                        {
+                            need_data_allocation = true;
+                        }
+                    }
+                    
+                    if (need_data_allocation)
+                    {
+                        // Create the cell data of convective flux in the z-direction with assumed largest patch box.
+                        d_data_scratch_convective_flux_z.reset(
+                            new pdat::CellData<double>(d_assumed_largest_patch_box, d_num_eqn, d_num_subghosts_convective_flux_z));
+                    }
+                    
+                    d_data_convective_flux_z = d_data_scratch_convective_flux_z;
                 }
-            }
-            
-            if (need_data_allocation)
-            {
-                // Create the cell data of convective flux in the z-direction.
-                d_data_convective_flux_z.reset(
-                    new pdat::CellData<double>(cell_data_box, d_num_eqn, d_num_subghosts_convective_flux_z));
+                else
+                {
+                    // Create the cell data of convective flux in the z-direction.
+                    d_data_convective_flux_z.reset(
+                        new pdat::CellData<double>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_z));
+                }
             }
         }
         else
@@ -1294,22 +1391,33 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
         {
             if (!d_data_max_wave_speed_x)
             {
-                need_data_allocation = true;
+                    bool need_data_allocation = false;
+                    if (!d_data_scratch_max_wave_speed_x)
+                    {
+                        need_data_allocation = true;
+                    }
+                    else
+                    {
+                        if (d_num_subghosts_max_wave_speed_x != d_data_scratch_max_wave_speed_x->getGhostCellWidth())
+                        {
+                            need_data_allocation = true;
+                        }
+                    }
+                    
+                    if (need_data_allocation)
+                    {
+                        // Create the cell data of maximum wave speed in the x-direction. with assumed largest patch box.
+                        d_data_scratch_max_wave_speed_x.reset(
+                            new pdat::CellData<double>(d_assumed_largest_patch_box, 1, d_num_subghosts_max_wave_speed_x));
+                    }
+                    
+                    d_data_max_wave_speed_x = d_data_scratch_max_wave_speed_x;
             }
-            else if (d_bounded_patch_size_assumed)
-            {
-                if ((d_num_subghosts_max_wave_speed_x != d_data_max_wave_speed_x->getGhostCellWidth()) ||
-                    !d_has_boundead_patch_size)
-                {
-                    need_data_allocation = true;
-                }
-            }
-            
-            if (need_data_allocation)
+            else
             {
                 // Create the cell data of maximum wave speed in the x-direction.
                 d_data_max_wave_speed_x.reset(
-                    new pdat::CellData<double>(cell_data_box, 1, d_num_subghosts_max_wave_speed_x));
+                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_wave_speed_x));
             }
         }
         else
@@ -1325,25 +1433,35 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
     {
         if (!d_cell_data_computed_max_wave_speed_y)
         {
-            bool need_data_allocation = false;
             if (!d_data_max_wave_speed_y)
             {
-                need_data_allocation = true;
+                    bool need_data_allocation = false;
+                    if (!d_data_scratch_max_wave_speed_y)
+                    {
+                        need_data_allocation = true;
+                    }
+                    else
+                    {
+                        if (d_num_subghosts_max_wave_speed_y != d_data_scratch_max_wave_speed_y->getGhostCellWidth())
+                        {
+                            need_data_allocation = true;
+                        }
+                    }
+                    
+                    if (need_data_allocation)
+                    {
+                        // Create the cell data of maximum wave speed in the y-direction. with assumed largest patch box.
+                        d_data_scratch_max_wave_speed_y.reset(
+                            new pdat::CellData<double>(d_assumed_largest_patch_box, 1, d_num_subghosts_max_wave_speed_y));
+                    }
+                    
+                    d_data_max_wave_speed_y = d_data_scratch_max_wave_speed_y;
             }
-            else if (d_bounded_patch_size_assumed)
-            {
-                if ((d_num_subghosts_max_wave_speed_y != d_data_max_wave_speed_y->getGhostCellWidth()) ||
-                    !d_has_boundead_patch_size)
-                {
-                    need_data_allocation = true;
-                }
-            }
-            
-            if (need_data_allocation)
+            else
             {
                 // Create the cell data of maximum wave speed in the y-direction.
                 d_data_max_wave_speed_y.reset(
-                    new pdat::CellData<double>(cell_data_box, 1, d_num_subghosts_max_wave_speed_y));
+                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_wave_speed_y));
             }
         }
         else
@@ -1359,25 +1477,35 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
     {
         if (!d_cell_data_computed_max_wave_speed_z)
         {
-            bool need_data_allocation = false;
             if (!d_data_max_wave_speed_z)
             {
-                need_data_allocation = true;
+                    bool need_data_allocation = false;
+                    if (!d_data_scratch_max_wave_speed_z)
+                    {
+                        need_data_allocation = true;
+                    }
+                    else
+                    {
+                        if (d_num_subghosts_max_wave_speed_z != d_data_scratch_max_wave_speed_z->getGhostCellWidth())
+                        {
+                            need_data_allocation = true;
+                        }
+                    }
+                    
+                    if (need_data_allocation)
+                    {
+                        // Create the cell data of maximum wave speed in the z-direction. with assumed largest patch box.
+                        d_data_scratch_max_wave_speed_z.reset(
+                            new pdat::CellData<double>(d_assumed_largest_patch_box, 1, d_num_subghosts_max_wave_speed_z));
+                    }
+                    
+                    d_data_max_wave_speed_z = d_data_scratch_max_wave_speed_z;
             }
-            else if (d_bounded_patch_size_assumed)
-            {
-                if ((d_num_subghosts_max_wave_speed_z != d_data_max_wave_speed_z->getGhostCellWidth()) ||
-                    !d_has_boundead_patch_size)
-                {
-                    need_data_allocation = true;
-                }
-            }
-            
-            if (need_data_allocation)
+            else
             {
                 // Create the cell data of maximum wave speed in the z-direction.
                 d_data_max_wave_speed_z.reset(
-                    new pdat::CellData<double>(cell_data_box, 1, d_num_subghosts_max_wave_speed_z));
+                    new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_wave_speed_z));
             }
         }
         else
@@ -1393,25 +1521,38 @@ FlowModelSingleSpecies::allocateMemoryForDerivedCellData()
     {
         if (!d_cell_data_computed_max_diffusivity)
         {
-            bool need_data_allocation = false;
             if (!d_data_max_diffusivity)
             {
-                need_data_allocation = true;
-            }
-            else if (d_bounded_patch_size_assumed)
-            {
-                if ((d_num_subghosts_max_diffusivity != d_data_max_diffusivity->getGhostCellWidth()) ||
-                    !d_has_boundead_patch_size)
+                if (d_has_bounded_patch_size)
                 {
-                    need_data_allocation = true;
+                    bool need_data_allocation = false;
+                    if (!d_data_scratch_max_diffusivity)
+                    {
+                        need_data_allocation = true;
+                    }
+                    else
+                    {
+                        if (d_num_subghosts_max_diffusivity != d_data_scratch_max_diffusivity->getGhostCellWidth())
+                        {
+                            need_data_allocation = true;
+                        }
+                    }
+                    
+                    if (need_data_allocation)
+                    {
+                        // Create the cell data of maximum diffusivity with assumed largest patch box.
+                        d_data_scratch_max_diffusivity.reset(
+                            new pdat::CellData<double>(d_assumed_largest_patch_box, 1, d_num_subghosts_max_diffusivity));
+                    }
+                    
+                    d_data_max_diffusivity = d_data_scratch_max_diffusivity;
                 }
-            }
-            
-            if (need_data_allocation)
-            {
-                // Create the cell data of maximum diffusivity.
-                d_data_max_diffusivity.reset(
-                    new pdat::CellData<double>(cell_data_box, 1, d_num_subghosts_max_diffusivity));
+                else
+                {
+                    // Create the cell data of maximum diffusivity.
+                    d_data_max_diffusivity.reset(
+                        new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
+                }
             }
         }
         else
