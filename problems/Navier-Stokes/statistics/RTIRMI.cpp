@@ -2320,7 +2320,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
     
     HAMERS_SHARED_PTR<RTIRMIStatisticsUtilities> rti_rmi_statistics_utilities(
         new RTIRMIStatisticsUtilities(
-            "RMI statistics utilities",
+            "RTI RMI statistics utilities",
             d_dim,
             d_grid_geometry,
             d_num_species,
