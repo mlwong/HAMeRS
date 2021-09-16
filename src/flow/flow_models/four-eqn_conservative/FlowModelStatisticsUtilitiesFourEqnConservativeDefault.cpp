@@ -18,9 +18,11 @@ void
 FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double output_time)
 {
     NULL_USE(stat_dump_filename);
     NULL_USE(patch_hierarchy);
     NULL_USE(data_context);
+    NULL_USE(output_time);
 }
