@@ -2589,7 +2589,8 @@ Euler::outputDataStatistics(
         flow_model_statistics_utilities->outputStatisticalQuantities(
             d_stat_dump_filename,
             patch_hierarchy,
-            getDataContext());
+            getDataContext(),
+            output_time);
         
         if (mpi.getRank() == 0)
         {
