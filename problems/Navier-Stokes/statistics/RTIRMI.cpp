@@ -42,7 +42,7 @@ class RTIRMIStatisticsUtilities
         outputMixingWidthInXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Output mixedness in x-direction to a file.
@@ -51,7 +51,7 @@ class RTIRMIStatisticsUtilities
         outputMixednessInXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Output TKE integrated with assumed homogeneity in y-direction to a file.
@@ -60,7 +60,7 @@ class RTIRMIStatisticsUtilities
         outputTKEIntegratedWithHomogeneityInYDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Output TKE integrated with assumed homogeneity in yz-plane to a file.
@@ -69,7 +69,7 @@ class RTIRMIStatisticsUtilities
         outputTKEIntegratedWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Output TKE in x-direction integrated with assumed homogeneity in yz-plane to a file.
@@ -78,7 +78,7 @@ class RTIRMIStatisticsUtilities
         outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Output TKE in y-direction integrated with assumed homogeneity in yz-plane to a file.
@@ -87,7 +87,7 @@ class RTIRMIStatisticsUtilities
         outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Output TKE in z-direction integrated with assumed homogeneity in yz-plane to a file.
@@ -96,7 +96,7 @@ class RTIRMIStatisticsUtilities
         outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Output mean velocity associated with turbulent mass flux component in x-direction with assumed homogeneity
@@ -106,7 +106,7 @@ class RTIRMIStatisticsUtilities
         outputTurbMassFluxVelocityXWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Output density-specific volume covariance with assumed homogeneity in y-direction (2D) or yz-plane (3D)
@@ -116,7 +116,7 @@ class RTIRMIStatisticsUtilities
         outputDensitySpecificVolumeCovarianceWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Output Boussinesq approximation deviation with assumed homogeneity in y-direction (2D) or yz-plane (3D)
@@ -126,7 +126,7 @@ class RTIRMIStatisticsUtilities
         outputBoussinesqDeviationWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Output Reynolds normal stress component in x-direction with assumed homogeneity in y-direction (2D) or yz-plane (3D)
@@ -136,7 +136,7 @@ class RTIRMIStatisticsUtilities
         outputReynoldsNormalStressXWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Output Reynolds normal stress component in y-direction with assumed homogeneity in y-direction (2D) or yz-plane (3D)
@@ -146,7 +146,7 @@ class RTIRMIStatisticsUtilities
         outputReynoldsNormalStressYWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Output enstrophy integrated to a file.
@@ -155,7 +155,7 @@ class RTIRMIStatisticsUtilities
         outputEnstrophyIntegrated(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Output scalar dissipation rate of first species integrated to a file.
@@ -164,7 +164,7 @@ class RTIRMIStatisticsUtilities
         outputScalarDissipationRateIntegrated(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Output numerical interface thickness to a file.
@@ -173,7 +173,7 @@ class RTIRMIStatisticsUtilities
         outputNumericalInterfaceThickness(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Output number of cells to a file.
@@ -182,7 +182,7 @@ class RTIRMIStatisticsUtilities
         outputNumberOfCells(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Output weighted number of cells to a file.
@@ -191,7 +191,7 @@ class RTIRMIStatisticsUtilities
         outputWeightedNumberOfCells(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
 
         /*
          * Output minimum interface location in x-direction to a file.
@@ -200,7 +200,7 @@ class RTIRMIStatisticsUtilities
         outputInterfaceMinInXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
          * Output maximum interface location in x-direction to a file.
@@ -209,7 +209,7 @@ class RTIRMIStatisticsUtilities
         outputInterfaceMaxInXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
     private:
         /*
@@ -282,7 +282,7 @@ void
 RTIRMIStatisticsUtilities::outputMixingWidthInXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -368,7 +368,7 @@ void
 RTIRMIStatisticsUtilities::outputMixednessInXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -474,7 +474,7 @@ void
 RTIRMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -660,7 +660,7 @@ void
 RTIRMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -886,7 +886,7 @@ RTIRMIStatisticsUtilities::
 outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -1038,7 +1038,7 @@ RTIRMIStatisticsUtilities::
 outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -1189,7 +1189,7 @@ RTIRMIStatisticsUtilities::
 outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -1340,7 +1340,7 @@ void
 RTIRMIStatisticsUtilities::outputTurbMassFluxVelocityXWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -1461,7 +1461,7 @@ void
 RTIRMIStatisticsUtilities::outputDensitySpecificVolumeCovarianceWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -1587,7 +1587,7 @@ void
 RTIRMIStatisticsUtilities::outputBoussinesqDeviationWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -1735,7 +1735,7 @@ void
 RTIRMIStatisticsUtilities::outputReynoldsNormalStressXWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -1888,7 +1888,7 @@ void
 RTIRMIStatisticsUtilities::outputReynoldsNormalStressYWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -1972,7 +1972,7 @@ RTIRMIStatisticsUtilities::outputReynoldsNormalStressYWithInhomogeneousXDirectio
         v_tilde[i] /= rho_mean[i];
     }
     
-    // Compute R_11.
+    // Compute R_22.
     
     std::vector<double> zeros(finest_level_dims[0], double(0));
     
@@ -2040,7 +2040,7 @@ void
 RTIRMIStatisticsUtilities::outputEnstrophyIntegrated(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -2488,7 +2488,7 @@ void
 RTIRMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -2796,7 +2796,7 @@ void
 RTIRMIStatisticsUtilities::outputNumericalInterfaceThickness(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -2882,7 +2882,7 @@ void
 RTIRMIStatisticsUtilities::outputNumberOfCells(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -2933,7 +2933,7 @@ void
 RTIRMIStatisticsUtilities::outputWeightedNumberOfCells(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -2983,7 +2983,7 @@ void
 RTIRMIStatisticsUtilities::outputInterfaceMinInXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
@@ -3076,7 +3076,7 @@ void
 RTIRMIStatisticsUtilities::outputInterfaceMaxInXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
