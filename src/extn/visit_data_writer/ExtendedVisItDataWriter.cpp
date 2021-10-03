@@ -1742,7 +1742,7 @@ ExtendedVisItDataWriter::writeHDFFiles(
     {
         // cluster_leader guaranteed to enter this section before anyone else
         sprintf(temp_buf, "/processor_cluster.%0*d.samrai",
-            d_dump_directory_name_zero_padding_length,
+            5,
             d_my_file_cluster_number);
         std::string database_name(temp_buf);
         std::string visit_HDFFilename = dump_dirname + database_name;
@@ -1769,7 +1769,7 @@ ExtendedVisItDataWriter::writeHDFFiles(
         }
         
         // create group for this proc
-        sprintf(temp_buf, "processor.%0*d", d_dump_directory_name_zero_padding_length, my_proc);
+        sprintf(temp_buf, "processor.%0*d", 5, my_proc);
         HAMERS_SHARED_PTR<SAMRAI::tbox::Database> processor_HDFGroup(
             visit_HDFFilePointer->putDatabase(std::string(temp_buf)));
         writeVisItVariablesToHDFFile(processor_HDFGroup,
