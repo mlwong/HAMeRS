@@ -3053,10 +3053,10 @@ RTIRMIStatisticsUtilities::outputInterfaceMinInXDirection(
         {
             if (Y_avg_global[i] > 0.01 && Y_avg_global[i] < 0.99)
             {
-                const double x_loca = x_lo[0] + 0.5*dx_finest[0] + i*dx_finest[0];
-                if (x_loca < interface_min)
+                const double x_loc = x_lo[0] + 0.5*dx_finest[0] + i*dx_finest[0];
+                if (x_loc < interface_min)
                 {
-                   interface_min = x_loca;
+                   interface_min = x_loc;
                 }
             }
         }
@@ -3139,17 +3139,17 @@ RTIRMIStatisticsUtilities::outputInterfaceMaxInXDirection(
     if (mpi.getRank() == 0)
     {
         const double* x_lo = d_grid_geometry->getXLower();
-        const double* x_hi = d_grid_geometry->getXUpper();
+        // const double* x_hi = d_grid_geometry->getXUpper();
         double interface_max = x_lo[0];
         
         for (int i = 0; i < finest_level_dims[0]; i++)
         {
             if (Y_avg_global[i] > 0.01 && Y_avg_global[i] < 0.99)
             {
-                const double x_loca = x_lo[0] + 0.5*dx_finest[0] + i*dx_finest[0];
-                if (x_loca > interface_max)
+                const double x_loc = x_lo[0] + 0.5*dx_finest[0] + i*dx_finest[0];
+                if (x_loc > interface_max)
                 {
-                   interface_max = x_loca;
+                   interface_max = x_loc;
                 }
             }
         }
