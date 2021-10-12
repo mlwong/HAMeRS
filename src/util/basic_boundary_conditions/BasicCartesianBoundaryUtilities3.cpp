@@ -1965,14 +1965,6 @@ BasicCartesianBoundaryUtilities3::fillNodeBoundaryData(
                     }
                 }
             }
-            // else
-            // {
-            //     TBOX_ERROR("BasicCartesianBoundaryUtilities3::fillNodeBoundaryData()\n"
-            //         << "Invalid node boundary condition!\n"
-            //         << "node_loc = '" << node_loc << "'." << std::endl
-            //         << "bdry_node_conds[node_loc] = '" << bdry_node_conds[node_loc] << "'."
-            //         << std::endl);
-            // }
         }
     }
 }
