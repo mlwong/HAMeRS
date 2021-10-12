@@ -159,8 +159,8 @@ struct BasicCartesianBoundaryUtilities2
         getFromInput(
             BoundaryUtilityStrategy* bdry_strategy,
             const HAMERS_SHARED_PTR<tbox::Database>& input_db,
-            const std::vector<int>& edge_locs,
-            const std::vector<int>& node_locs,
+            std::vector<int>& edge_locs,
+            std::vector<int>& node_locs,
             std::vector<int>& edge_conds,
             std::vector<int>& node_conds,
             const hier::IntVector& periodic);
@@ -309,14 +309,14 @@ struct BasicCartesianBoundaryUtilities2
         read2dBdryEdges(
             BoundaryUtilityStrategy* bdry_strategy,
             const HAMERS_SHARED_PTR<tbox::Database>& input_db,
-            const std::vector<int>& edge_locs,
+            std::vector<int>& edge_locs,
             std::vector<int>& edge_conds,
             const hier::IntVector& periodic);
         
         static void
         read2dBdryNodes(
             const HAMERS_SHARED_PTR<tbox::Database>& input_db,
-            const std::vector<int>& node_locs,
+            std::vector<int>& node_locs,
             const std::vector<int>& edge_conds,
             std::vector<int>& node_conds,
             const hier::IntVector& periodic);

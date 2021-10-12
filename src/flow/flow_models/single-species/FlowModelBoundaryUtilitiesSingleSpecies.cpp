@@ -780,6 +780,23 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill1dNodeBoundaryData(
             }
         }
     }
+    
+    for (int ni = 0; ni < static_cast<int>(node_bdry.size()); ni++)
+    {
+        TBOX_ASSERT(node_bdry[ni].getBoundaryType() == BDRY::NODE1D);
+        
+        int node_loc = node_bdry[ni].getLocationIndex();
+        
+        if (std::find(bdry_node_locs.begin(), bdry_node_locs.end(), node_loc) !=
+            bdry_node_locs.end())
+        {
+            TBOX_ERROR("FlowModelBoundaryUtilitiesSingleSpecies::fill1dNodeBoundaryData()\n"
+                << "Invalid node boundary condition!\n"
+                << "node_loc = '" << node_loc << "'." << std::endl
+                << "bdry_node_conds[node_loc] = '" << bdry_node_conds[node_loc] << "'."
+                << std::endl);
+        }
+    }
 }
 
 
@@ -2790,6 +2807,23 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
             }
         }
     }
+    
+    for (int ei = 0; ei < static_cast<int>(edge_bdry.size()); ei++)
+    {
+        TBOX_ASSERT(edge_bdry[ei].getBoundaryType() == BDRY::EDGE2D);
+        
+        int edge_loc = edge_bdry[ei].getLocationIndex();
+        
+        if (std::find(bdry_edge_locs.begin(), bdry_edge_locs.end(), edge_loc) !=
+            bdry_edge_locs.end())
+        {
+            TBOX_ERROR("FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData()\n"
+                << "Invalid edge boundary condition!\n"
+                << "edge_loc = '" << edge_loc << "'." << std::endl
+                << "bdry_edge_conds[edge_loc] = '" << bdry_edge_conds[edge_loc] << "'."
+                << std::endl);
+        }
+    }
 }
 
 
@@ -3433,6 +3467,23 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dNodeBoundaryData(
                         bdry_node_locs.end());
                 }
             }
+        }
+    }
+    
+    for (int ni = 0; ni < static_cast<int>(node_bdry.size()); ni++)
+    {
+        TBOX_ASSERT(node_bdry[ni].getBoundaryType() == BDRY::NODE2D);
+        
+        int node_loc = node_bdry[ni].getLocationIndex();
+        
+        if (std::find(bdry_node_locs.begin(), bdry_node_locs.end(), node_loc) !=
+            bdry_node_locs.end())
+        {
+            TBOX_ERROR("FlowModelBoundaryUtilitiesSingleSpecies::fill2dNodeBoundaryData\n"
+                << "Invalid node boundary condition!\n"
+                << "node_loc = '" << node_loc << "'." << std::endl
+                << "bdry_node_conds[node_loc] = '" << bdry_node_conds[node_loc] << "'."
+                << std::endl);
         }
     }
 }
@@ -7871,6 +7922,23 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
             }
         }
     }
+    
+    for (int fi = 0; fi < static_cast<int>(face_bdry.size()); fi++)
+    {
+        TBOX_ASSERT(face_bdry[fi].getBoundaryType() == BDRY::FACE3D);
+        
+        int face_loc = face_bdry[fi].getLocationIndex();
+        
+        if (std::find(bdry_face_locs.begin(), bdry_face_locs.end(), face_loc) !=
+            bdry_face_locs.end())
+        {
+            TBOX_ERROR("FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData\n"
+                << "Invalid face boundary condition!\n"
+                << "face_loc = '" << face_loc << "'." << std::endl
+                << "bdry_face_conds[face_loc] = '" << bdry_face_conds[face_loc] << "'."
+                << std::endl);
+        }
+    }
 }
 
 
@@ -9002,6 +9070,23 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dEdgeBoundaryData(
             }
         }
     }
+    
+    for (int ei = 0; ei < static_cast<int>(edge_bdry.size()); ei++)
+    {
+        TBOX_ASSERT(edge_bdry[ei].getBoundaryType() == BDRY::EDGE3D);
+        
+        int edge_loc(edge_bdry[ei].getLocationIndex());
+        
+        if (std::find(bdry_edge_locs.begin(), bdry_edge_locs.end(), edge_loc) !=
+            bdry_edge_locs.end())
+        {
+            TBOX_ERROR("FlowModelBoundaryUtilitiesSingleSpecies::fill3dEdgeBoundaryData()\n"
+                << "Invalid edge boundary condition!\n"
+                << "edge_loc = '" << edge_loc << "'." << std::endl
+                << "bdry_edge_conds[edge_loc] = '" << bdry_edge_conds[edge_loc] << "'."
+                << std::endl);
+        }
+    }
 }
 
 
@@ -10113,6 +10198,23 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dNodeBoundaryData(
             }
         }
     }
+    
+    for (int ni = 0; ni < static_cast<int>(node_bdry.size()); ni++)
+    {
+        TBOX_ASSERT(node_bdry[ni].getBoundaryType() == BDRY::NODE3D);
+        
+        int node_loc(node_bdry[ni].getLocationIndex());
+        
+        if (std::find(bdry_node_locs.begin(), bdry_node_locs.end(), node_loc) !=
+            bdry_node_locs.end())
+        {
+            TBOX_ERROR("FlowModelBoundaryUtilitiesSingleSpecies::fill3dNodeBoundaryData\n"
+                << "Invalid node boundary condition!\n"
+                << "node_loc = '" << node_loc << "'." << std::endl
+                << "bdry_node_conds[node_loc] = '" << bdry_node_conds[node_loc] << "'."
+                << std::endl);
+        }
+    }
 }
 
 
@@ -10197,6 +10299,14 @@ FlowModelBoundaryUtilitiesSingleSpecies::read1dBdryNodes(
                         s);
                     
                     node_locs[ni] = BOGUS_BDRY_LOC;
+                }
+                else
+                {
+                    TBOX_ERROR("FlowModelBoundaryUtilitiesSingleSpecies::read1dBdryNodes()\n"
+                        << "Unknown node boundary string = '"
+                        << bdry_cond_str
+                        << "' found in input."
+                        << std::endl);
                 }
             } // if (need_data_read)
         } // for (int ni = 0 ...
@@ -10322,6 +10432,14 @@ FlowModelBoundaryUtilitiesSingleSpecies::read2dBdryEdges(
                             hier::IntVector::getOne(d_dim));
                     }
                 }
+                else
+                {
+                    TBOX_ERROR("FlowModelBoundaryUtilitiesSingleSpecies::read2dBdryEdges()\n"
+                        << "Unknown edge boundary string = '"
+                        << bdry_cond_str
+                        << "' found in input."
+                        << std::endl);
+                }
             } // if (need_data_read)
        } // for (int ei = 0 ...
     } // if (num_per_dirs < 2)
@@ -10411,6 +10529,14 @@ FlowModelBoundaryUtilitiesSingleSpecies::read2dBdryNodes(
             {
                 node_conds[s] = BDRY_COND::FLOW_MODEL::YISOTHERMAL_NO_SLIP;
                 node_locs[ni] = BOGUS_BDRY_LOC;
+            }
+            else
+            {
+                TBOX_ERROR("FlowModelBoundaryUtilitiesSingleSpecies::read2dBdryNodes()\n"
+                    << "Unknown node boundary string = '"
+                    << bdry_cond_str
+                    << "' found in input."
+                    << std::endl);
             }
             
             std::string proper_edge;
@@ -10641,6 +10767,14 @@ FlowModelBoundaryUtilitiesSingleSpecies::read3dBdryFaces(
                             hier::IntVector::getOne(d_dim));
                     }
                 }
+                else
+                {
+                    TBOX_ERROR("FlowModelBoundaryUtilitiesSingleSpecies::read3dBdryFaces\n"
+                        << "Unknown face boundary string = '"
+                        << bdry_cond_str
+                        << "' found in input."
+                        << std::endl);
+                }
             } // if (need_data_read)
         } // for (int fi = 0 ...
     } // if (num_per_dirs < 3)
@@ -10813,6 +10947,14 @@ FlowModelBoundaryUtilitiesSingleSpecies::read3dBdryEdges(
                 {
                     edge_conds[s] = BDRY_COND::FLOW_MODEL::ZISOTHERMAL_NO_SLIP;
                     edge_locs[ei] = BOGUS_BDRY_LOC;
+                }
+                else
+                {
+                    TBOX_ERROR("FlowModelBoundaryUtilitiesSingleSpecies::read3dBdryEdges\n"
+                        << "Unknown edge boundary string = '"
+                        << bdry_cond_str
+                        << "' found in input."
+                        << std::endl);
                 }
                 
                 bool ambiguous_type = false;
@@ -11112,6 +11254,14 @@ FlowModelBoundaryUtilitiesSingleSpecies::read3dBdryNodes(
             {
                 node_conds[s] = BDRY_COND::FLOW_MODEL::ZISOTHERMAL_NO_SLIP;
                 node_locs[ni] = BOGUS_BDRY_LOC;
+            }
+            else
+            {
+                TBOX_ERROR("FlowModelBoundaryUtilitiesSingleSpecies::read3dBdryNodes()\n"
+                    << "Unknown node boundary string = '"
+                    << bdry_cond_str
+                    << "' found in input."
+                    << std::endl);
             }
             
             std::string proper_face;

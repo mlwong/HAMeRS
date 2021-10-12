@@ -11,6 +11,9 @@
 
 #include <algorithm>
 
+// Integer constant for debugging improperly set boundary data.
+#define BOGUS_BDRY_LOC (-9999)
+
 /*
  * This function reads 1D boundary data from given input database.
  * The integer boundary condition types are placed in the integer
@@ -430,6 +433,8 @@ BasicCartesianBoundaryUtilities1::read1dBdryNodes(
                         bdry_loc_db,
                         bdry_loc_str,
                         s);
+                    
+                    node_locs[ni] = BOGUS_BDRY_LOC;
                 }
                 else if (bdry_cond_str == "NEUMANN")
                 {

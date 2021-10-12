@@ -22,6 +22,9 @@
 
 #include <algorithm>
 
+// Integer constant for debugging improperly set boundary data.
+#define BOGUS_BDRY_LOC (-9999)
+
 /*
  * This function reads 2D boundary data from given input database.
  * The integer boundary condition types are placed in the integer
@@ -57,8 +60,8 @@ void
 BasicCartesianBoundaryUtilities2::getFromInput(
     BoundaryUtilityStrategy* bdry_strategy,
     const HAMERS_SHARED_PTR<tbox::Database>& input_db,
-    const std::vector<int>& edge_locs,
-    const std::vector<int>& node_locs,
+    std::vector<int>& edge_locs,
+    std::vector<int>& node_locs,
     std::vector<int>& edge_conds,
     std::vector<int>& node_conds,
     const hier::IntVector& periodic)
@@ -983,7 +986,7 @@ void
 BasicCartesianBoundaryUtilities2::read2dBdryEdges(
     BoundaryUtilityStrategy* bdry_strategy,
     const HAMERS_SHARED_PTR<tbox::Database>& input_db,
-    const std::vector<int>& edge_locs,
+    std::vector<int>& edge_locs,
     std::vector<int>& edge_conds,
     const hier::IntVector& periodic)
 {
@@ -1108,7 +1111,7 @@ BasicCartesianBoundaryUtilities2::read2dBdryEdges(
 void
 BasicCartesianBoundaryUtilities2::read2dBdryNodes(
     const HAMERS_SHARED_PTR<tbox::Database>& input_db,
-    const std::vector<int>& node_locs,
+    std::vector<int>& node_locs,
     const std::vector<int>& edge_conds,
     std::vector<int>& node_conds,
     const hier::IntVector& periodic)
@@ -1169,50 +1172,52 @@ BasicCartesianBoundaryUtilities2::read2dBdryNodes(
             if (bdry_cond_str == "XFLOW")
             {
                 node_conds[s] = BDRY_COND::BASIC::XFLOW;
+                node_locs[ni] = BOGUS_BDRY_LOC;
             }
             else if (bdry_cond_str == "YFLOW")
             {
                 node_conds[s] = BDRY_COND::BASIC::YFLOW;
+                node_locs[ni] = BOGUS_BDRY_LOC;
             }
             else if (bdry_cond_str == "XREFLECT")
             {
                 node_conds[s] = BDRY_COND::BASIC::XREFLECT;
+                node_locs[ni] = BOGUS_BDRY_LOC;
             }
             else if (bdry_cond_str == "YREFLECT")
             {
                 node_conds[s] = BDRY_COND::BASIC::YREFLECT;
+                node_locs[ni] = BOGUS_BDRY_LOC;
             }
             else if (bdry_cond_str == "XSYMMETRY")
             {
                 node_conds[s] = BDRY_COND::BASIC::XSYMMETRY;
+                node_locs[ni] = BOGUS_BDRY_LOC;
             }
             else if (bdry_cond_str == "YSYMMETRY")
             {
                 node_conds[s] = BDRY_COND::BASIC::YSYMMETRY;
+                node_locs[ni] = BOGUS_BDRY_LOC;
             }
             else if (bdry_cond_str == "XDIRICHLET")
             {
                 node_conds[s] = BDRY_COND::BASIC::XDIRICHLET;
+                node_locs[ni] = BOGUS_BDRY_LOC;
             }
             else if (bdry_cond_str == "YDIRICHLET")
             {
                 node_conds[s] = BDRY_COND::BASIC::YDIRICHLET;
+                node_locs[ni] = BOGUS_BDRY_LOC;
             }
             else if (bdry_cond_str == "XNEUMANN")
             {
                 node_conds[s] = BDRY_COND::BASIC::XNEUMANN;
+                node_locs[ni] = BOGUS_BDRY_LOC;
             }
             else if (bdry_cond_str == "YNEUMANN")
             {
                 node_conds[s] = BDRY_COND::BASIC::YNEUMANN;
-            }
-            else
-            {
-                TBOX_ERROR("BasicCartesianBoundaryUtilities2::read2dBdryNodes()\n"
-                    << "Unknown node boundary string = '"
-                    << bdry_cond_str
-                    << "' found in input."
-                    << std::endl);
+                node_locs[ni] = BOGUS_BDRY_LOC;
             }
             
             std::string proper_edge;
@@ -1386,4 +1391,7 @@ BasicCartesianBoundaryUtilities2::read2dBdryNodes(
             }
         } // for (int ni = 0 ...
     } // if (num_per_dirs < 1)
+    
+    // Remove node locations that have boundary conditions identified.
+    node_locs.erase(std::remove(node_locs.begin(), node_locs.end(), BOGUS_BDRY_LOC), node_locs.end());
 }

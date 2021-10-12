@@ -40,6 +40,9 @@ EulerBoundaryConditions::EulerBoundaryConditions(
         }
     }
     
+    const HAMERS_SHARED_PTR<FlowModelBoundaryUtilities> flow_model_boundary_utilities =
+        d_flow_model->getFlowModelBoundaryUtilities();
+    
     if (num_per_dirs < d_dim.getValue())
     {
         if (boundary_conditions_db_is_from_restart)
@@ -99,6 +102,13 @@ EulerBoundaryConditions::EulerBoundaryConditions(
                     node_locs,
                     d_master_bdry_node_conds,
                     periodic);
+                
+                flow_model_boundary_utilities->
+                    getFromInput1d(
+                        boundary_conditions_db,
+                        node_locs,
+                        d_master_bdry_node_conds,
+                        periodic);
             }
             if (d_dim == tbox::Dimension(2))
             {
@@ -124,6 +134,15 @@ EulerBoundaryConditions::EulerBoundaryConditions(
                     d_master_bdry_edge_conds,
                     d_master_bdry_node_conds,
                     periodic);
+                
+                flow_model_boundary_utilities->
+                    getFromInput2d(
+                        boundary_conditions_db,
+                        edge_locs,
+                        node_locs,
+                        d_master_bdry_edge_conds,
+                        d_master_bdry_node_conds,
+                        periodic);
             }
             else if (d_dim == tbox::Dimension(3))
             {
@@ -158,6 +177,17 @@ EulerBoundaryConditions::EulerBoundaryConditions(
                     d_master_bdry_edge_conds,
                     d_master_bdry_node_conds,
                     periodic);
+                
+                flow_model_boundary_utilities->
+                    getFromInput3d(
+                        boundary_conditions_db,
+                        face_locs,
+                        edge_locs,
+                        node_locs,
+                        d_master_bdry_face_conds,
+                        d_master_bdry_edge_conds,
+                        d_master_bdry_node_conds,
+                        periodic);
             }
         }
     } // if (num_per_dirs < d_dim.getValue())
@@ -738,6 +768,13 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
     std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > conservative_var_data =
         d_flow_model->getCellDataOfConservativeVariables();
     
+    /*
+     * Get the HAMERS_SHARED_PTR to flow model boundary utilities object from d_flow_model.
+     */
+    
+    const HAMERS_SHARED_PTR<FlowModelBoundaryUtilities> flow_model_boundary_utilities =
+        d_flow_model->getFlowModelBoundaryUtilities();
+    
     if (d_dim == tbox::Dimension(1))
     {
         /*
@@ -776,6 +813,25 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     ghost_width_to_fill);
             }
         }
+        
+        BasicCartesianBoundaryUtilities1::removeBoundaryNodeLocations(
+            node_locs,
+            patch,
+            d_scalar_bdry_node_conds);
+        
+        BasicCartesianBoundaryUtilities1::removeBoundaryNodeLocations(
+            node_locs,
+            patch,
+            d_vector_bdry_node_conds);
+        
+        flow_model_boundary_utilities->
+            fill1dNodeBoundaryData(
+                conservative_var_data,
+                patch,
+                node_locs,
+                d_vector_bdry_node_conds,
+                d_bdry_node_conservative_var,
+                ghost_width_to_fill);
     }
     else if (d_dim == tbox::Dimension(2))
     {
@@ -816,6 +872,26 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
             }
         }
         
+        BasicCartesianBoundaryUtilities2::removeBoundaryEdgeLocations(
+            edge_locs,
+            patch,
+            d_scalar_bdry_edge_conds);
+        
+        BasicCartesianBoundaryUtilities2::removeBoundaryEdgeLocations(
+            edge_locs,
+            patch,
+            d_vector_bdry_edge_conds);
+        
+        flow_model_boundary_utilities->
+            fill2dEdgeBoundaryData(
+                conservative_var_data,
+                patch,
+                edge_locs,
+                d_vector_bdry_edge_conds,
+                d_bdry_edge_conservative_var,
+                ghost_width_to_fill);
+        
+        
         /*
          *  Set boundary conditions for cells corresponding to patch nodes.
          */
@@ -852,6 +928,25 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     ghost_width_to_fill);
             }
         }
+        
+        BasicCartesianBoundaryUtilities2::removeBoundaryNodeLocations(
+            node_locs,
+            patch,
+            d_scalar_bdry_node_conds);
+        
+        BasicCartesianBoundaryUtilities2::removeBoundaryNodeLocations(
+            node_locs,
+            patch,
+            d_scalar_bdry_node_conds);
+        
+        flow_model_boundary_utilities->
+            fill2dNodeBoundaryData(
+                conservative_var_data,
+                patch,
+                node_locs,
+                d_vector_bdry_node_conds,
+                d_bdry_edge_conservative_var,
+                ghost_width_to_fill);
     }
     else if (d_dim == tbox::Dimension(3))
     {
@@ -892,6 +987,25 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
             }
         }
         
+        BasicCartesianBoundaryUtilities3::removeBoundaryFaceLocations(
+            face_locs,
+            patch,
+            d_scalar_bdry_face_conds);
+        
+        BasicCartesianBoundaryUtilities3::removeBoundaryFaceLocations(
+            face_locs,
+            patch,
+            d_vector_bdry_face_conds);
+        
+        flow_model_boundary_utilities->
+            fill3dFaceBoundaryData(
+                conservative_var_data,
+                patch,
+                face_locs,
+                d_vector_bdry_face_conds,
+                d_bdry_face_conservative_var,
+                ghost_width_to_fill);
+        
         /*
          * Set boundary conditions for cells corresponding to patch edges.
          */
@@ -929,6 +1043,25 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
             }
         }
         
+        BasicCartesianBoundaryUtilities3::removeBoundaryEdgeLocations(
+            edge_locs,
+            patch,
+            d_scalar_bdry_edge_conds);
+        
+        BasicCartesianBoundaryUtilities3::removeBoundaryEdgeLocations(
+            edge_locs,
+            patch,
+            d_vector_bdry_edge_conds);
+        
+        flow_model_boundary_utilities->
+            fill3dEdgeBoundaryData(
+                conservative_var_data,
+                patch,
+                edge_locs,
+                d_vector_bdry_edge_conds,
+                d_bdry_face_conservative_var,
+                ghost_width_to_fill);
+        
         /*
          *  Set boundary conditions for cells corresponding to patch nodes.
          */
@@ -965,6 +1098,25 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     ghost_width_to_fill);
             }
         }
+        
+        BasicCartesianBoundaryUtilities3::removeBoundaryNodeLocations(
+            node_locs,
+            patch,
+            d_scalar_bdry_node_conds);
+        
+        BasicCartesianBoundaryUtilities3::removeBoundaryNodeLocations(
+            node_locs,
+            patch,
+            d_vector_bdry_node_conds);
+        
+        flow_model_boundary_utilities->
+            fill3dNodeBoundaryData(
+                conservative_var_data,
+                patch,
+                node_locs,
+                d_vector_bdry_node_conds,
+                d_bdry_face_conservative_var,
+                ghost_width_to_fill);
     }
     
     d_Euler_special_boundary_conditions->setSpecialBoundaryConditions(

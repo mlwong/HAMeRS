@@ -22,6 +22,9 @@
 
 #include <algorithm>
 
+// Integer constant for debugging improperly set boundary data.
+#define BOGUS_BDRY_LOC (-9999)
+
 /*
  * This function reads 3D boundary data from given input database.
  * The integer boundary condition types are placed in the integer
@@ -61,9 +64,9 @@ void
 BasicCartesianBoundaryUtilities3::getFromInput(
     BoundaryUtilityStrategy* bdry_strategy,
     const HAMERS_SHARED_PTR<tbox::Database>& input_db,
-    const std::vector<int>& face_locs,
-    const std::vector<int>& edge_locs,
-    const std::vector<int>& node_locs,
+    std::vector<int>& face_locs,
+    std::vector<int>& edge_locs,
+    std::vector<int>& node_locs,
     std::vector<int>& face_conds,
     std::vector<int>& edge_conds,
     std::vector<int>& node_conds,
@@ -198,14 +201,6 @@ BasicCartesianBoundaryUtilities3::removeBoundaryFaceLocations(
                 bdry_face_locs.erase(std::remove(bdry_face_locs.begin(), bdry_face_locs.end(), face_loc),
                     bdry_face_locs.end());
             }
-            // else
-            // {
-            //     TBOX_ERROR("BasicCartesianBoundaryUtilities3::fillFaceBoundaryData()\n"
-            //         << "Invalid face boundary condition!\n"
-            //         << "face_loc = '" << face_loc << "'." << std::endl
-            //         << "bdry_face_conds[face_loc] = '" << bdry_face_conds[face_loc] << "'."
-            //         << std::endl);
-            // }
         }
     }
 }
@@ -534,14 +529,6 @@ BasicCartesianBoundaryUtilities3::fillFaceBoundaryData(
                     }
                 }
             }
-            // else
-            // {
-            //     TBOX_ERROR("BasicCartesianBoundaryUtilities3::fillFaceBoundaryData()\n"
-            //         << "Invalid face boundary condition!\n"
-            //         << "face_loc = '" << face_loc << "'." << std::endl
-            //         << "bdry_face_conds[face_loc] = '" << bdry_face_conds[face_loc] << "'."
-            //         << std::endl);
-            // }
         }
     }
 }
@@ -674,14 +661,6 @@ BasicCartesianBoundaryUtilities3::removeBoundaryEdgeLocations(
                 bdry_edge_locs.erase(std::remove(bdry_edge_locs.begin(), bdry_edge_locs.end(), edge_loc),
                     bdry_edge_locs.end());
             }
-            // else
-            // {
-            //     TBOX_ERROR("BasicCartesianBoundaryUtilities3::fillEdgeBoundaryData()\n"
-            //         << "Invalid edge boundary condition!\n"
-            //         << "edge_loc = '" << edge_loc << "'." << std::endl
-            //         << "bdry_edge_conds[edge_loc] = '" << bdry_edge_conds[edge_loc] << "'."
-            //         << std::endl);
-            // }
         }
     }
 }
@@ -1281,14 +1260,6 @@ BasicCartesianBoundaryUtilities3::fillEdgeBoundaryData(
                     }
                 }
             }
-            // else
-            // {
-            //     TBOX_ERROR("BasicCartesianBoundaryUtilities3::fillEdgeBoundaryData()\n"
-            //         << "Invalid edge boundary condition!\n"
-            //         << "edge_loc = '" << edge_loc << "'." << std::endl
-            //         << "bdry_edge_conds[edge_loc] = '" << bdry_edge_conds[edge_loc] << "'."
-            //         << std::endl);
-            // }
         }
     }
 }
@@ -1415,14 +1386,6 @@ BasicCartesianBoundaryUtilities3::removeBoundaryNodeLocations(
                 bdry_node_locs.erase(std::remove(bdry_node_locs.begin(), bdry_node_locs.end(), node_loc),
                     bdry_node_locs.end());
             }
-            // else
-            // {
-            //     TBOX_ERROR("BasicCartesianBoundaryUtilities3::fillNodeBoundaryData()\n"
-            //         << "Invalid node boundary condition!\n"
-            //         << "node_loc = '" << node_loc << "'." << std::endl
-            //         << "bdry_node_conds[node_loc] = '" << bdry_node_conds[node_loc] << "'."
-            //         << std::endl);
-            // }
         }
     }
 }
@@ -2236,7 +2199,7 @@ void
 BasicCartesianBoundaryUtilities3::read3dBdryFaces(
     BoundaryUtilityStrategy* bdry_strategy,
     const HAMERS_SHARED_PTR<tbox::Database>& input_db,
-    const std::vector<int>& face_locs,
+    std::vector<int>& face_locs,
     std::vector<int>& face_conds,
     const hier::IntVector& periodic)
 {
@@ -2325,14 +2288,20 @@ BasicCartesianBoundaryUtilities3::read3dBdryFaces(
                 if (bdry_cond_str == "FLOW")
                 {
                     face_conds[s] = BDRY_COND::BASIC::FLOW;
+                    
+                    face_locs[fi] = BOGUS_BDRY_LOC;
                 }
                 else if (bdry_cond_str == "REFLECT")
                 {
                     face_conds[s] = BDRY_COND::BASIC::REFLECT;
+                    
+                    face_locs[fi] = BOGUS_BDRY_LOC;
                 }
                 else if (bdry_cond_str == "SYMMETRY")
                 {
                     face_conds[s] = BDRY_COND::BASIC::SYMMETRY;
+                    
+                    face_locs[fi] = BOGUS_BDRY_LOC;
                 }
                 else if (bdry_cond_str == "DIRICHLET")
                 {
@@ -2341,6 +2310,8 @@ BasicCartesianBoundaryUtilities3::read3dBdryFaces(
                         bdry_loc_db,
                         bdry_loc_str,
                         s);
+                    
+                    face_locs[fi] = BOGUS_BDRY_LOC;
                 }
                 else if (bdry_cond_str == "NEUMANN")
                 {
@@ -2349,18 +2320,15 @@ BasicCartesianBoundaryUtilities3::read3dBdryFaces(
                         bdry_loc_db,
                         bdry_loc_str,
                         s);
-                }
-                else
-                {
-                    TBOX_ERROR("BasicCartesianBoundaryUtilities3::read3dBdryFaces()\n"
-                        << "Unknown face boundary string = '"
-                        << bdry_cond_str
-                        << "' found in input."
-                        << std::endl);
+                    
+                    face_locs[fi] = BOGUS_BDRY_LOC;
                 }
             } // if (need_data_read)
         } // for (int fi = 0 ...
     } // if (num_per_dirs < 3)
+    
+    // Remove face locations that have boundary conditions identified.
+    face_locs.erase(std::remove(face_locs.begin(), face_locs.end(), BOGUS_BDRY_LOC), face_locs.end());
 }
 
 
@@ -2370,7 +2338,7 @@ BasicCartesianBoundaryUtilities3::read3dBdryFaces(
 void
 BasicCartesianBoundaryUtilities3::read3dBdryEdges(
     const HAMERS_SHARED_PTR<tbox::Database>& input_db,
-    const std::vector<int>& edge_locs,
+    std::vector<int>& edge_locs,
     const std::vector<int>& face_conds,
     std::vector<int>& edge_conds,
     const hier::IntVector& periodic)
@@ -2504,70 +2472,77 @@ BasicCartesianBoundaryUtilities3::read3dBdryEdges(
                 if (bdry_cond_str == "XFLOW")
                 {
                     edge_conds[s] = BDRY_COND::BASIC::XFLOW;
+                    edge_locs[ei] = BOGUS_BDRY_LOC;
                 }
                 else if (bdry_cond_str == "YFLOW")
                 {
                     edge_conds[s] = BDRY_COND::BASIC::YFLOW;
+                    edge_locs[ei] = BOGUS_BDRY_LOC;
                 }
                 else if (bdry_cond_str == "ZFLOW")
                 {
                     edge_conds[s] = BDRY_COND::BASIC::ZFLOW;
+                    edge_locs[ei] = BOGUS_BDRY_LOC;
                 }
                 else if (bdry_cond_str == "XREFLECT")
                 {
                     edge_conds[s] = BDRY_COND::BASIC::XREFLECT;
+                    edge_locs[ei] = BOGUS_BDRY_LOC;
                 }
                 else if (bdry_cond_str == "YREFLECT")
                 {
                     edge_conds[s] = BDRY_COND::BASIC::YREFLECT;
+                    edge_locs[ei] = BOGUS_BDRY_LOC;
                 }
                 else if (bdry_cond_str == "ZREFLECT")
                 {
                     edge_conds[s] = BDRY_COND::BASIC::ZREFLECT;
+                    edge_locs[ei] = BOGUS_BDRY_LOC;
                 }
                 else if (bdry_cond_str == "XSYMMETRY")
                 {
                     edge_conds[s] = BDRY_COND::BASIC::XSYMMETRY;
+                    edge_locs[ei] = BOGUS_BDRY_LOC;
                 }
                 else if (bdry_cond_str == "YSYMMETRY")
                 {
                     edge_conds[s] = BDRY_COND::BASIC::YSYMMETRY;
+                    edge_locs[ei] = BOGUS_BDRY_LOC;
                 }
                 else if (bdry_cond_str == "ZSYMMETRY")
                 {
                     edge_conds[s] = BDRY_COND::BASIC::ZSYMMETRY;
+                    edge_locs[ei] = BOGUS_BDRY_LOC;
                 }
                 else if (bdry_cond_str == "XDIRICHLET")
                 {
                     edge_conds[s] = BDRY_COND::BASIC::XDIRICHLET;
+                    edge_locs[ei] = BOGUS_BDRY_LOC;
                 }
                 else if (bdry_cond_str == "YDIRICHLET")
                 {
                     edge_conds[s] = BDRY_COND::BASIC::YDIRICHLET;
+                    edge_locs[ei] = BOGUS_BDRY_LOC;
                 }
                 else if (bdry_cond_str == "ZDIRICHLET")
                 {
                     edge_conds[s] = BDRY_COND::BASIC::ZDIRICHLET;
+                    edge_locs[ei] = BOGUS_BDRY_LOC;
                 }
                 else if (bdry_cond_str == "XNEUMANN")
                 {
                     edge_conds[s] = BDRY_COND::BASIC::XNEUMANN;
+                    edge_locs[ei] = BOGUS_BDRY_LOC;
                 }
                 else if (bdry_cond_str == "YNEUMANN")
                 {
                     edge_conds[s] = BDRY_COND::BASIC::YNEUMANN;
+                    edge_locs[ei] = BOGUS_BDRY_LOC;
                 }
                 else if (bdry_cond_str == "ZNEUMANN")
                 {
                     edge_conds[s] = BDRY_COND::BASIC::ZNEUMANN;
-                }
-                else
-                {
-                    TBOX_ERROR("BasicCartesianBoundaryUtilities3::read3dBdryEdges()\n"
-                        << "Unknown edge boundary string = '"
-                        << bdry_cond_str
-                        << "' found in input."
-                        << std::endl);
+                    edge_locs[ei] = BOGUS_BDRY_LOC;
                 }
                 
                 bool ambiguous_type = false;
@@ -2878,16 +2853,19 @@ BasicCartesianBoundaryUtilities3::read3dBdryEdges(
             } // if (need_data_read)
         } // for (int ei = 0 ...
     } // if (num_per_dirs < 2)
+    
+    // Remove edge locations that have boundary conditions identified.
+    edge_locs.erase(std::remove(edge_locs.begin(), edge_locs.end(), BOGUS_BDRY_LOC), edge_locs.end());
 }
-    
-    
+
+
 /*
  * Private function to read 3D node boundary data from input database.
  */
 void
 BasicCartesianBoundaryUtilities3::read3dBdryNodes(
     const HAMERS_SHARED_PTR<tbox::Database>& input_db,
-    const std::vector<int>& node_locs,
+    std::vector<int>& node_locs,
     const std::vector<int>& face_conds,
     std::vector<int>& node_conds,
     const hier::IntVector& periodic)
@@ -2967,70 +2945,77 @@ BasicCartesianBoundaryUtilities3::read3dBdryNodes(
             if (bdry_cond_str == "XFLOW")
             {
                 node_conds[s] = BDRY_COND::BASIC::XFLOW;
+                node_locs[ni] = BOGUS_BDRY_LOC;
             }
             else if (bdry_cond_str == "YFLOW")
             {
                 node_conds[s] = BDRY_COND::BASIC::YFLOW;
+                node_locs[ni] = BOGUS_BDRY_LOC;
             }
             else if (bdry_cond_str == "ZFLOW")
             {
                 node_conds[s] = BDRY_COND::BASIC::ZFLOW;
+                node_locs[ni] = BOGUS_BDRY_LOC;
             }
             else if (bdry_cond_str == "XREFLECT")
             {
                 node_conds[s] = BDRY_COND::BASIC::XREFLECT;
+                node_locs[ni] = BOGUS_BDRY_LOC;
             }
             else if (bdry_cond_str == "YREFLECT")
             {
                 node_conds[s] = BDRY_COND::BASIC::YREFLECT;
+                node_locs[ni] = BOGUS_BDRY_LOC;
             }
             else if (bdry_cond_str == "ZREFLECT")
             {
                 node_conds[s] = BDRY_COND::BASIC::ZREFLECT;
+                node_locs[ni] = BOGUS_BDRY_LOC;
             }
             else if (bdry_cond_str == "XSYMMETRY")
             {
                 node_conds[s] = BDRY_COND::BASIC::XSYMMETRY;
+                node_locs[ni] = BOGUS_BDRY_LOC;
             }
             else if (bdry_cond_str == "YSYMMETRY")
             {
                 node_conds[s] = BDRY_COND::BASIC::YSYMMETRY;
+                node_locs[ni] = BOGUS_BDRY_LOC;
             }
             else if (bdry_cond_str == "ZSYMMETRY")
             {
                 node_conds[s] = BDRY_COND::BASIC::ZSYMMETRY;
+                node_locs[ni] = BOGUS_BDRY_LOC;
             }
             else if (bdry_cond_str == "XDIRICHLET")
             {
                 node_conds[s] = BDRY_COND::BASIC::XDIRICHLET;
+                node_locs[ni] = BOGUS_BDRY_LOC;
             }
             else if (bdry_cond_str == "YDIRICHLET")
             {
                 node_conds[s] = BDRY_COND::BASIC::YDIRICHLET;
+                node_locs[ni] = BOGUS_BDRY_LOC;
             }
             else if (bdry_cond_str == "ZDIRICHLET")
             {
                 node_conds[s] = BDRY_COND::BASIC::ZDIRICHLET;
+                node_locs[ni] = BOGUS_BDRY_LOC;
             }
             else if (bdry_cond_str == "XNEUMANN")
             {
                 node_conds[s] = BDRY_COND::BASIC::XNEUMANN;
+                node_locs[ni] = BOGUS_BDRY_LOC;
             }
             else if (bdry_cond_str == "YNEUMANN")
             {
                 node_conds[s] = BDRY_COND::BASIC::YNEUMANN;
+                node_locs[ni] = BOGUS_BDRY_LOC;
             }
             else if (bdry_cond_str == "ZNEUMANN")
             {
                 node_conds[s] = BDRY_COND::BASIC::ZNEUMANN;
-            }
-            else
-            {
-                TBOX_ERROR("BasicCartesianBoundaryUtilities3::read3dBdryNodes()\n"
-                    << "Unknown node boundary string = '"
-                    << bdry_cond_str
-                    << "' found in input."
-                    << std::endl);
+                node_locs[ni] = BOGUS_BDRY_LOC;
             }
             
             std::string proper_face;
@@ -3286,4 +3271,7 @@ BasicCartesianBoundaryUtilities3::read3dBdryNodes(
             }
         } // for (int ni = 0 ...
     } // if (num_per_dirs < 1)
+    
+    // Remove node locations that have boundary conditions identified.
+    node_locs.erase(std::remove(node_locs.begin(), node_locs.end(), BOGUS_BDRY_LOC), node_locs.end());
 }

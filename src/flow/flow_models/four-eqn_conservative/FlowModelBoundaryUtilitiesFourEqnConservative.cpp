@@ -822,6 +822,23 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill1dNodeBoundaryData(
             }
         }
     }
+    
+    for (int ni = 0; ni < static_cast<int>(node_bdry.size()); ni++)
+    {
+        TBOX_ASSERT(node_bdry[ni].getBoundaryType() == BDRY::NODE1D);
+        
+        int node_loc = node_bdry[ni].getLocationIndex();
+        
+        if (std::find(bdry_node_locs.begin(), bdry_node_locs.end(), node_loc) !=
+            bdry_node_locs.end())
+        {
+            TBOX_ERROR("FlowModelBoundaryUtilitiesFourEqnConservative::fill1dNodeBoundaryData()\n"
+                << "Invalid node boundary condition!\n"
+                << "node_loc = '" << node_loc << "'." << std::endl
+                << "bdry_node_conds[node_loc] = '" << bdry_node_conds[node_loc] << "'."
+                << std::endl);
+        }
+    }
 }
 
 
@@ -1349,7 +1366,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                         if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
-                                << ": FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData()\n"
+                                << ": FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData()\n"
                                 << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                          
@@ -2019,7 +2036,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                         if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
-                                << ": FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData()\n"
+                                << ": FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData()\n"
                                 << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         
@@ -2688,7 +2705,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                         if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
-                                << ": FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData()\n"
+                                << ": FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData()\n"
                                 << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         
@@ -3355,7 +3372,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                         if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
-                                << ": FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData()\n"
+                                << ": FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData()\n"
                                 << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         
@@ -4021,6 +4038,23 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                         bdry_edge_locs.end());
                 }
             }
+        }
+    }
+    
+    for (int ei = 0; ei < static_cast<int>(edge_bdry.size()); ei++)
+    {
+        TBOX_ASSERT(edge_bdry[ei].getBoundaryType() == BDRY::EDGE2D);
+        
+        int edge_loc = edge_bdry[ei].getLocationIndex();
+        
+        if (std::find(bdry_edge_locs.begin(), bdry_edge_locs.end(), edge_loc) !=
+            bdry_edge_locs.end())
+        {
+            TBOX_ERROR("FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData()\n"
+                << "Invalid edge boundary condition!\n"
+                << "edge_loc = '" << edge_loc << "'." << std::endl
+                << "bdry_edge_conds[edge_loc] = '" << bdry_edge_conds[edge_loc] << "'."
+                << std::endl);
         }
     }
 }
@@ -4798,6 +4832,23 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
                         bdry_node_locs.end());
                 }
             }
+        }
+    }
+    
+    for (int ni = 0; ni < static_cast<int>(node_bdry.size()); ni++)
+    {
+        TBOX_ASSERT(node_bdry[ni].getBoundaryType() == BDRY::NODE2D);
+        
+        int node_loc = node_bdry[ni].getLocationIndex();
+        
+        if (std::find(bdry_node_locs.begin(), bdry_node_locs.end(), node_loc) !=
+            bdry_node_locs.end())
+        {
+            TBOX_ERROR("FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData\n"
+                << "Invalid node boundary condition!\n"
+                << "node_loc = '" << node_loc << "'." << std::endl
+                << "bdry_node_conds[node_loc] = '" << bdry_node_conds[node_loc] << "'."
+                << std::endl);
         }
     }
 }
@@ -6560,7 +6611,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                         if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
-                                << ": FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData()\n"
+                                << ": FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData()\n"
                                 << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         
@@ -7585,7 +7636,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                         if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
-                                << ": FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData()\n"
+                                << ": FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData()\n"
                                 << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         
@@ -8611,7 +8662,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                         if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
-                                << ": FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData()\n"
+                                << ": FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData()\n"
                                 << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         
@@ -9637,7 +9688,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                         if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
-                                << ": FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData()\n"
+                                << ": FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData()\n"
                                 << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         
@@ -10663,7 +10714,7 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                         if (num_ghosts_to_fill > 6)
                         {
                             TBOX_ERROR(d_object_name
-                                << ": FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData()\n"
+                                << ": FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData()\n"
                                 << "Non-reflecting outflow BC doesn't support more than six ghost cells yet!");
                         }
                         
@@ -11688,6 +11739,23 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                         bdry_face_locs.end());
                 }
             }
+        }
+    }
+    
+    for (int fi = 0; fi < static_cast<int>(face_bdry.size()); fi++)
+    {
+        TBOX_ASSERT(face_bdry[fi].getBoundaryType() == BDRY::FACE3D);
+        
+        int face_loc = face_bdry[fi].getLocationIndex();
+        
+        if (std::find(bdry_face_locs.begin(), bdry_face_locs.end(), face_loc) !=
+            bdry_face_locs.end())
+        {
+            TBOX_ERROR("FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData\n"
+                << "Invalid face boundary condition!\n"
+                << "face_loc = '" << face_loc << "'." << std::endl
+                << "bdry_face_conds[face_loc] = '" << bdry_face_conds[face_loc] << "'."
+                << std::endl);
         }
     }
 }
@@ -13029,6 +13097,23 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
             }
         }
     }
+    
+    for (int ei = 0; ei < static_cast<int>(edge_bdry.size()); ei++)
+    {
+        TBOX_ASSERT(edge_bdry[ei].getBoundaryType() == BDRY::EDGE3D);
+        
+        int edge_loc(edge_bdry[ei].getLocationIndex());
+        
+        if (std::find(bdry_edge_locs.begin(), bdry_edge_locs.end(), edge_loc) !=
+            bdry_edge_locs.end())
+        {
+            TBOX_ERROR("FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData()\n"
+                << "Invalid edge boundary condition!\n"
+                << "edge_loc = '" << edge_loc << "'." << std::endl
+                << "bdry_edge_conds[edge_loc] = '" << bdry_edge_conds[edge_loc] << "'."
+                << std::endl);
+        }
+    }
 }
 
 
@@ -14348,6 +14433,23 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
             }
         }
     }
+    
+    for (int ni = 0; ni < static_cast<int>(node_bdry.size()); ni++)
+    {
+        TBOX_ASSERT(node_bdry[ni].getBoundaryType() == BDRY::NODE3D);
+        
+        int node_loc(node_bdry[ni].getLocationIndex());
+        
+        if (std::find(bdry_node_locs.begin(), bdry_node_locs.end(), node_loc) !=
+            bdry_node_locs.end())
+        {
+            TBOX_ERROR("FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData\n"
+                << "Invalid node boundary condition!\n"
+                << "node_loc = '" << node_loc << "'." << std::endl
+                << "bdry_node_conds[node_loc] = '" << bdry_node_conds[node_loc] << "'."
+                << std::endl);
+        }
+    }
 }
 
 
@@ -14432,6 +14534,14 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read1dBdryNodes(
                         s);
                     
                     node_locs[ni] = BOGUS_BDRY_LOC;
+                }
+                else
+                {
+                    TBOX_ERROR("FlowModelBoundaryUtilitiesFourEqnConservative::read1dBdryNodes()\n"
+                        << "Unknown node boundary string = '"
+                        << bdry_cond_str
+                        << "' found in input."
+                        << std::endl);
                 }
             } // if (need_data_read)
         } // for (int ni = 0 ...
@@ -14557,6 +14667,14 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read2dBdryEdges(
                             hier::IntVector::getOne(d_dim));
                     }
                 }
+                else
+                {
+                    TBOX_ERROR("FlowModelBoundaryUtilitiesFourEqnConservative::read2dBdryEdges()\n"
+                        << "Unknown edge boundary string = '"
+                        << bdry_cond_str
+                        << "' found in input."
+                        << std::endl);
+                }
             } // if (need_data_read)
        } // for (int ei = 0 ...
     } // if (num_per_dirs < 2)
@@ -14646,6 +14764,14 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read2dBdryNodes(
             {
                 node_conds[s] = BDRY_COND::FLOW_MODEL::YISOTHERMAL_NO_SLIP;
                 node_locs[ni] = BOGUS_BDRY_LOC;
+            }
+            else
+            {
+                TBOX_ERROR("FlowModelBoundaryUtilitiesFourEqnConservative::read2dBdryNodes()\n"
+                    << "Unknown node boundary string = '"
+                    << bdry_cond_str
+                    << "' found in input."
+                    << std::endl);
             }
             
             std::string proper_edge;
@@ -14876,6 +15002,14 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read3dBdryFaces(
                             hier::IntVector::getOne(d_dim));
                     }
                 }
+                else
+                {
+                    TBOX_ERROR("FlowModelBoundaryUtilitiesFourEqnConservative::read3dBdryFaces\n"
+                        << "Unknown face boundary string = '"
+                        << bdry_cond_str
+                        << "' found in input."
+                        << std::endl);
+                }
             } // if (need_data_read)
         } // for (int fi = 0 ...
     } // if (num_per_dirs < 3)
@@ -15048,6 +15182,14 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read3dBdryEdges(
                 {
                     edge_conds[s] = BDRY_COND::FLOW_MODEL::ZISOTHERMAL_NO_SLIP;
                     edge_locs[ei] = BOGUS_BDRY_LOC;
+                }
+                else
+                {
+                    TBOX_ERROR("FlowModelBoundaryUtilitiesFourEqnConservative::read3dBdryEdges\n"
+                        << "Unknown edge boundary string = '"
+                        << bdry_cond_str
+                        << "' found in input."
+                        << std::endl);
                 }
                 
                 bool ambiguous_type = false;
@@ -15347,6 +15489,14 @@ FlowModelBoundaryUtilitiesFourEqnConservative::read3dBdryNodes(
             {
                 node_conds[s] = BDRY_COND::FLOW_MODEL::ZISOTHERMAL_NO_SLIP;
                 node_locs[ni] = BOGUS_BDRY_LOC;
+            }
+            else
+            {
+                TBOX_ERROR("FlowModelBoundaryUtilitiesFourEqnConservative::read3dBdryNodes()\n"
+                    << "Unknown node boundary string = '"
+                    << bdry_cond_str
+                    << "' found in input."
+                    << std::endl);
             }
             
             std::string proper_face;
