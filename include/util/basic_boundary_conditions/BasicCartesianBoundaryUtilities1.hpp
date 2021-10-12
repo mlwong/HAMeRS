@@ -118,9 +118,27 @@ struct BasicCartesianBoundaryUtilities1
         getFromInput(
             BoundaryUtilityStrategy* bdry_strategy,
             const HAMERS_SHARED_PTR<tbox::Database>& input_db,
-            const std::vector<int>& node_locs,
+            std::vector<int>& node_locs,
             std::vector<int>& node_conds,
             const hier::IntVector& periodic);
+        
+        /*!
+         * Function to remove 1d boundary nodes with boundary conditions filled by this class for a patch.
+         *
+         * @param bdry_node_locs      Array of locations of nodes for applying
+         *                            boundary conditions.
+         * @param patch               hier::Patch on which data object lives.
+         * @param bdry_node_conds     Array of boundary condition types for
+         *                            patch nodes.
+         *
+         * @pre bdry_node_locs.size()) <= NUM_1D_NODES
+         * @pre bdry_node_conds.size() == NUM_1D_NODES
+         */
+        static void
+        removeBoundaryNodeLocations(
+            std::vector<int>& bdry_node_locs,
+            const hier::Patch& patch,
+            const std::vector<int>& bdry_node_conds);
         
         /*!
          * Function to fill 1d node boundary values for a patch.
@@ -132,15 +150,15 @@ struct BasicCartesianBoundaryUtilities1
          * @param var_name            String name of variable (for error reporting).
          * @param var_data            Cell-centered patch data object to fill.
          * @param patch               hier::Patch on which data object lives.
-         * @param bdry_node_locs      tbox::Array of locations of nodes for applying
+         * @param bdry_node_locs      Array of locations of nodes for applying
          *                            boundary conditions.
-         * @param bdry_node_conds     tbox::Array of boundary condition types for
+         * @param bdry_node_conds     Array of boundary condition types for
          *                            patch nodes.
          * @param ghost_width_to_fill Width of ghost region to fill.
          *
          * @pre !var_name.empty()
          * @pre var_data
-         * @pre bdry_node_conds.size() > 0 and <= NUM_1D_EDGES
+         * @pre bdry_node_locs.size()) <= NUM_1D_NODES
          * @pre bdry_node_conds.size() == NUM_1D_NODES
          * @pre bdry_node_values.size() == NUM_1D_NODES * (var_data->getDepth())
          * @pre (var_data->getDim() == patch.getDim()) &&
@@ -162,7 +180,7 @@ struct BasicCartesianBoundaryUtilities1
         read1dBdryNodes(
             BoundaryUtilityStrategy* bdry_strategy,
             const HAMERS_SHARED_PTR<tbox::Database>& input_db,
-            const std::vector<int>& node_locs,
+            std::vector<int>& node_locs,
             std::vector<int>& node_conds,
             const hier::IntVector& periodic);
         

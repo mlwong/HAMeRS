@@ -40,7 +40,7 @@ void
 BasicCartesianBoundaryUtilities1::getFromInput(
     BoundaryUtilityStrategy* bdry_strategy,
     const HAMERS_SHARED_PTR<tbox::Database>& input_db,
-    const std::vector<int>& node_locs,
+    std::vector<int>& node_locs,
     std::vector<int>& node_conds,
     const hier::IntVector& periodic)
 {
@@ -69,6 +69,76 @@ BasicCartesianBoundaryUtilities1::getFromInput(
             node_locs,
             node_conds,
             periodic);
+    }
+}
+
+
+/*
+ * Function to remove 1d boundary nodes with boundary conditions filled by this class for a patch.
+ *
+ * Arguments are:
+ *    bdry_node_locs ....... array of locations of nodes for applying
+ *                           boundary conditions.
+ *    patch ................ patch on which data object lives
+ *    bdry_node_conds ...... array of boundary conditions for patch nodes
+ */
+void
+BasicCartesianBoundaryUtilities1::removeBoundaryNodeLocations(
+    std::vector<int>& bdry_node_locs,
+    const hier::Patch& patch,
+    const std::vector<int>& bdry_node_conds)
+{
+    TBOX_ASSERT(static_cast<int>(bdry_node_locs.size()) <= NUM_1D_NODES);
+    TBOX_ASSERT(*min_element(bdry_node_locs.begin(), bdry_node_locs.end()) >= 0);
+    TBOX_ASSERT(*max_element(bdry_node_locs.begin(), bdry_node_locs.end()) < NUM_1D_NODES);
+    TBOX_ASSERT(static_cast<int>(bdry_node_conds.size()) == NUM_1D_NODES);
+    
+    const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+        HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+            patch.getPatchGeometry()));
+    TBOX_ASSERT(patch_geom);
+    
+    const std::vector<hier::BoundaryBox>& node_bdry =
+        patch_geom->getCodimensionBoundaries(BDRY::NODE1D);
+    
+    for (int ni = 0; ni < static_cast<int>(node_bdry.size()); ni++)
+    {
+        TBOX_ASSERT(node_bdry[ni].getBoundaryType() == BDRY::NODE1D);
+        
+        int node_loc = node_bdry[ni].getLocationIndex();
+        
+        if (std::find(bdry_node_locs.begin(), bdry_node_locs.end(), node_loc) !=
+            bdry_node_locs.end())
+        {
+            if (bdry_node_conds[node_loc] == BDRY_COND::BASIC::DIRICHLET)
+            {
+                // Remove node locations that have boundary conditions identified.
+                bdry_node_locs.erase(std::remove(bdry_node_locs.begin(), bdry_node_locs.end(), node_loc),
+                    bdry_node_locs.end());
+            }
+            else if (bdry_node_conds[node_loc] == BDRY_COND::BASIC::NEUMANN)
+            {
+                // NOT YET IMPLEMENTED
+            }
+            else if (bdry_node_conds[node_loc] == BDRY_COND::BASIC::FLOW)
+            {
+                // Remove node locations that have boundary conditions identified.
+                bdry_node_locs.erase(std::remove(bdry_node_locs.begin(), bdry_node_locs.end(), node_loc),
+                    bdry_node_locs.end());
+            }
+            else if (bdry_node_conds[node_loc] == BDRY_COND::BASIC::REFLECT)
+            {
+                // Remove node locations that have boundary conditions identified.
+                bdry_node_locs.erase(std::remove(bdry_node_locs.begin(), bdry_node_locs.end(), node_loc),
+                    bdry_node_locs.end());
+            }
+            else if (bdry_node_conds[node_loc] == BDRY_COND::BASIC::SYMMETRY)
+            {
+                // Remove node locations that have boundary conditions identified.
+                bdry_node_locs.erase(std::remove(bdry_node_locs.begin(), bdry_node_locs.end(), node_loc),
+                    bdry_node_locs.end());
+            }
+        }
     }
 }
 
@@ -265,14 +335,6 @@ BasicCartesianBoundaryUtilities1::fillNodeBoundaryData(
                     }
                 }
             }
-            else
-            {
-                TBOX_ERROR("BasicCartesianBoundaryUtilities1::fillNodeBoundaryData()\n"
-                    << "Invalid node boundary condition!\n"
-                    << "node_loc = '" << node_loc << "'." << std::endl
-                    << "bdry_node_conds[node_loc] = '" << bdry_node_conds[node_loc] << "'."
-                    << std::endl);
-            }
         }
     }
 }
@@ -285,7 +347,7 @@ void
 BasicCartesianBoundaryUtilities1::read1dBdryNodes(
     BoundaryUtilityStrategy* bdry_strategy,
     const HAMERS_SHARED_PTR<tbox::Database>& input_db,
-    const std::vector<int>& node_locs,
+    std::vector<int>& node_locs,
     std::vector<int>& node_conds,
     const hier::IntVector& periodic)
 {
@@ -346,14 +408,20 @@ BasicCartesianBoundaryUtilities1::read1dBdryNodes(
                 if (bdry_cond_str == "FLOW")
                 {
                     node_conds[s] = BDRY_COND::BASIC::FLOW;
+                    
+                    node_locs[ni] = BOGUS_BDRY_LOC;
                 }
                 else if (bdry_cond_str == "REFLECT")
                 {
                     node_conds[s] = BDRY_COND::BASIC::REFLECT;
+                    
+                    node_locs[ni] = BOGUS_BDRY_LOC;
                 }
                 else if (bdry_cond_str == "SYMMETRY")
                 {
                     node_conds[s] = BDRY_COND::BASIC::SYMMETRY;
+                    
+                    node_locs[ni] = BOGUS_BDRY_LOC;
                 }
                 else if (bdry_cond_str == "DIRICHLET")
                 {
@@ -370,16 +438,13 @@ BasicCartesianBoundaryUtilities1::read1dBdryNodes(
                         bdry_loc_db,
                         bdry_loc_str,
                         s);
-                }
-                else
-                {
-                    TBOX_ERROR("BasicCartesianBoundaryUtilities1::read1dBdryNodes()\n"
-                        << "Unknown node boundary string = '"
-                        << bdry_cond_str
-                        << "' found in input."
-                        << std::endl);
+                    
+                    node_locs[ni] = BOGUS_BDRY_LOC;
                 }
             } // if (need_data_read)
        } // for (int ni = 0 ...
     } // if (num_per_dirs < 1)
+    
+    // Remove node locations that have boundary conditions identified.
+    node_locs.erase(std::remove(node_locs.begin(), node_locs.end(), BOGUS_BDRY_LOC), node_locs.end());
 }
