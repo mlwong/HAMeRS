@@ -206,8 +206,11 @@ FlowModelBoundaryUtilitiesFiveEqnAllaire::fill1dNodeBoundaryData(
     NULL_USE(ghost_width_to_fill);
     
     TBOX_ASSERT(static_cast<int>(bdry_node_locs.size()) <= NUM_1D_NODES);
-    TBOX_ASSERT(*min_element(bdry_node_locs.begin(), bdry_node_locs.end()) >= 0);
-    TBOX_ASSERT(*max_element(bdry_node_locs.begin(), bdry_node_locs.end()) < NUM_1D_NODES);
+    if (static_cast<int>(bdry_node_locs.size()) > 0)
+    {
+        TBOX_ASSERT(*min_element(bdry_node_locs.begin(), bdry_node_locs.end()) >= 0);
+        TBOX_ASSERT(*max_element(bdry_node_locs.begin(), bdry_node_locs.end()) < NUM_1D_NODES);
+    }
     TBOX_ASSERT(static_cast<int>(bdry_node_conds.size()) == NUM_1D_NODES);
     
     const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
@@ -255,8 +258,11 @@ FlowModelBoundaryUtilitiesFiveEqnAllaire::fill2dEdgeBoundaryData(
     NULL_USE(ghost_width_to_fill);
     
     TBOX_ASSERT(static_cast<int>(bdry_edge_locs.size()) <= NUM_2D_EDGES);
-    TBOX_ASSERT(*min_element(bdry_edge_locs.begin(), bdry_edge_locs.end()) >= 0);
-    TBOX_ASSERT(*max_element(bdry_edge_locs.begin(), bdry_edge_locs.end()) < NUM_2D_EDGES);
+    if (static_cast<int>(bdry_edge_locs.size()) > 0)
+    {
+        TBOX_ASSERT(*min_element(bdry_edge_locs.begin(), bdry_edge_locs.end()) >= 0);
+        TBOX_ASSERT(*max_element(bdry_edge_locs.begin(), bdry_edge_locs.end()) < NUM_2D_EDGES);
+    }
     TBOX_ASSERT(static_cast<int>(bdry_edge_conds.size()) == NUM_2D_EDGES);
     
     const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
@@ -304,8 +310,11 @@ FlowModelBoundaryUtilitiesFiveEqnAllaire::fill2dNodeBoundaryData(
     NULL_USE(ghost_width_to_fill);
     
     TBOX_ASSERT(static_cast<int>(bdry_node_locs.size()) <= NUM_2D_NODES);
-    TBOX_ASSERT(*min_element(bdry_node_locs.begin(), bdry_node_locs.end()) >= 0);
-    TBOX_ASSERT(*max_element(bdry_node_locs.begin(), bdry_node_locs.end()) < NUM_2D_NODES);
+    if (static_cast<int>(bdry_node_locs.size()) > 0)
+    {
+        TBOX_ASSERT(*min_element(bdry_node_locs.begin(), bdry_node_locs.end()) >= 0);
+        TBOX_ASSERT(*max_element(bdry_node_locs.begin(), bdry_node_locs.end()) < NUM_2D_NODES);
+    }
     TBOX_ASSERT(static_cast<int>(bdry_node_conds.size()) == NUM_2D_NODES);
     
     const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
@@ -353,8 +362,11 @@ FlowModelBoundaryUtilitiesFiveEqnAllaire::fill3dFaceBoundaryData(
     NULL_USE(ghost_width_to_fill);
     
     TBOX_ASSERT(static_cast<int>(bdry_face_locs.size()) <= NUM_3D_FACES);
-    TBOX_ASSERT(*min_element(bdry_face_locs.begin(), bdry_face_locs.end()) >= 0);
-    TBOX_ASSERT(*max_element(bdry_face_locs.begin(), bdry_face_locs.end()) < NUM_3D_FACES);
+    if (static_cast<int>(bdry_face_locs.size()) > 0)
+    {
+        TBOX_ASSERT(*min_element(bdry_face_locs.begin(), bdry_face_locs.end()) >= 0);
+        TBOX_ASSERT(*max_element(bdry_face_locs.begin(), bdry_face_locs.end()) < NUM_3D_FACES);
+    }
     TBOX_ASSERT(static_cast<int>(bdry_face_conds.size()) == NUM_3D_FACES);
     
     const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
@@ -402,8 +414,11 @@ FlowModelBoundaryUtilitiesFiveEqnAllaire::fill3dEdgeBoundaryData(
     NULL_USE(ghost_width_to_fill);
     
     TBOX_ASSERT(static_cast<int>(bdry_edge_locs.size()) <= NUM_3D_EDGES);
-    TBOX_ASSERT(*min_element(bdry_edge_locs.begin(), bdry_edge_locs.end()) >= 0);
-    TBOX_ASSERT(*max_element(bdry_edge_locs.begin(), bdry_edge_locs.end()) < NUM_3D_EDGES);
+    if (static_cast<int>(bdry_edge_locs.size()) > 0)
+    {
+        TBOX_ASSERT(*min_element(bdry_edge_locs.begin(), bdry_edge_locs.end()) >= 0);
+        TBOX_ASSERT(*max_element(bdry_edge_locs.begin(), bdry_edge_locs.end()) < NUM_3D_EDGES);
+    }
     TBOX_ASSERT(static_cast<int>(bdry_edge_conds.size()) == NUM_3D_EDGES);
     
     const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
@@ -451,8 +466,11 @@ FlowModelBoundaryUtilitiesFiveEqnAllaire::fill3dNodeBoundaryData(
     NULL_USE(ghost_width_to_fill);
     
     TBOX_ASSERT(static_cast<int>(bdry_node_locs.size()) <= NUM_3D_NODES);
-    TBOX_ASSERT(*min_element(bdry_node_locs.begin(), bdry_node_locs.end()) >= 0);
-    TBOX_ASSERT(*max_element(bdry_node_locs.begin(), bdry_node_locs.end()) < NUM_3D_NODES);
+    if (static_cast<int>(bdry_node_locs.size()) > 0)
+    {
+        TBOX_ASSERT(*min_element(bdry_node_locs.begin(), bdry_node_locs.end()) >= 0);
+        TBOX_ASSERT(*max_element(bdry_node_locs.begin(), bdry_node_locs.end()) < NUM_3D_NODES);
+    }
     TBOX_ASSERT(static_cast<int>(bdry_node_conds.size()) == NUM_3D_NODES);
     
     const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(

@@ -488,8 +488,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill1dNodeBoundaryData(
         TBOX_ASSERT(conservative_var_data[vi]);
     }
     TBOX_ASSERT(static_cast<int>(bdry_node_locs.size()) <= NUM_1D_NODES);
-    TBOX_ASSERT(*min_element(bdry_node_locs.begin(), bdry_node_locs.end()) >= 0);
-    TBOX_ASSERT(*max_element(bdry_node_locs.begin(), bdry_node_locs.end()) < NUM_1D_NODES);
+    if (static_cast<int>(bdry_node_locs.size()) > 0)
+    {
+        TBOX_ASSERT(*min_element(bdry_node_locs.begin(), bdry_node_locs.end()) >= 0);
+        TBOX_ASSERT(*max_element(bdry_node_locs.begin(), bdry_node_locs.end()) < NUM_1D_NODES);
+    }
     TBOX_ASSERT(static_cast<int>(bdry_node_conds.size()) == NUM_1D_NODES);
     TBOX_ASSERT(static_cast<int>(bdry_node_values.size()) == 3);
     for (int vi = 0; vi < static_cast<int>(bdry_node_values.size()); vi++)
@@ -897,8 +900,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
         TBOX_ASSERT(conservative_var_data[vi]);
     }
     TBOX_ASSERT(static_cast<int>(bdry_edge_locs.size()) <= NUM_2D_EDGES);
-    TBOX_ASSERT(*min_element(bdry_edge_locs.begin(), bdry_edge_locs.end()) >= 0);
-    TBOX_ASSERT(*max_element(bdry_edge_locs.begin(), bdry_edge_locs.end()) < NUM_2D_EDGES);
+    if (static_cast<int>(bdry_edge_locs.size()) > 0)
+    {
+        TBOX_ASSERT(*min_element(bdry_edge_locs.begin(), bdry_edge_locs.end()) >= 0);
+        TBOX_ASSERT(*max_element(bdry_edge_locs.begin(), bdry_edge_locs.end()) < NUM_2D_EDGES);
+    }
     TBOX_ASSERT(static_cast<int>(bdry_edge_conds.size()) == NUM_2D_EDGES);
     TBOX_ASSERT(static_cast<int>(bdry_edge_values.size()) == 3);
     for (int vi = 0; vi < static_cast<int>(bdry_edge_values.size()); vi++)
@@ -4115,8 +4121,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dNodeBoundaryData(
         TBOX_ASSERT(conservative_var_data[vi]);
     }
     TBOX_ASSERT(static_cast<int>(bdry_node_locs.size()) <= NUM_2D_NODES);
-    TBOX_ASSERT(*min_element(bdry_node_locs.begin(), bdry_node_locs.end()) >= 0);
-    TBOX_ASSERT(*max_element(bdry_node_locs.begin(), bdry_node_locs.end()) < NUM_2D_NODES);
+    if (static_cast<int>(bdry_node_locs.size()) > 0)
+    {
+        TBOX_ASSERT(*min_element(bdry_node_locs.begin(), bdry_node_locs.end()) >= 0);
+        TBOX_ASSERT(*max_element(bdry_node_locs.begin(), bdry_node_locs.end()) < NUM_2D_NODES);
+    }
     TBOX_ASSERT(static_cast<int>(bdry_node_conds.size()) == NUM_2D_NODES);
     TBOX_ASSERT(static_cast<int>(bdry_edge_values.size()) == 3);
     for (int vi = 0; vi < static_cast<int>(bdry_edge_values.size()); vi++)
@@ -4909,8 +4918,10 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
         TBOX_ASSERT(conservative_var_data[vi]);
     }
     TBOX_ASSERT(static_cast<int>(bdry_face_locs.size()) <= NUM_3D_FACES);
-    TBOX_ASSERT(*min_element(bdry_face_locs.begin(), bdry_face_locs.end()) >= 0);
-    TBOX_ASSERT(*max_element(bdry_face_locs.begin(), bdry_face_locs.end()) < NUM_3D_FACES);
+    {
+        TBOX_ASSERT(*min_element(bdry_face_locs.begin(), bdry_face_locs.end()) >= 0);
+        TBOX_ASSERT(*max_element(bdry_face_locs.begin(), bdry_face_locs.end()) < NUM_3D_FACES);
+    }
     TBOX_ASSERT(static_cast<int>(bdry_face_conds.size()) == NUM_3D_FACES);
     TBOX_ASSERT(static_cast<int>(bdry_face_values.size()) == 3);
     for (int vi = 0; vi < static_cast<int>(bdry_face_values.size()); vi++)
@@ -11816,8 +11827,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dEdgeBoundaryData(
         TBOX_ASSERT(conservative_var_data[vi]);
     }
     TBOX_ASSERT(static_cast<int>(bdry_edge_locs.size()) <= NUM_3D_EDGES);
-    TBOX_ASSERT(*min_element(bdry_edge_locs.begin(), bdry_edge_locs.end()) >= 0);
-    TBOX_ASSERT(*max_element(bdry_edge_locs.begin(), bdry_edge_locs.end()) < NUM_3D_EDGES);
+    if (static_cast<int>(bdry_edge_locs.size()) > 0)
+    {
+        TBOX_ASSERT(*min_element(bdry_edge_locs.begin(), bdry_edge_locs.end()) >= 0);
+        TBOX_ASSERT(*max_element(bdry_edge_locs.begin(), bdry_edge_locs.end()) < NUM_3D_EDGES);
+    }
     TBOX_ASSERT(static_cast<int>(bdry_edge_conds.size()) == NUM_3D_EDGES);
     TBOX_ASSERT(static_cast<int>(bdry_face_values.size()) == 3);
     for (int vi = 0; vi < static_cast<int>(bdry_face_values.size()); vi++)
@@ -13172,8 +13186,10 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dNodeBoundaryData(
         TBOX_ASSERT(conservative_var_data[vi]);
     }
     TBOX_ASSERT(static_cast<int>(bdry_node_locs.size()) <= NUM_3D_NODES);
-    TBOX_ASSERT(*min_element(bdry_node_locs.begin(), bdry_node_locs.end()) >= 0);
-    TBOX_ASSERT(*max_element(bdry_node_locs.begin(), bdry_node_locs.end()) < NUM_3D_NODES);
+    {
+        TBOX_ASSERT(*min_element(bdry_node_locs.begin(), bdry_node_locs.end()) >= 0);
+        TBOX_ASSERT(*max_element(bdry_node_locs.begin(), bdry_node_locs.end()) < NUM_3D_NODES);
+    }
     TBOX_ASSERT(static_cast<int>(bdry_node_conds.size()) == NUM_3D_NODES);
     TBOX_ASSERT(static_cast<int>(bdry_face_values.size()) == 3);
     for (int vi = 0; vi < static_cast<int>(bdry_face_values.size()); vi++)
