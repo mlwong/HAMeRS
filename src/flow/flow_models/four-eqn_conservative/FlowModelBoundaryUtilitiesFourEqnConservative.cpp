@@ -82,8 +82,11 @@ FlowModelBoundaryUtilitiesFourEqnConservative::getFromInput1d(
 {
     TBOX_DIM_ASSERT(periodic.getDim() == tbox::Dimension(1));
     TBOX_ASSERT(static_cast<int>(node_locs.size()) <= NUM_1D_NODES);
-    TBOX_ASSERT(*min_element(node_locs.begin(), node_locs.end()) >= 0);
-    TBOX_ASSERT(*max_element(node_locs.begin(), node_locs.end()) < NUM_1D_NODES);
+    if (static_cast<int>(node_locs.size()) > 0)
+    {
+        TBOX_ASSERT(*min_element(node_locs.begin(), node_locs.end()) >= 0);
+        TBOX_ASSERT(*max_element(node_locs.begin(), node_locs.end()) < NUM_1D_NODES);
+    }
     TBOX_ASSERT(static_cast<int>(node_conds.size()) == NUM_1D_NODES);
     
     if (!input_db)
@@ -93,11 +96,14 @@ FlowModelBoundaryUtilitiesFourEqnConservative::getFromInput1d(
             << std::endl);
     }
     
-    read1dBdryNodes(
-        input_db,
-        node_locs,
-        node_conds,
-        periodic);
+    if (static_cast<int>(node_locs.size()) > 0)
+    {
+        read1dBdryNodes(
+            input_db,
+            node_locs,
+            node_conds,
+            periodic);
+    }
 }
 
 
@@ -118,10 +124,16 @@ FlowModelBoundaryUtilitiesFourEqnConservative::getFromInput2d(
     TBOX_DIM_ASSERT(periodic.getDim() == tbox::Dimension(2));
     TBOX_ASSERT(static_cast<int>(edge_locs.size()) <= NUM_2D_EDGES);
     TBOX_ASSERT(static_cast<int>(node_locs.size()) <= NUM_2D_NODES);
-    TBOX_ASSERT(*min_element(edge_locs.begin(), edge_locs.end()) >= 0);
-    TBOX_ASSERT(*max_element(edge_locs.begin(), edge_locs.end()) < NUM_2D_EDGES);
-    TBOX_ASSERT(*min_element(node_locs.begin(), node_locs.end()) >= 0);
-    TBOX_ASSERT(*max_element(node_locs.begin(), node_locs.end()) < NUM_2D_NODES);
+    if (static_cast<int>(edge_locs.size()) > 0)
+    {
+        TBOX_ASSERT(*min_element(edge_locs.begin(), edge_locs.end()) >= 0);
+        TBOX_ASSERT(*max_element(edge_locs.begin(), edge_locs.end()) < NUM_2D_EDGES);
+    }
+    if (static_cast<int>(node_locs.size()) > 0)
+    {
+        TBOX_ASSERT(*min_element(node_locs.begin(), node_locs.end()) >= 0);
+        TBOX_ASSERT(*max_element(node_locs.begin(), node_locs.end()) < NUM_2D_NODES);
+    }
     TBOX_ASSERT(static_cast<int>(edge_conds.size()) == NUM_2D_EDGES);
     TBOX_ASSERT(static_cast<int>(node_conds.size()) == NUM_2D_NODES);
     
@@ -132,18 +144,24 @@ FlowModelBoundaryUtilitiesFourEqnConservative::getFromInput2d(
             << std::endl);
     }
     
-    read2dBdryEdges(
-        input_db,
-        edge_locs,
-        edge_conds,
-        periodic);
+    if (static_cast<int>(edge_locs.size()) > 0)
+    {
+        read2dBdryEdges(
+            input_db,
+            edge_locs,
+            edge_conds,
+            periodic);
+    }
     
-    read2dBdryNodes(
-        input_db,
-        node_locs,
-        edge_conds,
-        node_conds,
-        periodic);
+    if (static_cast<int>(node_locs.size()) > 0)
+    {
+        read2dBdryNodes(
+            input_db,
+            node_locs,
+            edge_conds,
+            node_conds,
+            periodic);
+    }
 }
 
 
@@ -168,12 +186,21 @@ FlowModelBoundaryUtilitiesFourEqnConservative::getFromInput3d(
     TBOX_ASSERT(static_cast<int>(face_locs.size()) <= NUM_3D_FACES);
     TBOX_ASSERT(static_cast<int>(edge_locs.size()) <= NUM_3D_EDGES);
     TBOX_ASSERT(static_cast<int>(node_locs.size()) <= NUM_3D_NODES);
-    TBOX_ASSERT(*min_element(face_locs.begin(), face_locs.end()) >= 0);
-    TBOX_ASSERT(*max_element(face_locs.begin(), face_locs.end()) < NUM_3D_FACES);
-    TBOX_ASSERT(*min_element(edge_locs.begin(), edge_locs.end()) >= 0);
-    TBOX_ASSERT(*max_element(edge_locs.begin(), edge_locs.end()) < NUM_3D_EDGES);
-    TBOX_ASSERT(*min_element(node_locs.begin(), node_locs.end()) >= 0);
-    TBOX_ASSERT(*max_element(node_locs.begin(), node_locs.end()) < NUM_3D_NODES);
+    if (static_cast<int>(face_locs.size()) > 0)
+    {
+        TBOX_ASSERT(*min_element(face_locs.begin(), face_locs.end()) >= 0);
+        TBOX_ASSERT(*max_element(face_locs.begin(), face_locs.end()) < NUM_3D_FACES);
+    }
+    if (static_cast<int>(edge_locs.size()) > 0)
+    {
+        TBOX_ASSERT(*min_element(edge_locs.begin(), edge_locs.end()) >= 0);
+        TBOX_ASSERT(*max_element(edge_locs.begin(), edge_locs.end()) < NUM_3D_EDGES);
+    }
+    if (static_cast<int>(node_locs.size()) > 0)
+    {
+        TBOX_ASSERT(*min_element(node_locs.begin(), node_locs.end()) >= 0);
+        TBOX_ASSERT(*max_element(node_locs.begin(), node_locs.end()) < NUM_3D_NODES);
+    }
     TBOX_ASSERT(static_cast<int>(face_conds.size()) == NUM_3D_FACES);
     TBOX_ASSERT(static_cast<int>(edge_conds.size()) == NUM_3D_EDGES);
     TBOX_ASSERT(static_cast<int>(node_conds.size()) == NUM_3D_NODES);
@@ -186,25 +213,34 @@ FlowModelBoundaryUtilitiesFourEqnConservative::getFromInput3d(
             << std::endl);
     }
     
-    read3dBdryFaces(
-        input_db,
-        face_locs,
-        face_conds,
-        periodic);
+    if (static_cast<int>(face_locs.size()) > 0)
+    {
+        read3dBdryFaces(
+            input_db,
+            face_locs,
+            face_conds,
+            periodic);
+    }
     
-    read3dBdryEdges(
-        input_db,
-        edge_locs,
-        face_conds,
-        edge_conds,
-        periodic);
+    if (static_cast<int>(edge_locs.size()) > 0)
+    {
+        read3dBdryEdges(
+            input_db,
+            edge_locs,
+            face_conds,
+            edge_conds,
+            periodic);
+    }
     
-    read3dBdryNodes(
-        input_db,
-        node_locs,
-        face_conds,
-        node_conds,
-        periodic);
+    if (static_cast<int>(node_locs.size()) > 0)
+    {
+        read3dBdryNodes(
+            input_db,
+            node_locs,
+            face_conds,
+            node_conds,
+            periodic);
+    }
 }
 
 
