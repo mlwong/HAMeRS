@@ -158,7 +158,7 @@ struct BasicCartesianBoundaryUtilities1
          *
          * @pre !var_name.empty()
          * @pre var_data
-         * @pre bdry_node_locs.size()) <= NUM_1D_NODES
+         * @pre bdry_node_locs.size() <= NUM_1D_NODES
          * @pre bdry_node_conds.size() == NUM_1D_NODES
          * @pre bdry_node_values.size() == NUM_1D_NODES * (var_data->getDepth())
          * @pre (var_data->getDim() == patch.getDim()) &&

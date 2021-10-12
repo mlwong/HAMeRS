@@ -937,7 +937,7 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
         BasicCartesianBoundaryUtilities2::removeBoundaryNodeLocations(
             node_locs,
             patch,
-            d_scalar_bdry_node_conds);
+            d_vector_bdry_node_conds);
         
         flow_model_boundary_utilities->
             fill2dNodeBoundaryData(
