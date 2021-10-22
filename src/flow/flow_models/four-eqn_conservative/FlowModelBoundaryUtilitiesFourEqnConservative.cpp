@@ -1637,12 +1637,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                         double dv_dy = double(0);
                         double dp_dy = double(0);
                         
-                        if (((patch_geom->getTouchesRegularBoundary(1, 0)) && (j == interior_box_lo_idx[1])) ||
-                            ((j + num_subghosts_conservative_var[0][1] == 0) ||
-                             (j + num_subghosts_conservative_var[1][1] == 0) ||
-                             (j + num_subghosts_conservative_var[2][1] == 0)))
+                        if ((j + num_subghosts_conservative_var[0][1] == 0) ||
+                            (j + num_subghosts_conservative_var[1][1] == 0) ||
+                            (j + num_subghosts_conservative_var[2][1] == 0))
+                        // if (((patch_geom->getTouchesRegularBoundary(1, 0)) && (j == interior_box_lo_idx[1])) ||
+                        //     ((j + num_subghosts_conservative_var[0][1] == 0) ||
+                        //      (j + num_subghosts_conservative_var[1][1] == 0) ||
+                        //      (j + num_subghosts_conservative_var[2][1] == 0)))
                         {
-                            // Patch is touching bottom physical or periodic boundary.
+                            // Patch is touching periodic boundary.
                             
                             const int idx_cell_rho_Y_y_T = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
                                 (j + 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
@@ -1700,12 +1703,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             dv_dy = (v_y_T - v_x_R)/(dx[1]);
                             dp_dy = (p_y_T - p_x_R)/(dx[1]);
                         }
-                        else if (((patch_geom->getTouchesRegularBoundary(1, 1)) && (j == interior_box_hi_idx[1])) ||
-                                 ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
-                                  (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
-                                  (j + num_subghosts_conservative_var[2][1] + 1 == subghostcell_dims_conservative_var[2][1])))
+                        else if ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
+                                 (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
+                                 (j + num_subghosts_conservative_var[2][1] + 1 == subghostcell_dims_conservative_var[2][1]))
+                        // else if (((patch_geom->getTouchesRegularBoundary(1, 1)) && (j == interior_box_hi_idx[1])) ||
+                        //          ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
+                        //           (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
+                        //           (j + num_subghosts_conservative_var[2][1] + 1 == subghostcell_dims_conservative_var[2][1])))
                         {
-                            // Patch is touching top physical or periodic boundary.
+                            // Patch is touching periodic boundary.
                             
                             const int idx_cell_rho_Y_y_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
                                 (j - 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
@@ -2307,12 +2313,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                         double dv_dy = double(0);
                         double dp_dy = double(0);
                         
-                        if (((patch_geom->getTouchesRegularBoundary(1, 0)) && (j == interior_box_lo_idx[1])) ||
-                            ((j + num_subghosts_conservative_var[0][1] == 0) ||
-                             (j + num_subghosts_conservative_var[1][1] == 0) ||
-                             (j + num_subghosts_conservative_var[2][1] == 0)))
+                        if ((j + num_subghosts_conservative_var[0][1] == 0) ||
+                            (j + num_subghosts_conservative_var[1][1] == 0) ||
+                            (j + num_subghosts_conservative_var[2][1] == 0))
+                        // if (((patch_geom->getTouchesRegularBoundary(1, 0)) && (j == interior_box_lo_idx[1])) ||
+                        //     ((j + num_subghosts_conservative_var[0][1] == 0) ||
+                        //      (j + num_subghosts_conservative_var[1][1] == 0) ||
+                        //      (j + num_subghosts_conservative_var[2][1] == 0)))
                         {
-                            // Patch is touching bottom physical or periodic boundary.
+                            // Patch is touching periodic boundary.
                             
                             const int idx_cell_rho_Y_y_T = (interior_box_hi_idx[0] + num_subghosts_conservative_var[0][0]) +
                                 (j + 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
@@ -2369,12 +2378,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             dv_dy = (v_y_T - v_x_L)/(dx[1]);
                             dp_dy = (p_y_T - p_x_L)/(dx[1]);
                         }
-                        else if (((patch_geom->getTouchesRegularBoundary(1, 1)) && (j == interior_box_hi_idx[1])) ||
-                                 ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
-                                  (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
-                                  (j + num_subghosts_conservative_var[2][1] + 1 == subghostcell_dims_conservative_var[2][1])))
+                        else if ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
+                                 (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
+                                 (j + num_subghosts_conservative_var[2][1] + 1 == subghostcell_dims_conservative_var[2][1]))
+                        // else if (((patch_geom->getTouchesRegularBoundary(1, 1)) && (j == interior_box_hi_idx[1])) ||
+                        //          ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
+                        //           (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
+                        //           (j + num_subghosts_conservative_var[2][1] + 1 == subghostcell_dims_conservative_var[2][1])))
                         {
-                            // Patch is touching top physical or periodic boundary.
+                            // Patch is touching periodic boundary.
                             
                             const int idx_cell_rho_Y_y_B = (interior_box_hi_idx[0] + num_subghosts_conservative_var[0][0]) +
                                 (j - 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
@@ -2975,13 +2987,16 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                         double du_dx = double(0);
                         double dv_dx = double(0);
                         double dp_dx = double(0);
-
-                         if (((patch_geom->getTouchesRegularBoundary(0, 0)) && (i == interior_box_lo_idx[0])) ||
-                            ((i + num_subghosts_conservative_var[0][0] == 0) ||
-                             (i + num_subghosts_conservative_var[1][0] == 0) ||
-                             (i + num_subghosts_conservative_var[2][0] == 0)))
+                        
+                        if ((i + num_subghosts_conservative_var[0][0] == 0) ||
+                            (i + num_subghosts_conservative_var[1][0] == 0) ||
+                            (i + num_subghosts_conservative_var[2][0] == 0))
+                        // if (((patch_geom->getTouchesRegularBoundary(0, 0)) && (i == interior_box_lo_idx[0])) ||
+                        //     ((i + num_subghosts_conservative_var[0][0] == 0) ||
+                        //      (i + num_subghosts_conservative_var[1][0] == 0) ||
+                        //      (i + num_subghosts_conservative_var[2][0] == 0)))
                         {
-                            // Patch is touching left physical or periodic boundary.
+                            // Patch is touching periodic boundary.
                             
                             const int idx_cell_rho_Y_x_R = (i + 1 + num_subghosts_conservative_var[0][0]) +
                                 (interior_box_lo_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
@@ -3039,12 +3054,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             dv_dx = (v_x_R - v_y_T)/(dx[0]);
                             dp_dx = (p_x_R - p_y_T)/(dx[0]);
                         }
-                        else if (((patch_geom->getTouchesRegularBoundary(0, 1)) && (i == interior_box_hi_idx[0])) ||
-                                 ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
-                                  (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
-                                  (i + num_subghosts_conservative_var[2][0] + 1 == subghostcell_dims_conservative_var[2][0])))
+                        else if ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
+                                 (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
+                                 (i + num_subghosts_conservative_var[2][0] + 1 == subghostcell_dims_conservative_var[2][0]))
+                        // else if (((patch_geom->getTouchesRegularBoundary(0, 1)) && (i == interior_box_hi_idx[0])) ||
+                        //          ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
+                        //           (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
+                        //           (i + num_subghosts_conservative_var[2][0] + 1 == subghostcell_dims_conservative_var[2][0])))
                         {
-                            // Patch is touching right physical or periodic boundary.
+                            // Patch is touching periodic boundary.
                             
                             const int idx_cell_rho_Y_x_L = (i - 1 + num_subghosts_conservative_var[0][0]) +
                                 (interior_box_lo_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
@@ -3643,12 +3661,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                         double dv_dx = double(0);
                         double dp_dx = double(0);
                         
-                        if (((patch_geom->getTouchesRegularBoundary(0, 0)) && (i == interior_box_lo_idx[0])) ||
-                            ((i + num_subghosts_conservative_var[0][0] == 0) ||
-                             (i + num_subghosts_conservative_var[1][0] == 0) ||
-                             (i + num_subghosts_conservative_var[2][0] == 0)))
+                        if ((i + num_subghosts_conservative_var[0][0] == 0) ||
+                            (i + num_subghosts_conservative_var[1][0] == 0) ||
+                            (i + num_subghosts_conservative_var[2][0] == 0))
+                        // if (((patch_geom->getTouchesRegularBoundary(0, 0)) && (i == interior_box_lo_idx[0])) ||
+                        //     ((i + num_subghosts_conservative_var[0][0] == 0) ||
+                        //      (i + num_subghosts_conservative_var[1][0] == 0) ||
+                        //      (i + num_subghosts_conservative_var[2][0] == 0)))
                         {
-                            // Patch is touching left physical or periodic boundary.
+                            // Patch is touching periodic boundary.
                             
                             const int idx_cell_rho_Y_x_R = (i + 1 + num_subghosts_conservative_var[0][0]) +
                                 (interior_box_hi_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
@@ -3706,12 +3727,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill2dEdgeBoundaryData(
                             dv_dx = (v_x_R - v_y_B)/(dx[0]);
                             dp_dx = (p_x_R - p_y_B)/(dx[0]);
                         }
-                        else if (((patch_geom->getTouchesRegularBoundary(0, 1)) && (i == interior_box_hi_idx[0])) ||
-                                 ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
-                                  (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
-                                  (i + num_subghosts_conservative_var[2][0] + 1 == subghostcell_dims_conservative_var[2][0])))
+                        else if ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
+                                 (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
+                                 (i + num_subghosts_conservative_var[2][0] + 1 == subghostcell_dims_conservative_var[2][0]))
+                        // else if (((patch_geom->getTouchesRegularBoundary(0, 1)) && (i == interior_box_hi_idx[0])) ||
+                        //          ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
+                        //           (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
+                        //           (i + num_subghosts_conservative_var[2][0] + 1 == subghostcell_dims_conservative_var[2][0])))
                         {
-                            // Patch is touching right physical or periodic boundary.
+                            // Patch is touching periodic boundary.
                             
                             const int idx_cell_rho_Y_x_L = (i - 1 + num_subghosts_conservative_var[0][0]) +
                                 (interior_box_hi_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0];
@@ -5967,12 +5991,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                             // double dw_dy = double(0);
                             double dp_dy = double(0);
                             
-                            if (((patch_geom->getTouchesRegularBoundary(1, 0)) && (j == interior_box_lo_idx[1])) ||
-                                ((j + num_subghosts_conservative_var[0][1] == 0) ||
-                                 (j + num_subghosts_conservative_var[1][1] == 0) ||
-                                 (j + num_subghosts_conservative_var[2][1] == 0)))
+                            if ((j + num_subghosts_conservative_var[0][1] == 0) ||
+                                (j + num_subghosts_conservative_var[1][1] == 0) ||
+                                (j + num_subghosts_conservative_var[2][1] == 0))
+                            // if (((patch_geom->getTouchesRegularBoundary(1, 0)) && (j == interior_box_lo_idx[1])) ||
+                            //     ((j + num_subghosts_conservative_var[0][1] == 0) ||
+                            //      (j + num_subghosts_conservative_var[1][1] == 0) ||
+                            //      (j + num_subghosts_conservative_var[2][1] == 0)))
                             {
-                                // Patch is touching bottom physical or periodic boundary.
+                                // Patch is touching periodic boundary.
                                 
                                 const int idx_cell_rho_Y_y_T = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
                                     (j + 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -6038,12 +6065,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 // dw_dy = (w_y_T - w_x_R)/(dx[1]);
                                 dp_dy = (p_y_T - p_x_R)/(dx[1]);
                             }
-                            else if (((patch_geom->getTouchesRegularBoundary(1, 1)) && (j == interior_box_hi_idx[1])) ||
-                                     ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
-                                      (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
-                                      (j + num_subghosts_conservative_var[2][1] + 1 == subghostcell_dims_conservative_var[2][1])))
+                            else if ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
+                                     (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
+                                     (j + num_subghosts_conservative_var[2][1] + 1 == subghostcell_dims_conservative_var[2][1]))
+                            // else if (((patch_geom->getTouchesRegularBoundary(1, 1)) && (j == interior_box_hi_idx[1])) ||
+                            //          ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
+                            //           (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
+                            //           (j + num_subghosts_conservative_var[2][1] + 1 == subghostcell_dims_conservative_var[2][1])))
                             {
-                                // Patch is touching top physical or periodic boundary.     
+                                // Patch is touching periodic boundary.
                                 const int idx_cell_rho_Y_y_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
                                     (j - 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
                                     (k + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
@@ -6220,12 +6250,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                             double dw_dz = double(0);
                             double dp_dz = double(0);
                             
-                            if (((patch_geom->getTouchesRegularBoundary(2, 0)) && (k == interior_box_lo_idx[2])) ||
-                                ((k + num_subghosts_conservative_var[0][2] == 0) ||
-                                 (k + num_subghosts_conservative_var[1][2] == 0) ||
-                                 (k + num_subghosts_conservative_var[2][2] == 0)))
+                            if ((k + num_subghosts_conservative_var[0][2] == 0) ||
+                                (k + num_subghosts_conservative_var[1][2] == 0) ||
+                                (k + num_subghosts_conservative_var[2][2] == 0))
+                            // if (((patch_geom->getTouchesRegularBoundary(2, 0)) && (k == interior_box_lo_idx[2])) ||
+                            //     ((k + num_subghosts_conservative_var[0][2] == 0) ||
+                            //      (k + num_subghosts_conservative_var[1][2] == 0) ||
+                            //      (k + num_subghosts_conservative_var[2][2] == 0)))
                             {
-                                // Patch is touching back physical or periodic boundary.
+                                // Patch is touching periodic boundary.
                                 
                                 const int idx_cell_rho_Y_z_F = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
                                     (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -6291,12 +6324,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 dw_dz = (w_z_F - w_x_R)/(dx[2]);
                                 dp_dz = (p_z_F - p_x_R)/(dx[2]);
                             }
-                            else if (((patch_geom->getTouchesRegularBoundary(2, 1)) && (k == interior_box_hi_idx[2])) ||
-                                     ((k + num_subghosts_conservative_var[0][2] + 1 == subghostcell_dims_conservative_var[0][2]) ||
-                                      (k + num_subghosts_conservative_var[1][2] + 1 == subghostcell_dims_conservative_var[1][2]) ||
-                                      (k + num_subghosts_conservative_var[2][2] + 1 == subghostcell_dims_conservative_var[2][2])))
+                            else if ((k + num_subghosts_conservative_var[0][2] + 1 == subghostcell_dims_conservative_var[0][2]) ||
+                                     (k + num_subghosts_conservative_var[1][2] + 1 == subghostcell_dims_conservative_var[1][2]) ||
+                                     (k + num_subghosts_conservative_var[2][2] + 1 == subghostcell_dims_conservative_var[2][2]))
+                            // else if (((patch_geom->getTouchesRegularBoundary(2, 1)) && (k == interior_box_hi_idx[2])) ||
+                            //          ((k + num_subghosts_conservative_var[0][2] + 1 == subghostcell_dims_conservative_var[0][2]) ||
+                            //           (k + num_subghosts_conservative_var[1][2] + 1 == subghostcell_dims_conservative_var[1][2]) ||
+                            //           (k + num_subghosts_conservative_var[2][2] + 1 == subghostcell_dims_conservative_var[2][2])))
                             {
-                                // Patch is touching front physical or periodic boundary.
+                                // Patch is touching periodic boundary.
                                 const int idx_cell_rho_Y_z_B = (interior_box_lo_idx[0] + num_subghosts_conservative_var[0][0]) +
                                     (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
                                     (k - 1 + num_subghosts_conservative_var[0][2])*subghostcell_dims_conservative_var[0][0]*
@@ -6990,12 +7026,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                             // double dw_dy = double(0);
                             double dp_dy = double(0);
                             
-                            if (((patch_geom->getTouchesRegularBoundary(1, 0)) && (j == interior_box_lo_idx[1])) ||
-                                ((j + num_subghosts_conservative_var[0][1] == 0) ||
-                                 (j + num_subghosts_conservative_var[1][1] == 0) ||
-                                 (j + num_subghosts_conservative_var[2][1] == 0)))
+                            if ((j + num_subghosts_conservative_var[0][1] == 0) ||
+                                (j + num_subghosts_conservative_var[1][1] == 0) ||
+                                (j + num_subghosts_conservative_var[2][1] == 0))
+                            // if (((patch_geom->getTouchesRegularBoundary(1, 0)) && (j == interior_box_lo_idx[1])) ||
+                            //     ((j + num_subghosts_conservative_var[0][1] == 0) ||
+                            //      (j + num_subghosts_conservative_var[1][1] == 0) ||
+                            //      (j + num_subghosts_conservative_var[2][1] == 0)))
                             {
-                                // Patch is touching bottom physical or periodic boundary.
+                                // Patch is touching periodic boundary.
                                 
                                 const int idx_cell_rho_Y_y_T = (interior_box_hi_idx[0] + num_subghosts_conservative_var[0][0]) +
                                     (j + 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -7061,12 +7100,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 // dw_dy = (w_y_T - w_x_L)/(dx[1]);
                                 dp_dy = (p_y_T - p_x_L)/(dx[1]);
                             }
-                            else if (((patch_geom->getTouchesRegularBoundary(1, 1)) && (j == interior_box_hi_idx[1])) ||
-                                     ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
-                                      (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
-                                      (j + num_subghosts_conservative_var[2][1] + 1 == subghostcell_dims_conservative_var[2][1])))
+                            else if ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
+                                     (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
+                                     (j + num_subghosts_conservative_var[2][1] + 1 == subghostcell_dims_conservative_var[2][1]))
+                            // else if (((patch_geom->getTouchesRegularBoundary(1, 1)) && (j == interior_box_hi_idx[1])) ||
+                            //          ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
+                            //           (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
+                            //           (j + num_subghosts_conservative_var[2][1] + 1 == subghostcell_dims_conservative_var[2][1])))
                             {
-                                // Patch is touching top physical or periodIic boundary.
+                                // Patch is touching periodIic boundary.
                                 
                                 const int idx_cell_rho_Y_y_B = (interior_box_hi_idx[0] + num_subghosts_conservative_var[0][0]) +
                                     (j - 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -7244,12 +7286,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                             double dw_dz = double(0);
                             double dp_dz = double(0);
                             
-                            if (((patch_geom->getTouchesRegularBoundary(2, 0)) && (k == interior_box_lo_idx[2])) ||
-                                ((k + num_subghosts_conservative_var[0][2] == 0) ||
-                                 (k + num_subghosts_conservative_var[1][2] == 0) ||
-                                 (k + num_subghosts_conservative_var[2][2] == 0)))
+                            if ((k + num_subghosts_conservative_var[0][2] == 0) ||
+                                (k + num_subghosts_conservative_var[1][2] == 0) ||
+                                (k + num_subghosts_conservative_var[2][2] == 0))
+                            // if (((patch_geom->getTouchesRegularBoundary(2, 0)) && (k == interior_box_lo_idx[2])) ||
+                            //     ((k + num_subghosts_conservative_var[0][2] == 0) ||
+                            //      (k + num_subghosts_conservative_var[1][2] == 0) ||
+                            //      (k + num_subghosts_conservative_var[2][2] == 0)))
                             {
-                                // Patch is touching back physical or periodic boundary.
+                                // Patch is touching periodic boundary.
                                 
                                 const int idx_cell_rho_Y_z_F = (interior_box_hi_idx[0] + num_subghosts_conservative_var[0][0]) +
                                     (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -7315,12 +7360,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 dw_dz = (w_z_F - w_x_L)/(dx[2]);
                                 dp_dz = (p_z_F - p_x_L)/(dx[2]);
                             }
-                            else if (((patch_geom->getTouchesRegularBoundary(2, 1)) && (k == interior_box_hi_idx[2])) ||
-                                     ((k + num_subghosts_conservative_var[0][2] + 1 == subghostcell_dims_conservative_var[0][2]) ||
-                                      (k + num_subghosts_conservative_var[1][2] + 1 == subghostcell_dims_conservative_var[1][2]) ||
-                                      (k + num_subghosts_conservative_var[2][2] + 1 == subghostcell_dims_conservative_var[2][2])))
+                            else if ((k + num_subghosts_conservative_var[0][2] + 1 == subghostcell_dims_conservative_var[0][2]) ||
+                                     (k + num_subghosts_conservative_var[1][2] + 1 == subghostcell_dims_conservative_var[1][2]) ||
+                                     (k + num_subghosts_conservative_var[2][2] + 1 == subghostcell_dims_conservative_var[2][2]))
+                            // else if (((patch_geom->getTouchesRegularBoundary(2, 1)) && (k == interior_box_hi_idx[2])) ||
+                            //          ((k + num_subghosts_conservative_var[0][2] + 1 == subghostcell_dims_conservative_var[0][2]) ||
+                            //           (k + num_subghosts_conservative_var[1][2] + 1 == subghostcell_dims_conservative_var[1][2]) ||
+                            //           (k + num_subghosts_conservative_var[2][2] + 1 == subghostcell_dims_conservative_var[2][2])))
                             {
-                                // Patch is touching front physical or periodic boundary.
+                                // Patch is touching periodic boundary.
                                 
                                 const int idx_cell_rho_Y_z_B = (interior_box_hi_idx[0] + num_subghosts_conservative_var[0][0]) +
                                     (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -8015,12 +8063,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                             // double dw_dx = double(0);
                             double dp_dx = double(0);
                             
-                            if (((patch_geom->getTouchesRegularBoundary(0, 0)) && (i == interior_box_lo_idx[0])) ||
-                                ((i + num_subghosts_conservative_var[0][0] == 0) ||
-                                 (i + num_subghosts_conservative_var[1][0] == 0) ||
-                                 (i + num_subghosts_conservative_var[2][0] == 0)))
+                            if ((i + num_subghosts_conservative_var[0][0] == 0) ||
+                                (i + num_subghosts_conservative_var[1][0] == 0) ||
+                                (i + num_subghosts_conservative_var[2][0] == 0))
+                            // if (((patch_geom->getTouchesRegularBoundary(0, 0)) && (i == interior_box_lo_idx[0])) ||
+                            //     ((i + num_subghosts_conservative_var[0][0] == 0) ||
+                            //      (i + num_subghosts_conservative_var[1][0] == 0) ||
+                            //      (i + num_subghosts_conservative_var[2][0] == 0)))
                             {
-                                // Patch is touching left physical or periodic boundary.
+                                // Patch is touching periodic boundary.
                                 
                                 const int idx_cell_rho_Y_x_R = (i + 1 + num_subghosts_conservative_var[0][0]) +
                                     (interior_box_lo_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -8086,12 +8137,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 // dw_dx = (w_x_R - w_y_T)/(dx[0]);
                                 dp_dx = (p_x_R - p_y_T)/(dx[0]);
                             }
-                            else if (((patch_geom->getTouchesRegularBoundary(0, 1)) && (i == interior_box_hi_idx[0])) ||
-                                     ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
-                                      (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
-                                      (i + num_subghosts_conservative_var[2][0] + 1 == subghostcell_dims_conservative_var[2][0])))
+                            else if ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
+                                     (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
+                                     (i + num_subghosts_conservative_var[2][0] + 1 == subghostcell_dims_conservative_var[2][0]))
+                            // else if (((patch_geom->getTouchesRegularBoundary(0, 1)) && (i == interior_box_hi_idx[0])) ||
+                            //          ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
+                            //           (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
+                            //           (i + num_subghosts_conservative_var[2][0] + 1 == subghostcell_dims_conservative_var[2][0])))
                             {
-                                // Patch is touching right physical or periodic boundary.
+                                // Patch is touching periodic boundary.
                                 
                                 const int idx_cell_rho_Y_x_L = (i - 1 + num_subghosts_conservative_var[0][0]) +
                                     (interior_box_lo_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -8270,12 +8324,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                             double dw_dz = double(0);
                             double dp_dz = double(0);
                             
-                            if (((patch_geom->getTouchesRegularBoundary(2, 0)) && (k == interior_box_lo_idx[2])) ||
-                                ((k + num_subghosts_conservative_var[0][2] == 0) ||
-                                 (k + num_subghosts_conservative_var[1][2] == 0) ||
-                                 (k + num_subghosts_conservative_var[2][2] == 0)))
+                            if ((k + num_subghosts_conservative_var[0][2] == 0) ||
+                                (k + num_subghosts_conservative_var[1][2] == 0) ||
+                                (k + num_subghosts_conservative_var[2][2] == 0))
+                            // if (((patch_geom->getTouchesRegularBoundary(2, 0)) && (k == interior_box_lo_idx[2])) ||
+                            //     ((k + num_subghosts_conservative_var[0][2] == 0) ||
+                            //      (k + num_subghosts_conservative_var[1][2] == 0) ||
+                            //      (k + num_subghosts_conservative_var[2][2] == 0)))
                             {
-                                // Patch is touching back physical or periodic boundary.
+                                // Patch is touching periodic boundary.
                                 
                                 const int idx_cell_rho_Y_z_F = (i + num_subghosts_conservative_var[0][0]) +
                                     (interior_box_lo_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -8341,12 +8398,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 dw_dz = (w_z_F - w_y_T)/(dx[2]);
                                 dp_dz = (p_z_F - p_y_T)/(dx[2]);
                             }
-                            else if (((patch_geom->getTouchesRegularBoundary(2, 1)) && (k == interior_box_hi_idx[2])) ||
-                                     ((k + num_subghosts_conservative_var[0][2] + 1 == subghostcell_dims_conservative_var[0][2]) ||
-                                      (k + num_subghosts_conservative_var[1][2] + 1 == subghostcell_dims_conservative_var[1][2]) ||
-                                      (k + num_subghosts_conservative_var[2][2] + 1 == subghostcell_dims_conservative_var[2][2])))
+                            else if ((k + num_subghosts_conservative_var[0][2] + 1 == subghostcell_dims_conservative_var[0][2]) ||
+                                     (k + num_subghosts_conservative_var[1][2] + 1 == subghostcell_dims_conservative_var[1][2]) ||
+                                     (k + num_subghosts_conservative_var[2][2] + 1 == subghostcell_dims_conservative_var[2][2]))
+                            // else if (((patch_geom->getTouchesRegularBoundary(2, 1)) && (k == interior_box_hi_idx[2])) ||
+                            //          ((k + num_subghosts_conservative_var[0][2] + 1 == subghostcell_dims_conservative_var[0][2]) ||
+                            //           (k + num_subghosts_conservative_var[1][2] + 1 == subghostcell_dims_conservative_var[1][2]) ||
+                            //           (k + num_subghosts_conservative_var[2][2] + 1 == subghostcell_dims_conservative_var[2][2])))
                             {
-                                // Patch is touching front physical or periodic boundary.
+                                // Patch is touching periodic boundary.
                                 
                                 const int idx_cell_rho_Y_z_B = (i + num_subghosts_conservative_var[0][0]) +
                                     (interior_box_lo_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -9041,12 +9101,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                             // double dw_dx = double(0);
                             double dp_dx = double(0);
                             
-                            if (((patch_geom->getTouchesRegularBoundary(0, 0)) && (i == interior_box_lo_idx[0])) ||
-                                ((i + num_subghosts_conservative_var[0][0] == 0) ||
-                                 (i + num_subghosts_conservative_var[1][0] == 0) ||
-                                 (i + num_subghosts_conservative_var[2][0] == 0)))
+                            if ((i + num_subghosts_conservative_var[0][0] == 0) ||
+                                (i + num_subghosts_conservative_var[1][0] == 0) ||
+                                (i + num_subghosts_conservative_var[2][0] == 0))
+                            // if (((patch_geom->getTouchesRegularBoundary(0, 0)) && (i == interior_box_lo_idx[0])) ||
+                            //     ((i + num_subghosts_conservative_var[0][0] == 0) ||
+                            //      (i + num_subghosts_conservative_var[1][0] == 0) ||
+                            //      (i + num_subghosts_conservative_var[2][0] == 0)))
                             {
-                                // Patch is touching left physical or periodic boundary.
+                                // Patch is touching periodic boundary.
                                 
                                 const int idx_cell_rho_Y_x_R = (i + 1 + num_subghosts_conservative_var[0][0]) +
                                     (interior_box_hi_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -9112,12 +9175,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 // dw_dx = (w_x_R - w_y_B)/(dx[0]);
                                 dp_dx = (p_x_R - p_y_B)/(dx[0]);
                             }
-                            else if (((patch_geom->getTouchesRegularBoundary(0, 1)) && (i == interior_box_hi_idx[0])) ||
-                                     ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
-                                      (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
-                                      (i + num_subghosts_conservative_var[2][0] + 1 == subghostcell_dims_conservative_var[2][0])))
+                            else if ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
+                                     (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
+                                     (i + num_subghosts_conservative_var[2][0] + 1 == subghostcell_dims_conservative_var[2][0]))
+                            // else if (((patch_geom->getTouchesRegularBoundary(0, 1)) && (i == interior_box_hi_idx[0])) ||
+                            //          ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
+                            //           (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
+                            //           (i + num_subghosts_conservative_var[2][0] + 1 == subghostcell_dims_conservative_var[2][0])))
                             {
-                                // Patch is touching right physical or periodic boundary.
+                                // Patch is touching periodic boundary.
                                 
                                 const int idx_cell_rho_Y_x_L = (i - 1 + num_subghosts_conservative_var[0][0]) +
                                     (interior_box_hi_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -9296,12 +9362,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                             double dw_dz = double(0);
                             double dp_dz = double(0);
                             
-                            if (((patch_geom->getTouchesRegularBoundary(2, 0)) && (k == interior_box_lo_idx[2])) ||
-                                ((k + num_subghosts_conservative_var[0][2] == 0) ||
-                                 (k + num_subghosts_conservative_var[1][2] == 0) ||
-                                 (k + num_subghosts_conservative_var[2][2] == 0)))
+                            if (((k + num_subghosts_conservative_var[0][2] == 0) ||
+                                (k + num_subghosts_conservative_var[1][2] == 0) ||
+                                (k + num_subghosts_conservative_var[2][2] == 0)))
+                            // if (((patch_geom->getTouchesRegularBoundary(2, 0)) && (k == interior_box_lo_idx[2])) ||
+                            //     ((k + num_subghosts_conservative_var[0][2] == 0) ||
+                            //      (k + num_subghosts_conservative_var[1][2] == 0) ||
+                            //      (k + num_subghosts_conservative_var[2][2] == 0)))
                             {
-                                // Patch is touching back physical or periodic boundary.
+                                // Patch is touching periodic boundary.
                                 
                                 const int idx_cell_rho_Y_z_F = (i + num_subghosts_conservative_var[0][0]) +
                                     (interior_box_hi_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -9367,12 +9436,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 dw_dz = (w_z_F - w_y_B)/(dx[2]);
                                 dp_dz = (p_z_F - p_y_B)/(dx[2]);
                             }
-                            else if (((patch_geom->getTouchesRegularBoundary(2, 1)) && (k == interior_box_hi_idx[2])) ||
-                                     ((k + num_subghosts_conservative_var[0][2] + 1 == subghostcell_dims_conservative_var[0][2]) ||
-                                      (k + num_subghosts_conservative_var[1][2] + 1 == subghostcell_dims_conservative_var[1][2]) ||
-                                      (k + num_subghosts_conservative_var[2][2] + 1 == subghostcell_dims_conservative_var[2][2])))
+                            else if ((k + num_subghosts_conservative_var[0][2] + 1 == subghostcell_dims_conservative_var[0][2]) ||
+                                     (k + num_subghosts_conservative_var[1][2] + 1 == subghostcell_dims_conservative_var[1][2]) ||
+                                     (k + num_subghosts_conservative_var[2][2] + 1 == subghostcell_dims_conservative_var[2][2]))
+                            // else if (((patch_geom->getTouchesRegularBoundary(2, 1)) && (k == interior_box_hi_idx[2])) ||
+                            //          ((k + num_subghosts_conservative_var[0][2] + 1 == subghostcell_dims_conservative_var[0][2]) ||
+                            //           (k + num_subghosts_conservative_var[1][2] + 1 == subghostcell_dims_conservative_var[1][2]) ||
+                            //           (k + num_subghosts_conservative_var[2][2] + 1 == subghostcell_dims_conservative_var[2][2])))
                             {
-                                // Patch is touching front physical or periodic boundary.
+                                // Patch is touching periodic boundary.
                                 
                                 const int idx_cell_rho_Y_z_B = (i + num_subghosts_conservative_var[0][0]) +
                                     (interior_box_hi_idx[1] + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -10067,12 +10139,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                             double dw_dx = double(0);
                             double dp_dx = double(0);
                             
-                            if (((patch_geom->getTouchesRegularBoundary(0, 0)) && (i == interior_box_lo_idx[0])) ||
-                                ((i + num_subghosts_conservative_var[0][0] == 0) ||
-                                 (i + num_subghosts_conservative_var[1][0] == 0) ||
-                                 (i + num_subghosts_conservative_var[2][0] == 0)))
+                            if ((i + num_subghosts_conservative_var[0][0] == 0) ||
+                                (i + num_subghosts_conservative_var[1][0] == 0) ||
+                                (i + num_subghosts_conservative_var[2][0] == 0))
+                            // if (((patch_geom->getTouchesRegularBoundary(0, 0)) && (i == interior_box_lo_idx[0])) ||
+                            //     ((i + num_subghosts_conservative_var[0][0] == 0) ||
+                            //      (i + num_subghosts_conservative_var[1][0] == 0) ||
+                            //      (i + num_subghosts_conservative_var[2][0] == 0)))
                             {
-                                // Patch is touching left physical or periodic boundary.
+                                // Patch is touching periodic boundary.
                                 
                                 const int idx_cell_rho_Y_x_R = (i + 1 + num_subghosts_conservative_var[0][0]) +
                                     (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -10138,12 +10213,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 dw_dx = (w_x_R - w_z_F)/(dx[0]);
                                 dp_dx = (p_x_R - p_z_F)/(dx[0]);
                             }
-                            else if (((patch_geom->getTouchesRegularBoundary(0, 1)) && (i == interior_box_hi_idx[0])) ||
-                                     ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
-                                      (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
-                                      (i + num_subghosts_conservative_var[2][0] + 1 == subghostcell_dims_conservative_var[2][0])))
+                            else if ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
+                                     (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
+                                     (i + num_subghosts_conservative_var[2][0] + 1 == subghostcell_dims_conservative_var[2][0]))
+                            // else if (((patch_geom->getTouchesRegularBoundary(0, 1)) && (i == interior_box_hi_idx[0])) ||
+                            //          ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
+                            //           (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
+                            //           (i + num_subghosts_conservative_var[2][0] + 1 == subghostcell_dims_conservative_var[2][0])))
                             {
-                                // Patch is touching right physical or periodic boundary.
+                                // Patch is touching periodic boundary.
                                 
                                 const int idx_cell_rho_Y_x_L = (i - 1 + num_subghosts_conservative_var[0][0]) +
                                     (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -10322,12 +10400,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                             double dw_dy = double(0);
                             double dp_dy = double(0);
                             
-                            if (((patch_geom->getTouchesRegularBoundary(1, 0)) && (j == interior_box_lo_idx[1])) ||
-                                ((j + num_subghosts_conservative_var[0][1] == 0) ||
-                                 (j + num_subghosts_conservative_var[1][1] == 0) ||
-                                 (j + num_subghosts_conservative_var[2][1] == 0)))
+                            if ((j + num_subghosts_conservative_var[0][1] == 0) ||
+                                (j + num_subghosts_conservative_var[1][1] == 0) ||
+                                (j + num_subghosts_conservative_var[2][1] == 0))
+                            // if (((patch_geom->getTouchesRegularBoundary(1, 0)) && (j == interior_box_lo_idx[1])) ||
+                            //     ((j + num_subghosts_conservative_var[0][1] == 0) ||
+                            //      (j + num_subghosts_conservative_var[1][1] == 0) ||
+                            //      (j + num_subghosts_conservative_var[2][1] == 0)))
                             {
-                                // Patch is touching bottom physical or periodic boundary.
+                                // Patch is touching periodic boundary.
                                 
                                 const int idx_cell_rho_Y_y_T = (i + num_subghosts_conservative_var[0][0]) +
                                     (j + 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -10393,12 +10474,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 dw_dy = (w_y_T - w_z_F)/(dx[1]);
                                 dp_dy = (p_y_T - p_z_F)/(dx[1]);
                             }
-                            else if (((patch_geom->getTouchesRegularBoundary(1, 1)) && (j == interior_box_hi_idx[1])) ||
-                                     ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
-                                      (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
-                                      (j + num_subghosts_conservative_var[2][1] + 1 == subghostcell_dims_conservative_var[2][1])))
+                            else if ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
+                                     (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
+                                     (j + num_subghosts_conservative_var[2][1] + 1 == subghostcell_dims_conservative_var[2][1]))
+                            // else if (((patch_geom->getTouchesRegularBoundary(1, 1)) && (j == interior_box_hi_idx[1])) ||
+                            //          ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
+                            //           (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
+                            //           (j + num_subghosts_conservative_var[2][1] + 1 == subghostcell_dims_conservative_var[2][1])))
                             {
-                                // Patch is touching top physical or periodic boundary.
+                                // Patch is touching periodic boundary.
                                 
                                 const int idx_cell_rho_Y_y_B = (i + num_subghosts_conservative_var[0][0]) +
                                     (j - 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -11093,12 +11177,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                             double dw_dx = double(0);
                             double dp_dx = double(0);
                             
-                            if (((patch_geom->getTouchesRegularBoundary(0, 0)) && (i == interior_box_lo_idx[0])) ||
-                                ((i + num_subghosts_conservative_var[0][0] == 0) ||
-                                 (i + num_subghosts_conservative_var[1][0] == 0) ||
-                                 (i + num_subghosts_conservative_var[2][0] == 0)))
+                            if ((i + num_subghosts_conservative_var[0][0] == 0) ||
+                                (i + num_subghosts_conservative_var[1][0] == 0) ||
+                                (i + num_subghosts_conservative_var[2][0] == 0))
+                            // if (((patch_geom->getTouchesRegularBoundary(0, 0)) && (i == interior_box_lo_idx[0])) ||
+                            //     ((i + num_subghosts_conservative_var[0][0] == 0) ||
+                            //      (i + num_subghosts_conservative_var[1][0] == 0) ||
+                            //      (i + num_subghosts_conservative_var[2][0] == 0)))
                             {
-                                // Patch is touching left physical or periodic boundary.
+                                // Patch is touching periodic boundary.
                                 
                                 const int idx_cell_rho_Y_x_R = (i + 1 + num_subghosts_conservative_var[0][0]) +
                                     (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -11164,12 +11251,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 dw_dx = (w_x_R - w_z_B)/(dx[0]);
                                 dp_dx = (p_x_R - p_z_B)/(dx[0]);
                             }
-                            else if (((patch_geom->getTouchesRegularBoundary(0, 1)) && (i == interior_box_hi_idx[0])) ||
-                                     ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
-                                      (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
-                                      (i + num_subghosts_conservative_var[2][0] + 1 == subghostcell_dims_conservative_var[2][0])))
+                            else if ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
+                                     (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
+                                     (i + num_subghosts_conservative_var[2][0] + 1 == subghostcell_dims_conservative_var[2][0]))
+                            // else if (((patch_geom->getTouchesRegularBoundary(0, 1)) && (i == interior_box_hi_idx[0])) ||
+                            //          ((i + num_subghosts_conservative_var[0][0] + 1 == subghostcell_dims_conservative_var[0][0]) ||
+                            //           (i + num_subghosts_conservative_var[1][0] + 1 == subghostcell_dims_conservative_var[1][0]) ||
+                            //           (i + num_subghosts_conservative_var[2][0] + 1 == subghostcell_dims_conservative_var[2][0])))
                             {
-                                // Patch is touching right physical or periodic boundary.
+                                // Patch is touching periodic boundary.
                                 
                                 const int idx_cell_rho_Y_x_L = (i - 1 + num_subghosts_conservative_var[0][0]) +
                                     (j + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -11348,12 +11438,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                             double dw_dy = double(0);
                             double dp_dy = double(0);
                             
-                            if (((patch_geom->getTouchesRegularBoundary(1, 0)) && (j == interior_box_lo_idx[1])) ||
-                                ((j + num_subghosts_conservative_var[0][1] == 0) ||
-                                 (j + num_subghosts_conservative_var[1][1] == 0) ||
-                                 (j + num_subghosts_conservative_var[2][1] == 0)))
+                            if ((j + num_subghosts_conservative_var[0][1] == 0) ||
+                                (j + num_subghosts_conservative_var[1][1] == 0) ||
+                                (j + num_subghosts_conservative_var[2][1] == 0))
+                            // if (((patch_geom->getTouchesRegularBoundary(1, 0)) && (j == interior_box_lo_idx[1])) ||
+                            //     ((j + num_subghosts_conservative_var[0][1] == 0) ||
+                            //      (j + num_subghosts_conservative_var[1][1] == 0) ||
+                            //      (j + num_subghosts_conservative_var[2][1] == 0)))
                             {
-                                // Patch is touching bottom physical or periodic boundary.
+                                // Patch is touching periodic boundary.
                                 
                                 const int idx_cell_rho_Y_y_T = (i + num_subghosts_conservative_var[0][0]) +
                                     (j + 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
@@ -11419,12 +11512,15 @@ FlowModelBoundaryUtilitiesFourEqnConservative::fill3dFaceBoundaryData(
                                 dw_dy = (w_y_T - w_z_B)/(dx[1]);
                                 dp_dy = (p_y_T - p_z_B)/(dx[1]);
                             }
-                            else if (((patch_geom->getTouchesRegularBoundary(1, 1)) && (j == interior_box_hi_idx[1])) ||
-                                     ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
-                                      (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
-                                      (j + num_subghosts_conservative_var[2][1] + 1 == subghostcell_dims_conservative_var[2][1])))
+                            else if ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
+                                     (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
+                                     (j + num_subghosts_conservative_var[2][1] + 1 == subghostcell_dims_conservative_var[2][1]))
+                            // else if (((patch_geom->getTouchesRegularBoundary(1, 1)) && (j == interior_box_hi_idx[1])) ||
+                            //          ((j + num_subghosts_conservative_var[0][1] + 1 == subghostcell_dims_conservative_var[0][1]) ||
+                            //           (j + num_subghosts_conservative_var[1][1] + 1 == subghostcell_dims_conservative_var[1][1]) ||
+                            //           (j + num_subghosts_conservative_var[2][1] + 1 == subghostcell_dims_conservative_var[2][1])))
                             {
-                                // Patch is touching top physical or periodic boundary.
+                                // Patch is touching periodic boundary.
                                 
                                 const int idx_cell_rho_Y_y_B = (i + num_subghosts_conservative_var[0][0]) +
                                     (j - 1 + num_subghosts_conservative_var[0][1])*subghostcell_dims_conservative_var[0][0] +
