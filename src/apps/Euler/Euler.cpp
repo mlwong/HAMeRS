@@ -565,7 +565,6 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
     if (d_dim == tbox::Dimension(1))
     {
         spectral_radiuses_and_dt.resize(2, double(0));
-        double* spectral_radiuses_and_dt_ptr = spectral_radiuses_and_dt.data();
         
         /*
          * Get the dimension and grid spacing.
@@ -629,8 +628,10 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
         
         double* max_lambda_x = max_wave_speed_x->getPointer(0);
         
+        double spectral_radiuses_and_dt_0 = double(0);
+        double spectral_radiuses_and_dt_1 = double(0);
 #ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd reduction(max: spectral_radiuses_and_dt_ptr[:2])
+        #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1)
 #endif
         for (int i = -num_ghosts_0;
              i < interior_dim_0 + num_ghosts_0;
@@ -641,10 +642,13 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
             
             const double spectral_radius_x = max_lambda_x[idx]/dx_0;
             
-            spectral_radiuses_and_dt_ptr[0] = fmax(spectral_radiuses_and_dt_ptr[0], spectral_radius_x);
+            spectral_radiuses_and_dt_0 = fmax(spectral_radiuses_and_dt_0, spectral_radius_x);
              
-            spectral_radiuses_and_dt_ptr[1] = fmax(spectral_radiuses_and_dt_ptr[1], spectral_radius_x);
+            spectral_radiuses_and_dt_1 = fmax(spectral_radiuses_and_dt_1, spectral_radius_x);
         }
+        
+        spectral_radiuses_and_dt[0] = spectral_radiuses_and_dt_0;
+        spectral_radiuses_and_dt[1] = spectral_radiuses_and_dt_1;
         
         spectral_radiuses_and_dt[1] = double(1)/spectral_radiuses_and_dt[1];
         
@@ -664,7 +668,6 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
     else if (d_dim == tbox::Dimension(2))
     {
         spectral_radiuses_and_dt.resize(3, double(0));
-        double* spectral_radiuses_and_dt_ptr = spectral_radiuses_and_dt.data();
         
         /*
          * Get the dimensions and grid spacings.
@@ -743,12 +746,15 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
         double* max_lambda_x = max_wave_speed_x->getPointer(0);
         double* max_lambda_y = max_wave_speed_y->getPointer(0);
         
+        double spectral_radiuses_and_dt_0 = double(0);
+        double spectral_radiuses_and_dt_1 = double(0);
+        double spectral_radiuses_and_dt_2 = double(0);
         for (int j = -num_ghosts_1;
              j < interior_dim_1 + num_ghosts_1;
              j++)
         {
 #ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(max: spectral_radiuses_and_dt_ptr[:3])
+            #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2)
 #endif
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + num_ghosts_0;
@@ -761,13 +767,17 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
                 const double spectral_radius_x = max_lambda_x[idx]/dx_0;
                 const double spectral_radius_y = max_lambda_y[idx]/dx_1;
                 
-                spectral_radiuses_and_dt_ptr[0] = fmax(spectral_radiuses_and_dt_ptr[0], spectral_radius_x);
-                spectral_radiuses_and_dt_ptr[1] = fmax(spectral_radiuses_and_dt_ptr[1], spectral_radius_y);
+                spectral_radiuses_and_dt_0 = fmax(spectral_radiuses_and_dt_0, spectral_radius_x);
+                spectral_radiuses_and_dt_1 = fmax(spectral_radiuses_and_dt_1, spectral_radius_y);
                 
-                spectral_radiuses_and_dt_ptr[2] = fmax(spectral_radiuses_and_dt_ptr[2],
+                spectral_radiuses_and_dt_2 = fmax(spectral_radiuses_and_dt_2,
                     spectral_radius_x + spectral_radius_y);
             }
         }
+        
+        spectral_radiuses_and_dt[0] = spectral_radiuses_and_dt_0;
+        spectral_radiuses_and_dt[1] = spectral_radiuses_and_dt_1;
+        spectral_radiuses_and_dt[2] = spectral_radiuses_and_dt_2;
         
         spectral_radiuses_and_dt[2] = double(1)/spectral_radiuses_and_dt[2];
         
@@ -787,7 +797,6 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
     else if (d_dim == tbox::Dimension(3))
     {
         spectral_radiuses_and_dt.resize(4, double(0));
-        double* spectral_radiuses_and_dt_ptr = spectral_radiuses_and_dt.data();
         
         /*
          * Get the dimensions and grid spacings.
@@ -878,6 +887,10 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
         double* max_lambda_y = max_wave_speed_y->getPointer(0);
         double* max_lambda_z = max_wave_speed_z->getPointer(0);
         
+        double spectral_radiuses_and_dt_0 = double(0);
+        double spectral_radiuses_and_dt_1 = double(0);
+        double spectral_radiuses_and_dt_2 = double(0);
+        double spectral_radiuses_and_dt_3 = double(0);
         for (int k = -num_ghosts_2;
              k < interior_dim_2 + num_ghosts_2;
              k++)
@@ -887,7 +900,7 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
                  j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd reduction(max: spectral_radiuses_and_dt_ptr[:4])
+                #pragma omp simd reduction(max: spectral_radiuses_and_dt_0, spectral_radiuses_and_dt_1, spectral_radiuses_and_dt_2, spectral_radiuses_and_dt_3)
 #endif
                 for (int i = -num_ghosts_0;
                      i < interior_dim_0 + num_ghosts_0;
@@ -903,15 +916,20 @@ Euler::computeSpectralRadiusesAndStableDtOnPatch(
                     const double spectral_radius_y = max_lambda_y[idx]/dx_1;
                     const double spectral_radius_z = max_lambda_z[idx]/dx_2;
                     
-                    spectral_radiuses_and_dt_ptr[0] = fmax(spectral_radiuses_and_dt_ptr[0], spectral_radius_x);
-                    spectral_radiuses_and_dt_ptr[1] = fmax(spectral_radiuses_and_dt_ptr[1], spectral_radius_y);
-                    spectral_radiuses_and_dt_ptr[2] = fmax(spectral_radiuses_and_dt_ptr[2], spectral_radius_z);
+                    spectral_radiuses_and_dt_0 = fmax(spectral_radiuses_and_dt_0, spectral_radius_x);
+                    spectral_radiuses_and_dt_1 = fmax(spectral_radiuses_and_dt_1, spectral_radius_y);
+                    spectral_radiuses_and_dt_2 = fmax(spectral_radiuses_and_dt_2, spectral_radius_z);
                 
-                    spectral_radiuses_and_dt_ptr[3] = fmax(spectral_radiuses_and_dt_ptr[3],
+                    spectral_radiuses_and_dt_3 = fmax(spectral_radiuses_and_dt_3,
                         spectral_radius_x + spectral_radius_y + spectral_radius_z);
                 }
             }
         }
+        
+        spectral_radiuses_and_dt[0] = spectral_radiuses_and_dt_0;
+        spectral_radiuses_and_dt[1] = spectral_radiuses_and_dt_1;
+        spectral_radiuses_and_dt[2] = spectral_radiuses_and_dt_2;
+        spectral_radiuses_and_dt[3] = spectral_radiuses_and_dt_3;
         
         spectral_radiuses_and_dt[3] = double(1)/spectral_radiuses_and_dt[3];
         
@@ -2599,7 +2617,8 @@ Euler::outputDataStatistics(
         flow_model_statistics_utilities->outputStatisticalQuantities(
             d_stat_dump_filename,
             patch_hierarchy,
-            getDataContext());
+            getDataContext(),
+            output_time);
         
         if (mpi.getRank() == 0)
         {

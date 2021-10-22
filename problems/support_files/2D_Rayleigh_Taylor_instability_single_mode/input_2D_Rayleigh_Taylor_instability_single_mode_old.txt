@@ -3,13 +3,13 @@ Application = "Navier-Stokes"
 NavierStokes
 {
     // Name of project
-    project_name = "2D vortex leaving domain in x-direction"
+    project_name = "2D smooth Rayleigh-Taylor instability"
 
     // Number of species
-    num_species = 1
+    num_species = 2
 
     // Flow model to use
-    flow_model = "SINGLE_SPECIES"
+    flow_model = "FOUR_EQN_CONSERVATIVE"
 
     Flow_model
     {
@@ -18,19 +18,24 @@ NavierStokes
 
         Equation_of_state_mixing_rules
         {
-            species_gamma = 1.4
-            species_R = 1.0
+            species_gamma = 1.4, 1.4
+            species_R = 249.833612324316, 270.653080018009
         }
 
-        has_source_terms = FALSE
+        has_source_terms = TRUE
 
+        Source_terms
+        {
+            has_gravity = TRUE
+            gravity = 10.0, 0.0
+        }
         // Equation of shear viscosity to use
         equation_of_shear_viscosity = "CONSTANT"
 
         Equation_of_shear_viscosity_mixing_rules
         {
-            species_mu = 1.0e-5
-            species_M  = 1.0
+            species_mu = 0.0,0.0
+            species_M  = 1.0,1.0
         }
 
         // Equation of bulk viscosity to use
@@ -38,8 +43,16 @@ NavierStokes
 
         Equation_of_bulk_viscosity_mixing_rules
         {
-            species_mu_v = 0.0
-            species_M    = 1.0
+            species_mu_v = 0.0,0.0
+            species_M    = 1.0,1.0
+        }
+
+        // Equation of mass diffusivity to use
+        equation_of_mass_diffusivity = "CONSTANT"
+
+        Equation_of_mass_diffusivity_mixing_rules
+        {
+            species_D = 0.0, 0.0
         }
 
         // Equation of thermal conductivity to use
@@ -47,10 +60,10 @@ NavierStokes
 
         Equation_of_thermal_conductivity_mixing_rules
         {
-            species_c_p = 1005
-            species_Pr = 0.72
-            species_M = 1.0
-            species_mu = 1.0e-5
+            species_c_p = 1005,1000
+            species_Pr = 0.72,0.7
+            species_M = 1.0,1.0
+            species_mu = 0.0,0.0
 
             equation_of_shear_viscosity = "CONSTANT"
         }
@@ -71,21 +84,62 @@ NavierStokes
 
     Boundary_data
     {
-        // Set the boundary conditions for edges
-
         boundary_edge_xlo
         {
-            boundary_condition = "FLOW"
+            // boundary_condition = "DIRICHLET"
+            // partial_densities  = 0.917546375094821, 0.0
+            // velocity           = 0.0, 0.0
+            // pressure           = 68770.1776095063
+            
+            boundary_condition = "NONREFLECTING_OUTFLOW"
+            pressure_target = 68770.1776095063
+            sigma = 100.0
+            beta = 0.0
+            // beta = 0.283
+            length_char = 701.53278340668
         }
 
+        // Set the boundary conditions for edges
         boundary_edge_xhi
         {
+            // boundary_condition = "DIRICHLET"
+            // partial_densities  = 0.0, 1.74003484181604
+            // velocity           = 0.0, 0.0
+            // pressure           = 141283.736782848
+            
             boundary_condition = "NONREFLECTING_OUTFLOW"
-            pressure_target = 0.71428571428
-            sigma = 0.25
-            beta = 0.283
-            length_char = 1.0
+            pressure_target = 141283.736782848
+            sigma = 100.0
+            beta = 0.0
+            // beta = 0.283
+            length_char = 701.53278340668
         }
+
+        // boundary_edge_yhi
+        // {
+        //     boundary_condition = "FLOW"
+        // }
+
+        // Set the boundary conditions for nodes
+        // boundary_node_xlo_ylo
+        // {
+        //     boundary_condition = "XREFLECT"
+        // }
+
+        // boundary_node_xhi_ylo
+        // {
+        //     boundary_condition = "XREFLECT"
+        // }
+
+        // boundary_node_xlo_yhi
+        // {
+        //     boundary_condition = "XREFLECT"
+        // }
+
+        // boundary_node_xhi_yhi
+        // {
+        //     boundary_condition = "XREFLECT"
+        // }
     }
 }
 
@@ -95,7 +149,7 @@ Main
     dim = 2
     
     // Base name of log file
-    base_name = "2D_vortex_leaving_domain"
+    base_name = "2D_Rayleigh_Taylor_instability"
     
     // Whether all nodes log to individual files,
     // if false only node 0 will log 
@@ -103,11 +157,12 @@ Main
     
     // Visualization dump parameters
     // Setting to dump viz output: CONSTANT_TIME_INTERVAL, CONSTANT_TIMESTEP_INTERVAL
-    viz_dump_setting = "CONSTANT_TIME_INTERVAL"
+    viz_dump_setting = "CONSTANT_TIMESTEP_INTERVAL"
     // Frequency at which to dump viz output (0 to turn off)
-    viz_dump_interval = 3.5e-2
+    viz_dump_interval = 20
+    // viz_dump_interval = 3.5e-2
     // Name of directory in which to place viz output
-    viz_dump_dirname = "viz_2D_vortex_leaving_domain"
+    viz_dump_dirname = "viz_2D_Rayleigh_Taylor_instability"
     // Number of processors which write to each viz file
     visit_number_procs_per_file = 1
     
@@ -120,9 +175,9 @@ Main
 CartesianGeometry
 {
     // Lower and upper indices of computational domain
-    domain_boxes = [(0, 0), (63, 63)]
-    x_lo         = -0.5, -0.5 // Lower end of computational domain
-    x_up         =  0.5,  0.5 // Upper end of computational domain
+    domain_boxes = [(0, 0), (479, 59)]
+    x_lo         = -2806.13113362672,  0.0     // Lower end of computational domain
+    x_up         =  2806.13113362672,  701.53278340668 // Upper end of computational domain
 
     // Periodic dimension. A non-zero value indicates that the direction is periodic
     periodic_dimension = 0, 1
@@ -167,12 +222,9 @@ RungeKuttaLevelIntegrator
 TimeRefinementIntegrator
 {
     start_time           = 0.0e0  // Initial simulation time
-    end_time             = 3.5e0  // Final simulation time
+    end_time             = 5.0e0 // Final simulation time
     grow_dt              = 1.0e0  // Growth factor for timesteps
     max_integrator_steps = 10000  // Max number of simulation timesteps
-    tag_buffer           = 2, 2   // array of integer values (one for each level that
-                                  // may be refined representing the number of cells
-                                  // by which tagged cells are buffered)
 }
 
 TimerManager

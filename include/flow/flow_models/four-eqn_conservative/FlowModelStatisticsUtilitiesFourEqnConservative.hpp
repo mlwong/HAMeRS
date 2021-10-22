@@ -51,7 +51,8 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
         outputStatisticalQuantities(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time);
         
     private:
         /*

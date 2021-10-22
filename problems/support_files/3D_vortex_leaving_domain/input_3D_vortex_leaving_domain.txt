@@ -3,7 +3,7 @@ Application = "Navier-Stokes"
 NavierStokes
 {
     // Name of project
-    project_name = "2D vortex leaving domain in x-direction"
+    project_name = "3D vortex leaving domain in x-direction"
 
     // Number of species
     num_species = 1
@@ -71,14 +71,14 @@ NavierStokes
 
     Boundary_data
     {
-        // Set the boundary conditions for edges
+        // Set the boundary conditions for faces
 
-        boundary_edge_xlo
+        boundary_face_xlo
         {
             boundary_condition = "FLOW"
         }
 
-        boundary_edge_xhi
+        boundary_face_xhi
         {
             boundary_condition = "NONREFLECTING_OUTFLOW"
             pressure_target = 0.71428571428
@@ -92,10 +92,10 @@ NavierStokes
 Main
 {
     // Dimension of problem
-    dim = 2
+    dim = 3
     
     // Base name of log file
-    base_name = "2D_vortex_leaving_domain"
+    base_name = "3D_vortex_leaving_domain"
     
     // Whether all nodes log to individual files,
     // if false only node 0 will log 
@@ -107,7 +107,7 @@ Main
     // Frequency at which to dump viz output (0 to turn off)
     viz_dump_interval = 3.5e-2
     // Name of directory in which to place viz output
-    viz_dump_dirname = "viz_2D_vortex_leaving_domain"
+    viz_dump_dirname = "viz_3D_vortex_leaving_domain"
     // Number of processors which write to each viz file
     visit_number_procs_per_file = 1
     
@@ -120,12 +120,12 @@ Main
 CartesianGeometry
 {
     // Lower and upper indices of computational domain
-    domain_boxes = [(0, 0), (63, 63)]
-    x_lo         = -0.5, -0.5 // Lower end of computational domain
-    x_up         =  0.5,  0.5 // Upper end of computational domain
+    domain_boxes = [(0, 0, 0), (63, 63, 63)]
+    x_lo         = -0.5, -0.5, -0.5 // Lower end of computational domain
+    x_up         =  0.5,  0.5,  0.5 // Upper end of computational domain
 
     // Periodic dimension. A non-zero value indicates that the direction is periodic
-    periodic_dimension = 0, 1
+    periodic_dimension = 0, 1, 1
 }
 
 ExtendedTagAndInitialize
@@ -140,17 +140,17 @@ PatchHierarchy
     ratio_to_coarser
     {
         // Vector ratio to next coarser level
-        level_1 = 2, 2 // all finer levels will use same values as level_1...
+        level_1 = 2, 2, 2 // all finer levels will use same values as level_1...
     }
 
     largest_patch_size
     {
-        level_0 = 128, 128 // all finer levels will use same values as level_0...
+        level_0 = 128, 128, 128 // all finer levels will use same values as level_0...
     }
 
     smallest_patch_size
     {
-       level_0 = 8, 8 // all finer levels will use same values as level_0...
+       level_0 = 8, 8, 8 // all finer levels will use same values as level_0...
     }
 }
 
@@ -166,13 +166,13 @@ RungeKuttaLevelIntegrator
 
 TimeRefinementIntegrator
 {
-    start_time           = 0.0e0  // Initial simulation time
-    end_time             = 3.5e0  // Final simulation time
-    grow_dt              = 1.0e0  // Growth factor for timesteps
-    max_integrator_steps = 10000  // Max number of simulation timesteps
-    tag_buffer           = 2, 2   // array of integer values (one for each level that
-                                  // may be refined representing the number of cells
-                                  // by which tagged cells are buffered)
+    start_time           = 0.0e0   // Initial simulation time
+    end_time             = 3.5e0   // Final simulation time
+    grow_dt              = 1.0e0   // Growth factor for timesteps
+    max_integrator_steps = 10000   // Max number of simulation timesteps
+    tag_buffer           = 2, 2, 2 // array of integer values (one for each level that
+                                   // may be refined representing the number of cells
+                                   // by which tagged cells are buffered)
 }
 
 TimerManager
