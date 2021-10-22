@@ -159,11 +159,29 @@ struct BasicCartesianBoundaryUtilities2
         getFromInput(
             BoundaryUtilityStrategy* bdry_strategy,
             const HAMERS_SHARED_PTR<tbox::Database>& input_db,
-            const std::vector<int>& edge_locs,
-            const std::vector<int>& node_locs,
+            std::vector<int>& edge_locs,
+            std::vector<int>& node_locs,
             std::vector<int>& edge_conds,
             std::vector<int>& node_conds,
             const hier::IntVector& periodic);
+        
+        /*!
+         * Function to remove 2d boundary edges with boundary conditions filled by this class for a patch.
+         *
+         * @param bdry_edge_locs      Array of locations of edges for applying
+         *                            boundary conditions.
+         * @param patch               hier::Patch on which data object lives.
+         * @param bdry_edge_conds     Array of boundary condition types for
+         *                            patch edges.
+         *
+         * @pre bdry_edge_locs.size() > 0 and <= NUM_2D_EDGES
+         * @pre bdry_edge_conds.size() == NUM_2D_EDGES
+         */
+        static void
+        removeBoundaryEdgeLocations(
+            std::vector<int>& bdry_edge_locs,
+            const hier::Patch& patch,
+            const std::vector<int>& bdry_edge_conds);
         
         /*!
          * Function to fill 2d edge boundary values for a patch.
@@ -175,11 +193,11 @@ struct BasicCartesianBoundaryUtilities2
          * @param var_name            String name of variable (for error reporting).
          * @param var_data            Cell-centered patch data object to fill.
          * @param patch               hier::Patch on which data object lives.
-         * @param bdry_edge_locs      tbox::Array of locations of edges for applying
+         * @param bdry_edge_locs      Array of locations of edges for applying
          *                            boundary conditions.
-         * @param bdry_edge_conds     tbox::Array of boundary condition types for
+         * @param bdry_edge_conds     Array of boundary condition types for
          *                            patch edges.
-         * @param bdry_edge_values    tbox::Array of boundary values for patch
+         * @param bdry_edge_values    Array of boundary values for patch
          *                            edges.
          * @param ghost_width_to_fill Width of ghost region to fill.
          *
@@ -203,6 +221,24 @@ struct BasicCartesianBoundaryUtilities2
             const hier::IntVector& ghost_width_to_fill = -hier::IntVector::getOne(tbox::Dimension(2)));
         
         /*!
+         * Function to remove 2d boundary nodes with boundary conditions filled by this class for a patch.
+         *
+         * @param bdry_node_locs      Array of locations of nodes for applying
+         *                            boundary conditions.
+         * @param patch               hier::Patch on which data object lives.
+         * @param bdry_node_conds     Array of boundary condition types for
+         *                            patch nodes.
+         *
+         * @pre bdry_node_locs.size() <= NUM_2D_EDGES
+         * @pre bdry_node_conds.size() == NUM_2D_NODES
+         */
+        static void
+        removeBoundaryNodeLocations(
+            std::vector<int>& bdry_node_locs,
+            const hier::Patch& patch,
+            const std::vector<int>& bdry_node_conds);
+        
+        /*!
          * Function to fill 2d node boundary values for a patch.
          *
          * When assertion checking is active, assertions will result when any
@@ -212,17 +248,17 @@ struct BasicCartesianBoundaryUtilities2
          * @param var_name            String name of variable (for error reporting).
          * @param var_data            Cell-centered patch data object to fill.
          * @param patch               hier::Patch on which data object lives.
-         * @param bdry_node_locs      tbox::Array of locations of nodes for applying
+         * @param bdry_node_locs      Array of locations of nodes for applying
          *                            boundary conditions.
-         * @param bdry_node_conds     tbox::Array of boundary condition types for
+         * @param bdry_node_conds     Array of boundary condition types for
          *                            patch nodes.
-         * @param bdry_edge_values    tbox::Array of boundary values for patch
+         * @param bdry_edge_values    Array of boundary values for patch
          *                            edges.
          * @param ghost_width_to_fill Width of ghost region to fill.
          *
          * @pre !var_name.empty()
          * @pre var_data
-         * @pre bdry_node_conds.size() > 0 and <= NUM_2D_EDGES
+         * @pre bdry_node_locs.size() <= NUM_2D_EDGES
          * @pre bdry_node_conds.size() == NUM_2D_NODES
          * @pre bdry_edge_values.size() == NUM_2D_EDGES * (var_data->getDepth())
          * @pre (var_data->getDim() == patch.getDim()) &&
@@ -273,14 +309,14 @@ struct BasicCartesianBoundaryUtilities2
         read2dBdryEdges(
             BoundaryUtilityStrategy* bdry_strategy,
             const HAMERS_SHARED_PTR<tbox::Database>& input_db,
-            const std::vector<int>& edge_locs,
+            std::vector<int>& edge_locs,
             std::vector<int>& edge_conds,
             const hier::IntVector& periodic);
         
         static void
         read2dBdryNodes(
             const HAMERS_SHARED_PTR<tbox::Database>& input_db,
-            const std::vector<int>& node_locs,
+            std::vector<int>& node_locs,
             const std::vector<int>& edge_conds,
             std::vector<int>& node_conds,
             const hier::IntVector& periodic);

@@ -74,7 +74,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                 const double L       = double(1);
                 const double Gamma_v = double(0.024);
                 const double R_v     = L/double(10);
-                const double Ma      = -double(0.283);
+                const double Ma      = double(0.283);
                 
                 const double x_v = double(0);
                 const double y_v = double(0);
@@ -122,7 +122,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                 const double L       = double(1);
                 const double Gamma_v = double(0.024);
                 const double R_v     = L/double(10);
-                const double Ma      = -double(0.283);
+                const double Ma      = double(0.283);
                 
                 const double x_v = double(0);
                 const double y_v = double(0);
