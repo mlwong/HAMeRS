@@ -792,11 +792,11 @@ int main(int argc, char *argv[])
     double loop_time = time_integrator->getIntegratorTime();
     double loop_time_end = time_integrator->getEndTime();
     
-    double last_viz_dump_time = floor((time_integrator->getIntegratorTime() + DBL_EPSILON)/
+    double last_viz_dump_time = floor((time_integrator->getIntegratorTime() + double(10)*HAMERS_REAL_EPSILON)/
         viz_dump_time_interval)*viz_dump_time_interval;
     bool dump_viz = true;
     
-    double last_stat_dump_time = floor((time_integrator->getIntegratorTime() + DBL_EPSILON)/
+    double last_stat_dump_time = floor((time_integrator->getIntegratorTime() + double(10)*HAMERS_REAL_EPSILON)/
         stat_dump_time_interval)*stat_dump_time_interval;
     bool dump_stat = true;
     
@@ -818,7 +818,7 @@ int main(int argc, char *argv[])
         {
             if (viz_dump_time_interval == stat_dump_time_interval)
             {
-                if ((loop_time + dt_now) - (last_viz_dump_time + viz_dump_time_interval) >= -DBL_EPSILON)
+                if ((loop_time + dt_now) - (last_viz_dump_time + viz_dump_time_interval) >= -double(10)*HAMERS_REAL_EPSILON)
                 {
                     dt_now = last_viz_dump_time + viz_dump_time_interval - loop_time;
                     dump_viz = true;
@@ -827,12 +827,12 @@ int main(int argc, char *argv[])
             }
             else
             {
-                if ((loop_time + dt_now) - (last_viz_dump_time + viz_dump_time_interval) >= -DBL_EPSILON)
+                if ((loop_time + dt_now) - (last_viz_dump_time + viz_dump_time_interval) >= -double(10)*HAMERS_REAL_EPSILON)
                 {
                     dt_now = last_viz_dump_time + viz_dump_time_interval - loop_time;
                     dump_viz = true;
                     
-                    if ((loop_time + dt_now) - (last_stat_dump_time + stat_dump_time_interval) >= -DBL_EPSILON)
+                    if ((loop_time + dt_now) - (last_stat_dump_time + stat_dump_time_interval) >= -double(10)*HAMERS_REAL_EPSILON)
                     {
                         dt_now = last_stat_dump_time + stat_dump_time_interval - loop_time;
                         dump_viz = false;
@@ -843,7 +843,7 @@ int main(int argc, char *argv[])
         }
         else if (viz_dump_setting == "CONSTANT_TIME_INTERVAL")
         {
-            if ((loop_time + dt_now) - (last_viz_dump_time + viz_dump_time_interval) >= -DBL_EPSILON)
+            if ((loop_time + dt_now) - (last_viz_dump_time + viz_dump_time_interval) >= -double(10)*HAMERS_REAL_EPSILON)
             {
                 dt_now = last_viz_dump_time + viz_dump_time_interval - loop_time;
                 dump_viz = true;
@@ -851,7 +851,7 @@ int main(int argc, char *argv[])
         }
         else if (stat_dump_setting == "CONSTANT_TIME_INTERVAL")
         {
-            if ((loop_time + dt_now) - (last_stat_dump_time + stat_dump_time_interval) >= -DBL_EPSILON)
+            if ((loop_time + dt_now) - (last_stat_dump_time + stat_dump_time_interval) >= -double(10)*HAMERS_REAL_EPSILON)
             {
                 dt_now = last_stat_dump_time + stat_dump_time_interval - loop_time;
                 dump_stat = true;

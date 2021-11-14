@@ -16,12 +16,13 @@ NavierStokesInitialConditions::initializeDataOnPatch(
     // Note that the sign of gravity in the paper is flipped.
     NULL_USE(data_time);
     
-    if ((d_project_name != "2D discontinuous Rayleigh-Taylor instability") && (d_project_name != "2D smooth Rayleigh-Taylor instability"))
+    if ((d_project_name != "2D discontinuous Rayleigh-Taylor instability") && (d_project_name != "2D smooth Rayleigh-Taylor instability") && (d_project_name != "2D smooth multi-mode Rayleigh-Taylor instability")) 
     {
         TBOX_ERROR(d_object_name
             << ": "
             << "Can only initialize data for 'project_name' = '2D discontinuous Rayleigh-Taylor instability' or "
-            << "'2D smooth Rayleigh-Taylor instability'!\n"
+            << "'2D smooth Rayleigh-Taylor instability' or "
+	    << "'2D smooth multi-mode Rayleigh-Taylor instability'!\n"
             << "'project_name' = '"
             << d_project_name
             << "' is given."
@@ -87,8 +88,8 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         // const double gamma_0 = double(7)/double(5);
         // const double gamma_1 = double(7)/double(5);
         
-        const double lambda = 701.53278340668; // wavelength of single-mode perturbation
-        const double eta_0  = 0.01*lambda;     // 1% perturbation
+              double lambda = 701.53278340668; // wavelength of single-mode perturbation
+              double eta_0  = 0.01*lambda;      // 1% perturbation
         // const double eta_0  = 0.0*lambda;      // no perturbation
         
         const double W_1 = 0.03328; // molecular weight of heavier gas
@@ -97,7 +98,11 @@ NavierStokesInitialConditions::initializeDataOnPatch(
         const double p_i = 100000.0; // interface pressure
         const double T_0 = 300.0;    // background temperature
         
-        const double g   = 10.0; // gravity
+        TBOX_ASSERT(d_initial_conditions_db != nullptr);
+        TBOX_ASSERT(d_initial_conditions_db->keyExists("gravity"));
+        
+        std::vector<double> gravity_vector = d_initial_conditions_db->getDoubleVector("gravity");
+        const double g = gravity_vector[0]; // gravity
         
         const double R_u = 8.31446261815324; // universal gas constant
         const double R_1 = R_u/W_1;          // gas constant of heavier gas
@@ -238,5 +243,90 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                 }
             }
         }
+	else if (d_project_name == "2D smooth multi-mode Rayleigh-Taylor instability")
+	{
+		         lambda  = lambda/4.0;
+			 eta_0   = lambda*0.04;
+	    const double delta   = 0.04*lambda; // characteristic length of interface.
+	    const int    waven   = 16;          // dominant wave number
+            const double width   = 16.0*lambda; // domain size in y direction.   
+	    const double rmod[9] = {6.031966614958411, 1.273017034173460, 5.934447177754063, 3.101658133166612, 2.294026034817427, 4.916046917518752, 0.571212135466553, 4.966766749458944, 5.027899324302027}; //random number seed
+            
+            for (int j = 0; j < patch_dims[1]; j++)
+            {
+                for (int i = 0; i < patch_dims[0]; i++)
+                {
+                    // Compute index into linear data array.
+                    int idx_cell = i + j*patch_dims[0];
+
+                    // Compute the coordinates.
+                    double x[2];
+                    x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
+                    x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
+            
+                    double eta = 0.0;        
+                    for (int m = waven - 4; m <= waven + 4; m++)
+                    {
+                        eta += eta_0/3.0*cos(2.0*M_PI*m/width*x[1] + rmod[m-waven+4]);
+                    }
+
+                    const double X_2_H = 0.5*(1.0 + erf((x[0] - eta)/delta)); // mass fraction of second species (Y_2)
+                    const double R_H   = R_1*(1.0 - X_2_H) + X_2_H*R_2;
+
+                    const int N_int = 10000; // number of numerical quadrature points
+                    const double dx_p = x[0]/(N_int - 1.0);
+
+                    double integral = 0.0;
+                    for (int ii = 0; ii < N_int; ii++)
+                    {
+                        const double x_p = x[0] + ii*dx_p;
+                        integral += 1.0/(0.5*(R_2 - R_1)*erf((x_p - eta)/delta) + 0.5*(R_1 + R_2))*dx_p;
+                    }
+
+                    const double p_H = p_i*exp(g/T_0*integral);
+                    const double rho_H = p_H/(R_H*T_0);
+
+                    double rho, p;
+                    rho = rho_H;
+                    p   = p_H;
+
+                    // if (x[0] < eta)
+                    // {
+                    //     const double p_1_H   = p_i*exp((g*x[0])/(R_1*T_0));
+                    //     const double rho_1_H = p_i/(R_1*T_0)*exp((g*x[0])/(R_1*T_0));
+                    //
+                    //     const double p_1   = p_i*exp((g*x[0])/(R_1*T_0));
+                    //     const double rho_1 = p_i/(R_1*T_0)*exp((g*x[0])/(R_1*T_0));
+                    //
+                    //     p   = p_1*p_H/p_1_H;
+                    //     rho = rho_1*rho_H/rho_1_H;
+                    //
+                    //
+                    // }
+                    // else
+                    // {
+                    //     const double p_2_H   = p_i*exp((g*x[0])/(R_2*T_0));
+                    //     const double rho_2_H = p_i/(R_2*T_0)*exp((g*x[0])/(R_2*T_0));
+                    //
+                    //     const double p_2   = p_i*exp((g*x[0])/(R_2*T_0));
+                    //     const double rho_2 = p_i/(R_2*T_0)*exp((g*x[0])/(R_2*T_0));
+                    //
+                    //     p   = p_2*p_H/p_2_H;
+                    //     rho = rho_2*rho_H/rho_2_H;
+                    // }
+
+                    rho_Y_0[idx_cell] = rho*(1.0 - X_2_H);
+                    rho_Y_1[idx_cell] = rho*X_2_H;
+
+                    const double u = 0.0;
+                    const double v = 0.0;
+
+                    rho_u[idx_cell] = rho*u;
+                    rho_v[idx_cell] = rho*v;
+                    E[idx_cell]     = p/(gamma - double(1)) + double(1)/double(2)*rho*(u*u + v*v);
+   	        }
+	    }
+
+	}
     }
 }

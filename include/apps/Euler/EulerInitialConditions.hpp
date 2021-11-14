@@ -28,13 +28,15 @@ class EulerInitialConditions
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const FLOW_MODEL::TYPE& flow_model_type,
-            const HAMERS_SHARED_PTR<FlowModel>& flow_model):
+            const HAMERS_SHARED_PTR<FlowModel>& flow_model,
+            const HAMERS_SHARED_PTR<tbox::Database>& initial_conditions_db):
                 d_object_name(object_name),
                 d_project_name(project_name),
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
                 d_flow_model_type(flow_model_type),
-                d_flow_model(flow_model)
+                d_flow_model(flow_model),
+                d_initial_conditions_db(initial_conditions_db)
         {}
         
         /*
@@ -78,6 +80,11 @@ class EulerInitialConditions
          * Flow model.
          */
         const HAMERS_SHARED_PTR<FlowModel> d_flow_model;
+        
+        /*
+         * Initial conditions database.
+         */
+        const HAMERS_SHARED_PTR<tbox::Database> d_initial_conditions_db;
         
 };
 

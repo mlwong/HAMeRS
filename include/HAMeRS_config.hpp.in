@@ -15,6 +15,9 @@
 /* Define epsilon to prevent divisoin by zero */
 #define HAMERS_EPSILON 1.0e-15
 
+/* Define machine epsilon */
+#define HAMERS_REAL_EPSILON DBL_EPSILON
+
 /* Enable compilation with Boost library */
 #cmakedefine HAMERS_USE_BOOST
 
