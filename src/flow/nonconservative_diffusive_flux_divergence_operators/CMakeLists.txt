@@ -2,7 +2,11 @@
 # a list of the source files for the nonconservative_diffusive_flux_divergence_operators library
 set(nonconservative_diffusive_flux_divergence_operators_source_files
     NonconservativeDiffusiveFluxDivergenceOperatorManager.cpp
-    ./sixth_order/NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder.cpp
+    NonconservativeDiffusiveFluxDivergenceOperator.cpp
+    NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder.cpp
+    NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder.cpp
+    NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder.cpp
+    NonconservativeDiffusiveFluxDivergenceOperatorTwelfthOrder.cpp
 )
 
 # Create a library called nonconservative_diffusive_flux_divergence_operators which includes the 

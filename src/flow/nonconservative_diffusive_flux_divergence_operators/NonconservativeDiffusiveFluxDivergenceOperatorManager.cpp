@@ -23,6 +23,45 @@ NonconservativeDiffusiveFluxDivergenceOperatorManager::NonconservativeDiffusiveF
             flow_model,
             nonconservative_diffusive_flux_divergence_operator_db));
     }
+    else if (nonconservative_diffusive_flux_divergence_operator_str == "EIGHTH_ORDER")
+    {
+        d_nonconservative_diffusive_flux_divergence_operator_type =
+            NONCONSERVATIVE_DIFFUSIVE_FLUX_DIVERGENCE_OPERATOR::EIGHTH_ORDER;
+        
+        d_noncons_diff_flux_div_op.reset(new NonconservativeDiffusiveFluxDivergenceOperatorEighthOrder(
+            "d_nonconservative_diffusive_flux_divergence_operator",
+            dim,
+            grid_geometry,
+            flow_model->getNumberOfEquations(),
+            flow_model,
+            nonconservative_diffusive_flux_divergence_operator_db));
+    }
+    else if (nonconservative_diffusive_flux_divergence_operator_str == "TENTH_ORDER")
+    {
+        d_nonconservative_diffusive_flux_divergence_operator_type =
+            NONCONSERVATIVE_DIFFUSIVE_FLUX_DIVERGENCE_OPERATOR::TENTH_ORDER;
+        
+        d_noncons_diff_flux_div_op.reset(new NonconservativeDiffusiveFluxDivergenceOperatorTenthOrder(
+            "d_nonconservative_diffusive_flux_divergence_operator",
+            dim,
+            grid_geometry,
+            flow_model->getNumberOfEquations(),
+            flow_model,
+            nonconservative_diffusive_flux_divergence_operator_db));
+    }
+    else if (nonconservative_diffusive_flux_divergence_operator_str == "TWELFTH_ORDER")
+    {
+        d_nonconservative_diffusive_flux_divergence_operator_type =
+            NONCONSERVATIVE_DIFFUSIVE_FLUX_DIVERGENCE_OPERATOR::TWELFTH_ORDER;
+        
+        d_noncons_diff_flux_div_op.reset(new NonconservativeDiffusiveFluxDivergenceOperatorTwelfthOrder(
+            "d_nonconservative_diffusive_flux_divergence_operator",
+            dim,
+            grid_geometry,
+            flow_model->getNumberOfEquations(),
+            flow_model,
+            nonconservative_diffusive_flux_divergence_operator_db));
+    }
     else
     {
         TBOX_ERROR(d_object_name
@@ -30,7 +69,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorManager::NonconservativeDiffusiveF
             << "Unknown nonconservative_diffusive_flux_divergence_operator string = '"
             << nonconservative_diffusive_flux_divergence_operator_str
             << "' found in input."
-            << std::endl);        
+            << std::endl);
     }
 }
 
