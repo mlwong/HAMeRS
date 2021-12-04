@@ -120,83 +120,85 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                 {
 		    for (int i = 0; i < patch_dims[0]; i++)
 		    {
-                    // Compute index into linear data array.
-                    int idx_cell = i + j*patch_dims[0] +  k*patch_dims[0]*patch_dims[1];
-                    
-                    // Compute the coordinates.
-                    double x[3];
-                    x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
-                    x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
-		    x[2] = patch_xlo[2] + (double(k) + double(1)/double(2))*dx[2];
-                    
-                    const double eta = eta_0*cos(2.0*M_PI/lambda*x[1]);
-                    
-                    const double X_2_H = 0.5*(1.0 + erf((x[0] - eta)/delta)); // mass fraction of second species (Y_2)
-                    const double R_H   = R_1*(1.0 - X_2_H) + X_2_H*R_2;
-                    
-                    const int N_int = 10000; // number of numerical quadrature points
-                    const double dx_p = x[0]/(N_int - 1.0);
-                    
-                    double integral = 0.0;
-                    for (int ii = 0; ii < N_int; ii++)
-                    {
-                        const double x_p = x[0] + ii*dx_p;
-                        integral += 1.0/(0.5*(R_2 - R_1)*erf((x_p - eta)/delta) + 0.5*(R_1 + R_2))*dx_p;
-                    }
-                    
-                    const double p_H = p_i*exp(g/T_0*integral);
-                    const double rho_H = p_H/(R_H*T_0);
-                    
-                    // Scott's implementation
-                    // const double dX_2_H_dx = 1.0/(delta*sqrt(M_PI))*exp(-(x[0]/delta)*(x[0]/delta));
-                    // const double dlnR_H_dx = (R_2 - R_1)*dX_2_H_dx;
-                    // const double p_H = p_i*exp(g/(R_H*T_0)*(x[0] - 0.5*delta*delta*dlnR_H_dx));
-                    // const double rho_H = p_H/(R_H*T_0);
-                    
-                    // const double X_2 = 0.5*(1.0 + erf((x[0] - eta)/delta)); // mass fraction of second species (Y_2)
-                    
-                    double rho, p;
-                    
-                    rho = rho_H;
-                    p   = p_H;
-                    
-                    // if (x[0] < eta)
-                    // {
-                    //     const double p_1_H   = p_i*exp((g*x[0])/(R_1*T_0));
-                    //     const double rho_1_H = p_i/(R_1*T_0)*exp((g*x[0])/(R_1*T_0));
-                    //     
-                    //     const double p_1   = p_i*exp((g*x[0])/(R_1*T_0));
-                    //     const double rho_1 = p_i/(R_1*T_0)*exp((g*x[0])/(R_1*T_0));
-                    //     
-                    //     p   = p_1*p_H/p_1_H;
-                    //     rho = rho_1*rho_H/rho_1_H;
-                    //     
-                    //     
-                    // }
-                    // else
-                    // {
-                    //     const double p_2_H   = p_i*exp((g*x[0])/(R_2*T_0));
-                    //     const double rho_2_H = p_i/(R_2*T_0)*exp((g*x[0])/(R_2*T_0));
-                    //     
-                    //     const double p_2   = p_i*exp((g*x[0])/(R_2*T_0));
-                    //     const double rho_2 = p_i/(R_2*T_0)*exp((g*x[0])/(R_2*T_0));
-                    //     
-                    //     p   = p_2*p_H/p_2_H;
-                    //     rho = rho_2*rho_H/rho_2_H;
-                    // }
-                    
-                    rho_Y_0[idx_cell] = rho*(1.0 - X_2_H);
-                    rho_Y_1[idx_cell] = rho*X_2_H;
-                    
-                    const double u = 0.0;
-                    const double v = 0.0;
-		    const double w = 0.0;
-                    
-                    rho_u[idx_cell] = rho*u;
-                    rho_v[idx_cell] = rho*v;
-		    rho_w[idx_cell] = rho*w;
-                    E[idx_cell]     = p/(gamma - double(1)) + double(1)/double(2)*rho*(u*u + v*v + w*w);
-                }
+                        // Compute index into linear data array.
+                        int idx_cell = i + j*patch_dims[0] +  k*patch_dims[0]*patch_dims[1];
+                        
+                        // Compute the coordinates.
+                        double x[3];
+                        x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
+                        x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
+		        x[2] = patch_xlo[2] + (double(k) + double(1)/double(2))*dx[2];
+                        
+                        const double eta = eta_0*cos(2.0*M_PI/lambda*x[1])*cos(2.0*M_PI/lambda*x[2]);
+                        
+                        const double X_2_H = 0.5*(1.0 + erf((x[0] - eta)/delta)); // mass fraction of second species (Y_2)
+                        const double R_H   = R_1*(1.0 - X_2_H) + X_2_H*R_2;
+                        
+                        const int N_int = 10000; // number of numerical quadrature points
+                        const double dx_p = x[0]/(N_int - 1.0);
+                        
+                        double integral = 0.0;
+                        for (int ii = 0; ii < N_int; ii++)
+                        {
+                            const double x_p = x[0] + ii*dx_p;
+                            integral += 1.0/(0.5*(R_2 - R_1)*erf((x_p - eta)/delta) + 0.5*(R_1 + R_2))*dx_p;
+                        }
+                        
+                        const double p_H = p_i*exp(g/T_0*integral);
+                        const double rho_H = p_H/(R_H*T_0);
+                        
+                        // Scott's implementation
+                        // const double dX_2_H_dx = 1.0/(delta*sqrt(M_PI))*exp(-(x[0]/delta)*(x[0]/delta));
+                        // const double dlnR_H_dx = (R_2 - R_1)*dX_2_H_dx;
+                        // const double p_H = p_i*exp(g/(R_H*T_0)*(x[0] - 0.5*delta*delta*dlnR_H_dx));
+                        // const double rho_H = p_H/(R_H*T_0);
+                        
+                        // const double X_2 = 0.5*(1.0 + erf((x[0] - eta)/delta)); // mass fraction of second species (Y_2)
+                        
+                        double rho, p;
+                        
+                        rho = rho_H;
+                        p   = p_H;
+                        
+                        // if (x[0] < eta)
+                        // {
+                        //     const double p_1_H   = p_i*exp((g*x[0])/(R_1*T_0));
+                        //     const double rho_1_H = p_i/(R_1*T_0)*exp((g*x[0])/(R_1*T_0));
+                        //     
+                        //     const double p_1   = p_i*exp((g*x[0])/(R_1*T_0));
+                        //     const double rho_1 = p_i/(R_1*T_0)*exp((g*x[0])/(R_1*T_0));
+                        //     
+                        //     p   = p_1*p_H/p_1_H;
+                        //     rho = rho_1*rho_H/rho_1_H;
+                        //     
+                        //     
+                        // }
+                        // else
+                        // {
+                        //     const double p_2_H   = p_i*exp((g*x[0])/(R_2*T_0));
+                        //     const double rho_2_H = p_i/(R_2*T_0)*exp((g*x[0])/(R_2*T_0));
+                        //     
+                        //     const double p_2   = p_i*exp((g*x[0])/(R_2*T_0));
+                        //     const double rho_2 = p_i/(R_2*T_0)*exp((g*x[0])/(R_2*T_0));
+                        //     
+                        //     p   = p_2*p_H/p_2_H;
+                        //     rho = rho_2*rho_H/rho_2_H;
+                        // }
+                        
+                        rho_Y_0[idx_cell] = rho*(1.0 - X_2_H);
+                        rho_Y_1[idx_cell] = rho*X_2_H;
+                        
+                        const double u = 0.0;
+                        const double v = 0.0;
+		        const double w = 0.0;
+                        
+                        rho_u[idx_cell] = rho*u;
+                        rho_v[idx_cell] = rho*v;
+		        rho_w[idx_cell] = rho*w;
+                        E[idx_cell]     = p/(gamma - double(1)) + double(1)/double(2)*rho*(u*u + v*v + w*w);
+ 
+     		    }
+		}
             }
         }
     }
