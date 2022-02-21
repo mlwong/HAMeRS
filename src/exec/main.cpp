@@ -234,11 +234,11 @@ int main(int argc, char *argv[])
     
     std::string mode_string = input_db->getStringWithDefault("Mode", "SIMULATION");
     
-    if (mode_string != "SIMULATION")
+    if (mode_string == "SIMULATION")
     {
         mode_label = SIMULATION;
     }
-    else if (mode_string != "POSTPROCESSING")
+    else if (mode_string == "POSTPROCESSING")
     {
         mode_label = POSTPROCESSING;
     }
@@ -385,7 +385,7 @@ int main(int argc, char *argv[])
     }
     else if (mode_label == POSTPROCESSING)
     {
-        stat_dump_setting = true;
+        is_stat_dumping = true;
     }
     
     if (is_stat_dumping)
@@ -730,7 +730,7 @@ int main(int argc, char *argv[])
         
         time_integrator_db->putDouble("start_time", tbox::MathUtilities<double>::getMin());
         time_integrator_db->putDouble("end_time", tbox::MathUtilities<double>::getMax());
-        time_integrator_db->putInteger("max_integrator_steps", tbox::MathUtilities<double>::getMax());
+        time_integrator_db->putInteger("max_integrator_steps", tbox::MathUtilities<int>::getMax());
     }
     
     HAMERS_SHARED_PTR<algs::TimeRefinementIntegrator> time_integrator(
@@ -879,7 +879,7 @@ int main(int argc, char *argv[])
         
         int iteration_num = 0;
         
-        tbox::pout << "Start simulation... " << std::endl;
+        tbox::pout << "Start simulation..." << std::endl;
         tbox::pout << std::endl;
         
         while (loop_time < loop_time_end && time_integrator->stepsRemaining())
@@ -1180,7 +1180,7 @@ int main(int argc, char *argv[])
                 break;
             }
         }
-    
+        
         tbox::plog << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
         tbox::plog << std::endl;
         tbox::plog << "GriddingAlgorithm statistics:\n";
@@ -1190,7 +1190,7 @@ int main(int argc, char *argv[])
     {
         TBOX_ASSERT(is_stat_dumping);
         
-        tbox::pout << "Ouput statistics... " << std::endl;
+        tbox::pout << "Output statistics..." << std::endl;
         tbox::pout << std::endl;
         
         t_write_stat->start();
