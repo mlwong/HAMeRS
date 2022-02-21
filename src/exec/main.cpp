@@ -156,6 +156,8 @@ using namespace SAMRAI;
  *******************************************************************
  */
 
+enum MODE_LABEL { SIMULATION,
+                  POSTPROCESSING };
 
 enum APPLICATION_LABEL { EULER,
                          NAVIER_STOKES };
@@ -228,6 +230,26 @@ int main(int argc, char *argv[])
         }
     }
     
+    MODE_LABEL mode_label = SIMULATION;
+    
+    std::string mode_string = input_db->getStringWithDefault("Mode", "SIMULATION");
+    
+    if (mode_string != "SIMULATION")
+    {
+        mode_label = SIMULATION;
+    }
+    else if (mode_string != "POSTPROCESSING")
+    {
+        mode_label = POSTPROCESSING;
+    }
+    else
+    {
+        TBOX_ERROR("Unkonwn mode string = '"
+             << mode_string
+             << "' found in input database."
+             << std::endl); 
+    }
+    
     /*
      * Retrieve "Main" section of the input database.  First, read dump
      * information, which is used for writing plot files.  Second, if
@@ -271,114 +293,128 @@ int main(int argc, char *argv[])
     bool is_viz_dumping = false;
     std::string viz_dump_setting;
     int viz_dump_timestep_interval = 0;
-    double viz_dump_time_interval = 0.0;
+    double viz_dump_time_interval = double(0);
     std::string visit_dump_dirname = "";
     int visit_dump_directory_name_zero_padding_length = 5;
     int visit_number_procs_per_file = 1;
     
-    if (main_db->keyExists("viz_dump_setting"))
+    // Only dump visualization files if it is in simulation mode.
+    if (mode_label == SIMULATION)
     {
-        viz_dump_setting = main_db->getString("viz_dump_setting");
-        
-        if ((viz_dump_setting != "CONSTANT_TIME_INTERVAL") &&
-            (viz_dump_setting != "CONSTANT_TIMESTEP_INTERVAL"))
+        if (main_db->keyExists("viz_dump_setting"))
         {
-            TBOX_ERROR("Unknown viz_dump_setting string = "
-                << viz_dump_setting
-                << " found in input."
-                << std::endl);   
+            viz_dump_setting = main_db->getString("viz_dump_setting");
+            
+            if ((viz_dump_setting != "CONSTANT_TIME_INTERVAL") &&
+                (viz_dump_setting != "CONSTANT_TIMESTEP_INTERVAL"))
+            {
+                TBOX_ERROR("Unknown viz_dump_setting string = "
+                    << viz_dump_setting
+                    << " found in input."
+                    << std::endl);
+            }
+            
+            is_viz_dumping = true;
         }
         
-        is_viz_dumping = true;
-    }
-    
-    if (is_viz_dumping)
-    {
-        if (main_db->keyExists("viz_dump_interval"))
+        if (is_viz_dumping)
         {
-            if (viz_dump_setting == "CONSTANT_TIME_INTERVAL")
+            if (main_db->keyExists("viz_dump_interval"))
             {
-                viz_dump_time_interval = main_db->getDouble("viz_dump_interval");
-            }
-            else if (viz_dump_setting == "CONSTANT_TIMESTEP_INTERVAL")
-            {
-                viz_dump_timestep_interval = main_db->getInteger("viz_dump_interval");
+                if (viz_dump_setting == "CONSTANT_TIME_INTERVAL")
+                {
+                    viz_dump_time_interval = main_db->getDouble("viz_dump_interval");
+                }
+                else if (viz_dump_setting == "CONSTANT_TIMESTEP_INTERVAL")
+                {
+                    viz_dump_timestep_interval = main_db->getInteger("viz_dump_interval");
+                }
+                else
+                {
+                    TBOX_ERROR("Unknown viz_dump_setting = "
+                        << viz_dump_setting
+                        << "."
+                        << std::endl);
+                }
             }
             else
             {
-                TBOX_ERROR("Unknown viz_dump_setting = "
-                    << viz_dump_setting
-                    << "."
-                    << std::endl);
+                TBOX_ERROR("Key data 'viz_dump_interval' not found in input."
+                        << std::endl);
             }
-        }
-        else
-        {
-            TBOX_ERROR("Key data 'viz_dump_interval' not found in input."
-                    << std::endl);
-        }
-        
-        visit_dump_dirname =
-            main_db->getStringWithDefault("viz_dump_dirname", base_name + ".visit");
-        
-        if (main_db->keyExists("visit_dump_directory_name_zero_padding_length"))
-        {
-            visit_dump_directory_name_zero_padding_length =
-                main_db->getInteger("visit_dump_directory_name_zero_padding_length");
-        }
-        
-        if (main_db->keyExists("visit_number_procs_per_file"))
-        {
-            visit_number_procs_per_file = main_db->getInteger("visit_number_procs_per_file");
+            
+            visit_dump_dirname =
+                main_db->getStringWithDefault("viz_dump_dirname", base_name + ".visit");
+            
+            if (main_db->keyExists("visit_dump_directory_name_zero_padding_length"))
+            {
+                visit_dump_directory_name_zero_padding_length =
+                    main_db->getInteger("visit_dump_directory_name_zero_padding_length");
+            }
+            
+            if (main_db->keyExists("visit_number_procs_per_file"))
+            {
+                visit_number_procs_per_file = main_db->getInteger("visit_number_procs_per_file");
+            }
         }
     }
     
     bool is_stat_dumping = false;
     std::string stat_dump_setting;
     int stat_dump_timestep_interval = 0;
-    double stat_dump_time_interval = 0.0;
+    double stat_dump_time_interval = double(0);
     std::string stat_dump_filename = "";
     
-    if (main_db->keyExists("stat_dump_setting"))
+    if (mode_label == SIMULATION)
     {
-        stat_dump_setting = main_db->getString("stat_dump_setting");
-        
-        if ((stat_dump_setting != "CONSTANT_TIME_INTERVAL") &&
-            (stat_dump_setting != "CONSTANT_TIMESTEP_INTERVAL"))
+        if (main_db->keyExists("stat_dump_setting"))
         {
-            TBOX_ERROR("Unknown stat_dump_setting string = "
-                << stat_dump_setting
-                << " found in input."
-                << std::endl);
+            stat_dump_setting = main_db->getString("stat_dump_setting");
+            
+            if ((stat_dump_setting != "CONSTANT_TIME_INTERVAL") &&
+                (stat_dump_setting != "CONSTANT_TIMESTEP_INTERVAL"))
+            {
+                TBOX_ERROR("Unknown stat_dump_setting string = "
+                    << stat_dump_setting
+                    << " found in input."
+                    << std::endl);
+            }
+            
+            is_stat_dumping = true;
         }
-        
-        is_stat_dumping = true;
+    }
+    else if (mode_label == POSTPROCESSING)
+    {
+        stat_dump_setting = true;
     }
     
     if (is_stat_dumping)
     {
-        if (main_db->keyExists("stat_dump_interval"))
+        if (mode_label == SIMULATION)
         {
-            if (stat_dump_setting == "CONSTANT_TIME_INTERVAL")
+            if (main_db->keyExists("stat_dump_interval"))
             {
-                stat_dump_time_interval = main_db->getDouble("stat_dump_interval");
-            }
-            else if (stat_dump_setting == "CONSTANT_TIMESTEP_INTERVAL")
-            {
-                stat_dump_timestep_interval = main_db->getInteger("stat_dump_interval");
+                if (stat_dump_setting == "CONSTANT_TIME_INTERVAL")
+                {
+                    stat_dump_time_interval = main_db->getDouble("stat_dump_interval");
+                }
+                else if (stat_dump_setting == "CONSTANT_TIMESTEP_INTERVAL")
+                {
+                    stat_dump_timestep_interval = main_db->getInteger("stat_dump_interval");
+                }
+                else
+                {
+                    TBOX_ERROR("Unknown stat_dump_setting = "
+                        << stat_dump_setting
+                        << "."
+                        << std::endl);
+                }
             }
             else
             {
-                TBOX_ERROR("Unknown stat_dump_setting = "
-                    << stat_dump_setting
-                    << "."
+                TBOX_ERROR("Key data 'stat_dump_interval' not found in input."
                     << std::endl);
             }
-        }
-        else
-        {
-            TBOX_ERROR("Key data 'stat_dump_interval' not found in input."
-                << std::endl);
         }
         
         if (main_db->keyExists("stat_dump_filename"))
@@ -393,25 +429,31 @@ int main(int argc, char *argv[])
     }
     
     int restart_interval = 0;
-    if (main_db->keyExists("restart_interval"))
-    {
-        restart_interval = main_db->getInteger("restart_interval");
-    }
-    
-    const std::string restart_write_dirname =
-        main_db->getStringWithDefault("restart_write_dirname",
-                                      base_name + ".restart");
-    
-    const bool write_restart = (restart_interval > 0)
-                                && !(restart_write_dirname.empty());
-    
+    std::string restart_write_dirname;
+    bool write_restart = false;
     bool use_refined_timestepping = true;
-    if (main_db->keyExists("timestepping"))
+    
+    // Only dump restart files if it is in simulation mode.
+    if (mode_label == SIMULATION)
     {
-        std::string timestepping_method = main_db->getString("timestepping");
-        if (timestepping_method == "SYNCHRONIZED")
+        if (main_db->keyExists("restart_interval"))
         {
-            use_refined_timestepping = false;
+            restart_interval = main_db->getInteger("restart_interval");
+        }
+        
+        restart_write_dirname =
+            main_db->getStringWithDefault("restart_write_dirname",
+                                          base_name + ".restart");
+        
+        write_restart = (restart_interval > 0) && !(restart_write_dirname.empty());
+        
+        if (main_db->keyExists("timestepping"))
+        {
+            std::string timestepping_method = main_db->getString("timestepping");
+            if (timestepping_method == "SYNCHRONIZED")
+            {
+                use_refined_timestepping = false;
+            }
         }
     }
     
@@ -492,8 +534,25 @@ int main(int argc, char *argv[])
             << std::endl); 
     }
     
-    Euler* Euler_app = nullptr;
-    NavierStokes* Navier_Stokes_app = nullptr;
+    HAMERS_SHARED_PTR<Euler> Euler_app;
+    HAMERS_SHARED_PTR<NavierStokes> Navier_Stokes_app;
+    
+    HAMERS_SHARED_PTR<tbox::Database> RK_level_integrator_db;
+    
+    if (mode_label == SIMULATION)
+    {
+        RK_level_integrator_db = input_db->getDatabase("RungeKuttaLevelIntegrator");
+    }
+    else // Set bogus database for Runge Kutta level integrator if it is not in simulation mode.
+    {
+        RK_level_integrator_db = HAMERS_SHARED_PTR<tbox::InputDatabase> (
+            new tbox::InputDatabase("RungeKuttaLevelIntegrator"));
+        
+        RK_level_integrator_db->putDouble("cfl", double(0));
+        RK_level_integrator_db->putDouble("cfl_init", double(0));
+        RK_level_integrator_db->putBool("lag_dt_computation", false);
+        RK_level_integrator_db->putBool("use_ghosts_to_compute_dt", false);
+    }
     
     HAMERS_SHARED_PTR<RungeKuttaLevelIntegrator> RK_level_integrator;
     
@@ -501,35 +560,35 @@ int main(int argc, char *argv[])
     {
         case EULER:
         {
-            Euler_app = new Euler(
+            Euler_app = HAMERS_SHARED_PTR<Euler> (new Euler(
                 "Euler_app",
                 dim,
                 input_db->getDatabase("Euler"),
                 grid_geometry,
-                stat_dump_filename);
+                stat_dump_filename));
             
                 RK_level_integrator.reset(new RungeKuttaLevelIntegrator(
                     "Runge-Kutta level integrator",
-                    input_db->getDatabase("RungeKuttaLevelIntegrator"),
-                    Euler_app,
+                    RK_level_integrator_db,
+                    Euler_app.get(),
                     use_refined_timestepping));
             
             break;
         }
         case NAVIER_STOKES:
         {
-            Navier_Stokes_app = new NavierStokes(
+            Navier_Stokes_app = HAMERS_SHARED_PTR<NavierStokes> (new NavierStokes(
                 "Navier_Stokes_app",
                 dim,
                 input_db->getDatabase("NavierStokes"),
                 grid_geometry,
-                stat_dump_filename);
+                stat_dump_filename));
             
             RK_level_integrator.reset(
                 new RungeKuttaLevelIntegrator(
                     "Runge-Kutta level integrator",
-                    input_db->getDatabase("RungeKuttaLevelIntegrator"),
-                    Navier_Stokes_app,
+                    RK_level_integrator_db,
+                    Navier_Stokes_app.get(),
                     use_refined_timestepping));
             
             break;
@@ -658,16 +717,32 @@ int main(int argc, char *argv[])
             load_balancer,
             load_balancer0));
     
+    HAMERS_SHARED_PTR<tbox::Database> time_integrator_db;
+    
+    if (mode_label == SIMULATION)
+    {
+        time_integrator_db = input_db->getDatabase("TimeRefinementIntegrator");
+    }
+    else // Set bogus database for Runge Kutta level integrator if it is not in simulation mode.
+    {
+        time_integrator_db = HAMERS_SHARED_PTR<tbox::InputDatabase> (
+            new tbox::InputDatabase("TimeRefinementIntegrator"));
+        
+        time_integrator_db->putDouble("start_time", tbox::MathUtilities<double>::getMin());
+        time_integrator_db->putDouble("end_time", tbox::MathUtilities<double>::getMax());
+        time_integrator_db->putInteger("max_integrator_steps", tbox::MathUtilities<double>::getMax());
+    }
+    
     HAMERS_SHARED_PTR<algs::TimeRefinementIntegrator> time_integrator(
         new algs::TimeRefinementIntegrator(
             "TimeRefinementIntegrator",
-            input_db->getDatabase("TimeRefinementIntegrator"),
+            time_integrator_db,
             patch_hierarchy,
             RK_level_integrator,
             gridding_algorithm));
     
     /*
-     * Set up Visualization writer(s).  Note that the Euler application
+     * Set up visualization writer(s).  Note that the Euler application
      * creates some derived data quantities so we register the Euler model
      * as a derived data writer.  If no derived data is written, this step
      * is not necessary.
@@ -775,339 +850,355 @@ int main(int argc, char *argv[])
 #endif
     t_write_viz->stop();
     
-    t_write_stat->start();
-    if (is_stat_dumping)
+    if (mode_label == SIMULATION)
     {
-        RK_level_integrator->outputDataStatistics(
-            patch_hierarchy,
-            time_integrator->getIntegratorTime());
-    }
-    t_write_stat->stop();
-    
-    /*
-     * Time step loop.  Note that the step count and integration
-     * time are maintained by algs::TimeRefinementIntegrator.
-     */
-    
-    double loop_time = time_integrator->getIntegratorTime();
-    double loop_time_end = time_integrator->getEndTime();
-    
-    double last_viz_dump_time = floor((time_integrator->getIntegratorTime() + double(10)*HAMERS_REAL_EPSILON)/
-        viz_dump_time_interval)*viz_dump_time_interval;
-    bool dump_viz = true;
-    
-    double last_stat_dump_time = floor((time_integrator->getIntegratorTime() + double(10)*HAMERS_REAL_EPSILON)/
-        stat_dump_time_interval)*stat_dump_time_interval;
-    bool dump_stat = true;
-    
-    int iteration_num = 0;
-    
-    tbox::pout << "Start simulation... " << std::endl;
-    tbox::pout << std::endl;
-    
-    while (loop_time < loop_time_end && time_integrator->stepsRemaining())
-    {
-        dump_viz = false;
-        dump_stat = false;
-        
-        iteration_num = time_integrator->getIntegratorStep() + 1;
-        
-        // Check whether dt_now is larger than the time interval to next files dumping time.
-        if ((viz_dump_setting == "CONSTANT_TIME_INTERVAL") &&
-            (stat_dump_setting == "CONSTANT_TIME_INTERVAL"))
+        t_write_stat->start();
+        if (is_stat_dumping)
         {
-            if (viz_dump_time_interval == stat_dump_time_interval)
+            RK_level_integrator->outputDataStatistics(
+                patch_hierarchy,
+                time_integrator->getIntegratorTime());
+        }
+        t_write_stat->stop();
+        
+        /*
+         * Time step loop.  Note that the step count and integration
+         * time are maintained by algs::TimeRefinementIntegrator.
+         */
+        
+        double loop_time = time_integrator->getIntegratorTime();
+        double loop_time_end = time_integrator->getEndTime();
+        
+        double last_viz_dump_time = floor((time_integrator->getIntegratorTime() + double(10)*HAMERS_REAL_EPSILON)/
+            viz_dump_time_interval)*viz_dump_time_interval;
+        bool dump_viz = true;
+        
+        double last_stat_dump_time = floor((time_integrator->getIntegratorTime() + double(10)*HAMERS_REAL_EPSILON)/
+            stat_dump_time_interval)*stat_dump_time_interval;
+        bool dump_stat = true;
+        
+        int iteration_num = 0;
+        
+        tbox::pout << "Start simulation... " << std::endl;
+        tbox::pout << std::endl;
+        
+        while (loop_time < loop_time_end && time_integrator->stepsRemaining())
+        {
+            dump_viz = false;
+            dump_stat = false;
+            
+            iteration_num = time_integrator->getIntegratorStep() + 1;
+            
+            // Check whether dt_now is larger than the time interval to next files dumping time.
+            if ((viz_dump_setting == "CONSTANT_TIME_INTERVAL") &&
+                (stat_dump_setting == "CONSTANT_TIME_INTERVAL"))
+            {
+                if (viz_dump_time_interval == stat_dump_time_interval)
+                {
+                    if ((loop_time + dt_now) - (last_viz_dump_time + viz_dump_time_interval) >= -double(10)*HAMERS_REAL_EPSILON)
+                    {
+                        dt_now = last_viz_dump_time + viz_dump_time_interval - loop_time;
+                        dump_viz = true;
+                        dump_stat = true;
+                    }
+                }
+                else
+                {
+                    if ((loop_time + dt_now) - (last_viz_dump_time + viz_dump_time_interval) >= -double(10)*HAMERS_REAL_EPSILON)
+                    {
+                        dt_now = last_viz_dump_time + viz_dump_time_interval - loop_time;
+                        dump_viz = true;
+                        
+                        if ((loop_time + dt_now) - (last_stat_dump_time + stat_dump_time_interval) >= -double(10)*HAMERS_REAL_EPSILON)
+                        {
+                            dt_now = last_stat_dump_time + stat_dump_time_interval - loop_time;
+                            dump_viz = false;
+                            dump_stat = true;
+                        }
+                    }
+                }
+            }
+            else if (viz_dump_setting == "CONSTANT_TIME_INTERVAL")
             {
                 if ((loop_time + dt_now) - (last_viz_dump_time + viz_dump_time_interval) >= -double(10)*HAMERS_REAL_EPSILON)
                 {
                     dt_now = last_viz_dump_time + viz_dump_time_interval - loop_time;
                     dump_viz = true;
+                }
+            }
+            else if (stat_dump_setting == "CONSTANT_TIME_INTERVAL")
+            {
+                if ((loop_time + dt_now) - (last_stat_dump_time + stat_dump_time_interval) >= -double(10)*HAMERS_REAL_EPSILON)
+                {
+                    dt_now = last_stat_dump_time + stat_dump_time_interval - loop_time;
                     dump_stat = true;
+                }
+            }
+            
+            tbox::pout << "At begining of timestep # " << iteration_num - 1 << std::endl;
+            tbox::pout << "Simulation time is " << loop_time << std::endl;
+            tbox::pout << "Current dt is " << dt_now << std::endl;
+            
+            // Advance the solution.
+            double dt_new = time_integrator->advanceHierarchy(dt_now);
+            
+            loop_time += dt_now;
+            
+            if (!(RK_level_integrator->usingRefinedTimestepping()))
+            {
+                dt_now = dt_const;
+                
+                if (loop_time + dt_now > loop_time_end)
+                {
+                    dt_now = loop_time_end - loop_time;
                 }
             }
             else
             {
-                if ((loop_time + dt_now) - (last_viz_dump_time + viz_dump_time_interval) >= -double(10)*HAMERS_REAL_EPSILON)
+                dt_now = dt_new;
+            }
+            
+            tbox::pout << "At end of timestep # " << iteration_num - 1 << std::endl;
+            tbox::pout << "Simulation time is " << loop_time << std::endl;
+            switch (app_label)
+            {
+                case EULER:
                 {
-                    dt_now = last_viz_dump_time + viz_dump_time_interval - loop_time;
-                    dump_viz = true;
-                    
-                    if ((loop_time + dt_now) - (last_stat_dump_time + stat_dump_time_interval) >= -double(10)*HAMERS_REAL_EPSILON)
+                    Euler_app->printDataStatistics(tbox::pout, patch_hierarchy);
+                    break;
+                }
+                case NAVIER_STOKES:
+                {
+                    Navier_Stokes_app->printDataStatistics(tbox::pout, patch_hierarchy);
+                    break;
+                }
+            }
+            
+            /*
+             * At specified intervals, write out data files for plotting.
+             * If restart_interval = -1, also write restart files when writing out data
+             * files for plotting
+             */
+    #ifdef HAVE_HDF5
+            if (is_viz_dumping)
+            {
+                if (viz_dump_setting == "CONSTANT_TIME_INTERVAL")
+                {
+                    if (dump_viz)
                     {
-                        dt_now = last_stat_dump_time + stat_dump_time_interval - loop_time;
-                        dump_viz = false;
-                        dump_stat = true;
+                        t_write_viz->start();
+                        
+                        visit_data_writer->writePlotData(
+                            patch_hierarchy,
+                            iteration_num,
+                            loop_time);
+                        
+                        t_write_viz->stop();
+                        
+                        last_viz_dump_time = loop_time;
+                        
+                        tbox::pout << "Files for plotting are written." << std::endl;
+                        
+                        if ((restart_interval == -1) && !(restart_write_dirname.empty()))
+                        {
+                            t_write_restart->start();
+                            
+                            tbox::RestartManager::getManager()->
+                                writeRestartFile(restart_write_dirname,
+                                                 iteration_num);
+                            
+                            t_write_restart->stop();
+                            
+                            tbox::pout << "Files for restart are written." << std::endl;
+                        }
                     }
+                }
+                else if (viz_dump_setting == "CONSTANT_TIMESTEP_INTERVAL")
+                {
+                    if ((iteration_num % viz_dump_timestep_interval) == 0)
+                    {
+                        t_write_viz->start();
+                        
+                        visit_data_writer->writePlotData(
+                            patch_hierarchy,
+                            iteration_num,
+                            loop_time);
+                        
+                        t_write_viz->stop();
+                        
+                        tbox::pout << "Files for plotting are written." << std::endl;
+                        
+                        if ((restart_interval == -1) && !(restart_write_dirname.empty()))
+                        {
+                            t_write_restart->start();
+                            
+                            tbox::RestartManager::getManager()->
+                                writeRestartFile(restart_write_dirname,
+                                                 iteration_num);
+                            
+                            t_write_restart->stop();
+                            
+                            tbox::pout << "Files for restart are written." << std::endl;
+                        }
+                    }
+                }
+                else
+                {
+                    TBOX_ERROR("Unknown viz_dump_setting = "
+                        << viz_dump_setting
+                        << "."
+                        << std::endl); 
+                }
+            }
+    #endif
+            
+            if (is_stat_dumping)
+            {
+                if (stat_dump_setting == "CONSTANT_TIME_INTERVAL")
+                {
+                    if (dump_stat)
+                    {
+                        t_write_stat->start();
+                        
+                        RK_level_integrator->outputDataStatistics(patch_hierarchy, loop_time);
+                        
+                        t_write_stat->stop();
+                        
+                        last_stat_dump_time = loop_time;
+                        
+                        tbox::pout << "File of statistics is updated." << std::endl;
+                    }
+                }
+                else if (stat_dump_setting == "CONSTANT_TIMESTEP_INTERVAL")
+                {
+                    if ((iteration_num % stat_dump_timestep_interval) == 0)
+                    {
+                        t_write_stat->start();
+                        
+                        RK_level_integrator->outputDataStatistics(patch_hierarchy, loop_time);
+                        
+                        t_write_stat->stop();
+                        
+                        tbox::pout << "File of statistics is updated." << std::endl;
+                    }
+                }
+                else
+                {
+                    TBOX_ERROR("Unknown stat_dump_setting = "
+                        << stat_dump_setting
+                        << "."
+                        << std::endl); 
+                }
+            }
+            
+            /*
+             * At specified intervals, write restart files.
+             */
+            if (write_restart)
+            {
+                if ((iteration_num % restart_interval) == 0)
+                {
+                    t_write_restart->start();
+                    
+                    tbox::RestartManager::getManager()->
+                        writeRestartFile(restart_write_dirname,
+                                         iteration_num);
+                    
+                    t_write_restart->stop();
+                }
+                
+                tbox::pout << "Files for restart are written." << std::endl;
+            }
+            
+            tbox::pout << "--------------------------------------------------------------------------------";
+            tbox::pout << std::endl;
+        }
+        
+    #ifdef HAVE_HDF5
+        if (is_viz_dumping)
+        {
+            if (viz_dump_setting == "CONSTANT_TIME_INTERVAL" && !dump_viz)
+            {
+                t_write_viz->start();
+                
+                visit_data_writer->writePlotData(
+                    patch_hierarchy,
+                    iteration_num,
+                    loop_time);
+                
+                t_write_viz->stop();
+                
+                last_viz_dump_time = loop_time;
+                
+                tbox::pout << "Files for plotting at last time step are written." << std::endl;
+                
+                if ((restart_interval == -1) && !(restart_write_dirname.empty()))
+                {
+                    t_write_restart->start();
+                    
+                    tbox::RestartManager::getManager()->
+                        writeRestartFile(restart_write_dirname,
+                                         iteration_num);
+                    
+                    t_write_restart->stop();
+                    
+                    tbox::pout << "Files for restart at last time step are written." << std::endl;
                 }
             }
         }
-        else if (viz_dump_setting == "CONSTANT_TIME_INTERVAL")
+    #endif
+        
+        if (is_stat_dumping)
         {
-            if ((loop_time + dt_now) - (last_viz_dump_time + viz_dump_time_interval) >= -double(10)*HAMERS_REAL_EPSILON)
+            if (stat_dump_setting == "CONSTANT_TIME_INTERVAL" && !dump_stat)
             {
-                dt_now = last_viz_dump_time + viz_dump_time_interval - loop_time;
-                dump_viz = true;
+                t_write_stat->start();
+                
+                RK_level_integrator->outputDataStatistics(patch_hierarchy, loop_time);
+                
+                t_write_stat->stop();
+                
+                last_stat_dump_time = loop_time;
+                
+                tbox::pout << "File of statistics at last time step is updated." << std::endl;
             }
         }
-        else if (stat_dump_setting == "CONSTANT_TIME_INTERVAL")
-        {
-            if ((loop_time + dt_now) - (last_stat_dump_time + stat_dump_time_interval) >= -double(10)*HAMERS_REAL_EPSILON)
-            {
-                dt_now = last_stat_dump_time + stat_dump_time_interval - loop_time;
-                dump_stat = true;
-            }
-        }
         
-        tbox::pout << "At begining of timestep # " << iteration_num - 1 << std::endl;
-        tbox::pout << "Simulation time is " << loop_time << std::endl;
-        tbox::pout << "Current dt is " << dt_now << std::endl;
-        
-        // Advance the solution.
-        double dt_new = time_integrator->advanceHierarchy(dt_now);
-        
-        loop_time += dt_now;
-        
-        if (!(RK_level_integrator->usingRefinedTimestepping()))
-        {
-            dt_now = dt_const;
-            
-            if (loop_time + dt_now > loop_time_end)
-            {
-                dt_now = loop_time_end - loop_time;
-            }
-        }
-        else
-        {
-            dt_now = dt_new;
-        }
-        
-        tbox::pout << "At end of timestep # " << iteration_num - 1 << std::endl;
-        tbox::pout << "Simulation time is " << loop_time << std::endl;
+        tbox::plog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
+        tbox::plog << std::endl;
+        tbox::plog << "Error statistics:\n";
         switch (app_label)
         {
             case EULER:
             {
-                Euler_app->printDataStatistics(tbox::pout, patch_hierarchy);
+                Euler_app->printErrorStatistics(tbox::pout, patch_hierarchy, time_integrator->getIntegratorTime());
                 break;
             }
             case NAVIER_STOKES:
             {
-                Navier_Stokes_app->printDataStatistics(tbox::pout, patch_hierarchy);
+                Navier_Stokes_app->printErrorStatistics(tbox::pout, patch_hierarchy, time_integrator->getIntegratorTime());
                 break;
             }
         }
+    
+        tbox::plog << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
+        tbox::plog << std::endl;
+        tbox::plog << "GriddingAlgorithm statistics:\n";
+        gridding_algorithm->printStatistics();
+    }
+    else if (mode_label == POSTPROCESSING)
+    {
+        TBOX_ASSERT(is_stat_dumping);
         
-        /*
-         * At specified intervals, write out data files for plotting.
-         * If restart_interval = -1, also write restart files when writing out data
-         * files for plotting
-         */
-#ifdef HAVE_HDF5
-        if (is_viz_dumping)
-        {
-            if (viz_dump_setting == "CONSTANT_TIME_INTERVAL")
-            {
-                if (dump_viz)
-                {
-                    t_write_viz->start();
-                    
-                    visit_data_writer->writePlotData(
-                        patch_hierarchy,
-                        iteration_num,
-                        loop_time);
-                    
-                    t_write_viz->stop();
-                    
-                    last_viz_dump_time = loop_time;
-                    
-                    tbox::pout << "Files for plotting are written." << std::endl;
-                    
-                    if ((restart_interval == -1) && !(restart_write_dirname.empty()))
-                    {
-                        t_write_restart->start();
-                        
-                        tbox::RestartManager::getManager()->
-                            writeRestartFile(restart_write_dirname,
-                                             iteration_num);
-                        
-                        t_write_restart->stop();
-                        
-                        tbox::pout << "Files for restart are written." << std::endl;
-                    }
-                }
-            }
-            else if (viz_dump_setting == "CONSTANT_TIMESTEP_INTERVAL")
-            {
-                if ((iteration_num % viz_dump_timestep_interval) == 0)
-                {
-                    t_write_viz->start();
-                    
-                    visit_data_writer->writePlotData(
-                        patch_hierarchy,
-                        iteration_num,
-                        loop_time);
-                    
-                    t_write_viz->stop();
-                    
-                    tbox::pout << "Files for plotting are written." << std::endl;
-                    
-                    if ((restart_interval == -1) && !(restart_write_dirname.empty()))
-                    {
-                        t_write_restart->start();
-                        
-                        tbox::RestartManager::getManager()->
-                            writeRestartFile(restart_write_dirname,
-                                             iteration_num);
-                        
-                        t_write_restart->stop();
-                        
-                        tbox::pout << "Files for restart are written." << std::endl;
-                    }
-                }
-            }
-            else
-            {
-                TBOX_ERROR("Unknown viz_dump_setting = "
-                    << viz_dump_setting
-                    << "."
-                    << std::endl); 
-            }
-        }
-#endif
-        
-        if (is_stat_dumping)
-        {
-            if (stat_dump_setting == "CONSTANT_TIME_INTERVAL")
-            {
-                if (dump_stat)
-                {
-                    t_write_stat->start();
-                    
-                    RK_level_integrator->outputDataStatistics(patch_hierarchy, loop_time);
-                    
-                    t_write_stat->stop();
-                    
-                    last_stat_dump_time = loop_time;
-                    
-                    tbox::pout << "File of statistics is updated." << std::endl;
-                }
-            }
-            else if (stat_dump_setting == "CONSTANT_TIMESTEP_INTERVAL")
-            {
-                if ((iteration_num % stat_dump_timestep_interval) == 0)
-                {
-                    t_write_stat->start();
-                    
-                    RK_level_integrator->outputDataStatistics(patch_hierarchy, loop_time);
-                    
-                    t_write_stat->stop();
-                    
-                    tbox::pout << "File of statistics is updated." << std::endl;
-                }
-            }
-            else
-            {
-                TBOX_ERROR("Unknown stat_dump_setting = "
-                    << stat_dump_setting
-                    << "."
-                    << std::endl); 
-            }
-        }
-        
-        /*
-         * At specified intervals, write restart files.
-         */
-        if (write_restart)
-        {
-            if ((iteration_num % restart_interval) == 0)
-            {
-                t_write_restart->start();
-                
-                tbox::RestartManager::getManager()->
-                    writeRestartFile(restart_write_dirname,
-                                     iteration_num);
-                
-                t_write_restart->stop();
-            }
-            
-            tbox::pout << "Files for restart are written." << std::endl;
-        }
-        
-        tbox::pout << "--------------------------------------------------------------------------------";
+        tbox::pout << "Ouput statistics... " << std::endl;
         tbox::pout << std::endl;
+        
+        t_write_stat->start();
+        RK_level_integrator->outputDataStatistics(
+            patch_hierarchy,
+            time_integrator->getIntegratorTime());
+        t_write_stat->stop();
     }
-    
-#ifdef HAVE_HDF5
-    if (is_viz_dumping)
-    {
-        if (viz_dump_setting == "CONSTANT_TIME_INTERVAL" && !dump_viz)
-        {
-            t_write_viz->start();
-            
-            visit_data_writer->writePlotData(
-                patch_hierarchy,
-                iteration_num,
-                loop_time);
-            
-            t_write_viz->stop();
-            
-            last_viz_dump_time = loop_time;
-            
-            tbox::pout << "Files for plotting at last time step are written." << std::endl;
-            
-            if ((restart_interval == -1) && !(restart_write_dirname.empty()))
-            {
-                t_write_restart->start();
-                
-                tbox::RestartManager::getManager()->
-                    writeRestartFile(restart_write_dirname,
-                                     iteration_num);
-                
-                t_write_restart->stop();
-                
-                tbox::pout << "Files for restart at last time step are written." << std::endl;
-            }
-        }
-    }
-#endif
-    
-    if (is_stat_dumping)
-    {
-        if (stat_dump_setting == "CONSTANT_TIME_INTERVAL" && !dump_stat)
-        {
-            t_write_stat->start();
-            
-            RK_level_integrator->outputDataStatistics(patch_hierarchy, loop_time);
-            
-            t_write_stat->stop();
-            
-            last_stat_dump_time = loop_time;
-            
-            tbox::pout << "File of statistics at last time step is updated." << std::endl;
-        }
-    }
-    
-    tbox::plog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
-    tbox::plog << std::endl;
-    tbox::plog << "Error statistics:\n";
-    switch (app_label)
-    {
-        case EULER:
-        {
-            Euler_app->printErrorStatistics(tbox::pout, patch_hierarchy, time_integrator->getIntegratorTime());
-            break;
-        }
-        case NAVIER_STOKES:
-        {
-            Navier_Stokes_app->printErrorStatistics(tbox::pout, patch_hierarchy, time_integrator->getIntegratorTime());
-            break;
-        }
-    }
-
-    tbox::plog << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
-    tbox::plog << std::endl;
-    tbox::plog << "GriddingAlgorithm statistics:\n";
-    gridding_algorithm->printStatistics();
     
     /*
      * Output timer results.
@@ -1131,11 +1222,8 @@ int main(int argc, char *argv[])
     visit_data_writer.reset();
 #endif
     
-    if (Euler_app)
-        delete Euler_app;
-    
-    if (Navier_Stokes_app)
-        delete Navier_Stokes_app;
+    Euler_app.reset();
+    Navier_Stokes_app.reset();
     
     tbox::SAMRAIManager::shutdown();
     tbox::SAMRAIManager::finalize();

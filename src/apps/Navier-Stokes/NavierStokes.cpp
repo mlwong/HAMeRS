@@ -303,7 +303,7 @@ NavierStokes::NavierStokes(
                     << std::endl);
             }
             
-            f_out << "TIME                 ";
+            f_out << "# TIME               ";
             f_out.close();
         }
         
