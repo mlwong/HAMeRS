@@ -979,7 +979,7 @@ int main(int argc, char *argv[])
              * If restart_interval = -1, also write restart files when writing out data
              * files for plotting
              */
-    #ifdef HAVE_HDF5
+#ifdef HAVE_HDF5
             if (is_viz_dumping)
             {
                 if (viz_dump_setting == "CONSTANT_TIME_INTERVAL")
@@ -1050,7 +1050,7 @@ int main(int argc, char *argv[])
                         << std::endl); 
                 }
             }
-    #endif
+#endif
             
             if (is_stat_dumping)
             {
@@ -1114,7 +1114,7 @@ int main(int argc, char *argv[])
             tbox::pout << std::endl;
         }
         
-    #ifdef HAVE_HDF5
+#ifdef HAVE_HDF5
         if (is_viz_dumping)
         {
             if (viz_dump_setting == "CONSTANT_TIME_INTERVAL" && !dump_viz)
@@ -1146,7 +1146,7 @@ int main(int argc, char *argv[])
                 }
             }
         }
-    #endif
+#endif
         
         if (is_stat_dumping)
         {
