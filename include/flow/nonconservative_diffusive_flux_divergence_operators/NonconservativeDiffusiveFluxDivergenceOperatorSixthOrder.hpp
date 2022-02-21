@@ -30,32 +30,7 @@ class NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder: public Nonconser
         putToRestart(
             const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
         
-        /*
-         * Compute the non-conservative diffusive flux divergence on a patch.
-         */
-        void computeNonconservativeDiffusiveFluxDivergenceOnPatch(
-            hier::Patch& patch,
-            const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_diffusive_flux_divergence,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const double time,
-            const double dt,
-            const int RK_step_number);
-        
     private:
-        /*
-         * Add derivatives to divergence.
-         */
-        void addDerivativeToDivergence(
-            hier::Patch& patch,
-            HAMERS_SHARED_PTR<pdat::CellData<double> > & divergence,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& var_first_derivative,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& var_derivative_cross_derivative,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& diffusivities_data,
-            const std::vector<std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > >& diffusivities_first_derivative,
-            const std::vector<std::vector<int> >& var_component_idx,
-            const std::vector<std::vector<int> >& diffusivities_component_idx,
-            const double dt);
-        
         /*
          * Compute the first derivatives in the x-direction.
          */
