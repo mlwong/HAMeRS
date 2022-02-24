@@ -3715,7 +3715,6 @@ RungeKuttaLevelIntegrator::outputDataStatistics(
         }
     }
     
-
     // Set conservative variables as the filtered valued if necessary.
     // Then, compute and output statistics.
     // Reset conservative variables as the pre-filtered values if necessary.
