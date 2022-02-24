@@ -44,6 +44,7 @@
 #include "SAMRAI/mesh/CascadePartitioner.h"
 
 #include <cmath>
+#include <dirent.h>
 #include <fstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -194,7 +195,7 @@ int main(int argc, char *argv[])
     
     bool is_from_restart = false;
     
-    if ((argc != 2) && (argc != 4))
+    if ((argc != 2) && (argc != 3) && (argc != 4))
     {
         tbox::pout << "USAGE:  "
                    << argv[0]
@@ -209,11 +210,17 @@ int main(int argc, char *argv[])
     else
     {
         input_filename = argv[1];
+        if (argc == 3)
+        {
+            restart_read_dirname = argv[2];
+            
+            is_from_restart = true;
+        }
         if (argc == 4)
         {
             restart_read_dirname = argv[2];
             restore_num = atoi(argv[3]);
-      
+            
             is_from_restart = true;
         }
     }
@@ -265,6 +272,12 @@ int main(int argc, char *argv[])
              << std::endl); 
     }
     
+    if (argc == 3 && (mode_label != POSTPROCESSING))
+    {
+        TBOX_ERROR("Number of arguments is three while not in post-processing mode."
+             << std::endl); 
+    }
+    
     if (mode_label == SIMULATION)
     {
         runSimulation(input_db,
@@ -274,18 +287,59 @@ int main(int argc, char *argv[])
     }
     else if (mode_label == POSTPROCESSING)
     {
-        runPostProcessing(input_db,
-            is_from_restart,
-            restart_read_dirname,
-            restore_num);
+        if (argc == 3)
+        {
+            DIR *dir; struct dirent *diread;
+            std::vector<int> restore_nums;
+            std::string prefix = "restore.";
+            
+            if ((dir = opendir(restart_read_dirname.c_str())) != nullptr)
+            {
+                while ((diread = readdir(dir)) != nullptr)
+                {
+                    std::string dummy = diread->d_name;
+                    if ((dummy != ".." && dummy != ".") && (dummy.find(prefix) != std::string::npos))
+                    {
+                        size_t pos = dummy.find(prefix);
+                        dummy.erase(pos, prefix.length());
+                        
+                        restore_nums.push_back(atoi(dummy.c_str()));
+                    }
+                }
+                closedir(dir);
+            }
+            else
+            {
+                perror ("opendir");
+                return EXIT_FAILURE;
+            }
         
-        tbox::SAMRAIManager::shutdown();
-        tbox::SAMRAIManager::startup();
+            std::sort(restore_nums.begin(), restore_nums.end());
         
-        runPostProcessing(input_db,
-            is_from_restart,
-            restart_read_dirname,
-            restore_num);
+            // for (const int& restore_num : restore_nums)
+            // {
+            //     std::cout << restore_num << " | ";
+            // }
+            // std::cout << std::endl;
+            
+            for (const int& restore_num : restore_nums)
+            {
+                runPostProcessing(input_db,
+                    is_from_restart,
+                    restart_read_dirname,
+                    restore_num);
+            
+                tbox::SAMRAIManager::shutdown();
+                tbox::SAMRAIManager::startup();
+            }
+        }
+        else
+        {
+            runPostProcessing(input_db,
+                is_from_restart,
+                restart_read_dirname,
+                restore_num);
+        }
     }
     
     tbox::SAMRAIManager::shutdown();
