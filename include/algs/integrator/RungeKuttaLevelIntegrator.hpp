@@ -809,6 +809,12 @@ class RungeKuttaLevelIntegrator:
             const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
         
         /**
+         * Output the header of statistics.
+         */
+        virtual void
+        outputHeaderStatistics();
+        
+        /**
          * Output statistics of data.
          */
         virtual void

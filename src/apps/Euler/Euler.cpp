@@ -227,52 +227,6 @@ Euler::Euler(
     
     d_variable_source = HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(dim, "source", d_flow_model->getNumberOfEquations()));
-    
-    if ((!d_stat_dump_filename.empty()))
-    {
-        d_flow_model->setupStatisticsUtilities();
-        
-        const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
-        if (mpi.getRank() == 0)
-        {
-            std::ofstream f_out;
-            f_out.open(d_stat_dump_filename.c_str(), std::ios::app);
-            
-            if (!f_out.is_open())
-            {
-                TBOX_ERROR(d_object_name
-                    << ": "
-                    << "Failed to open file to output statistics!"
-                    << std::endl);
-            }
-            
-            f_out << "# TIME               ";
-            f_out.close();
-        }
-        
-        HAMERS_SHARED_PTR<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
-            d_flow_model->getFlowModelStatisticsUtilities();
-        
-        flow_model_statistics_utilities->outputStatisticalQuantitiesNames(
-            d_stat_dump_filename);
-        
-        if (mpi.getRank() == 0)
-        {
-            std::ofstream f_out;
-            f_out.open(d_stat_dump_filename.c_str(), std::ios::app);
-            
-            if (!f_out.is_open())
-            {
-                TBOX_ERROR(d_object_name
-                    << ": "
-                    << "Failed to open file to output statistics!"
-                    << std::endl);
-            }
-            
-            f_out << std::endl;
-            f_out.close();
-        }
-    }
 }
 
 
@@ -2567,6 +2521,61 @@ Euler::filterStatisticsVariables(
         level,
         patch_hierarchy,
         getDataContext());
+}
+
+
+/**
+ * Output the header of statistics.
+ */
+void
+Euler::outputHeaderStatistics()
+{
+
+    if ((!d_stat_dump_filename.empty()))
+    {
+        d_flow_model->setupStatisticsUtilities();
+        
+        const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+        if (mpi.getRank() == 0)
+        {
+            std::ofstream f_out;
+            f_out.open(d_stat_dump_filename.c_str(), std::ios::app);
+            
+            if (!f_out.is_open())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "Failed to open file to output statistics!"
+                    << std::endl);
+            }
+            
+            f_out << "# TIME               ";
+            f_out.close();
+        }
+        
+        HAMERS_SHARED_PTR<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
+            d_flow_model->getFlowModelStatisticsUtilities();
+        
+        flow_model_statistics_utilities->outputStatisticalQuantitiesNames(
+            d_stat_dump_filename);
+        
+        if (mpi.getRank() == 0)
+        {
+            std::ofstream f_out;
+            f_out.open(d_stat_dump_filename.c_str(), std::ios::app);
+            
+            if (!f_out.is_open())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "Failed to open file to output statistics!"
+                    << std::endl);
+            }
+            
+            f_out << std::endl;
+            f_out.close();
+        }
+    }
 }
 
 

@@ -563,6 +563,8 @@ void runSimulation(
     t_write_stat->start();
     if (is_stat_dumping)
     {
+        RK_level_integrator->outputHeaderStatistics();
+        
         RK_level_integrator->outputDataStatistics(
             patch_hierarchy,
             time_integrator->getIntegratorTime());

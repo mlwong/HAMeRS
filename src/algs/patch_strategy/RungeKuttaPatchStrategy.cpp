@@ -375,6 +375,15 @@ RungeKuttaPatchStrategy::filterStatisticsVariables(
 
 
 /**
+ * Output the header of statistics.
+ */
+void
+RungeKuttaPatchStrategy::outputHeaderStatistics()
+{
+}
+
+
+/**
  * Output the statistics of data.
  */
 void

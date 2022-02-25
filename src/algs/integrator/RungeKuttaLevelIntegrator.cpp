@@ -3587,6 +3587,22 @@ RungeKuttaLevelIntegrator::putToRestart(
 /*
  **************************************************************************************************
  *
+ * Output header of data.
+ *
+ **************************************************************************************************
+ */
+void
+RungeKuttaLevelIntegrator::outputHeaderStatistics()
+{
+    t_output_data_statistics->start();
+    d_patch_strategy->outputHeaderStatistics();
+    t_output_data_statistics->stop();
+}
+
+
+/*
+ **************************************************************************************************
+ *
  * Output statistics of data.
  *
  **************************************************************************************************

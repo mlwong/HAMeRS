@@ -573,13 +573,18 @@ class RungeKuttaPatchStrategy:
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy);
         
         /**
+         * Output the header of statistics.
+         */
+        virtual void
+        outputHeaderStatistics();
+        
+        /**
          * Output the statistics of data.
          */
         virtual void
         outputDataStatistics(
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const double output_time);
-        
         
         /**
          * Return pointer to patch data context.

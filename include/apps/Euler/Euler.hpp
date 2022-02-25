@@ -445,6 +445,12 @@ class Euler:
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy);
         
         /**
+         * Output the header of statistics.
+         */
+        void
+        outputHeaderStatistics();
+        
+        /**
          * Output the statistics of data.
          */
         void

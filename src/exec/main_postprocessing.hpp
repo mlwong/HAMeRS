@@ -2,7 +2,8 @@ void runPostProcessing(
     HAMERS_SHARED_PTR<tbox::InputDatabase> input_db,
     const bool& is_from_restart,
     const std::string& restart_read_dirname,
-    const int& restore_num)
+    const int& restore_num,
+    const bool& is_first_restore_index)
 {
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -344,26 +345,29 @@ void runPostProcessing(
      * to the log file.
      */
     
-    tbox::pout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
-    switch (app_label)
+    if (is_first_restore_index)
     {
-        case EULER:
+        tbox::pout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
+        switch (app_label)
         {
-            Euler_app->printClassData(tbox::pout);
-            break;
+            case EULER:
+            {
+                Euler_app->printClassData(tbox::pout);
+                break;
+            }
+            case NAVIER_STOKES:
+            {
+                Navier_Stokes_app->printClassData(tbox::pout);
+                break;
+            }
         }
-        case NAVIER_STOKES:
-        {
-            Navier_Stokes_app->printClassData(tbox::pout);
-            break;
-        }
+        
+        tbox::pout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
+        RK_level_integrator->printClassData(tbox::pout);
+        
+        tbox::pout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
+        tbox::pout << std::endl;
     }
-    
-    tbox::pout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
-    RK_level_integrator->printClassData(tbox::pout);
-    
-    tbox::pout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
-    tbox::pout << std::endl;
     
     /*
      * Create timers for measuring I/O.
@@ -372,12 +376,19 @@ void runPostProcessing(
     HAMERS_SHARED_PTR<tbox::Timer> t_write_stat(
         tbox::TimerManager::getManager()->getTimer("apps::main::write_stat"));
     
-    tbox::pout << "Output statistics..." << std::endl;
-    tbox::pout << std::endl;
+    tbox::pout << "Output statistics at time: "
+        << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+        << time_integrator->getIntegratorTime()
+        << std::endl;
     
     /*
      * Output the statistics.
      */
+    
+    if (is_first_restore_index)
+    {
+        RK_level_integrator->outputHeaderStatistics();
+    }
     
     t_write_stat->start();
     RK_level_integrator->outputDataStatistics(

@@ -173,7 +173,8 @@ void runPostProcessing(
     HAMERS_SHARED_PTR<tbox::InputDatabase> input_db,
     const bool& is_from_restart,
     const std::string& restart_read_dirname,
-    const int& restore_num);
+    const int& restore_num,
+    const bool& is_first_restore_index = true);
 
 #include "main_simulation.hpp"
 #include "main_postprocessing.hpp"
@@ -387,11 +388,13 @@ int main(int argc, char *argv[])
             for (int i = restore_index_start; i <= restore_index_end; i++)
             {
                 const int& restore_num = restore_nums[i];
+                const bool is_first_restore_index = (i == restore_index_start);
                 
                 runPostProcessing(input_db,
                     is_from_restart,
                     restart_read_dirname,
-                    restore_num);
+                    restore_num,
+                    is_first_restore_index);
             
                 tbox::SAMRAIManager::shutdown();
                 tbox::SAMRAIManager::startup();
