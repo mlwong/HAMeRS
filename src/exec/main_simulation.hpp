@@ -93,7 +93,7 @@ void runSimulation(
         else
         {
             TBOX_ERROR("Key data 'viz_dump_interval' not found in input."
-                    << std::endl);
+                << std::endl);
         }
         
         visit_dump_dirname =
