@@ -174,10 +174,17 @@ void runPostProcessing(
     const bool& is_from_restart,
     const std::string& restart_read_dirname,
     const int& restore_num,
-    const bool& is_first_restore_index = true);
+    const bool& is_first_restore_index = true,
+    const bool& is_ensemble_postprocessing = false,
+    const bool& is_first_realization = true,
+    const bool& is_last_realization = false,
+    const bool& is_last_restore_index = false,
+    const int& realizaton_num = 0);
 
 #include "main_simulation.hpp"
 #include "main_postprocessing.hpp"
+
+std::vector<int> getRestoreNumbers(const std::string& restart_read_dirname);
 
 int main(int argc, char *argv[])
 {
@@ -290,38 +297,7 @@ int main(int argc, char *argv[])
     {
         if (argc == 3)
         {
-            DIR *dir; struct dirent *diread;
-            std::vector<int> restore_nums;
-            std::string prefix = "restore.";
-            
-            if ((dir = opendir(restart_read_dirname.c_str())) != nullptr)
-            {
-                while ((diread = readdir(dir)) != nullptr)
-                {
-                    std::string dummy = diread->d_name;
-                    if ((dummy != ".." && dummy != ".") && (dummy.find(prefix) != std::string::npos))
-                    {
-                        size_t pos = dummy.find(prefix);
-                        dummy.erase(pos, prefix.length());
-                        
-                        restore_nums.push_back(atoi(dummy.c_str()));
-                    }
-                }
-                closedir(dir);
-            }
-            else
-            {
-                perror ("opendir");
-                return EXIT_FAILURE;
-            }
-        
-            std::sort(restore_nums.begin(), restore_nums.end());
-        
-            // for (const int& restore_num : restore_nums)
-            // {
-            //     std::cout << restore_num << " | ";
-            // }
-            // std::cout << std::endl;
+            std::vector<int> restore_nums = getRestoreNumbers(restart_read_dirname);
             
             HAMERS_SHARED_PTR<tbox::Database> postprocess_db;
             if (input_db->keyExists("PostProcessing"))
@@ -384,13 +360,13 @@ int main(int argc, char *argv[])
                     << std::endl);
             }
             
-            // for (const int& restore_num : restore_nums)
             for (int i = restore_index_start; i <= restore_index_end; i++)
             {
                 const int& restore_num = restore_nums[i];
                 const bool is_first_restore_index = (i == restore_index_start);
                 
-                runPostProcessing(input_db,
+                runPostProcessing(
+                    input_db,
                     is_from_restart,
                     restart_read_dirname,
                     restore_num,
@@ -400,9 +376,135 @@ int main(int argc, char *argv[])
                 tbox::SAMRAIManager::startup();
             }
         }
+        else if (argc == 2)
+        {
+            // Check whether it is ensemble post-processing.
+            bool is_ensemble_postprocessing = false;
+            
+            HAMERS_SHARED_PTR<tbox::Database> postprocess_db;
+            if (input_db->keyExists("PostProcessing"))
+            {
+                postprocess_db = input_db->getDatabase("PostProcessing");
+                is_ensemble_postprocessing = postprocess_db->getBoolWithDefault(
+                    "is_ensemble_postprocessing",
+                    false);;
+            }
+            else
+            {
+                TBOX_ERROR("Unknown post-processing settings in post-processing mode when number of arguments is three. "
+                    << std::endl
+                    << "Please provide the 'PostProcessing' database."
+                    << std::endl);
+            }
+            
+            if (!is_ensemble_postprocessing)
+            {
+                TBOX_ERROR("Number of arguments is two while in ensemble post-processing mode."
+                     << std::endl);
+            }
+            
+            // Get all of the directories for ensemble post-processing.
+            
+            std::vector<std::string> restart_read_dirnames;
+            if (postprocess_db->keyExists("restart_read_dirnames"))
+            {
+                restart_read_dirnames = postprocess_db->getStringVector("restart_read_dirnames");
+            }
+            else
+            {
+                TBOX_ERROR("Key data 'restart_read_dirnames' not found in input."
+                    << std::endl);
+            }
+            
+            int restore_index_start = 0;
+            if (postprocess_db->keyExists("restore_index_start"))
+            {
+                restore_index_start = postprocess_db->getInteger("restore_index_start");
+                if (restore_index_start < 0)
+                {
+                    TBOX_ERROR("Key data 'restore_index_start' is smaller than zero."
+                        << std::endl);
+                }
+            }
+            else
+            {
+                TBOX_ERROR("Key data 'restore_index_start' not found in input."
+                    << std::endl);
+            }
+            
+            int restore_index_end = 0;
+            if (postprocess_db->keyExists("restore_index_end"))
+            {
+                restore_index_end = postprocess_db->getInteger("restore_index_end");
+                if (restore_index_end < 0)
+                {
+                    TBOX_ERROR("Key data 'restore_index_end' is smaller than zero."
+                        << std::endl);
+                }
+            }
+            else
+            {
+                TBOX_ERROR("Key data 'restore_index_end' not found in input."
+                    << std::endl);
+            }
+            
+            if (restore_index_start > restore_index_end)
+            {
+                TBOX_ERROR("Key data 'restore_index_end' is smaller than key data 'restore_index_start'."
+                    << std::endl);
+            }
+            
+            const int num_ensembles = static_cast<int>(restart_read_dirnames.size());
+            
+            for (int ri = 0; ri < num_ensembles; ri++)
+            {
+                const std::string restart_read_dirname = restart_read_dirnames[ri];
+                std::vector<int> restore_nums = getRestoreNumbers(restart_read_dirname);
+                
+                if (restore_index_start >= static_cast<int>(restore_nums.size()))
+                {
+                    TBOX_ERROR("Key data 'restore_index_start' is larger than avaiable indices of realization #"
+                        << ri << "."
+                        << std::endl);
+                }
+                
+                if (restore_index_end >= static_cast<int>(restore_nums.size()))
+                {
+                    TBOX_ERROR("Key data 'restore_index_end' is larger than avaiable indices of realization #"
+                        << ri << "."
+                        << std::endl);
+                }
+                
+                for (int i = restore_index_start; i <= restore_index_end; i++)
+                {
+                    const int& restore_num = restore_nums[i];
+                    const bool is_first_restore_index = (i == restore_index_start);
+                    const bool is_first_realization   = (ri == 0);
+                    
+                    const bool is_last_restore_index = (i == restore_index_end - 1);
+                    const bool is_last_realization   = (ri == num_ensembles - 1);
+                    
+                    runPostProcessing(
+                        input_db,
+                        is_from_restart,
+                        restart_read_dirname,
+                        restore_num,
+                        is_first_restore_index,
+                        is_ensemble_postprocessing,
+                        is_first_realization,
+                        is_last_realization,
+                        is_last_restore_index,
+                        ri);
+                    
+                    tbox::SAMRAIManager::shutdown();
+                    tbox::SAMRAIManager::startup();
+                }
+            }
+        }
         else
         {
-            runPostProcessing(input_db,
+            runPostProcessing(
+                input_db,
                 is_from_restart,
                 restart_read_dirname,
                 restore_num);
@@ -414,4 +516,45 @@ int main(int argc, char *argv[])
     tbox::SAMRAI_MPI::finalize();
    
     return 0;
+}
+
+
+std::vector<int>
+getRestoreNumbers(const std::string& restart_read_dirname)
+{
+    std::vector<int> restore_nums;
+    DIR *dir; struct dirent *diread;
+    std::string prefix = "restore.";
+    
+    if ((dir = opendir(restart_read_dirname.c_str())) != nullptr)
+    {
+        while ((diread = readdir(dir)) != nullptr)
+        {
+            std::string dummy = diread->d_name;
+            if ((dummy != ".." && dummy != ".") && (dummy.find(prefix) != std::string::npos))
+            {
+                size_t pos = dummy.find(prefix);
+                dummy.erase(pos, prefix.length());
+                
+                restore_nums.push_back(atoi(dummy.c_str()));
+            }
+        }
+        closedir(dir);
+    }
+    else
+    {
+        TBOX_ERROR("Unknown error in getting restore numbers with restart_read_dirname = '"
+            << restart_read_dirname << "'."
+            << std::endl);
+    }
+    
+    std::sort(restore_nums.begin(), restore_nums.end());
+    
+    // for (const int& restore_num : restore_nums)
+    // {
+    //     std::cout << restore_num << " | ";
+    // }
+    // std::cout << std::endl;
+    
+    return restore_nums;
 }

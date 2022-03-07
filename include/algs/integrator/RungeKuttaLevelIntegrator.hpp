@@ -815,12 +815,13 @@ class RungeKuttaLevelIntegrator:
         outputHeaderStatistics();
         
         /**
-         * Output statistics of data.
+         * Compute and output statistics of data.
          */
         virtual void
-        outputDataStatistics(
+        computeAndOutputDataStatistics(
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
-            const double statistics_data_time);
+            const double statistics_data_time,
+            const bool output_statistics = false);
         
         /**
          * Return pointer to "current" variable context used by integrator. Current data corresponds

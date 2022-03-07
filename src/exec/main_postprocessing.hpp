@@ -1,9 +1,17 @@
+// Set this pointer to the object of ensemble statistics for ensemble post-processing.
+HAMERS_SHARED_PTR<EnsembleStatistics> is_ensemble_statistics_initialized;
+
 void runPostProcessing(
     HAMERS_SHARED_PTR<tbox::InputDatabase> input_db,
     const bool& is_from_restart,
     const std::string& restart_read_dirname,
     const int& restore_num,
-    const bool& is_first_restore_index)
+    const bool& is_first_restore_index,
+    const bool& is_ensemble_postprocessing,
+    const bool& is_first_realization,
+    const bool& is_last_realization,
+    const bool& is_last_restore_index,
+    const int& realizaton_num)
 {
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -376,25 +384,93 @@ void runPostProcessing(
     HAMERS_SHARED_PTR<tbox::Timer> t_write_stat(
         tbox::TimerManager::getManager()->getTimer("apps::main::write_stat"));
     
-    tbox::pout << "Output statistics at time: "
-        << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-        << time_integrator->getIntegratorTime()
-        << std::endl;
+    if (is_ensemble_postprocessing)
+    {
+        tbox::pout << "Computing statistics of realization #" << realizaton_num << " at time: "
+            << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+            << time_integrator->getIntegratorTime()
+            << std::endl;
+    }
+    else
+    {
+        tbox::pout << "Output statistics at time: "
+            << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+            << time_integrator->getIntegratorTime()
+            << std::endl;
+    }
+    
+    /*
+     * Set the ensemble statistics if this is first time to call this function.
+     */
+    if (is_ensemble_postprocessing && !(is_first_realization && is_first_restore_index))
+    {
+        switch (app_label)
+        {
+            case EULER:
+            {
+                Euler_app->setEnsembleStatistics(is_ensemble_statistics_initialized);
+                break;
+            }
+            case NAVIER_STOKES:
+            {
+                Navier_Stokes_app->setEnsembleStatistics(is_ensemble_statistics_initialized);
+                break;
+            }
+        }
+    }
     
     /*
      * Output the statistics.
      */
     
-    if (is_first_restore_index)
+    if (is_ensemble_postprocessing)
     {
-        RK_level_integrator->outputHeaderStatistics();
+        const bool output_statistics = (is_last_realization && is_last_restore_index);
+        t_write_stat->start();
+        if (is_first_realization && is_first_restore_index)
+        {
+            RK_level_integrator->outputHeaderStatistics();
+        }
+        RK_level_integrator->computeAndOutputDataStatistics(
+            patch_hierarchy,
+            time_integrator->getIntegratorTime(),
+            output_statistics);
+        t_write_stat->stop();
+    }
+    else
+    {
+        if (is_first_restore_index)
+        {
+            RK_level_integrator->outputHeaderStatistics();
+        }
+        
+        t_write_stat->start();
+        RK_level_integrator->computeAndOutputDataStatistics(
+            patch_hierarchy,
+            time_integrator->getIntegratorTime(),
+            true);
+        t_write_stat->stop();
     }
     
-    t_write_stat->start();
-    RK_level_integrator->outputDataStatistics(
-        patch_hierarchy,
-        time_integrator->getIntegratorTime());
-    t_write_stat->stop();
+    /*
+     * Store the ensemble statistics if this is first time to call this function.
+     */
+    if (is_ensemble_postprocessing && (is_first_realization && is_first_restore_index))
+    {
+        switch (app_label)
+        {
+            case EULER:
+            {
+                is_ensemble_statistics_initialized = Euler_app->getEnsembleStatistics();
+                break;
+            }
+            case NAVIER_STOKES:
+            {
+                is_ensemble_statistics_initialized = Navier_Stokes_app->getEnsembleStatistics();
+                break;
+            }
+        }
+    }
     
     // /*
     //  * Output timer results.

@@ -454,12 +454,32 @@ class NavierStokes:
         outputHeaderStatistics();
         
         /**
+         * Compute the statistics of data.
+         */
+        void
+        computeDataStatistics(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const double statistics_data_time);
+        
+        /**
          * Output the statistics of data.
          */
         void
         outputDataStatistics(
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const double output_time);
+        
+        /**
+         * Get object of storing ensemble statistics.
+         */
+        HAMERS_SHARED_PTR<EnsembleStatistics>
+        getEnsembleStatistics();
+        
+        /**
+         * Set object of storing ensemble statistics.
+         */
+        void
+        setEnsembleStatistics(const HAMERS_SHARED_PTR<EnsembleStatistics> ensemble_statistics);
         
         /*
          * Set the plotting context.

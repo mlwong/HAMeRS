@@ -565,9 +565,10 @@ void runSimulation(
     {
         RK_level_integrator->outputHeaderStatistics();
         
-        RK_level_integrator->outputDataStatistics(
+        RK_level_integrator->computeAndOutputDataStatistics(
             patch_hierarchy,
-            time_integrator->getIntegratorTime());
+            time_integrator->getIntegratorTime(),
+            true);
     }
     t_write_stat->stop();
     
@@ -768,7 +769,7 @@ void runSimulation(
                 {
                     t_write_stat->start();
                     
-                    RK_level_integrator->outputDataStatistics(patch_hierarchy, loop_time);
+                    RK_level_integrator->computeAndOutputDataStatistics(patch_hierarchy, loop_time, true);
                     
                     t_write_stat->stop();
                     
@@ -783,7 +784,7 @@ void runSimulation(
                 {
                     t_write_stat->start();
                     
-                    RK_level_integrator->outputDataStatistics(patch_hierarchy, loop_time);
+                    RK_level_integrator->computeAndOutputDataStatistics(patch_hierarchy, loop_time, true);
                     
                     t_write_stat->stop();
                     
@@ -860,7 +861,7 @@ void runSimulation(
         {
             t_write_stat->start();
             
-            RK_level_integrator->outputDataStatistics(patch_hierarchy, loop_time);
+            RK_level_integrator->computeAndOutputDataStatistics(patch_hierarchy, loop_time, true);
             
             t_write_stat->stop();
             

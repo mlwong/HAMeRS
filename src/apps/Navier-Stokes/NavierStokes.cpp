@@ -3560,6 +3560,26 @@ NavierStokes::outputHeaderStatistics()
 
 
 /**
+ * Compute the statistics of data.
+ */
+void
+NavierStokes::computeDataStatistics(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const double statistics_data_time)
+{
+    d_flow_model->setupStatisticsUtilities();
+    
+    HAMERS_SHARED_PTR<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
+        d_flow_model->getFlowModelStatisticsUtilities();
+    
+    flow_model_statistics_utilities->computeStatisticalQuantities(
+        patch_hierarchy,
+        getDataContext(),
+        statistics_data_time);
+}
+
+
+/**
  * Output the statistics of data.
  */
 void
@@ -3616,6 +3636,36 @@ NavierStokes::outputDataStatistics(
             f_out.close();
         }
     }
+}
+
+
+/**
+ * Get object of storing ensemble statistics.
+ */
+HAMERS_SHARED_PTR<EnsembleStatistics>
+NavierStokes::getEnsembleStatistics()
+{
+    d_flow_model->setupStatisticsUtilities();
+    
+    HAMERS_SHARED_PTR<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
+        d_flow_model->getFlowModelStatisticsUtilities();
+    
+    return flow_model_statistics_utilities->getEnsembleStatistics();
+}
+
+
+/**
+ * Set object of storing ensemble statistics.
+ */
+void
+NavierStokes::setEnsembleStatistics(const HAMERS_SHARED_PTR<EnsembleStatistics> ensemble_statistics)
+{
+    d_flow_model->setupStatisticsUtilities();
+    
+    HAMERS_SHARED_PTR<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
+        d_flow_model->getFlowModelStatisticsUtilities();
+    
+    flow_model_statistics_utilities->setEnsembleStatistics(ensemble_statistics);
 }
 
 
