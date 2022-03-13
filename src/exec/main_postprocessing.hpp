@@ -127,11 +127,11 @@ void runPostProcessing(
     
     std::string app_string = input_db->getString("Application");
     
-    if (app_string == "Euler")
+    if (app_string == "EULER" || app_string == "Euler")
     {
         app_label = EULER;
     }
-    else if (app_string == "Navier-Stokes")
+    else if (app_string == "NAVIER_STOKES" || app_string == "Navier-Stokes")
     {
         app_label = NAVIER_STOKES;
     }
