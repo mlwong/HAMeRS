@@ -47810,6 +47810,21 @@ RMIStatisticsUtilities::outputWeightedNumberOfCells(
 
 
 /*
+ * Compute statisitcal quantities.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double statistics_data_time)
+{
+    NULL_USE(patch_hierarchy);
+    NULL_USE(data_context);
+    NULL_USE(statistics_data_time);
+}
+
+
+/*
  * Output names of statistical quantities to output to a file.
  */
 void
@@ -48681,7 +48696,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 << ": "
                 << "Unknown statistical quantity key = '"
                 << statistical_quantity_key
-                << " found."
+                << "' found."
                 << std::endl);
         }
     }

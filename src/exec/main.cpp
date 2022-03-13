@@ -218,13 +218,17 @@ int main(int argc, char *argv[])
     else
     {
         input_filename = argv[1];
-        if (argc == 3)
+        if (argc == 2)
+        {
+            is_from_restart = true;
+        }
+        else if (argc == 3)
         {
             restart_read_dirname = argv[2];
             
             is_from_restart = true;
         }
-        if (argc == 4)
+        else if (argc == 4)
         {
             restart_read_dirname = argv[2];
             restore_num = atoi(argv[3]);
@@ -399,7 +403,7 @@ int main(int argc, char *argv[])
             
             if (!is_ensemble_postprocessing)
             {
-                TBOX_ERROR("Number of arguments is two while in ensemble post-processing mode."
+                TBOX_ERROR("Number of arguments is two while not in ensemble post-processing mode."
                      << std::endl);
             }
             
@@ -456,33 +460,34 @@ int main(int argc, char *argv[])
             
             const int num_ensembles = static_cast<int>(restart_read_dirnames.size());
             
-            for (int ri = 0; ri < num_ensembles; ri++)
+            for (int i = restore_index_start; i <= restore_index_end; i++)
             {
-                const std::string restart_read_dirname = restart_read_dirnames[ri];
-                std::vector<int> restore_nums = getRestoreNumbers(restart_read_dirname);
+                const bool is_first_restore_index = (i == restore_index_start);
+                const bool is_last_restore_index  = (i == restore_index_end - 1);
                 
-                if (restore_index_start >= static_cast<int>(restore_nums.size()))
+                for (int ri = 0; ri < num_ensembles; ri++)
                 {
-                    TBOX_ERROR("Key data 'restore_index_start' is larger than avaiable indices of realization #"
-                        << ri << "."
-                        << std::endl);
-                }
-                
-                if (restore_index_end >= static_cast<int>(restore_nums.size()))
-                {
-                    TBOX_ERROR("Key data 'restore_index_end' is larger than avaiable indices of realization #"
-                        << ri << "."
-                        << std::endl);
-                }
-                
-                for (int i = restore_index_start; i <= restore_index_end; i++)
-                {
-                    const int& restore_num = restore_nums[i];
-                    const bool is_first_restore_index = (i == restore_index_start);
-                    const bool is_first_realization   = (ri == 0);
+                    const std::string restart_read_dirname = restart_read_dirnames[ri];
+                    std::vector<int> restore_nums = getRestoreNumbers(restart_read_dirname);
                     
-                    const bool is_last_restore_index = (i == restore_index_end - 1);
-                    const bool is_last_realization   = (ri == num_ensembles - 1);
+                    if (restore_index_start >= static_cast<int>(restore_nums.size()))
+                    {
+                        TBOX_ERROR("Key data 'restore_index_start' is larger than avaiable indices of realization #"
+                            << ri << "."
+                            << std::endl);
+                    }
+                    
+                    if (restore_index_end >= static_cast<int>(restore_nums.size()))
+                    {
+                        TBOX_ERROR("Key data 'restore_index_end' is larger than avaiable indices of realization #"
+                            << ri << "."
+                            << std::endl);
+                    }
+                    
+                    const int& restore_num = restore_nums[i];
+                    
+                    const bool is_first_realization = (ri == 0);
+                    const bool is_last_realization  = (ri == num_ensembles - 1);
                     
                     runPostProcessing(
                         input_db,

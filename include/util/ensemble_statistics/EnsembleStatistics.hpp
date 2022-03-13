@@ -22,6 +22,10 @@ class EnsembleStatistics
             d_num_ensembles++;
         }
         
+        virtual void clearAllData()
+        {
+        }
+        
     protected:
         /*
          * The object name is used for error/warning reporting.

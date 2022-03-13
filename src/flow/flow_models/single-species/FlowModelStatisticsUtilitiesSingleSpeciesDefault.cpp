@@ -12,6 +12,21 @@ FlowModelStatisticsUtilitiesSingleSpecies::outputStatisticalQuantitiesNames(
 
 
 /*
+ * Compute statisitcal quantities.
+ */
+void
+FlowModelStatisticsUtilitiesSingleSpecies::computeStatisticalQuantities(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double statistics_data_time)
+{
+    NULL_USE(patch_hierarchy);
+    NULL_USE(data_context);
+    NULL_USE(statistics_data_time);
+}
+
+
+/*
  * Output statisitcal quantities to a file.
  */
 void

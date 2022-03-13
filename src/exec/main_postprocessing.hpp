@@ -1,5 +1,5 @@
 // Set this pointer to the object of ensemble statistics for ensemble post-processing.
-HAMERS_SHARED_PTR<EnsembleStatistics> is_ensemble_statistics_initialized;
+HAMERS_SHARED_PTR<EnsembleStatistics> ensemble_statistics;
 
 void runPostProcessing(
     HAMERS_SHARED_PTR<tbox::InputDatabase> input_db,
@@ -353,7 +353,7 @@ void runPostProcessing(
      * to the log file.
      */
     
-    if (is_first_restore_index)
+    if (is_first_restore_index && is_first_realization)
     {
         tbox::pout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
         switch (app_label)
@@ -400,20 +400,20 @@ void runPostProcessing(
     }
     
     /*
-     * Set the ensemble statistics if this is first time to call this function.
+     * Set the ensemble statistics if this is not the first realization to call this function.
      */
-    if (is_ensemble_postprocessing && !(is_first_realization && is_first_restore_index))
+    if (is_ensemble_postprocessing && !(is_first_realization))
     {
         switch (app_label)
         {
             case EULER:
             {
-                Euler_app->setEnsembleStatistics(is_ensemble_statistics_initialized);
+                Euler_app->setEnsembleStatistics(ensemble_statistics);
                 break;
             }
             case NAVIER_STOKES:
             {
-                Navier_Stokes_app->setEnsembleStatistics(is_ensemble_statistics_initialized);
+                Navier_Stokes_app->setEnsembleStatistics(ensemble_statistics);
                 break;
             }
         }
@@ -425,7 +425,7 @@ void runPostProcessing(
     
     if (is_ensemble_postprocessing)
     {
-        const bool output_statistics = (is_last_realization && is_last_restore_index);
+        const bool output_statistics = is_last_realization;
         t_write_stat->start();
         if (is_first_realization && is_first_restore_index)
         {
@@ -453,20 +453,20 @@ void runPostProcessing(
     }
     
     /*
-     * Store the ensemble statistics if this is first time to call this function.
+     * Get the ensemble statistics if this is the first realization to call this function.
      */
-    if (is_ensemble_postprocessing && (is_first_realization && is_first_restore_index))
+    if (is_ensemble_postprocessing && is_first_realization)
     {
         switch (app_label)
         {
             case EULER:
             {
-                is_ensemble_statistics_initialized = Euler_app->getEnsembleStatistics();
+                ensemble_statistics = Euler_app->getEnsembleStatistics();
                 break;
             }
             case NAVIER_STOKES:
             {
-                is_ensemble_statistics_initialized = Navier_Stokes_app->getEnsembleStatistics();
+                ensemble_statistics = Navier_Stokes_app->getEnsembleStatistics();
                 break;
             }
         }

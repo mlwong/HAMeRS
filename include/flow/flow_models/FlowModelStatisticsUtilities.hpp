@@ -159,6 +159,7 @@ class FlowModelStatisticsUtilities
         setEnsembleStatistics(const HAMERS_SHARED_PTR<EnsembleStatistics> ensemble_statistics)
         {
             d_ensemble_statistics = ensemble_statistics;
+            d_is_ensemble_statistics_initialized = true;
         }
         
     protected:
@@ -193,7 +194,7 @@ class FlowModelStatisticsUtilities
         std::vector<std::string> d_statistical_quantities;
         
         /*
-         * Store ensemble statistics
+         * Store ensemble statistics.
          */
         HAMERS_SHARED_PTR<EnsembleStatistics> d_ensemble_statistics;
         
