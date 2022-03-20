@@ -15,15 +15,15 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
             EnsembleStatistics(
                 object_name)
         {
-            Y_0_avg_computed    = false;
-            Y_0_sq_avg_computed = false;
-            rho_avg_computed    = false;
-            u_avg_computed      = false;
-            v_avg_computed      = false;
-            w_avg_computed      = false;
-            rho_u_avg_computed  = false;
-            rho_v_avg_computed  = false;
-            rho_w_avg_computed  = false;
+            Y_0_avg_computed      = false;
+            Y_0_sq_avg_computed   = false;
+            rho_avg_computed      = false;
+            u_avg_computed        = false;
+            v_avg_computed        = false;
+            w_avg_computed        = false;
+            rho_u_avg_computed    = false;
+            rho_v_avg_computed    = false;
+            rho_w_avg_computed    = false;
             rho_u_u_avg_computed  = false;
             rho_v_v_avg_computed  = false;
             rho_w_w_avg_computed  = false;
@@ -44,15 +44,15 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
             rho_v_v_avg_realizations.clear();
             rho_w_w_avg_realizations.clear();
             
-            Y_0_avg_computed    = false;
-            Y_0_sq_avg_computed = false;
-            rho_avg_computed    = false;
-            u_avg_computed      = false;
-            v_avg_computed      = false;
-            w_avg_computed      = false;
-            rho_u_avg_computed  = false;
-            rho_v_avg_computed  = false;
-            rho_w_avg_computed  = false;
+            Y_0_avg_computed      = false;
+            Y_0_sq_avg_computed   = false;
+            rho_avg_computed      = false;
+            u_avg_computed        = false;
+            v_avg_computed        = false;
+            w_avg_computed        = false;
+            rho_u_avg_computed    = false;
+            rho_v_avg_computed    = false;
+            rho_w_avg_computed    = false;
             rho_u_u_avg_computed  = false;
             rho_v_v_avg_computed  = false;
             rho_w_w_avg_computed  = false;
@@ -1616,15 +1616,16 @@ RTIRMISpatialProfilesUtilities::outputEnsembleReynoldsNormalStressXWithHomogenei
             }
         }
         
-        std::vector<double> rho_u_pp_u_pp(num_cells, double(0));
+        std::vector<double> R_11(num_cells, double(0));
         for (int i = 0; i < num_cells; i++)
         {
             const double u_tilde = rho_u_avg_global[i]/rho_avg_global[i];
-            rho_u_pp_u_pp[i] = rho_u_u_avg_global[i] - rho_u_avg_global[i]*u_tilde;
+            const double rho_u_pp_u_pp = rho_u_u_avg_global[i] - rho_u_avg_global[i]*u_tilde;
+            R_11[i] = rho_u_pp_u_pp/rho_avg_global[i];
         }
         
         f_out.write((char*)&output_time, sizeof(double));
-        f_out.write((char*)&rho_u_pp_u_pp[0], sizeof(double)*rho_u_pp_u_pp.size());
+        f_out.write((char*)&R_11[0], sizeof(double)*R_11.size());
         
         f_out.close();
     }
@@ -1699,15 +1700,16 @@ RTIRMISpatialProfilesUtilities::outputEnsembleReynoldsNormalStressYWithHomogenei
             }
         }
         
-        std::vector<double> rho_v_pp_v_pp(num_cells, double(0));
+        std::vector<double> R_22(num_cells, double(0));
         for (int i = 0; i < num_cells; i++)
         {
             const double v_tilde = rho_v_avg_global[i]/rho_avg_global[i];
-            rho_v_pp_v_pp[i] = rho_v_v_avg_global[i] - rho_v_avg_global[i]*v_tilde;
+            const double rho_v_pp_v_pp = rho_v_v_avg_global[i] - rho_v_avg_global[i]*v_tilde;
+            R_22[i] = rho_v_pp_v_pp/rho_avg_global[i];
         }
         
         f_out.write((char*)&output_time, sizeof(double));
-        f_out.write((char*)&rho_v_pp_v_pp[0], sizeof(double)*rho_v_pp_v_pp.size());
+        f_out.write((char*)&R_22[0], sizeof(double)*R_22.size());
         
         f_out.close();
     }
@@ -1782,15 +1784,16 @@ RTIRMISpatialProfilesUtilities::outputEnsembleReynoldsNormalStressZWithHomogenei
             }
         }
         
-        std::vector<double> rho_w_pp_w_pp(num_cells, double(0));
+        std::vector<double> R_33(num_cells, double(0));
         for (int i = 0; i < num_cells; i++)
         {
-            const double v_tilde = rho_w_avg_global[i]/rho_avg_global[i];
-            rho_w_pp_w_pp[i] = rho_w_w_avg_global[i] - rho_w_avg_global[i]*v_tilde;
+            const double w_tilde = rho_w_avg_global[i]/rho_avg_global[i];
+            const double rho_w_pp_w_pp = rho_w_w_avg_global[i] - rho_w_avg_global[i]*w_tilde;
+            R_33[i] = rho_w_pp_w_pp/rho_avg_global[i];
         }
         
         f_out.write((char*)&output_time, sizeof(double));
-        f_out.write((char*)&rho_w_pp_w_pp[0], sizeof(double)*rho_w_pp_w_pp.size());
+        f_out.write((char*)&R_33[0], sizeof(double)*R_33.size());
         
         f_out.close();
     }
