@@ -128,7 +128,7 @@ class RTIRMISpatialProfilesUtilities
          * to a file.
          */
         void
-        outputAveragedVelocityZWithHomogeneityInYDirectionOrInYZPlane(
+        outputAveragedVelocityZWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -157,10 +157,10 @@ class RTIRMISpatialProfilesUtilities
             const double output_time) const;
         
         /*
-         * Output Favre-averaged velocity Z-component with assumed homogeneity in yz-plane (3D) to a file.
+         * Output Favre-averaged velocity z-component with assumed homogeneity in yz-plane (3D) to a file.
          */
         void
-        outputFavreAveragedVelocityZWithHomogeneityInYDirectionOrInYZPlane(
+        outputFavreAveragedVelocityZWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -891,7 +891,7 @@ RTIRMISpatialProfilesUtilities::outputAveragedVelocityYWithHomogeneityInYDirecti
  * Output averaged velocity z-component with assumed homogeneity yz-plane (3D) to a file.
  */
 void
-RTIRMISpatialProfilesUtilities::outputAveragedVelocityZWithHomogeneityInYDirectionOrInYZPlane(
+RTIRMISpatialProfilesUtilities::outputAveragedVelocityZWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -1124,10 +1124,10 @@ RTIRMISpatialProfilesUtilities::outputFavreAveragedVelocityYWithHomogeneityInYDi
 
 
 /*
- * Output Favre-averaged velocity Z-component with assumed homogeneity in yz-plane (3D) to a file.
+ * Output Favre-averaged velocity z-component with assumed homogeneity in yz-plane (3D) to a file.
  */
 void
-RTIRMISpatialProfilesUtilities::outputFavreAveragedVelocityZWithHomogeneityInYDirectionOrInYZPlane(
+RTIRMISpatialProfilesUtilities::outputFavreAveragedVelocityZWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -2684,7 +2684,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         }
         else if (statistical_quantity_key == "VELOCITY_Z_AVG")
         {
-            rti_rmi_spatial_profiles_utilities->outputAveragedVelocityZWithHomogeneityInYDirectionOrInYZPlane(
+            rti_rmi_spatial_profiles_utilities->outputAveragedVelocityZWithHomogeneityInYZPlane(
                 "w_avg.dat",
                 patch_hierarchy,
                 data_context,
@@ -2708,7 +2708,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         }
         else if (statistical_quantity_key == "VELOCITY_Z_FAVRE_AVG")
         {
-            rti_rmi_spatial_profiles_utilities->outputFavreAveragedVelocityZWithHomogeneityInYDirectionOrInYZPlane(
+            rti_rmi_spatial_profiles_utilities->outputFavreAveragedVelocityZWithHomogeneityInYZPlane(
                 "w_Favre_avg.dat",
                 patch_hierarchy,
                 data_context,
