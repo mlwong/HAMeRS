@@ -11,7 +11,8 @@ void runPostProcessing(
     const bool& is_first_realization,
     const bool& is_last_realization,
     const bool& is_last_restore_index,
-    const int& realizaton_num)
+    const int& realizaton_num,
+    const int& restore_index)
 {
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -386,7 +387,12 @@ void runPostProcessing(
     
     if (is_ensemble_postprocessing)
     {
-        tbox::pout << "Computing statistics of realization #" << realizaton_num << " at time: "
+        if (realizaton_num == 0)
+        {
+            tbox::pout << "Computing ensemble statistics at restore index: " << restore_index << std::endl;
+        }
+        
+        tbox::pout << " Computing statistics of realization #" << realizaton_num << " at time: "
             << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
             << time_integrator->getIntegratorTime()
             << std::endl;

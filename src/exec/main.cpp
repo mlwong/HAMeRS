@@ -179,7 +179,8 @@ void runPostProcessing(
     const bool& is_first_realization = true,
     const bool& is_last_realization = false,
     const bool& is_last_restore_index = false,
-    const int& realizaton_num = 0);
+    const int& realizaton_num = 0,
+    const int& restore_index = -1);
 
 #include "main_simulation.hpp"
 #include "main_postprocessing.hpp"
@@ -299,88 +300,7 @@ int main(int argc, char *argv[])
     }
     else if (mode_label == POSTPROCESSING)
     {
-        if (argc == 3)
-        {
-            std::vector<int> restore_nums = getRestoreNumbers(restart_read_dirname);
-            
-            HAMERS_SHARED_PTR<tbox::Database> postprocess_db;
-            if (input_db->keyExists("PostProcessing"))
-            {
-                postprocess_db = input_db->getDatabase("PostProcessing");
-            }
-            else
-            {
-                TBOX_ERROR("Unknown post-processing settings in post-processing mode when number of arguments is three. "
-                    << std::endl
-                    << "Please provide the 'PostProcessing' database."
-                    << std::endl);
-            }
-            
-            int restore_index_start = 0;
-            if (postprocess_db->keyExists("restore_index_start"))
-            {
-                restore_index_start = postprocess_db->getInteger("restore_index_start");
-                if (restore_index_start < 0)
-                {
-                    TBOX_ERROR("Key data 'restore_index_start' is smaller than zero."
-                        << std::endl);
-                }
-                if (restore_index_start >= static_cast<int>(restore_nums.size()))
-                {
-                    TBOX_ERROR("Key data 'restore_index_start' is larger than avaiable indices."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                TBOX_ERROR("Key data 'restore_index_start' not found in input."
-                    << std::endl);
-            }
-            
-            int restore_index_end = 0;
-            if (postprocess_db->keyExists("restore_index_end"))
-            {
-                restore_index_end = postprocess_db->getInteger("restore_index_end");
-                if (restore_index_end < 0)
-                {
-                    TBOX_ERROR("Key data 'restore_index_end' is smaller than zero."
-                        << std::endl);
-                }
-                if (restore_index_end >= static_cast<int>(restore_nums.size()))
-                {
-                    TBOX_ERROR("Key data 'restore_index_end' is larger than avaiable indices."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                TBOX_ERROR("Key data 'restore_index_end' not found in input."
-                    << std::endl);
-            }
-            
-            if (restore_index_start > restore_index_end)
-            {
-                TBOX_ERROR("Key data 'restore_index_end' is smaller than key data 'restore_index_start'."
-                    << std::endl);
-            }
-            
-            for (int i = restore_index_start; i <= restore_index_end; i++)
-            {
-                const int& restore_num = restore_nums[i];
-                const bool is_first_restore_index = (i == restore_index_start);
-                
-                runPostProcessing(
-                    input_db,
-                    is_from_restart,
-                    restart_read_dirname,
-                    restore_num,
-                    is_first_restore_index);
-            
-                tbox::SAMRAIManager::shutdown();
-                tbox::SAMRAIManager::startup();
-            }
-        }
-        else if (argc == 2)
+        if (argc == 2)
         {
             // Check whether it is ensemble post-processing.
             bool is_ensemble_postprocessing = false;
@@ -458,9 +378,20 @@ int main(int argc, char *argv[])
                     << std::endl);
             }
             
+            int restore_index_stride = 1;
+            if (postprocess_db->keyExists("restore_index_stride"))
+            {
+                restore_index_stride = postprocess_db->getInteger("restore_index_stride");
+                if (restore_index_stride < 1)
+                {
+                    TBOX_ERROR("Key data 'restore_index_end' is smaller than one."
+                        << std::endl);
+                }
+            }
+            
             const int num_ensembles = static_cast<int>(restart_read_dirnames.size());
             
-            for (int i = restore_index_start; i <= restore_index_end; i++)
+            for (int i = restore_index_start; i <= restore_index_end; i += restore_index_stride)
             {
                 const bool is_first_restore_index = (i == restore_index_start);
                 const bool is_last_restore_index  = (i == restore_index_end - 1);
@@ -499,11 +430,104 @@ int main(int argc, char *argv[])
                         is_first_realization,
                         is_last_realization,
                         is_last_restore_index,
-                        ri);
+                        ri,
+                        i);
                     
                     tbox::SAMRAIManager::shutdown();
                     tbox::SAMRAIManager::startup();
                 }
+            }
+        }
+        else if (argc == 3)
+        {
+            std::vector<int> restore_nums = getRestoreNumbers(restart_read_dirname);
+            
+            HAMERS_SHARED_PTR<tbox::Database> postprocess_db;
+            if (input_db->keyExists("PostProcessing"))
+            {
+                postprocess_db = input_db->getDatabase("PostProcessing");
+            }
+            else
+            {
+                TBOX_ERROR("Unknown post-processing settings in post-processing mode when number of arguments is three. "
+                    << std::endl
+                    << "Please provide the 'PostProcessing' database."
+                    << std::endl);
+            }
+            
+            int restore_index_start = 0;
+            if (postprocess_db->keyExists("restore_index_start"))
+            {
+                restore_index_start = postprocess_db->getInteger("restore_index_start");
+                if (restore_index_start < 0)
+                {
+                    TBOX_ERROR("Key data 'restore_index_start' is smaller than zero."
+                        << std::endl);
+                }
+                if (restore_index_start >= static_cast<int>(restore_nums.size()))
+                {
+                    TBOX_ERROR("Key data 'restore_index_start' is larger than avaiable indices."
+                        << std::endl);
+                }
+            }
+            else
+            {
+                TBOX_ERROR("Key data 'restore_index_start' not found in input."
+                    << std::endl);
+            }
+            
+            int restore_index_end = 0;
+            if (postprocess_db->keyExists("restore_index_end"))
+            {
+                restore_index_end = postprocess_db->getInteger("restore_index_end");
+                if (restore_index_end < 0)
+                {
+                    TBOX_ERROR("Key data 'restore_index_end' is smaller than zero."
+                        << std::endl);
+                }
+                if (restore_index_end >= static_cast<int>(restore_nums.size()))
+                {
+                    TBOX_ERROR("Key data 'restore_index_end' is larger than avaiable indices."
+                        << std::endl);
+                }
+            }
+            else
+            {
+                TBOX_ERROR("Key data 'restore_index_end' not found in input."
+                    << std::endl);
+            }
+            
+            if (restore_index_start > restore_index_end)
+            {
+                TBOX_ERROR("Key data 'restore_index_end' is smaller than key data 'restore_index_start'."
+                    << std::endl);
+            }
+            
+            int restore_index_stride = 1;
+            if (postprocess_db->keyExists("restore_index_stride"))
+            {
+                restore_index_stride = postprocess_db->getInteger("restore_index_stride");
+                if (restore_index_stride < 1)
+                {
+                    TBOX_ERROR("Key data 'restore_index_end' is smaller than one."
+                        << std::endl);
+                }
+            }
+            
+            for (int i = restore_index_start; i <= restore_index_end; i += restore_index_stride)
+            {
+                const int& restore_num = restore_nums[i];
+                const bool is_first_restore_index = (i == restore_index_start);
+                
+                runPostProcessing(
+                    input_db,
+                    is_from_restart,
+                    restart_read_dirname,
+                    restore_num,
+                    is_first_restore_index);
+            
+                tbox::SAMRAIManager::shutdown();
+                tbox::SAMRAIManager::startup();
             }
         }
         else
