@@ -18,6 +18,7 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
             Y_0_avg_computed      = false;
             Y_0_sq_avg_computed   = false;
             rho_avg_computed      = false;
+            rho_sq_avg_computed   = false;
             u_avg_computed        = false;
             v_avg_computed        = false;
             w_avg_computed        = false;
@@ -34,6 +35,7 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
             Y_0_avg_realizations.clear();
             Y_0_sq_avg_realizations.clear();
             rho_avg_realizations.clear();
+            rho_sq_avg_realizations.clear();
             u_avg_realizations.clear();
             v_avg_realizations.clear();
             w_avg_realizations.clear();
@@ -47,6 +49,7 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
             Y_0_avg_computed      = false;
             Y_0_sq_avg_computed   = false;
             rho_avg_computed      = false;
+            rho_sq_avg_computed   = false;
             u_avg_computed        = false;
             v_avg_computed        = false;
             w_avg_computed        = false;
@@ -63,6 +66,7 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
         std::vector<std::vector<double> > Y_0_avg_realizations;
         std::vector<std::vector<double> > Y_0_sq_avg_realizations;
         std::vector<std::vector<double> > rho_avg_realizations;
+        std::vector<std::vector<double> > rho_sq_avg_realizations;
         std::vector<std::vector<double> > u_avg_realizations;
         std::vector<std::vector<double> > v_avg_realizations;
         std::vector<std::vector<double> > w_avg_realizations;
@@ -77,6 +81,7 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
         bool Y_0_avg_computed;
         bool Y_0_sq_avg_computed;
         bool rho_avg_computed;
+        bool rho_sq_avg_computed;
         bool u_avg_computed;
         bool v_avg_computed;
         bool w_avg_computed;
@@ -141,6 +146,14 @@ class RTIRMISpatialProfilesUtilities
          */
         void
         computeAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute density variance with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+         */
+        void
+        computeDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
@@ -246,6 +259,17 @@ class RTIRMISpatialProfilesUtilities
          */
         void
         outputEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output ensemble variance of density with assumed homogeneity in y-direction (2D) or yz-plane (3D)
+         * to a file.
+         */
+        void
+        outputEnsembleDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -561,6 +585,57 @@ RTIRMISpatialProfilesUtilities::computeAveragedDensityWithHomogeneityInYDirectio
     rho_avg_realizations.push_back(rho_avg_global);
     
     d_ensemble_statistics->rho_avg_computed = true;
+}
+
+
+/*
+ * Compute density variance with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+ */
+void
+RTIRMISpatialProfilesUtilities::computeDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    
+    std::vector<double> rho_sq_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<std::vector<double> >& rho_sq_avg_realizations = d_ensemble_statistics->rho_sq_avg_realizations;
+    rho_sq_avg_realizations.push_back(rho_sq_avg_global);
+    
+    d_ensemble_statistics->rho_sq_avg_computed = true;
 }
 
 
@@ -1085,6 +1160,81 @@ RTIRMISpatialProfilesUtilities::outputEnsembleAveragedDensityWithHomogeneityInYD
         
         f_out.write((char*)&output_time, sizeof(double));
         f_out.write((char*)&rho_avg_global[0], sizeof(double)*rho_avg_global.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output ensemble variance of density with assumed homogeneity in y-direction (2D) or yz-plane (3D)
+ * to a file.
+ */
+void
+RTIRMISpatialProfilesUtilities::outputEnsembleDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& rho_avg_realizations =
+            d_ensemble_statistics->rho_avg_realizations;
+        
+        const std::vector<std::vector<double> >& rho_sq_avg_realizations = 
+            d_ensemble_statistics->rho_sq_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(rho_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(rho_sq_avg_realizations.size()));
+        
+        const int num_cells = static_cast<int>(rho_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> rho_avg_global(num_cells, double(0));
+        std::vector<double> rho_sq_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                rho_avg_global[i]    += weight*rho_avg_realizations[ri][i];
+                rho_sq_avg_global[i] += weight*rho_sq_avg_realizations[ri][i];
+            }
+        }
+        
+        std::vector<double> rho_var_global(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            rho_var_global[i] = rho_sq_avg_global[i] - rho_avg_global[i]*rho_avg_global[i];
+        }
+        
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&rho_var_global[0], sizeof(double)*rho_var_global.size());
         
         f_out.close();
     }
@@ -1866,6 +2016,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
     rti_rmi_spatial_profiles_utilities->d_ensemble_statistics->Y_0_avg_computed      = false;
     rti_rmi_spatial_profiles_utilities->d_ensemble_statistics->Y_0_sq_avg_computed   = false;
     rti_rmi_spatial_profiles_utilities->d_ensemble_statistics->rho_avg_computed      = false;
+    rti_rmi_spatial_profiles_utilities->d_ensemble_statistics->rho_sq_avg_computed   = false;
     rti_rmi_spatial_profiles_utilities->d_ensemble_statistics->u_avg_computed        = false;
     rti_rmi_spatial_profiles_utilities->d_ensemble_statistics->v_avg_computed        = false;
     rti_rmi_spatial_profiles_utilities->d_ensemble_statistics->w_avg_computed        = false;
@@ -1916,6 +2067,24 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
                 computeAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
                     patch_hierarchy,
                     data_context);
+        }
+        else if (statistical_quantity_key == "DENSITY_VAR")
+        {
+            if (!(rti_rmi_spatial_profiles_utilities->d_ensemble_statistics->rho_avg_computed))
+            {
+                rti_rmi_spatial_profiles_utilities->
+                    computeAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_spatial_profiles_utilities->d_ensemble_statistics->rho_sq_avg_computed))
+            {
+                rti_rmi_spatial_profiles_utilities->
+                    computeDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
         }
         else if (statistical_quantity_key == "VELOCITY_X_AVG")
         {
@@ -2136,6 +2305,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
             rti_rmi_spatial_profiles_utilities->
                 outputEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
                     "rho_avg.dat",
+                    patch_hierarchy,
+                    data_context,
+                    output_time);
+        }
+        else if (statistical_quantity_key == "DENSITY_VAR")
+        {
+            rti_rmi_spatial_profiles_utilities->
+                outputEnsembleDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
+                    "rho_var.dat",
                     patch_hierarchy,
                     data_context,
                     output_time);
