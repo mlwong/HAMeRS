@@ -403,14 +403,14 @@ int main(int argc, char *argv[])
                     
                     if (restore_index_start >= static_cast<int>(restore_nums.size()))
                     {
-                        TBOX_ERROR("Key data 'restore_index_start' is larger than avaiable indices of realization #"
+                        TBOX_ERROR("Key data 'restore_index_start' is larger than available indices of realization #"
                             << ri << "."
                             << std::endl);
                     }
                     
                     if (restore_index_end >= static_cast<int>(restore_nums.size()))
                     {
-                        TBOX_ERROR("Key data 'restore_index_end' is larger than avaiable indices of realization #"
+                        TBOX_ERROR("Key data 'restore_index_end' is larger than available indices of realization #"
                             << ri << "."
                             << std::endl);
                     }
@@ -466,7 +466,7 @@ int main(int argc, char *argv[])
                 }
                 if (restore_index_start >= static_cast<int>(restore_nums.size()))
                 {
-                    TBOX_ERROR("Key data 'restore_index_start' is larger than avaiable indices."
+                    TBOX_ERROR("Key data 'restore_index_start' is larger than available indices."
                         << std::endl);
                 }
             }
@@ -487,7 +487,7 @@ int main(int argc, char *argv[])
                 }
                 if (restore_index_end >= static_cast<int>(restore_nums.size()))
                 {
-                    TBOX_ERROR("Key data 'restore_index_end' is larger than avaiable indices."
+                    TBOX_ERROR("Key data 'restore_index_end' is larger than available indices."
                         << std::endl);
                 }
             }
