@@ -2571,14 +2571,14 @@ RTIRMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
         
         if (mpi.getRank() == 0)
         {
-            double Chi_integrated_global = double(0);
+            double chi_integrated_global = double(0);
             for (int i = 0; i < finest_level_dims[0]; i++)
             {
-                Chi_integrated_global += scalar_dissipation_rate[i]*dx_finest[0];
+                chi_integrated_global += scalar_dissipation_rate[i]*dx_finest[0];
             }
             
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << Chi_integrated_global;
+                  << "\t" << chi_integrated_global;
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -2652,19 +2652,19 @@ RTIRMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                 scalar_dissipation_rate_full[i] = scalar_dissipation_rate_part_1[i] + scalar_dissipation_rate_part_2[i];
             }
             
-            double Chi_integrated_global = double(0);
+            double chi_integrated_global = double(0);
             for (int i = 0; i < finest_level_dims[0]; i++)
             {
-                Chi_integrated_global += scalar_dissipation_rate_full[i]*dx_finest[0];
+                chi_integrated_global += scalar_dissipation_rate_full[i]*dx_finest[0];
             }
             
             const double* x_lo = d_grid_geometry->getXLower();
             const double* x_hi = d_grid_geometry->getXUpper();
             const double L_y = x_hi[1] - x_lo[1];
-            Chi_integrated_global *= L_y;
+            chi_integrated_global *= L_y;
             
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << Chi_integrated_global;
+                  << "\t" << chi_integrated_global;
         }
     }
     else if (d_dim == tbox::Dimension(3))
@@ -2765,20 +2765,20 @@ RTIRMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
                     scalar_dissipation_rate_part_1[i] + scalar_dissipation_rate_part_2[i] + scalar_dissipation_rate_part_3[i];
             }
             
-            double Chi_integrated_global = double(0);
+            double chi_integrated_global = double(0);
             for (int i = 0; i < finest_level_dims[0]; i++)
             {
-                Chi_integrated_global += scalar_dissipation_rate_full[i]*dx_finest[0];
+                chi_integrated_global += scalar_dissipation_rate_full[i]*dx_finest[0];
             }
             
             const double* x_lo = d_grid_geometry->getXLower();
             const double* x_hi = d_grid_geometry->getXUpper();
             const double L_y = x_hi[1] - x_lo[1];
             const double L_z = x_hi[2] - x_lo[2];
-            Chi_integrated_global *= (L_y*L_z);
+            chi_integrated_global *= (L_y*L_z);
             
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-                  << "\t" << Chi_integrated_global;
+                  << "\t" << chi_integrated_global;
         }
     }
     
