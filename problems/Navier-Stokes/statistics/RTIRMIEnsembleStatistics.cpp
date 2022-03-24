@@ -2033,7 +2033,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
         // Get the key of the current variable.
         std::string statistical_quantity_key = d_statistical_quantities[qi];
         
-        if (statistical_quantity_key == "MASS_FRACTION_AVG")
+        if (statistical_quantity_key == "MASS_FRACTION_AVG_SP")
         {
             if (!(rti_rmi_spatial_profiles_utilities->d_ensemble_statistics->Y_0_avg_computed))
             {
@@ -2043,7 +2043,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
                         data_context);
             }
         }
-        else if (statistical_quantity_key == "MASS_FRACTION_VAR")
+        else if (statistical_quantity_key == "MASS_FRACTION_VAR_SP")
         {
             if (!(rti_rmi_spatial_profiles_utilities->d_ensemble_statistics->Y_0_avg_computed))
             {
@@ -2061,14 +2061,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
                         data_context);
             }
         }
-        else if (statistical_quantity_key == "DENSITY_AVG")
+        else if (statistical_quantity_key == "DENSITY_AVG_SP")
         {
             rti_rmi_spatial_profiles_utilities->
                 computeAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
                     patch_hierarchy,
                     data_context);
         }
-        else if (statistical_quantity_key == "DENSITY_VAR")
+        else if (statistical_quantity_key == "DENSITY_VAR_SP")
         {
             if (!(rti_rmi_spatial_profiles_utilities->d_ensemble_statistics->rho_avg_computed))
             {
@@ -2086,49 +2086,49 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
                         data_context);
             }
         }
-        else if (statistical_quantity_key == "VELOCITY_X_AVG")
+        else if (statistical_quantity_key == "VELOCITY_X_AVG_SP")
         {
             rti_rmi_spatial_profiles_utilities->
                 computeAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
                     patch_hierarchy,
                     data_context);
         }
-        else if (statistical_quantity_key == "VELOCITY_Y_AVG")
+        else if (statistical_quantity_key == "VELOCITY_Y_AVG_SP")
         {
             rti_rmi_spatial_profiles_utilities->
                 computeAveragedVelocityYWithHomogeneityInYDirectionOrInYZPlane(
                     patch_hierarchy,
                     data_context);
         }
-        else if (statistical_quantity_key == "VELOCITY_Z_AVG")
+        else if (statistical_quantity_key == "VELOCITY_Z_AVG_SP")
         {
             rti_rmi_spatial_profiles_utilities->
                 computeAveragedVelocityZWithHomogeneityInYZPlane(
                     patch_hierarchy,
                     data_context);
         }
-        else if (statistical_quantity_key == "MOMENTUM_X_AVG")
+        else if (statistical_quantity_key == "MOMENTUM_X_AVG_SP")
         {
             rti_rmi_spatial_profiles_utilities->
                 computeAveragedMomentumXWithHomogeneityInYDirectionOrInYZPlane(
                     patch_hierarchy,
                     data_context);
         }
-        else if (statistical_quantity_key == "MOMENTUM_Y_AVG")
+        else if (statistical_quantity_key == "MOMENTUM_Y_AVG_SP")
         {
             rti_rmi_spatial_profiles_utilities->
                 computeAveragedMomentumYWithHomogeneityInYDirectionOrInYZPlane(
                     patch_hierarchy,
                     data_context);
         }
-        else if (statistical_quantity_key == "MOMENTUM_Z_AVG")
+        else if (statistical_quantity_key == "MOMENTUM_Z_AVG_SP")
         {
             rti_rmi_spatial_profiles_utilities->
                 computeAveragedMomentumZWithHomogeneityInYZPlane(
                     patch_hierarchy,
                     data_context);
         }
-        else if (statistical_quantity_key == "TURB_MASS_FLUX_X")
+        else if (statistical_quantity_key == "TURB_MASS_FLUX_X_SP")
         {
             if (!(rti_rmi_spatial_profiles_utilities->d_ensemble_statistics->rho_avg_computed))
             {
@@ -2154,7 +2154,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
                         data_context);
             }
         }
-        else if (statistical_quantity_key == "RE_STRESS_11")
+        else if (statistical_quantity_key == "RE_STRESS_11_SP")
         {
             if (!(rti_rmi_spatial_profiles_utilities->d_ensemble_statistics->rho_avg_computed))
             {
@@ -2180,7 +2180,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
                         data_context);
             }
         }
-        else if (statistical_quantity_key == "RE_STRESS_22")
+        else if (statistical_quantity_key == "RE_STRESS_22_SP")
         {
             if (!(rti_rmi_spatial_profiles_utilities->d_ensemble_statistics->rho_avg_computed))
             {
@@ -2206,7 +2206,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
                         data_context);
             }
         }
-        else if (statistical_quantity_key == "RE_STRESS_33")
+        else if (statistical_quantity_key == "RE_STRESS_33_SP")
         {
             if (!(rti_rmi_spatial_profiles_utilities->d_ensemble_statistics->rho_avg_computed))
             {
@@ -2282,7 +2282,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         // Get the key of the current variable.
         std::string statistical_quantity_key = d_statistical_quantities[qi];
         
-        if (statistical_quantity_key == "MASS_FRACTION_AVG")
+        if (statistical_quantity_key == "MASS_FRACTION_AVG_SP")
         {
             rti_rmi_spatial_profiles_utilities->
                 outputEnsembleAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
@@ -2291,7 +2291,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                     data_context,
                     output_time);
         }
-        else if (statistical_quantity_key == "MASS_FRACTION_VAR")
+        else if (statistical_quantity_key == "MASS_FRACTION_VAR_SP")
         {
             rti_rmi_spatial_profiles_utilities->
                 outputEnsembleMassFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
@@ -2300,7 +2300,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                     data_context,
                     output_time);
         }
-        else if (statistical_quantity_key == "DENSITY_AVG")
+        else if (statistical_quantity_key == "DENSITY_AVG_SP")
         {
             rti_rmi_spatial_profiles_utilities->
                 outputEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
@@ -2309,7 +2309,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                     data_context,
                     output_time);
         }
-        else if (statistical_quantity_key == "DENSITY_VAR")
+        else if (statistical_quantity_key == "DENSITY_VAR_SP")
         {
             rti_rmi_spatial_profiles_utilities->
                 outputEnsembleDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
@@ -2318,7 +2318,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                     data_context,
                     output_time);
         }
-        else if (statistical_quantity_key == "VELOCITY_X_AVG")
+        else if (statistical_quantity_key == "VELOCITY_X_AVG_SP")
         {
             rti_rmi_spatial_profiles_utilities->
                 outputEnsembleAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
@@ -2327,7 +2327,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                     data_context,
                     output_time);
         }
-        else if (statistical_quantity_key == "VELOCITY_Y_AVG")
+        else if (statistical_quantity_key == "VELOCITY_Y_AVG_SP")
         {
             rti_rmi_spatial_profiles_utilities->
                 outputEnsembleAveragedVelocityYWithHomogeneityInYDirectionOrInYZPlane(
@@ -2336,7 +2336,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                     data_context,
                     output_time);
         }
-        else if (statistical_quantity_key == "VELOCITY_Z_AVG")
+        else if (statistical_quantity_key == "VELOCITY_Z_AVG_SP")
         {
             rti_rmi_spatial_profiles_utilities->
                 outputEnsembleAveragedVelocityZWithHomogeneityInYZPlane(
@@ -2345,7 +2345,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                     data_context,
                     output_time);
         }
-        else if (statistical_quantity_key == "MOMENTUM_X_AVG")
+        else if (statistical_quantity_key == "MOMENTUM_X_AVG_SP")
         {
             rti_rmi_spatial_profiles_utilities->
                 outputEnsembleAveragedMomentumXWithHomogeneityInYDirectionOrInYZPlane(
@@ -2354,7 +2354,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                     data_context,
                     output_time);
         }
-        else if (statistical_quantity_key == "MOMENTUM_Y_AVG")
+        else if (statistical_quantity_key == "MOMENTUM_Y_AVG_SP")
         {
             rti_rmi_spatial_profiles_utilities->
                 outputEnsembleAveragedMomentumYWithHomogeneityInYDirectionOrInYZPlane(
@@ -2363,7 +2363,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                     data_context,
                     output_time);
         }
-        else if (statistical_quantity_key == "MOMENTUM_Z_AVG")
+        else if (statistical_quantity_key == "MOMENTUM_Z_AVG_SP")
         {
             rti_rmi_spatial_profiles_utilities->
                 outputEnsembleAveragedMomentumZWithHomogeneitynYZPlane(
@@ -2372,7 +2372,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                     data_context,
                     output_time);
         }
-        else if (statistical_quantity_key == "TURB_MASS_FLUX_X")
+        else if (statistical_quantity_key == "TURB_MASS_FLUX_X_SP")
         {
             rti_rmi_spatial_profiles_utilities->
                 outputEnsembleTurbulentMassFluxXWithHomogeneityInYDirectionOrInYZPlane(
@@ -2381,7 +2381,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                     data_context,
                     output_time);
         }
-        else if (statistical_quantity_key == "RE_STRESS_11")
+        else if (statistical_quantity_key == "RE_STRESS_11_SP")
         {
             rti_rmi_spatial_profiles_utilities->
                 outputEnsembleReynoldsNormalStressXWithHomogeneityInYDirectionOrInYZPlane(
@@ -2390,7 +2390,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                     data_context,
                     output_time);
         }
-        else if (statistical_quantity_key == "RE_STRESS_22")
+        else if (statistical_quantity_key == "RE_STRESS_22_SP")
         {
             rti_rmi_spatial_profiles_utilities->
                 outputEnsembleReynoldsNormalStressYWithHomogeneityInYDirectionOrInYZPlane(
@@ -2399,7 +2399,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                     data_context,
                     output_time);
         }
-        else if (statistical_quantity_key == "RE_STRESS_33")
+        else if (statistical_quantity_key == "RE_STRESS_33_SP")
         {
             rti_rmi_spatial_profiles_utilities->
                 outputEnsembleReynoldsNormalStressZWithHomogeneityInYZPlane(
