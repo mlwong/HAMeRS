@@ -1826,7 +1826,7 @@ RTIRMISpatialProfilesUtilities::outputReynoldsNormalStressZWithHomogeneityInYZPl
     {
         TBOX_ERROR(d_object_name
             << ": "
-            << "'RE_STRESS_33' can be computed for 3D problem only."
+            << "'R33' can be computed for 3D problem only."
             << std::endl);
     }
     
@@ -2963,7 +2963,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 data_context,
                 output_time);
         }
-        else if (statistical_quantity_key == "RE_STRESS_11")
+        else if (statistical_quantity_key == "R11")
         {
             rti_rmi_spatial_profiles_utilities->outputReynoldsNormalStressXWithHomogeneityInYDirectionOrInYZPlane(
                 "R11.dat",
@@ -2971,7 +2971,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 data_context,
                 output_time);
         }
-        else if (statistical_quantity_key == "RE_STRESS_22")
+        else if (statistical_quantity_key == "R22")
         {
             rti_rmi_spatial_profiles_utilities->outputReynoldsNormalStressYWithHomogeneityInYDirectionOrInYZPlane(
                 "R22.dat",
@@ -2979,7 +2979,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 data_context,
                 output_time);
         }
-        else if (statistical_quantity_key == "RE_STRESS_33")
+        else if (statistical_quantity_key == "R33")
         {
             rti_rmi_spatial_profiles_utilities->outputReynoldsNormalStressZWithHomogeneityInYZPlane(
                 "R33.dat",
