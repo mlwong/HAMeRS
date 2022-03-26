@@ -25,6 +25,7 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
             Y_0_Y_1_avg_computed  = false;
             rho_avg_computed      = false;
             rho_sq_avg_computed   = false;
+            rho_inv_avg_computed  = false;
             u_avg_computed        = false;
             v_avg_computed        = false;
             w_avg_computed        = false;
@@ -45,6 +46,7 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
             Y_0_Y_1_avg_realizations.clear();
             rho_avg_realizations.clear();
             rho_sq_avg_realizations.clear();
+            rho_inv_avg_realizations.clear();
             u_avg_realizations.clear();
             v_avg_realizations.clear();
             w_avg_realizations.clear();
@@ -67,6 +69,7 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
         std::vector<std::vector<double> > Y_0_Y_1_avg_realizations;
         std::vector<std::vector<double> > rho_avg_realizations;
         std::vector<std::vector<double> > rho_sq_avg_realizations;
+        std::vector<std::vector<double> > rho_inv_avg_realizations;
         std::vector<std::vector<double> > u_avg_realizations;
         std::vector<std::vector<double> > v_avg_realizations;
         std::vector<std::vector<double> > w_avg_realizations;
@@ -85,6 +88,7 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
         bool Y_0_Y_1_avg_computed;
         bool rho_avg_computed;
         bool rho_sq_avg_computed;
+        bool rho_inv_avg_computed;
         bool u_avg_computed;
         bool v_avg_computed;
         bool w_avg_computed;
@@ -167,6 +171,14 @@ class RTIRMIStatisticsUtilities
          */
         void
         computeDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute averaged specific volume with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+         */
+        void
+        computeAveragedSpecificVolumeWithHomogeneityInYDirectionOrInYZPlane(
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
@@ -261,171 +273,198 @@ class RTIRMIStatisticsUtilities
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
-         * Output ensemble averaged mass fraction with assumed homogeneity in y-direction (2D) or yz-plane (3D)
+         * Output spatial profile of ensemble averaged mass fraction with assumed homogeneity in y-direction (2D) or
+         * yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output spatial profile of ensemble variance of mass fraction with assumed homogeneity in y-direction (2D) or
+         * yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleMassFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output spatial profile of ensemble averaged density with assumed homogeneity in y-direction (2D) or
+         * yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output spatial profile of ensemble variance of density with assumed homogeneity in y-direction (2D) or
+         * yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output spatial profile of ensemble averaged specific volume with assumed homogeneity in y-direction (2D) or
+         * yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleAveragedSpecificVolumeWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output spatial profile of ensemble averaged density-specific-volume covariance with assumed homogeneity in
+         * y-direction (2D) or yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleAveragedDensitySpecificVolumeCovarianceWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output spatial profile of ensemble averaged velocity x-component with assumed homogeneity in y-direction (2D)
+         * or yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output spatial profile of ensemble averaged velocity y-component with assumed homogeneity in y-direction (2D)
+         * or yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleAveragedVelocityYWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output spatial profile of ensemble averaged velocity z-component with assumed homogeneity in yz-plane (3D)
          * to a file.
          */
         void
-        outputEnsembleAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
+        outputSpatialProfileEnsembleAveragedVelocityZWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
-         * Output ensemble variance of mass fraction with assumed homogeneity in y-direction (2D) or yz-plane (3D)
+         * Output spatial profile of ensemble averaged momentum x-component with assumed homogeneity in y-direction (2D)
+         * or yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleAveragedMomentumXWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output spatial profile of ensemble averaged momentum y-component with assumed homogeneity in y-direction (2D)
+         * or yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleAveragedMomentumYWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output spatial profile of ensemble averaged momentum z-component with assumed homogeneity in yz-plane (3D)
          * to a file.
          */
         void
-        outputEnsembleMassFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+        outputSpatialProfileEnsembleAveragedMomentumZWithHomogeneitynYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
-         * Output ensemble averaged density with assumed homogeneity in y-direction (2D) or yz-plane (3D)
-         * to a file.
+         * Output spatial profile of ensemble turbulent mass flux in x-direction with assumed homogeneity in
+         * y-direction (2D) or yz-plane (3D) to a file.
          */
         void
-        outputEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
+        outputSpatialProfileEnsembleTurbulentMassFluxXWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
-         * Output ensemble variance of density with assumed homogeneity in y-direction (2D) or yz-plane (3D)
-         * to a file.
+         * Output spatial profile of ensemble Reynolds normal stress x-component with assumed homogeneity in
+         * y-direction (2D) or yz-plane (3D) to a file.
          */
         void
-        outputEnsembleDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
+        outputSpatialProfileEnsembleReynoldsNormalStressXWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
-         * Output ensemble averaged velocity x-component with assumed homogeneity in y-direction (2D) or yz-plane (3D)
-         * to a file.
+         * Output spatial profile of ensemble Reynolds normal stress y-component with assumed homogeneity in
+         * y-direction (2D) or yz-plane (3D) to a file.
          */
         void
-        outputEnsembleAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
+        outputSpatialProfileEnsembleReynoldsNormalStressYWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
-         * Output ensemble averaged velocity y-component with assumed homogeneity in y-direction (2D) or yz-plane (3D)
-         * to a file.
+         * Output spatial profile of ensemble Reynolds normal stress z-component with assumed homogeneity in
+         * yz-plane (3D) to a file.
          */
         void
-        outputEnsembleAveragedVelocityYWithHomogeneityInYDirectionOrInYZPlane(
+        outputSpatialProfileEnsembleReynoldsNormalStressZWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
-         * Output ensemble averaged velocity z-component with assumed homogeneity in yz-plane (3D) to a file.
+         * Output spatial profile of ensemble averaged enstrophy with assumed homogeneity in y-direction (2D) or
+         * yz-plane (3D) to a file.
          */
         void
-        outputEnsembleAveragedVelocityZWithHomogeneityInYZPlane(
+        outputSpatialProfileEnsembleAveragedEnstrophyWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
-         * Output ensemble averaged momentum x-component with assumed homogeneity in y-direction (2D) or yz-plane (3D)
-         * to a file.
+         * Output spatial profile of ensemble averaged scalar dissipation rate with assumed homogeneity in
+         * y-direction (2D) or yz-plane (3D) to a file.
          */
         void
-        outputEnsembleAveragedMomentumXWithHomogeneityInYDirectionOrInYZPlane(
-            const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const double output_time) const;
-        
-        /*
-         * Output ensemble averaged momentum y-component with assumed homogeneity in y-direction (2D) or yz-plane (3D)
-         * to a file.
-         */
-        void
-        outputEnsembleAveragedMomentumYWithHomogeneityInYDirectionOrInYZPlane(
-            const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const double output_time) const;
-        
-        /*
-         * Output ensemble averaged momentum z-component with assumed homogeneity in yz-plane (3D) to a file.
-         */
-        void
-        outputEnsembleAveragedMomentumZWithHomogeneitynYZPlane(
-            const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const double output_time) const;
-        
-        /*
-         * Output ensemble turbulent mass flux in x-direction with assumed homogeneity in y-direction (2D) or yz-plane (3D)
-         * to a file.
-         */
-        void
-        outputEnsembleTurbulentMassFluxXWithHomogeneityInYDirectionOrInYZPlane(
-            const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const double output_time) const;
-        
-        /*
-         * Output ensemble Reynolds normal stress x-component with assumed homogeneity in y-direction (2D) or yz-plane (3D)
-         * to a file.
-         */
-        void
-        outputEnsembleReynoldsNormalStressXWithHomogeneityInYDirectionOrInYZPlane(
-            const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const double output_time) const;
-        
-        /*
-         * Output ensemble Reynolds normal stress y-component with assumed homogeneity in y-direction (2D) or yz-plane (3D)
-         * to a file.
-         */
-        void
-        outputEnsembleReynoldsNormalStressYWithHomogeneityInYDirectionOrInYZPlane(
-            const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const double output_time) const;
-        
-        /*
-         * Output ensemble Reynolds normal stress z-component with assumed homogeneity in yz-plane (3D) to a file.
-         */
-        void
-        outputEnsembleReynoldsNormalStressZWithHomogeneityInYZPlane(
-            const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const double output_time) const;
-        
-        /*
-         * Output enstrophy with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
-         */
-        void
-        outputEnsembleAveragedEnstrophyWithHomogeneityInYDirectionOrInYZPlane(
-            const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const double output_time) const;
-        
-        /*
-         * Output scalar dissipation rate with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
-         */
-        void
-        outputEnsembleAveragedScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+        outputSpatialProfileEnsembleAveragedScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -434,76 +473,96 @@ class RTIRMIStatisticsUtilities
         /// Non-spatial profiles.
         
         /*
-         * Output mixing width in x-direction to a file.
+         * Output ensemble mixing width in x-direction to a file.
          */
         void
-        outputMixingWidthInXDirection(
+        outputEnsembleMixingWidthInXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
-         * Output mixedness in x-direction to a file.
+         * Output ensemble mixedness in x-direction to a file.
          */
         void
-        outputMixednessInXDirection(
+        outputEnsembleMixednessInXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
-         * Output mean velocity associated with turbulent mass flux component in x-direction with assumed homogeneity
-         * in y-direction (2D) or * yz-plane (3D) to a file.
+         * Output ensemble mean velocity associated with turbulent mass flux component in x-direction with
+         * assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
          */
         void
-        outputTurbulentMassFluxVelocityXWithInhomogeneousXDirection(
+        outputEnsembleTurbulentMassFluxVelocityXWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
-         * Output Reynolds normal stress component in x-direction with assumed homogeneity in y-direction (2D) or yz-plane (3D)
+         * Output ensemble mean density-specific-volume covariance with assumed homogeneity in y-direction (2D)
+         * or yz-plane (3D) to a file.
+         */
+        void
+        outputEnsembleDensitySpecificVolumeCovarianceWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Output ensemble TKE integrated with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
+         */
+        void
+        outputEnsembleTKEIntegrateWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Output ensemble Reynolds normal stress component in x-direction with assumed homogeneity in y-direction (2D)
+         * or yz-plane (3D) to a file.
+         */
+        void
+        outputEnsembleReynoldsNormalStressXWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Output ensemble Reynolds normal stress component in y-direction with assumed homogeneity in y-direction (2D)
+         * or yz-plane (3D) to a file.
+         */
+        void
+        outputEnsembleReynoldsNormalStressYWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Output ensemble Reynolds normal stress component in z-direction with assumed homogeneity in yz-plane (3D)
          * to a file.
          */
         void
-        outputReynoldsNormalStressXWithInhomogeneousXDirection(
+        outputEnsembleReynoldsNormalStressZWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
-         * Output Reynolds normal stress component in y-direction with assumed homogeneity in y-direction (2D) or yz-plane (3D)
-         * to a file.
+         * Output ensemble enstrophy integrated to a file.
          */
         void
-        outputReynoldsNormalStressYWithInhomogeneousXDirection(
+        outputEnsembleEnstrophyIntegrated(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
-         * Output Reynolds normal stress component in z-direction with assumed homogeneity in yz-plane (3D) to a file.
+         * Output ensemble scalar dissipation rate of first species integrated to a file.
          */
         void
-        outputReynoldsNormalStressZWithInhomogeneousXDirection(
-            const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
-        
-        /*
-         * Output enstrophy integrated to a file.
-         */
-        void
-        outputEnstrophyIntegrated(
-            const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
-        
-        /*
-         * Output scalar dissipation rate of first species integrated to a file.
-         */
-        void
-        outputScalarDissipationRateIntegrated(
+        outputEnsembleScalarDissipationRateIntegrated(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
@@ -811,6 +870,35 @@ RTIRMIStatisticsUtilities::computeDensityVarianceWithHomogeneityInYDirectionOrIn
     rho_sq_avg_realizations.push_back(rho_sq_avg_global);
     
     d_ensemble_statistics->rho_sq_avg_computed = true;
+}
+
+
+/*
+ * Compute averaged specific volume with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+ */
+void
+RTIRMIStatisticsUtilities::computeAveragedSpecificVolumeWithHomogeneityInYDirectionOrInYZPlane(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    std::vector<double> rho_inv_avg_global = MPI_helper_average.getAveragedReciprocalOfQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        data_context);
+    
+    std::vector<std::vector<double> >& rho_inv_avg_realizations = d_ensemble_statistics->rho_inv_avg_realizations;
+    rho_inv_avg_realizations.push_back(rho_inv_avg_global);
+    
+    d_ensemble_statistics->rho_inv_avg_computed = true;
 }
 
 
@@ -1739,11 +1827,11 @@ RTIRMIStatisticsUtilities::computeAveragedScalarDissipationRateWithHomogeneityIn
 
 
 /*
- * Output ensemble averaged mass fraction with assumed homogeneity in y-direction (2D) or yz-plane (3D)
- * to a file.
+ * Output spatial profile of ensemble averaged mass fraction with assumed homogeneity in y-direction (2D) or
+ * yz-plane (3D) to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -1802,11 +1890,11 @@ RTIRMIStatisticsUtilities::outputEnsembleAveragedMassFractionWithHomogeneityInYD
 
 
 /*
- * Output ensemble variance of mass fraction with assumed homogeneity in y-direction (2D) or yz-plane (3D)
- * to a file.
+ * Output spatial profile of ensemble variance of mass fraction with assumed homogeneity in y-direction (2D) or
+ * yz-plane (3D) to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleMassFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleMassFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -1877,11 +1965,11 @@ RTIRMIStatisticsUtilities::outputEnsembleMassFractionVarianceWithHomogeneityInYD
 
 
 /*
- * Output ensemble averaged density with assumed homogeneity in y-direction (2D) or yz-plane (3D)
- * to a file.
+ * Output spatial profile of ensemble averaged density with assumed homogeneity in y-direction (2D) or
+ * yz-plane (3D) to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -1940,11 +2028,11 @@ RTIRMIStatisticsUtilities::outputEnsembleAveragedDensityWithHomogeneityInYDirect
 
 
 /*
- * Output ensemble variance of density with assumed homogeneity in y-direction (2D) or yz-plane (3D)
- * to a file.
+ * Output spatial profile of ensemble variance of density with assumed homogeneity in y-direction (2D) or
+ * yz-plane (3D) to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -2015,11 +2103,149 @@ RTIRMIStatisticsUtilities::outputEnsembleDensityVarianceWithHomogeneityInYDirect
 
 
 /*
- * Output ensemble averaged velocity x-component with assumed homogeneity in y-direction (2D) or yz-plane (3D)
- * to a file.
+ * Output spatial profile of ensemble averaged specific volume with assumed homogeneity in y-direction (2D) or
+ * yz-plane (3D) to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedSpecificVolumeWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& rho_inv_avg_realizations =
+            d_ensemble_statistics->rho_inv_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(rho_inv_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        
+        const int num_cells = static_cast<int>(rho_inv_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> rho_inv_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                rho_inv_avg_global[i] += weight*rho_inv_avg_realizations[ri][i];
+            }
+        }
+        
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&rho_inv_avg_global[0], sizeof(double)*rho_inv_avg_global.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output spatial profile of ensemble averaged density-specific-volume covariance with assumed homogeneity in
+ * y-direction (2D) or yz-plane (3D) to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedDensitySpecificVolumeCovarianceWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& rho_avg_realizations =
+            d_ensemble_statistics->rho_avg_realizations;
+        
+        const std::vector<std::vector<double> >& rho_inv_avg_realizations =
+            d_ensemble_statistics->rho_inv_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(rho_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(rho_inv_avg_realizations.size()));
+        
+        const int num_cells = static_cast<int>(rho_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> rho_avg_global(num_cells, double(0));
+        std::vector<double> rho_inv_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                rho_avg_global[i]     += weight*rho_avg_realizations[ri][i];
+                rho_inv_avg_global[i] += weight*rho_inv_avg_realizations[ri][i];
+            }
+        }
+        
+        std::vector<double> rho_p_rho_inv_p(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            rho_p_rho_inv_p[i] = double(1) - rho_avg_global[i]*rho_inv_avg_global[i];
+        }
+        
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&rho_p_rho_inv_p[0], sizeof(double)*rho_p_rho_inv_p.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output spatial profile of ensemble averaged velocity x-component with assumed homogeneity in y-direction (2D)
+ * or yz-plane (3D) to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -2078,11 +2304,11 @@ RTIRMIStatisticsUtilities::outputEnsembleAveragedVelocityXWithHomogeneityInYDire
 
 
 /*
- * Output ensemble averaged velocity y-component with assumed homogeneity in y-direction (2D) or yz-plane (3D)
- * to a file.
+ * Output spatial profile of ensemble averaged velocity y-component with assumed homogeneity in y-direction (2D)
+ * or yz-plane (3D) to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleAveragedVelocityYWithHomogeneityInYDirectionOrInYZPlane(
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedVelocityYWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -2141,10 +2367,11 @@ RTIRMIStatisticsUtilities::outputEnsembleAveragedVelocityYWithHomogeneityInYDire
 
 
 /*
- * Output ensemble averaged velocity z-component with assumed homogeneity in yz-plane (3D) to a file.
+ * Output spatial profile of ensemble averaged velocity z-component with assumed homogeneity in yz-plane (3D)
+ * to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleAveragedVelocityZWithHomogeneityInYZPlane(
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedVelocityZWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -2203,11 +2430,11 @@ RTIRMIStatisticsUtilities::outputEnsembleAveragedVelocityZWithHomogeneityInYZPla
 
 
 /*
- * Output ensemble averaged momentum x-component with assumed homogeneity in y-direction (2D) or yz-plane (3D)
- * to a file.
+ * Output spatial profile of ensemble averaged momentum x-component with assumed homogeneity in y-direction (2D)
+ * or yz-plane (3D) to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleAveragedMomentumXWithHomogeneityInYDirectionOrInYZPlane(
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedMomentumXWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -2266,11 +2493,11 @@ RTIRMIStatisticsUtilities::outputEnsembleAveragedMomentumXWithHomogeneityInYDire
 
 
 /*
- * Output ensemble averaged momentum y-component with assumed homogeneity in y-direction (2D) or yz-plane (3D)
- * to a file.
+ * Output spatial profile of ensemble averaged momentum y-component with assumed homogeneity in y-direction (2D)
+ * or yz-plane (3D) to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleAveragedMomentumYWithHomogeneityInYDirectionOrInYZPlane(
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedMomentumYWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -2329,10 +2556,11 @@ RTIRMIStatisticsUtilities::outputEnsembleAveragedMomentumYWithHomogeneityInYDire
 
 
 /*
- * Output ensemble averaged momentum z-component with assumed homogeneity in yz-plane (3D) to a file.
+ * Output spatial profile of ensemble averaged momentum z-component with assumed homogeneity in yz-plane (3D)
+ * to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleAveragedMomentumZWithHomogeneitynYZPlane(
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedMomentumZWithHomogeneitynYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -2391,11 +2619,11 @@ RTIRMIStatisticsUtilities::outputEnsembleAveragedMomentumZWithHomogeneitynYZPlan
 
 
 /*
- * Output ensemble turbulent mass flux in x-direction with assumed homogeneity in y-direction (2D) or yz-plane (3D)
- * to a file.
+ * Output spatial profile of ensemble turbulent mass flux in x-direction with assumed homogeneity in
+ * y-direction (2D) or yz-plane (3D) to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleTurbulentMassFluxXWithHomogeneityInYDirectionOrInYZPlane(
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleTurbulentMassFluxXWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -2472,11 +2700,11 @@ RTIRMIStatisticsUtilities::outputEnsembleTurbulentMassFluxXWithHomogeneityInYDir
 
 
 /*
- * Output ensemble Reynolds normal stress x-component with assumed homogeneity in y-direction (2D) or yz-plane (3D)
- * to a file.
+ * Output spatial profile of ensemble Reynolds normal stress x-component with assumed homogeneity in
+ * y-direction (2D) or yz-plane (3D) to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleReynoldsNormalStressXWithHomogeneityInYDirectionOrInYZPlane(
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleReynoldsNormalStressXWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -2556,11 +2784,11 @@ RTIRMIStatisticsUtilities::outputEnsembleReynoldsNormalStressXWithHomogeneityInY
 
 
 /*
- * Output ensemble Reynolds normal stress y-component with assumed homogeneity in y-direction (2D) or yz-plane (3D)
- * to a file.
+ * Output spatial profile of ensemble Reynolds normal stress y-component with assumed homogeneity in
+ * y-direction (2D) or yz-plane (3D) to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleReynoldsNormalStressYWithHomogeneityInYDirectionOrInYZPlane(
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleReynoldsNormalStressYWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -2640,11 +2868,11 @@ RTIRMIStatisticsUtilities::outputEnsembleReynoldsNormalStressYWithHomogeneityInY
 
 
 /*
- * Output ensemble Reynolds normal stress z-component with assumed homogeneity in yz-plane (3D) to a file.
- * to a file.
+ * Output spatial profile of ensemble Reynolds normal stress z-component with assumed homogeneity in
+ * yz-plane (3D) to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleReynoldsNormalStressZWithHomogeneityInYZPlane(
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleReynoldsNormalStressZWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -2724,10 +2952,11 @@ RTIRMIStatisticsUtilities::outputEnsembleReynoldsNormalStressZWithHomogeneityInY
 
 
 /*
- * Output enstrophy with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
+ * Output spatial profile of ensemble averaged enstrophy with assumed homogeneity in y-direction (2D) or
+ * yz-plane (3D) to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleAveragedEnstrophyWithHomogeneityInYDirectionOrInYZPlane(
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedEnstrophyWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -2786,10 +3015,11 @@ RTIRMIStatisticsUtilities::outputEnsembleAveragedEnstrophyWithHomogeneityInYDire
 
 
 /*
- * Output scalar dissipation rate with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
+ * Output spatial profile of ensemble averaged scalar dissipation rate with assumed homogeneity in
+ * y-direction (2D) or yz-plane (3D) to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleAveragedScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -2848,10 +3078,10 @@ RTIRMIStatisticsUtilities::outputEnsembleAveragedScalarDissipationRateWithHomoge
 
 
 /*
- * Output mixing width in x-direction to a file.
+ * Output ensemble mixing width in x-direction to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputMixingWidthInXDirection(
+RTIRMIStatisticsUtilities::outputEnsembleMixingWidthInXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
@@ -2934,10 +3164,10 @@ RTIRMIStatisticsUtilities::outputMixingWidthInXDirection(
 
 
 /*
- * Output mixedness in x-direction to a file.
+ * Output ensemble mixedness in x-direction to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputMixednessInXDirection(
+RTIRMIStatisticsUtilities::outputEnsembleMixednessInXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
@@ -3020,11 +3250,11 @@ RTIRMIStatisticsUtilities::outputMixednessInXDirection(
 
 
 /*
- * Output mean velocity associated with turbulent mass flux component in x-direction with assumed homogeneity
- * in y-direction (2D) or * yz-plane (3D) to a file.
+ * Output ensemble mean velocity associated with turbulent mass flux component in x-direction with
+ * assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputTurbulentMassFluxVelocityXWithInhomogeneousXDirection(
+RTIRMIStatisticsUtilities::outputEnsembleTurbulentMassFluxVelocityXWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
@@ -3121,11 +3351,340 @@ RTIRMIStatisticsUtilities::outputTurbulentMassFluxVelocityXWithInhomogeneousXDir
 
 
 /*
- * Output Reynolds normal stress component in x-direction with assumed homogeneity in y-direction (2D) or yz-plane (3D)
- * to a file.
+ * Output ensemble mean density-specific-volume covariance with assumed homogeneity in y-direction (2D)
+ * or yz-plane (3D) to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputReynoldsNormalStressXWithInhomogeneousXDirection(
+RTIRMIStatisticsUtilities::outputEnsembleDensitySpecificVolumeCovarianceWithInhomogeneousXDirection(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Compute and output the quantity (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& rho_avg_realizations =
+            d_ensemble_statistics->rho_avg_realizations;
+        
+        const std::vector<std::vector<double> >& rho_inv_avg_realizations =
+            d_ensemble_statistics->rho_inv_avg_realizations;
+        
+        const std::vector<std::vector<double> >& Y_0_avg_realizations =
+            d_ensemble_statistics->Y_0_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(rho_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(rho_inv_avg_realizations.size()));
+        TBOX_ASSERT(num_realizations == static_cast<int>(Y_0_avg_realizations.size()));
+        
+        const int num_cells = static_cast<int>(rho_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> rho_avg_global(num_cells, double(0));
+        std::vector<double> rho_inv_avg_global(num_cells, double(0));
+        std::vector<double> Y_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                rho_avg_global[i]     += weight*rho_avg_realizations[ri][i];
+                rho_inv_avg_global[i] += weight*rho_inv_avg_realizations[ri][i];
+                Y_0_avg_global[i]     += weight*Y_0_avg_realizations[ri][i];
+            }
+        }
+        
+        std::vector<double> rho_p_rho_inv_p(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            rho_p_rho_inv_p[i] = double(1) - rho_avg_global[i]*rho_inv_avg_global[i];
+        }
+        
+        double b_sum = double(0);
+        int count = 0;
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            const double mixing_metric = double(4)*Y_0_avg_global[i]*(double(1) - Y_0_avg_global[i]);
+            if (mixing_metric > double(9)/double(10))
+            {
+                b_sum += rho_p_rho_inv_p[i];
+                count++;
+            }
+        }
+        
+        const double b_mean = b_sum/count;
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << b_mean;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output ensemble TKE integrated with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleTKEIntegrateWithInhomogeneousXDirection(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    MPIHelper MPI_helper = MPIHelper(
+        "MPI_helper",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy);
+    
+    const std::vector<double>& dx_finest = MPI_helper.getFinestRefinedDomainGridSpacing();
+    
+    /*
+     * Compute and output the quantity (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        double TKE_integrated_global = double(0);
+        const double half = double(1)/double(2);
+        
+        if (d_dim == tbox::Dimension(1))
+        {
+            const std::vector<std::vector<double> >& rho_avg_realizations =
+                d_ensemble_statistics->rho_avg_realizations;
+            
+            const std::vector<std::vector<double> >& rho_u_avg_realizations =
+                d_ensemble_statistics->rho_u_avg_realizations;
+            
+            const std::vector<std::vector<double> >& rho_u_u_avg_realizations =
+                d_ensemble_statistics->rho_u_u_avg_realizations;
+            
+            const int num_realizations = static_cast<int>(rho_avg_realizations.size());
+            
+            TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+            TBOX_ASSERT(num_realizations > 0);
+            TBOX_ASSERT(num_realizations == static_cast<int>(rho_avg_realizations.size()));
+            TBOX_ASSERT(num_realizations == static_cast<int>(rho_u_avg_realizations.size()));
+            TBOX_ASSERT(num_realizations == static_cast<int>(rho_u_u_avg_realizations.size()));
+            
+            const int num_cells = static_cast<int>(rho_avg_realizations[0].size());
+            const double weight = double(1)/double(num_realizations);
+            
+            std::vector<double> rho_avg_global(num_cells, double(0));
+            std::vector<double> rho_u_avg_global(num_cells, double(0));
+            std::vector<double> rho_u_u_avg_global(num_cells, double(0));
+            
+            for (int ri = 0; ri < num_realizations; ri++)
+            {
+                for (int i = 0; i < num_cells; i++)
+                {
+                    rho_avg_global[i]     += weight*rho_avg_realizations[ri][i];
+                    rho_u_avg_global[i]   += weight*rho_u_avg_realizations[ri][i];
+                    rho_u_u_avg_global[i] += weight*rho_u_u_avg_realizations[ri][i];
+                }
+            }
+            
+            for (int i = 0; i < num_cells; i++)
+            {
+                const double u_tilde = rho_u_avg_global[i]/rho_avg_global[i];
+                const double rho_u_pp_u_pp = rho_u_u_avg_global[i] - rho_u_avg_global[i]*u_tilde;
+                
+                TKE_integrated_global += (half*rho_u_pp_u_pp*dx_finest[0]);
+            }
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            const std::vector<std::vector<double> >& rho_avg_realizations =
+                d_ensemble_statistics->rho_avg_realizations;
+            
+            const std::vector<std::vector<double> >& rho_u_avg_realizations =
+                d_ensemble_statistics->rho_u_avg_realizations;
+            
+            const std::vector<std::vector<double> >& rho_v_avg_realizations =
+                d_ensemble_statistics->rho_u_avg_realizations;
+            
+            const std::vector<std::vector<double> >& rho_u_u_avg_realizations =
+                d_ensemble_statistics->rho_u_u_avg_realizations;
+            
+            const std::vector<std::vector<double> >& rho_v_v_avg_realizations =
+                d_ensemble_statistics->rho_u_u_avg_realizations;
+            
+            const int num_realizations = static_cast<int>(rho_avg_realizations.size());
+            
+            TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+            TBOX_ASSERT(num_realizations > 0);
+            TBOX_ASSERT(num_realizations == static_cast<int>(rho_avg_realizations.size()));
+            TBOX_ASSERT(num_realizations == static_cast<int>(rho_u_avg_realizations.size()));
+            TBOX_ASSERT(num_realizations == static_cast<int>(rho_v_avg_realizations.size()));
+            TBOX_ASSERT(num_realizations == static_cast<int>(rho_u_u_avg_realizations.size()));
+            TBOX_ASSERT(num_realizations == static_cast<int>(rho_v_v_avg_realizations.size()));
+            
+            const int num_cells = static_cast<int>(rho_avg_realizations[0].size());
+            const double weight = double(1)/double(num_realizations);
+            
+            std::vector<double> rho_avg_global(num_cells, double(0));
+            std::vector<double> rho_u_avg_global(num_cells, double(0));
+            std::vector<double> rho_v_avg_global(num_cells, double(0));
+            std::vector<double> rho_u_u_avg_global(num_cells, double(0));
+            std::vector<double> rho_v_v_avg_global(num_cells, double(0));
+            
+            for (int ri = 0; ri < num_realizations; ri++)
+            {
+                for (int i = 0; i < num_cells; i++)
+                {
+                    rho_avg_global[i]     += weight*rho_avg_realizations[ri][i];
+                    rho_u_avg_global[i]   += weight*rho_u_avg_realizations[ri][i];
+                    rho_v_avg_global[i]   += weight*rho_v_avg_realizations[ri][i];
+                    rho_u_u_avg_global[i] += weight*rho_u_u_avg_realizations[ri][i];
+                    rho_v_v_avg_global[i] += weight*rho_v_v_avg_realizations[ri][i];
+                }
+            }
+            
+            for (int i = 0; i < num_cells; i++)
+            {
+                const double u_tilde = rho_u_avg_global[i]/rho_avg_global[i];
+                const double v_tilde = rho_v_avg_global[i]/rho_avg_global[i];
+                const double rho_u_pp_u_pp = rho_u_u_avg_global[i] - rho_u_avg_global[i]*u_tilde;
+                const double rho_v_pp_v_pp = rho_v_v_avg_global[i] - rho_v_avg_global[i]*v_tilde;
+                
+                TKE_integrated_global += (half*(rho_u_pp_u_pp + rho_v_pp_v_pp)*dx_finest[0]);
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            const std::vector<std::vector<double> >& rho_avg_realizations =
+                d_ensemble_statistics->rho_avg_realizations;
+            
+            const std::vector<std::vector<double> >& rho_u_avg_realizations =
+                d_ensemble_statistics->rho_u_avg_realizations;
+            
+            const std::vector<std::vector<double> >& rho_v_avg_realizations =
+                d_ensemble_statistics->rho_u_avg_realizations;
+            
+            const std::vector<std::vector<double> >& rho_w_avg_realizations =
+                d_ensemble_statistics->rho_u_avg_realizations;
+            
+            const std::vector<std::vector<double> >& rho_u_u_avg_realizations =
+                d_ensemble_statistics->rho_u_u_avg_realizations;
+            
+            const std::vector<std::vector<double> >& rho_v_v_avg_realizations =
+                d_ensemble_statistics->rho_u_u_avg_realizations;
+            
+            const std::vector<std::vector<double> >& rho_w_w_avg_realizations =
+                d_ensemble_statistics->rho_u_u_avg_realizations;
+            
+            const int num_realizations = static_cast<int>(rho_avg_realizations.size());
+            
+            TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+            TBOX_ASSERT(num_realizations > 0);
+            TBOX_ASSERT(num_realizations == static_cast<int>(rho_avg_realizations.size()));
+            TBOX_ASSERT(num_realizations == static_cast<int>(rho_u_avg_realizations.size()));
+            TBOX_ASSERT(num_realizations == static_cast<int>(rho_v_avg_realizations.size()));
+            TBOX_ASSERT(num_realizations == static_cast<int>(rho_w_avg_realizations.size()));
+            TBOX_ASSERT(num_realizations == static_cast<int>(rho_u_u_avg_realizations.size()));
+            TBOX_ASSERT(num_realizations == static_cast<int>(rho_v_v_avg_realizations.size()));
+            TBOX_ASSERT(num_realizations == static_cast<int>(rho_w_w_avg_realizations.size()));
+            
+            const int num_cells = static_cast<int>(rho_avg_realizations[0].size());
+            const double weight = double(1)/double(num_realizations);
+            
+            std::vector<double> rho_avg_global(num_cells, double(0));
+            std::vector<double> rho_u_avg_global(num_cells, double(0));
+            std::vector<double> rho_v_avg_global(num_cells, double(0));
+            std::vector<double> rho_w_avg_global(num_cells, double(0));
+            std::vector<double> rho_u_u_avg_global(num_cells, double(0));
+            std::vector<double> rho_v_v_avg_global(num_cells, double(0));
+            std::vector<double> rho_w_w_avg_global(num_cells, double(0));
+            
+            for (int ri = 0; ri < num_realizations; ri++)
+            {
+                for (int i = 0; i < num_cells; i++)
+                {
+                    rho_avg_global[i]     += weight*rho_avg_realizations[ri][i];
+                    rho_u_avg_global[i]   += weight*rho_u_avg_realizations[ri][i];
+                    rho_v_avg_global[i]   += weight*rho_v_avg_realizations[ri][i];
+                    rho_w_avg_global[i]   += weight*rho_w_avg_realizations[ri][i];
+                    rho_u_u_avg_global[i] += weight*rho_u_u_avg_realizations[ri][i];
+                    rho_v_v_avg_global[i] += weight*rho_v_v_avg_realizations[ri][i];
+                    rho_w_w_avg_global[i] += weight*rho_w_w_avg_realizations[ri][i];
+                }
+            }
+            
+            for (int i = 0; i < num_cells; i++)
+            {
+                const double u_tilde = rho_u_avg_global[i]/rho_avg_global[i];
+                const double v_tilde = rho_v_avg_global[i]/rho_avg_global[i];
+                const double w_tilde = rho_w_avg_global[i]/rho_avg_global[i];
+                const double rho_u_pp_u_pp = rho_u_u_avg_global[i] - rho_u_avg_global[i]*u_tilde;
+                const double rho_v_pp_v_pp = rho_v_v_avg_global[i] - rho_v_avg_global[i]*v_tilde;
+                const double rho_w_pp_w_pp = rho_w_w_avg_global[i] - rho_w_avg_global[i]*w_tilde;
+                
+                TKE_integrated_global += (half*(rho_u_pp_u_pp + rho_v_pp_v_pp + rho_w_pp_w_pp)*dx_finest[0]);
+            }
+        }
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << TKE_integrated_global;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output ensemble Reynolds normal stress component in x-direction with assumed homogeneity in y-direction (2D)
+ * or yz-plane (3D) to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleReynoldsNormalStressXWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
@@ -3233,11 +3792,11 @@ RTIRMIStatisticsUtilities::outputReynoldsNormalStressXWithInhomogeneousXDirectio
 
 
 /*
- * Output Reynolds normal stress component in y-direction with assumed homogeneity in y-direction (2D) or yz-plane (3D)
- * to a file.
+ * Output ensemble Reynolds normal stress component in y-direction with assumed homogeneity in y-direction (2D)
+ * or yz-plane (3D) to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputReynoldsNormalStressYWithInhomogeneousXDirection(
+RTIRMIStatisticsUtilities::outputEnsembleReynoldsNormalStressYWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
@@ -3316,8 +3875,8 @@ RTIRMIStatisticsUtilities::outputReynoldsNormalStressYWithInhomogeneousXDirectio
         std::vector<double> R_22(num_cells, double(0));
         for (int i = 0; i < num_cells; i++)
         {
-            const double u_tilde = rho_v_avg_global[i]/rho_avg_global[i];
-            const double rho_v_pp_v_pp = rho_v_v_avg_global[i] - rho_v_avg_global[i]*u_tilde;
+            const double v_tilde = rho_v_avg_global[i]/rho_avg_global[i];
+            const double rho_v_pp_v_pp = rho_v_v_avg_global[i] - rho_v_avg_global[i]*v_tilde;
             R_22[i] = rho_v_pp_v_pp/rho_avg_global[i];
         }
         
@@ -3345,10 +3904,11 @@ RTIRMIStatisticsUtilities::outputReynoldsNormalStressYWithInhomogeneousXDirectio
 
 
 /*
- * Output Reynolds normal stress component in z-direction with assumed homogeneity in yz-plane (3D) to a file.
+ * Output ensemble Reynolds normal stress component in z-direction with assumed homogeneity in yz-plane (3D)
+ * to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputReynoldsNormalStressZWithInhomogeneousXDirection(
+RTIRMIStatisticsUtilities::outputEnsembleReynoldsNormalStressZWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
@@ -3427,8 +3987,8 @@ RTIRMIStatisticsUtilities::outputReynoldsNormalStressZWithInhomogeneousXDirectio
         std::vector<double> R_33(num_cells, double(0));
         for (int i = 0; i < num_cells; i++)
         {
-            const double u_tilde = rho_w_avg_global[i]/rho_avg_global[i];
-            const double rho_w_pp_w_pp = rho_w_w_avg_global[i] - rho_w_avg_global[i]*u_tilde;
+            const double w_tilde = rho_w_avg_global[i]/rho_avg_global[i];
+            const double rho_w_pp_w_pp = rho_w_w_avg_global[i] - rho_w_avg_global[i]*w_tilde;
             R_33[i] = rho_w_pp_w_pp/rho_avg_global[i];
         }
         
@@ -3456,10 +4016,10 @@ RTIRMIStatisticsUtilities::outputReynoldsNormalStressZWithInhomogeneousXDirectio
 
 
 /*
- * Output enstrophy integrated to a file.
+ * Output ensemble enstrophy integrated to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnstrophyIntegrated(
+RTIRMIStatisticsUtilities::outputEnsembleEnstrophyIntegrated(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
@@ -3547,10 +4107,10 @@ RTIRMIStatisticsUtilities::outputEnstrophyIntegrated(
 
 
 /*
- * Output scalar dissipation rate of first species integrated to a file.
+ * Output ensemble scalar dissipation rate of first species integrated to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
+RTIRMIStatisticsUtilities::outputEnsembleScalarDissipationRateIntegrated(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
@@ -3684,9 +4244,17 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             {
                 f_out << "\t" << "MIXEDNESS_X          ";
             }
+            else if (statistical_quantity_key == "TKE_INT")
+            {
+                f_out << "\t" << "TKE_INT              ";
+            }
             else if (statistical_quantity_key == "a1_MEAN_INHOMO_X")
             {
                 f_out << "\t" << "a1_MEAN_INHOMO_X     ";
+            }
+            else if (statistical_quantity_key == "b_MEAN_INHOMO_X")
+            {
+                f_out << "\t" << "b_MEAN_INHOMO_X      ";
             }
             else if (statistical_quantity_key == "R11_MEAN_INHOMO_X")
             {
@@ -3805,6 +4373,34 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
             {
                 rti_rmi_statistics_utilities->
                     computeDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "SPECIFIC_VOLUME_AVG_SP")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->rho_inv_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedSpecificVolumeWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "DENSITY_SPEC_VOL_COV_SP")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->rho_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->rho_inv_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedSpecificVolumeWithHomogeneityInYDirectionOrInYZPlane(
                         patch_hierarchy,
                         data_context);
             }
@@ -4004,6 +4600,70 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
                         data_context);
             }
         }
+        else if (statistical_quantity_key == "TKE_INT")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->rho_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->rho_u_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMomentumXWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->rho_u_u_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeReynoldsNormalStressXWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+            {
+                if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->rho_v_avg_computed))
+                {
+                    rti_rmi_statistics_utilities->
+                        computeAveragedMomentumYWithHomogeneityInYDirectionOrInYZPlane(
+                            patch_hierarchy,
+                            data_context);
+                }
+                
+                if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->rho_v_v_avg_computed))
+                {
+                    rti_rmi_statistics_utilities->
+                        computeReynoldsNormalStressYWithHomogeneityInYDirectionOrInYZPlane(
+                            patch_hierarchy,
+                            data_context);
+                }
+            }
+            
+            if (d_dim == tbox::Dimension(3))
+            {
+                if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->rho_w_avg_computed))
+                {
+                    rti_rmi_statistics_utilities->
+                        computeAveragedMomentumZWithHomogeneityInYZPlane(
+                            patch_hierarchy,
+                            data_context);
+                }
+                
+                if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->rho_w_w_avg_computed))
+                {
+                    rti_rmi_statistics_utilities->
+                        computeReynoldsNormalStressZWithHomogeneityInYZPlane(
+                            patch_hierarchy,
+                            data_context);
+                }
+            }
+        }
         else if (statistical_quantity_key == "a1_MEAN_INHOMO_X")
         {
             if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->rho_avg_computed))
@@ -4034,6 +4694,24 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
             {
                 rti_rmi_statistics_utilities->
                     computeAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "b_MEAN_INHOMO_X")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->rho_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->rho_inv_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedSpecificVolumeWithHomogeneityInYDirectionOrInYZPlane(
                         patch_hierarchy,
                         data_context);
             }
@@ -4214,7 +4892,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         if (statistical_quantity_key == "MASS_FRACTION_AVG_SP")
         {
             rti_rmi_statistics_utilities->
-                outputEnsembleAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
+                outputSpatialProfileEnsembleAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
                     "Y_avg.dat",
                     patch_hierarchy,
                     data_context,
@@ -4223,7 +4901,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "MASS_FRACTION_VAR_SP")
         {
             rti_rmi_statistics_utilities->
-                outputEnsembleMassFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+                outputSpatialProfileEnsembleMassFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
                     "Y_var.dat",
                     patch_hierarchy,
                     data_context,
@@ -4232,7 +4910,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "DENSITY_AVG_SP")
         {
             rti_rmi_statistics_utilities->
-                outputEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
+                outputSpatialProfileEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
                     "rho_avg.dat",
                     patch_hierarchy,
                     data_context,
@@ -4241,8 +4919,26 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "DENSITY_VAR_SP")
         {
             rti_rmi_statistics_utilities->
-                outputEnsembleDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
+                outputSpatialProfileEnsembleDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
                     "rho_var.dat",
+                    patch_hierarchy,
+                    data_context,
+                    output_time);
+        }
+        else if (statistical_quantity_key == "SPECIFIC_VOLUME_AVG_SP")
+        {
+            rti_rmi_statistics_utilities->
+                outputSpatialProfileEnsembleAveragedSpecificVolumeWithHomogeneityInYDirectionOrInYZPlane(
+                    "rho_inv_avg.dat",
+                    patch_hierarchy,
+                    data_context,
+                    output_time);
+        }
+        else if (statistical_quantity_key == "DENSITY_SPEC_VOL_COV_SP")
+        {
+            rti_rmi_statistics_utilities->
+                outputSpatialProfileEnsembleAveragedDensitySpecificVolumeCovarianceWithHomogeneityInYDirectionOrInYZPlane(
+                    "b.dat",
                     patch_hierarchy,
                     data_context,
                     output_time);
@@ -4250,7 +4946,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "VELOCITY_X_AVG_SP")
         {
             rti_rmi_statistics_utilities->
-                outputEnsembleAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
+                outputSpatialProfileEnsembleAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
                     "u_avg.dat",
                     patch_hierarchy,
                     data_context,
@@ -4259,7 +4955,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "VELOCITY_Y_AVG_SP")
         {
             rti_rmi_statistics_utilities->
-                outputEnsembleAveragedVelocityYWithHomogeneityInYDirectionOrInYZPlane(
+                outputSpatialProfileEnsembleAveragedVelocityYWithHomogeneityInYDirectionOrInYZPlane(
                     "v_avg.dat",
                     patch_hierarchy,
                     data_context,
@@ -4268,7 +4964,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "VELOCITY_Z_AVG_SP")
         {
             rti_rmi_statistics_utilities->
-                outputEnsembleAveragedVelocityZWithHomogeneityInYZPlane(
+                outputSpatialProfileEnsembleAveragedVelocityZWithHomogeneityInYZPlane(
                     "w_avg.dat",
                     patch_hierarchy,
                     data_context,
@@ -4277,7 +4973,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "MOMENTUM_X_AVG_SP")
         {
             rti_rmi_statistics_utilities->
-                outputEnsembleAveragedMomentumXWithHomogeneityInYDirectionOrInYZPlane(
+                outputSpatialProfileEnsembleAveragedMomentumXWithHomogeneityInYDirectionOrInYZPlane(
                     "rho_u_avg.dat",
                     patch_hierarchy,
                     data_context,
@@ -4286,7 +4982,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "MOMENTUM_Y_AVG_SP")
         {
             rti_rmi_statistics_utilities->
-                outputEnsembleAveragedMomentumYWithHomogeneityInYDirectionOrInYZPlane(
+                outputSpatialProfileEnsembleAveragedMomentumYWithHomogeneityInYDirectionOrInYZPlane(
                     "rho_v_avg.dat",
                     patch_hierarchy,
                     data_context,
@@ -4295,7 +4991,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "MOMENTUM_Z_AVG_SP")
         {
             rti_rmi_statistics_utilities->
-                outputEnsembleAveragedMomentumZWithHomogeneitynYZPlane(
+                outputSpatialProfileEnsembleAveragedMomentumZWithHomogeneitynYZPlane(
                     "rho_w_avg.dat",
                     patch_hierarchy,
                     data_context,
@@ -4304,7 +5000,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "TURB_MASS_FLUX_X_SP")
         {
             rti_rmi_statistics_utilities->
-                outputEnsembleTurbulentMassFluxXWithHomogeneityInYDirectionOrInYZPlane(
+                outputSpatialProfileEnsembleTurbulentMassFluxXWithHomogeneityInYDirectionOrInYZPlane(
                     "rho_a1.dat",
                     patch_hierarchy,
                     data_context,
@@ -4313,7 +5009,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "R11_SP")
         {
             rti_rmi_statistics_utilities->
-                outputEnsembleReynoldsNormalStressXWithHomogeneityInYDirectionOrInYZPlane(
+                outputSpatialProfileEnsembleReynoldsNormalStressXWithHomogeneityInYDirectionOrInYZPlane(
                     "R11.dat",
                     patch_hierarchy,
                     data_context,
@@ -4322,7 +5018,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "R22_SP")
         {
             rti_rmi_statistics_utilities->
-                outputEnsembleReynoldsNormalStressYWithHomogeneityInYDirectionOrInYZPlane(
+                outputSpatialProfileEnsembleReynoldsNormalStressYWithHomogeneityInYDirectionOrInYZPlane(
                     "R22.dat",
                     patch_hierarchy,
                     data_context,
@@ -4331,7 +5027,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "R33_SP")
         {
             rti_rmi_statistics_utilities->
-                outputEnsembleReynoldsNormalStressZWithHomogeneityInYZPlane(
+                outputSpatialProfileEnsembleReynoldsNormalStressZWithHomogeneityInYZPlane(
                     "R33.dat",
                     patch_hierarchy,
                     data_context,
@@ -4340,7 +5036,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "ENSTROPHY_AVG_SP")
         {
             rti_rmi_statistics_utilities->
-                outputEnsembleAveragedEnstrophyWithHomogeneityInYDirectionOrInYZPlane(
+                outputSpatialProfileEnsembleAveragedEnstrophyWithHomogeneityInYDirectionOrInYZPlane(
                     "Omega_avg.dat",
                     patch_hierarchy,
                     data_context,
@@ -4349,7 +5045,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "SCAL_DISS_RAT_AVG_SP")
         {
             rti_rmi_statistics_utilities->
-                outputEnsembleAveragedScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+                outputSpatialProfileEnsembleAveragedScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
                     "chi_avg.dat",
                     patch_hierarchy,
                     data_context,
@@ -4359,7 +5055,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "MIXING_WIDTH_X")
         {
             rti_rmi_statistics_utilities->
-                outputMixingWidthInXDirection(
+                outputEnsembleMixingWidthInXDirection(
                     stat_dump_filename,
                     patch_hierarchy,
                     data_context);
@@ -4367,7 +5063,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "MIXEDNESS_X")
         {
             rti_rmi_statistics_utilities->
-                outputMixednessInXDirection(
+                outputEnsembleMixednessInXDirection(
+                    stat_dump_filename,
+                    patch_hierarchy,
+                    data_context);
+        }
+        else if (statistical_quantity_key == "TKE_INT")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleTKEIntegrateWithInhomogeneousXDirection(
                     stat_dump_filename,
                     patch_hierarchy,
                     data_context);
@@ -4375,7 +5079,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "a1_MEAN_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
-                outputTurbulentMassFluxVelocityXWithInhomogeneousXDirection(
+                outputEnsembleTurbulentMassFluxVelocityXWithInhomogeneousXDirection(
+                    stat_dump_filename,
+                    patch_hierarchy,
+                    data_context);
+        }
+        else if (statistical_quantity_key == "b_MEAN_INHOMO_X")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleDensitySpecificVolumeCovarianceWithInhomogeneousXDirection(
                     stat_dump_filename,
                     patch_hierarchy,
                     data_context);
@@ -4383,7 +5095,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "R11_MEAN_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
-                outputReynoldsNormalStressXWithInhomogeneousXDirection(
+                outputEnsembleReynoldsNormalStressXWithInhomogeneousXDirection(
                     stat_dump_filename,
                     patch_hierarchy,
                     data_context);
@@ -4391,7 +5103,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "R22_MEAN_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
-                outputReynoldsNormalStressYWithInhomogeneousXDirection(
+                outputEnsembleReynoldsNormalStressYWithInhomogeneousXDirection(
                     stat_dump_filename,
                     patch_hierarchy,
                     data_context);
@@ -4399,7 +5111,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "R33_MEAN_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
-                outputReynoldsNormalStressZWithInhomogeneousXDirection(
+                outputEnsembleReynoldsNormalStressZWithInhomogeneousXDirection(
                     stat_dump_filename,
                     patch_hierarchy,
                     data_context);
@@ -4407,7 +5119,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "ENSTROPHY_INT")
         {
             rti_rmi_statistics_utilities->
-                outputEnstrophyIntegrated(
+                outputEnsembleEnstrophyIntegrated(
                     stat_dump_filename,
                     patch_hierarchy,
                     data_context);
@@ -4415,7 +5127,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "SCAL_DISS_RAT_INT")
         {
             rti_rmi_statistics_utilities->
-                outputScalarDissipationRateIntegrated(
+                outputEnsembleScalarDissipationRateIntegrated(
                     stat_dump_filename,
                     patch_hierarchy,
                     data_context);

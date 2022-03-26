@@ -2125,7 +2125,7 @@ RTIRMISpatialProfilesUtilities::outputReynoldsShearStressXZWithHomogeneityInYZPl
     {
         TBOX_ERROR(d_object_name
             << ": "
-            << "'RE_STRESS_13' can be computed for 3D problem only."
+            << "'R13' can be computed for 3D problem only."
             << std::endl);
     }
     
@@ -2290,7 +2290,7 @@ RTIRMISpatialProfilesUtilities::outputReynoldsShearStressYZWithHomogeneityInYZPl
     {
         TBOX_ERROR(d_object_name
             << ": "
-            << "'RE_STRESS_23' can be computed for 3D problem only."
+            << "'R23' can be computed for 3D problem only."
             << std::endl);
     }
     
@@ -2987,7 +2987,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 data_context,
                 output_time);
         }
-        else if (statistical_quantity_key == "RE_STRESS_12")
+        else if (statistical_quantity_key == "R12")
         {
             rti_rmi_spatial_profiles_utilities->outputReynoldsShearStressXYWithHomogeneityInYDirectionOrInYZPlane(
                 "R12.dat",
@@ -2995,7 +2995,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 data_context,
                 output_time);
         }
-        else if (statistical_quantity_key == "RE_STRESS_13")
+        else if (statistical_quantity_key == "R13")
         {
             rti_rmi_spatial_profiles_utilities->outputReynoldsShearStressXZWithHomogeneityInYZPlane(
                 "R13.dat",
@@ -3003,7 +3003,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 data_context,
                 output_time);
         }
-        else if (statistical_quantity_key == "RE_STRESS_23")
+        else if (statistical_quantity_key == "R23")
         {
             rti_rmi_spatial_profiles_utilities->outputReynoldsShearStressYZWithHomogeneityInYZPlane(
                 "R23.dat",
