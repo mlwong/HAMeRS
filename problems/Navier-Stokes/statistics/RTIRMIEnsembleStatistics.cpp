@@ -3430,7 +3430,7 @@ RTIRMIStatisticsUtilities::outputEnsembleDensitySpecificVolumeCovarianceWithInho
             const double mixing_metric = double(4)*Y_0_avg_global[i]*(double(1) - Y_0_avg_global[i]);
             if (mixing_metric > double(9)/double(10))
             {
-                b_sum += rho_p_rho_inv_p[i];
+                b_sum -= rho_p_rho_inv_p[i];
                 count++;
             }
         }
@@ -3597,6 +3597,11 @@ RTIRMIStatisticsUtilities::outputEnsembleTKEIntegrateWithInhomogeneousXDirection
                 
                 TKE_integrated_global += (half*(rho_u_pp_u_pp + rho_v_pp_v_pp)*dx_finest[0]);
             }
+            
+            const double* x_lo = d_grid_geometry->getXLower();
+            const double* x_hi = d_grid_geometry->getXUpper();
+            const double L_y = x_hi[1] - x_lo[1];
+            TKE_integrated_global *= L_y;
         }
         else if (d_dim == tbox::Dimension(3))
         {
@@ -3669,6 +3674,12 @@ RTIRMIStatisticsUtilities::outputEnsembleTKEIntegrateWithInhomogeneousXDirection
                 
                 TKE_integrated_global += (half*(rho_u_pp_u_pp + rho_v_pp_v_pp + rho_w_pp_w_pp)*dx_finest[0]);
             }
+            
+            const double* x_lo = d_grid_geometry->getXLower();
+            const double* x_hi = d_grid_geometry->getXUpper();
+            const double L_y = x_hi[1] - x_lo[1];
+            const double L_z = x_hi[2] - x_lo[2];
+            TKE_integrated_global *= (L_y*L_z);
         }
         
         f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
