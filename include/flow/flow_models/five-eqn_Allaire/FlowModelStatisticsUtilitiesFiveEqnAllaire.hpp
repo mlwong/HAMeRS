@@ -38,6 +38,15 @@ class FlowModelStatisticsUtilitiesFiveEqnAllaire: public FlowModelStatisticsUtil
             const std::string& stat_dump_filename);
         
         /*
+         * Compute statisitcal quantities.
+         */
+        void
+        computeStatisticalQuantities(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double statistics_data_time);
+        
+        /*
          * Output statisitcal quantities to a file.
          */
         void
