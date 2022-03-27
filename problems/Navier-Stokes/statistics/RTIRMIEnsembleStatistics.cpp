@@ -482,6 +482,24 @@ class RTIRMIStatisticsUtilities
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
+         * Output ensemble minimum interface location in x-direction to a file.
+         */
+        void
+        outputEnsembleInterfaceMinInXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Output ensemble maximum interface location in x-direction to a file.
+         */
+        void
+        outputEnsembleInterfaceMaxInXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
          * Output ensemble mixedness in x-direction to a file.
          */
         void
@@ -3164,6 +3182,192 @@ RTIRMIStatisticsUtilities::outputEnsembleMixingWidthInXDirection(
 
 
 /*
+ * Output ensemble minimum interface location in x-direction to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleInterfaceMinInXDirection(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'INTERFACE_MIN_X' can be computed with two species only."
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    MPIHelper MPI_helper = MPIHelper(
+        "MPI_helper",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy);
+    
+    const std::vector<double>& dx_finest = MPI_helper.getFinestRefinedDomainGridSpacing();
+    
+    /*
+     * Compute and output the quantity (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& Y_0_avg_realizations =
+            d_ensemble_statistics->Y_0_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(Y_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        
+        const int num_cells = static_cast<int>(Y_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> Y_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                Y_0_avg_global[i] += weight*Y_0_avg_realizations[ri][i];
+            }
+        }
+        
+        const double* x_lo = d_grid_geometry->getXLower();
+        const double* x_hi = d_grid_geometry->getXUpper();
+        double interface_min = x_hi[0];
+        
+        for (int i = num_cells - 1; i >= 0;  i--)
+        {
+            if (Y_0_avg_global[i] > 0.01 && Y_0_avg_global[i] < 0.99)
+            {
+                const double x_loc = x_lo[0] + 0.5*dx_finest[0] + i*dx_finest[0];
+                if (x_loc < interface_min)
+                {
+                   interface_min = x_loc;
+                }
+            }
+        }
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << interface_min;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output ensemble maximum interface location in x-direction to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleInterfaceMaxInXDirection(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'INTERFACE_MIN_X' can be computed with two species only."
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    MPIHelper MPI_helper = MPIHelper(
+        "MPI_helper",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy);
+    
+    const std::vector<double>& dx_finest = MPI_helper.getFinestRefinedDomainGridSpacing();
+    
+    /*
+     * Compute and output the quantity (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& Y_0_avg_realizations =
+            d_ensemble_statistics->Y_0_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(Y_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        
+        const int num_cells = static_cast<int>(Y_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> Y_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                Y_0_avg_global[i] += weight*Y_0_avg_realizations[ri][i];
+            }
+        }
+        
+        const double* x_lo = d_grid_geometry->getXLower();
+        // const double* x_hi = d_grid_geometry->getXUpper();
+        double interface_max = x_lo[0];
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            if (Y_0_avg_global[i] > 0.01 && Y_0_avg_global[i] < 0.99)
+            {
+                const double x_loc = x_lo[0] + 0.5*dx_finest[0] + i*dx_finest[0];
+                if (x_loc > interface_max)
+                {
+                   interface_max = x_loc;
+                }
+            }
+        }
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << interface_max;
+        
+        f_out.close();
+    }
+}
+
+
+/*
  * Output ensemble mixedness in x-direction to a file.
  */
 void
@@ -4251,6 +4455,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             {
                 f_out << "\t" << "MIXING_WIDTH_X       ";
             }
+            else if (statistical_quantity_key == "INTERFACE_MIN_X")
+            {
+                f_out << "\t" << "INTERFACE_MIN_X      ";
+            }
+            else if (statistical_quantity_key == "INTERFACE_MAX_X")
+            {
+                f_out << "\t" << "INTERFACE_MAX_X      ";
+            }
             else if (statistical_quantity_key == "MIXEDNESS_X")
             {
                 f_out << "\t" << "MIXEDNESS_X          ";
@@ -4584,6 +4796,26 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
         }
         // Non-spatial profiles.
         else if (statistical_quantity_key == "MIXING_WIDTH_X")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Y_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "INTERFACE_MIN_X")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Y_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "INTERFACE_MAX_X")
         {
             if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Y_0_avg_computed))
             {
@@ -5067,6 +5299,22 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleMixingWidthInXDirection(
+                    stat_dump_filename,
+                    patch_hierarchy,
+                    data_context);
+        }
+        else if (statistical_quantity_key == "INTERFACE_MIN_X")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleInterfaceMinInXDirection(
+                    stat_dump_filename,
+                    patch_hierarchy,
+                    data_context);
+        }
+        else if (statistical_quantity_key == "INTERFACE_MAX_X")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleInterfaceMaxInXDirection(
                     stat_dump_filename,
                     patch_hierarchy,
                     data_context);

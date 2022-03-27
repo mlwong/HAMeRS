@@ -3049,7 +3049,7 @@ RTIRMIStatisticsUtilities::outputInterfaceMinInXDirection(
         const double* x_hi = d_grid_geometry->getXUpper();
         double interface_min = x_hi[0];
         
-        for (int i = finest_level_dims[0]-1; i >= 0;  i--)
+        for (int i = finest_level_dims[0] - 1; i >= 0;  i--)
         {
             if (Y_avg_global[i] > 0.01 && Y_avg_global[i] < 0.99)
             {
