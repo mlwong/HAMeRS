@@ -375,6 +375,28 @@ RungeKuttaPatchStrategy::filterStatisticsVariables(
 
 
 /**
+ * Output the header of statistics.
+ */
+void
+RungeKuttaPatchStrategy::outputHeaderStatistics()
+{
+}
+
+
+/**
+ * Compute the statistics of data.
+ */
+void
+RungeKuttaPatchStrategy::computeDataStatistics(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const double statistics_data_time)
+{
+    NULL_USE(patch_hierarchy);
+    NULL_USE(statistics_data_time);
+}
+
+
+/**
  * Output the statistics of data.
  */
 void
