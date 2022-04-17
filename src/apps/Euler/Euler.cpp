@@ -110,6 +110,7 @@ Euler::Euler(
     
     d_flow_model_manager.reset(new FlowModelManager(
         "d_flow_model_manager",
+        d_project_name,
         d_dim,
         d_grid_geometry,
         d_num_species,
