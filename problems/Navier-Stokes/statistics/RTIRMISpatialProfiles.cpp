@@ -47,6 +47,17 @@ class RTIRMISpatialProfilesUtilities
             const double output_time) const;
         
         /*
+         * Output variance of mass fraction with assumed homogeneity in y-direction (2D) or yz-plane (3D)
+         * to a file.
+         */
+        void
+        outputMassFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
          * Output averaged mole fraction with assumed homogeneity in y-direction (2D) or yz-plane (3D)
          * to a file.
          */
@@ -58,11 +69,33 @@ class RTIRMISpatialProfilesUtilities
             const double output_time) const;
         
         /*
+         * Output variance of mole fraction with assumed homogeneity in y-direction (2D) or yz-plane (3D)
+         * to a file.
+         */
+        void
+        outputMoleFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
          * Output averaged density with assumed homogeneity in y-direction (2D) or yz-plane (3D)
          * to a file.
          */
         void
         outputAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output variance of density with assumed homogeneity in y-direction (2D) or yz-plane (3D)
+         * to a file.
+         */
+        void
+        outputDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -128,7 +161,7 @@ class RTIRMISpatialProfilesUtilities
          * to a file.
          */
         void
-        outputAveragedVelocityZWithHomogeneityInYDirectionOrInYZPlane(
+        outputAveragedVelocityZWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -157,10 +190,10 @@ class RTIRMISpatialProfilesUtilities
             const double output_time) const;
         
         /*
-         * Output Favre-averaged velocity Z-component with assumed homogeneity in yz-plane (3D) to a file.
+         * Output Favre-averaged velocity z-component with assumed homogeneity in yz-plane (3D) to a file.
          */
         void
-        outputFavreAveragedVelocityZWithHomogeneityInYDirectionOrInYZPlane(
+        outputFavreAveragedVelocityZWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -256,16 +289,6 @@ class RTIRMISpatialProfilesUtilities
          */
         void
         outputDensitySpecificVolumeCovarianceWithHomogeneityInYDirectionOrInYZPlane(
-            const std::string& stat_dump_filename,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
-            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-            const double output_time) const;
-        
-        /*
-         * Output density variance in x-direction with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
-         */
-        void
-        outputDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -411,6 +434,110 @@ RTIRMISpatialProfilesUtilities::outputAveragedMassFractionWithHomogeneityInYDire
 
 
 /*
+ * Output variance of mass fraction with assumed homogeneity in y-direction (2D) or yz-plane (3D)
+ * to a file.
+ */
+void
+RTIRMISpatialProfilesUtilities::outputMassFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+        const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'MASS_FRACTION_VAR' can be computed with two species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    FlowModelMPIHelperCorrelation MPI_helper_correlation = FlowModelMPIHelperCorrelation(
+        "MPI_helper_correlation",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    std::vector<double> Y_0_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "MASS_FRACTIONS",
+        0,
+        data_context);
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    std::vector<std::vector<double> > averaged_quantities;
+    
+    quantity_names.push_back("MASS_FRACTIONS");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(Y_0_avg_global);
+    
+    quantity_names.push_back("MASS_FRACTIONS");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(Y_0_avg_global);
+    
+    std::vector<double> Y_0_var_global = MPI_helper_correlation.getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        averaged_quantities,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    averaged_quantities.clear();
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&Y_0_var_global[0], sizeof(double)*Y_0_var_global.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
  * Output averaged mole fraction with assumed homogeneity in y-direction (2D) or yz-plane (3D)
  * to a file.
  */
@@ -486,6 +613,110 @@ RTIRMISpatialProfilesUtilities::outputAveragedMoleFractionWithHomogeneityInYDire
 
 
 /*
+ * Output variance of mole fraction with assumed homogeneity in y-direction (2D) or yz-plane (3D)
+ * to a file.
+ */
+void
+RTIRMISpatialProfilesUtilities::outputMoleFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+        const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'MOLE_FRACTION_VAR' can be computed with two species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    FlowModelMPIHelperCorrelation MPI_helper_correlation = FlowModelMPIHelperCorrelation(
+        "MPI_helper_correlation",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    std::vector<double> X_0_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "MOLE_FRACTIONS",
+        0,
+        data_context);
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    std::vector<std::vector<double> > averaged_quantities;
+    
+    quantity_names.push_back("MOLE_FRACTIONS");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(X_0_avg_global);
+    
+    quantity_names.push_back("MOLE_FRACTIONS");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(X_0_avg_global);
+    
+    std::vector<double> X_0_var_global = MPI_helper_correlation.getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        averaged_quantities,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    averaged_quantities.clear();
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&X_0_var_global[0], sizeof(double)*X_0_var_global.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
  * Output averaged density with assumed homogeneity in y-direction (2D) or yz-plane (3D)
  * to a file.
  */
@@ -546,6 +777,102 @@ RTIRMISpatialProfilesUtilities::outputAveragedDensityWithHomogeneityInYDirection
     {
         f_out.write((char*)&output_time, sizeof(double));
         f_out.write((char*)&rho_avg_global[0], sizeof(double)*rho_avg_global.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output variance of density with assumed homogeneity in y-direction (2D) or yz-plane (3D)
+ * to a file.
+ */
+void
+RTIRMISpatialProfilesUtilities::outputDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+        const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    FlowModelMPIHelperCorrelation MPI_helper_correlation = FlowModelMPIHelperCorrelation(
+        "MPI_helper_correlation",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    std::vector<double> rho_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        data_context);
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    std::vector<std::vector<double> > averaged_quantities;
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(rho_avg_global);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    averaged_quantities.push_back(rho_avg_global);
+    
+    std::vector<double> rho_var_global = MPI_helper_correlation.getQuantityCorrelationWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        averaged_quantities,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    averaged_quantities.clear();
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&rho_var_global[0], sizeof(double)*rho_var_global.size());
         
         f_out.close();
     }
@@ -891,7 +1218,7 @@ RTIRMISpatialProfilesUtilities::outputAveragedVelocityYWithHomogeneityInYDirecti
  * Output averaged velocity z-component with assumed homogeneity yz-plane (3D) to a file.
  */
 void
-RTIRMISpatialProfilesUtilities::outputAveragedVelocityZWithHomogeneityInYDirectionOrInYZPlane(
+RTIRMISpatialProfilesUtilities::outputAveragedVelocityZWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -1124,10 +1451,10 @@ RTIRMISpatialProfilesUtilities::outputFavreAveragedVelocityYWithHomogeneityInYDi
 
 
 /*
- * Output Favre-averaged velocity Z-component with assumed homogeneity in yz-plane (3D) to a file.
+ * Output Favre-averaged velocity z-component with assumed homogeneity in yz-plane (3D) to a file.
  */
 void
-RTIRMISpatialProfilesUtilities::outputFavreAveragedVelocityZWithHomogeneityInYDirectionOrInYZPlane(
+RTIRMISpatialProfilesUtilities::outputFavreAveragedVelocityZWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -1260,7 +1587,7 @@ RTIRMISpatialProfilesUtilities::outputReynoldsNormalStressXWithHomogeneityInYDir
         flow_model_tmp);
     
     FlowModelMPIHelperCorrelation MPI_helper_correlation = FlowModelMPIHelperCorrelation(
-        "MPI_helper_average",
+        "MPI_helper_correlation",
         d_dim,
         d_grid_geometry,
         patch_hierarchy,
@@ -1395,7 +1722,7 @@ RTIRMISpatialProfilesUtilities::outputReynoldsNormalStressYWithHomogeneityInYDir
         flow_model_tmp);
     
     FlowModelMPIHelperCorrelation MPI_helper_correlation = FlowModelMPIHelperCorrelation(
-        "MPI_helper_average",
+        "MPI_helper_correlation",
         d_dim,
         d_grid_geometry,
         patch_hierarchy,
@@ -1499,7 +1826,7 @@ RTIRMISpatialProfilesUtilities::outputReynoldsNormalStressZWithHomogeneityInYZPl
     {
         TBOX_ERROR(d_object_name
             << ": "
-            << "'RE_STRESS_33' can be computed for 3D problem only."
+            << "'R33' can be computed for 3D problem only."
             << std::endl);
     }
     
@@ -1537,7 +1864,7 @@ RTIRMISpatialProfilesUtilities::outputReynoldsNormalStressZWithHomogeneityInYZPl
         flow_model_tmp);
     
     FlowModelMPIHelperCorrelation MPI_helper_correlation = FlowModelMPIHelperCorrelation(
-        "MPI_helper_average",
+        "MPI_helper_correlation",
         d_dim,
         d_grid_geometry,
         patch_hierarchy,
@@ -1671,7 +1998,7 @@ RTIRMISpatialProfilesUtilities::outputReynoldsShearStressXYWithHomogeneityInYDir
         flow_model_tmp);
     
     FlowModelMPIHelperCorrelation MPI_helper_correlation = FlowModelMPIHelperCorrelation(
-        "MPI_helper_average",
+        "MPI_helper_correlation",
         d_dim,
         d_grid_geometry,
         patch_hierarchy,
@@ -1798,7 +2125,7 @@ RTIRMISpatialProfilesUtilities::outputReynoldsShearStressXZWithHomogeneityInYZPl
     {
         TBOX_ERROR(d_object_name
             << ": "
-            << "'RE_STRESS_13' can be computed for 3D problem only."
+            << "'R13' can be computed for 3D problem only."
             << std::endl);
     }
     
@@ -1836,7 +2163,7 @@ RTIRMISpatialProfilesUtilities::outputReynoldsShearStressXZWithHomogeneityInYZPl
         flow_model_tmp);
     
     FlowModelMPIHelperCorrelation MPI_helper_correlation = FlowModelMPIHelperCorrelation(
-        "MPI_helper_average",
+        "MPI_helper_correlation",
         d_dim,
         d_grid_geometry,
         patch_hierarchy,
@@ -1963,7 +2290,7 @@ RTIRMISpatialProfilesUtilities::outputReynoldsShearStressYZWithHomogeneityInYZPl
     {
         TBOX_ERROR(d_object_name
             << ": "
-            << "'RE_STRESS_23' can be computed for 3D problem only."
+            << "'R23' can be computed for 3D problem only."
             << std::endl);
     }
     
@@ -2001,7 +2328,7 @@ RTIRMISpatialProfilesUtilities::outputReynoldsShearStressYZWithHomogeneityInYZPl
         flow_model_tmp);
     
     FlowModelMPIHelperCorrelation MPI_helper_correlation = FlowModelMPIHelperCorrelation(
-        "MPI_helper_average",
+        "MPI_helper_correlation",
         d_dim,
         d_grid_geometry,
         patch_hierarchy,
@@ -2159,7 +2486,7 @@ RTIRMISpatialProfilesUtilities::outputTurbulentMassFluxXWithHomogeneityInYDirect
         flow_model_tmp);
     
     FlowModelMPIHelperCorrelation MPI_helper_correlation = FlowModelMPIHelperCorrelation(
-        "MPI_helper_average",
+        "MPI_helper_correlation",
         d_dim,
         d_grid_geometry,
         patch_hierarchy,
@@ -2262,7 +2589,7 @@ RTIRMISpatialProfilesUtilities::outputTurbulentMassFluxVelocityXWithHomogeneityI
         flow_model_tmp);
     
     FlowModelMPIHelperCorrelation MPI_helper_correlation = FlowModelMPIHelperCorrelation(
-        "MPI_helper_average",
+        "MPI_helper_correlation",
         d_dim,
         d_grid_geometry,
         patch_hierarchy,
@@ -2371,7 +2698,7 @@ RTIRMISpatialProfilesUtilities::outputDensitySpecificVolumeCovarianceWithHomogen
         flow_model_tmp);
     
     FlowModelMPIHelperCorrelation MPI_helper_correlation = FlowModelMPIHelperCorrelation(
-        "MPI_helper_average",
+        "MPI_helper_correlation",
         d_dim,
         d_grid_geometry,
         patch_hierarchy,
@@ -2438,104 +2765,17 @@ RTIRMISpatialProfilesUtilities::outputDensitySpecificVolumeCovarianceWithHomogen
 
 
 /*
- * Output density variance with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
+ * Compute statisitcal quantities.
  */
 void
-RTIRMISpatialProfilesUtilities::outputDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
-    const std::string& stat_dump_filename,
+FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
-    const double output_time) const
+    const double statistics_data_time)
 {
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(!stat_dump_filename.empty());
-#endif
-    
-    if (d_flow_model.expired())
-    {
-        TBOX_ERROR(d_object_name
-            << ": "
-            << "The object is not setup yet!"
-            << std::endl);
-    }
-    
-    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
-    
-    std::ofstream f_out;
-    
-    if (mpi.getRank() == 0)
-    {
-        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
-        if (!f_out.is_open())
-        {
-            TBOX_ERROR(d_object_name
-                << ": "
-                << "Failed to open file to output statistics!"
-                << std::endl);
-        }
-    }
-    
-    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
-    
-    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
-        "MPI_helper_average",
-        d_dim,
-        d_grid_geometry,
-        patch_hierarchy,
-        flow_model_tmp);
-    
-    FlowModelMPIHelperCorrelation MPI_helper_correlation = FlowModelMPIHelperCorrelation(
-        "MPI_helper_average",
-        d_dim,
-        d_grid_geometry,
-        patch_hierarchy,
-        flow_model_tmp);
-    
-    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
-    
-    std::vector<double> rho_mean = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
-        "DENSITY",
-        0,
-        data_context);
-    
-    std::vector<double> v_mean = MPI_helper_average.getAveragedReciprocalOfQuantityWithInhomogeneousXDirection(
-        "DENSITY",
-        0,
-        data_context);
-    
-    std::vector<std::string> quantity_names;
-    std::vector<int> component_indices;
-    std::vector<std::vector<double> > averaged_quantities;
-    
-    quantity_names.push_back("DENSITY");
-    component_indices.push_back(0);
-    averaged_quantities.push_back(rho_mean);
-    
-    quantity_names.push_back("DENSITY");
-    component_indices.push_back(0);
-    averaged_quantities.push_back(rho_mean);
-    
-    std::vector<double> rho_p_rho_p = MPI_helper_correlation.getQuantityCorrelationWithInhomogeneousXDirection(
-        quantity_names,
-        component_indices,
-        averaged_quantities,
-        data_context);
-    
-    quantity_names.clear();
-    component_indices.clear();
-    averaged_quantities.clear();
-    
-    /*
-     * Output the spatial profile (only done by process 0).
-     */
-    
-    if (mpi.getRank() == 0)
-    {
-        f_out.write((char*)&output_time, sizeof(double));
-        f_out.write((char*)&rho_p_rho_p[0], sizeof(double)*rho_p_rho_p.size());
-        
-        f_out.close();
-    }
+    NULL_USE(patch_hierarchy);
+    NULL_USE(data_context);
+    NULL_USE(statistics_data_time);
 }
 
 
@@ -2611,6 +2851,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 data_context,
                 output_time);
         }
+        else if (statistical_quantity_key == "MASS_FRACTION_VAR")
+        {
+            rti_rmi_spatial_profiles_utilities->outputMassFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+                "Y_var.dat",
+                patch_hierarchy,
+                data_context,
+                output_time);
+        }
         else if (statistical_quantity_key == "MOLE_FRACTION_AVG")
         {
             rti_rmi_spatial_profiles_utilities->outputAveragedMoleFractionWithHomogeneityInYDirectionOrInYZPlane(
@@ -2619,10 +2867,26 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 data_context,
                 output_time);
         }
+        else if (statistical_quantity_key == "MOLE_FRACTION_VAR")
+        {
+            rti_rmi_spatial_profiles_utilities->outputMoleFractionVarianceWithHomogeneityInYDirectionOrInYZPlane(
+                "X_var.dat",
+                patch_hierarchy,
+                data_context,
+                output_time);
+        }
         else if (statistical_quantity_key == "DENSITY_AVG")
         {
             rti_rmi_spatial_profiles_utilities->outputAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
                 "rho_avg.dat",
+                patch_hierarchy,
+                data_context,
+                output_time);
+        }
+        else if (statistical_quantity_key == "DENSITY_VAR")
+        {
+            rti_rmi_spatial_profiles_utilities->outputDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
+                "rho_var.dat",
                 patch_hierarchy,
                 data_context,
                 output_time);
@@ -2669,7 +2933,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         }
         else if (statistical_quantity_key == "VELOCITY_Z_AVG")
         {
-            rti_rmi_spatial_profiles_utilities->outputAveragedVelocityZWithHomogeneityInYDirectionOrInYZPlane(
+            rti_rmi_spatial_profiles_utilities->outputAveragedVelocityZWithHomogeneityInYZPlane(
                 "w_avg.dat",
                 patch_hierarchy,
                 data_context,
@@ -2693,13 +2957,13 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         }
         else if (statistical_quantity_key == "VELOCITY_Z_FAVRE_AVG")
         {
-            rti_rmi_spatial_profiles_utilities->outputFavreAveragedVelocityZWithHomogeneityInYDirectionOrInYZPlane(
+            rti_rmi_spatial_profiles_utilities->outputFavreAveragedVelocityZWithHomogeneityInYZPlane(
                 "w_Favre_avg.dat",
                 patch_hierarchy,
                 data_context,
                 output_time);
         }
-        else if (statistical_quantity_key == "RE_STRESS_11")
+        else if (statistical_quantity_key == "R11")
         {
             rti_rmi_spatial_profiles_utilities->outputReynoldsNormalStressXWithHomogeneityInYDirectionOrInYZPlane(
                 "R11.dat",
@@ -2707,7 +2971,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 data_context,
                 output_time);
         }
-        else if (statistical_quantity_key == "RE_STRESS_22")
+        else if (statistical_quantity_key == "R22")
         {
             rti_rmi_spatial_profiles_utilities->outputReynoldsNormalStressYWithHomogeneityInYDirectionOrInYZPlane(
                 "R22.dat",
@@ -2715,7 +2979,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 data_context,
                 output_time);
         }
-        else if (statistical_quantity_key == "RE_STRESS_33")
+        else if (statistical_quantity_key == "R33")
         {
             rti_rmi_spatial_profiles_utilities->outputReynoldsNormalStressZWithHomogeneityInYZPlane(
                 "R33.dat",
@@ -2723,7 +2987,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 data_context,
                 output_time);
         }
-        else if (statistical_quantity_key == "RE_STRESS_12")
+        else if (statistical_quantity_key == "R12")
         {
             rti_rmi_spatial_profiles_utilities->outputReynoldsShearStressXYWithHomogeneityInYDirectionOrInYZPlane(
                 "R12.dat",
@@ -2731,7 +2995,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 data_context,
                 output_time);
         }
-        else if (statistical_quantity_key == "RE_STRESS_13")
+        else if (statistical_quantity_key == "R13")
         {
             rti_rmi_spatial_profiles_utilities->outputReynoldsShearStressXZWithHomogeneityInYZPlane(
                 "R13.dat",
@@ -2739,7 +3003,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 data_context,
                 output_time);
         }
-        else if (statistical_quantity_key == "RE_STRESS_23")
+        else if (statistical_quantity_key == "R23")
         {
             rti_rmi_spatial_profiles_utilities->outputReynoldsShearStressYZWithHomogeneityInYZPlane(
                 "R23.dat",
@@ -2771,21 +3035,13 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 data_context,
                 output_time);
         }
-        else if (statistical_quantity_key == "DENSITY_VAR")
-        {
-            rti_rmi_spatial_profiles_utilities->outputDensityVarianceWithHomogeneityInYDirectionOrInYZPlane(
-                "rho_p_rho_p.dat",
-                patch_hierarchy,
-                data_context,
-                output_time);
-        }
         else
         {
             TBOX_ERROR(d_object_name
                 << ": "
                 << "Unknown statistical quantity key = '"
                 << statistical_quantity_key
-                << " found."
+                << "' found."
                 << std::endl);
         }
     }

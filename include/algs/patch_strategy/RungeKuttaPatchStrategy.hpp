@@ -18,6 +18,8 @@
 
 #include "HAMeRS_memory.hpp"
 
+#include "util/ensemble_statistics/EnsembleStatistics.hpp"
+
 #include "SAMRAI/hier/IntVector.h"
 #include "SAMRAI/hier/PatchData.h"
 #include "SAMRAI/hier/PatchLevel.h"
@@ -573,6 +575,20 @@ class RungeKuttaPatchStrategy:
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy);
         
         /**
+         * Output the header of statistics.
+         */
+        virtual void
+        outputHeaderStatistics();
+        
+        /**
+         * Compute the statistics of data.
+         */
+        virtual void
+        computeDataStatistics(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const double statistics_data_time);
+        
+        /**
          * Output the statistics of data.
          */
         virtual void
@@ -580,11 +596,22 @@ class RungeKuttaPatchStrategy:
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const double output_time);
         
+        /**
+         * Get object of storing ensemble statistics.
+         */
+        virtual HAMERS_SHARED_PTR<EnsembleStatistics>
+        getEnsembleStatistics() = 0;
+        
+        /**
+         * Set object of storing ensemble statistics.
+         */
+        virtual void
+        setEnsembleStatistics(const HAMERS_SHARED_PTR<EnsembleStatistics> ensemble_statistics) = 0;
         
         /**
          * Return pointer to patch data context.
          */
-        HAMERS_SHARED_PTR<hier::VariableContext>
+        virtual HAMERS_SHARED_PTR<hier::VariableContext>
         getDataContext() const
         {
            return d_data_context;

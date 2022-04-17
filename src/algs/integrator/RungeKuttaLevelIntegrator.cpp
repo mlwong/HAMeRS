@@ -3587,14 +3587,31 @@ RungeKuttaLevelIntegrator::putToRestart(
 /*
  **************************************************************************************************
  *
- * Output statistics of data.
+ * Output header of data.
  *
  **************************************************************************************************
  */
 void
-RungeKuttaLevelIntegrator::outputDataStatistics(
+RungeKuttaLevelIntegrator::outputHeaderStatistics()
+{
+    t_output_data_statistics->start();
+    d_patch_strategy->outputHeaderStatistics();
+    t_output_data_statistics->stop();
+}
+
+
+/*
+ **************************************************************************************************
+ *
+ * Compute and output statistics of data.
+ *
+ **************************************************************************************************
+ */
+void
+RungeKuttaLevelIntegrator::computeAndOutputDataStatistics(
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
-    const double statistics_data_time)
+    const double statistics_data_time,
+    const bool output_statistics)
 {
     t_output_data_statistics->start();
     
@@ -3715,11 +3732,15 @@ RungeKuttaLevelIntegrator::outputDataStatistics(
         }
     }
     
-
-    // Set conservative variables as the filtered valued if necessary.
-    // Then, compute and output statistics.
+    // Set conservative variables as the filtered value if necessary.
+    // Then, compute output statistics.
     // Reset conservative variables as the pre-filtered values if necessary.
-    d_patch_strategy->outputDataStatistics(hierarchy, statistics_data_time);
+    d_patch_strategy->computeDataStatistics(hierarchy, statistics_data_time);
+    
+    if (output_statistics)
+    {
+        d_patch_strategy->outputDataStatistics(hierarchy, statistics_data_time);
+    }
     
     for (int li = 0; li < num_levels; li++)
     {

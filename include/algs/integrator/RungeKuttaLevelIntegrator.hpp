@@ -809,12 +809,19 @@ class RungeKuttaLevelIntegrator:
             const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
         
         /**
-         * Output statistics of data.
+         * Output the header of statistics.
          */
         virtual void
-        outputDataStatistics(
+        outputHeaderStatistics();
+        
+        /**
+         * Compute and output statistics of data.
+         */
+        virtual void
+        computeAndOutputDataStatistics(
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& hierarchy,
-            const double statistics_data_time);
+            const double statistics_data_time,
+            const bool output_statistics = false);
         
         /**
          * Return pointer to "current" variable context used by integrator. Current data corresponds
