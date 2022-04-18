@@ -85,6 +85,22 @@ class FlowModelSponge
                     << "No key 'sponge_rate' or 'd_sponge_rate' found in data for source terms."
                     << std::endl);
             }
+            
+            if (d_sponge_box_lo.size() != d_dim.getValue())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSponge::FlowModelSponge\n"
+                    << "Size of 'sponge_box_lo' or 'd_sponge_box_lo' is not consistent with problem dimension."
+                    << std::endl);
+            }
+            
+            if (d_sponge_box_hi.size() != d_dim.getValue())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSponge::FlowModelSponge\n"
+                    << "Size of 'sponge_box_hi' or 'd_sponge_box_hi' is not consistent with problem dimension."
+                    << std::endl);
+            }
         }
         
         void
