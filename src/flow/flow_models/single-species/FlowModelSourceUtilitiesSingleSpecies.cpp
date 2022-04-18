@@ -2,6 +2,7 @@
 
 FlowModelSourceUtilitiesSingleSpecies::FlowModelSourceUtilitiesSingleSpecies(
     const std::string& object_name,
+    const std::string& project_name,
     const tbox::Dimension& dim,
     const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_species,
@@ -9,6 +10,7 @@ FlowModelSourceUtilitiesSingleSpecies::FlowModelSourceUtilitiesSingleSpecies(
     const HAMERS_SHARED_PTR<EquationOfStateMixingRules> equation_of_state_mixing_rules):
         FlowModelSourceUtilities(
             object_name,
+            project_name,
             dim,
             grid_geometry,
             num_species,
@@ -64,7 +66,7 @@ FlowModelSourceUtilitiesSingleSpecies::FlowModelSourceUtilitiesSingleSpecies(
             d_has_gravity = source_terms_db->getBool("d_has_gravity");
             if (d_has_gravity)
             {
-                if (source_terms_db->keyExists("d_has_gravity"))
+                if (source_terms_db->keyExists("d_gravity"))
                 {
                     source_terms_db->getVector("d_gravity", d_gravity);
                 }
@@ -72,7 +74,7 @@ FlowModelSourceUtilitiesSingleSpecies::FlowModelSourceUtilitiesSingleSpecies(
                 {
                     TBOX_ERROR(d_object_name
                         << ": "
-                        << "No key 'd_has_gravity' found in data for source terms."
+                        << "No key 'd_gravity' found in data for source terms."
                         << std::endl);
                 }
             }
@@ -716,6 +718,8 @@ FlowModelSourceUtilitiesSingleSpecies::putToRestart(
     {
         HAMERS_SHARED_PTR<tbox::Database> restart_source_terms_db =
             restart_db->putDatabase("d_source_terms");
+        
+        putToRestartSponge(restart_source_terms_db);
         
         restart_source_terms_db->putBool("d_has_gravity", d_has_gravity);
         if (d_has_gravity)

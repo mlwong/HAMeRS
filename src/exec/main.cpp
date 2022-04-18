@@ -272,6 +272,10 @@ int main(int argc, char *argv[])
     if (mode_string == "SIMULATION")
     {
         mode_label = SIMULATION;
+        if (argc == 2)
+        {
+            is_from_restart = false;
+        }
     }
     else if (mode_string == "POSTPROCESSING")
     {
