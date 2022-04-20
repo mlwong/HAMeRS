@@ -198,8 +198,8 @@ FlowModelSponge::computeSpongeSourceTermsOnPatch(
                         rho_u_ref 	= rho_ref*u_ref;
                         rho_v_ref 	= rho_ref*v_ref;
                         E_ref     	= p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
-			sponge_rate_tot = ((p_ref/rho_ref)**0.5)*d_sponge_rate;
-                    }
+			sponge_rate_tot = (pow((p_ref/rho_ref),0.5))*d_sponge_rate;
+		    }
                     else // lighter fluid
                     {
                         const double rho_ref = p_i/(R_2*T_0)*exp((g*x[0])/(R_2*T_0));
@@ -214,7 +214,7 @@ FlowModelSponge::computeSpongeSourceTermsOnPatch(
                         rho_u_ref 	= rho_ref*u_ref;
                         rho_v_ref 	= rho_ref*v_ref;
                         E_ref     	= p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
-			sponge_rate_tot = ((p_ref/rho_ref)**0.5)*d_sponge_rate;
+			sponge_rate_tot = (pow((p_ref/rho_ref),0.5))*d_sponge_rate;
                     }
                     
                     const double rho_Y_0_p = rho_Y_0[idx_cons_var] - rho_Y_0_ref;
