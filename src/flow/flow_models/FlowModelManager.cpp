@@ -2,12 +2,14 @@
 
 FlowModelManager::FlowModelManager(
     const std::string& object_name,
+    const std::string& project_name,
     const tbox::Dimension& dim,
     const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_species,
     const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db,
     const std::string& flow_model_str):
         d_object_name(object_name),
+        d_project_name(project_name),
         d_dim(dim),
         d_grid_geometry(grid_geometry),
         d_num_species(num_species)
@@ -21,6 +23,7 @@ FlowModelManager::FlowModelManager(
         
         d_flow_model.reset(new FlowModelSingleSpecies(
             "d_flow_model",
+            d_project_name,
             d_dim,
             d_grid_geometry,
             d_num_species,
@@ -32,6 +35,7 @@ FlowModelManager::FlowModelManager(
         
         d_flow_model.reset(new FlowModelFourEqnConservative(
             "d_flow_model",
+            d_project_name,
             d_dim,
             d_grid_geometry,
             d_num_species,
@@ -43,6 +47,7 @@ FlowModelManager::FlowModelManager(
         
         d_flow_model.reset(new FlowModelFiveEqnAllaire(
             "d_flow_model",
+            d_project_name,
             d_dim,
             d_grid_geometry,
             d_num_species,
@@ -55,7 +60,7 @@ FlowModelManager::FlowModelManager(
             << "Unknown flow_model/d_flow_model string = '"
             << flow_model_str
             << "' found in input/restart file."
-            << std::endl);        
+            << std::endl);
     }
     
     if (d_num_species > 1 && d_flow_model_type == FLOW_MODEL::SINGLE_SPECIES)

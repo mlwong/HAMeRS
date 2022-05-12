@@ -14,12 +14,14 @@ HAMERS_SHARED_PTR<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variab
 
 FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
     const std::string& object_name,
+    const std::string& project_name,
     const tbox::Dimension& dim,
     const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_species,
     const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db):
         FlowModel(
             object_name,
+            project_name,
             dim,
             grid_geometry,
             num_species,
@@ -317,6 +319,7 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
      */
     d_flow_model_source_utilities.reset(new FlowModelSourceUtilitiesFiveEqnAllaire(
         "d_flow_model_source_utilities",
+        d_project_name,
         d_dim,
         d_grid_geometry,
         d_num_species,

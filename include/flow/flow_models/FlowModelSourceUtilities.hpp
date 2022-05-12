@@ -6,6 +6,7 @@
 #include "HAMeRS_memory.hpp"
 
 #include "flow/flow_models/FlowModel.hpp"
+#include "flow/flow_models/FlowModelSponge.hpp"
 
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/pdat/CellData.h"
@@ -19,6 +20,7 @@ class FlowModelSourceUtilities
     public:
         FlowModelSourceUtilities(
             const std::string& object_name,
+            const std::string& project_name,
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
@@ -82,6 +84,16 @@ class FlowModelSourceUtilities
             const int RK_step_number);
         
         /*
+         * Compute source terms at the sponge.
+         */
+        virtual void
+        computeSpongeSourceTermsOnPatch(
+            const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
+            const double time,
+            const double dt,
+            const int RK_step_number);
+        
+        /*
          * Get local stable time increment for source terms.
          */
         virtual double
@@ -94,11 +106,23 @@ class FlowModelSourceUtilities
         putToRestart(
             const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
         
-protected:
+        /*
+         * Put the characteristics of sponge into the restart source database.
+         */
+        void
+        putToRestartSponge(
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_source_terms_db) const;
+        
+    protected:
         /*
          * The object name is used for error/warning reporting.
          */
         const std::string d_object_name;
+        
+        /*
+         * Name of the project.
+         */
+        std::string d_project_name;
         
         /*
          * Problem dimension.
@@ -124,6 +148,16 @@ protected:
          * Whether there are source terms.
          */
         bool d_has_source_terms;
+        
+        /*
+         * Whether there is sponge.
+         */
+        bool d_has_sponge;
+        
+        /*
+         * Sponge object.
+         */
+        HAMERS_SHARED_PTR<FlowModelSponge> d_sponge;
         
         /* 
          * Whether all derived cell data related to this class is computed in full domain or sub-domain.
