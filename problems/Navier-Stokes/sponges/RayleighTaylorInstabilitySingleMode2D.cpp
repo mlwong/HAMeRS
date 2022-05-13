@@ -182,6 +182,8 @@ FlowModelSponge::computeSpongeSourceTermsOnPatch(
                     double rho_u_ref;
                     double rho_v_ref;
                     double E_ref;
+		    double sponge_rate_tot;
+		    double xi_b;
                     
                     if (x[0] < eta) // heavier fluid
                     {
@@ -194,10 +196,13 @@ FlowModelSponge::computeSpongeSourceTermsOnPatch(
                         const double u_ref = 0.0;
                         const double v_ref = 0.0;
                         
-                        rho_u_ref = rho_ref*u_ref;
-                        rho_v_ref = rho_ref*v_ref;
-                        E_ref     = p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
-                    }
+                        rho_u_ref 	= rho_ref*u_ref;
+                        rho_v_ref 	= rho_ref*v_ref;
+                        E_ref     	= p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
+			sponge_rate_tot = (pow((p_ref/rho_ref),0.5))*d_sponge_rate;
+			xi_b 		= -(x[0])/(701.0-600.0);   //mask value needs to be improved 
+		
+		    }
                     else // lighter fluid
                     {
                         const double rho_ref = p_i/(R_2*T_0)*exp((g*x[0])/(R_2*T_0));
@@ -209,9 +214,11 @@ FlowModelSponge::computeSpongeSourceTermsOnPatch(
                         const double u_ref = 0.0;
                         const double v_ref = 0.0;
                         
-                        rho_u_ref = rho_ref*u_ref;
-                        rho_v_ref = rho_ref*v_ref;
-                        E_ref     = p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
+                        rho_u_ref 	= rho_ref*u_ref;
+                        rho_v_ref 	= rho_ref*v_ref;
+                        E_ref     	= p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
+			sponge_rate_tot = (pow((p_ref/rho_ref),0.5))*d_sponge_rate;
+			xi_b            = (x[0])/(701.0-600.0);   //mask value needs to be improved
                     }
                     
                     const double rho_Y_0_p = rho_Y_0[idx_cons_var] - rho_Y_0_ref;
@@ -220,13 +227,11 @@ FlowModelSponge::computeSpongeSourceTermsOnPatch(
                     const double rho_v_p   = rho_v[idx_cons_var]   - rho_v_ref;
                     const double E_p       = E[idx_cons_var]       - E_ref;
                     
-                    const double xi_b = double(1); // mask value
-                    
-                    S[0][idx_source] -= dt*d_sponge_rate*xi_b*rho_Y_0_p;
-                    S[1][idx_source] -= dt*d_sponge_rate*xi_b*rho_Y_1_p;
-                    S[2][idx_source] -= dt*d_sponge_rate*xi_b*rho_u_p;
-                    S[3][idx_source] -= dt*d_sponge_rate*xi_b*rho_v_p;
-                    S[4][idx_source] -= dt*d_sponge_rate*xi_b*E_p;
+                    S[0][idx_source] -= dt*sponge_rate_tot*xi_b*rho_Y_0_p;
+                    S[1][idx_source] -= dt*sponge_rate_tot*xi_b*rho_Y_1_p;
+                    S[2][idx_source] -= dt*sponge_rate_tot*xi_b*rho_u_p;
+                    S[3][idx_source] -= dt*sponge_rate_tot*xi_b*rho_v_p;
+                    S[4][idx_source] -= dt*sponge_rate_tot*xi_b*E_p;
                 }
             }
         }
