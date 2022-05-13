@@ -38,6 +38,7 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
             rho_u_u_avg_computed  = false;
             rho_v_v_avg_computed  = false;
             rho_w_w_avg_computed  = false;
+            c_avg_computed        = false;
             Omega_avg_computed    = false;
             chi_avg_computed      = false;
             mu_avg_computed       = false;
@@ -63,6 +64,7 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
             rho_u_u_avg_realizations.clear();
             rho_v_v_avg_realizations.clear();
             rho_w_w_avg_realizations.clear();
+            c_avg_realizations.clear();
             Omega_avg_realizations.clear();
             chi_avg_realizations.clear();
             mu_avg_realizations.clear();
@@ -90,6 +92,7 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
         std::vector<std::vector<double> > rho_u_u_avg_realizations;
         std::vector<std::vector<double> > rho_v_v_avg_realizations;
         std::vector<std::vector<double> > rho_w_w_avg_realizations;
+        std::vector<std::vector<double> > c_avg_realizations;
         std::vector<std::vector<double> > Omega_avg_realizations;
         std::vector<std::vector<double> > chi_avg_realizations;
         std::vector<std::vector<double> > mu_avg_realizations;
@@ -113,6 +116,7 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
         bool rho_u_u_avg_computed;
         bool rho_v_v_avg_computed;
         bool rho_w_w_avg_computed;
+        bool c_avg_computed;
         bool Omega_avg_computed;
         bool chi_avg_computed;
         bool mu_avg_computed;
@@ -293,6 +297,14 @@ class RTIRMIStatisticsUtilities
          */
         void
         computeReynoldsNormalStressZWithHomogeneityInYZPlane(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute averaged sound speed with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+         */
+        void
+        computeAveragedSoundSpeedWithHomogeneityInYDirectionOrInYZPlane(
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
@@ -634,10 +646,20 @@ class RTIRMIStatisticsUtilities
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
-         * Output turbulent Reynolds number based on mixing width to a file.
+         * Output turbulent Reynolds number based on mixing width with assumed homogeneity in y-direction (2D)
+         * or yz-plane (3D) to a file.to a file.
          */
         void
-        outputEnsembleMixingWidthReynoldsNumber(
+        outputEnsembleMixingWidthReynoldsNumberWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Output turbulent Mach number with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.to a file.
+         */
+        void
+        outputEnsembleTurbulentMachNumberWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
@@ -1429,6 +1451,35 @@ RTIRMIStatisticsUtilities::computeReynoldsNormalStressZWithHomogeneityInYZPlane(
     rho_w_w_avg_realizations.push_back(rho_w_w_avg_global);
     
     d_ensemble_statistics->rho_w_w_avg_computed = true;
+}
+
+
+/*
+ * Compute averaged sound speed with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+ */
+void
+RTIRMIStatisticsUtilities::computeAveragedSoundSpeedWithHomogeneityInYDirectionOrInYZPlane(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    std::vector<double> c_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "SOUND_SPEED",
+        0,
+        data_context);
+    
+    std::vector<std::vector<double> >& c_avg_realizations = d_ensemble_statistics->c_avg_realizations;
+    c_avg_realizations.push_back(c_avg_global);
+    
+    d_ensemble_statistics->c_avg_computed = true;
 }
 
 
@@ -4658,10 +4709,11 @@ RTIRMIStatisticsUtilities::outputEnsembleScalarDissipationRateIntegrated(
 
 
 /*
- * Output turbulent Reynolds number based on mixing width to a file.
+ * Output turbulent Reynolds number based on mixing width with assumed homogeneity in y-direction (2D)
+ * or yz-plane (3D) to a file.to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleMixingWidthReynoldsNumber(
+RTIRMIStatisticsUtilities::outputEnsembleMixingWidthReynoldsNumberWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
@@ -4669,6 +4721,14 @@ RTIRMIStatisticsUtilities::outputEnsembleMixingWidthReynoldsNumber(
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(!stat_dump_filename.empty());
 #endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'RE_W_INHOMO_X' can be computed with two species only."
+            << std::endl);
+    }
     
     if (d_flow_model.expired())
     {
@@ -4741,18 +4801,17 @@ RTIRMIStatisticsUtilities::outputEnsembleMixingWidthReynoldsNumber(
         const std::vector<std::vector<double> >& rho_w_avg_realizations =
             d_ensemble_statistics->rho_w_avg_realizations;
         
-        const int num_realizations = static_cast<int>(rho_avg_realizations.size());
+        const int num_realizations = static_cast<int>(Y_0_avg_realizations.size());
         
         TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
         TBOX_ASSERT(num_realizations > 0);
-        TBOX_ASSERT(num_realizations == static_cast<int>(Y_0_avg_realizations.size()));
         TBOX_ASSERT(num_realizations == static_cast<int>(rho_avg_realizations.size()));
         TBOX_ASSERT(num_realizations == static_cast<int>(mu_avg_realizations.size()));
         TBOX_ASSERT(num_realizations == static_cast<int>(u_avg_realizations.size()));
         TBOX_ASSERT(num_realizations == static_cast<int>(u_sq_avg_realizations.size()));
         TBOX_ASSERT(num_realizations == static_cast<int>(rho_u_avg_realizations.size()));
         
-        const int num_cells = static_cast<int>(rho_avg_realizations[0].size());
+        const int num_cells = static_cast<int>(Y_0_avg_realizations[0].size());
         const double weight = double(1)/double(num_realizations);
         
         std::vector<double> Y_0_avg_global(num_cells, double(0));
@@ -4815,15 +4874,14 @@ RTIRMIStatisticsUtilities::outputEnsembleMixingWidthReynoldsNumber(
             }
         }
         
-        // need modification below!!!
         const double two = double(2);
-        std::vector<double> u_rms(num_cells, double(0));
+        std::vector<double> u_i_pp_u_i_pp(num_cells, double(0));
         
         for (int i = 0; i < num_cells; i++)
         {
             const double u_tilde = rho_u_avg_global[i]/rho_avg_global[i];
             const double u_pp_sq = u_sq_avg_global[i] + u_tilde*u_tilde - two*u_tilde*u_avg_global[i];
-            u_rms[i] += u_pp_sq;
+            u_i_pp_u_i_pp[i] += u_pp_sq;
         }
         
         if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
@@ -4832,7 +4890,7 @@ RTIRMIStatisticsUtilities::outputEnsembleMixingWidthReynoldsNumber(
             {
                 const double v_tilde = rho_v_avg_global[i]/rho_avg_global[i];
                 const double v_pp_sq = v_sq_avg_global[i] + v_tilde*v_tilde - two*v_tilde*v_avg_global[i];
-                u_rms[i] += v_pp_sq;
+                u_i_pp_u_i_pp[i] += v_pp_sq;
             }
         }
         
@@ -4842,31 +4900,7 @@ RTIRMIStatisticsUtilities::outputEnsembleMixingWidthReynoldsNumber(
             {
                 const double w_tilde = rho_w_avg_global[i]/rho_avg_global[i];
                 const double w_pp_sq = w_sq_avg_global[i] + w_tilde*w_tilde - two*w_tilde*w_avg_global[i];
-                u_rms[i] += w_pp_sq;
-            }
-        }
-        
-        if (d_dim == tbox::Dimension(1))
-        {
-            for (int i = 0; i < num_cells; i++)
-            {
-                u_rms[i] = sqrt(u_rms[i]);
-            }
-        }
-        else if (d_dim == tbox::Dimension(2))
-        {
-            const double half = double(1)/double(2);
-            for (int i = 0; i < num_cells; i++)
-            {
-                u_rms[i] = sqrt(half*u_rms[i]);
-            }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            const double one_third = double(1)/double(3);
-            for (int i = 0; i < num_cells; i++)
-            {
-                u_rms[i] = sqrt(one_third*u_rms[i]);
+                u_i_pp_u_i_pp[i] += w_pp_sq;
             }
         }
         
@@ -4879,7 +4913,9 @@ RTIRMIStatisticsUtilities::outputEnsembleMixingWidthReynoldsNumber(
         
         W = double(4)*W*dx_finest[0];
         
-        double Re_sum = double(0);
+        double rho_sum           = double(0);
+        double mu_sum            = double(0);
+        double u_i_pp_u_i_pp_sum = double(0);
         int count = 0;
         
         for (int i = 0; i < num_cells; i++)
@@ -4887,16 +4923,247 @@ RTIRMIStatisticsUtilities::outputEnsembleMixingWidthReynoldsNumber(
             const double mixing_metric = double(4)*Y_0_avg_global[i]*(double(1) - Y_0_avg_global[i]);
             if (mixing_metric > double(9)/double(10))
             {
-                const double Re = rho_avg_global[i]*u_rms[i]*W/mu_avg_global[i];
-                Re_sum += Re;
+                rho_sum           += rho_avg_global[i];
+                mu_sum            += mu_avg_global[i];
+                u_i_pp_u_i_pp_sum += u_i_pp_u_i_pp[i];
                 count++;
             }
         }
         
-        const double Re_mean = Re_sum/count;
+        const double rho_mean = rho_sum/count;
+        const double mu_mean  = mu_sum/count;
+        
+        double u_rms = double(0);
+        if (d_dim == tbox::Dimension(1))
+        {
+            u_rms = sqrt(u_i_pp_u_i_pp_sum/count);
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            const double half = double(1)/double(2);
+            u_rms = sqrt(half*u_i_pp_u_i_pp_sum/count);
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            const double one_third = double(1)/double(3);
+            u_rms = sqrt(one_third*u_i_pp_u_i_pp_sum/count);
+        }
         
         f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-              << "\t" << Re_mean;
+              << "\t" << rho_mean*u_rms*W/mu_mean;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output turbulent Mach number with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleTurbulentMachNumberWithInhomogeneousXDirection(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'MA_T_INHOMO_X' can be computed with two species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Compute and output the quantity (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& Y_0_avg_realizations =
+            d_ensemble_statistics->Y_0_avg_realizations;
+        
+        const std::vector<std::vector<double> >& rho_avg_realizations =
+            d_ensemble_statistics->rho_avg_realizations;
+        
+        const std::vector<std::vector<double> >& c_avg_realizations =
+            d_ensemble_statistics->c_avg_realizations;
+        
+        const std::vector<std::vector<double> >& u_avg_realizations =
+            d_ensemble_statistics->u_sq_avg_realizations;
+        
+        const std::vector<std::vector<double> >& v_avg_realizations =
+            d_ensemble_statistics->v_sq_avg_realizations;
+        
+        const std::vector<std::vector<double> >& w_avg_realizations =
+            d_ensemble_statistics->w_sq_avg_realizations;
+        
+        const std::vector<std::vector<double> >& u_sq_avg_realizations =
+            d_ensemble_statistics->u_sq_avg_realizations;
+        
+        const std::vector<std::vector<double> >& v_sq_avg_realizations =
+            d_ensemble_statistics->v_sq_avg_realizations;
+        
+        const std::vector<std::vector<double> >& w_sq_avg_realizations =
+            d_ensemble_statistics->w_sq_avg_realizations;
+        
+        const std::vector<std::vector<double> >& rho_u_avg_realizations =
+            d_ensemble_statistics->rho_u_avg_realizations;
+        
+        const std::vector<std::vector<double> >& rho_v_avg_realizations =
+            d_ensemble_statistics->rho_v_avg_realizations;
+        
+        const std::vector<std::vector<double> >& rho_w_avg_realizations =
+            d_ensemble_statistics->rho_w_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(Y_0_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(rho_avg_realizations.size()));
+        TBOX_ASSERT(num_realizations == static_cast<int>(c_avg_realizations.size()));
+        TBOX_ASSERT(num_realizations == static_cast<int>(u_avg_realizations.size()));
+        TBOX_ASSERT(num_realizations == static_cast<int>(u_sq_avg_realizations.size()));
+        TBOX_ASSERT(num_realizations == static_cast<int>(rho_u_avg_realizations.size()));
+        
+        const int num_cells = static_cast<int>(Y_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> Y_0_avg_global(num_cells, double(0));
+        std::vector<double> rho_avg_global(num_cells, double(0));
+        std::vector<double> c_avg_global(num_cells, double(0));
+        std::vector<double> u_avg_global(num_cells, double(0));
+        std::vector<double> v_avg_global(num_cells, double(0));
+        std::vector<double> w_avg_global(num_cells, double(0));
+        std::vector<double> u_sq_avg_global(num_cells, double(0));
+        std::vector<double> v_sq_avg_global(num_cells, double(0));
+        std::vector<double> w_sq_avg_global(num_cells, double(0));
+        std::vector<double> rho_u_avg_global(num_cells, double(0));
+        std::vector<double> rho_v_avg_global(num_cells, double(0));
+        std::vector<double> rho_w_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                Y_0_avg_global[i]   += weight*Y_0_avg_realizations[ri][i];
+                rho_avg_global[i]   += weight*rho_avg_realizations[ri][i];
+                c_avg_global[i]     += weight*c_avg_realizations[ri][i];
+                u_avg_global[i]     += weight*u_avg_realizations[ri][i];
+                u_sq_avg_global[i]  += weight*u_sq_avg_realizations[ri][i];
+                rho_u_avg_global[i] += weight*rho_u_avg_realizations[ri][i];
+            }
+        }
+        
+        if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+        {
+            TBOX_ASSERT(num_realizations == static_cast<int>(v_avg_realizations.size()));
+            TBOX_ASSERT(num_realizations == static_cast<int>(v_sq_avg_realizations.size()));
+            TBOX_ASSERT(num_realizations == static_cast<int>(rho_v_avg_realizations.size()));
+            
+            for (int ri = 0; ri < num_realizations; ri++)
+            {
+                for (int i = 0; i < num_cells; i++)
+                {
+                    v_avg_global[i]     += weight*v_avg_realizations[ri][i];
+                    v_sq_avg_global[i]  += weight*v_sq_avg_realizations[ri][i];
+                    rho_v_avg_global[i] += weight*rho_v_avg_realizations[ri][i];
+                }
+            }
+        }
+        
+        if (d_dim == tbox::Dimension(3))
+        {
+            TBOX_ASSERT(num_realizations == static_cast<int>(w_avg_realizations.size()));
+            TBOX_ASSERT(num_realizations == static_cast<int>(w_sq_avg_realizations.size()));
+            TBOX_ASSERT(num_realizations == static_cast<int>(rho_w_avg_realizations.size()));
+            
+            for (int ri = 0; ri < num_realizations; ri++)
+            {
+                for (int i = 0; i < num_cells; i++)
+                {
+                    w_avg_global[i]     += weight*w_avg_realizations[ri][i];
+                    w_sq_avg_global[i]  += weight*w_sq_avg_realizations[ri][i];
+                    rho_w_avg_global[i] += weight*rho_w_avg_realizations[ri][i];
+                }
+            }
+        }
+        
+        const double two = double(2);
+        std::vector<double> u_i_pp_u_i_pp(num_cells, double(0));
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            const double u_tilde = rho_u_avg_global[i]/rho_avg_global[i];
+            const double u_pp_sq = u_sq_avg_global[i] + u_tilde*u_tilde - two*u_tilde*u_avg_global[i];
+            u_i_pp_u_i_pp[i] += u_pp_sq;
+        }
+        
+        if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                const double v_tilde = rho_v_avg_global[i]/rho_avg_global[i];
+                const double v_pp_sq = v_sq_avg_global[i] + v_tilde*v_tilde - two*v_tilde*v_avg_global[i];
+                u_i_pp_u_i_pp[i] += v_pp_sq;
+            }
+        }
+        
+        if (d_dim == tbox::Dimension(3))
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                const double w_tilde = rho_w_avg_global[i]/rho_avg_global[i];
+                const double w_pp_sq = w_sq_avg_global[i] + w_tilde*w_tilde - two*w_tilde*w_avg_global[i];
+                u_i_pp_u_i_pp[i] += w_pp_sq;
+            }
+        }
+        
+        double c_sum             = double(0);
+        double u_i_pp_u_i_pp_sum = double(0);
+        int count = 0;
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            const double mixing_metric = double(4)*Y_0_avg_global[i]*(double(1) - Y_0_avg_global[i]);
+            if (mixing_metric > double(9)/double(10))
+            {
+                c_sum             += c_avg_global[i];
+                u_i_pp_u_i_pp_sum += u_i_pp_u_i_pp[i];
+                count++;
+            }
+        }
+        
+        const double u_rms  = sqrt(u_i_pp_u_i_pp_sum/count);
+        const double c_mean = c_sum/count;
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << u_rms/c_mean;
         
         f_out.close();
     }
@@ -5584,7 +5851,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
                         data_context);
             }
         }
-        else if (statistical_quantity_key == "Re_W")
+        else if (statistical_quantity_key == "RE_W_INHOMO_X")
         {
             if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Y_0_avg_computed))
             {
@@ -5606,6 +5873,112 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
             {
                 rti_rmi_statistics_utilities->
                     computeAveragedShearViscosityWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            // The following are for computing rms of velocity.
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->u_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->u_sq_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeVelocityXVarianceWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->rho_u_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMomentumXWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+            {
+                if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->v_avg_computed))
+                {
+                    rti_rmi_statistics_utilities->
+                        computeAveragedVelocityYWithHomogeneityInYDirectionOrInYZPlane(
+                            patch_hierarchy,
+                            data_context);
+                }
+                
+                if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->v_sq_avg_computed))
+                {
+                    rti_rmi_statistics_utilities->
+                        computeVelocityYVarianceWithHomogeneityInYDirectionOrInYZPlane(
+                            patch_hierarchy,
+                            data_context);
+                }
+                
+                if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->rho_v_avg_computed))
+                {
+                    rti_rmi_statistics_utilities->
+                        computeAveragedMomentumYWithHomogeneityInYDirectionOrInYZPlane(
+                            patch_hierarchy,
+                            data_context);
+                }
+            }
+            
+            if (d_dim == tbox::Dimension(3))
+            {
+                if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->w_avg_computed))
+                {
+                    rti_rmi_statistics_utilities->
+                        computeAveragedVelocityZWithHomogeneityInYZPlane(
+                            patch_hierarchy,
+                            data_context);
+                }
+                
+                if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->w_sq_avg_computed))
+                {
+                    rti_rmi_statistics_utilities->
+                        computeVelocityZVarianceWithHomogeneityInYZPlane(
+                            patch_hierarchy,
+                            data_context);
+                }
+                
+                if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->rho_w_avg_computed))
+                {
+                    rti_rmi_statistics_utilities->
+                        computeAveragedMomentumZWithHomogeneityInYZPlane(
+                            patch_hierarchy,
+                            data_context);
+                }
+            }
+        }
+        else if (statistical_quantity_key == "MA_T_INHOMO_X")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Y_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->rho_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->c_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedSoundSpeedWithHomogeneityInYDirectionOrInYZPlane(
                         patch_hierarchy,
                         data_context);
             }
@@ -6000,10 +6373,18 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                     patch_hierarchy,
                     data_context);
         }
-        else if (statistical_quantity_key == "Re_W")
+        else if (statistical_quantity_key == "RE_W_INHOMO_X")
         {
             rti_rmi_statistics_utilities->
-                outputEnsembleMixingWidthReynoldsNumber(
+                outputEnsembleMixingWidthReynoldsNumberWithInhomogeneousXDirection(
+                    stat_dump_filename,
+                    patch_hierarchy,
+                    data_context);
+        }
+        else if (statistical_quantity_key == "MA_T_INHOMO_X")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleTurbulentMachNumberWithInhomogeneousXDirection(
                     stat_dump_filename,
                     patch_hierarchy,
                     data_context);
