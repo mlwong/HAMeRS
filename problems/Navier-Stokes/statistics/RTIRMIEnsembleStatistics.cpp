@@ -5257,6 +5257,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             {
                 f_out << "\t" << "SCAL_DISS_RAT_INT    ";
             }
+            else if (statistical_quantity_key == "RE_W_INHOMO_X")
+            {
+                f_out << "\t" << "RE_W_INHOMO_X        ";
+            }
+            else if (statistical_quantity_key == "MA_T_INHOMO_X")
+            {
+                f_out << "\t" << "MA_T_INHOMO_X        ";
+            }
         }
         
         f_out.close();
