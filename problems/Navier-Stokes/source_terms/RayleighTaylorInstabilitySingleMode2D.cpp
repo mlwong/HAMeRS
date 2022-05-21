@@ -1,10 +1,10 @@
-#include "flow/flow_models/FlowModelSponge.hpp"
+#include "flow/flow_models/FlowModelSpecialSourceTerms.hpp"
 
 /*
- * Add the effect of the sponge to the source terms.
+ * Add the effects of the special source terms.
  */
 void
-FlowModelSponge::computeSpongeSourceTermsOnPatch(
+FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     HAMERS_SHARED_PTR<pdat::CellData<double> >& source,
     const hier::Patch& patch,
     const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_variables,
@@ -49,11 +49,26 @@ FlowModelSponge::computeSpongeSourceTermsOnPatch(
             << std::endl);
     }
     
-    if (d_sponge_exterior == false)
+    if (d_special_source_exterior == false)
     {
         TBOX_ERROR(d_object_name
             << ": "
-            << "The 'sponge_exterior' option should be true!"
+            << "The 'special_source_exterior' option should be true!"
+            << std::endl);
+    }
+    
+    TBOX_ASSERT(d_source_terms_db->keyExists("special_source_rate"));
+    
+    double special_source_rate = double(0);
+    if (d_source_terms_db->keyExists("special_source_rate"))
+    {
+        special_source_rate = d_source_terms_db->getDouble("special_source_rate");
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "No key 'special_source_rate' found in data for source terms."
             << std::endl);
     }
     
@@ -172,8 +187,8 @@ FlowModelSponge::computeSpongeSourceTermsOnPatch(
                 x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
                 x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
                 
-                // Check whether it is outside the sponge.
-                if (!(x[0] >= d_sponge_box_lo[0] && x[0] <= d_sponge_box_hi[0]))
+                // Check whether it is outside the special source box.
+                if (!(x[0] >= d_special_source_box_lo[0] && x[0] <= d_special_source_box_hi[0]))
                 {
                     const double eta = eta_0*cos(2.0*M_PI/lambda*x[1]);
                     
@@ -222,13 +237,35 @@ FlowModelSponge::computeSpongeSourceTermsOnPatch(
                     
                     const double xi_b = double(1); // mask value
                     
-                    S[0][idx_source] -= dt*d_sponge_rate*xi_b*rho_Y_0_p;
-                    S[1][idx_source] -= dt*d_sponge_rate*xi_b*rho_Y_1_p;
-                    S[2][idx_source] -= dt*d_sponge_rate*xi_b*rho_u_p;
-                    S[3][idx_source] -= dt*d_sponge_rate*xi_b*rho_v_p;
-                    S[4][idx_source] -= dt*d_sponge_rate*xi_b*E_p;
+                    S[0][idx_source] -= dt*special_source_rate*xi_b*rho_Y_0_p;
+                    S[1][idx_source] -= dt*special_source_rate*xi_b*rho_Y_1_p;
+                    S[2][idx_source] -= dt*special_source_rate*xi_b*rho_u_p;
+                    S[3][idx_source] -= dt*special_source_rate*xi_b*rho_v_p;
+                    S[4][idx_source] -= dt*special_source_rate*xi_b*E_p;
                 }
             }
         }
     }
+}
+
+
+void
+FlowModelSpecialSourceTerms::putToRestart(const HAMERS_SHARED_PTR<tbox::Database>& restart_source_terms_db)
+{
+    putToRestartBase(restart_source_terms_db);
+    
+    double special_source_rate = double(0);
+    if (d_source_terms_db->keyExists("special_source_rate"))
+    {
+        special_source_rate = d_source_terms_db->getDouble("special_source_rate");
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "No key 'special_source_rate' found in data for source terms."
+            << std::endl);
+    }
+    
+    restart_source_terms_db->putDouble("special_source_rate", special_source_rate);
 }

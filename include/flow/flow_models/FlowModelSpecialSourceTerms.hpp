@@ -70,22 +70,6 @@ class FlowModelSpecialSourceTerms
             d_special_source_exterior = source_terms_db->getBoolWithDefault("special_source_exterior", true);
             d_special_source_exterior = source_terms_db->getBoolWithDefault("d_special_source_exterior", d_special_source_exterior);
             
-            if (source_terms_db->keyExists("special_source_rate"))
-            {
-                d_special_source_rate = source_terms_db->getDouble("special_source_rate");
-            }
-            else if (source_terms_db->keyExists("d_special_source_rate"))
-            {
-                d_special_source_rate = source_terms_db->getDouble("d_special_source_rate");
-            }
-            else
-            {
-                TBOX_ERROR(d_object_name
-                    << ": "
-                    << "No key 'special_source_rate' or 'd_special_source_rate' found in data for source terms."
-                    << std::endl);
-            }
-            
             if (d_special_source_box_lo.size() != d_dim.getValue())
             {
                 TBOX_ERROR(d_object_name
@@ -104,7 +88,7 @@ class FlowModelSpecialSourceTerms
         }
         
         /*
-         * Add the effect of the special source terms.
+         * Add the effects of the special source terms.
          */
         void
         computeSpecialSourceTermsOnPatch(
@@ -130,22 +114,18 @@ class FlowModelSpecialSourceTerms
             return d_special_source_exterior;
         }
         
-        double getSpecialSourceRate() const
-        {
-            return d_special_source_rate;
-        }
+        virtual void putToRestart(const HAMERS_SHARED_PTR<tbox::Database>& restart_source_terms_db);
         
+    private:
         void
-        putToRestart(const HAMERS_SHARED_PTR<tbox::Database>& restart_source_terms_db)
+        putToRestartBase(const HAMERS_SHARED_PTR<tbox::Database>& restart_source_terms_db)
         {
             restart_source_terms_db->putDoubleVector("d_special_source_box_lo", d_special_source_box_lo);
             restart_source_terms_db->putDoubleVector("d_special_source_box_hi", d_special_source_box_hi);
         
             restart_source_terms_db->putBool("d_special_source_exterior", d_special_source_exterior);
-            restart_source_terms_db->putDouble("d_special_source_rate",   d_special_source_rate);
         }
         
-    private:
         /*
          * The object name is used for error/warning reporting.
          */
@@ -182,7 +162,6 @@ class FlowModelSpecialSourceTerms
         std::vector<double> d_special_source_box_lo; // Lower spatial coordinates.
         std::vector<double> d_special_source_box_hi; // Upper spatial coordinates.
         bool d_special_source_exterior;
-        double d_special_source_rate;
         
 };
 

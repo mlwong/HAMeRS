@@ -1,7 +1,7 @@
 #include "flow/flow_models/FlowModelSpecialSourceTerms.hpp"
 
 /*
- * Add the effect of the special source terms.
+ * Add the effects of the special source terms.
  */
 void
 FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
@@ -23,4 +23,11 @@ FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
         << ": "
         << "No special source terms are implemented yet while special source terms are used!\n"
         << std::endl);
+}
+
+
+void
+FlowModelSpecialSourceTerms::putToRestart(const HAMERS_SHARED_PTR<tbox::Database>& restart_source_terms_db)
+{
+    putToRestartBase(restart_source_terms_db);
 }
