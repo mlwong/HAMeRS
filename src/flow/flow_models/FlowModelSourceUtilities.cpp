@@ -15,7 +15,7 @@ FlowModelSourceUtilities::FlowModelSourceUtilities(
         d_num_species(num_species),
         d_num_eqn(num_eqn),
         d_has_source_terms(false),
-        d_has_sponge(false),
+        d_has_special_source_terms(false),
         d_derived_cell_data_computed(false),
         d_num_subghosts_source_terms(-hier::IntVector::getOne(d_dim)),
         d_subghost_box_source_terms(hier::Box::getEmptyBox(dim)),
@@ -50,24 +50,21 @@ FlowModelSourceUtilities::FlowModelSourceUtilities(
                 << std::endl);
         }
         
-        std::vector<double> sponge_box_lo; // Lower spatial coordinates.
-        std::vector<double> sponge_box_hi; // Upper spatial coordinates.
-        bool sponge_exterior = false;
-        double sponge_rate   = double(0);
+        bool special_source_exterior = false;
         
-        if (source_terms_db->keyExists("has_sponge"))
+        if (source_terms_db->keyExists("has_special_source_terms"))
         {
-            d_has_sponge = source_terms_db->getBool("has_sponge");
+            d_has_special_source_terms = source_terms_db->getBool("has_special_source_terms");
         }
-        else if (source_terms_db->keyExists("d_has_sponge"))
+        else if (source_terms_db->keyExists("d_has_special_source_terms"))
         {
-            d_has_sponge = source_terms_db->getBool("d_has_sponge");
+            d_has_special_source_terms = source_terms_db->getBool("d_has_special_source_terms");
         }
         
-        if (d_has_sponge)
+        if (d_has_special_source_terms)
         {
-            d_sponge.reset(new FlowModelSponge(
-                "d_sponge",
+            d_special_source_terms.reset(new FlowModelSpecialSourceTerms(
+                "d_special_source_terms",
                 d_project_name,
                 d_dim,
                 d_grid_geometry,
@@ -175,16 +172,16 @@ FlowModelSourceUtilities::computeSourceTermsOnPatch(
 
 
 /*
- * Compute source terms at the sponge.
+ * Compute special source terms.
  */
 void
-FlowModelSourceUtilities::computeSpongeSourceTermsOnPatch(
+FlowModelSourceUtilities::computeSpecialSourceTermsOnPatch(
     const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
     const double time,
     const double dt,
     const int RK_step_number)
 {
-    if (d_has_sponge)
+    if (d_has_special_source_terms)
     {
         HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
         const hier::Patch& patch = flow_model_tmp->getRegisteredPatch();
@@ -198,7 +195,7 @@ FlowModelSourceUtilities::computeSpongeSourceTermsOnPatch(
             HAMERS_SHARED_PTR_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(variable_source, data_context)));
         
-        d_sponge->computeSpongeSourceTermsOnPatch(
+        d_special_source_terms->computeSpecialSourceTermsOnPatch(
             source,
             patch,
             conservative_var_data,
@@ -231,29 +228,40 @@ void
 FlowModelSourceUtilities::putToRestart(
     const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
-    restart_db->putBool("d_has_source_terms", d_has_source_terms);
+    putToRestartBase(restart_db);
     
     if (d_has_source_terms)
     {
         HAMERS_SHARED_PTR<tbox::Database> restart_source_terms_db =
             restart_db->putDatabase("d_source_terms");
         
-        putToRestartSponge(restart_source_terms_db);
+        putToRestartSourceBase(restart_source_terms_db);
     }
 }
 
 
 /*
- * Put the characteristics of sponge into the restart source database.
+ * Put the characteristics of base class into the restart database.
  */
 void
-FlowModelSourceUtilities::putToRestartSponge(
+FlowModelSourceUtilities::putToRestartBase(
+    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
+{
+    restart_db->putBool("d_has_source_terms", d_has_source_terms);
+}
+
+
+/*
+ * Put the characteristics of base class into the restart source database.
+ */
+void
+FlowModelSourceUtilities::putToRestartSourceBase(
     const HAMERS_SHARED_PTR<tbox::Database>& restart_source_terms_db) const
 {
-    restart_source_terms_db->putBool("d_has_sponge", d_has_sponge);
+    restart_source_terms_db->putBool("d_has_special_source_terms", d_has_special_source_terms);
     
-    if (d_has_sponge)
+    if (d_has_special_source_terms)
     {
-        d_sponge->putToRestart(restart_source_terms_db);
+        d_special_source_terms->putToRestart(restart_source_terms_db);
     }
 }

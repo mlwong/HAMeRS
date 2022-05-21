@@ -1,10 +1,10 @@
-#include "flow/flow_models/FlowModelSponge.hpp"
+#include "flow/flow_models/FlowModelSpecialSourceTerms.hpp"
 
 /*
- * Add the effect of the sponge to the source terms.
+ * Add the effects of the special source terms.
  */
 void
-FlowModelSponge::computeSpongeSourceTermsOnPatch(
+FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     HAMERS_SHARED_PTR<pdat::CellData<double> >& source,
     const hier::Patch& patch,
     const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_variables,
@@ -49,11 +49,26 @@ FlowModelSponge::computeSpongeSourceTermsOnPatch(
             << std::endl);
     }
     
-    if (d_sponge_exterior == false)
+    if (d_special_source_exterior == false)
     {
         TBOX_ERROR(d_object_name
             << ": "
-            << "The 'sponge_exterior' option should be true!"
+            << "The 'special_source_exterior' option should be true!"
+            << std::endl);
+    }
+    
+    TBOX_ASSERT(d_source_terms_db->keyExists("sponge_rate"));
+    
+    double sponge_rate = double(0);
+    if (d_source_terms_db->keyExists("sponge_rate"))
+    {
+        sponge_rate = d_source_terms_db->getDouble("sponge_rate");
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "No key 'sponge_rate' found in data for source terms."
             << std::endl);
     }
     
@@ -172,8 +187,8 @@ FlowModelSponge::computeSpongeSourceTermsOnPatch(
                 x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
                 x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
                 
-                // Check whether it is outside the sponge.
-                if (!(x[0] >= d_sponge_box_lo[0] && x[0] <= d_sponge_box_hi[0]))
+                // Check whether it is outside the special source box.
+                if (!(x[0] >= d_special_source_box_lo[0] && x[0] <= d_special_source_box_hi[0]))
                 {
                     const double eta = eta_0*cos(2.0*M_PI/lambda*x[1]);
                     
@@ -182,8 +197,8 @@ FlowModelSponge::computeSpongeSourceTermsOnPatch(
                     double rho_u_ref;
                     double rho_v_ref;
                     double E_ref;
-		    double sponge_rate_tot;
-		    double xi_b;
+                    double sponge_rate_tot;
+                    double xi_b;
                     
                     if (x[0] < eta) // heavier fluid
                     {
@@ -196,13 +211,13 @@ FlowModelSponge::computeSpongeSourceTermsOnPatch(
                         const double u_ref = 0.0;
                         const double v_ref = 0.0;
                         
-                        rho_u_ref 	= rho_ref*u_ref;
-                        rho_v_ref 	= rho_ref*v_ref;
-                        E_ref     	= p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
-			sponge_rate_tot = (pow((p_ref/rho_ref),0.5))*d_sponge_rate;
-			xi_b 		= -(x[0])/(701.0-600.0);   //mask value needs to be improved 
-		
-		    }
+                        rho_u_ref       = rho_ref*u_ref;
+                        rho_v_ref       = rho_ref*v_ref;
+                        E_ref           = p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
+                        sponge_rate_tot = (pow((p_ref/rho_ref),0.5))*sponge_rate;
+                        
+                        xi_b            = -(x[0])/(701.0-600.0); // mask value needs to be improved 
+                    }
                     else // lighter fluid
                     {
                         const double rho_ref = p_i/(R_2*T_0)*exp((g*x[0])/(R_2*T_0));
@@ -214,11 +229,11 @@ FlowModelSponge::computeSpongeSourceTermsOnPatch(
                         const double u_ref = 0.0;
                         const double v_ref = 0.0;
                         
-                        rho_u_ref 	= rho_ref*u_ref;
-                        rho_v_ref 	= rho_ref*v_ref;
-                        E_ref     	= p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
-			sponge_rate_tot = (pow((p_ref/rho_ref),0.5))*d_sponge_rate;
-			xi_b            = (x[0])/(701.0-600.0);   //mask value needs to be improved
+                        rho_u_ref       = rho_ref*u_ref;
+                        rho_v_ref       = rho_ref*v_ref;
+                        E_ref           = p_ref/(gamma - double(1)) + double(1)/double(2)*rho_ref*(u_ref*u_ref + v_ref*v_ref);
+                        sponge_rate_tot = (pow((p_ref/rho_ref),0.5))*sponge_rate;
+                        xi_b            = (x[0])/(701.0-600.0);   // mask value needs to be improved
                     }
                     
                     const double rho_Y_0_p = rho_Y_0[idx_cons_var] - rho_Y_0_ref;
@@ -236,4 +251,26 @@ FlowModelSponge::computeSpongeSourceTermsOnPatch(
             }
         }
     }
+}
+
+
+void
+FlowModelSpecialSourceTerms::putToRestart(const HAMERS_SHARED_PTR<tbox::Database>& restart_source_terms_db)
+{
+    putToRestartBase(restart_source_terms_db);
+    
+    double sponge_rate = double(0);
+    if (d_source_terms_db->keyExists("sponge_rate"))
+    {
+        sponge_rate = d_source_terms_db->getDouble("sponge_rate");
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "No key 'sponge_rate' found in data for source terms."
+            << std::endl);
+    }
+    
+    restart_source_terms_db->putDouble("sponge_rate", sponge_rate);
 }

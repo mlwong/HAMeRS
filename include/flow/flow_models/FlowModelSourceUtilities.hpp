@@ -6,7 +6,7 @@
 #include "HAMeRS_memory.hpp"
 
 #include "flow/flow_models/FlowModel.hpp"
-#include "flow/flow_models/FlowModelSponge.hpp"
+#include "flow/flow_models/FlowModelSpecialSourceTerms.hpp"
 
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/pdat/CellData.h"
@@ -84,16 +84,6 @@ class FlowModelSourceUtilities
             const int RK_step_number);
         
         /*
-         * Compute source terms at the sponge.
-         */
-        virtual void
-        computeSpongeSourceTermsOnPatch(
-            const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
-            const double time,
-            const double dt,
-            const int RK_step_number);
-        
-        /*
          * Get local stable time increment for source terms.
          */
         virtual double
@@ -106,14 +96,31 @@ class FlowModelSourceUtilities
         putToRestart(
             const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
         
+    protected:
         /*
-         * Put the characteristics of sponge into the restart source database.
+         * Compute special source terms.
          */
         void
-        putToRestartSponge(
+        computeSpecialSourceTermsOnPatch(
+            const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
+            const double time,
+            const double dt,
+            const int RK_step_number);
+        
+        /*
+         * Put the characteristics of base class into the restart database.
+         */
+        void
+        putToRestartBase(
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
+        
+        /*
+         * Put the characteristics of base class into the restart source database.
+         */
+        void
+        putToRestartSourceBase(
             const HAMERS_SHARED_PTR<tbox::Database>& restart_source_terms_db) const;
         
-    protected:
         /*
          * The object name is used for error/warning reporting.
          */
@@ -150,14 +157,14 @@ class FlowModelSourceUtilities
         bool d_has_source_terms;
         
         /*
-         * Whether there is sponge.
+         * Whether there are special source terms.
          */
-        bool d_has_sponge;
+        bool d_has_special_source_terms;
         
         /*
-         * Sponge object.
+         * Special source terms object.
          */
-        HAMERS_SHARED_PTR<FlowModelSponge> d_sponge;
+        HAMERS_SHARED_PTR<FlowModelSpecialSourceTerms> d_special_source_terms;
         
         /* 
          * Whether all derived cell data related to this class is computed in full domain or sub-domain.

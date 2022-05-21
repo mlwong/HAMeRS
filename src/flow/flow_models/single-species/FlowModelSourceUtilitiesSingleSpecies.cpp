@@ -541,6 +541,13 @@ FlowModelSourceUtilitiesSingleSpecies::computeSourceTermsOnPatch(
                 }
             }
         }
+        
+        flow_model_tmp.reset();
+        computeSpecialSourceTermsOnPatch(
+            variable_source,
+            time,
+            dt,
+            RK_step_number);
     }
 }
 
@@ -712,14 +719,14 @@ void
 FlowModelSourceUtilitiesSingleSpecies::putToRestart(
     const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
-    restart_db->putBool("d_has_source_terms", d_has_source_terms);
+    putToRestartBase(restart_db);
     
     if (d_has_source_terms)
     {
         HAMERS_SHARED_PTR<tbox::Database> restart_source_terms_db =
             restart_db->putDatabase("d_source_terms");
         
-        putToRestartSponge(restart_source_terms_db);
+        putToRestartSourceBase(restart_source_terms_db);
         
         restart_source_terms_db->putBool("d_has_gravity", d_has_gravity);
         if (d_has_gravity)
