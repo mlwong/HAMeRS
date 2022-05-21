@@ -231,23 +231,34 @@ void
 FlowModelSourceUtilities::putToRestart(
     const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
-    restart_db->putBool("d_has_source_terms", d_has_source_terms);
+    putToRestartBase(restart_db);
     
     if (d_has_source_terms)
     {
         HAMERS_SHARED_PTR<tbox::Database> restart_source_terms_db =
             restart_db->putDatabase("d_source_terms");
         
-        putToRestartSponge(restart_source_terms_db);
+        putToRestartSourceBase(restart_source_terms_db);
     }
 }
 
 
 /*
- * Put the characteristics of sponge into the restart source database.
+ * Put the characteristics of base class into the restart database.
  */
 void
-FlowModelSourceUtilities::putToRestartSponge(
+FlowModelSourceUtilities::putToRestartBase(
+    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
+{
+    restart_db->putBool("d_has_source_terms", d_has_source_terms);
+}
+
+
+/*
+ * Put the characteristics of base class into the restart source database.
+ */
+void
+FlowModelSourceUtilities::putToRestartSourceBase(
     const HAMERS_SHARED_PTR<tbox::Database>& restart_source_terms_db) const
 {
     restart_source_terms_db->putBool("d_has_sponge", d_has_sponge);
