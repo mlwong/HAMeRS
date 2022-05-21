@@ -551,7 +551,7 @@ FlowModelSourceUtilitiesFourEqnConservative::computeSourceTermsOnPatch(
         }
         
         flow_model_tmp.reset();
-        computeSpongeSourceTermsOnPatch(
+        computeSpecialSourceTermsOnPatch(
             variable_source,
             time,
             dt,

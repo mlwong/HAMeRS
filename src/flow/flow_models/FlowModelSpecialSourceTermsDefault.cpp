@@ -1,10 +1,10 @@
-#include "flow/flow_models/FlowModelSponge.hpp"
+#include "flow/flow_models/FlowModelSpecialSourceTerms.hpp"
 
 /*
- * Add the effect of the sponge to the source terms.
+ * Add the effect of the special source terms.
  */
 void
-FlowModelSponge::computeSpongeSourceTermsOnPatch(
+FlowModelSpecialSourceTerms::computeSpecialSourceTermsOnPatch(
     HAMERS_SHARED_PTR<pdat::CellData<double> >& source,
     const hier::Patch& patch,
     const std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > >& conservative_variables,
@@ -21,6 +21,6 @@ FlowModelSponge::computeSpongeSourceTermsOnPatch(
     
     TBOX_WARNING(d_object_name
         << ": "
-        << "No sponge is implemented yet while sponge is used!\n"
+        << "No special source terms are implemented yet while special source terms are used!\n"
         << std::endl);
 }

@@ -6,7 +6,7 @@
 #include "HAMeRS_memory.hpp"
 
 #include "flow/flow_models/FlowModel.hpp"
-#include "flow/flow_models/FlowModelSponge.hpp"
+#include "flow/flow_models/FlowModelSpecialSourceTerms.hpp"
 
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/pdat/CellData.h"
@@ -98,10 +98,10 @@ class FlowModelSourceUtilities
         
     protected:
         /*
-         * Compute source terms at the sponge.
+         * Compute special source terms.
          */
         void
-        computeSpongeSourceTermsOnPatch(
+        computeSpecialSourceTermsOnPatch(
             const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
             const double time,
             const double dt,
@@ -157,14 +157,14 @@ class FlowModelSourceUtilities
         bool d_has_source_terms;
         
         /*
-         * Whether there is sponge.
+         * Whether there are special source terms.
          */
-        bool d_has_sponge;
+        bool d_has_special_source_terms;
         
         /*
-         * Sponge object.
+         * Special source terms object.
          */
-        HAMERS_SHARED_PTR<FlowModelSponge> d_sponge;
+        HAMERS_SHARED_PTR<FlowModelSpecialSourceTerms> d_special_source_terms;
         
         /* 
          * Whether all derived cell data related to this class is computed in full domain or sub-domain.
