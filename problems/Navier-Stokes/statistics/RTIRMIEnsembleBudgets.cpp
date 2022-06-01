@@ -1,0 +1,10972 @@
+#include "flow/flow_models/four-eqn_conservative/FlowModelStatisticsUtilitiesFourEqnConservative.hpp"
+
+#include "extn/patch_hierarchies/ExtendedFlattenedHierarchy.hpp"
+#include "flow/flow_models/MPI_helpers/FlowModelMPIHelperAverage.hpp"
+#include "flow/flow_models/MPI_helpers/FlowModelMPIHelperCorrelation.hpp"
+#include "flow/flow_models/MPI_helpers/FlowModelMPIHelperMaxMin.hpp"
+#include "util/MPI_helpers/MPIHelperNumberOfCells.hpp"
+
+#include <fstream>
+
+class EnsembleBudgetsRTIRMI: public EnsembleStatistics
+{
+    public:
+        EnsembleBudgetsRTIRMI(const std::string& object_name):
+            EnsembleStatistics(
+                object_name)
+        {
+            setVariablesNotComputed();
+        }
+        
+        void setVariablesNotComputed()
+        {
+            rho_avg_computed     = false;
+            rho_inv_avg_computed = false;
+            u_avg_computed       = false;
+            u_sq_avg_computed    = false;
+            rho_u_avg_computed   = false;
+            rho_u_u_avg_computed = false;
+            
+            ddx_rho_avg_computed     = false;
+            ddx_p_avg_computed       = false;
+            ddx_u_avg_computed       = false;
+            ddx_u_sq_avg_computed    = false;
+            ddx_rho_u_avg_computed   = false;
+            ddx_rho_u_u_avg_computed = false;
+            
+            ddy_v_avg_computed = false;
+            ddz_w_avg_computed = false;
+            
+            rho_inv_ddx_p_avg_computed = false;
+            
+            u_ddx_u_avg_computed = false;
+            u_ddy_v_avg_computed = false;
+            u_ddz_w_avg_computed = false;
+            
+            ddx_tau_11_avg_computed = false;
+            ddy_tau_12_avg_computed = false;
+            ddz_tau_13_avg_computed = false;
+            
+            rho_inv_ddx_tau_11_avg_computed = false;
+            rho_inv_ddy_tau_12_avg_computed = false;
+            rho_inv_ddz_tau_13_avg_computed = false;
+        }
+        
+        void clearAllData()
+        {
+            rho_avg_realizations.clear();
+            rho_inv_avg_realizations.clear();
+            u_avg_realizations.clear();
+            u_sq_avg_realizations.clear();
+            rho_u_avg_realizations.clear();
+            rho_u_u_avg_realizations.clear();
+            
+            ddx_rho_avg_realizations.clear();
+            ddx_p_avg_realizations.clear();
+            ddx_u_avg_realizations.clear();
+            ddx_u_sq_avg_realizations.clear();
+            ddx_rho_u_avg_realizations.clear();
+            ddx_rho_u_u_avg_realizations.clear();
+            
+            ddy_v_avg_realizations.clear();
+            ddz_w_avg_realizations.clear();
+            
+            rho_inv_ddx_p_avg_realizations.clear();
+            
+            u_ddx_u_avg_realizations.clear();
+            u_ddy_v_avg_realizations.clear();
+            u_ddz_w_avg_realizations.clear();
+            
+            ddx_tau_11_avg_realizations.clear();
+            ddy_tau_12_avg_realizations.clear();
+            ddz_tau_13_avg_realizations.clear();
+            
+            rho_inv_ddx_tau_11_avg_realizations.clear();
+            rho_inv_ddy_tau_12_avg_realizations.clear();
+            rho_inv_ddz_tau_13_avg_realizations.clear();
+            
+            setVariablesNotComputed();
+        }
+        
+        // Scratch arrays.
+        // Number of realizalizations; number of cells.
+        std::vector<std::vector<double> > rho_avg_realizations;
+        std::vector<std::vector<double> > rho_inv_avg_realizations;
+        std::vector<std::vector<double> > u_avg_realizations;
+        std::vector<std::vector<double> > u_sq_avg_realizations;
+        std::vector<std::vector<double> > rho_u_avg_realizations;
+        std::vector<std::vector<double> > rho_u_u_avg_realizations;
+        
+        std::vector<std::vector<double> > ddx_rho_avg_realizations;
+        std::vector<std::vector<double> > ddx_p_avg_realizations;
+        std::vector<std::vector<double> > ddx_u_avg_realizations;
+        std::vector<std::vector<double> > ddx_u_sq_avg_realizations;
+        std::vector<std::vector<double> > ddx_rho_u_avg_realizations;
+        std::vector<std::vector<double> > ddx_rho_u_u_avg_realizations;
+        
+        std::vector<std::vector<double> > ddy_v_avg_realizations;
+        std::vector<std::vector<double> > ddz_w_avg_realizations;
+        
+        std::vector<std::vector<double> > rho_inv_ddx_p_avg_realizations;
+        
+        std::vector<std::vector<double> > u_ddx_u_avg_realizations;
+        std::vector<std::vector<double> > u_ddy_v_avg_realizations;
+        std::vector<std::vector<double> > u_ddz_w_avg_realizations;
+        
+        std::vector<std::vector<double> > ddx_tau_11_avg_realizations;
+        std::vector<std::vector<double> > ddy_tau_12_avg_realizations;
+        std::vector<std::vector<double> > ddz_tau_13_avg_realizations;
+        
+        std::vector<std::vector<double> > rho_inv_ddx_tau_11_avg_realizations;
+        std::vector<std::vector<double> > rho_inv_ddy_tau_12_avg_realizations;
+        std::vector<std::vector<double> > rho_inv_ddz_tau_13_avg_realizations;
+        
+        // Whether the scratch arrays are filled.
+        
+        bool rho_avg_computed;
+        bool rho_inv_avg_computed;
+        bool u_avg_computed;
+        bool u_sq_avg_computed;
+        bool rho_u_avg_computed;
+        bool rho_u_u_avg_computed;
+        
+        bool ddx_rho_avg_computed;
+        bool ddx_p_avg_computed;
+        bool ddx_u_avg_computed;
+        bool ddx_u_sq_avg_computed;
+        bool ddx_rho_u_avg_computed;
+        bool ddx_rho_u_u_avg_computed;
+        
+        bool ddy_v_avg_computed;
+        bool ddz_w_avg_computed;
+        
+        bool rho_inv_ddx_p_avg_computed;
+        
+        bool u_ddx_u_avg_computed;
+        bool u_ddy_v_avg_computed;
+        bool u_ddz_w_avg_computed;
+        
+        bool ddx_tau_11_avg_computed;
+        bool ddy_tau_12_avg_computed;
+        bool ddz_tau_13_avg_computed;
+        
+        bool rho_inv_ddx_tau_11_avg_computed;
+        bool rho_inv_ddy_tau_12_avg_computed;
+        bool rho_inv_ddz_tau_13_avg_computed;
+        
+    private:
+        
+};
+
+
+class RTIRMIBudgetsUtilities
+{
+    public:
+        RTIRMIBudgetsUtilities(
+            const std::string& object_name,
+            const tbox::Dimension& dim,
+            const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
+            const int& num_species,
+            const HAMERS_WEAK_PTR<FlowModel> flow_model,
+            const HAMERS_SHARED_PTR<EquationOfStateMixingRules> equation_of_state_mixing_rules,
+            const HAMERS_SHARED_PTR<EquationOfMassDiffusivityMixingRules> equation_of_mass_diffusivity_mixing_rules,
+            const HAMERS_SHARED_PTR<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
+            const HAMERS_SHARED_PTR<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules,
+            const HAMERS_SHARED_PTR<EquationOfThermalConductivityMixingRules> equation_of_thermal_conductivity_mixing_rules,
+            const HAMERS_SHARED_PTR<EnsembleBudgetsRTIRMI> ensemble_statistics):
+                d_object_name(object_name),
+                d_dim(dim),
+                d_grid_geometry(grid_geometry),
+                d_num_species(num_species),
+                d_flow_model(flow_model),
+                d_equation_of_state_mixing_rules(equation_of_state_mixing_rules),
+                d_equation_of_mass_diffusivity_mixing_rules(equation_of_mass_diffusivity_mixing_rules),
+                d_equation_of_shear_viscosity_mixing_rules(equation_of_shear_viscosity_mixing_rules),
+                d_equation_of_bulk_viscosity_mixing_rules(equation_of_bulk_viscosity_mixing_rules),
+                d_equation_of_thermal_conductivity_mixing_rules(equation_of_thermal_conductivity_mixing_rules),
+                d_num_ghosts_derivative(3),
+                d_ensemble_statistics(ensemble_statistics)
+        {}
+        
+        /*
+         * Compute averaged quantities with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+         */
+        void
+        computeAveragedQuantitiesWithHomogeneityInYDirectionOrInYZPlane(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Output budget of turbulent mass flux in x-direction with inhomogeneous x-direction to a file.
+         */
+        void
+        outputBudgetTurbMassFluxXWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output spatial profile of ensemble averaged density with assumed homogeneity in y-direction (2D) or
+         * yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Compute averaged shear stress component with only x direction as inhomogeneous direction.
+         * component_idx:
+         * 0: tau_11
+         * 1: tau_12
+         * 2: tau_13
+         * 3: tau_22
+         * 4: tau_23
+         * 5: tau_33
+         */
+        std::vector<double>
+        getAveragedShearStressComponentWithInhomogeneousXDirection(
+            const int component_idx,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute averaged derivative of shear stress component with only x direction as inhomogeneous direction.
+         * component_idx:
+         * 0: tau_11
+         * 1: tau_12
+         * 2: tau_13
+         * 3: tau_22
+         * 4: tau_23
+         * 5: tau_33
+         */
+        std::vector<double>
+        getAveragedDerivativeOfShearStressComponentWithInhomogeneousXDirection(
+            const int component_idx,
+            const int derivative_direction,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute averaged value (on product of variable derivatives and shear stress component) with only x direction
+         * as inhomogeneous direction.
+         * component_idx:
+         * 0: tau_11
+         * 1: tau_12
+         * 2: tau_13
+         * 3: tau_22
+         * 4: tau_23
+         * 5: tau_33
+         */
+        std::vector<double>
+        getAveragedQuantityWithShearStressComponentWithInhomogeneousXDirection(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const std::vector<bool>& use_derivative,
+            const std::vector<int>& derivative_directions,
+            const std::vector<bool>& use_reciprocal,
+            const int shear_stress_component_idx,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Compute averaged value (on product of variable derivatives and derivative of shear stress component) with only
+         * x direction as inhomogeneous direction.
+         * component_idx:
+         * 0: tau_11
+         * 1: tau_12
+         * 2: tau_13
+         * 3: tau_22
+         * 4: tau_23
+         * 5: tau_33
+         */
+        std::vector<double>
+        getAveragedQuantityWithDerivativeOfShearStressComponentWithInhomogeneousXDirection(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const std::vector<bool>& use_derivative,
+            const std::vector<int>& derivative_directions,
+            const std::vector<bool>& use_reciprocal,
+            const int shear_stress_component_idx,
+            const int shear_stress_derivative_direction,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Store ensemble statistics.
+         */
+        HAMERS_SHARED_PTR<EnsembleBudgetsRTIRMI> d_ensemble_statistics;
+        
+    private:
+        /*
+         * The object name is used for error/warning reporting.
+         */
+        const std::string d_object_name;
+        
+        /*
+         * Problem dimension.
+         */
+        const tbox::Dimension d_dim;
+        
+        /*
+         * HAMERS_SHARED_PTR to the grid geometry.
+         */
+        const HAMERS_SHARED_PTR<geom::CartesianGridGeometry> d_grid_geometry;
+        
+        /*
+         * Number of species.
+         */
+        const int d_num_species;
+        
+        /*
+         * HAMERS_WEAK_PTR to FlowModel.
+         */
+        const HAMERS_WEAK_PTR<FlowModel> d_flow_model;
+        
+        /*
+         * HAMERS_SHARED_PTR to EquationOfStateMixingRules.
+         */
+        const HAMERS_SHARED_PTR<EquationOfStateMixingRules>
+            d_equation_of_state_mixing_rules;
+        
+        /*
+         * HAMERS_SHARED_PTR to EquationOfMassDiffusivityMixingRules.
+         */
+        const HAMERS_SHARED_PTR<EquationOfMassDiffusivityMixingRules>
+            d_equation_of_mass_diffusivity_mixing_rules;
+        
+        /*
+         * HAMERS_SHARED_PTR to EquationOfShearViscosityMixingRules.
+         */
+        const HAMERS_SHARED_PTR<EquationOfShearViscosityMixingRules>
+            d_equation_of_shear_viscosity_mixing_rules;
+        
+        /*
+         * HAMERS_SHARED_PTR to EquationOfBulkViscosityMixingRules.
+         */
+        const HAMERS_SHARED_PTR<EquationOfBulkViscosityMixingRules>
+            d_equation_of_bulk_viscosity_mixing_rules;
+        
+        /*
+         * HAMERS_SHARED_PTR to EquationOfThermalConductivityMixingRules.
+         */
+        const HAMERS_SHARED_PTR<EquationOfThermalConductivityMixingRules>
+            d_equation_of_thermal_conductivity_mixing_rules;
+        
+        /*
+         * Number of ghost cells to use in taking derivatives.
+         */
+        const int d_num_ghosts_derivative;
+        
+};
+
+
+/*
+ * Compute averaged quantities with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+ */
+void
+RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrInYZPlane(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    // Scratch data containers to pass to MPI helper.
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    std::vector<int> derivative_directions;
+    std::vector<bool> use_reciprocal;
+    std::vector<bool> use_derivative;
+    
+    // Compute rho_avg.
+    
+    std::vector<double> rho_avg = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        data_context);
+    
+    std::vector<std::vector<double> >& rho_avg_realizations = d_ensemble_statistics->rho_avg_realizations;
+    rho_avg_realizations.push_back(rho_avg);
+    
+    d_ensemble_statistics->rho_avg_computed = true;
+    
+    // Compute rho_inv_avg.
+    
+    std::vector<double> rho_inv_avg = MPI_helper_average.getAveragedReciprocalOfQuantityWithInhomogeneousXDirection(
+        "DENSITY",
+        0,
+        data_context);
+    
+    std::vector<std::vector<double> >& rho_inv_avg_realizations = d_ensemble_statistics->rho_inv_avg_realizations;
+    rho_inv_avg_realizations.push_back(rho_inv_avg);
+    
+    d_ensemble_statistics->rho_inv_avg_computed = true;
+    
+    // Compute u_avg.
+    
+    std::vector<double> u_avg = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "VELOCITY",
+        0,
+        data_context);
+    
+    std::vector<std::vector<double> >& u_avg_realizations = d_ensemble_statistics->u_avg_realizations;
+    u_avg_realizations.push_back(u_avg);
+    
+    d_ensemble_statistics->u_avg_computed = true;
+    
+    // Compute u_sq_avg.
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    
+    std::vector<double> u_sq_avg = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<std::vector<double> >& u_sq_avg_realizations = d_ensemble_statistics->u_sq_avg_realizations;
+    u_sq_avg_realizations.push_back(u_sq_avg);
+    
+    d_ensemble_statistics->u_sq_avg_computed = true;
+    
+    // Compute rho_u_avg.
+    
+    std::vector<double> rho_u_avg = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "MOMENTUM",
+        0,
+        data_context);
+    
+    std::vector<std::vector<double> >& rho_u_avg_realizations = d_ensemble_statistics->rho_u_avg_realizations;
+    rho_u_avg_realizations.push_back(rho_u_avg);
+    
+    d_ensemble_statistics->rho_u_avg_computed = true;
+    
+    // Compute rho_u_u_avg.
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    
+    std::vector<double> rho_u_u_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    
+    std::vector<std::vector<double> >& rho_u_u_avg_realizations = d_ensemble_statistics->rho_u_u_avg_realizations;
+    rho_u_u_avg_realizations.push_back(rho_u_u_avg_global);
+    
+    d_ensemble_statistics->rho_u_u_avg_computed = true;
+    
+    // Compute ddx_rho_avg.
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_reciprocal.push_back(false);
+    
+    std::vector<double> ddx_rho_avg = MPI_helper_average.getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_reciprocal,
+        0,
+        d_num_ghosts_derivative,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_reciprocal.clear();
+    
+    std::vector<std::vector<double> >& ddx_rho_avg_realizations = d_ensemble_statistics->ddx_rho_avg_realizations;
+    ddx_rho_avg_realizations.push_back(ddx_rho_avg);
+    
+    d_ensemble_statistics->ddx_rho_avg_computed = true;
+    
+    // Compute ddx_p_avg.
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_reciprocal.push_back(false);
+    
+    std::vector<double> ddx_p_avg = MPI_helper_average.getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_reciprocal,
+        0,
+        d_num_ghosts_derivative,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_reciprocal.clear();
+    
+    std::vector<std::vector<double> >& ddx_p_avg_realizations = d_ensemble_statistics->ddx_p_avg_realizations;
+    ddx_p_avg_realizations.push_back(ddx_p_avg);
+    
+    d_ensemble_statistics->ddx_p_avg_computed = true;
+    
+    // Computed ddx_u_avg.
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    use_reciprocal.push_back(false);
+    
+    std::vector<double> ddx_u_avg = MPI_helper_average.getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_reciprocal,
+        0,
+        d_num_ghosts_derivative,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_reciprocal.clear();
+    
+    std::vector<std::vector<double> >& ddx_u_avg_realizations = d_ensemble_statistics->ddx_u_avg_realizations;
+    ddx_u_avg_realizations.push_back(ddx_u_avg);
+    
+    d_ensemble_statistics->ddx_u_avg_computed = true;
+    
+    // Computed dx_u_sq_avg.
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    use_reciprocal.push_back(false);
+    
+    std::vector<double> ddx_u_sq_avg = MPI_helper_average.getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_reciprocal,
+        0,
+        d_num_ghosts_derivative,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_reciprocal.clear();
+    
+    std::vector<std::vector<double> >& ddx_u_sq_avg_realizations = d_ensemble_statistics->ddx_u_sq_avg_realizations;
+    ddx_u_sq_avg_realizations.push_back(ddx_u_sq_avg);
+    
+    d_ensemble_statistics->ddx_u_sq_avg_computed = true;
+    
+    // Compute ddx_rho_u_avg.
+    
+    quantity_names.push_back("MOMENTUM");
+    component_indices.push_back(0);
+    use_reciprocal.push_back(false);
+    
+    std::vector<double> ddx_rho_u_avg = MPI_helper_average.getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_reciprocal,
+        0,
+        d_num_ghosts_derivative,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_reciprocal.clear();
+    
+    std::vector<std::vector<double> >& ddx_rho_u_avg_realizations = d_ensemble_statistics->ddx_rho_u_avg_realizations;
+    ddx_rho_u_avg_realizations.push_back(ddx_rho_u_avg);
+    
+    d_ensemble_statistics->ddx_rho_u_avg_computed = true;
+    
+    // Compute ddx_rho_u_u_avg.
+    
+    quantity_names.push_back("MOMENTUM");
+    component_indices.push_back(0);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    use_reciprocal.push_back(false);
+    
+    std::vector<double> ddx_rho_u_u_avg = MPI_helper_average.getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_reciprocal,
+        0,
+        d_num_ghosts_derivative,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_reciprocal.clear();
+    
+    std::vector<std::vector<double> >& ddx_rho_u_u_avg_realizations = d_ensemble_statistics->ddx_rho_u_u_avg_realizations;
+    ddx_rho_u_u_avg_realizations.push_back(ddx_rho_u_u_avg);
+    
+    d_ensemble_statistics->ddx_rho_u_u_avg_computed = true;
+    
+    // Compute ddy_v_avg.
+    
+    if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_reciprocal.push_back(false);
+    
+        std::vector<double> ddy_v_avg = MPI_helper_average.getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_reciprocal,
+            1,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& ddy_v_avg_realizations = d_ensemble_statistics->ddy_v_avg_realizations;
+        ddy_v_avg_realizations.push_back(ddy_v_avg);
+        
+        d_ensemble_statistics->ddy_v_avg_computed = true;
+    }
+    
+    // Compute ddz_w_avg.
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(2);
+        use_reciprocal.push_back(false);
+    
+        std::vector<double> ddz_w_avg = MPI_helper_average.getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_reciprocal,
+            2,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& ddz_w_avg_realizations = d_ensemble_statistics->ddz_w_avg_realizations;
+        ddz_w_avg_realizations.push_back(ddz_w_avg);
+        
+        d_ensemble_statistics->ddz_w_avg_computed = true;
+    }
+    
+    // Compute rho_inv_ddx_p_avg.
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(0);
+    use_reciprocal.push_back(false);
+    
+    std::vector<double> rho_inv_ddx_p_avg = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_derivative,
+        derivative_directions,
+        use_reciprocal,
+        d_num_ghosts_derivative,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_derivative.clear();
+    derivative_directions.clear();
+    use_reciprocal.clear();
+    
+    std::vector<std::vector<double> >& rho_inv_ddx_p_avg_realizations = d_ensemble_statistics->rho_inv_ddx_p_avg_realizations;
+    rho_inv_ddx_p_avg_realizations.push_back(rho_inv_ddx_p_avg);
+    
+    d_ensemble_statistics->rho_inv_ddx_p_avg_computed = true;
+    
+    // Compute u_ddx_u_avg.
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(0);
+    
+    std::vector<double> u_ddx_u_avg = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_derivative,
+        derivative_directions,
+        d_num_ghosts_derivative,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_derivative.clear();
+    derivative_directions.clear();
+    
+    std::vector<std::vector<double> >& u_ddx_u_avg_realizations = d_ensemble_statistics->u_ddx_u_avg_realizations;
+    u_ddx_u_avg_realizations.push_back(u_ddx_u_avg);
+    
+    d_ensemble_statistics->u_ddx_u_avg_computed = true;
+    
+    // Compute u_ddy_v_avg.
+    
+    if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        
+        std::vector<double> u_ddy_v_avg = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        std::vector<std::vector<double> >& u_ddy_v_avg_realizations = d_ensemble_statistics->u_ddy_v_avg_realizations;
+        u_ddy_v_avg_realizations.push_back(u_ddy_v_avg);
+        
+        d_ensemble_statistics->u_ddy_v_avg_computed = true;
+    }
+    
+    // Compute u_ddz_w_avg.
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(2);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(2);
+        
+        std::vector<double> u_ddz_w_avg = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        std::vector<std::vector<double> >& u_ddz_w_avg_realizations = d_ensemble_statistics->u_ddz_w_avg_realizations;
+        u_ddz_w_avg_realizations.push_back(u_ddz_w_avg);
+        
+        d_ensemble_statistics->u_ddz_w_avg_computed = true;
+    }
+    
+    // Compute ddx_tau_11_avg.
+    
+    std::vector<double> ddx_tau_11_avg = getAveragedDerivativeOfShearStressComponentWithInhomogeneousXDirection(
+        0,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    std::vector<std::vector<double> >& ddx_tau_11_avg_realizations = d_ensemble_statistics->ddx_tau_11_avg_realizations;
+    ddx_tau_11_avg_realizations.push_back(ddx_tau_11_avg);
+    
+    d_ensemble_statistics->ddx_tau_11_avg_computed = true;
+    
+    // Compute ddy_tau_12_avg.
+    
+    if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+    {
+        std::vector<double> ddy_tau_12_avg = getAveragedDerivativeOfShearStressComponentWithInhomogeneousXDirection(
+            1,
+            1,
+            patch_hierarchy,
+            data_context);
+        
+        std::vector<std::vector<double> >& ddy_tau_12_avg_realizations = d_ensemble_statistics->ddy_tau_12_avg_realizations;
+        ddy_tau_12_avg_realizations.push_back(ddy_tau_12_avg);
+        
+        d_ensemble_statistics->ddy_tau_12_avg_computed = true;
+    }
+    
+    // Compute ddz_tau_13_avg.
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        std::vector<double> ddz_tau_13_avg = getAveragedDerivativeOfShearStressComponentWithInhomogeneousXDirection(
+            2,
+            2,
+            patch_hierarchy,
+            data_context);
+        
+        std::vector<std::vector<double> >& ddz_tau_13_avg_realizations = d_ensemble_statistics->ddz_tau_13_avg_realizations;
+        ddz_tau_13_avg_realizations.push_back(ddz_tau_13_avg);
+        
+        d_ensemble_statistics->ddz_tau_13_avg_computed = true;
+    }
+    
+    // Compute rho_inv_ddx_tau_11_avg.
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    std::vector<double> rho_inv_ddx_tau_11_avg =
+        getAveragedQuantityWithDerivativeOfShearStressComponentWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            use_reciprocal,
+            0,
+            0,
+            patch_hierarchy,
+            data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_derivative.clear();
+    derivative_directions.clear();
+    use_reciprocal.clear();
+    
+    std::vector<std::vector<double> >& rho_inv_ddx_tau_11_avg_realizations = d_ensemble_statistics->rho_inv_ddx_tau_11_avg_realizations;
+    rho_inv_ddx_tau_11_avg_realizations.push_back(rho_inv_ddx_tau_11_avg);
+    
+    d_ensemble_statistics->rho_inv_ddx_tau_11_avg_computed = true;
+    
+    // Compute rho_inv_ddy_tau_12_avg.
+    
+    if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("DENSITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        use_reciprocal.push_back(true);
+        
+        std::vector<double> rho_inv_ddy_tau_12_avg =
+            getAveragedQuantityWithDerivativeOfShearStressComponentWithInhomogeneousXDirection(
+                quantity_names,
+                component_indices,
+                use_derivative,
+                derivative_directions,
+                use_reciprocal,
+                1,
+                1,
+                patch_hierarchy,
+                data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& rho_inv_ddy_tau_12_avg_realizations = d_ensemble_statistics->rho_inv_ddy_tau_12_avg_realizations;
+        rho_inv_ddy_tau_12_avg_realizations.push_back(rho_inv_ddy_tau_12_avg);
+    
+        d_ensemble_statistics->rho_inv_ddy_tau_12_avg_computed = true;
+    }
+    
+    // Compute rho_inv_ddz_tau_13_avg.
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("DENSITY");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        use_reciprocal.push_back(true);
+        
+        std::vector<double> rho_inv_ddz_tau_13_avg =
+            getAveragedQuantityWithDerivativeOfShearStressComponentWithInhomogeneousXDirection(
+                quantity_names,
+                component_indices,
+                use_derivative,
+                derivative_directions,
+                use_reciprocal,
+                2,
+                2,
+                patch_hierarchy,
+                data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& rho_inv_ddz_tau_13_avg_realizations = d_ensemble_statistics->rho_inv_ddz_tau_13_avg_realizations;
+        rho_inv_ddz_tau_13_avg_realizations.push_back(rho_inv_ddz_tau_13_avg);
+    
+        d_ensemble_statistics->rho_inv_ddz_tau_13_avg_computed = true;
+    }
+}
+
+
+/*
+ * Output budget of turbulent mass flux in x-direction with inhomogeneous x-direction to a file.
+ */
+void
+RTIRMIBudgetsUtilities::outputBudgetTurbMassFluxXWithInhomogeneousXDirection(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    /*
+     * Output the spatial profiles (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& rho_avg_realizations     = d_ensemble_statistics->rho_avg_realizations;
+        const std::vector<std::vector<double> >& rho_inv_avg_realizations = d_ensemble_statistics->rho_inv_avg_realizations;
+        const std::vector<std::vector<double> >& u_avg_realizations       = d_ensemble_statistics->u_avg_realizations;
+        const std::vector<std::vector<double> >& u_sq_avg_realizations    = d_ensemble_statistics->u_sq_avg_realizations;
+        const std::vector<std::vector<double> >& rho_u_avg_realizations   = d_ensemble_statistics->rho_u_avg_realizations;
+        const std::vector<std::vector<double> >& rho_u_u_avg_realizations = d_ensemble_statistics->rho_u_u_avg_realizations;
+        
+        const std::vector<std::vector<double> >& ddx_rho_avg_realizations     = d_ensemble_statistics->ddx_rho_avg_realizations;
+        const std::vector<std::vector<double> >& ddx_p_avg_realizations       = d_ensemble_statistics->ddx_p_avg_realizations;
+        const std::vector<std::vector<double> >& ddx_u_avg_realizations       = d_ensemble_statistics->ddx_u_avg_realizations;
+        const std::vector<std::vector<double> >& ddx_u_sq_avg_realizations    = d_ensemble_statistics->ddx_u_sq_avg_realizations;
+        const std::vector<std::vector<double> >& ddx_rho_u_avg_realizations   = d_ensemble_statistics->ddx_rho_u_avg_realizations;
+        const std::vector<std::vector<double> >& ddx_rho_u_u_avg_realizations = d_ensemble_statistics->ddx_rho_u_u_avg_realizations;
+        
+        const std::vector<std::vector<double> >& ddy_v_avg_realizations = d_ensemble_statistics->ddy_v_avg_realizations;
+        const std::vector<std::vector<double> >& ddz_w_avg_realizations = d_ensemble_statistics->ddz_w_avg_realizations;
+        
+        const std::vector<std::vector<double> >& rho_inv_ddx_p_avg_realizations = d_ensemble_statistics->rho_inv_ddx_p_avg_realizations;
+        
+        const std::vector<std::vector<double> >& u_ddx_u_avg_realizations = d_ensemble_statistics->u_ddx_u_avg_realizations;
+        const std::vector<std::vector<double> >& u_ddy_v_avg_realizations = d_ensemble_statistics->u_ddy_v_avg_realizations;
+        const std::vector<std::vector<double> >& u_ddz_w_avg_realizations = d_ensemble_statistics->u_ddz_w_avg_realizations;
+        
+        const std::vector<std::vector<double> >& ddx_tau_11_avg_realizations = d_ensemble_statistics->ddx_tau_11_avg_realizations;
+        const std::vector<std::vector<double> >& ddy_tau_12_avg_realizations = d_ensemble_statistics->ddy_tau_12_avg_realizations;
+        const std::vector<std::vector<double> >& ddz_tau_13_avg_realizations = d_ensemble_statistics->ddz_tau_13_avg_realizations;
+        
+        const std::vector<std::vector<double> >& rho_inv_ddx_tau_11_avg_realizations = d_ensemble_statistics->rho_inv_ddx_tau_11_avg_realizations;
+        const std::vector<std::vector<double> >& rho_inv_ddy_tau_12_avg_realizations = d_ensemble_statistics->rho_inv_ddy_tau_12_avg_realizations;
+        const std::vector<std::vector<double> >& rho_inv_ddz_tau_13_avg_realizations = d_ensemble_statistics->rho_inv_ddz_tau_13_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(rho_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        
+        const int num_cells = static_cast<int>(rho_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> rho_avg_global(num_cells, double(0));
+        std::vector<double> rho_inv_avg_global(num_cells, double(0));
+        std::vector<double> u_avg_global(num_cells, double(0));
+        std::vector<double> u_sq_avg_global(num_cells, double(0));
+        std::vector<double> rho_u_avg_global(num_cells, double(0));
+        std::vector<double> rho_u_u_avg_global(num_cells, double(0));
+        
+        std::vector<double> ddx_rho_avg_global(num_cells, double(0));
+        std::vector<double> ddx_p_avg_global(num_cells, double(0));
+        std::vector<double> ddx_u_avg_global(num_cells, double(0));
+        std::vector<double> ddx_u_sq_avg_global(num_cells, double(0));
+        std::vector<double> ddx_rho_u_avg_global(num_cells, double(0));
+        std::vector<double> ddx_rho_u_u_avg_global(num_cells, double(0));
+        
+        std::vector<double> ddy_v_avg_global(num_cells, double(0));
+        std::vector<double> ddz_w_avg_global(num_cells, double(0));
+        
+        std::vector<double> rho_inv_ddx_p_avg_global(num_cells, double(0));
+        
+        std::vector<double> u_ddx_u_avg_global(num_cells, double(0));
+        std::vector<double> u_ddy_v_avg_global(num_cells, double(0));
+        std::vector<double> u_ddz_w_avg_global(num_cells, double(0));
+        
+        std::vector<double> ddx_tau_11_avg_global(num_cells, double(0));
+        std::vector<double> ddy_tau_12_avg_global(num_cells, double(0));
+        std::vector<double> ddz_tau_13_avg_global(num_cells, double(0));
+        
+        std::vector<double> rho_inv_ddx_tau_11_avg_global(num_cells, double(0));
+        std::vector<double> rho_inv_ddy_tau_12_avg_global(num_cells, double(0));
+        std::vector<double> rho_inv_ddz_tau_13_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                rho_avg_global[i]     += weight*rho_avg_realizations[ri][i];
+                rho_inv_avg_global[i] += weight*rho_inv_avg_realizations[ri][i];
+                u_avg_global[i]       += weight*u_avg_realizations[ri][i];
+                u_sq_avg_global[i]    += weight*u_sq_avg_realizations[ri][i];
+                rho_u_avg_global[i]   += weight*rho_u_avg_realizations[ri][i];
+                rho_u_u_avg_global[i] += weight*rho_u_u_avg_realizations[ri][i];
+                
+                ddx_rho_avg_global[i]     += weight*ddx_rho_avg_realizations[ri][i];
+                ddx_p_avg_global[i]       += weight*ddx_p_avg_realizations[ri][i];
+                ddx_u_avg_global[i]       += weight*ddx_u_avg_realizations[ri][i];
+                ddx_u_sq_avg_global[i]    += weight*ddx_u_sq_avg_realizations[ri][i];
+                ddx_rho_u_avg_global[i]   += weight*ddx_rho_u_avg_realizations[ri][i];
+                ddx_rho_u_u_avg_global[i] += weight*ddx_rho_u_u_avg_realizations[ri][i];
+                
+                
+                rho_inv_ddx_p_avg_global[i] += weight*rho_inv_ddx_p_avg_realizations[ri][i];
+                
+                u_ddx_u_avg_global[i] += weight*u_ddx_u_avg_realizations[ri][i];
+                
+                ddx_tau_11_avg_global[i] += weight*ddx_tau_11_avg_realizations[ri][i];
+                
+                rho_inv_ddx_tau_11_avg_global[i] += weight*rho_inv_ddx_tau_11_avg_realizations[ri][i];
+            }
+        }
+        
+        if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+        {
+            for (int ri = 0; ri < num_realizations; ri++)
+            {
+                for (int i = 0; i < num_cells; i++)
+                {
+                    ddy_v_avg_global[i] += weight*ddy_v_avg_realizations[ri][i];
+                    
+                    u_ddy_v_avg_global[i] += weight*u_ddy_v_avg_realizations[ri][i];
+                    
+                    ddy_tau_12_avg_global[i] += weight*ddy_tau_12_avg_realizations[ri][i];
+                    
+                    rho_inv_ddy_tau_12_avg_global[i] += weight*rho_inv_ddy_tau_12_avg_realizations[ri][i];
+                }
+            }
+        }
+        
+        if (d_dim == tbox::Dimension(3))
+        {
+            for (int ri = 0; ri < num_realizations; ri++)
+            {
+                for (int i = 0; i < num_cells; i++)
+                {
+                    ddz_w_avg_global[i] += weight*ddz_w_avg_realizations[ri][i];
+                    
+                    u_ddz_w_avg_global[i] += weight*u_ddz_w_avg_realizations[ri][i];
+                    
+                    ddz_tau_13_avg_global[i] += weight*ddz_tau_13_avg_realizations[ri][i];
+                    
+                    rho_inv_ddz_tau_13_avg_global[i] += weight*rho_inv_ddz_tau_13_avg_realizations[ri][i];
+                }
+            }
+        }
+        
+        f_out.write((char*)&output_time, sizeof(double));
+        // f_out.write((char*)&rho_avg_global[0], sizeof(double)*rho_avg_global.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output spatial profile of ensemble averaged density with assumed homogeneity in y-direction (2D) or
+ * yz-plane (3D) to a file.
+ */
+void
+RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& rho_avg_realizations =
+            d_ensemble_statistics->rho_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(rho_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        
+        const int num_cells = static_cast<int>(rho_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> rho_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                rho_avg_global[i] += weight*rho_avg_realizations[ri][i];
+            }
+        }
+        
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&rho_avg_global[0], sizeof(double)*rho_avg_global.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Compute averaged shear stress component with only x direction as inhomogeneous direction.
+ * component_idx:
+ * 0: tau_11
+ * 1: tau_12
+ * 2: tau_13
+ * 3: tau_22
+ * 4: tau_23
+ * 5: tau_33
+ */
+std::vector<double>
+RTIRMIBudgetsUtilities::getAveragedShearStressComponentWithInhomogeneousXDirection(
+    const int component_idx,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+    TBOX_ASSERT(d_num_ghosts_derivative == 3);
+    
+    std::vector<double> averaged_tau_ij;
+    
+    HAMERS_SHARED_PTR<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Get the refinement ratio from the finest level to the coarest level.
+     */
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    hier::IntVector ratio_finest_level_to_coarest_level =
+        patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
+    for (int li = num_levels - 2; li > 0 ; li--)
+    {
+        ratio_finest_level_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
+    }
+    
+    /*
+     * Get the flattened hierarchy where only the finest existing grid is visible at any given
+     * location in the problem space.
+     */
+    
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
+            *patch_hierarchy,
+            0,
+            num_levels - 1));
+    
+    /*
+     * Get the number of cells of physical domain refined to the finest level.
+     */
+    
+    const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
+    const hier::Box& physical_domain_box = physical_domain.front();
+    const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratio_finest_level_to_coarest_level;
+    
+    /*
+     * Get the indices of the physical domain.
+     */
+    
+    const double* x_lo = d_grid_geometry->getXLower();
+    const double* x_hi = d_grid_geometry->getXUpper();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        hier::IntVector num_ghosts_der = hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative;
+        
+        const int finest_level_dim_0 = finest_level_dims[0];
+        
+        double* tau_ij_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        averaged_tau_ij.resize(finest_level_dim_0);
+        double* tau_ij_avg_global = averaged_tau_ij.data();
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            tau_ij_avg_local[i] = double(0);
+            tau_ij_avg_global[i] = double(0);
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratio_to_coarest_level =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            
+            const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower index.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch and the quantity in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                d_flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                d_flow_model_tmp->computeDerivedCellData();
+                
+                /*
+                 * Get the pointers to data inside the flow model.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getCellData("VELOCITY");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
+                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
+                    d_flow_model_tmp->getCellData("PRESSURE");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
+                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                
+                double* u = data_velocity->getPointer(0);
+                std::vector<double*> Y;
+                Y.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                double* p = data_pressure->getPointer(0);
+                double* T = data_temperature->getPointer(0);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+                const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+                const int num_ghosts_0_temperature = num_ghosts_temperature[0];
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        /*
+                         * Compute the index of the data point and count how many times the data is repeated.
+                         */
+                        
+                        const hier::Index idx_pt(tbox::Dimension(1), idx_lo_0 + i);
+                        
+                        int n_overlapped = 1;
+                        
+                        for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                patch_overlapped_visible_boxes.begin());
+                             iob != patch_overlapped_visible_boxes.end();
+                             iob++)
+                        {
+                            const hier::Box& patch_overlapped_visible_box = *iob;
+                            
+                            if (patch_overlapped_visible_box.contains(idx_pt))
+                            {
+                                n_overlapped++;
+                            }
+                        }
+                        
+                        /*
+                         * Compute the shear stress component.
+                         */
+                        
+                        double value_to_add = double(0);
+                        
+                        // Compute linear indices of mass fraction, pressure and temperature.
+                        const int idx_mass_fraction = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
+                        const int idx_pressure = relative_idx_lo_0 + i + num_ghosts_0_pressure;
+                        const int idx_temperature = relative_idx_lo_0 + i + num_ghosts_0_temperature;
+                        
+                        if (component_idx == 0)
+                        {
+                            std::vector<const double*> Y_ptr;
+                            Y_ptr.resize(d_num_species);
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                Y_ptr[si] = &Y[si][idx_mass_fraction];
+                            }
+                            const double mu = d_equation_of_shear_viscosity_mixing_rules->
+                                getShearViscosity(
+                                    &p[idx_pressure],
+                                    &T[idx_temperature],
+                                    Y_ptr);
+                            const double mu_v = d_equation_of_bulk_viscosity_mixing_rules->
+                                getBulkViscosity(
+                                    &p[idx_pressure],
+                                    &T[idx_temperature],
+                                    Y_ptr);
+                            
+                            const int idx_vel_x_LLL = relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity;
+                            const int idx_vel_x_LL  = relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity;
+                            const int idx_vel_x_L   = relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity;
+                            const int idx_vel_x_R   = relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity;
+                            const int idx_vel_x_RR  = relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity;
+                            const int idx_vel_x_RRR = relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity;
+                            
+                            const double dudx = (double(1)/double(60)*(u[idx_vel_x_RRR] - u[idx_vel_x_LLL])
+                                - double(3)/double(20)*(u[idx_vel_x_RR] - u[idx_vel_x_LL])
+                                + double(3)/double(4)*(u[idx_vel_x_R] - u[idx_vel_x_L]))/dx[0];
+                            
+                            value_to_add = (double(4)/double(3)*mu + mu_v)*dudx / ((double) n_overlapped);
+                        }
+                        else
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Cannot compute shear stress component for one-dimensional problem!\n"
+                                << "component_idx = " << component_idx << " given!\n"
+                                << std::endl);
+                        }
+                        
+                        /*
+                         * Add the data.
+                         */
+                        
+                        for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
+                        {
+                            const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
+                            
+                            tau_ij_avg_local[idx_fine] += value_to_add;
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        /*
+         * Reduction to get the global average of shear stress component.
+         */
+        
+        mpi.Allreduce(
+            tau_ij_avg_local,
+            tau_ij_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        std::free(tau_ij_avg_local);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        hier::IntVector num_ghosts_der = hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative;
+        
+        const int finest_level_dim_0 = finest_level_dims[0];
+        
+        /*
+         * Get the size of the physical domain.
+         */
+        
+        const double L_y = x_hi[1] - x_lo[1];
+        
+        double* tau_ij_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        averaged_tau_ij.resize(finest_level_dim_0);
+        double* tau_ij_avg_global = averaged_tau_ij.data();
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            tau_ij_avg_local[i] = double(0);
+            tau_ij_avg_global[i] = double(0);
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratio_to_coarest_level =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            
+            const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower index and grid spacing.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch and the quantity in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                d_flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                d_flow_model_tmp->computeDerivedCellData();
+                
+                /*
+                 * Get the pointer to data inside the flow model.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getCellData("VELOCITY");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
+                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
+                    d_flow_model_tmp->getCellData("PRESSURE");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
+                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                
+                double* u = data_velocity->getPointer(0);
+                double* v = data_velocity->getPointer(1);
+                std::vector<double*> Y;
+                Y.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                double* p = data_pressure->getPointer(0);
+                double* T = data_temperature->getPointer(0);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_temperature = data_temperature->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                
+                const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+                const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+                const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
+                
+                const int num_ghosts_0_temperature = num_ghosts_temperature[0];
+                const int num_ghosts_1_temperature = num_ghosts_temperature[1];
+                const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
+                
+                const double weight = dx[1]/L_y;
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            /*
+                             * Compute the index of the data point and count how many times the data is repeated.
+                             */
+                            
+                            const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j);
+                            
+                            int n_overlapped = 1;
+                            
+                            for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                    patch_overlapped_visible_boxes.begin());
+                                 iob != patch_overlapped_visible_boxes.end();
+                                 iob++)
+                            {
+                                const hier::Box& patch_overlapped_visible_box = *iob;
+                                
+                                if (patch_overlapped_visible_box.contains(idx_pt))
+                                {
+                                    n_overlapped++;
+                                }
+                            }
+                            
+                            /*
+                             * Compute the shear stress component.
+                             */
+                            
+                            double value_to_add = double(0);
+                            
+                            const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                            
+                            const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                            
+                            const int idx_temperature = (relative_idx_lo_0 + i + num_ghosts_0_temperature) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature;
+                            
+                            const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const int idx_vel_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const int idx_vel_y_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const int idx_vel_y_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const int idx_vel_y_T   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const int idx_vel_y_TT  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const int idx_vel_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            if (component_idx == 0)
+                            {
+                                std::vector<const double*> Y_ptr;
+                                Y_ptr.resize(d_num_species);
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                }
+                                const double mu = d_equation_of_shear_viscosity_mixing_rules->
+                                    getShearViscosity(
+                                        &p[idx_pressure],
+                                        &T[idx_temperature],
+                                        Y_ptr);
+                                const double mu_v = d_equation_of_bulk_viscosity_mixing_rules->
+                                    getBulkViscosity(
+                                        &p[idx_pressure],
+                                        &T[idx_temperature],
+                                        Y_ptr);
+                                
+                                const double dudx = (double(1)/double(60)*(u[idx_vel_x_RRR] - u[idx_vel_x_LLL])
+                                    - double(3)/double(20)*(u[idx_vel_x_RR] - u[idx_vel_x_LL])
+                                    + double(3)/double(4)*(u[idx_vel_x_R] - u[idx_vel_x_L]))/dx[0];
+                                
+                                const double dvdy = (double(1)/double(60)*(v[idx_vel_y_TTT] - v[idx_vel_y_BBB])
+                                    - double(3)/double(20)*(v[idx_vel_y_TT] - v[idx_vel_y_BB])
+                                    + double(3)/double(4)*(v[idx_vel_y_T] - v[idx_vel_y_B]))/dx[1];
+                                
+                                value_to_add = ((double(4)/double(3)*mu + mu_v)*dudx - (double(2)/double(3)*mu - mu_v)*dvdy)
+                                    *weight/((double) n_overlapped);
+                            }
+                            else if (component_idx == 1)
+                            {
+                                std::vector<const double*> Y_ptr;
+                                Y_ptr.resize(d_num_species);
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                }
+                                const double mu = d_equation_of_shear_viscosity_mixing_rules->
+                                    getShearViscosity(
+                                        &p[idx_pressure],
+                                        &T[idx_temperature],
+                                        Y_ptr);
+                                
+                                const double dvdx = (double(1)/double(60)*(v[idx_vel_x_RRR] - v[idx_vel_x_LLL])
+                                    - double(3)/double(20)*(v[idx_vel_x_RR] - v[idx_vel_x_LL])
+                                    + double(3)/double(4)*(v[idx_vel_x_R] - v[idx_vel_x_L]))/dx[0];
+                                
+                                const double dudy = (double(1)/double(60)*(u[idx_vel_y_TTT] - u[idx_vel_y_BBB])
+                                    - double(3)/double(20)*(u[idx_vel_y_TT] - u[idx_vel_y_BB])
+                                    + double(3)/double(4)*(u[idx_vel_y_T] - u[idx_vel_y_B]))/dx[1];
+                                
+                                value_to_add = mu*(dudy + dvdx)
+                                    *weight/((double) n_overlapped);
+                            }
+                            else if (component_idx == 3)
+                            {
+                                std::vector<const double*> Y_ptr;
+                                Y_ptr.resize(d_num_species);
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                }
+                                const double mu = d_equation_of_shear_viscosity_mixing_rules->
+                                    getShearViscosity(
+                                        &p[idx_pressure],
+                                        &T[idx_temperature],
+                                        Y_ptr);
+                                const double mu_v = d_equation_of_bulk_viscosity_mixing_rules->
+                                    getBulkViscosity(
+                                        &p[idx_pressure],
+                                        &T[idx_temperature],
+                                        Y_ptr);
+                                
+                                const double dudx = (double(1)/double(60)*(u[idx_vel_x_RRR] - u[idx_vel_x_LLL])
+                                    - double(3)/double(20)*(u[idx_vel_x_RR] - u[idx_vel_x_LL])
+                                    + double(3)/double(4)*(u[idx_vel_x_R] - u[idx_vel_x_L]))/dx[0];
+                                
+                                const double dvdy = (double(1)/double(60)*(v[idx_vel_y_TTT] - v[idx_vel_y_BBB])
+                                    - double(3)/double(20)*(v[idx_vel_y_TT] - v[idx_vel_y_BB])
+                                    + double(3)/double(4)*(v[idx_vel_y_T] - v[idx_vel_y_B]))/dx[1];
+                                
+                                value_to_add = ((double(4)/double(3)*mu + mu_v)*dvdy - (double(2)/double(3)*mu - mu_v)*dudx)
+                                    *weight/((double) n_overlapped);
+                            }
+                            else
+                            {
+                                TBOX_ERROR(d_object_name
+                                    << ": "
+                                    << "Cannot compute shear stress component for two-dimensional problem!\n"
+                                    << "component_idx = " << component_idx << " given!\n"
+                                    << std::endl);
+                            }
+                            
+                            /*
+                             * Add the data.
+                             */
+                            
+                            for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
+                            {
+                                const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
+                                
+                                tau_ij_avg_local[idx_fine] += value_to_add;
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        /*
+         * Reduction to get the global average of shear stress component.
+         */
+        
+        mpi.Allreduce(
+            tau_ij_avg_local,
+            tau_ij_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        std::free(tau_ij_avg_local);
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        hier::IntVector num_ghosts_der = hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative;
+        
+        const int finest_level_dim_0 = finest_level_dims[0];
+        
+        /*
+         * Get the size of the physical domain.
+         */
+        
+        const double L_y = x_hi[1] - x_lo[1];
+        const double L_z = x_hi[2] - x_lo[2];
+        
+        double* tau_ij_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        averaged_tau_ij.resize(finest_level_dim_0);
+        double* tau_ij_avg_global = averaged_tau_ij.data();
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            tau_ij_avg_local[i] = double(0);
+            tau_ij_avg_global[i] = double(0);
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratio_to_coarest_level =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            
+            const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower index and grid spacing.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch and the quantity in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                d_flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                d_flow_model_tmp->computeDerivedCellData();
+                
+                /*
+                 * Get the pointer to data inside the flow model.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getCellData("VELOCITY");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
+                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
+                    d_flow_model_tmp->getCellData("PRESSURE");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
+                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                
+                double* u = data_velocity->getPointer(0);
+                double* v = data_velocity->getPointer(1);
+                double* w = data_velocity->getPointer(2);
+                std::vector<double*> Y;
+                Y.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                double* p = data_pressure->getPointer(0);
+                double* T = data_temperature->getPointer(0);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_temperature = data_temperature->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int num_ghosts_2_velocity = num_ghosts_velocity[2];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+                
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
+                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                
+                const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+                const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+                const int num_ghosts_2_pressure = num_ghosts_pressure[2];
+                const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
+                const int ghostcell_dim_1_pressure = ghostcell_dims_pressure[1];
+                
+                const int num_ghosts_0_temperature = num_ghosts_temperature[0];
+                const int num_ghosts_1_temperature = num_ghosts_temperature[1];
+                const int num_ghosts_2_temperature = num_ghosts_temperature[2];
+                const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
+                const int ghostcell_dim_1_temperature = ghostcell_dims_temperature[1];
+                
+                const double weight = (dx[1]*dx[2])/(L_y*L_z);
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    const int relative_idx_lo_2 = relative_index_lo[2];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the shear stress component.
+                                 */
+                                
+                                double value_to_add = double(0);
+                                
+                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                        ghostcell_dim_1_mass_fraction;
+                                
+                                const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                                        ghostcell_dim_1_pressure;
+                                
+                                const int idx_temperature = (relative_idx_lo_0 + i + num_ghosts_0_temperature) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                                        ghostcell_dim_1_temperature;
+                                
+                                if (component_idx == 0)
+                                {
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                    }
+                                    const double mu = d_equation_of_shear_viscosity_mixing_rules->
+                                        getShearViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                    const double mu_v = d_equation_of_bulk_viscosity_mixing_rules->
+                                        getBulkViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                    
+                                    const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dudx = (double(1)/double(60)*(u[idx_vel_x_RRR] - u[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(u[idx_vel_x_RR] - u[idx_vel_x_LL])
+                                        + double(3)/double(4)*(u[idx_vel_x_R] - u[idx_vel_x_L]))/dx[0];
+                                    
+                                    const int idx_vel_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_T   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TT  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dvdy = (double(1)/double(60)*(v[idx_vel_y_TTT] - v[idx_vel_y_BBB])
+                                        - double(3)/double(20)*(v[idx_vel_y_TT] - v[idx_vel_y_BB])
+                                        + double(3)/double(4)*(v[idx_vel_y_T] - v[idx_vel_y_B]))/dx[1];
+                                    
+                                    const int idx_vel_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_F   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FF  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dwdz = (double(1)/double(60)*(w[idx_vel_z_FFF] - w[idx_vel_z_BBB])
+                                        - double(3)/double(20)*(w[idx_vel_z_FF] - w[idx_vel_z_BB])
+                                        + double(3)/double(4)*(w[idx_vel_z_F] - w[idx_vel_z_B]))/dx[2];
+                                    
+                                    value_to_add = ((double(4)/double(3)*mu + mu_v)*dudx - (double(2)/double(3)*mu - mu_v)*(dvdy + dwdz))
+                                        *weight/((double) n_overlapped);
+                                }
+                                else if (component_idx == 1)
+                                {
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                    }
+                                    const double mu = d_equation_of_shear_viscosity_mixing_rules->
+                                        getShearViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                    
+                                    const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dvdx = (double(1)/double(60)*(v[idx_vel_x_RRR] - v[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(v[idx_vel_x_RR] - v[idx_vel_x_LL])
+                                        + double(3)/double(4)*(v[idx_vel_x_R] - v[idx_vel_x_L]))/dx[0];
+                                    
+                                    const int idx_vel_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_T   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TT  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dudy = (double(1)/double(60)*(u[idx_vel_y_TTT] - u[idx_vel_y_BBB])
+                                        - double(3)/double(20)*(u[idx_vel_y_TT] - u[idx_vel_y_BB])
+                                        + double(3)/double(4)*(u[idx_vel_y_T] - u[idx_vel_y_B]))/dx[1];
+                                    
+                                    value_to_add = mu*(dudy + dvdx)
+                                        *weight/((double) n_overlapped);
+                                }
+                                else if (component_idx == 2)
+                                {
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                    }
+                                    const double mu = d_equation_of_shear_viscosity_mixing_rules->
+                                        getShearViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                    
+                                    const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dwdx = (double(1)/double(60)*(w[idx_vel_x_RRR] - w[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(w[idx_vel_x_RR] - w[idx_vel_x_LL])
+                                        + double(3)/double(4)*(w[idx_vel_x_R] - w[idx_vel_x_L]))/dx[0];
+                                    
+                                    const int idx_vel_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_F   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FF  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dudz = (double(1)/double(60)*(u[idx_vel_z_FFF] - u[idx_vel_z_BBB])
+                                        - double(3)/double(20)*(u[idx_vel_z_FF] - u[idx_vel_z_BB])
+                                        + double(3)/double(4)*(u[idx_vel_z_F] - u[idx_vel_z_B]))/dx[2];
+                                    
+                                    value_to_add = mu*(dudz + dwdx)
+                                        *weight/((double) n_overlapped);
+                                }
+                                else if (component_idx == 3)
+                                {
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                    }
+                                    const double mu = d_equation_of_shear_viscosity_mixing_rules->
+                                        getShearViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                    const double mu_v = d_equation_of_bulk_viscosity_mixing_rules->
+                                        getBulkViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                    
+                                    const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dudx = (double(1)/double(60)*(u[idx_vel_x_RRR] - u[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(u[idx_vel_x_RR] - u[idx_vel_x_LL])
+                                        + double(3)/double(4)*(u[idx_vel_x_R] - u[idx_vel_x_L]))/dx[0];
+                                    
+                                    const int idx_vel_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_T   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TT  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dvdy = (double(1)/double(60)*(v[idx_vel_y_TTT] - v[idx_vel_y_BBB])
+                                        - double(3)/double(20)*(v[idx_vel_y_TT] - v[idx_vel_y_BB])
+                                        + double(3)/double(4)*(v[idx_vel_y_T] - v[idx_vel_y_B]))/dx[1];
+                                    
+                                    const int idx_vel_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_F   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FF  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dwdz = (double(1)/double(60)*(w[idx_vel_z_FFF] - w[idx_vel_z_BBB])
+                                        - double(3)/double(20)*(w[idx_vel_z_FF] - w[idx_vel_z_BB])
+                                        + double(3)/double(4)*(w[idx_vel_z_F] - w[idx_vel_z_B]))/dx[2];
+                                    
+                                    value_to_add = ((double(4)/double(3)*mu + mu_v)*dvdy - (double(2)/double(3)*mu - mu_v)*(dudx + dwdz))
+                                        *weight/((double) n_overlapped);
+                                }
+                                else if (component_idx == 4)
+                                {
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                    }
+                                    const double mu = d_equation_of_shear_viscosity_mixing_rules->
+                                        getShearViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                    
+                                    const int idx_vel_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_T   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TT  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dwdy = (double(1)/double(60)*(w[idx_vel_y_TTT] - w[idx_vel_y_BBB])
+                                        - double(3)/double(20)*(w[idx_vel_y_TT] - w[idx_vel_y_BB])
+                                        + double(3)/double(4)*(w[idx_vel_y_T] - w[idx_vel_y_B]))/dx[1];
+                                    
+                                    const int idx_vel_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_F   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FF  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dvdz = (double(1)/double(60)*(v[idx_vel_z_FFF] - v[idx_vel_z_BBB])
+                                        - double(3)/double(20)*(v[idx_vel_z_FF] - v[idx_vel_z_BB])
+                                        + double(3)/double(4)*(v[idx_vel_z_F] - v[idx_vel_z_B]))/dx[2];
+                                    
+                                    value_to_add = mu*(dvdz + dwdy)
+                                        *weight/((double) n_overlapped);
+                                }
+                                else if (component_idx == 5)
+                                {
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                    }
+                                    const double mu = d_equation_of_shear_viscosity_mixing_rules->
+                                        getShearViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                    const double mu_v = d_equation_of_bulk_viscosity_mixing_rules->
+                                        getBulkViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                    
+                                    const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dudx = (double(1)/double(60)*(u[idx_vel_x_RRR] - u[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(u[idx_vel_x_RR] - u[idx_vel_x_LL])
+                                        + double(3)/double(4)*(u[idx_vel_x_R] - u[idx_vel_x_L]))/dx[0];
+                                    
+                                    const int idx_vel_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_T   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TT  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dvdy = (double(1)/double(60)*(v[idx_vel_y_TTT] - v[idx_vel_y_BBB])
+                                        - double(3)/double(20)*(v[idx_vel_y_TT] - v[idx_vel_y_BB])
+                                        + double(3)/double(4)*(v[idx_vel_y_T] - v[idx_vel_y_B]))/dx[1];
+                                    
+                                    const int idx_vel_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_F   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FF  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dwdz = (double(1)/double(60)*(w[idx_vel_z_FFF] - w[idx_vel_z_BBB])
+                                        - double(3)/double(20)*(w[idx_vel_z_FF] - w[idx_vel_z_BB])
+                                        + double(3)/double(4)*(w[idx_vel_z_F] - w[idx_vel_z_B]))/dx[2];
+                                    
+                                    value_to_add = ((double(4)/double(3)*mu + mu_v)*dwdz - (double(2)/double(3)*mu - mu_v)*(dudx + dvdy))
+                                        *weight/((double) n_overlapped);
+                                }
+                                else
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": "
+                                        << "Cannot compute shear stress component for two-dimensional problem!\n"
+                                        << "component_idx = " << component_idx << " given!\n"
+                                        << std::endl);
+                                }
+                                
+                                /*
+                                 * Add the data.
+                                 */
+                                
+                                for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
+                                {
+                                    const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
+                                    
+                                    tau_ij_avg_local[idx_fine] += value_to_add;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        /*
+         * Reduction to get the global average of shear stress component.
+         */
+        
+        mpi.Allreduce(
+            tau_ij_avg_local,
+            tau_ij_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        std::free(tau_ij_avg_local);
+    }
+    
+    return  averaged_tau_ij;
+}
+
+
+/*
+ * Compute averaged derivative of shear stress component with only x direction as inhomogeneous direction.
+ * component_idx:
+ * 0: tau_11
+ * 1: tau_12
+ * 2: tau_13
+ * 3: tau_22
+ * 4: tau_23
+ * 5: tau_33
+ */
+std::vector<double>
+RTIRMIBudgetsUtilities::getAveragedDerivativeOfShearStressComponentWithInhomogeneousXDirection(
+    const int component_idx,
+    const int derivative_direction,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+    TBOX_ASSERT(d_num_ghosts_derivative == 3);
+    
+    std::vector<double> averaged_derivative_tau_ij;
+    
+    HAMERS_SHARED_PTR<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Get the refinement ratio from the finest level to the coarest level.
+     */
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    hier::IntVector ratio_finest_level_to_coarest_level =
+        patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
+    for (int li = num_levels - 2; li > 0 ; li--)
+    {
+        ratio_finest_level_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
+    }
+    
+    /*
+     * Get the flattened hierarchy where only the finest existing grid is visible at any given
+     * location in the problem space.
+     */
+    
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
+            *patch_hierarchy,
+            0,
+            num_levels - 1));
+    
+    /*
+     * Get the number of cells of physical domain refined to the finest level.
+     */
+    
+    const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
+    const hier::Box& physical_domain_box = physical_domain.front();
+    const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratio_finest_level_to_coarest_level;
+    
+    /*
+     * Get the indices of the physical domain.
+     */
+    
+    const double* x_lo = d_grid_geometry->getXLower();
+    const double* x_hi = d_grid_geometry->getXUpper();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        hier::IntVector num_ghosts_der = hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative;
+        
+        const int finest_level_dim_0 = finest_level_dims[0];
+        
+        double* tau_ij_der_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        averaged_derivative_tau_ij.resize(finest_level_dim_0);
+        double* tau_ij_der_avg_global = averaged_derivative_tau_ij.data();
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            tau_ij_der_avg_local[i] = double(0);
+            tau_ij_der_avg_global[i] = double(0);
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratio_to_coarest_level =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            
+            const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower index.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch and the quantities in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts_der));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("PRESSURE", num_ghosts_der));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("TEMPERATURE", num_ghosts_der));
+                
+                d_flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                d_flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                d_flow_model_tmp->computeDerivedCellData();
+                
+                /*
+                 * Get the pointers to data inside the flow model.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getCellData("VELOCITY");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
+                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
+                    d_flow_model_tmp->getCellData("PRESSURE");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
+                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                
+                double* u = data_velocity->getPointer(0);
+                std::vector<double*> Y;
+                Y.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                double* p = data_pressure->getPointer(0);
+                double* T = data_temperature->getPointer(0);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+                const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+                const int num_ghosts_0_temperature = num_ghosts_temperature[0];
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        /*
+                         * Compute the index of the data point and count how many times the data is repeated.
+                         */
+                        
+                        const hier::Index idx_pt(tbox::Dimension(1), idx_lo_0 + i);
+                        
+                        int n_overlapped = 1;
+                        
+                        for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                patch_overlapped_visible_boxes.begin());
+                             iob != patch_overlapped_visible_boxes.end();
+                             iob++)
+                        {
+                            const hier::Box& patch_overlapped_visible_box = *iob;
+                            
+                            if (patch_overlapped_visible_box.contains(idx_pt))
+                            {
+                                n_overlapped++;
+                            }
+                        }
+                        
+                        /*
+                         * Compute the derivative of shear stress component.
+                         */
+                        
+                        double value_to_add = double(0);
+                        
+                        if ((component_idx == 0) && (derivative_direction == 0))
+                        {
+                            double mu[7];
+                            double mu_v[7];
+                            
+                            std::vector<const double*> Y_ptr;
+                            Y_ptr.resize(d_num_species);
+                            for (int count = -3; count <= 3; count++)
+                            {
+                                const int idx_mass_fraction = relative_idx_lo_0 + (i + count) + num_ghosts_0_mass_fraction;
+                                const int idx_pressure = relative_idx_lo_0 + (i + count) + num_ghosts_0_pressure;
+                                const int idx_temperature = relative_idx_lo_0 + (i + count) + num_ghosts_0_temperature;
+                                
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                }
+                                mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                    getShearViscosity(
+                                        &p[idx_pressure],
+                                        &T[idx_temperature],
+                                        Y_ptr);
+                                mu_v[count + 3] = d_equation_of_bulk_viscosity_mixing_rules->
+                                    getBulkViscosity(
+                                        &p[idx_pressure],
+                                        &T[idx_temperature],
+                                        Y_ptr);
+                            }
+                            
+                            const double dmudx = (double(1)/double(60)*(mu[6] - mu[0])
+                                - double(3)/double(20)*(mu[5] - mu[1])
+                                + double(3)/double(4)*(mu[4] - mu[2]))/dx[0];
+                            
+                            const double dmu_vdx = (double(1)/double(60)*(mu_v[6] - mu_v[0])
+                                - double(3)/double(20)*(mu_v[5] - mu_v[1])
+                                + double(3)/double(4)*(mu_v[4] - mu_v[2]))/dx[0];
+                            
+                            const int idx_vel       = relative_idx_lo_0 +  i      + num_ghosts_0_velocity;
+                            
+                            const int idx_vel_x_LLL = relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity;
+                            const int idx_vel_x_LL  = relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity;
+                            const int idx_vel_x_L   = relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity;
+                            const int idx_vel_x_R   = relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity;
+                            const int idx_vel_x_RR  = relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity;
+                            const int idx_vel_x_RRR = relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity;
+                            
+                            const double dudx = (double(1)/double(60)*(u[idx_vel_x_RRR] - u[idx_vel_x_LLL])
+                                - double(3)/double(20)*(u[idx_vel_x_RR] - u[idx_vel_x_LL])
+                                + double(3)/double(4)*(u[idx_vel_x_R] - u[idx_vel_x_L]))/dx[0];
+                            
+                            const double d2udx2 = (double(1)/double(90)*(u[idx_vel_x_RRR] + u[idx_vel_x_LLL])
+                                - double(3)/double(20)*(u[idx_vel_x_RR] + u[idx_vel_x_LL])
+                                + double(3)/double(2)*(u[idx_vel_x_R] + u[idx_vel_x_L])
+                                - double(49)/double(18)*u[idx_vel])/(dx[0]*dx[0]);
+                            
+                            value_to_add = ((double(4)/double(3)*dmudx + dmu_vdx)*dudx 
+                                + (double(4)/double(3)*mu[3] + mu_v[3])*d2udx2) / ((double) n_overlapped);
+                        }
+                        else
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Cannot compute derivative of shear stress component for one-dimensional problem!\n"
+                                << "component_idx = " << component_idx << " and derivative_direction = "
+                                << derivative_direction << " given!\n"
+                                << std::endl);
+                        }
+                        
+                        /*
+                         * Add the data.
+                         */
+                        
+                        for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
+                        {
+                            const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
+                            
+                            tau_ij_der_avg_local[idx_fine] += value_to_add;
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        /*
+         * Reduction to get the global average of derivative of shear stress component.
+         */
+        
+        mpi.Allreduce(
+            tau_ij_der_avg_local,
+            tau_ij_der_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        std::free(tau_ij_der_avg_local);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        hier::IntVector num_ghosts_der = hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative;
+        
+        const int finest_level_dim_0 = finest_level_dims[0];
+        
+        /*
+         * Get the size of the physical domain.
+         */
+        
+        const double L_y = x_hi[1] - x_lo[1];
+        
+        double* tau_ij_der_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        averaged_derivative_tau_ij.resize(finest_level_dim_0);
+        double* tau_ij_der_avg_global = averaged_derivative_tau_ij.data();
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            tau_ij_der_avg_local[i] = double(0);
+            tau_ij_der_avg_global[i] = double(0);
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratio_to_coarest_level =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            
+            const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower index and grid spacing.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch and the quantities in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts_der));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("PRESSURE", num_ghosts_der));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("TEMPERATURE", num_ghosts_der));
+                
+                d_flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                d_flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                d_flow_model_tmp->computeDerivedCellData();
+                
+                /*
+                 * Get the pointer to data inside the flow model.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getCellData("VELOCITY");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
+                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
+                    d_flow_model_tmp->getCellData("PRESSURE");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
+                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                
+                double* u = data_velocity->getPointer(0);
+                double* v = data_velocity->getPointer(1);
+                std::vector<double*> Y;
+                Y.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                double* p = data_pressure->getPointer(0);
+                double* T = data_temperature->getPointer(0);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_temperature = data_temperature->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                
+                const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+                const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+                const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
+                
+                const int num_ghosts_0_temperature = num_ghosts_temperature[0];
+                const int num_ghosts_1_temperature = num_ghosts_temperature[1];
+                const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
+                
+                const double weight = dx[1]/L_y;
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            /*
+                             * Compute the index of the data point and count how many times the data is repeated.
+                             */
+                            
+                            const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j);
+                            
+                            int n_overlapped = 1;
+                            
+                            for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                    patch_overlapped_visible_boxes.begin());
+                                 iob != patch_overlapped_visible_boxes.end();
+                                 iob++)
+                            {
+                                const hier::Box& patch_overlapped_visible_box = *iob;
+                                
+                                if (patch_overlapped_visible_box.contains(idx_pt))
+                                {
+                                    n_overlapped++;
+                                }
+                            }
+                            
+                            /*
+                             * Compute the derivative shear stress component.
+                             */
+                            
+                            double value_to_add = double(0);
+                            
+                            if ((component_idx == 0) && (derivative_direction == 0))
+                            {
+                                double mu[7];
+                                double mu_v[7];
+                                
+                                std::vector<const double*> Y_ptr;
+                                Y_ptr.resize(d_num_species);
+                                for (int count = -3; count <= 3; count++)
+                                {
+                                    const int idx_mass_fraction = (relative_idx_lo_0 + (i + count) + num_ghosts_0_mass_fraction) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                    
+                                    const int idx_pressure = (relative_idx_lo_0 + (i + count) + num_ghosts_0_pressure) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                                    
+                                    const int idx_temperature = (relative_idx_lo_0 + (i + count) + num_ghosts_0_temperature) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature;
+                                    
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                    }
+                                    mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                        getShearViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                    mu_v[count + 3] = d_equation_of_bulk_viscosity_mixing_rules->
+                                        getBulkViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                }
+                                
+                                const double dmudx = (double(1)/double(60)*(mu[6] - mu[0])
+                                    - double(3)/double(20)*(mu[5] - mu[1])
+                                    + double(3)/double(4)*(mu[4] - mu[2]))/dx[0];
+                                
+                                const double dmu_vdx = (double(1)/double(60)*(mu_v[6] - mu_v[0])
+                                    - double(3)/double(20)*(mu_v[5] - mu_v[1])
+                                    + double(3)/double(4)*(mu_v[4] - mu_v[2]))/dx[0];
+                                
+                                const int idx_vel       = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const double dudx = (double(1)/double(60)*(u[idx_vel_x_RRR] - u[idx_vel_x_LLL])
+                                    - double(3)/double(20)*(u[idx_vel_x_RR] - u[idx_vel_x_LL])
+                                    + double(3)/double(4)*(u[idx_vel_x_R] - u[idx_vel_x_L]))/dx[0];
+                                
+                                const double d2udx2 = (double(1)/double(90)*(u[idx_vel_x_RRR] + u[idx_vel_x_LLL])
+                                    - double(3)/double(20)*(u[idx_vel_x_RR] + u[idx_vel_x_LL])
+                                    + double(3)/double(2)*(u[idx_vel_x_R] + u[idx_vel_x_L])
+                                    - double(49)/double(18)*u[idx_vel])/(dx[0]*dx[0]);
+                                
+                                double visc_dvdy[7];
+                                
+                                for (int count = -3; count <= 3; count++)
+                                {
+                                    const int idx_vel_y_BBB = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_y_BB  = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_y_B   = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_y_T   = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_y_TT  = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_y_TTT = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    visc_dvdy[count + 3] = (double(2)/double(3)*mu[count + 3] - mu_v[count + 3])*
+                                        (double(1)/double(60)*(v[idx_vel_y_TTT] - v[idx_vel_y_BBB])
+                                        - double(3)/double(20)*(v[idx_vel_y_TT] - v[idx_vel_y_BB])
+                                        + double(3)/double(4)*(v[idx_vel_y_T] - v[idx_vel_y_B]))/dx[1];
+                                }
+                                
+                                const double dvisc_dvdydx = (double(1)/double(60)*(visc_dvdy[6] - visc_dvdy[0])
+                                    - double(3)/double(20)*(visc_dvdy[5] - visc_dvdy[1])
+                                    + double(3)/double(4)*(visc_dvdy[4] - visc_dvdy[2]))/dx[0];
+                                
+                                value_to_add = (
+                                    (double(4)/double(3)*dmudx + dmu_vdx)*dudx
+                                    + (double(4)/double(3)*mu[3] + mu_v[3])*d2udx2
+                                    - dvisc_dvdydx
+                                    )*weight/((double) n_overlapped);
+                            }
+                            else if ((component_idx == 0) && (derivative_direction == 1))
+                            {
+                                double mu[7];
+                                double mu_v[7];
+                                
+                                std::vector<const double*> Y_ptr;
+                                Y_ptr.resize(d_num_species);
+                                for (int count = -3; count <= 3; count++)
+                                {
+                                    const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                    
+                                    const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                                    
+                                    const int idx_temperature = (relative_idx_lo_0 + i + num_ghosts_0_temperature) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_temperature)*ghostcell_dim_0_temperature;
+                                    
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                    }
+                                    mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                        getShearViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                    mu_v[count + 3] = d_equation_of_bulk_viscosity_mixing_rules->
+                                        getBulkViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                }
+                                
+                                const double dmudy = (double(1)/double(60)*(mu[6] - mu[0])
+                                    - double(3)/double(20)*(mu[5] - mu[1])
+                                    + double(3)/double(4)*(mu[4] - mu[2]))/dx[1];
+                                
+                                const double dmu_vdy = (double(1)/double(60)*(mu_v[6] - mu_v[0])
+                                    - double(3)/double(20)*(mu_v[5] - mu_v[1])
+                                    + double(3)/double(4)*(mu_v[4] - mu_v[2]))/dx[1];
+                                
+                                const int idx_vel       = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_y_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_y_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_y_T   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_y_TT  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const double dvdy = (double(1)/double(60)*(v[idx_vel_y_TTT] - v[idx_vel_y_BBB])
+                                    - double(3)/double(20)*(v[idx_vel_y_TT] - v[idx_vel_y_BB])
+                                    + double(3)/double(4)*(v[idx_vel_y_T] - v[idx_vel_y_B]))/dx[1];
+                                
+                                const double d2vdy2 = (double(1)/double(90)*(v[idx_vel_y_TTT] + v[idx_vel_y_BBB])
+                                    - double(3)/double(20)*(v[idx_vel_y_TT] + v[idx_vel_y_BB])
+                                    + double(3)/double(2)*(v[idx_vel_y_T] + v[idx_vel_y_B])
+                                    - double(49)/double(18)*v[idx_vel])/(dx[1]*dx[1]);
+                                
+                                double visc_dudx[7];
+                                
+                                for (int count = -3; count <= 3; count++)
+                                {
+                                    const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    visc_dudx[count + 3] = (double(4)/double(3)*mu[count + 3] + mu_v[count + 3])*
+                                        (double(1)/double(60)*(u[idx_vel_x_RRR] - u[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(u[idx_vel_x_RR] - u[idx_vel_x_LL])
+                                        + double(3)/double(4)*(u[idx_vel_x_R] - u[idx_vel_x_L]))/dx[0];
+                                }
+                                
+                                const double dvisc_dudxdy = (double(1)/double(60)*(visc_dudx[6] - visc_dudx[0])
+                                    - double(3)/double(20)*(visc_dudx[5] - visc_dudx[1])
+                                    + double(3)/double(4)*(visc_dudx[4] - visc_dudx[2]))/dx[1];
+                                
+                                value_to_add = (
+                                    dvisc_dudxdy
+                                    - (double(2)/double(3)*dmudy - dmu_vdy)*dvdy
+                                    - (double(2)/double(3)*mu[3] - mu_v[3])*d2vdy2
+                                    )*weight/((double) n_overlapped);
+                            }
+                            else if ((component_idx == 1) && (derivative_direction == 0))
+                            {
+                                double mu[7];
+                                
+                                std::vector<const double*> Y_ptr;
+                                Y_ptr.resize(d_num_species);
+                                for (int count = -3; count <= 3; count++)
+                                {
+                                    const int idx_mass_fraction = (relative_idx_lo_0 + (i + count) + num_ghosts_0_mass_fraction) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                    
+                                    const int idx_pressure = (relative_idx_lo_0 + (i + count) + num_ghosts_0_pressure) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                                    
+                                    const int idx_temperature = (relative_idx_lo_0 + (i + count) + num_ghosts_0_temperature) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature;
+                                    
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                    }
+                                    mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                        getShearViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                }
+                                
+                                const double dmudx = (double(1)/double(60)*(mu[6] - mu[0])
+                                    - double(3)/double(20)*(mu[5] - mu[1])
+                                    + double(3)/double(4)*(mu[4] - mu[2]))/dx[0];
+                                
+                                const int idx_vel       = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const double dvdx = (double(1)/double(60)*(v[idx_vel_x_RRR] - v[idx_vel_x_LLL])
+                                    - double(3)/double(20)*(v[idx_vel_x_RR] - v[idx_vel_x_LL])
+                                    + double(3)/double(4)*(v[idx_vel_x_R] - v[idx_vel_x_L]))/dx[0];
+                                
+                                const double d2vdx2 = (double(1)/double(90)*(v[idx_vel_x_RRR] + v[idx_vel_x_LLL])
+                                    - double(3)/double(20)*(v[idx_vel_x_RR] + v[idx_vel_x_LL])
+                                    + double(3)/double(2)*(v[idx_vel_x_R] + v[idx_vel_x_L])
+                                    - double(49)/double(18)*v[idx_vel])/(dx[0]*dx[0]);
+                                
+                                double visc_dudy[7];
+                                
+                                for (int count = -3; count <= 3; count++)
+                                {
+                                    const int idx_vel_y_BBB = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_y_BB  = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_y_B   = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_y_T   = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_y_TT  = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_y_TTT = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    visc_dudy[count + 3] = mu[count + 3]*
+                                        (double(1)/double(60)*(u[idx_vel_y_TTT] - u[idx_vel_y_BBB])
+                                        - double(3)/double(20)*(u[idx_vel_y_TT] - u[idx_vel_y_BB])
+                                        + double(3)/double(4)*(u[idx_vel_y_T] - u[idx_vel_y_B]))/dx[1];
+                                }
+                                
+                                const double dvisc_dudydx = (double(1)/double(60)*(visc_dudy[6] - visc_dudy[0])
+                                    - double(3)/double(20)*(visc_dudy[5] - visc_dudy[1])
+                                    + double(3)/double(4)*(visc_dudy[4] - visc_dudy[2]))/dx[0];
+                                
+                                value_to_add = (
+                                    dvisc_dudydx
+                                    + dmudx*dvdx
+                                    + mu[3]*d2vdx2
+                                    )*weight/((double) n_overlapped);
+                            }
+                            else if ((component_idx == 1) && (derivative_direction == 1))
+                            {
+                                double mu[7];
+                                
+                                std::vector<const double*> Y_ptr;
+                                Y_ptr.resize(d_num_species);
+                                for (int count = -3; count <= 3; count++)
+                                {
+                                    const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                    
+                                    const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                                    
+                                    const int idx_temperature = (relative_idx_lo_0 + i + num_ghosts_0_temperature) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_temperature)*ghostcell_dim_0_temperature;
+                                    
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                    }
+                                    mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                        getShearViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                }
+                                
+                                const double dmudy = (double(1)/double(60)*(mu[6] - mu[0])
+                                    - double(3)/double(20)*(mu[5] - mu[1])
+                                    + double(3)/double(4)*(mu[4] - mu[2]))/dx[1];
+                                
+                                const int idx_vel       = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_y_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_y_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_y_T   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_y_TT  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const double dudy = (double(1)/double(60)*(u[idx_vel_y_TTT] - u[idx_vel_y_BBB])
+                                    - double(3)/double(20)*(u[idx_vel_y_TT] - u[idx_vel_y_BB])
+                                    + double(3)/double(4)*(u[idx_vel_y_T] - u[idx_vel_y_B]))/dx[1];
+                                
+                                const double d2udy2 = (double(1)/double(90)*(u[idx_vel_y_TTT] + u[idx_vel_y_BBB])
+                                    - double(3)/double(20)*(u[idx_vel_y_TT] + u[idx_vel_y_BB])
+                                    + double(3)/double(2)*(u[idx_vel_y_T] + u[idx_vel_y_B])
+                                    - double(49)/double(18)*u[idx_vel])/(dx[1]*dx[1]);
+                                
+                                double visc_dvdx[7];
+                                
+                                for (int count = -3; count <= 3; count++)
+                                {
+                                    const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    visc_dvdx[count + 3] = mu[count + 3]*
+                                        (double(1)/double(60)*(v[idx_vel_x_RRR] - v[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(v[idx_vel_x_RR] - v[idx_vel_x_LL])
+                                        + double(3)/double(4)*(v[idx_vel_x_R] - v[idx_vel_x_L]))/dx[0];
+                                }
+                                
+                                const double dvisc_dvdxdy = (double(1)/double(60)*(visc_dvdx[6] - visc_dvdx[0])
+                                    - double(3)/double(20)*(visc_dvdx[5] - visc_dvdx[1])
+                                    + double(3)/double(4)*(visc_dvdx[4] - visc_dvdx[2]))/dx[1];
+                                
+                                value_to_add = (
+                                    dvisc_dvdxdy
+                                    + dmudy*dudy
+                                    + mu[3]*d2udy2
+                                    )*weight/((double) n_overlapped);
+                            }
+                            else
+                            {
+                                TBOX_ERROR(d_object_name
+                                    << ": "
+                                    << "Cannot compute derivative of shear stress component for two-dimensional problem!\n"
+                                    << "component_idx = " << component_idx << " and derivative_direction = "
+                                    << derivative_direction << " given!\n"
+                                    << std::endl);
+                            }
+                            
+                            /*
+                             * Add the data.
+                             */
+                            
+                            for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
+                            {
+                                const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
+                                
+                                tau_ij_der_avg_local[idx_fine] += value_to_add;
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        /*
+         * Reduction to get the global average of derivative of shear stress component.
+         */
+        
+        mpi.Allreduce(
+            tau_ij_der_avg_local,
+            tau_ij_der_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        std::free(tau_ij_der_avg_local);
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        hier::IntVector num_ghosts_der = hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative;
+        
+       const int finest_level_dim_0 = finest_level_dims[0];
+        
+        /*
+         * Get the size of the physical domain.
+         */
+        
+        const double L_y = x_hi[1] - x_lo[1];
+        const double L_z = x_hi[2] - x_lo[2];
+        
+        double* tau_ij_der_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        averaged_derivative_tau_ij.resize(finest_level_dim_0);
+        double* tau_ij_der_avg_global = averaged_derivative_tau_ij.data();
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            tau_ij_der_avg_local[i] = double(0);
+            tau_ij_der_avg_global[i] = double(0);
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratio_to_coarest_level =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            
+            const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower index and grid spacing.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch and the quantities in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts_der));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("PRESSURE", num_ghosts_der));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("TEMPERATURE", num_ghosts_der));
+                
+                d_flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                d_flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                d_flow_model_tmp->computeDerivedCellData();
+                
+                /*
+                 * Get the pointer to data inside the flow model.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getCellData("VELOCITY");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
+                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
+                    d_flow_model_tmp->getCellData("PRESSURE");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
+                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                
+                double* u = data_velocity->getPointer(0);
+                double* v = data_velocity->getPointer(1);
+                double* w = data_velocity->getPointer(2);
+                std::vector<double*> Y;
+                Y.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                double* p = data_pressure->getPointer(0);
+                double* T = data_temperature->getPointer(0);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_temperature = data_temperature->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int num_ghosts_2_velocity = num_ghosts_velocity[2];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+                
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
+                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                
+                const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+                const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+                const int num_ghosts_2_pressure = num_ghosts_pressure[2];
+                const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
+                const int ghostcell_dim_1_pressure = ghostcell_dims_pressure[1];
+                
+                const int num_ghosts_0_temperature = num_ghosts_temperature[0];
+                const int num_ghosts_1_temperature = num_ghosts_temperature[1];
+                const int num_ghosts_2_temperature = num_ghosts_temperature[2];
+                const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
+                const int ghostcell_dim_1_temperature = ghostcell_dims_temperature[1];
+                
+                const double weight = (dx[1]*dx[2])/(L_y*L_z);
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    const int relative_idx_lo_2 = relative_index_lo[2];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the derivative of shear stress component.
+                                 */
+                                
+                                double value_to_add = double(0);
+                                
+                                if ((component_idx == 0) && (derivative_direction == 0))
+                                {
+                                    double mu[7];
+                                    double mu_v[7];
+                                    
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_mass_fraction = (relative_idx_lo_0 + (i + count) + num_ghosts_0_mass_fraction) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                                ghostcell_dim_1_mass_fraction;
+                                        
+                                        const int idx_pressure = (relative_idx_lo_0 + (i + count) + num_ghosts_0_pressure) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                                                ghostcell_dim_1_pressure;
+                                        
+                                        const int idx_temperature = (relative_idx_lo_0 + (i + count) + num_ghosts_0_temperature) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                                                ghostcell_dim_1_temperature;
+                                        
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                        }
+                                        mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                            getShearViscosity(
+                                                &p[idx_pressure],
+                                                &T[idx_temperature],
+                                                Y_ptr);
+                                        mu_v[count + 3] = d_equation_of_bulk_viscosity_mixing_rules->
+                                            getBulkViscosity(
+                                                &p[idx_pressure],
+                                                &T[idx_temperature],
+                                                Y_ptr);
+                                    }
+                                    
+                                    const double dmudx = (double(1)/double(60)*(mu[6] - mu[0])
+                                        - double(3)/double(20)*(mu[5] - mu[1])
+                                        + double(3)/double(4)*(mu[4] - mu[2]))/dx[0];
+                                    
+                                    const double dmu_vdx = (double(1)/double(60)*(mu_v[6] - mu_v[0])
+                                        - double(3)/double(20)*(mu_v[5] - mu_v[1])
+                                        + double(3)/double(4)*(mu_v[4] - mu_v[2]))/dx[0];
+                                    
+                                    const int idx_vel       = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dudx = (double(1)/double(60)*(u[idx_vel_x_RRR] - u[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(u[idx_vel_x_RR] - u[idx_vel_x_LL])
+                                        + double(3)/double(4)*(u[idx_vel_x_R] - u[idx_vel_x_L]))/dx[0];
+                                    
+                                    const double d2udx2 = (double(1)/double(90)*(u[idx_vel_x_RRR] + u[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(u[idx_vel_x_RR] + u[idx_vel_x_LL])
+                                        + double(3)/double(2)*(u[idx_vel_x_R] + u[idx_vel_x_L])
+                                        - double(49)/double(18)*u[idx_vel])/(dx[0]*dx[0]);
+                                    
+                                    double visc_dvdy[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_y_BBB = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_BB  = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_B   = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_T   = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_TT  = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_TTT = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dvdy[count + 3] = (double(2)/double(3)*mu[count + 3] - mu_v[count + 3])*
+                                            (double(1)/double(60)*(v[idx_vel_y_TTT] - v[idx_vel_y_BBB])
+                                            - double(3)/double(20)*(v[idx_vel_y_TT] - v[idx_vel_y_BB])
+                                            + double(3)/double(4)*(v[idx_vel_y_T] - v[idx_vel_y_B]))/dx[1];
+                                    }
+                                    
+                                    const double dvisc_dvdydx = (double(1)/double(60)*(visc_dvdy[6] - visc_dvdy[0])
+                                        - double(3)/double(20)*(visc_dvdy[5] - visc_dvdy[1])
+                                        + double(3)/double(4)*(visc_dvdy[4] - visc_dvdy[2]))/dx[0];
+                                    
+                                    double visc_dwdz[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_z_BBB = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k - 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_BB  = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k - 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_B   = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k - 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_F   = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_FF  = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_FFF = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dwdz[count + 3] = (double(2)/double(3)*mu[count + 3] - mu_v[count + 3])*
+                                            (double(1)/double(60)*(w[idx_vel_z_FFF] - w[idx_vel_z_BBB])
+                                            - double(3)/double(20)*(w[idx_vel_z_FF] - w[idx_vel_z_BB])
+                                            + double(3)/double(4)*(w[idx_vel_z_F] - w[idx_vel_z_B]))/dx[2];
+                                    }
+                                    
+                                    const double dvisc_dwdzdx = (double(1)/double(60)*(visc_dwdz[6] - visc_dwdz[0])
+                                        - double(3)/double(20)*(visc_dwdz[5] - visc_dwdz[1])
+                                        + double(3)/double(4)*(visc_dwdz[4] - visc_dwdz[2]))/dx[0];
+                                    
+                                    value_to_add = (
+                                        (double(4)/double(3)*dmudx + dmu_vdx)*dudx
+                                        + (double(4)/double(3)*mu[3] + mu_v[3])*d2udx2
+                                        - dvisc_dvdydx
+                                        - dvisc_dwdzdx
+                                        )*weight/((double) n_overlapped);
+                                }
+                                else if ((component_idx == 0) && (derivative_direction == 1))
+                                {
+                                    double mu[7];
+                                    double mu_v[7];
+                                    
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                                ghostcell_dim_1_mass_fraction;
+                                        
+                                        const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                                                ghostcell_dim_1_pressure;
+                                        
+                                        const int idx_temperature = (relative_idx_lo_0 + i + num_ghosts_0_temperature) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                                                ghostcell_dim_1_temperature;
+                                        
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                        }
+                                        mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                            getShearViscosity(
+                                                &p[idx_pressure],
+                                                &T[idx_temperature],
+                                                Y_ptr);
+                                        mu_v[count + 3] = d_equation_of_bulk_viscosity_mixing_rules->
+                                            getBulkViscosity(
+                                                &p[idx_pressure],
+                                                &T[idx_temperature],
+                                                Y_ptr);
+                                    }
+                                    
+                                    const double dmudy = (double(1)/double(60)*(mu[6] - mu[0])
+                                        - double(3)/double(20)*(mu[5] - mu[1])
+                                        + double(3)/double(4)*(mu[4] - mu[2]))/dx[1];
+                                    
+                                    const double dmu_vdy = (double(1)/double(60)*(mu_v[6] - mu_v[0])
+                                        - double(3)/double(20)*(mu_v[5] - mu_v[1])
+                                        + double(3)/double(4)*(mu_v[4] - mu_v[2]))/dx[1];
+                                    
+                                    const int idx_vel       = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_T   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TT  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dvdy = (double(1)/double(60)*(v[idx_vel_y_TTT] - v[idx_vel_y_BBB])
+                                        - double(3)/double(20)*(v[idx_vel_y_TT] - v[idx_vel_y_BB])
+                                        + double(3)/double(4)*(v[idx_vel_y_T] - v[idx_vel_y_B]))/dx[1];
+                                    
+                                    const double d2vdy2 = (double(1)/double(90)*(v[idx_vel_y_TTT] + v[idx_vel_y_BBB])
+                                        - double(3)/double(20)*(v[idx_vel_y_TT] + v[idx_vel_y_BB])
+                                        + double(3)/double(2)*(v[idx_vel_y_T] + v[idx_vel_y_B])
+                                        - double(49)/double(18)*v[idx_vel])/(dx[1]*dx[1]);
+                                    
+                                    double visc_dudx[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dudx[count + 3] = (double(4)/double(3)*mu[count + 3] + mu_v[count + 3])*
+                                            (double(1)/double(60)*(u[idx_vel_x_RRR] - u[idx_vel_x_LLL])
+                                            - double(3)/double(20)*(u[idx_vel_x_RR] - u[idx_vel_x_LL])
+                                            + double(3)/double(4)*(u[idx_vel_x_R] - u[idx_vel_x_L]))/dx[0];
+                                    }
+                                    
+                                    const double dvisc_dudxdy = (double(1)/double(60)*(visc_dudx[6] - visc_dudx[0])
+                                        - double(3)/double(20)*(visc_dudx[5] - visc_dudx[1])
+                                        + double(3)/double(4)*(visc_dudx[4] - visc_dudx[2]))/dx[1];
+                                    
+                                    double visc_dwdz[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k - 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k - 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k - 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_F   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_FF  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dwdz[count + 3] = (double(2)/double(3)*mu[count + 3] - mu_v[count + 3])*
+                                            (double(1)/double(60)*(w[idx_vel_z_FFF] - w[idx_vel_z_BBB])
+                                            - double(3)/double(20)*(w[idx_vel_z_FF] - w[idx_vel_z_BB])
+                                            + double(3)/double(4)*(w[idx_vel_z_F] - w[idx_vel_z_B]))/dx[2];
+                                    }
+                                    
+                                    const double dvisc_dwdzdy = (double(1)/double(60)*(visc_dwdz[6] - visc_dwdz[0])
+                                        - double(3)/double(20)*(visc_dwdz[5] - visc_dwdz[1])
+                                        + double(3)/double(4)*(visc_dwdz[4] - visc_dwdz[2]))/dx[1];
+                                    
+                                    value_to_add = (
+                                        dvisc_dudxdy
+                                        - dvisc_dwdzdy
+                                        - (double(2)/double(3)*dmudy - dmu_vdy)*dvdy
+                                        - (double(2)/double(3)*mu[3] - mu_v[3])*d2vdy2
+                                        )*weight/((double) n_overlapped);
+                                }
+                                else if ((component_idx == 0) && (derivative_direction == 2))
+                                {
+                                    double mu[7];
+                                    double mu_v[7];
+                                    
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                                ghostcell_dim_1_mass_fraction;
+                                        
+                                        const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                                                ghostcell_dim_1_pressure;
+                                        
+                                        const int idx_temperature = (relative_idx_lo_0 + i + num_ghosts_0_temperature) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                                                ghostcell_dim_1_temperature;
+                                        
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                        }
+                                        mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                            getShearViscosity(
+                                                &p[idx_pressure],
+                                                &T[idx_temperature],
+                                                Y_ptr);
+                                        mu_v[count + 3] = d_equation_of_bulk_viscosity_mixing_rules->
+                                            getBulkViscosity(
+                                                &p[idx_pressure],
+                                                &T[idx_temperature],
+                                                Y_ptr);
+                                    }
+                                    
+                                    const double dmudz = (double(1)/double(60)*(mu[6] - mu[0])
+                                        - double(3)/double(20)*(mu[5] - mu[1])
+                                        + double(3)/double(4)*(mu[4] - mu[2]))/dx[2];
+                                    
+                                    const double dmu_vdz = (double(1)/double(60)*(mu_v[6] - mu_v[0])
+                                        - double(3)/double(20)*(mu_v[5] - mu_v[1])
+                                        + double(3)/double(4)*(mu_v[4] - mu_v[2]))/dx[2];
+                                    
+                                    const int idx_vel       = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_F   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FF  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dwdz = (double(1)/double(60)*(w[idx_vel_z_FFF] - w[idx_vel_z_BBB])
+                                        - double(3)/double(20)*(w[idx_vel_z_FF] - w[idx_vel_z_BB])
+                                        + double(3)/double(4)*(w[idx_vel_z_F] - w[idx_vel_z_B]))/dx[2];
+                                    
+                                    const double d2wdz2 = (double(1)/double(90)*(w[idx_vel_z_FFF] + w[idx_vel_z_BBB])
+                                        - double(3)/double(20)*(w[idx_vel_z_FF] + w[idx_vel_z_BB])
+                                        + double(3)/double(2)*(w[idx_vel_z_F] + w[idx_vel_z_B])
+                                        - double(49)/double(18)*w[idx_vel])/(dx[2]*dx[2]);
+                                    
+                                    double visc_dudx[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dudx[count + 3] = (double(4)/double(3)*mu[count + 3] + mu_v[count + 3])*
+                                            (double(1)/double(60)*(u[idx_vel_x_RRR] - u[idx_vel_x_LLL])
+                                            - double(3)/double(20)*(u[idx_vel_x_RR] - u[idx_vel_x_LL])
+                                            + double(3)/double(4)*(u[idx_vel_x_R] - u[idx_vel_x_L]))/dx[0];
+                                    }
+                                    
+                                    const double dvisc_dudxdz = (double(1)/double(60)*(visc_dudx[6] - visc_dudx[0])
+                                        - double(3)/double(20)*(visc_dudx[5] - visc_dudx[1])
+                                        + double(3)/double(4)*(visc_dudx[4] - visc_dudx[2]))/dx[2];
+                                    
+                                    double visc_dvdy[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_T   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_TT  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dvdy[count + 3] = (double(2)/double(3)*mu[count + 3] - mu_v[count + 3])*
+                                            (double(1)/double(60)*(v[idx_vel_y_TTT] - v[idx_vel_y_BBB])
+                                            - double(3)/double(20)*(v[idx_vel_y_TT] - v[idx_vel_y_BB])
+                                            + double(3)/double(4)*(v[idx_vel_y_T] - v[idx_vel_y_B]))/dx[1];
+                                    }
+                                    
+                                    const double dvisc_dvdydz = (double(1)/double(60)*(visc_dvdy[6] - visc_dvdy[0])
+                                        - double(3)/double(20)*(visc_dvdy[5] - visc_dvdy[1])
+                                        + double(3)/double(4)*(visc_dvdy[4] - visc_dvdy[2]))/dx[2];
+                                    
+                                    value_to_add = (
+                                        dvisc_dudxdz
+                                        - dvisc_dvdydz
+                                        - (double(2)/double(3)*dmudz - dmu_vdz)*dwdz
+                                        - (double(2)/double(3)*mu[3] - mu_v[3])*d2wdz2
+                                        )*weight/((double) n_overlapped);
+                                }
+                                else if ((component_idx == 1) && (derivative_direction == 0))
+                                {
+                                    double mu[7];
+                                    
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_mass_fraction = (relative_idx_lo_0 + (i + count) + num_ghosts_0_mass_fraction) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                                ghostcell_dim_1_mass_fraction;
+                                        
+                                        const int idx_pressure = (relative_idx_lo_0 + (i + count) + num_ghosts_0_pressure) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                                                ghostcell_dim_1_pressure;
+                                        
+                                        const int idx_temperature = (relative_idx_lo_0 + (i + count) + num_ghosts_0_temperature) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                                                ghostcell_dim_1_temperature;
+                                        
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                        }
+                                        mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                            getShearViscosity(
+                                                &p[idx_pressure],
+                                                &T[idx_temperature],
+                                                Y_ptr);
+                                    }
+                                    
+                                    const double dmudx = (double(1)/double(60)*(mu[6] - mu[0])
+                                        - double(3)/double(20)*(mu[5] - mu[1])
+                                        + double(3)/double(4)*(mu[4] - mu[2]))/dx[0];
+                                    
+                                    const int idx_vel       = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dvdx = (double(1)/double(60)*(v[idx_vel_x_RRR] - v[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(v[idx_vel_x_RR] - v[idx_vel_x_LL])
+                                        + double(3)/double(4)*(v[idx_vel_x_R] - v[idx_vel_x_L]))/dx[0];
+                                    
+                                    const double d2vdx2 = (double(1)/double(90)*(v[idx_vel_x_RRR] + v[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(v[idx_vel_x_RR] + v[idx_vel_x_LL])
+                                        + double(3)/double(2)*(v[idx_vel_x_R] + v[idx_vel_x_L])
+                                        - double(49)/double(18)*v[idx_vel])/(dx[0]*dx[0]);
+                                    
+                                    double visc_dudy[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_y_BBB = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_BB  = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_B   = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_T   = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_TT  = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_TTT = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dudy[count + 3] = mu[count + 3]*
+                                            (double(1)/double(60)*(u[idx_vel_y_TTT] - u[idx_vel_y_BBB])
+                                            - double(3)/double(20)*(u[idx_vel_y_TT] - u[idx_vel_y_BB])
+                                            + double(3)/double(4)*(u[idx_vel_y_T] - u[idx_vel_y_B]))/dx[1];
+                                    }
+                                    
+                                    const double dvisc_dudydx = (double(1)/double(60)*(visc_dudy[6] - visc_dudy[0])
+                                        - double(3)/double(20)*(visc_dudy[5] - visc_dudy[1])
+                                        + double(3)/double(4)*(visc_dudy[4] - visc_dudy[2]))/dx[0];
+                                    
+                                    value_to_add = (
+                                        dmudx*dvdx
+                                        + mu[3]*d2vdx2
+                                        + dvisc_dudydx
+                                        )*weight/((double) n_overlapped);
+                                }
+                                else if ((component_idx == 1) && (derivative_direction == 1))
+                                {
+                                    double mu[7];
+                                    
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                                ghostcell_dim_1_mass_fraction;
+                                        
+                                        const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                                                ghostcell_dim_1_pressure;
+                                        
+                                        const int idx_temperature = (relative_idx_lo_0 + i + num_ghosts_0_temperature) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                                                ghostcell_dim_1_temperature;
+                                        
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                        }
+                                        mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                            getShearViscosity(
+                                                &p[idx_pressure],
+                                                &T[idx_temperature],
+                                                Y_ptr);
+                                    }
+                                    
+                                    const double dmudy = (double(1)/double(60)*(mu[6] - mu[0])
+                                        - double(3)/double(20)*(mu[5] - mu[1])
+                                        + double(3)/double(4)*(mu[4] - mu[2]))/dx[1];
+                                    
+                                    const int idx_vel       = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_T   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TT  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dudy = (double(1)/double(60)*(u[idx_vel_y_TTT] - u[idx_vel_y_BBB])
+                                        - double(3)/double(20)*(u[idx_vel_y_TT] - u[idx_vel_y_BB])
+                                        + double(3)/double(4)*(u[idx_vel_y_T] - u[idx_vel_y_B]))/dx[1];
+                                    
+                                    const double d2udy2 = (double(1)/double(90)*(u[idx_vel_y_TTT] + u[idx_vel_y_BBB])
+                                        - double(3)/double(20)*(u[idx_vel_y_TT] + u[idx_vel_y_BB])
+                                        + double(3)/double(2)*(u[idx_vel_y_T] + u[idx_vel_y_B])
+                                        - double(49)/double(18)*u[idx_vel])/(dx[1]*dx[1]);
+                                    
+                                    double visc_dvdx[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) +num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) +num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) +num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) +num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) +num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) +num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dvdx[count + 3] = mu[count + 3]*
+                                            (double(1)/double(60)*(v[idx_vel_x_RRR] - v[idx_vel_x_LLL])
+                                            - double(3)/double(20)*(v[idx_vel_x_RR] - v[idx_vel_x_LL])
+                                            + double(3)/double(4)*(v[idx_vel_x_R] - v[idx_vel_x_L]))/dx[0];
+                                    }
+                                    
+                                    const double dvisc_dvdxdy = (double(1)/double(60)*(visc_dvdx[6] - visc_dvdx[0])
+                                        - double(3)/double(20)*(visc_dvdx[5] - visc_dvdx[1])
+                                        + double(3)/double(4)*(visc_dvdx[4] - visc_dvdx[2]))/dx[1];
+                                    
+                                    value_to_add = (
+                                        dmudy*dudy
+                                        + mu[3]*d2udy2
+                                        + dvisc_dvdxdy
+                                        )*weight/((double) n_overlapped);
+                                }
+                                else if ((component_idx == 1) && (derivative_direction == 2))
+                                {
+                                    double mu[7];
+                                    
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                                ghostcell_dim_1_mass_fraction;
+                                        
+                                        const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                                                ghostcell_dim_1_pressure;
+                                        
+                                        const int idx_temperature = (relative_idx_lo_0 + i + num_ghosts_0_temperature) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                                                ghostcell_dim_1_temperature;
+                                        
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                        }
+                                        mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                            getShearViscosity(
+                                                &p[idx_pressure],
+                                                &T[idx_temperature],
+                                                Y_ptr);
+                                    }
+                                    
+                                    double visc_dvdx[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dvdx[count + 3] = mu[count + 3]*
+                                            (double(1)/double(60)*(v[idx_vel_x_RRR] - v[idx_vel_x_LLL])
+                                            - double(3)/double(20)*(v[idx_vel_x_RR] - v[idx_vel_x_LL])
+                                            + double(3)/double(4)*(v[idx_vel_x_R] - v[idx_vel_x_L]))/dx[0];
+                                    }
+                                    
+                                    const double dvisc_dvdxdz = (double(1)/double(60)*(visc_dvdx[6] - visc_dvdx[0])
+                                        - double(3)/double(20)*(visc_dvdx[5] - visc_dvdx[1])
+                                        + double(3)/double(4)*(visc_dvdx[4] - visc_dvdx[2]))/dx[2];
+                                    
+                                    double visc_dudy[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_T   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_TT  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dudy[count + 3] = mu[count + 3]*
+                                            (double(1)/double(60)*(u[idx_vel_y_TTT] - u[idx_vel_y_BBB])
+                                            - double(3)/double(20)*(u[idx_vel_y_TT] - u[idx_vel_y_BB])
+                                            + double(3)/double(4)*(u[idx_vel_y_T] - u[idx_vel_y_B]))/dx[1];
+                                    }
+                                    
+                                    const double dvisc_dudydz = (double(1)/double(60)*(visc_dudy[6] - visc_dudy[0])
+                                        - double(3)/double(20)*(visc_dudy[5] - visc_dudy[1])
+                                        + double(3)/double(4)*(visc_dudy[4] - visc_dudy[2]))/dx[2];
+                                    
+                                    value_to_add = (
+                                        dvisc_dvdxdz
+                                        + dvisc_dudydz
+                                        )*weight/((double) n_overlapped);
+                                }
+                                else if ((component_idx == 2) && (derivative_direction == 0))
+                                {
+                                    double mu[7];
+                                    
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_mass_fraction = (relative_idx_lo_0 + (i + count) + num_ghosts_0_mass_fraction) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                                ghostcell_dim_1_mass_fraction;
+                                        
+                                        const int idx_pressure = (relative_idx_lo_0 + (i + count) + num_ghosts_0_pressure) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                                                ghostcell_dim_1_pressure;
+                                        
+                                        const int idx_temperature = (relative_idx_lo_0 + (i + count) + num_ghosts_0_temperature) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                                                ghostcell_dim_1_temperature;
+                                        
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                        }
+                                        mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                            getShearViscosity(
+                                                &p[idx_pressure],
+                                                &T[idx_temperature],
+                                                Y_ptr);
+                                    }
+                                    
+                                    const double dmudx = (double(1)/double(60)*(mu[6] - mu[0])
+                                        - double(3)/double(20)*(mu[5] - mu[1])
+                                        + double(3)/double(4)*(mu[4] - mu[2]))/dx[0];
+                                    
+                                    const int idx_vel       = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dwdx = (double(1)/double(60)*(w[idx_vel_x_RRR] - w[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(w[idx_vel_x_RR] - w[idx_vel_x_LL])
+                                        + double(3)/double(4)*(w[idx_vel_x_R] - w[idx_vel_x_L]))/dx[0];
+                                    
+                                    const double d2wdx2 = (double(1)/double(90)*(w[idx_vel_x_RRR] + w[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(w[idx_vel_x_RR] + w[idx_vel_x_LL])
+                                        + double(3)/double(2)*(w[idx_vel_x_R] + w[idx_vel_x_L])
+                                        - double(49)/double(18)*w[idx_vel])/(dx[0]*dx[0]);
+                                    
+                                    double visc_dudz[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_z_BBB = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k - 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_BB  = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k - 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_B   = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k - 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_F   = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_FF  = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_FFF = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dudz[count + 3] = mu[count + 3]*
+                                            (double(1)/double(60)*(u[idx_vel_z_FFF] - u[idx_vel_z_BBB])
+                                            - double(3)/double(20)*(u[idx_vel_z_FF] - u[idx_vel_z_BB])
+                                            + double(3)/double(4)*(u[idx_vel_z_F] - u[idx_vel_z_B]))/dx[2];
+                                    }
+                                    
+                                    const double dvisc_dudzdx = (double(1)/double(60)*(visc_dudz[6] - visc_dudz[0])
+                                        - double(3)/double(20)*(visc_dudz[5] - visc_dudz[1])
+                                        + double(3)/double(4)*(visc_dudz[4] - visc_dudz[2]))/dx[0];
+                                    
+                                    value_to_add = (
+                                        dmudx*dwdx
+                                        + mu[3]*d2wdx2
+                                        + dvisc_dudzdx
+                                        )*weight/((double) n_overlapped);
+                                }
+                                else if ((component_idx == 2) && (derivative_direction == 1))
+                                {
+                                    double mu[7];
+                                    
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                                ghostcell_dim_1_mass_fraction;
+                                        
+                                        const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                                                ghostcell_dim_1_pressure;
+                                        
+                                        const int idx_temperature = (relative_idx_lo_0 + i + num_ghosts_0_temperature) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                                                ghostcell_dim_1_temperature;
+                                        
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                        }
+                                        mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                            getShearViscosity(
+                                                &p[idx_pressure],
+                                                &T[idx_temperature],
+                                                Y_ptr);
+                                    }
+                                    
+                                    double visc_dwdx[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dwdx[count + 3] = mu[count + 3]*
+                                            (double(1)/double(60)*(w[idx_vel_x_RRR] - w[idx_vel_x_LLL])
+                                            - double(3)/double(20)*(w[idx_vel_x_RR] - w[idx_vel_x_LL])
+                                            + double(3)/double(4)*(w[idx_vel_x_R] - w[idx_vel_x_L]))/dx[0];
+                                    }
+                                    
+                                    const double dvisc_dwdxdy = (double(1)/double(60)*(visc_dwdx[6] - visc_dwdx[0])
+                                        - double(3)/double(20)*(visc_dwdx[5] - visc_dwdx[1])
+                                        + double(3)/double(4)*(visc_dwdx[4] - visc_dwdx[2]))/dx[1];
+                                    
+                                    double visc_dudz[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k - 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k - 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k - 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_F   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_FF  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dudz[count + 3] = mu[count + 3]*
+                                            (double(1)/double(60)*(u[idx_vel_z_FFF] - u[idx_vel_z_BBB])
+                                            - double(3)/double(20)*(u[idx_vel_z_FF] - u[idx_vel_z_BB])
+                                            + double(3)/double(4)*(u[idx_vel_z_F] - u[idx_vel_z_B]))/dx[2];
+                                    }
+                                    
+                                    const double dvisc_dudzdy = (double(1)/double(60)*(visc_dudz[6] - visc_dudz[0])
+                                        - double(3)/double(20)*(visc_dudz[5] - visc_dudz[1])
+                                        + double(3)/double(4)*(visc_dudz[4] - visc_dudz[2]))/dx[1];
+                                    
+                                    value_to_add = (
+                                        dvisc_dwdxdy
+                                        + dvisc_dudzdy
+                                        )*weight/((double) n_overlapped);
+                                }
+                                else if ((component_idx == 2) && (derivative_direction == 2))
+                                {
+                                    double mu[7];
+                                    
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                                ghostcell_dim_1_mass_fraction;
+                                        
+                                        const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                                                ghostcell_dim_1_pressure;
+                                        
+                                        const int idx_temperature = (relative_idx_lo_0 + i + num_ghosts_0_temperature) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                                                ghostcell_dim_1_temperature;
+                                        
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                        }
+                                        mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                            getShearViscosity(
+                                                &p[idx_pressure],
+                                                &T[idx_temperature],
+                                                Y_ptr);
+                                    }
+                                    
+                                    const double dmudz = (double(1)/double(60)*(mu[6] - mu[0])
+                                        - double(3)/double(20)*(mu[5] - mu[1])
+                                        + double(3)/double(4)*(mu[4] - mu[2]))/dx[2];
+                                    
+                                    const int idx_vel       = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_F   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FF  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dudz = (double(1)/double(60)*(u[idx_vel_z_FFF] - u[idx_vel_z_BBB])
+                                        - double(3)/double(20)*(u[idx_vel_z_FF] - u[idx_vel_z_BB])
+                                        + double(3)/double(4)*(u[idx_vel_z_F] - u[idx_vel_z_B]))/dx[2];
+                                    
+                                    const double d2udz2 = (double(1)/double(90)*(u[idx_vel_z_FFF] + u[idx_vel_z_BBB])
+                                        - double(3)/double(20)*(u[idx_vel_z_FF] + u[idx_vel_z_BB])
+                                        + double(3)/double(2)*(u[idx_vel_z_F] + u[idx_vel_z_B])
+                                        - double(49)/double(18)*u[idx_vel])/(dx[2]*dx[2]);
+                                    
+                                    double visc_dwdx[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dwdx[count + 3] = mu[count + 3]*
+                                            (double(1)/double(60)*(w[idx_vel_x_RRR] - w[idx_vel_x_LLL])
+                                            - double(3)/double(20)*(w[idx_vel_x_RR] - w[idx_vel_x_LL])
+                                            + double(3)/double(4)*(w[idx_vel_x_R] - w[idx_vel_x_L]))/dx[0];
+                                    }
+                                    
+                                    const double dvisc_dwdxdz = (double(1)/double(60)*(visc_dwdx[6] - visc_dwdx[0])
+                                        - double(3)/double(20)*(visc_dwdx[5] - visc_dwdx[1])
+                                        + double(3)/double(4)*(visc_dwdx[4] - visc_dwdx[2]))/dx[2];
+                                    
+                                    value_to_add = (
+                                        dmudz*dudz
+                                        + mu[3]*d2udz2
+                                        + dvisc_dwdxdz
+                                        )*weight/((double) n_overlapped);
+                                }
+                                else
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": "
+                                        << "Cannot compute derivative of shear stress component for three-dimensional problem!\n"
+                                        << "component_idx = " << component_idx << " and derivative_direction = "
+                                        << derivative_direction << " given!\n"
+                                        << std::endl);
+                                }
+                                
+                                /*
+                                 * Add the data.
+                                 */
+                                
+                                for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
+                                {
+                                    const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
+                                    
+                                    tau_ij_der_avg_local[idx_fine] += value_to_add;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        /*
+         * Reduction to get the global average of derivative of shear stress component.
+         */
+        
+        mpi.Allreduce(
+            tau_ij_der_avg_local,
+            tau_ij_der_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        std::free(tau_ij_der_avg_local);
+    }
+    
+    return averaged_derivative_tau_ij;
+}
+
+
+/*
+ * Compute averaged value (on product of variable derivatives and shear stress component) with only x direction
+ * as inhomogeneous direction.
+ * component_idx:
+ * 0: tau_11
+ * 1: tau_12
+ * 2: tau_13
+ * 3: tau_22
+ * 4: tau_23
+ * 5: tau_33
+ */
+std::vector<double>
+RTIRMIBudgetsUtilities::getAveragedQuantityWithShearStressComponentWithInhomogeneousXDirection(
+    const std::vector<std::string>& quantity_names,
+    const std::vector<int>& component_indices,
+    const std::vector<bool>& use_derivative,
+    const std::vector<int>& derivative_directions,
+    const std::vector<bool>& use_reciprocal,
+    const int shear_stress_component_idx,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+    TBOX_ASSERT(d_num_ghosts_derivative == 3);
+    
+    int num_quantities = static_cast<int>(quantity_names.size());
+    
+    TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
+    TBOX_ASSERT(static_cast<int>(use_derivative.size()) == num_quantities);
+    TBOX_ASSERT(static_cast<int>(derivative_directions.size()) == num_quantities);
+    TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
+    
+    int num_use_derivative = 0;
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        for (int qi = 0; qi < num_quantities; qi++)
+        {
+            if (use_derivative[qi])
+            {
+                num_use_derivative++;
+                if (derivative_directions[qi] < 0 || derivative_directions[qi] > 0)
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": RTIRMIBudgetsUtilities::"
+                        << "getAveragedQuantityWithShearStressComponentWithInhomogeneousXDirection():\n"
+                        << "Cannot take derivative for one-dimensional problem!\n"
+                        << "derivative_directions[" << qi << "] = " << derivative_directions[qi] << " given!\n"
+                        << std::endl);
+                }
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        for (int qi = 0; qi < num_quantities; qi++)
+        {
+            if (use_derivative[qi])
+            {
+                num_use_derivative++;
+                if (derivative_directions[qi] < 0 || derivative_directions[qi] > 1)
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": RTIRMIBudgetsUtilities::"
+                        << "getAveragedQuantityWithShearStressComponentWithInhomogeneousXDirection():\n"
+                        << "Cannot take derivative for two-dimensional problem!\n"
+                        << "derivative_directions[" << qi << "] = " << derivative_directions[qi] << " given!\n"
+                        << std::endl);
+                }
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        for (int qi = 0; qi < num_quantities; qi++)
+        {
+            if (use_derivative[qi])
+            {
+                num_use_derivative++;
+                if (derivative_directions[qi] < 0 || derivative_directions[qi] > 2)
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": RTIRMIBudgetsUtilities::"
+                        << "getAveragedQuantityWithShearStressComponentWithInhomogeneousXDirection():\n"
+                        << "Cannot take derivative for three-dimensional problem!\n"
+                        << "derivative_directions[" << qi << "] = " << derivative_directions[qi] << " given!\n"
+                        << std::endl);
+                }
+            }
+        }
+    }
+    
+    std::vector<double> averaged_quantity;
+    
+    HAMERS_SHARED_PTR<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Get the refinement ratio from the finest level to the coarest level.
+     */
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    hier::IntVector ratio_finest_level_to_coarest_level =
+        patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
+    for (int li = num_levels - 2; li > 0 ; li--)
+    {
+        ratio_finest_level_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
+    }
+    
+    /*
+     * Get the flattened hierarchy where only the finest existing grid is visible at any given
+     * location in the problem space.
+     */
+    
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
+            *patch_hierarchy,
+            0,
+            num_levels - 1));
+    
+    /*
+     * Get the number of cells of physical domain refined to the finest level.
+     */
+    
+    const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
+    const hier::Box& physical_domain_box = physical_domain.front();
+    const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratio_finest_level_to_coarest_level;
+    
+    /*
+     * Get the indices of the physical domain.
+     */
+    
+    const double* x_lo = d_grid_geometry->getXLower();
+    const double* x_hi = d_grid_geometry->getXUpper();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
+            new DerivativeFirstOrder(
+                "first order derivative in x-direction",
+                d_dim,
+                DIRECTION::X_DIRECTION,
+                d_num_ghosts_derivative));
+        
+        hier::IntVector num_ghosts_der = hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative;
+        
+        const int finest_level_dim_0 = finest_level_dims[0];
+        
+        double* avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        averaged_quantity.resize(finest_level_dim_0);
+        double* avg_global = averaged_quantity.data();
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            avg_local[i]  = double(0);
+            avg_global[i] = double(0);
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratio_to_coarest_level =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            
+            const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower index.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch and the quantity in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
+                
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    if (num_use_derivative > 0)
+                    {
+                        num_subghosts_of_data.insert(
+                            std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
+                    }
+                    else
+                    {
+                        num_subghosts_of_data.insert(
+                            std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
+                    }
+                }
+                
+                d_flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                d_flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                d_flow_model_tmp->computeDerivedCellData();
+                
+                /*
+                 * Get the pointers to data inside the flow model.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getCellData("VELOCITY");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
+                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
+                    d_flow_model_tmp->getCellData("PRESSURE");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
+                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                
+                double* u = data_velocity->getPointer(0);
+                std::vector<double*> Y;
+                Y.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                double* p = data_pressure->getPointer(0);
+                double* T = data_temperature->getPointer(0);
+                
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                data_quantities.resize(num_quantities);
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    data_quantities[qi] = d_flow_model_tmp->getCellData(quantity_names[qi]);
+                }
+                
+                std::vector<double*> u_qi;
+                u_qi.resize(num_quantities);
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    u_qi[qi] = data_quantities[qi]->getPointer(component_indices[qi]);
+                }
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+                const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+                const int num_ghosts_0_temperature = num_ghosts_temperature[0];
+                
+                std::vector<int> num_ghosts_0_u_qi;
+                num_ghosts_0_u_qi.reserve(num_quantities);
+                
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    const hier::IntVector num_ghosts_u_qi = data_quantities[qi]->getGhostCellWidth();
+                    num_ghosts_0_u_qi.push_back(num_ghosts_u_qi[0]);
+                }
+                
+                /*
+                 * Initialize cell data for the derivatives and get pointers to the cell data.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative;
+                std::vector<double*> der_qi;
+                
+                if (num_use_derivative > 0)
+                {
+                    data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+                        patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
+                    
+                    der_qi.resize(num_use_derivative);
+                    for (int qi = 0; qi < num_use_derivative; qi++)
+                    {
+                        der_qi[qi] = data_derivative->getPointer(qi);
+                    }
+                }
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    int count_derivative = 0;
+                    for (int qi = 0; qi < num_quantities; qi++)
+                    {
+                        if (use_derivative[qi] && derivative_directions[qi] == 0)
+                        {
+                            derivative_first_order_x->computeDerivative(
+                                data_derivative,
+                                data_quantities[qi],
+                                dx[0],
+                                patch_visible_box,
+                                count_derivative,
+                                component_indices[qi]);
+                            
+                            count_derivative++;
+                        }
+                    }
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        /*
+                         * Compute the index of the data point and count how many times the data is repeated.
+                         */
+                        
+                        const hier::Index idx_pt(tbox::Dimension(1), idx_lo_0 + i);
+                        
+                        int n_overlapped = 1;
+                        
+                        for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                patch_overlapped_visible_boxes.begin());
+                             iob != patch_overlapped_visible_boxes.end();
+                             iob++)
+                        {
+                            const hier::Box& patch_overlapped_visible_box = *iob;
+                            
+                            if (patch_overlapped_visible_box.contains(idx_pt))
+                            {
+                                n_overlapped++;
+                            }
+                        }
+                        
+                        /*
+                         * Compute the shear stress component.
+                         */
+                        
+                        double tau_ij = double(0);
+                        
+                        // Compute linear indices of mass fraction, pressure and temperature.
+                        const int idx_mass_fraction = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
+                        const int idx_pressure = relative_idx_lo_0 + i + num_ghosts_0_pressure;
+                        const int idx_temperature = relative_idx_lo_0 + i + num_ghosts_0_temperature;
+                        
+                        if (shear_stress_component_idx == 0)
+                        {
+                            std::vector<const double*> Y_ptr;
+                            Y_ptr.resize(d_num_species);
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                Y_ptr[si] = &Y[si][idx_mass_fraction];
+                            }
+                            const double mu = d_equation_of_shear_viscosity_mixing_rules->
+                                getShearViscosity(
+                                    &p[idx_pressure],
+                                    &T[idx_temperature],
+                                    Y_ptr);
+                            const double mu_v = d_equation_of_bulk_viscosity_mixing_rules->
+                                getBulkViscosity(
+                                    &p[idx_pressure],
+                                    &T[idx_temperature],
+                                    Y_ptr);
+                            
+                            const int idx_vel_x_LLL = relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity;
+                            const int idx_vel_x_LL  = relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity;
+                            const int idx_vel_x_L   = relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity;
+                            const int idx_vel_x_R   = relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity;
+                            const int idx_vel_x_RR  = relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity;
+                            const int idx_vel_x_RRR = relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity;
+                            
+                            const double dudx = (double(1)/double(60)*(u[idx_vel_x_RRR] - u[idx_vel_x_LLL])
+                                - double(3)/double(20)*(u[idx_vel_x_RR] - u[idx_vel_x_LL])
+                                + double(3)/double(4)*(u[idx_vel_x_R] - u[idx_vel_x_L]))/dx[0];
+                            
+                            tau_ij = (double(4)/double(3)*mu + mu_v)*dudx / ((double) n_overlapped);
+                        }
+                        else
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Cannot compute shear stress component for one-dimensional problem!\n"
+                                << "shear_stress_component_idx = " << shear_stress_component_idx << " given!\n"
+                                << std::endl);
+                        }
+                        
+                        /*
+                         * Compute the linear indices and the data to add.
+                         */
+                        
+                        double avg = double(1);
+                        
+                        count_derivative = 0;
+                        for (int qi = 0; qi < num_quantities; qi++)
+                        {
+                            if (use_reciprocal[qi])
+                            {
+                                if (use_derivative[qi])
+                                {
+                                    const int idx_der = relative_idx_lo_0 + i;
+                                    
+                                    avg /= der_qi[count_derivative][idx_der];
+                                    count_derivative++;
+                                }
+                                else
+                                {
+                                    const int idx_qi = relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi];
+                                    
+                                    avg *= u_qi[qi][idx_qi];
+                                }
+                            }
+                            else
+                            {
+                                if (use_derivative[qi])
+                                {
+                                    const int idx_der = relative_idx_lo_0 + i;
+                                    
+                                    avg /= der_qi[count_derivative][idx_der];
+                                    count_derivative++;
+                                }
+                                else
+                                {
+                                    const int idx_qi = relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi];
+                                    
+                                    avg *= u_qi[qi][idx_qi];
+                                }
+                            }
+                        }
+                        
+                        /*
+                         * Add the data.
+                         */
+                        
+                        for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
+                        {
+                            const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
+                            
+                            avg_local[idx_fine] += (avg*tau_ij/((double) n_overlapped));
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        /*
+         * Reduction to get the global average.
+         */
+        
+        mpi.Allreduce(
+            avg_local,
+            avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        std::free(avg_local);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
+            new DerivativeFirstOrder(
+                "first order derivative in x-direction",
+                d_dim,
+                DIRECTION::X_DIRECTION,
+                d_num_ghosts_derivative));
+        
+        HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_y(
+            new DerivativeFirstOrder(
+                "first order derivative in y-direction",
+                d_dim,
+                DIRECTION::Y_DIRECTION,
+                d_num_ghosts_derivative));
+        
+        hier::IntVector num_ghosts_der = hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative;
+        
+        const int finest_level_dim_0 = finest_level_dims[0];
+        
+        /*
+         * Get the size of the physical domain.
+         */
+        
+        const double L_y = x_hi[1] - x_lo[1];
+        
+        double* avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        averaged_quantity.resize(finest_level_dim_0);
+        double* avg_global = averaged_quantity.data();
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            avg_local[i]  = double(0);
+            avg_global[i] = double(0);
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratio_to_coarest_level =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            
+            const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower index and grid spacing.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch and the quantity in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
+                
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    if (num_use_derivative > 0)
+                    {
+                        num_subghosts_of_data.insert(
+                            std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
+                    }
+                    else
+                    {
+                        num_subghosts_of_data.insert(
+                            std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
+                    }
+                }
+                
+                d_flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                d_flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                d_flow_model_tmp->computeDerivedCellData();
+                
+                /*
+                 * Get the pointer to data inside the flow model.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getCellData("VELOCITY");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
+                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
+                    d_flow_model_tmp->getCellData("PRESSURE");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
+                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                
+                double* u = data_velocity->getPointer(0);
+                double* v = data_velocity->getPointer(1);
+                std::vector<double*> Y;
+                Y.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                double* p = data_pressure->getPointer(0);
+                double* T = data_temperature->getPointer(0);
+                
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                data_quantities.resize(num_quantities);
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    data_quantities[qi] = d_flow_model_tmp->getCellData(quantity_names[qi]);
+                }
+                
+                std::vector<double*> u_qi;
+                u_qi.resize(num_quantities);
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    u_qi[qi] = data_quantities[qi]->getPointer(component_indices[qi]);
+                }
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_temperature = data_temperature->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                
+                const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+                const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+                const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
+                
+                const int num_ghosts_0_temperature = num_ghosts_temperature[0];
+                const int num_ghosts_1_temperature = num_ghosts_temperature[1];
+                const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
+                
+                std::vector<int> num_ghosts_0_u_qi;
+                std::vector<int> num_ghosts_1_u_qi;
+                std::vector<int> ghostcell_dim_0_u_qi;
+                num_ghosts_0_u_qi.reserve(num_quantities);
+                num_ghosts_1_u_qi.reserve(num_quantities);
+                ghostcell_dim_0_u_qi.reserve(num_quantities);
+                
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    const hier::IntVector num_ghosts_u_qi = data_quantities[qi]->getGhostCellWidth();
+                    const hier::IntVector ghostcell_dims_u_qi = data_quantities[qi]->getGhostBox().numberCells();
+                    
+                    num_ghosts_0_u_qi.push_back(num_ghosts_u_qi[0]);
+                    num_ghosts_1_u_qi.push_back(num_ghosts_u_qi[1]);
+                    ghostcell_dim_0_u_qi.push_back(ghostcell_dims_u_qi[0]);
+                }
+                
+                /*
+                 * Initialize cell data for the derivatives and get pointers to the cell data.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative;
+                std::vector<double*> der_qi;
+                
+                if (num_use_derivative > 0)
+                {
+                    data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+                        patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
+                    
+                    der_qi.resize(num_use_derivative);
+                    for (int qi = 0; qi < num_use_derivative; qi++)
+                    {
+                        der_qi[qi] = data_derivative->getPointer(qi);
+                    }
+                }
+                
+                const hier::IntVector patch_interior_dims = patch_box.numberCells();
+                const int patch_interior_dim_0 = patch_interior_dims[0];
+                
+                const double weight = dx[1]/L_y;
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    int count_derivative = 0;
+                    for (int qi = 0; qi < num_quantities; qi++)
+                    {
+                        if (use_derivative[qi] && derivative_directions[qi] == 0)
+                        {
+                            derivative_first_order_x->computeDerivative(
+                                data_derivative,
+                                data_quantities[qi],
+                                dx[0],
+                                patch_visible_box,
+                                count_derivative,
+                                component_indices[qi]);
+                            
+                            count_derivative++;
+                        }
+                        else if (use_derivative[qi] && derivative_directions[qi] == 1)
+                        {
+                            derivative_first_order_y->computeDerivative(
+                                data_derivative,
+                                data_quantities[qi],
+                                dx[1],
+                                patch_visible_box,
+                                count_derivative,
+                                component_indices[qi]);
+                            
+                            count_derivative++;
+                        }
+                    }
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            /*
+                             * Compute the index of the data point and count how many times the data is repeated.
+                             */
+                            
+                            const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j);
+                            
+                            int n_overlapped = 1;
+                            
+                            for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                    patch_overlapped_visible_boxes.begin());
+                                 iob != patch_overlapped_visible_boxes.end();
+                                 iob++)
+                            {
+                                const hier::Box& patch_overlapped_visible_box = *iob;
+                                
+                                if (patch_overlapped_visible_box.contains(idx_pt))
+                                {
+                                    n_overlapped++;
+                                }
+                            }
+                            
+                            /*
+                             * Compute the shear stress component.
+                             */
+                            
+                            double tau_ij = double(0);
+                            
+                            const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                            
+                            const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                            
+                            const int idx_temperature = (relative_idx_lo_0 + i + num_ghosts_0_temperature) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature;
+                            
+                            const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const int idx_vel_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const int idx_vel_y_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const int idx_vel_y_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const int idx_vel_y_T   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const int idx_vel_y_TT  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const int idx_vel_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            if (shear_stress_component_idx == 0)
+                            {
+                                std::vector<const double*> Y_ptr;
+                                Y_ptr.resize(d_num_species);
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                }
+                                const double mu = d_equation_of_shear_viscosity_mixing_rules->
+                                    getShearViscosity(
+                                        &p[idx_pressure],
+                                        &T[idx_temperature],
+                                        Y_ptr);
+                                const double mu_v = d_equation_of_bulk_viscosity_mixing_rules->
+                                    getBulkViscosity(
+                                        &p[idx_pressure],
+                                        &T[idx_temperature],
+                                        Y_ptr);
+                                
+                                const double dudx = (double(1)/double(60)*(u[idx_vel_x_RRR] - u[idx_vel_x_LLL])
+                                    - double(3)/double(20)*(u[idx_vel_x_RR] - u[idx_vel_x_LL])
+                                    + double(3)/double(4)*(u[idx_vel_x_R] - u[idx_vel_x_L]))/dx[0];
+                                
+                                const double dvdy = (double(1)/double(60)*(v[idx_vel_y_TTT] - v[idx_vel_y_BBB])
+                                    - double(3)/double(20)*(v[idx_vel_y_TT] - v[idx_vel_y_BB])
+                                    + double(3)/double(4)*(v[idx_vel_y_T] - v[idx_vel_y_B]))/dx[1];
+                                
+                                tau_ij = ((double(4)/double(3)*mu + mu_v)*dudx - (double(2)/double(3)*mu - mu_v)*dvdy)
+                                    *weight/((double) n_overlapped);
+                            }
+                            else if (shear_stress_component_idx == 1)
+                            {
+                                std::vector<const double*> Y_ptr;
+                                Y_ptr.resize(d_num_species);
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                }
+                                const double mu = d_equation_of_shear_viscosity_mixing_rules->
+                                    getShearViscosity(
+                                        &p[idx_pressure],
+                                        &T[idx_temperature],
+                                        Y_ptr);
+                                
+                                const double dvdx = (double(1)/double(60)*(v[idx_vel_x_RRR] - v[idx_vel_x_LLL])
+                                    - double(3)/double(20)*(v[idx_vel_x_RR] - v[idx_vel_x_LL])
+                                    + double(3)/double(4)*(v[idx_vel_x_R] - v[idx_vel_x_L]))/dx[0];
+                                
+                                const double dudy = (double(1)/double(60)*(u[idx_vel_y_TTT] - u[idx_vel_y_BBB])
+                                    - double(3)/double(20)*(u[idx_vel_y_TT] - u[idx_vel_y_BB])
+                                    + double(3)/double(4)*(u[idx_vel_y_T] - u[idx_vel_y_B]))/dx[1];
+                                
+                                tau_ij = mu*(dudy + dvdx)
+                                    *weight/((double) n_overlapped);
+                            }
+                            else if (shear_stress_component_idx == 3)
+                            {
+                                std::vector<const double*> Y_ptr;
+                                Y_ptr.resize(d_num_species);
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                }
+                                const double mu = d_equation_of_shear_viscosity_mixing_rules->
+                                    getShearViscosity(
+                                        &p[idx_pressure],
+                                        &T[idx_temperature],
+                                        Y_ptr);
+                                const double mu_v = d_equation_of_bulk_viscosity_mixing_rules->
+                                    getBulkViscosity(
+                                        &p[idx_pressure],
+                                        &T[idx_temperature],
+                                        Y_ptr);
+                                
+                                const double dudx = (double(1)/double(60)*(u[idx_vel_x_RRR] - u[idx_vel_x_LLL])
+                                    - double(3)/double(20)*(u[idx_vel_x_RR] - u[idx_vel_x_LL])
+                                    + double(3)/double(4)*(u[idx_vel_x_R] - u[idx_vel_x_L]))/dx[0];
+                                
+                                const double dvdy = (double(1)/double(60)*(v[idx_vel_y_TTT] - v[idx_vel_y_BBB])
+                                    - double(3)/double(20)*(v[idx_vel_y_TT] - v[idx_vel_y_BB])
+                                    + double(3)/double(4)*(v[idx_vel_y_T] - v[idx_vel_y_B]))/dx[1];
+                                
+                                tau_ij = ((double(4)/double(3)*mu + mu_v)*dvdy - (double(2)/double(3)*mu - mu_v)*dudx)
+                                    *weight/((double) n_overlapped);
+                            }
+                            else
+                            {
+                                TBOX_ERROR(d_object_name
+                                    << ": "
+                                    << "Cannot compute shear stress component for two-dimensional problem!\n"
+                                    << "component_idx = " << shear_stress_component_idx << " given!\n"
+                                    << std::endl);
+                            }
+                            
+                            /*
+                             * Compute the linear indices and the data to add.
+                             */
+                            
+                            double avg = double(1);
+                            
+                            count_derivative = 0;
+                            for (int qi = 0; qi < num_quantities; qi++)
+                            {
+                                if (use_reciprocal[qi])
+                                {
+                                    if (use_derivative[qi])
+                                    {
+                                        const int idx_der = (relative_idx_lo_0 + i) +
+                                            (relative_idx_lo_1 + j)*patch_interior_dim_0;
+                                        
+                                        avg /= der_qi[count_derivative][idx_der];
+                                        
+                                        count_derivative++;
+                                    }
+                                    else
+                                    {
+                                        const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
+                                        
+                                        avg /= u_qi[qi][idx_qi];
+                                    }
+                                }
+                                else
+                                {
+                                    if (use_derivative[qi])
+                                    {
+                                        const int idx_der = (relative_idx_lo_0 + i) +
+                                            (relative_idx_lo_1 + j)*patch_interior_dim_0;
+                                        
+                                        avg *= der_qi[count_derivative][idx_der];
+                                        
+                                        count_derivative++;
+                                    }
+                                    else
+                                    {
+                                        const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
+                                        
+                                        avg *= u_qi[qi][idx_qi];
+                                    }
+                                }
+                            }
+                            
+                            /*
+                             * Add the data.
+                             */
+                            
+                            for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
+                            {
+                                const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
+                                
+                                avg_local[idx_fine] += (avg*tau_ij*weight/((double) n_overlapped));
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        /*
+         * Reduction to get the global average.
+         */
+        
+        mpi.Allreduce(
+            avg_local,
+            avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        std::free(avg_local);
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
+            new DerivativeFirstOrder(
+                "first order derivative in x-direction",
+                d_dim,
+                DIRECTION::X_DIRECTION,
+                d_num_ghosts_derivative));
+        
+        HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_y(
+            new DerivativeFirstOrder(
+                "first order derivative in y-direction",
+                d_dim,
+                DIRECTION::Y_DIRECTION,
+                d_num_ghosts_derivative));
+        
+        HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_z(
+            new DerivativeFirstOrder(
+                "first order derivative in z-direction",
+                d_dim,
+                DIRECTION::Z_DIRECTION,
+                d_num_ghosts_derivative));
+        
+        hier::IntVector num_ghosts_der = hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative;
+        
+        const int finest_level_dim_0 = finest_level_dims[0];
+        
+        /*
+         * Get the size of the physical domain.
+         */
+        
+        const double L_y = x_hi[1] - x_lo[1];
+        const double L_z = x_hi[2] - x_lo[2];
+        
+        double* avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        averaged_quantity.resize(finest_level_dim_0);
+        double* avg_global = averaged_quantity.data();
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            avg_local[i]  = double(0);
+            avg_global[i] = double(0);
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratio_to_coarest_level =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            
+            const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower index and grid spacing.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch and the quantity in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
+                
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    if (num_use_derivative > 0)
+                    {
+                        num_subghosts_of_data.insert(
+                            std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
+                    }
+                    else
+                    {
+                        num_subghosts_of_data.insert(
+                            std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
+                    }
+                }
+                
+                d_flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                d_flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                d_flow_model_tmp->computeDerivedCellData();
+                
+                /*
+                 * Get the pointer to data inside the flow model.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getCellData("VELOCITY");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
+                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
+                    d_flow_model_tmp->getCellData("PRESSURE");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
+                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                
+                double* u = data_velocity->getPointer(0);
+                double* v = data_velocity->getPointer(1);
+                double* w = data_velocity->getPointer(2);
+                std::vector<double*> Y;
+                Y.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                double* p = data_pressure->getPointer(0);
+                double* T = data_temperature->getPointer(0);
+                
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                data_quantities.resize(num_quantities);
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    data_quantities[qi] = d_flow_model_tmp->getCellData(quantity_names[qi]);
+                }
+                
+                std::vector<double*> u_qi;
+                u_qi.resize(num_quantities);
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    u_qi[qi] = data_quantities[qi]->getPointer(component_indices[qi]);
+                }
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_temperature = data_temperature->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int num_ghosts_2_velocity = num_ghosts_velocity[2];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+                
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
+                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                
+                const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+                const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+                const int num_ghosts_2_pressure = num_ghosts_pressure[2];
+                const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
+                const int ghostcell_dim_1_pressure = ghostcell_dims_pressure[1];
+                
+                const int num_ghosts_0_temperature = num_ghosts_temperature[0];
+                const int num_ghosts_1_temperature = num_ghosts_temperature[1];
+                const int num_ghosts_2_temperature = num_ghosts_temperature[2];
+                const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
+                const int ghostcell_dim_1_temperature = ghostcell_dims_temperature[1];
+                
+                std::vector<int> num_ghosts_0_u_qi;
+                std::vector<int> num_ghosts_1_u_qi;
+                std::vector<int> num_ghosts_2_u_qi;
+                std::vector<int> ghostcell_dim_0_u_qi;
+                std::vector<int> ghostcell_dim_1_u_qi;
+                num_ghosts_0_u_qi.reserve(num_quantities);
+                num_ghosts_1_u_qi.reserve(num_quantities);
+                num_ghosts_2_u_qi.reserve(num_quantities);
+                ghostcell_dim_0_u_qi.reserve(num_quantities);
+                ghostcell_dim_1_u_qi.reserve(num_quantities);
+                
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    const hier::IntVector num_ghosts_u_qi = data_quantities[qi]->getGhostCellWidth();
+                    const hier::IntVector ghostcell_dims_u_qi = data_quantities[qi]->getGhostBox().numberCells();
+                    
+                    num_ghosts_0_u_qi.push_back(num_ghosts_u_qi[0]);
+                    num_ghosts_1_u_qi.push_back(num_ghosts_u_qi[1]);
+                    num_ghosts_2_u_qi.push_back(num_ghosts_u_qi[2]);
+                    ghostcell_dim_0_u_qi.push_back(ghostcell_dims_u_qi[0]);
+                    ghostcell_dim_1_u_qi.push_back(ghostcell_dims_u_qi[1]);
+                }
+                
+                /*
+                 * Initialize cell data for the derivatives and get pointers to the cell data.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative;
+                std::vector<double*> der_qi;
+                
+                if (num_use_derivative > 0)
+                {
+                    data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+                        patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
+                    
+                    der_qi.resize(num_use_derivative);
+                    for (int qi = 0; qi < num_use_derivative; qi++)
+                    {
+                        der_qi[qi] = data_derivative->getPointer(qi);
+                    }
+                }
+                
+                const hier::IntVector patch_interior_dims = patch_box.numberCells();
+                const int patch_interior_dim_0 = patch_interior_dims[0];
+                const int patch_interior_dim_1 = patch_interior_dims[1];
+                
+                const double weight = (dx[1]*dx[2])/(L_y*L_z);
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    int count_derivative = 0;
+                    for (int qi = 0; qi < num_quantities; qi++)
+                    {
+                        if (use_derivative[qi] && derivative_directions[qi] == 0)
+                        {
+                            derivative_first_order_x->computeDerivative(
+                                data_derivative,
+                                data_quantities[qi],
+                                dx[0],
+                                patch_visible_box,
+                                count_derivative,
+                                component_indices[qi]);
+                            
+                            count_derivative++;
+                        }
+                        else if (use_derivative[qi] && derivative_directions[qi] == 1)
+                        {
+                            derivative_first_order_y->computeDerivative(
+                                data_derivative,
+                                data_quantities[qi],
+                                dx[1],
+                                patch_visible_box,
+                                count_derivative,
+                                component_indices[qi]);
+                            
+                            count_derivative++;
+                        }
+                        else if (use_derivative[qi] && derivative_directions[qi] == 2)
+                        {
+                            derivative_first_order_z->computeDerivative(
+                                data_derivative,
+                                data_quantities[qi],
+                                dx[2],
+                                patch_visible_box,
+                                count_derivative,
+                                component_indices[qi]);
+                            
+                            count_derivative++;
+                        }
+                    }
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    const int relative_idx_lo_2 = relative_index_lo[2];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the shear stress component.
+                                 */
+                                
+                                double tau_ij = double(0);
+                                
+                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                        ghostcell_dim_1_mass_fraction;
+                                
+                                const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                                        ghostcell_dim_1_pressure;
+                                
+                                const int idx_temperature = (relative_idx_lo_0 + i + num_ghosts_0_temperature) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                                        ghostcell_dim_1_temperature;
+                                
+                                if (shear_stress_component_idx == 0)
+                                {
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                    }
+                                    const double mu = d_equation_of_shear_viscosity_mixing_rules->
+                                        getShearViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                    const double mu_v = d_equation_of_bulk_viscosity_mixing_rules->
+                                        getBulkViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                    
+                                    const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dudx = (double(1)/double(60)*(u[idx_vel_x_RRR] - u[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(u[idx_vel_x_RR] - u[idx_vel_x_LL])
+                                        + double(3)/double(4)*(u[idx_vel_x_R] - u[idx_vel_x_L]))/dx[0];
+                                    
+                                    const int idx_vel_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_T   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TT  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dvdy = (double(1)/double(60)*(v[idx_vel_y_TTT] - v[idx_vel_y_BBB])
+                                        - double(3)/double(20)*(v[idx_vel_y_TT] - v[idx_vel_y_BB])
+                                        + double(3)/double(4)*(v[idx_vel_y_T] - v[idx_vel_y_B]))/dx[1];
+                                    
+                                    const int idx_vel_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_F   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FF  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dwdz = (double(1)/double(60)*(w[idx_vel_z_FFF] - w[idx_vel_z_BBB])
+                                        - double(3)/double(20)*(w[idx_vel_z_FF] - w[idx_vel_z_BB])
+                                        + double(3)/double(4)*(w[idx_vel_z_F] - w[idx_vel_z_B]))/dx[2];
+                                    
+                                    tau_ij = ((double(4)/double(3)*mu + mu_v)*dudx - (double(2)/double(3)*mu - mu_v)*(dvdy + dwdz))
+                                        *weight/((double) n_overlapped);
+                                }
+                                else if (shear_stress_component_idx == 1)
+                                {
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                    }
+                                    const double mu = d_equation_of_shear_viscosity_mixing_rules->
+                                        getShearViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                    
+                                    const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dvdx = (double(1)/double(60)*(v[idx_vel_x_RRR] - v[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(v[idx_vel_x_RR] - v[idx_vel_x_LL])
+                                        + double(3)/double(4)*(v[idx_vel_x_R] - v[idx_vel_x_L]))/dx[0];
+                                    
+                                    const int idx_vel_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_T   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TT  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dudy = (double(1)/double(60)*(u[idx_vel_y_TTT] - u[idx_vel_y_BBB])
+                                        - double(3)/double(20)*(u[idx_vel_y_TT] - u[idx_vel_y_BB])
+                                        + double(3)/double(4)*(u[idx_vel_y_T] - u[idx_vel_y_B]))/dx[1];
+                                    
+                                    tau_ij = mu*(dudy + dvdx)
+                                        *weight/((double) n_overlapped);
+                                }
+                                else if (shear_stress_component_idx == 2)
+                                {
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                    }
+                                    const double mu = d_equation_of_shear_viscosity_mixing_rules->
+                                        getShearViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                    
+                                    const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dwdx = (double(1)/double(60)*(w[idx_vel_x_RRR] - w[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(w[idx_vel_x_RR] - w[idx_vel_x_LL])
+                                        + double(3)/double(4)*(w[idx_vel_x_R] - w[idx_vel_x_L]))/dx[0];
+                                    
+                                    const int idx_vel_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_F   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FF  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dudz = (double(1)/double(60)*(u[idx_vel_z_FFF] - u[idx_vel_z_BBB])
+                                        - double(3)/double(20)*(u[idx_vel_z_FF] - u[idx_vel_z_BB])
+                                        + double(3)/double(4)*(u[idx_vel_z_F] - u[idx_vel_z_B]))/dx[2];
+                                    
+                                    tau_ij = mu*(dudz + dwdx)
+                                        *weight/((double) n_overlapped);
+                                }
+                                else if (shear_stress_component_idx == 3)
+                                {
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                    }
+                                    const double mu = d_equation_of_shear_viscosity_mixing_rules->
+                                        getShearViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                    const double mu_v = d_equation_of_bulk_viscosity_mixing_rules->
+                                        getBulkViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                    
+                                    const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dudx = (double(1)/double(60)*(u[idx_vel_x_RRR] - u[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(u[idx_vel_x_RR] - u[idx_vel_x_LL])
+                                        + double(3)/double(4)*(u[idx_vel_x_R] - u[idx_vel_x_L]))/dx[0];
+                                    
+                                    const int idx_vel_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_T   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TT  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dvdy = (double(1)/double(60)*(v[idx_vel_y_TTT] - v[idx_vel_y_BBB])
+                                        - double(3)/double(20)*(v[idx_vel_y_TT] - v[idx_vel_y_BB])
+                                        + double(3)/double(4)*(v[idx_vel_y_T] - v[idx_vel_y_B]))/dx[1];
+                                    
+                                    const int idx_vel_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_F   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FF  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dwdz = (double(1)/double(60)*(w[idx_vel_z_FFF] - w[idx_vel_z_BBB])
+                                        - double(3)/double(20)*(w[idx_vel_z_FF] - w[idx_vel_z_BB])
+                                        + double(3)/double(4)*(w[idx_vel_z_F] - w[idx_vel_z_B]))/dx[2];
+                                    
+                                    tau_ij = ((double(4)/double(3)*mu + mu_v)*dvdy - (double(2)/double(3)*mu - mu_v)*(dudx + dwdz))
+                                        *weight/((double) n_overlapped);
+                                }
+                                else if (shear_stress_component_idx == 4)
+                                {
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                    }
+                                    const double mu = d_equation_of_shear_viscosity_mixing_rules->
+                                        getShearViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                    
+                                    const int idx_vel_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_T   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TT  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dwdy = (double(1)/double(60)*(w[idx_vel_y_TTT] - w[idx_vel_y_BBB])
+                                        - double(3)/double(20)*(w[idx_vel_y_TT] - w[idx_vel_y_BB])
+                                        + double(3)/double(4)*(w[idx_vel_y_T] - w[idx_vel_y_B]))/dx[1];
+                                    
+                                    const int idx_vel_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_F   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FF  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dvdz = (double(1)/double(60)*(v[idx_vel_z_FFF] - v[idx_vel_z_BBB])
+                                        - double(3)/double(20)*(v[idx_vel_z_FF] - v[idx_vel_z_BB])
+                                        + double(3)/double(4)*(v[idx_vel_z_F] - v[idx_vel_z_B]))/dx[2];
+                                    
+                                    tau_ij = mu*(dvdz + dwdy)
+                                        *weight/((double) n_overlapped);
+                                }
+                                else if (shear_stress_component_idx == 5)
+                                {
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                    }
+                                    const double mu = d_equation_of_shear_viscosity_mixing_rules->
+                                        getShearViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                    const double mu_v = d_equation_of_bulk_viscosity_mixing_rules->
+                                        getBulkViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                    
+                                    const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dudx = (double(1)/double(60)*(u[idx_vel_x_RRR] - u[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(u[idx_vel_x_RR] - u[idx_vel_x_LL])
+                                        + double(3)/double(4)*(u[idx_vel_x_R] - u[idx_vel_x_L]))/dx[0];
+                                    
+                                    const int idx_vel_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_T   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TT  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dvdy = (double(1)/double(60)*(v[idx_vel_y_TTT] - v[idx_vel_y_BBB])
+                                        - double(3)/double(20)*(v[idx_vel_y_TT] - v[idx_vel_y_BB])
+                                        + double(3)/double(4)*(v[idx_vel_y_T] - v[idx_vel_y_B]))/dx[1];
+                                    
+                                    const int idx_vel_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_F   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FF  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dwdz = (double(1)/double(60)*(w[idx_vel_z_FFF] - w[idx_vel_z_BBB])
+                                        - double(3)/double(20)*(w[idx_vel_z_FF] - w[idx_vel_z_BB])
+                                        + double(3)/double(4)*(w[idx_vel_z_F] - w[idx_vel_z_B]))/dx[2];
+                                    
+                                    tau_ij = ((double(4)/double(3)*mu + mu_v)*dwdz - (double(2)/double(3)*mu - mu_v)*(dudx + dvdy))
+                                        *weight/((double) n_overlapped);
+                                }
+                                else
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": "
+                                        << "Cannot compute shear stress component for two-dimensional problem!\n"
+                                        << "component_idx = " << shear_stress_component_idx << " given!\n"
+                                        << std::endl);
+                                }
+                                
+                                /*
+                                 * Compute the linear index and the data to add.
+                                 */
+                                
+                                double avg = double(1);
+                                
+                                count_derivative = 0;
+                                for (int qi = 0; qi < num_quantities; qi++)
+                                {
+                                    if (use_reciprocal[qi])
+                                    {
+                                        if (use_derivative[qi])
+                                        {
+                                            const int idx_der = (relative_idx_lo_0 + i) +
+                                                (relative_idx_lo_1 + j)*patch_interior_dim_0 +
+                                                (relative_idx_lo_2 + k)*patch_interior_dim_0*
+                                                    patch_interior_dim_1;
+                                            
+                                            avg /= der_qi[count_derivative][idx_der];
+                                            
+                                            count_derivative++;
+                                        }
+                                        else
+                                        {
+                                            const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                                (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                                (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                    ghostcell_dim_1_u_qi[qi];
+                                            
+                                            avg /= u_qi[qi][idx_qi];
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (use_derivative[qi])
+                                        {
+                                            const int idx_der = (relative_idx_lo_0 + i) +
+                                                (relative_idx_lo_1 + j)*patch_interior_dim_0 +
+                                                (relative_idx_lo_2 + k)*patch_interior_dim_0*
+                                                    patch_interior_dim_1;
+                                            
+                                            avg *= der_qi[count_derivative][idx_der];
+                                            
+                                            count_derivative++;
+                                        }
+                                        else
+                                        {
+                                            const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                                (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                                (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                    ghostcell_dim_1_u_qi[qi];
+                                            
+                                            avg *= u_qi[qi][idx_qi];
+                                        }
+                                    }
+                                }
+                                
+                                /*
+                                 * Add the data.
+                                 */
+                                
+                                for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
+                                {
+                                    const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
+                                    
+                                    avg_local[idx_fine] += (avg*tau_ij*weight/((double) n_overlapped));
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        /*
+         * Reduction to get the global average.
+         */
+        
+        mpi.Allreduce(
+            avg_local,
+            avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        std::free(avg_local);
+    }
+    
+    return averaged_quantity;
+}
+
+
+/*
+ * Compute averaged value (on product of variable derivatives and derivative of shear stress component) with only
+ * x direction as inhomogeneous direction.
+ * component_idx:
+ * 0: tau_11
+ * 1: tau_12
+ * 2: tau_13
+ * 3: tau_22
+ * 4: tau_23
+ * 5: tau_33
+ */
+std::vector<double>
+RTIRMIBudgetsUtilities::getAveragedQuantityWithDerivativeOfShearStressComponentWithInhomogeneousXDirection(
+    const std::vector<std::string>& quantity_names,
+    const std::vector<int>& component_indices,
+    const std::vector<bool>& use_derivative,
+    const std::vector<int>& derivative_directions,
+    const std::vector<bool>& use_reciprocal,
+    const int shear_stress_component_idx,
+    const int shear_stress_derivative_direction,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+    TBOX_ASSERT(d_num_ghosts_derivative == 3);
+    
+    int num_quantities = static_cast<int>(quantity_names.size());
+    
+    TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
+    TBOX_ASSERT(static_cast<int>(use_derivative.size()) == num_quantities);
+    TBOX_ASSERT(static_cast<int>(derivative_directions.size()) == num_quantities);
+    TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
+    
+    int num_use_derivative = 0;
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        for (int qi = 0; qi < num_quantities; qi++)
+        {
+            if (use_derivative[qi])
+            {
+                num_use_derivative++;
+                if (derivative_directions[qi] < 0 || derivative_directions[qi] > 0)
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": RTIRMIBudgetsUtilities::"
+                        << "getAveragedQuantityWithDerivativeOfShearStressComponentWithInhomogeneousXDirection():\n"
+                        << "Cannot take derivative for one-dimensional problem!\n"
+                        << "derivative_directions[" << qi << "] = " << derivative_directions[qi] << " given!\n"
+                        << std::endl);
+                }
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        for (int qi = 0; qi < num_quantities; qi++)
+        {
+            if (use_derivative[qi])
+            {
+                num_use_derivative++;
+                if (derivative_directions[qi] < 0 || derivative_directions[qi] > 1)
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": RTIRMIBudgetsUtilities::"
+                        << "getAveragedQuantityWithDerivativeOfShearStressComponentWithInhomogeneousXDirection():\n"
+                        << "Cannot take derivative for two-dimensional problem!\n"
+                        << "derivative_directions[" << qi << "] = " << derivative_directions[qi] << " given!\n"
+                        << std::endl);
+                }
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        for (int qi = 0; qi < num_quantities; qi++)
+        {
+            if (use_derivative[qi])
+            {
+                num_use_derivative++;
+                if (derivative_directions[qi] < 0 || derivative_directions[qi] > 2)
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": RTIRMIBudgetsUtilities::"
+                        << "getAveragedQuantityWithDerivativeOfShearStressComponentWithInhomogeneousXDirection():\n"
+                        << "Cannot take derivative for three-dimensional problem!\n"
+                        << "derivative_directions[" << qi << "] = " << derivative_directions[qi] << " given!\n"
+                        << std::endl);
+                }
+            }
+        }
+    }
+    
+    std::vector<double> averaged_quantity;
+    
+    HAMERS_SHARED_PTR<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Get the refinement ratio from the finest level to the coarest level.
+     */
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    hier::IntVector ratio_finest_level_to_coarest_level =
+        patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
+    for (int li = num_levels - 2; li > 0 ; li--)
+    {
+        ratio_finest_level_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(li);
+    }
+    
+    /*
+     * Get the flattened hierarchy where only the finest existing grid is visible at any given
+     * location in the problem space.
+     */
+    
+    HAMERS_SHARED_PTR<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
+            *patch_hierarchy,
+            0,
+            num_levels - 1));
+    
+    /*
+     * Get the number of cells of physical domain refined to the finest level.
+     */
+    
+    const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
+    const hier::Box& physical_domain_box = physical_domain.front();
+    const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratio_finest_level_to_coarest_level;
+    
+    /*
+     * Get the indices of the physical domain.
+     */
+    
+    const double* x_lo = d_grid_geometry->getXLower();
+    const double* x_hi = d_grid_geometry->getXUpper();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
+            new DerivativeFirstOrder(
+                "first order derivative in x-direction",
+                d_dim,
+                DIRECTION::X_DIRECTION,
+                d_num_ghosts_derivative));
+        
+        hier::IntVector num_ghosts_der = hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative;
+        
+        const int finest_level_dim_0 = finest_level_dims[0];
+        
+        double* avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        averaged_quantity.resize(finest_level_dim_0);
+        double* avg_global = averaged_quantity.data();
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            avg_local[i]  = double(0);
+            avg_global[i] = double(0);
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratio_to_coarest_level =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            
+            const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower index.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch and the quantities in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts_der));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("PRESSURE", num_ghosts_der));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("TEMPERATURE", num_ghosts_der));
+                
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    if (num_use_derivative > 0)
+                    {
+                        num_subghosts_of_data.insert(
+                            std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
+                    }
+                    else
+                    {
+                        num_subghosts_of_data.insert(
+                            std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
+                    }
+                }
+                
+                d_flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                d_flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                d_flow_model_tmp->computeDerivedCellData();
+                
+                /*
+                 * Get the pointers to data inside the flow model.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getCellData("VELOCITY");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
+                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
+                    d_flow_model_tmp->getCellData("PRESSURE");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
+                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                
+                double* u = data_velocity->getPointer(0);
+                std::vector<double*> Y;
+                Y.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                double* p = data_pressure->getPointer(0);
+                double* T = data_temperature->getPointer(0);
+                
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                data_quantities.resize(num_quantities);
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    data_quantities[qi] = d_flow_model_tmp->getCellData(quantity_names[qi]);
+                }
+                
+                std::vector<double*> u_qi;
+                u_qi.resize(num_quantities);
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    u_qi[qi] = data_quantities[qi]->getPointer(component_indices[qi]);
+                }
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+                const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+                const int num_ghosts_0_temperature = num_ghosts_temperature[0];
+                
+                std::vector<int> num_ghosts_0_u_qi;
+                num_ghosts_0_u_qi.reserve(num_quantities);
+                
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    const hier::IntVector num_ghosts_u_qi = data_quantities[qi]->getGhostCellWidth();
+                    num_ghosts_0_u_qi.push_back(num_ghosts_u_qi[0]);
+                }
+                
+                /*
+                 * Initialize cell data for the derivatives and get pointers to the cell data.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative;
+                std::vector<double*> der_qi;
+                
+                if (num_use_derivative > 0)
+                {
+                    data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+                        patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
+                    
+                    der_qi.resize(num_use_derivative);
+                    for (int qi = 0; qi < num_use_derivative; qi++)
+                    {
+                        der_qi[qi] = data_derivative->getPointer(qi);
+                    }
+                }
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    int count_derivative = 0;
+                    for (int qi = 0; qi < num_quantities; qi++)
+                    {
+                        if (use_derivative[qi] && derivative_directions[qi] == 0)
+                        {
+                            derivative_first_order_x->computeDerivative(
+                                data_derivative,
+                                data_quantities[qi],
+                                dx[0],
+                                patch_visible_box,
+                                count_derivative,
+                                component_indices[qi]);
+                            
+                            count_derivative++;
+                        }
+                    }
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        /*
+                         * Compute the index of the data point and count how many times the data is repeated.
+                         */
+                        
+                        const hier::Index idx_pt(tbox::Dimension(1), idx_lo_0 + i);
+                        
+                        int n_overlapped = 1;
+                        
+                        for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                patch_overlapped_visible_boxes.begin());
+                             iob != patch_overlapped_visible_boxes.end();
+                             iob++)
+                        {
+                            const hier::Box& patch_overlapped_visible_box = *iob;
+                            
+                            if (patch_overlapped_visible_box.contains(idx_pt))
+                            {
+                                n_overlapped++;
+                            }
+                        }
+                        
+                        /*
+                         * Compute the derivative of shear stress component.
+                         */
+                        
+                        double tau_ij_der = double(0);
+                        
+                        if ((shear_stress_component_idx == 0) && (shear_stress_derivative_direction == 0))
+                        {
+                            double mu[7];
+                            double mu_v[7];
+                            
+                            std::vector<const double*> Y_ptr;
+                            Y_ptr.resize(d_num_species);
+                            for (int count = -3; count <= 3; count++)
+                            {
+                                const int idx_mass_fraction = relative_idx_lo_0 + (i + count) + num_ghosts_0_mass_fraction;
+                                const int idx_pressure = relative_idx_lo_0 + (i + count) + num_ghosts_0_pressure;
+                                const int idx_temperature = relative_idx_lo_0 + (i + count) + num_ghosts_0_temperature;
+                                
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                }
+                                mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                    getShearViscosity(
+                                        &p[idx_pressure],
+                                        &T[idx_temperature],
+                                        Y_ptr);
+                                mu_v[count + 3] = d_equation_of_bulk_viscosity_mixing_rules->
+                                    getBulkViscosity(
+                                        &p[idx_pressure],
+                                        &T[idx_temperature],
+                                        Y_ptr);
+                            }
+                            
+                            const double dmudx = (double(1)/double(60)*(mu[6] - mu[0])
+                                - double(3)/double(20)*(mu[5] - mu[1])
+                                + double(3)/double(4)*(mu[4] - mu[2]))/dx[0];
+                            
+                            const double dmu_vdx = (double(1)/double(60)*(mu_v[6] - mu_v[0])
+                                - double(3)/double(20)*(mu_v[5] - mu_v[1])
+                                + double(3)/double(4)*(mu_v[4] - mu_v[2]))/dx[0];
+                            
+                            const int idx_vel       = relative_idx_lo_0 +  i      + num_ghosts_0_velocity;
+                            
+                            const int idx_vel_x_LLL = relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity;
+                            const int idx_vel_x_LL  = relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity;
+                            const int idx_vel_x_L   = relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity;
+                            const int idx_vel_x_R   = relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity;
+                            const int idx_vel_x_RR  = relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity;
+                            const int idx_vel_x_RRR = relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity;
+                            
+                            const double dudx = (double(1)/double(60)*(u[idx_vel_x_RRR] - u[idx_vel_x_LLL])
+                                - double(3)/double(20)*(u[idx_vel_x_RR] - u[idx_vel_x_LL])
+                                + double(3)/double(4)*(u[idx_vel_x_R] - u[idx_vel_x_L]))/dx[0];
+                            
+                            const double d2udx2 = (double(1)/double(90)*(u[idx_vel_x_RRR] + u[idx_vel_x_LLL])
+                                - double(3)/double(20)*(u[idx_vel_x_RR] + u[idx_vel_x_LL])
+                                + double(3)/double(2)*(u[idx_vel_x_R] + u[idx_vel_x_L])
+                                - double(49)/double(18)*u[idx_vel])/(dx[0]*dx[0]);
+                            
+                            tau_ij_der = ((double(4)/double(3)*dmudx + dmu_vdx)*dudx 
+                                + (double(4)/double(3)*mu[3] + mu_v[3])*d2udx2) / ((double) n_overlapped);
+                        }
+                        else
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Cannot compute derivative of shear stress component for one-dimensional problem!\n"
+                                << "shear_stress_component_idx = " << shear_stress_component_idx << " and shear_stress_derivative_direction = "
+                                << shear_stress_derivative_direction << " given!\n"
+                                << std::endl);
+                        }
+                        
+                        /*
+                         * Compute the linear indices and the data to add.
+                         */
+                        
+                        double avg = double(1);
+                        
+                        count_derivative = 0;
+                        for (int qi = 0; qi < num_quantities; qi++)
+                        {
+                            if (use_reciprocal[qi])
+                            {
+                                if (use_derivative[qi])
+                                {
+                                    const int idx_der = relative_idx_lo_0 + i;
+                                    
+                                    avg /= der_qi[count_derivative][idx_der];
+                                    count_derivative++;
+                                }
+                                else
+                                {
+                                    const int idx_qi = relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi];
+                                    
+                                    avg *= u_qi[qi][idx_qi];
+                                }
+                            }
+                            else
+                            {
+                                if (use_derivative[qi])
+                                {
+                                    const int idx_der = relative_idx_lo_0 + i;
+                                    
+                                    avg /= der_qi[count_derivative][idx_der];
+                                    count_derivative++;
+                                }
+                                else
+                                {
+                                    const int idx_qi = relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi];
+                                    
+                                    avg *= u_qi[qi][idx_qi];
+                                }
+                            }
+                        }
+                        
+                        /*
+                         * Add the data.
+                         */
+                        
+                        for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
+                        {
+                            const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
+                            
+                            avg_local[idx_fine] += (avg*tau_ij_der/((double) n_overlapped));
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        /*
+         * Reduction to get the global average.
+         */
+        
+        mpi.Allreduce(
+            avg_local,
+            avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        std::free(avg_local);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
+            new DerivativeFirstOrder(
+                "first order derivative in x-direction",
+                d_dim,
+                DIRECTION::X_DIRECTION,
+                d_num_ghosts_derivative));
+        
+        HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_y(
+            new DerivativeFirstOrder(
+                "first order derivative in y-direction",
+                d_dim,
+                DIRECTION::Y_DIRECTION,
+                d_num_ghosts_derivative));
+        
+        hier::IntVector num_ghosts_der = hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative;
+        
+        const int finest_level_dim_0 = finest_level_dims[0];
+        
+        /*
+         * Get the size of the physical domain.
+         */
+        
+        const double L_y = x_hi[1] - x_lo[1];
+        
+        double* avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        averaged_quantity.resize(finest_level_dim_0);
+        double* avg_global = averaged_quantity.data();
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            avg_local[i]  = double(0);
+            avg_global[i] = double(0);
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratio_to_coarest_level =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            
+            const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower index and grid spacing.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch and the quantities in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts_der));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("PRESSURE", num_ghosts_der));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("TEMPERATURE", num_ghosts_der));
+                
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    if (num_use_derivative > 0)
+                    {
+                        num_subghosts_of_data.insert(
+                            std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
+                    }
+                    else
+                    {
+                        num_subghosts_of_data.insert(
+                            std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
+                    }
+                }
+                
+                d_flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                d_flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                d_flow_model_tmp->computeDerivedCellData();
+                
+                /*
+                 * Get the pointer to data inside the flow model.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getCellData("VELOCITY");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
+                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
+                    d_flow_model_tmp->getCellData("PRESSURE");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
+                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                
+                double* u = data_velocity->getPointer(0);
+                double* v = data_velocity->getPointer(1);
+                std::vector<double*> Y;
+                Y.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                double* p = data_pressure->getPointer(0);
+                double* T = data_temperature->getPointer(0);
+                
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                data_quantities.resize(num_quantities);
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    data_quantities[qi] = d_flow_model_tmp->getCellData(quantity_names[qi]);
+                }
+                
+                std::vector<double*> u_qi;
+                u_qi.resize(num_quantities);
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    u_qi[qi] = data_quantities[qi]->getPointer(component_indices[qi]);
+                }
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_temperature = data_temperature->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                
+                const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+                const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+                const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
+                
+                const int num_ghosts_0_temperature = num_ghosts_temperature[0];
+                const int num_ghosts_1_temperature = num_ghosts_temperature[1];
+                const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
+                
+                std::vector<int> num_ghosts_0_u_qi;
+                std::vector<int> num_ghosts_1_u_qi;
+                std::vector<int> ghostcell_dim_0_u_qi;
+                num_ghosts_0_u_qi.reserve(num_quantities);
+                num_ghosts_1_u_qi.reserve(num_quantities);
+                ghostcell_dim_0_u_qi.reserve(num_quantities);
+                
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    const hier::IntVector num_ghosts_u_qi = data_quantities[qi]->getGhostCellWidth();
+                    const hier::IntVector ghostcell_dims_u_qi = data_quantities[qi]->getGhostBox().numberCells();
+                    
+                    num_ghosts_0_u_qi.push_back(num_ghosts_u_qi[0]);
+                    num_ghosts_1_u_qi.push_back(num_ghosts_u_qi[1]);
+                    ghostcell_dim_0_u_qi.push_back(ghostcell_dims_u_qi[0]);
+                }
+                
+                /*
+                 * Initialize cell data for the derivatives and get pointers to the cell data.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative;
+                std::vector<double*> der_qi;
+                
+                if (num_use_derivative > 0)
+                {
+                    data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+                        patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
+                    
+                    der_qi.resize(num_use_derivative);
+                    for (int qi = 0; qi < num_use_derivative; qi++)
+                    {
+                        der_qi[qi] = data_derivative->getPointer(qi);
+                    }
+                }
+                
+                const hier::IntVector patch_interior_dims = patch_box.numberCells();
+                const int patch_interior_dim_0 = patch_interior_dims[0];
+                
+                const double weight = dx[1]/L_y;
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    int count_derivative = 0;
+                    for (int qi = 0; qi < num_quantities; qi++)
+                    {
+                        if (use_derivative[qi] && derivative_directions[qi] == 0)
+                        {
+                            derivative_first_order_x->computeDerivative(
+                                data_derivative,
+                                data_quantities[qi],
+                                dx[0],
+                                patch_visible_box,
+                                count_derivative,
+                                component_indices[qi]);
+                            
+                            count_derivative++;
+                        }
+                        else if (use_derivative[qi] && derivative_directions[qi] == 1)
+                        {
+                            derivative_first_order_y->computeDerivative(
+                                data_derivative,
+                                data_quantities[qi],
+                                dx[1],
+                                patch_visible_box,
+                                count_derivative,
+                                component_indices[qi]);
+                            
+                            count_derivative++;
+                        }
+                    }
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            /*
+                             * Compute the index of the data point and count how many times the data is repeated.
+                             */
+                            
+                            const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j);
+                            
+                            int n_overlapped = 1;
+                            
+                            for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                    patch_overlapped_visible_boxes.begin());
+                                 iob != patch_overlapped_visible_boxes.end();
+                                 iob++)
+                            {
+                                const hier::Box& patch_overlapped_visible_box = *iob;
+                                
+                                if (patch_overlapped_visible_box.contains(idx_pt))
+                                {
+                                    n_overlapped++;
+                                }
+                            }
+                            
+                            /*
+                             * Compute the derivative shear stress component.
+                             */
+                            
+                            double tau_ij_der = double(0);
+                            
+                            if ((shear_stress_component_idx == 0) && (shear_stress_derivative_direction == 0))
+                            {
+                                double mu[7];
+                                double mu_v[7];
+                                
+                                std::vector<const double*> Y_ptr;
+                                Y_ptr.resize(d_num_species);
+                                for (int count = -3; count <= 3; count++)
+                                {
+                                    const int idx_mass_fraction = (relative_idx_lo_0 + (i + count) + num_ghosts_0_mass_fraction) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                    
+                                    const int idx_pressure = (relative_idx_lo_0 + (i + count) + num_ghosts_0_pressure) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                                    
+                                    const int idx_temperature = (relative_idx_lo_0 + (i + count) + num_ghosts_0_temperature) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature;
+                                    
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                    }
+                                    mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                        getShearViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                    mu_v[count + 3] = d_equation_of_bulk_viscosity_mixing_rules->
+                                        getBulkViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                }
+                                
+                                const double dmudx = (double(1)/double(60)*(mu[6] - mu[0])
+                                    - double(3)/double(20)*(mu[5] - mu[1])
+                                    + double(3)/double(4)*(mu[4] - mu[2]))/dx[0];
+                                
+                                const double dmu_vdx = (double(1)/double(60)*(mu_v[6] - mu_v[0])
+                                    - double(3)/double(20)*(mu_v[5] - mu_v[1])
+                                    + double(3)/double(4)*(mu_v[4] - mu_v[2]))/dx[0];
+                                
+                                const int idx_vel       = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const double dudx = (double(1)/double(60)*(u[idx_vel_x_RRR] - u[idx_vel_x_LLL])
+                                    - double(3)/double(20)*(u[idx_vel_x_RR] - u[idx_vel_x_LL])
+                                    + double(3)/double(4)*(u[idx_vel_x_R] - u[idx_vel_x_L]))/dx[0];
+                                
+                                const double d2udx2 = (double(1)/double(90)*(u[idx_vel_x_RRR] + u[idx_vel_x_LLL])
+                                    - double(3)/double(20)*(u[idx_vel_x_RR] + u[idx_vel_x_LL])
+                                    + double(3)/double(2)*(u[idx_vel_x_R] + u[idx_vel_x_L])
+                                    - double(49)/double(18)*u[idx_vel])/(dx[0]*dx[0]);
+                                
+                                double visc_dvdy[7];
+                                
+                                for (int count = -3; count <= 3; count++)
+                                {
+                                    const int idx_vel_y_BBB = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_y_BB  = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_y_B   = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_y_T   = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_y_TT  = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_y_TTT = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    visc_dvdy[count + 3] = (double(2)/double(3)*mu[count + 3] - mu_v[count + 3])*
+                                        (double(1)/double(60)*(v[idx_vel_y_TTT] - v[idx_vel_y_BBB])
+                                        - double(3)/double(20)*(v[idx_vel_y_TT] - v[idx_vel_y_BB])
+                                        + double(3)/double(4)*(v[idx_vel_y_T] - v[idx_vel_y_B]))/dx[1];
+                                }
+                                
+                                const double dvisc_dvdydx = (double(1)/double(60)*(visc_dvdy[6] - visc_dvdy[0])
+                                    - double(3)/double(20)*(visc_dvdy[5] - visc_dvdy[1])
+                                    + double(3)/double(4)*(visc_dvdy[4] - visc_dvdy[2]))/dx[0];
+                                
+                                tau_ij_der = (
+                                    (double(4)/double(3)*dmudx + dmu_vdx)*dudx
+                                    + (double(4)/double(3)*mu[3] + mu_v[3])*d2udx2
+                                    - dvisc_dvdydx
+                                    )*weight/((double) n_overlapped);
+                            }
+                            else if ((shear_stress_component_idx == 0) && (shear_stress_derivative_direction == 1))
+                            {
+                                double mu[7];
+                                double mu_v[7];
+                                
+                                std::vector<const double*> Y_ptr;
+                                Y_ptr.resize(d_num_species);
+                                for (int count = -3; count <= 3; count++)
+                                {
+                                    const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                    
+                                    const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                                    
+                                    const int idx_temperature = (relative_idx_lo_0 + i + num_ghosts_0_temperature) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_temperature)*ghostcell_dim_0_temperature;
+                                    
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                    }
+                                    mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                        getShearViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                    mu_v[count + 3] = d_equation_of_bulk_viscosity_mixing_rules->
+                                        getBulkViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                }
+                                
+                                const double dmudy = (double(1)/double(60)*(mu[6] - mu[0])
+                                    - double(3)/double(20)*(mu[5] - mu[1])
+                                    + double(3)/double(4)*(mu[4] - mu[2]))/dx[1];
+                                
+                                const double dmu_vdy = (double(1)/double(60)*(mu_v[6] - mu_v[0])
+                                    - double(3)/double(20)*(mu_v[5] - mu_v[1])
+                                    + double(3)/double(4)*(mu_v[4] - mu_v[2]))/dx[1];
+                                
+                                const int idx_vel       = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_y_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_y_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_y_T   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_y_TT  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const double dvdy = (double(1)/double(60)*(v[idx_vel_y_TTT] - v[idx_vel_y_BBB])
+                                    - double(3)/double(20)*(v[idx_vel_y_TT] - v[idx_vel_y_BB])
+                                    + double(3)/double(4)*(v[idx_vel_y_T] - v[idx_vel_y_B]))/dx[1];
+                                
+                                const double d2vdy2 = (double(1)/double(90)*(v[idx_vel_y_TTT] + v[idx_vel_y_BBB])
+                                    - double(3)/double(20)*(v[idx_vel_y_TT] + v[idx_vel_y_BB])
+                                    + double(3)/double(2)*(v[idx_vel_y_T] + v[idx_vel_y_B])
+                                    - double(49)/double(18)*v[idx_vel])/(dx[1]*dx[1]);
+                                
+                                double visc_dudx[7];
+                                
+                                for (int count = -3; count <= 3; count++)
+                                {
+                                    const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    visc_dudx[count + 3] = (double(4)/double(3)*mu[count + 3] + mu_v[count + 3])*
+                                        (double(1)/double(60)*(u[idx_vel_x_RRR] - u[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(u[idx_vel_x_RR] - u[idx_vel_x_LL])
+                                        + double(3)/double(4)*(u[idx_vel_x_R] - u[idx_vel_x_L]))/dx[0];
+                                }
+                                
+                                const double dvisc_dudxdy = (double(1)/double(60)*(visc_dudx[6] - visc_dudx[0])
+                                    - double(3)/double(20)*(visc_dudx[5] - visc_dudx[1])
+                                    + double(3)/double(4)*(visc_dudx[4] - visc_dudx[2]))/dx[1];
+                                
+                                tau_ij_der = (
+                                    dvisc_dudxdy
+                                    - (double(2)/double(3)*dmudy - dmu_vdy)*dvdy
+                                    - (double(2)/double(3)*mu[3] - mu_v[3])*d2vdy2
+                                    )*weight/((double) n_overlapped);
+                            }
+                            else if ((shear_stress_component_idx == 1) && (shear_stress_derivative_direction == 0))
+                            {
+                                double mu[7];
+                                
+                                std::vector<const double*> Y_ptr;
+                                Y_ptr.resize(d_num_species);
+                                for (int count = -3; count <= 3; count++)
+                                {
+                                    const int idx_mass_fraction = (relative_idx_lo_0 + (i + count) + num_ghosts_0_mass_fraction) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                    
+                                    const int idx_pressure = (relative_idx_lo_0 + (i + count) + num_ghosts_0_pressure) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                                    
+                                    const int idx_temperature = (relative_idx_lo_0 + (i + count) + num_ghosts_0_temperature) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature;
+                                    
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                    }
+                                    mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                        getShearViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                }
+                                
+                                const double dmudx = (double(1)/double(60)*(mu[6] - mu[0])
+                                    - double(3)/double(20)*(mu[5] - mu[1])
+                                    + double(3)/double(4)*(mu[4] - mu[2]))/dx[0];
+                                
+                                const int idx_vel       = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const double dvdx = (double(1)/double(60)*(v[idx_vel_x_RRR] - v[idx_vel_x_LLL])
+                                    - double(3)/double(20)*(v[idx_vel_x_RR] - v[idx_vel_x_LL])
+                                    + double(3)/double(4)*(v[idx_vel_x_R] - v[idx_vel_x_L]))/dx[0];
+                                
+                                const double d2vdx2 = (double(1)/double(90)*(v[idx_vel_x_RRR] + v[idx_vel_x_LLL])
+                                    - double(3)/double(20)*(v[idx_vel_x_RR] + v[idx_vel_x_LL])
+                                    + double(3)/double(2)*(v[idx_vel_x_R] + v[idx_vel_x_L])
+                                    - double(49)/double(18)*v[idx_vel])/(dx[0]*dx[0]);
+                                
+                                double visc_dudy[7];
+                                
+                                for (int count = -3; count <= 3; count++)
+                                {
+                                    const int idx_vel_y_BBB = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_y_BB  = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_y_B   = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_y_T   = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_y_TT  = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_y_TTT = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    visc_dudy[count + 3] = mu[count + 3]*
+                                        (double(1)/double(60)*(u[idx_vel_y_TTT] - u[idx_vel_y_BBB])
+                                        - double(3)/double(20)*(u[idx_vel_y_TT] - u[idx_vel_y_BB])
+                                        + double(3)/double(4)*(u[idx_vel_y_T] - u[idx_vel_y_B]))/dx[1];
+                                }
+                                
+                                const double dvisc_dudydx = (double(1)/double(60)*(visc_dudy[6] - visc_dudy[0])
+                                    - double(3)/double(20)*(visc_dudy[5] - visc_dudy[1])
+                                    + double(3)/double(4)*(visc_dudy[4] - visc_dudy[2]))/dx[0];
+                                
+                                tau_ij_der = (
+                                    dvisc_dudydx
+                                    + dmudx*dvdx
+                                    + mu[3]*d2vdx2
+                                    )*weight/((double) n_overlapped);
+                            }
+                            else if ((shear_stress_component_idx == 1) && (shear_stress_derivative_direction == 1))
+                            {
+                                double mu[7];
+                                
+                                std::vector<const double*> Y_ptr;
+                                Y_ptr.resize(d_num_species);
+                                for (int count = -3; count <= 3; count++)
+                                {
+                                    const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                    
+                                    const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                                    
+                                    const int idx_temperature = (relative_idx_lo_0 + i + num_ghosts_0_temperature) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_temperature)*ghostcell_dim_0_temperature;
+                                    
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                    }
+                                    mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                        getShearViscosity(
+                                            &p[idx_pressure],
+                                            &T[idx_temperature],
+                                            Y_ptr);
+                                }
+                                
+                                const double dmudy = (double(1)/double(60)*(mu[6] - mu[0])
+                                    - double(3)/double(20)*(mu[5] - mu[1])
+                                    + double(3)/double(4)*(mu[4] - mu[2]))/dx[1];
+                                
+                                const int idx_vel       = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_y_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_y_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_y_T   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_y_TT  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const int idx_vel_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                
+                                const double dudy = (double(1)/double(60)*(u[idx_vel_y_TTT] - u[idx_vel_y_BBB])
+                                    - double(3)/double(20)*(u[idx_vel_y_TT] - u[idx_vel_y_BB])
+                                    + double(3)/double(4)*(u[idx_vel_y_T] - u[idx_vel_y_B]))/dx[1];
+                                
+                                const double d2udy2 = (double(1)/double(90)*(u[idx_vel_y_TTT] + u[idx_vel_y_BBB])
+                                    - double(3)/double(20)*(u[idx_vel_y_TT] + u[idx_vel_y_BB])
+                                    + double(3)/double(2)*(u[idx_vel_y_T] + u[idx_vel_y_B])
+                                    - double(49)/double(18)*u[idx_vel])/(dx[1]*dx[1]);
+                                
+                                double visc_dvdx[7];
+                                
+                                for (int count = -3; count <= 3; count++)
+                                {
+                                    const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                                    
+                                    visc_dvdx[count + 3] = mu[count + 3]*
+                                        (double(1)/double(60)*(v[idx_vel_x_RRR] - v[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(v[idx_vel_x_RR] - v[idx_vel_x_LL])
+                                        + double(3)/double(4)*(v[idx_vel_x_R] - v[idx_vel_x_L]))/dx[0];
+                                }
+                                
+                                const double dvisc_dvdxdy = (double(1)/double(60)*(visc_dvdx[6] - visc_dvdx[0])
+                                    - double(3)/double(20)*(visc_dvdx[5] - visc_dvdx[1])
+                                    + double(3)/double(4)*(visc_dvdx[4] - visc_dvdx[2]))/dx[1];
+                                
+                                tau_ij_der = (
+                                    dvisc_dvdxdy
+                                    + dmudy*dudy
+                                    + mu[3]*d2udy2
+                                    )*weight/((double) n_overlapped);
+                            }
+                            else
+                            {
+                                TBOX_ERROR(d_object_name
+                                    << ": "
+                                    << "Cannot compute derivative of shear stress component for two-dimensional problem!\n"
+                                    << "shear_stress_component_idx = " << shear_stress_component_idx << " and shear_stress_derivative_direction = "
+                                    << shear_stress_derivative_direction << " given!\n"
+                                    << std::endl);
+                            }
+                            
+                            /*
+                             * Compute the linear indices and the data to add.
+                             */
+                            
+                            double avg = double(1);
+                            
+                            count_derivative = 0;
+                            for (int qi = 0; qi < num_quantities; qi++)
+                            {
+                                if (use_reciprocal[qi])
+                                {
+                                    if (use_derivative[qi])
+                                    {
+                                        const int idx_der = (relative_idx_lo_0 + i) +
+                                            (relative_idx_lo_1 + j)*patch_interior_dim_0;
+                                        
+                                        avg /= der_qi[count_derivative][idx_der];
+                                        
+                                        count_derivative++;
+                                    }
+                                    else
+                                    {
+                                        const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
+                                        
+                                        avg /= u_qi[qi][idx_qi];
+                                    }
+                                }
+                                else
+                                {
+                                    if (use_derivative[qi])
+                                    {
+                                        const int idx_der = (relative_idx_lo_0 + i) +
+                                            (relative_idx_lo_1 + j)*patch_interior_dim_0;
+                                        
+                                        avg *= der_qi[count_derivative][idx_der];
+                                        
+                                        count_derivative++;
+                                    }
+                                    else
+                                    {
+                                        const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
+                                        
+                                        avg *= u_qi[qi][idx_qi];
+                                    }
+                                }
+                            }
+                            
+                            /*
+                             * Add the data.
+                             */
+                            
+                            for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
+                            {
+                                const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
+                                
+                                avg_local[idx_fine] += (avg*tau_ij_der*weight/((double) n_overlapped));
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        /*
+         * Reduction to get the global average.
+         */
+        
+        mpi.Allreduce(
+            avg_local,
+            avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        std::free(avg_local);
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_x(
+            new DerivativeFirstOrder(
+                "first order derivative in x-direction",
+                d_dim,
+                DIRECTION::X_DIRECTION,
+                d_num_ghosts_derivative));
+        
+        HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_y(
+            new DerivativeFirstOrder(
+                "first order derivative in y-direction",
+                d_dim,
+                DIRECTION::Y_DIRECTION,
+                d_num_ghosts_derivative));
+        
+        HAMERS_SHARED_PTR<DerivativeFirstOrder> derivative_first_order_z(
+            new DerivativeFirstOrder(
+                "first order derivative in z-direction",
+                d_dim,
+                DIRECTION::Z_DIRECTION,
+                d_num_ghosts_derivative));
+        
+        hier::IntVector num_ghosts_der = hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative;
+        
+       const int finest_level_dim_0 = finest_level_dims[0];
+        
+        /*
+         * Get the size of the physical domain.
+         */
+        
+        const double L_y = x_hi[1] - x_lo[1];
+        const double L_z = x_hi[2] - x_lo[2];
+        
+        double* avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        averaged_quantity.resize(finest_level_dim_0);
+        double* avg_global = averaged_quantity.data();
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            avg_local[i]  = double(0);
+            avg_global[i] = double(0);
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            HAMERS_SHARED_PTR<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratio_to_coarest_level =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratio_to_coarest_level *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratio_to_finest_level = ratio_finest_level_to_coarest_level/ratio_to_coarest_level;
+            
+            const int ratio_to_finest_level_0 = ratio_to_finest_level[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const HAMERS_SHARED_PTR<hier::Patch> patch = *ip;
+                
+                /*
+                 * Get the patch lower index and grid spacing.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const HAMERS_SHARED_PTR<geom::CartesianPatchGeometry> patch_geom(
+                    HAMERS_SHARED_PTR_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch and the quantities in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts_der));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("PRESSURE", num_ghosts_der));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("TEMPERATURE", num_ghosts_der));
+                
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    if (num_use_derivative > 0)
+                    {
+                        num_subghosts_of_data.insert(
+                            std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
+                    }
+                    else
+                    {
+                        num_subghosts_of_data.insert(
+                            std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
+                    }
+                }
+                
+                d_flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
+                
+                d_flow_model_tmp->allocateMemoryForDerivedCellData();
+                
+                d_flow_model_tmp->computeDerivedCellData();
+                
+                /*
+                 * Get the pointer to data inside the flow model.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getCellData("VELOCITY");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
+                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
+                    d_flow_model_tmp->getCellData("PRESSURE");
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_temperature =
+                    d_flow_model_tmp->getCellData("TEMPERATURE");
+                
+                double* u = data_velocity->getPointer(0);
+                double* v = data_velocity->getPointer(1);
+                double* w = data_velocity->getPointer(2);
+                std::vector<double*> Y;
+                Y.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                double* p = data_pressure->getPointer(0);
+                double* T = data_temperature->getPointer(0);
+                
+                std::vector<HAMERS_SHARED_PTR<pdat::CellData<double> > > data_quantities;
+                data_quantities.resize(num_quantities);
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    data_quantities[qi] = d_flow_model_tmp->getCellData(quantity_names[qi]);
+                }
+                
+                std::vector<double*> u_qi;
+                u_qi.resize(num_quantities);
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    u_qi[qi] = data_quantities[qi]->getPointer(component_indices[qi]);
+                }
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_temperature = data_temperature->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int num_ghosts_2_velocity = num_ghosts_velocity[2];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+                
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
+                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                
+                const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+                const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+                const int num_ghosts_2_pressure = num_ghosts_pressure[2];
+                const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
+                const int ghostcell_dim_1_pressure = ghostcell_dims_pressure[1];
+                
+                const int num_ghosts_0_temperature = num_ghosts_temperature[0];
+                const int num_ghosts_1_temperature = num_ghosts_temperature[1];
+                const int num_ghosts_2_temperature = num_ghosts_temperature[2];
+                const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
+                const int ghostcell_dim_1_temperature = ghostcell_dims_temperature[1];
+                
+                std::vector<int> num_ghosts_0_u_qi;
+                std::vector<int> num_ghosts_1_u_qi;
+                std::vector<int> num_ghosts_2_u_qi;
+                std::vector<int> ghostcell_dim_0_u_qi;
+                std::vector<int> ghostcell_dim_1_u_qi;
+                num_ghosts_0_u_qi.reserve(num_quantities);
+                num_ghosts_1_u_qi.reserve(num_quantities);
+                num_ghosts_2_u_qi.reserve(num_quantities);
+                ghostcell_dim_0_u_qi.reserve(num_quantities);
+                ghostcell_dim_1_u_qi.reserve(num_quantities);
+                
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    const hier::IntVector num_ghosts_u_qi = data_quantities[qi]->getGhostCellWidth();
+                    const hier::IntVector ghostcell_dims_u_qi = data_quantities[qi]->getGhostBox().numberCells();
+                    
+                    num_ghosts_0_u_qi.push_back(num_ghosts_u_qi[0]);
+                    num_ghosts_1_u_qi.push_back(num_ghosts_u_qi[1]);
+                    num_ghosts_2_u_qi.push_back(num_ghosts_u_qi[2]);
+                    ghostcell_dim_0_u_qi.push_back(ghostcell_dims_u_qi[0]);
+                    ghostcell_dim_1_u_qi.push_back(ghostcell_dims_u_qi[1]);
+                }
+                
+                /*
+                 * Initialize cell data for the derivatives and get pointers to the cell data.
+                 */
+                
+                HAMERS_SHARED_PTR<pdat::CellData<double> > data_derivative;
+                std::vector<double*> der_qi;
+                
+                if (num_use_derivative > 0)
+                {
+                    data_derivative = HAMERS_MAKE_SHARED<pdat::CellData<double> >(
+                        patch_box, num_use_derivative, hier::IntVector::getZero(d_dim));
+                    
+                    der_qi.resize(num_use_derivative);
+                    for (int qi = 0; qi < num_use_derivative; qi++)
+                    {
+                        der_qi[qi] = data_derivative->getPointer(qi);
+                    }
+                }
+                
+                const hier::IntVector patch_interior_dims = patch_box.numberCells();
+                const int patch_interior_dim_0 = patch_interior_dims[0];
+                const int patch_interior_dim_1 = patch_interior_dims[1];
+                
+                const double weight = (dx[1]*dx[2])/(L_y*L_z);
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    int count_derivative = 0;
+                    for (int qi = 0; qi < num_quantities; qi++)
+                    {
+                        if (use_derivative[qi] && derivative_directions[qi] == 0)
+                        {
+                            derivative_first_order_x->computeDerivative(
+                                data_derivative,
+                                data_quantities[qi],
+                                dx[0],
+                                patch_visible_box,
+                                count_derivative,
+                                component_indices[qi]);
+                            
+                            count_derivative++;
+                        }
+                        else if (use_derivative[qi] && derivative_directions[qi] == 1)
+                        {
+                            derivative_first_order_y->computeDerivative(
+                                data_derivative,
+                                data_quantities[qi],
+                                dx[1],
+                                patch_visible_box,
+                                count_derivative,
+                                component_indices[qi]);
+                            
+                            count_derivative++;
+                        }
+                        else if (use_derivative[qi] && derivative_directions[qi] == 2)
+                        {
+                            derivative_first_order_z->computeDerivative(
+                                data_derivative,
+                                data_quantities[qi],
+                                dx[2],
+                                patch_visible_box,
+                                count_derivative,
+                                component_indices[qi]);
+                            
+                            count_derivative++;
+                        }
+                    }
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    const int relative_idx_lo_2 = relative_index_lo[2];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the derivative of shear stress component.
+                                 */
+                                
+                                double tau_ij_der = double(0);
+                                
+                                if ((shear_stress_component_idx == 0) && (shear_stress_derivative_direction == 0))
+                                {
+                                    double mu[7];
+                                    double mu_v[7];
+                                    
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_mass_fraction = (relative_idx_lo_0 + (i + count) + num_ghosts_0_mass_fraction) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                                ghostcell_dim_1_mass_fraction;
+                                        
+                                        const int idx_pressure = (relative_idx_lo_0 + (i + count) + num_ghosts_0_pressure) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                                                ghostcell_dim_1_pressure;
+                                        
+                                        const int idx_temperature = (relative_idx_lo_0 + (i + count) + num_ghosts_0_temperature) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                                                ghostcell_dim_1_temperature;
+                                        
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                        }
+                                        mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                            getShearViscosity(
+                                                &p[idx_pressure],
+                                                &T[idx_temperature],
+                                                Y_ptr);
+                                        mu_v[count + 3] = d_equation_of_bulk_viscosity_mixing_rules->
+                                            getBulkViscosity(
+                                                &p[idx_pressure],
+                                                &T[idx_temperature],
+                                                Y_ptr);
+                                    }
+                                    
+                                    const double dmudx = (double(1)/double(60)*(mu[6] - mu[0])
+                                        - double(3)/double(20)*(mu[5] - mu[1])
+                                        + double(3)/double(4)*(mu[4] - mu[2]))/dx[0];
+                                    
+                                    const double dmu_vdx = (double(1)/double(60)*(mu_v[6] - mu_v[0])
+                                        - double(3)/double(20)*(mu_v[5] - mu_v[1])
+                                        + double(3)/double(4)*(mu_v[4] - mu_v[2]))/dx[0];
+                                    
+                                    const int idx_vel       = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dudx = (double(1)/double(60)*(u[idx_vel_x_RRR] - u[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(u[idx_vel_x_RR] - u[idx_vel_x_LL])
+                                        + double(3)/double(4)*(u[idx_vel_x_R] - u[idx_vel_x_L]))/dx[0];
+                                    
+                                    const double d2udx2 = (double(1)/double(90)*(u[idx_vel_x_RRR] + u[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(u[idx_vel_x_RR] + u[idx_vel_x_LL])
+                                        + double(3)/double(2)*(u[idx_vel_x_R] + u[idx_vel_x_L])
+                                        - double(49)/double(18)*u[idx_vel])/(dx[0]*dx[0]);
+                                    
+                                    double visc_dvdy[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_y_BBB = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_BB  = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_B   = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_T   = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_TT  = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_TTT = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dvdy[count + 3] = (double(2)/double(3)*mu[count + 3] - mu_v[count + 3])*
+                                            (double(1)/double(60)*(v[idx_vel_y_TTT] - v[idx_vel_y_BBB])
+                                            - double(3)/double(20)*(v[idx_vel_y_TT] - v[idx_vel_y_BB])
+                                            + double(3)/double(4)*(v[idx_vel_y_T] - v[idx_vel_y_B]))/dx[1];
+                                    }
+                                    
+                                    const double dvisc_dvdydx = (double(1)/double(60)*(visc_dvdy[6] - visc_dvdy[0])
+                                        - double(3)/double(20)*(visc_dvdy[5] - visc_dvdy[1])
+                                        + double(3)/double(4)*(visc_dvdy[4] - visc_dvdy[2]))/dx[0];
+                                    
+                                    double visc_dwdz[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_z_BBB = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k - 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_BB  = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k - 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_B   = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k - 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_F   = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_FF  = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_FFF = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dwdz[count + 3] = (double(2)/double(3)*mu[count + 3] - mu_v[count + 3])*
+                                            (double(1)/double(60)*(w[idx_vel_z_FFF] - w[idx_vel_z_BBB])
+                                            - double(3)/double(20)*(w[idx_vel_z_FF] - w[idx_vel_z_BB])
+                                            + double(3)/double(4)*(w[idx_vel_z_F] - w[idx_vel_z_B]))/dx[2];
+                                    }
+                                    
+                                    const double dvisc_dwdzdx = (double(1)/double(60)*(visc_dwdz[6] - visc_dwdz[0])
+                                        - double(3)/double(20)*(visc_dwdz[5] - visc_dwdz[1])
+                                        + double(3)/double(4)*(visc_dwdz[4] - visc_dwdz[2]))/dx[0];
+                                    
+                                    tau_ij_der = (
+                                        (double(4)/double(3)*dmudx + dmu_vdx)*dudx
+                                        + (double(4)/double(3)*mu[3] + mu_v[3])*d2udx2
+                                        - dvisc_dvdydx
+                                        - dvisc_dwdzdx
+                                        )*weight/((double) n_overlapped);
+                                }
+                                else if ((shear_stress_component_idx == 0) && (shear_stress_derivative_direction == 1))
+                                {
+                                    double mu[7];
+                                    double mu_v[7];
+                                    
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                                ghostcell_dim_1_mass_fraction;
+                                        
+                                        const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                                                ghostcell_dim_1_pressure;
+                                        
+                                        const int idx_temperature = (relative_idx_lo_0 + i + num_ghosts_0_temperature) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                                                ghostcell_dim_1_temperature;
+                                        
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                        }
+                                        mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                            getShearViscosity(
+                                                &p[idx_pressure],
+                                                &T[idx_temperature],
+                                                Y_ptr);
+                                        mu_v[count + 3] = d_equation_of_bulk_viscosity_mixing_rules->
+                                            getBulkViscosity(
+                                                &p[idx_pressure],
+                                                &T[idx_temperature],
+                                                Y_ptr);
+                                    }
+                                    
+                                    const double dmudy = (double(1)/double(60)*(mu[6] - mu[0])
+                                        - double(3)/double(20)*(mu[5] - mu[1])
+                                        + double(3)/double(4)*(mu[4] - mu[2]))/dx[1];
+                                    
+                                    const double dmu_vdy = (double(1)/double(60)*(mu_v[6] - mu_v[0])
+                                        - double(3)/double(20)*(mu_v[5] - mu_v[1])
+                                        + double(3)/double(4)*(mu_v[4] - mu_v[2]))/dx[1];
+                                    
+                                    const int idx_vel       = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_T   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TT  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dvdy = (double(1)/double(60)*(v[idx_vel_y_TTT] - v[idx_vel_y_BBB])
+                                        - double(3)/double(20)*(v[idx_vel_y_TT] - v[idx_vel_y_BB])
+                                        + double(3)/double(4)*(v[idx_vel_y_T] - v[idx_vel_y_B]))/dx[1];
+                                    
+                                    const double d2vdy2 = (double(1)/double(90)*(v[idx_vel_y_TTT] + v[idx_vel_y_BBB])
+                                        - double(3)/double(20)*(v[idx_vel_y_TT] + v[idx_vel_y_BB])
+                                        + double(3)/double(2)*(v[idx_vel_y_T] + v[idx_vel_y_B])
+                                        - double(49)/double(18)*v[idx_vel])/(dx[1]*dx[1]);
+                                    
+                                    double visc_dudx[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dudx[count + 3] = (double(4)/double(3)*mu[count + 3] + mu_v[count + 3])*
+                                            (double(1)/double(60)*(u[idx_vel_x_RRR] - u[idx_vel_x_LLL])
+                                            - double(3)/double(20)*(u[idx_vel_x_RR] - u[idx_vel_x_LL])
+                                            + double(3)/double(4)*(u[idx_vel_x_R] - u[idx_vel_x_L]))/dx[0];
+                                    }
+                                    
+                                    const double dvisc_dudxdy = (double(1)/double(60)*(visc_dudx[6] - visc_dudx[0])
+                                        - double(3)/double(20)*(visc_dudx[5] - visc_dudx[1])
+                                        + double(3)/double(4)*(visc_dudx[4] - visc_dudx[2]))/dx[1];
+                                    
+                                    double visc_dwdz[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k - 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k - 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k - 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_F   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_FF  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dwdz[count + 3] = (double(2)/double(3)*mu[count + 3] - mu_v[count + 3])*
+                                            (double(1)/double(60)*(w[idx_vel_z_FFF] - w[idx_vel_z_BBB])
+                                            - double(3)/double(20)*(w[idx_vel_z_FF] - w[idx_vel_z_BB])
+                                            + double(3)/double(4)*(w[idx_vel_z_F] - w[idx_vel_z_B]))/dx[2];
+                                    }
+                                    
+                                    const double dvisc_dwdzdy = (double(1)/double(60)*(visc_dwdz[6] - visc_dwdz[0])
+                                        - double(3)/double(20)*(visc_dwdz[5] - visc_dwdz[1])
+                                        + double(3)/double(4)*(visc_dwdz[4] - visc_dwdz[2]))/dx[1];
+                                    
+                                    tau_ij_der = (
+                                        dvisc_dudxdy
+                                        - dvisc_dwdzdy
+                                        - (double(2)/double(3)*dmudy - dmu_vdy)*dvdy
+                                        - (double(2)/double(3)*mu[3] - mu_v[3])*d2vdy2
+                                        )*weight/((double) n_overlapped);
+                                }
+                                else if ((shear_stress_component_idx == 0) && (shear_stress_derivative_direction == 2))
+                                {
+                                    double mu[7];
+                                    double mu_v[7];
+                                    
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                                ghostcell_dim_1_mass_fraction;
+                                        
+                                        const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                                                ghostcell_dim_1_pressure;
+                                        
+                                        const int idx_temperature = (relative_idx_lo_0 + i + num_ghosts_0_temperature) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                                                ghostcell_dim_1_temperature;
+                                        
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                        }
+                                        mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                            getShearViscosity(
+                                                &p[idx_pressure],
+                                                &T[idx_temperature],
+                                                Y_ptr);
+                                        mu_v[count + 3] = d_equation_of_bulk_viscosity_mixing_rules->
+                                            getBulkViscosity(
+                                                &p[idx_pressure],
+                                                &T[idx_temperature],
+                                                Y_ptr);
+                                    }
+                                    
+                                    const double dmudz = (double(1)/double(60)*(mu[6] - mu[0])
+                                        - double(3)/double(20)*(mu[5] - mu[1])
+                                        + double(3)/double(4)*(mu[4] - mu[2]))/dx[2];
+                                    
+                                    const double dmu_vdz = (double(1)/double(60)*(mu_v[6] - mu_v[0])
+                                        - double(3)/double(20)*(mu_v[5] - mu_v[1])
+                                        + double(3)/double(4)*(mu_v[4] - mu_v[2]))/dx[2];
+                                    
+                                    const int idx_vel       = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_F   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FF  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dwdz = (double(1)/double(60)*(w[idx_vel_z_FFF] - w[idx_vel_z_BBB])
+                                        - double(3)/double(20)*(w[idx_vel_z_FF] - w[idx_vel_z_BB])
+                                        + double(3)/double(4)*(w[idx_vel_z_F] - w[idx_vel_z_B]))/dx[2];
+                                    
+                                    const double d2wdz2 = (double(1)/double(90)*(w[idx_vel_z_FFF] + w[idx_vel_z_BBB])
+                                        - double(3)/double(20)*(w[idx_vel_z_FF] + w[idx_vel_z_BB])
+                                        + double(3)/double(2)*(w[idx_vel_z_F] + w[idx_vel_z_B])
+                                        - double(49)/double(18)*w[idx_vel])/(dx[2]*dx[2]);
+                                    
+                                    double visc_dudx[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dudx[count + 3] = (double(4)/double(3)*mu[count + 3] + mu_v[count + 3])*
+                                            (double(1)/double(60)*(u[idx_vel_x_RRR] - u[idx_vel_x_LLL])
+                                            - double(3)/double(20)*(u[idx_vel_x_RR] - u[idx_vel_x_LL])
+                                            + double(3)/double(4)*(u[idx_vel_x_R] - u[idx_vel_x_L]))/dx[0];
+                                    }
+                                    
+                                    const double dvisc_dudxdz = (double(1)/double(60)*(visc_dudx[6] - visc_dudx[0])
+                                        - double(3)/double(20)*(visc_dudx[5] - visc_dudx[1])
+                                        + double(3)/double(4)*(visc_dudx[4] - visc_dudx[2]))/dx[2];
+                                    
+                                    double visc_dvdy[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_T   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_TT  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dvdy[count + 3] = (double(2)/double(3)*mu[count + 3] - mu_v[count + 3])*
+                                            (double(1)/double(60)*(v[idx_vel_y_TTT] - v[idx_vel_y_BBB])
+                                            - double(3)/double(20)*(v[idx_vel_y_TT] - v[idx_vel_y_BB])
+                                            + double(3)/double(4)*(v[idx_vel_y_T] - v[idx_vel_y_B]))/dx[1];
+                                    }
+                                    
+                                    const double dvisc_dvdydz = (double(1)/double(60)*(visc_dvdy[6] - visc_dvdy[0])
+                                        - double(3)/double(20)*(visc_dvdy[5] - visc_dvdy[1])
+                                        + double(3)/double(4)*(visc_dvdy[4] - visc_dvdy[2]))/dx[2];
+                                    
+                                    tau_ij_der = (
+                                        dvisc_dudxdz
+                                        - dvisc_dvdydz
+                                        - (double(2)/double(3)*dmudz - dmu_vdz)*dwdz
+                                        - (double(2)/double(3)*mu[3] - mu_v[3])*d2wdz2
+                                        )*weight/((double) n_overlapped);
+                                }
+                                else if ((shear_stress_component_idx == 1) && (shear_stress_derivative_direction == 0))
+                                {
+                                    double mu[7];
+                                    
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_mass_fraction = (relative_idx_lo_0 + (i + count) + num_ghosts_0_mass_fraction) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                                ghostcell_dim_1_mass_fraction;
+                                        
+                                        const int idx_pressure = (relative_idx_lo_0 + (i + count) + num_ghosts_0_pressure) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                                                ghostcell_dim_1_pressure;
+                                        
+                                        const int idx_temperature = (relative_idx_lo_0 + (i + count) + num_ghosts_0_temperature) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                                                ghostcell_dim_1_temperature;
+                                        
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                        }
+                                        mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                            getShearViscosity(
+                                                &p[idx_pressure],
+                                                &T[idx_temperature],
+                                                Y_ptr);
+                                    }
+                                    
+                                    const double dmudx = (double(1)/double(60)*(mu[6] - mu[0])
+                                        - double(3)/double(20)*(mu[5] - mu[1])
+                                        + double(3)/double(4)*(mu[4] - mu[2]))/dx[0];
+                                    
+                                    const int idx_vel       = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dvdx = (double(1)/double(60)*(v[idx_vel_x_RRR] - v[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(v[idx_vel_x_RR] - v[idx_vel_x_LL])
+                                        + double(3)/double(4)*(v[idx_vel_x_R] - v[idx_vel_x_L]))/dx[0];
+                                    
+                                    const double d2vdx2 = (double(1)/double(90)*(v[idx_vel_x_RRR] + v[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(v[idx_vel_x_RR] + v[idx_vel_x_LL])
+                                        + double(3)/double(2)*(v[idx_vel_x_R] + v[idx_vel_x_L])
+                                        - double(49)/double(18)*v[idx_vel])/(dx[0]*dx[0]);
+                                    
+                                    double visc_dudy[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_y_BBB = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_BB  = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_B   = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_T   = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_TT  = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_TTT = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dudy[count + 3] = mu[count + 3]*
+                                            (double(1)/double(60)*(u[idx_vel_y_TTT] - u[idx_vel_y_BBB])
+                                            - double(3)/double(20)*(u[idx_vel_y_TT] - u[idx_vel_y_BB])
+                                            + double(3)/double(4)*(u[idx_vel_y_T] - u[idx_vel_y_B]))/dx[1];
+                                    }
+                                    
+                                    const double dvisc_dudydx = (double(1)/double(60)*(visc_dudy[6] - visc_dudy[0])
+                                        - double(3)/double(20)*(visc_dudy[5] - visc_dudy[1])
+                                        + double(3)/double(4)*(visc_dudy[4] - visc_dudy[2]))/dx[0];
+                                    
+                                    tau_ij_der = (
+                                        dmudx*dvdx
+                                        + mu[3]*d2vdx2
+                                        + dvisc_dudydx
+                                        )*weight/((double) n_overlapped);
+                                }
+                                else if ((shear_stress_component_idx == 1) && (shear_stress_derivative_direction == 1))
+                                {
+                                    double mu[7];
+                                    
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                                ghostcell_dim_1_mass_fraction;
+                                        
+                                        const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                                                ghostcell_dim_1_pressure;
+                                        
+                                        const int idx_temperature = (relative_idx_lo_0 + i + num_ghosts_0_temperature) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                                                ghostcell_dim_1_temperature;
+                                        
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                        }
+                                        mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                            getShearViscosity(
+                                                &p[idx_pressure],
+                                                &T[idx_temperature],
+                                                Y_ptr);
+                                    }
+                                    
+                                    const double dmudy = (double(1)/double(60)*(mu[6] - mu[0])
+                                        - double(3)/double(20)*(mu[5] - mu[1])
+                                        + double(3)/double(4)*(mu[4] - mu[2]))/dx[1];
+                                    
+                                    const int idx_vel       = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_T   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TT  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dudy = (double(1)/double(60)*(u[idx_vel_y_TTT] - u[idx_vel_y_BBB])
+                                        - double(3)/double(20)*(u[idx_vel_y_TT] - u[idx_vel_y_BB])
+                                        + double(3)/double(4)*(u[idx_vel_y_T] - u[idx_vel_y_B]))/dx[1];
+                                    
+                                    const double d2udy2 = (double(1)/double(90)*(u[idx_vel_y_TTT] + u[idx_vel_y_BBB])
+                                        - double(3)/double(20)*(u[idx_vel_y_TT] + u[idx_vel_y_BB])
+                                        + double(3)/double(2)*(u[idx_vel_y_T] + u[idx_vel_y_B])
+                                        - double(49)/double(18)*u[idx_vel])/(dx[1]*dx[1]);
+                                    
+                                    double visc_dvdx[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) +num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) +num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) +num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) +num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) +num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) +num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dvdx[count + 3] = mu[count + 3]*
+                                            (double(1)/double(60)*(v[idx_vel_x_RRR] - v[idx_vel_x_LLL])
+                                            - double(3)/double(20)*(v[idx_vel_x_RR] - v[idx_vel_x_LL])
+                                            + double(3)/double(4)*(v[idx_vel_x_R] - v[idx_vel_x_L]))/dx[0];
+                                    }
+                                    
+                                    const double dvisc_dvdxdy = (double(1)/double(60)*(visc_dvdx[6] - visc_dvdx[0])
+                                        - double(3)/double(20)*(visc_dvdx[5] - visc_dvdx[1])
+                                        + double(3)/double(4)*(visc_dvdx[4] - visc_dvdx[2]))/dx[1];
+                                    
+                                    tau_ij_der = (
+                                        dmudy*dudy
+                                        + mu[3]*d2udy2
+                                        + dvisc_dvdxdy
+                                        )*weight/((double) n_overlapped);
+                                }
+                                else if ((shear_stress_component_idx == 1) && (shear_stress_derivative_direction == 2))
+                                {
+                                    double mu[7];
+                                    
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                                ghostcell_dim_1_mass_fraction;
+                                        
+                                        const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                                                ghostcell_dim_1_pressure;
+                                        
+                                        const int idx_temperature = (relative_idx_lo_0 + i + num_ghosts_0_temperature) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                                                ghostcell_dim_1_temperature;
+                                        
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                        }
+                                        mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                            getShearViscosity(
+                                                &p[idx_pressure],
+                                                &T[idx_temperature],
+                                                Y_ptr);
+                                    }
+                                    
+                                    double visc_dvdx[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dvdx[count + 3] = mu[count + 3]*
+                                            (double(1)/double(60)*(v[idx_vel_x_RRR] - v[idx_vel_x_LLL])
+                                            - double(3)/double(20)*(v[idx_vel_x_RR] - v[idx_vel_x_LL])
+                                            + double(3)/double(4)*(v[idx_vel_x_R] - v[idx_vel_x_L]))/dx[0];
+                                    }
+                                    
+                                    const double dvisc_dvdxdz = (double(1)/double(60)*(visc_dvdx[6] - visc_dvdx[0])
+                                        - double(3)/double(20)*(visc_dvdx[5] - visc_dvdx[1])
+                                        + double(3)/double(4)*(visc_dvdx[4] - visc_dvdx[2]))/dx[2];
+                                    
+                                    double visc_dudy[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j - 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j - 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j - 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_T   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + 1) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_TT  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + 2) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + 3) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dudy[count + 3] = mu[count + 3]*
+                                            (double(1)/double(60)*(u[idx_vel_y_TTT] - u[idx_vel_y_BBB])
+                                            - double(3)/double(20)*(u[idx_vel_y_TT] - u[idx_vel_y_BB])
+                                            + double(3)/double(4)*(u[idx_vel_y_T] - u[idx_vel_y_B]))/dx[1];
+                                    }
+                                    
+                                    const double dvisc_dudydz = (double(1)/double(60)*(visc_dudy[6] - visc_dudy[0])
+                                        - double(3)/double(20)*(visc_dudy[5] - visc_dudy[1])
+                                        + double(3)/double(4)*(visc_dudy[4] - visc_dudy[2]))/dx[2];
+                                    
+                                    tau_ij_der = (
+                                        dvisc_dvdxdz
+                                        + dvisc_dudydz
+                                        )*weight/((double) n_overlapped);
+                                }
+                                else if ((shear_stress_component_idx == 2) && (shear_stress_derivative_direction == 0))
+                                {
+                                    double mu[7];
+                                    
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_mass_fraction = (relative_idx_lo_0 + (i + count) + num_ghosts_0_mass_fraction) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                                ghostcell_dim_1_mass_fraction;
+                                        
+                                        const int idx_pressure = (relative_idx_lo_0 + (i + count) + num_ghosts_0_pressure) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                                                ghostcell_dim_1_pressure;
+                                        
+                                        const int idx_temperature = (relative_idx_lo_0 + (i + count) + num_ghosts_0_temperature) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                                                ghostcell_dim_1_temperature;
+                                        
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                        }
+                                        mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                            getShearViscosity(
+                                                &p[idx_pressure],
+                                                &T[idx_temperature],
+                                                Y_ptr);
+                                    }
+                                    
+                                    const double dmudx = (double(1)/double(60)*(mu[6] - mu[0])
+                                        - double(3)/double(20)*(mu[5] - mu[1])
+                                        + double(3)/double(4)*(mu[4] - mu[2]))/dx[0];
+                                    
+                                    const int idx_vel       = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dwdx = (double(1)/double(60)*(w[idx_vel_x_RRR] - w[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(w[idx_vel_x_RR] - w[idx_vel_x_LL])
+                                        + double(3)/double(4)*(w[idx_vel_x_R] - w[idx_vel_x_L]))/dx[0];
+                                    
+                                    const double d2wdx2 = (double(1)/double(90)*(w[idx_vel_x_RRR] + w[idx_vel_x_LLL])
+                                        - double(3)/double(20)*(w[idx_vel_x_RR] + w[idx_vel_x_LL])
+                                        + double(3)/double(2)*(w[idx_vel_x_R] + w[idx_vel_x_L])
+                                        - double(49)/double(18)*w[idx_vel])/(dx[0]*dx[0]);
+                                    
+                                    double visc_dudz[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_z_BBB = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k - 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_BB  = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k - 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_B   = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k - 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_F   = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_FF  = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_FFF = (relative_idx_lo_0 + (i + count) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dudz[count + 3] = mu[count + 3]*
+                                            (double(1)/double(60)*(u[idx_vel_z_FFF] - u[idx_vel_z_BBB])
+                                            - double(3)/double(20)*(u[idx_vel_z_FF] - u[idx_vel_z_BB])
+                                            + double(3)/double(4)*(u[idx_vel_z_F] - u[idx_vel_z_B]))/dx[2];
+                                    }
+                                    
+                                    const double dvisc_dudzdx = (double(1)/double(60)*(visc_dudz[6] - visc_dudz[0])
+                                        - double(3)/double(20)*(visc_dudz[5] - visc_dudz[1])
+                                        + double(3)/double(4)*(visc_dudz[4] - visc_dudz[2]))/dx[0];
+                                    
+                                    tau_ij_der = (
+                                        dmudx*dwdx
+                                        + mu[3]*d2wdx2
+                                        + dvisc_dudzdx
+                                        )*weight/((double) n_overlapped);
+                                }
+                                else if ((shear_stress_component_idx == 2) && (shear_stress_derivative_direction == 1))
+                                {
+                                    double mu[7];
+                                    
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                                ghostcell_dim_1_mass_fraction;
+                                        
+                                        const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                                                ghostcell_dim_1_pressure;
+                                        
+                                        const int idx_temperature = (relative_idx_lo_0 + i + num_ghosts_0_temperature) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                                                ghostcell_dim_1_temperature;
+                                        
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                        }
+                                        mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                            getShearViscosity(
+                                                &p[idx_pressure],
+                                                &T[idx_temperature],
+                                                Y_ptr);
+                                    }
+                                    
+                                    double visc_dwdx[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dwdx[count + 3] = mu[count + 3]*
+                                            (double(1)/double(60)*(w[idx_vel_x_RRR] - w[idx_vel_x_LLL])
+                                            - double(3)/double(20)*(w[idx_vel_x_RR] - w[idx_vel_x_LL])
+                                            + double(3)/double(4)*(w[idx_vel_x_R] - w[idx_vel_x_L]))/dx[0];
+                                    }
+                                    
+                                    const double dvisc_dwdxdy = (double(1)/double(60)*(visc_dwdx[6] - visc_dwdx[0])
+                                        - double(3)/double(20)*(visc_dwdx[5] - visc_dwdx[1])
+                                        + double(3)/double(4)*(visc_dwdx[4] - visc_dwdx[2]))/dx[1];
+                                    
+                                    double visc_dudz[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k - 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k - 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k - 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_F   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_FF  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + (j + count) + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dudz[count + 3] = mu[count + 3]*
+                                            (double(1)/double(60)*(u[idx_vel_z_FFF] - u[idx_vel_z_BBB])
+                                            - double(3)/double(20)*(u[idx_vel_z_FF] - u[idx_vel_z_BB])
+                                            + double(3)/double(4)*(u[idx_vel_z_F] - u[idx_vel_z_B]))/dx[2];
+                                    }
+                                    
+                                    const double dvisc_dudzdy = (double(1)/double(60)*(visc_dudz[6] - visc_dudz[0])
+                                        - double(3)/double(20)*(visc_dudz[5] - visc_dudz[1])
+                                        + double(3)/double(4)*(visc_dudz[4] - visc_dudz[2]))/dx[1];
+                                    
+                                    tau_ij_der = (
+                                        dvisc_dwdxdy
+                                        + dvisc_dudzdy
+                                        )*weight/((double) n_overlapped);
+                                }
+                                else if ((shear_stress_component_idx == 2) && (shear_stress_derivative_direction == 2))
+                                {
+                                    double mu[7];
+                                    
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.resize(d_num_species);
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                                ghostcell_dim_1_mass_fraction;
+                                        
+                                        const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                                                ghostcell_dim_1_pressure;
+                                        
+                                        const int idx_temperature = (relative_idx_lo_0 + i + num_ghosts_0_temperature) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                                                ghostcell_dim_1_temperature;
+                                        
+                                        for (int si = 0; si < d_num_species; si++)
+                                        {
+                                            Y_ptr[si] = &Y[si][idx_mass_fraction];
+                                        }
+                                        mu[count + 3] = d_equation_of_shear_viscosity_mixing_rules->
+                                            getShearViscosity(
+                                                &p[idx_pressure],
+                                                &T[idx_temperature],
+                                                Y_ptr);
+                                    }
+                                    
+                                    const double dmudz = (double(1)/double(60)*(mu[6] - mu[0])
+                                        - double(3)/double(20)*(mu[5] - mu[1])
+                                        + double(3)/double(4)*(mu[4] - mu[2]))/dx[2];
+                                    
+                                    const int idx_vel       = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_BB  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_B   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k - 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_F   = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 1) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FF  = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 2) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const int idx_vel_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                        (relative_idx_lo_2 + (k + 3) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                            ghostcell_dim_1_velocity;
+                                    
+                                    const double dudz = (double(1)/double(60)*(u[idx_vel_z_FFF] - u[idx_vel_z_BBB])
+                                        - double(3)/double(20)*(u[idx_vel_z_FF] - u[idx_vel_z_BB])
+                                        + double(3)/double(4)*(u[idx_vel_z_F] - u[idx_vel_z_B]))/dx[2];
+                                    
+                                    const double d2udz2 = (double(1)/double(90)*(u[idx_vel_z_FFF] + u[idx_vel_z_BBB])
+                                        - double(3)/double(20)*(u[idx_vel_z_FF] + u[idx_vel_z_BB])
+                                        + double(3)/double(2)*(u[idx_vel_z_F] + u[idx_vel_z_B])
+                                        - double(49)/double(18)*u[idx_vel])/(dx[2]*dx[2]);
+                                    
+                                    double visc_dwdx[7];
+                                    
+                                    for (int count = -3; count <= 3; count++)
+                                    {
+                                        const int idx_vel_x_LLL = (relative_idx_lo_0 + (i - 3) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_LL  = (relative_idx_lo_0 + (i - 2) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_L   = (relative_idx_lo_0 + (i - 1) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_R   = (relative_idx_lo_0 + (i + 1) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_RR  = (relative_idx_lo_0 + (i + 2) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        const int idx_vel_x_RRR = (relative_idx_lo_0 + (i + 3) + num_ghosts_0_velocity) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                            (relative_idx_lo_2 + (k + count) + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                                ghostcell_dim_1_velocity;
+                                        
+                                        visc_dwdx[count + 3] = mu[count + 3]*
+                                            (double(1)/double(60)*(w[idx_vel_x_RRR] - w[idx_vel_x_LLL])
+                                            - double(3)/double(20)*(w[idx_vel_x_RR] - w[idx_vel_x_LL])
+                                            + double(3)/double(4)*(w[idx_vel_x_R] - w[idx_vel_x_L]))/dx[0];
+                                    }
+                                    
+                                    const double dvisc_dwdxdz = (double(1)/double(60)*(visc_dwdx[6] - visc_dwdx[0])
+                                        - double(3)/double(20)*(visc_dwdx[5] - visc_dwdx[1])
+                                        + double(3)/double(4)*(visc_dwdx[4] - visc_dwdx[2]))/dx[2];
+                                    
+                                    tau_ij_der = (
+                                        dmudz*dudz
+                                        + mu[3]*d2udz2
+                                        + dvisc_dwdxdz
+                                        )*weight/((double) n_overlapped);
+                                }
+                                else
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": "
+                                        << "Cannot compute derivative of shear stress component for three-dimensional problem!\n"
+                                        << "shear_stress_component_idx = " << shear_stress_component_idx << " and shear_stress_derivative_direction = "
+                                        << shear_stress_derivative_direction << " given!\n"
+                                        << std::endl);
+                                }
+                                
+                                /*
+                                 * Compute the linear index and the data to add.
+                                 */
+                                
+                                double avg = double(1);
+                                
+                                count_derivative = 0;
+                                for (int qi = 0; qi < num_quantities; qi++)
+                                {
+                                    if (use_reciprocal[qi])
+                                    {
+                                        if (use_derivative[qi])
+                                        {
+                                            const int idx_der = (relative_idx_lo_0 + i) +
+                                                (relative_idx_lo_1 + j)*patch_interior_dim_0 +
+                                                (relative_idx_lo_2 + k)*patch_interior_dim_0*
+                                                    patch_interior_dim_1;
+                                            
+                                            avg /= der_qi[count_derivative][idx_der];
+                                            
+                                            count_derivative++;
+                                        }
+                                        else
+                                        {
+                                            const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                                (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                                (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                    ghostcell_dim_1_u_qi[qi];
+                                            
+                                            avg /= u_qi[qi][idx_qi];
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (use_derivative[qi])
+                                        {
+                                            const int idx_der = (relative_idx_lo_0 + i) +
+                                                (relative_idx_lo_1 + j)*patch_interior_dim_0 +
+                                                (relative_idx_lo_2 + k)*patch_interior_dim_0*
+                                                    patch_interior_dim_1;
+                                            
+                                            avg *= der_qi[count_derivative][idx_der];
+                                            
+                                            count_derivative++;
+                                        }
+                                        else
+                                        {
+                                            const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                                (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                                (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                    ghostcell_dim_1_u_qi[qi];
+                                            
+                                            avg *= u_qi[qi][idx_qi];
+                                        }
+                                    }
+                                }
+                                
+                                /*
+                                 * Add the data.
+                                 */
+                                
+                                for (int ii = 0; ii < ratio_to_finest_level_0; ii++)
+                                {
+                                    const int idx_fine = (idx_lo_0 + i)*ratio_to_finest_level_0 + ii;
+                                    
+                                    avg_local[idx_fine] += (avg*tau_ij_der*weight/((double) n_overlapped));
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        /*
+         * Reduction to get the global average.
+         */
+        
+        mpi.Allreduce(
+            avg_local,
+            avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        std::free(avg_local);
+    }
+    
+    return averaged_quantity;
+}
+
+
+/*
+ * Output names of statistical quantities to output to a file.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesNames(
+    const std::string& stat_dump_filename)
+{
+    // DO NOTHING.
+}
+
+
+/*
+ * Compute statisitcal quantities.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double statistics_data_time)
+{
+    NULL_USE(statistics_data_time);
+    
+    if (d_is_ensemble_statistics_initialized == false)
+    {
+        d_ensemble_statistics = HAMERS_MAKE_SHARED<EnsembleBudgetsRTIRMI>("d_ensemble_statistics");
+        d_is_ensemble_statistics_initialized = true;
+    }
+    
+    HAMERS_SHARED_PTR<RTIRMIBudgetsUtilities> rti_rmi_budgets_utilities(
+        new RTIRMIBudgetsUtilities(
+            "RTI RMI budgets utilities",
+            d_dim,
+            d_grid_geometry,
+            d_num_species,
+            d_flow_model,
+            d_equation_of_state_mixing_rules,
+            d_equation_of_mass_diffusivity_mixing_rules,
+            d_equation_of_shear_viscosity_mixing_rules,
+            d_equation_of_bulk_viscosity_mixing_rules,
+            d_equation_of_thermal_conductivity_mixing_rules,
+            HAMERS_DYNAMIC_POINTER_CAST<EnsembleBudgetsRTIRMI>(d_ensemble_statistics)));
+    
+    // Statistics are not computed for this realization yet.
+    rti_rmi_budgets_utilities->d_ensemble_statistics->setVariablesNotComputed();
+    
+    // Loop over statistical quantities.
+    for (int qi = 0; qi < static_cast<int>(d_statistical_quantities.size()); qi++)
+    {
+        // Get the key of the current variable.
+        std::string statistical_quantity_key = d_statistical_quantities[qi];
+        
+        // Spatial profiles.
+        if (statistical_quantity_key == "DENSITY_AVG_SP")
+        {
+            if (!(rti_rmi_budgets_utilities->d_ensemble_statistics->rho_avg_computed))
+            {
+                rti_rmi_budgets_utilities->
+                    computeAveragedQuantitiesWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Unknown statistical quantity key = '"
+                << statistical_quantity_key
+                << "' found."
+                << std::endl);
+        }
+    }
+    
+    d_ensemble_statistics->incrementNumberOfEnsembles();
+}
+
+
+/*
+ * Output statisitcal quantities to a file.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double output_time)
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(d_is_ensemble_statistics_initialized);
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    HAMERS_SHARED_PTR<RTIRMIBudgetsUtilities> rti_rmi_budgets_utilities(
+        new RTIRMIBudgetsUtilities(
+            "RTI RMI budgets utilities",
+            d_dim,
+            d_grid_geometry,
+            d_num_species,
+            d_flow_model,
+            d_equation_of_state_mixing_rules,
+            d_equation_of_mass_diffusivity_mixing_rules,
+            d_equation_of_shear_viscosity_mixing_rules,
+            d_equation_of_bulk_viscosity_mixing_rules,
+            d_equation_of_thermal_conductivity_mixing_rules,
+            HAMERS_DYNAMIC_POINTER_CAST<EnsembleBudgetsRTIRMI>(d_ensemble_statistics)));
+    
+    // Loop over statistical quantities.
+    for (int qi = 0; qi < static_cast<int>(d_statistical_quantities.size()); qi++)
+    {
+        // Get the key of the current variable.
+        std::string statistical_quantity_key = d_statistical_quantities[qi];
+        
+        // Spatial profiles.
+        if (statistical_quantity_key == "DENSITY_AVG_SP")
+        {
+            rti_rmi_budgets_utilities->
+                outputSpatialProfileEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
+                    "rho_avg.dat",
+                    patch_hierarchy,
+                    data_context,
+                    output_time);
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Unknown statistical quantity key = '"
+                << statistical_quantity_key
+                << "' found."
+                << std::endl);
+        }
+    }
+}
