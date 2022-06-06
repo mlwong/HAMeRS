@@ -1091,6 +1091,35 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
         d_ensemble_statistics->tau13_avg_computed = true;
     }
     
+    // Compute u_tau11_avg.
+    
+    quantity_names.push_back("VELOCITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(false);
+    
+    std::vector<double> u_tau11_avg = getAveragedQuantityWithShearStressComponentWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_derivative,
+        derivative_directions,
+        use_reciprocal,
+        0,
+        patch_hierarchy,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_derivative.clear();
+    derivative_directions.clear();
+    use_reciprocal.clear();
+    
+    std::vector<std::vector<double> >& u_tau11_avg_realizations = d_ensemble_statistics->u_tau11_avg_realizations;
+    u_tau11_avg_realizations.push_back(u_tau11_avg);
+    
+    d_ensemble_statistics->u_tau11_avg_computed = true;
+    
     // Compute ddx_tau11_avg.
     
     std::vector<double> ddx_tau11_avg = getAveragedDerivativeOfShearStressComponentWithInhomogeneousXDirection(
@@ -2437,7 +2466,7 @@ RTIRMIBudgetsUtilities::getAveragedShearStressComponentWithInhomogeneousXDirecti
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
@@ -2459,7 +2488,7 @@ RTIRMIBudgetsUtilities::getAveragedShearStressComponentWithInhomogeneousXDirecti
                     d_flow_model_tmp->getCellData("VELOCITY");
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getCellData("PRESSURE");
@@ -2703,7 +2732,7 @@ RTIRMIBudgetsUtilities::getAveragedShearStressComponentWithInhomogeneousXDirecti
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
@@ -2725,7 +2754,7 @@ RTIRMIBudgetsUtilities::getAveragedShearStressComponentWithInhomogeneousXDirecti
                     d_flow_model_tmp->getCellData("VELOCITY");
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getCellData("PRESSURE");
@@ -3090,7 +3119,7 @@ RTIRMIBudgetsUtilities::getAveragedShearStressComponentWithInhomogeneousXDirecti
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
@@ -3112,7 +3141,7 @@ RTIRMIBudgetsUtilities::getAveragedShearStressComponentWithInhomogeneousXDirecti
                     d_flow_model_tmp->getCellData("VELOCITY");
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getCellData("PRESSURE");
@@ -4067,7 +4096,7 @@ RTIRMIBudgetsUtilities::getAveragedDerivativeOfShearStressComponentWithInhomogen
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts_der));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", num_ghosts_der));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", num_ghosts_der));
@@ -4089,7 +4118,7 @@ RTIRMIBudgetsUtilities::getAveragedDerivativeOfShearStressComponentWithInhomogen
                     d_flow_model_tmp->getCellData("VELOCITY");
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getCellData("PRESSURE");
@@ -4355,7 +4384,7 @@ RTIRMIBudgetsUtilities::getAveragedDerivativeOfShearStressComponentWithInhomogen
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts_der));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", num_ghosts_der));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", num_ghosts_der));
@@ -4377,7 +4406,7 @@ RTIRMIBudgetsUtilities::getAveragedDerivativeOfShearStressComponentWithInhomogen
                     d_flow_model_tmp->getCellData("VELOCITY");
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getCellData("PRESSURE");
@@ -5033,7 +5062,7 @@ RTIRMIBudgetsUtilities::getAveragedDerivativeOfShearStressComponentWithInhomogen
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts_der));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", num_ghosts_der));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", num_ghosts_der));
@@ -5055,7 +5084,7 @@ RTIRMIBudgetsUtilities::getAveragedDerivativeOfShearStressComponentWithInhomogen
                     d_flow_model_tmp->getCellData("VELOCITY");
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getCellData("PRESSURE");
@@ -6791,7 +6820,7 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithShearStressComponentWithInhomogen
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
@@ -6827,7 +6856,7 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithShearStressComponentWithInhomogen
                     d_flow_model_tmp->getCellData("VELOCITY");
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getCellData("PRESSURE");
@@ -7187,7 +7216,7 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithShearStressComponentWithInhomogen
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
@@ -7223,7 +7252,7 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithShearStressComponentWithInhomogen
                     d_flow_model_tmp->getCellData("VELOCITY");
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getCellData("PRESSURE");
@@ -7740,7 +7769,7 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithShearStressComponentWithInhomogen
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
@@ -7776,7 +7805,7 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithShearStressComponentWithInhomogen
                     d_flow_model_tmp->getCellData("VELOCITY");
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getCellData("PRESSURE");
@@ -8969,7 +8998,7 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithDerivativeOfShearStressComponentW
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts_der));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", num_ghosts_der));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", num_ghosts_der));
@@ -9005,7 +9034,7 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithDerivativeOfShearStressComponentW
                     d_flow_model_tmp->getCellData("VELOCITY");
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getCellData("PRESSURE");
@@ -9387,7 +9416,7 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithDerivativeOfShearStressComponentW
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts_der));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", num_ghosts_der));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", num_ghosts_der));
@@ -9423,7 +9452,7 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithDerivativeOfShearStressComponentW
                     d_flow_model_tmp->getCellData("VELOCITY");
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getCellData("PRESSURE");
@@ -10231,7 +10260,7 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithDerivativeOfShearStressComponentW
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts_der));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", num_ghosts_der));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", num_ghosts_der));
@@ -10267,7 +10296,7 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithDerivativeOfShearStressComponentW
                     d_flow_model_tmp->getCellData("VELOCITY");
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getCellData("MASS_FRACTION");
+                    d_flow_model_tmp->getCellData("MASS_FRACTIONS");
                 
                 HAMERS_SHARED_PTR<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getCellData("PRESSURE");
@@ -12040,15 +12069,13 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
         std::string statistical_quantity_key = d_statistical_quantities[qi];
         
         // Spatial profiles.
-        if (statistical_quantity_key == "DENSITY_AVG_SP")
+        if (statistical_quantity_key == "rho_a1_budget_SP" ||
+            statistical_quantity_key == "rho_R11_budget_SP")
         {
-            if (!(rti_rmi_budgets_utilities->d_ensemble_statistics->rho_avg_computed))
-            {
-                rti_rmi_budgets_utilities->
-                    computeAveragedQuantitiesWithHomogeneityInYDirectionOrInYZPlane(
-                        patch_hierarchy,
-                        data_context);
-            }
+            rti_rmi_budgets_utilities->
+                computeAveragedQuantitiesWithHomogeneityInYDirectionOrInYZPlane(
+                    patch_hierarchy,
+                    data_context);
         }
         else
         {
@@ -12101,11 +12128,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         std::string statistical_quantity_key = d_statistical_quantities[qi];
         
         // Spatial profiles.
-        if (statistical_quantity_key == "DENSITY_AVG_SP")
+        if (statistical_quantity_key == "rho_a1_budget_SP")
         {
             rti_rmi_budgets_utilities->
-                outputSpatialProfileEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
-                    "rho_avg.dat",
+                outputBudgetTurbMassFluxXWithInhomogeneousXDirection(
+                    "rho_a1_budget.dat",
+                    patch_hierarchy,
+                    data_context,
+                    output_time);
+        }
+        else if (statistical_quantity_key == "rho_R11_budget_SP")
+        {
+            rti_rmi_budgets_utilities->
+                outputBudgetReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
+                    "rho_R11_budget.dat",
                     patch_hierarchy,
                     data_context,
                     output_time);
