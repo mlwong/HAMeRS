@@ -42,6 +42,10 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
             Omega_avg_computed    = false;
             chi_avg_computed      = false;
             mu_avg_computed       = false;
+            
+            ddx_p_avg_computed = false;
+            ddy_p_avg_computed = false;
+            ddz_p_avg_computed = false;
         }
         
         void clearAllData()
@@ -68,6 +72,10 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
             Omega_avg_realizations.clear();
             chi_avg_realizations.clear();
             mu_avg_realizations.clear();
+            
+            ddx_p_avg_realizations.clear();
+            ddy_p_avg_realizations.clear();
+            ddz_p_avg_realizations.clear();
             
             setVariablesNotComputed();
         }
@@ -97,6 +105,10 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
         std::vector<std::vector<double> > chi_avg_realizations;
         std::vector<std::vector<double> > mu_avg_realizations;
         
+        std::vector<std::vector<double> > ddx_p_avg_realizations;
+        std::vector<std::vector<double> > ddy_p_avg_realizations;
+        std::vector<std::vector<double> > ddz_p_avg_realizations;
+        
         // Whether the scratch arrays are filled.
         bool Y_0_avg_computed;
         bool Y_0_sq_avg_computed;
@@ -120,6 +132,10 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
         bool Omega_avg_computed;
         bool chi_avg_computed;
         bool mu_avg_computed;
+        
+        bool ddx_p_avg_computed;
+        bool ddy_p_avg_computed;
+        bool ddz_p_avg_computed;
         
     private:
         
@@ -326,10 +342,37 @@ class RTIRMIStatisticsUtilities
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
-         * Compute averaged dynamic shear viscosity with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
+         * Compute averaged dynamic shear viscosity with assumed homogeneity in y-direction (2D) or yz-plane (3D) to
+         * a file.
          */
         void
         computeAveragedShearViscosityWithHomogeneityInYDirectionOrInYZPlane(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Computed averaged x-derivative of pressure with assumed homogeneity in y-direction (2D) or yz-plane (3D) to 
+         * a file.
+         */
+        void
+        computeAveragedXDerivativeOfPressureWithHomogeneityInYDirectionOrInYZPlane(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Computed averaged y-derivative of pressure with assumed homogeneity in y-direction (2D) or yz-plane (3D) to
+         * a file.
+         */
+        void
+        computeAveragedYDerivativeOfPressureWithHomogeneityInYDirectionOrInYZPlane(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Computed averaged z-derivative of pressure with assumed homogeneity in yz-plane (3D) to a file.
+         */
+        void
+        computeAveragedZDerivativeOfPressureWithHomogeneityInYZPlane(
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
@@ -638,6 +681,15 @@ class RTIRMIStatisticsUtilities
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
+         * Output ensemble enstrophy with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
+         */
+        void
+        outputEnsembleEnstrophyWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
          * Output ensemble scalar dissipation rate of first species integrated to a file.
          */
         void
@@ -647,8 +699,18 @@ class RTIRMIStatisticsUtilities
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
+         * Output ensemble scalar dissipation rate of first species  with assumed homogeneity in y-direction (2D) or
+         * yz-plane (3D) to a file.
+         */
+        void
+        outputEnsembleScalarDissipationRateWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
          * Output turbulent Reynolds number based on mixing width with assumed homogeneity in y-direction (2D)
-         * or yz-plane (3D) to a file.to a file.
+         * or yz-plane (3D) to a file.
          */
         void
         outputEnsembleMixingWidthReynoldsNumberWithInhomogeneousXDirection(
@@ -657,10 +719,28 @@ class RTIRMIStatisticsUtilities
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
-         * Output turbulent Mach number with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.to a file.
+         * Output turbulent Mach number with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
          */
         void
         outputEnsembleTurbulentMachNumberWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Output TKE production integrated to a file.
+         */
+        void
+        outputEnsembleTKEProductionIntegrated(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Output TKE production with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
+         */
+        void
+        outputEnsembleTKEProductionWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
@@ -2142,6 +2222,196 @@ RTIRMIStatisticsUtilities::computeAveragedShearViscosityWithHomogeneityInYDirect
 
 
 /*
+ * Computed averaged x-derivative of pressure with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
+ */
+void
+RTIRMIStatisticsUtilities::computeAveragedXDerivativeOfPressureWithHomogeneityInYDirectionOrInYZPlane(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
+    
+    std::vector<std::vector<double> >& ddx_p_avg_realizations = d_ensemble_statistics->ddx_p_avg_realizations;
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    std::vector<bool> use_derivative;
+    std::vector<int> derivative_directions;
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(0);
+    
+    std::vector<double> ddx_p_avg = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_derivative,
+        derivative_directions,
+        d_num_ghosts_derivative,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_derivative.clear();
+    derivative_directions.clear();
+    
+    ddx_p_avg_realizations.push_back(ddx_p_avg);
+    
+    d_ensemble_statistics->ddx_p_avg_computed = true;
+}
+
+
+/*
+ * Computed averaged y-derivative of pressure with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
+ */
+void
+RTIRMIStatisticsUtilities::computeAveragedYDerivativeOfPressureWithHomogeneityInYDirectionOrInYZPlane(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no 'DDY_PRESSURE_AVG_SP' for one-dimensional problem."
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
+    
+    std::vector<std::vector<double> >& ddy_p_avg_realizations = d_ensemble_statistics->ddy_p_avg_realizations;
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    std::vector<bool> use_derivative;
+    std::vector<int> derivative_directions;
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(1);
+    
+    std::vector<double> ddy_p_avg = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_derivative,
+        derivative_directions,
+        d_num_ghosts_derivative,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_derivative.clear();
+    derivative_directions.clear();
+    
+    ddy_p_avg_realizations.push_back(ddy_p_avg);
+    
+    d_ensemble_statistics->ddy_p_avg_computed = true;
+}
+
+
+/*
+ * Computed averaged z-derivative of pressure with assumed homogeneity in yz-plane (3D) to a file.
+ */
+void
+RTIRMIStatisticsUtilities::computeAveragedZDerivativeOfPressureWithHomogeneityInYZPlane(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    if (d_dim == tbox::Dimension(1) || d_dim == tbox::Dimension(2))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no 'DDZ_PRESSURE_AVG_SP' for one-dimensional or two-dimensional problem."
+            << std::endl);
+    }
+    
+    HAMERS_SHARED_PTR<FlowModel> flow_model_tmp = d_flow_model.lock();
+    
+    FlowModelMPIHelperAverage MPI_helper_average = FlowModelMPIHelperAverage(
+        "MPI_helper_average",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy,
+        flow_model_tmp);
+    
+    const hier::IntVector& finest_level_dims = MPI_helper_average.getFinestRefinedDomainNumberOfPoints();
+    
+    std::vector<std::vector<double> >& ddz_p_avg_realizations = d_ensemble_statistics->ddz_p_avg_realizations;
+    
+    std::vector<std::string> quantity_names;
+    std::vector<int> component_indices;
+    std::vector<bool> use_derivative;
+    std::vector<int> derivative_directions;
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(2);
+    
+    std::vector<double> ddz_p_avg = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_derivative,
+        derivative_directions,
+        d_num_ghosts_derivative,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_derivative.clear();
+    derivative_directions.clear();
+    
+    ddz_p_avg_realizations.push_back(ddz_p_avg);
+    
+    d_ensemble_statistics->ddz_p_avg_computed = true;
+}
+
+
+/*
  * Output spatial profile of ensemble averaged mass fraction with assumed homogeneity in y-direction (2D) or
  * yz-plane (3D) to a file.
  */
@@ -2158,14 +2428,14 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedMassFractionWithH
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
-    std::ofstream f_out;
-    
     /*
      * Output the spatial profile (only done by process 0).
      */
     
     if (mpi.getRank() == 0)
     {
+        std::ofstream f_out;
+        
         f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
         if (!f_out.is_open())
         {
@@ -2221,14 +2491,14 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleMassFractionVarianceWithH
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
-    std::ofstream f_out;
-    
     /*
      * Output the spatial profile (only done by process 0).
      */
     
     if (mpi.getRank() == 0)
     {
+        std::ofstream f_out;
+        
         f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
         if (!f_out.is_open())
         {
@@ -2296,14 +2566,14 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedDensityWithHomoge
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
-    std::ofstream f_out;
-    
     /*
      * Output the spatial profile (only done by process 0).
      */
     
     if (mpi.getRank() == 0)
     {
+        std::ofstream f_out;
+        
         f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
         if (!f_out.is_open())
         {
@@ -2359,14 +2629,14 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleDensityVarianceWithHomoge
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
-    std::ofstream f_out;
-    
     /*
      * Output the spatial profile (only done by process 0).
      */
     
     if (mpi.getRank() == 0)
     {
+        std::ofstream f_out;
+        
         f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
         if (!f_out.is_open())
         {
@@ -2434,14 +2704,14 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedSpecificVolumeWit
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
-    std::ofstream f_out;
-    
     /*
      * Output the spatial profile (only done by process 0).
      */
     
     if (mpi.getRank() == 0)
     {
+        std::ofstream f_out;
+        
         f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
         if (!f_out.is_open())
         {
@@ -2497,14 +2767,14 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedDensitySpecificVo
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
-    std::ofstream f_out;
-    
     /*
      * Output the spatial profile (only done by process 0).
      */
     
     if (mpi.getRank() == 0)
     {
+        std::ofstream f_out;
+        
         f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
         if (!f_out.is_open())
         {
@@ -2572,14 +2842,14 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedVelocityXWithHomo
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
-    std::ofstream f_out;
-    
     /*
      * Output the spatial profile (only done by process 0).
      */
     
     if (mpi.getRank() == 0)
     {
+        std::ofstream f_out;
+        
         f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
         if (!f_out.is_open())
         {
@@ -2635,14 +2905,14 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedVelocityYWithHomo
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
-    std::ofstream f_out;
-    
     /*
      * Output the spatial profile (only done by process 0).
      */
     
     if (mpi.getRank() == 0)
     {
+        std::ofstream f_out;
+        
         f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
         if (!f_out.is_open())
         {
@@ -2698,14 +2968,14 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedVelocityZWithHomo
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
-    std::ofstream f_out;
-    
     /*
      * Output the spatial profile (only done by process 0).
      */
     
     if (mpi.getRank() == 0)
     {
+        std::ofstream f_out;
+        
         f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
         if (!f_out.is_open())
         {
@@ -2761,14 +3031,14 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedMomentumXWithHomo
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
-    std::ofstream f_out;
-    
     /*
      * Output the spatial profile (only done by process 0).
      */
     
     if (mpi.getRank() == 0)
     {
+        std::ofstream f_out;
+        
         f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
         if (!f_out.is_open())
         {
@@ -2824,14 +3094,14 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedMomentumYWithHomo
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
-    std::ofstream f_out;
-    
     /*
      * Output the spatial profile (only done by process 0).
      */
     
     if (mpi.getRank() == 0)
     {
+        std::ofstream f_out;
+        
         f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
         if (!f_out.is_open())
         {
@@ -2887,14 +3157,14 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedMomentumZWithHomo
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
-    std::ofstream f_out;
-    
     /*
      * Output the spatial profile (only done by process 0).
      */
     
     if (mpi.getRank() == 0)
     {
+        std::ofstream f_out;
+        
         f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
         if (!f_out.is_open())
         {
@@ -2950,14 +3220,14 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleTurbulentMassFluxXWithHom
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
-    std::ofstream f_out;
-    
     /*
      * Output the spatial profile (only done by process 0).
      */
     
     if (mpi.getRank() == 0)
     {
+        std::ofstream f_out;
+        
         f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
         if (!f_out.is_open())
         {
@@ -3031,14 +3301,14 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleReynoldsNormalStressXWith
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
-    std::ofstream f_out;
-    
     /*
      * Output the spatial profile (only done by process 0).
      */
     
     if (mpi.getRank() == 0)
     {
+        std::ofstream f_out;
+        
         f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
         if (!f_out.is_open())
         {
@@ -3115,14 +3385,14 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleReynoldsNormalStressYWith
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
-    std::ofstream f_out;
-    
     /*
      * Output the spatial profile (only done by process 0).
      */
     
     if (mpi.getRank() == 0)
     {
+        std::ofstream f_out;
+        
         f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
         if (!f_out.is_open())
         {
@@ -3199,14 +3469,14 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleReynoldsNormalStressZWith
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
-    std::ofstream f_out;
-    
     /*
      * Output the spatial profile (only done by process 0).
      */
     
     if (mpi.getRank() == 0)
     {
+        std::ofstream f_out;
+        
         f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
         if (!f_out.is_open())
         {
@@ -3283,14 +3553,14 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedEnstrophyWithHomo
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
-    std::ofstream f_out;
-    
     /*
      * Output the spatial profile (only done by process 0).
      */
     
     if (mpi.getRank() == 0)
     {
+        std::ofstream f_out;
+        
         f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
         if (!f_out.is_open())
         {
@@ -3346,14 +3616,14 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedScalarDissipation
     
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
-    std::ofstream f_out;
-    
     /*
      * Output the spatial profile (only done by process 0).
      */
     
     if (mpi.getRank() == 0)
     {
+        std::ofstream f_out;
+        
         f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
         if (!f_out.is_open())
         {
@@ -4614,6 +4884,94 @@ RTIRMIStatisticsUtilities::outputEnsembleEnstrophyIntegrated(
         
         f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
               << "\t" << Omega_integrated_global;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output ensemble enstrophy with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleEnstrophyWithInhomogeneousXDirection(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& Omega_avg_realizations =
+            d_ensemble_statistics->Omega_avg_realizations;
+        
+        const std::vector<std::vector<double> >& Y_0_avg_realizations =
+            d_ensemble_statistics->Y_0_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(Omega_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(Y_0_avg_realizations.size()));
+        
+        const int num_cells = static_cast<int>(Omega_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> Omega_avg_global(num_cells, double(0));
+        std::vector<double> Y_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                Omega_avg_global[i] += weight*Omega_avg_realizations[ri][i];
+                Y_0_avg_global[i]   += weight*Y_0_avg_realizations[ri][i];
+            }
+        }
+        
+        double Omega_sum = double(0);
+        int count = 0;
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            const double mixing_metric = double(4)*Y_0_avg_global[i]*(double(1) - Y_0_avg_global[i]);
+            if (mixing_metric > double(9)/double(10))
+            {
+                Omega_sum += Omega_avg_global[i];
+                count++;
+            }
+        }
+        
+        const double Omega_mean = Omega_sum/count;
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << Omega_mean;
+        
+        f_out.close();
     }
 }
 
@@ -4705,13 +5063,102 @@ RTIRMIStatisticsUtilities::outputEnsembleScalarDissipationRateIntegrated(
         
         f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
               << "\t" << chi_integrated_global;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output ensemble scalar dissipation rate of first species  with assumed homogeneity in y-direction (2D) or
+ * yz-plane (3D) to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleScalarDissipationRateWithInhomogeneousXDirection(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& chi_avg_realizations =
+            d_ensemble_statistics->chi_avg_realizations;
+        
+        const std::vector<std::vector<double> >& Y_0_avg_realizations =
+            d_ensemble_statistics->Y_0_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(chi_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(Y_0_avg_realizations.size()));
+        
+        const int num_cells = static_cast<int>(chi_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> chi_avg_global(num_cells, double(0));
+        std::vector<double> Y_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                chi_avg_global[i] += weight*chi_avg_realizations[ri][i];
+                Y_0_avg_global[i] += weight*Y_0_avg_realizations[ri][i];
+            }
+        }
+        
+        double chi_sum = double(0);
+        int count = 0;
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            const double mixing_metric = double(4)*Y_0_avg_global[i]*(double(1) - Y_0_avg_global[i]);
+            if (mixing_metric > double(9)/double(10))
+            {
+                chi_sum += chi_avg_global[i];
+                count++;
+            }
+        }
+        
+        const double chi_mean = chi_sum/count;
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << chi_mean;
+        
+        f_out.close();
     }
 }
 
 
 /*
  * Output turbulent Reynolds number based on mixing width with assumed homogeneity in y-direction (2D)
- * or yz-plane (3D) to a file.to a file.
+ * or yz-plane (3D) to a file.
  */
 void
 RTIRMIStatisticsUtilities::outputEnsembleMixingWidthReynoldsNumberWithInhomogeneousXDirection(
@@ -4959,7 +5406,7 @@ RTIRMIStatisticsUtilities::outputEnsembleMixingWidthReynoldsNumberWithInhomogene
 
 
 /*
- * Output turbulent Mach number with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.to a file.
+ * Output turbulent Mach number with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
  */
 void
 RTIRMIStatisticsUtilities::outputEnsembleTurbulentMachNumberWithInhomogeneousXDirection(
@@ -5172,6 +5619,419 @@ RTIRMIStatisticsUtilities::outputEnsembleTurbulentMachNumberWithInhomogeneousXDi
 
 
 /*
+ * Output TKE production integrated to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleTKEProductionIntegrated(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    MPIHelper MPI_helper = MPIHelper(
+        "MPI_helper",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy);
+    
+    const std::vector<double>& dx_finest = MPI_helper.getFinestRefinedDomainGridSpacing();
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& rho_avg_realizations =
+            d_ensemble_statistics->rho_avg_realizations;
+        
+        const std::vector<std::vector<double> >& u_avg_realizations =
+            d_ensemble_statistics->u_avg_realizations;
+        
+        const std::vector<std::vector<double> >& v_avg_realizations =
+            d_ensemble_statistics->v_avg_realizations;
+        
+        const std::vector<std::vector<double> >& w_avg_realizations =
+            d_ensemble_statistics->w_avg_realizations;
+        
+        const std::vector<std::vector<double> >& rho_u_avg_realizations =
+            d_ensemble_statistics->rho_u_avg_realizations;
+        
+        const std::vector<std::vector<double> >& rho_v_avg_realizations =
+            d_ensemble_statistics->rho_v_avg_realizations;
+        
+        const std::vector<std::vector<double> >& rho_w_avg_realizations =
+            d_ensemble_statistics->rho_w_avg_realizations;
+        
+        const std::vector<std::vector<double> >& ddx_p_avg_realizations =
+            d_ensemble_statistics->ddx_p_avg_realizations;
+        
+        const std::vector<std::vector<double> >& ddy_p_avg_realizations =
+            d_ensemble_statistics->ddy_p_avg_realizations;
+        
+        const std::vector<std::vector<double> >& ddz_p_avg_realizations =
+            d_ensemble_statistics->ddz_p_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(rho_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(u_avg_realizations.size()));
+        TBOX_ASSERT(num_realizations == static_cast<int>(rho_u_avg_realizations.size()));
+        TBOX_ASSERT(num_realizations == static_cast<int>(ddx_p_avg_realizations.size()));
+        if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+        {
+            TBOX_ASSERT(num_realizations == static_cast<int>(v_avg_realizations.size()));
+            TBOX_ASSERT(num_realizations == static_cast<int>(rho_v_avg_realizations.size()));
+            TBOX_ASSERT(num_realizations == static_cast<int>(ddy_p_avg_realizations.size()));
+        }
+        if (d_dim == tbox::Dimension(3))
+        {
+            TBOX_ASSERT(num_realizations == static_cast<int>(w_avg_realizations.size()));
+            TBOX_ASSERT(num_realizations == static_cast<int>(rho_w_avg_realizations.size()));
+            TBOX_ASSERT(num_realizations == static_cast<int>(ddz_p_avg_realizations.size()));
+        }
+        
+        const int num_cells = static_cast<int>(rho_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> rho_avg_global(num_cells, double(0));
+        std::vector<double> u_avg_global(num_cells, double(0));
+        std::vector<double> v_avg_global(num_cells, double(0));
+        std::vector<double> w_avg_global(num_cells, double(0));
+        std::vector<double> rho_u_avg_global(num_cells, double(0));
+        std::vector<double> rho_v_avg_global(num_cells, double(0));
+        std::vector<double> rho_w_avg_global(num_cells, double(0));
+        std::vector<double> ddx_p_avg_global(num_cells, double(0));
+        std::vector<double> ddy_p_avg_global(num_cells, double(0));
+        std::vector<double> ddz_p_avg_global(num_cells, double(0));
+        
+        std::vector<double> a1(num_cells, double(0));
+        std::vector<double> a2(num_cells, double(0));
+        std::vector<double> a3(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                rho_avg_global[i]   += weight*rho_avg_realizations[ri][i];
+                u_avg_global[i]     += weight*u_avg_realizations[ri][i];
+                rho_u_avg_global[i] += weight*rho_u_avg_realizations[ri][i];
+                ddx_p_avg_global[i] += weight*ddx_p_avg_realizations[ri][i];
+            }
+        }
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            a1[i] = (rho_u_avg_global[i] - rho_avg_global[i]*u_avg_global[i])/rho_avg_global[i];
+        }
+        
+        if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+        {
+            for (int ri = 0; ri < num_realizations; ri++)
+            {
+                for (int i = 0; i < num_cells; i++)
+                {
+                    v_avg_global[i]     += weight*v_avg_realizations[ri][i];
+                    rho_v_avg_global[i] += weight*rho_v_avg_realizations[ri][i];
+                    ddy_p_avg_global[i] += weight*ddy_p_avg_realizations[ri][i];
+                }
+            }
+            
+            for (int i = 0; i < num_cells; i++)
+            {
+                a2[i] = (rho_v_avg_global[i] - rho_avg_global[i]*v_avg_global[i])/rho_avg_global[i];
+            }
+        }
+        
+        if (d_dim == tbox::Dimension(3))
+        {
+            for (int ri = 0; ri < num_realizations; ri++)
+            {
+                for (int i = 0; i < num_cells; i++)
+                {
+                    w_avg_global[i]     += weight*w_avg_realizations[ri][i];
+                    rho_w_avg_global[i] += weight*rho_w_avg_realizations[ri][i];
+                    ddz_p_avg_global[i] += weight*ddz_p_avg_realizations[ri][i];
+                }
+            }
+            
+            for (int i = 0; i < num_cells; i++)
+            {
+                a3[i] = (rho_w_avg_global[i] - rho_avg_global[i]*w_avg_global[i])/rho_avg_global[i];
+            }
+        }
+        
+        double TKE_prod_integrated_global = double(0);
+        if (d_dim == tbox::Dimension(1))
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                TKE_prod_integrated_global += (a1[i]*ddx_p_avg_global[i])*dx_finest[0];
+            }
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                TKE_prod_integrated_global += (a1[i]*ddx_p_avg_global[i] + a2[i]*ddy_p_avg_global[i])*dx_finest[0];
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                TKE_prod_integrated_global += (a1[i]*ddx_p_avg_global[i] + a2[i]*ddy_p_avg_global[i] + a3[i]*ddz_p_avg_global[i])*dx_finest[0];
+            }
+        }
+        
+        const double* x_lo = d_grid_geometry->getXLower();
+        const double* x_hi = d_grid_geometry->getXUpper();
+        if (d_dim == tbox::Dimension(2))
+        {
+            const double L_y = x_hi[1] - x_lo[1];
+            TKE_prod_integrated_global *= L_y;
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            const double L_y = x_hi[1] - x_lo[1];
+            const double L_z = x_hi[2] - x_lo[2];
+            TKE_prod_integrated_global *= (L_y*L_z);
+        }
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << TKE_prod_integrated_global;
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output TKE production with assumed homogeneity in y-direction (2D) or yz-plane (3D) to a file.
+ */
+void
+RTIRMIStatisticsUtilities::outputEnsembleTKEProductionWithInhomogeneousXDirection(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& rho_avg_realizations =
+            d_ensemble_statistics->rho_avg_realizations;
+        
+        const std::vector<std::vector<double> >& u_avg_realizations =
+            d_ensemble_statistics->u_avg_realizations;
+        
+        const std::vector<std::vector<double> >& v_avg_realizations =
+            d_ensemble_statistics->v_avg_realizations;
+        
+        const std::vector<std::vector<double> >& w_avg_realizations =
+            d_ensemble_statistics->w_avg_realizations;
+        
+        const std::vector<std::vector<double> >& rho_u_avg_realizations =
+            d_ensemble_statistics->rho_u_avg_realizations;
+        
+        const std::vector<std::vector<double> >& rho_v_avg_realizations =
+            d_ensemble_statistics->rho_v_avg_realizations;
+        
+        const std::vector<std::vector<double> >& rho_w_avg_realizations =
+            d_ensemble_statistics->rho_w_avg_realizations;
+        
+        const std::vector<std::vector<double> >& ddx_p_avg_realizations =
+            d_ensemble_statistics->ddx_p_avg_realizations;
+        
+        const std::vector<std::vector<double> >& ddy_p_avg_realizations =
+            d_ensemble_statistics->ddy_p_avg_realizations;
+        
+        const std::vector<std::vector<double> >& ddz_p_avg_realizations =
+            d_ensemble_statistics->ddz_p_avg_realizations;
+        
+        const std::vector<std::vector<double> >& Y_0_avg_realizations =
+            d_ensemble_statistics->Y_0_avg_realizations;
+        
+        const int num_realizations = static_cast<int>(rho_avg_realizations.size());
+        
+        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(u_avg_realizations.size()));
+        TBOX_ASSERT(num_realizations == static_cast<int>(rho_u_avg_realizations.size()));
+        TBOX_ASSERT(num_realizations == static_cast<int>(ddx_p_avg_realizations.size()));
+        if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+        {
+            TBOX_ASSERT(num_realizations == static_cast<int>(v_avg_realizations.size()));
+            TBOX_ASSERT(num_realizations == static_cast<int>(rho_v_avg_realizations.size()));
+            TBOX_ASSERT(num_realizations == static_cast<int>(ddy_p_avg_realizations.size()));
+        }
+        if (d_dim == tbox::Dimension(3))
+        {
+            TBOX_ASSERT(num_realizations == static_cast<int>(w_avg_realizations.size()));
+            TBOX_ASSERT(num_realizations == static_cast<int>(rho_w_avg_realizations.size()));
+            TBOX_ASSERT(num_realizations == static_cast<int>(ddz_p_avg_realizations.size()));
+        }
+        TBOX_ASSERT(num_realizations == static_cast<int>(Y_0_avg_realizations.size()));
+        
+        const int num_cells = static_cast<int>(rho_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> rho_avg_global(num_cells, double(0));
+        std::vector<double> u_avg_global(num_cells, double(0));
+        std::vector<double> v_avg_global(num_cells, double(0));
+        std::vector<double> w_avg_global(num_cells, double(0));
+        std::vector<double> rho_u_avg_global(num_cells, double(0));
+        std::vector<double> rho_v_avg_global(num_cells, double(0));
+        std::vector<double> rho_w_avg_global(num_cells, double(0));
+        std::vector<double> ddx_p_avg_global(num_cells, double(0));
+        std::vector<double> ddy_p_avg_global(num_cells, double(0));
+        std::vector<double> ddz_p_avg_global(num_cells, double(0));
+        std::vector<double> Y_0_avg_global(num_cells, double(0));
+        
+        std::vector<double> a1(num_cells, double(0));
+        std::vector<double> a2(num_cells, double(0));
+        std::vector<double> a3(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                rho_avg_global[i]   += weight*rho_avg_realizations[ri][i];
+                u_avg_global[i]     += weight*u_avg_realizations[ri][i];
+                rho_u_avg_global[i] += weight*rho_u_avg_realizations[ri][i];
+                ddx_p_avg_global[i] += weight*ddx_p_avg_realizations[ri][i];
+                Y_0_avg_global[i]   += weight*Y_0_avg_realizations[ri][i];
+            }
+        }
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            a1[i] = (rho_u_avg_global[i] - rho_avg_global[i]*u_avg_global[i])/rho_avg_global[i];
+        }
+        
+        if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+        {
+            for (int ri = 0; ri < num_realizations; ri++)
+            {
+                for (int i = 0; i < num_cells; i++)
+                {
+                    v_avg_global[i]     += weight*v_avg_realizations[ri][i];
+                    rho_v_avg_global[i] += weight*rho_v_avg_realizations[ri][i];
+                    ddy_p_avg_global[i] += weight*ddy_p_avg_realizations[ri][i];
+                }
+            }
+            
+            for (int i = 0; i < num_cells; i++)
+            {
+                a2[i] = (rho_v_avg_global[i] - rho_avg_global[i]*v_avg_global[i])/rho_avg_global[i];
+            }
+        }
+        
+        if (d_dim == tbox::Dimension(3))
+        {
+            for (int ri = 0; ri < num_realizations; ri++)
+            {
+                for (int i = 0; i < num_cells; i++)
+                {
+                    w_avg_global[i]     += weight*w_avg_realizations[ri][i];
+                    rho_w_avg_global[i] += weight*rho_w_avg_realizations[ri][i];
+                    ddz_p_avg_global[i] += weight*ddz_p_avg_realizations[ri][i];
+                }
+            }
+            
+            for (int i = 0; i < num_cells; i++)
+            {
+                a3[i] = (rho_w_avg_global[i] - rho_avg_global[i]*w_avg_global[i])/rho_avg_global[i];
+            }
+        }
+        
+        double TKE_prod_sum = double(0);
+        int count = 0;
+        
+        if (d_dim == tbox::Dimension(1))
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                const double mixing_metric = double(4)*Y_0_avg_global[i]*(double(1) - Y_0_avg_global[i]);
+                if (mixing_metric > double(9)/double(10))
+                {
+                    TKE_prod_sum += (a1[i]*ddx_p_avg_global[i]);
+                    count++;
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                const double mixing_metric = double(4)*Y_0_avg_global[i]*(double(1) - Y_0_avg_global[i]);
+                if (mixing_metric > double(9)/double(10))
+                {
+                    TKE_prod_sum += (a1[i]*ddx_p_avg_global[i] + a2[i]*ddy_p_avg_global[i]);
+                    count++;
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                const double mixing_metric = double(4)*Y_0_avg_global[i]*(double(1) - Y_0_avg_global[i]);
+                if (mixing_metric > double(9)/double(10))
+                {
+                    TKE_prod_sum += (a1[i]*ddx_p_avg_global[i] + a2[i]*ddy_p_avg_global[i] + a3[i]*ddz_p_avg_global[i]);
+                    count++;
+                }
+            }
+        }
+        
+        const double TKE_prod_mean = TKE_prod_sum/count;
+        
+        f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+              << "\t" << TKE_prod_mean;
+        
+        f_out.close();
+    }
+}
+
+
+/*
  * Output names of statistical quantities to output to a file.
  */
 void
@@ -5254,9 +6114,17 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             {
                 f_out << "\t" << "ENSTROPHY_INT        ";
             }
+            else if (statistical_quantity_key == "ENSTROPHY_INHOMO_X")
+            {
+                f_out << "\t" << "ENSTROPHY_INHOMO_X   ";
+            }
             else if (statistical_quantity_key == "SCAL_DISS_RAT_INT")
             {
                 f_out << "\t" << "SCAL_DISS_RAT_INT    ";
+            }
+            else if (statistical_quantity_key == "SCAL_DIS_RAT_INHOMO_X")
+            {
+                f_out << "\t" << "SCAL_DIS_RAT_INHOMO_X";
             }
             else if (statistical_quantity_key == "RE_W_INHOMO_X")
             {
@@ -5265,6 +6133,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             else if (statistical_quantity_key == "MA_T_INHOMO_X")
             {
                 f_out << "\t" << "MA_T_INHOMO_X        ";
+            }
+            else if (statistical_quantity_key == "TKE_PROD_INT")
+            {
+                f_out << "\t" << "TKE_PROD_INT         ";
+            }
+            else if (statistical_quantity_key == "TKE_PROD_INHOMO_X")
+            {
+                f_out << "\t" << "TKE_PROD_INHOMO_X    ";
             }
         }
         
@@ -5850,12 +6726,48 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
                         data_context);
             }
         }
+        else if (statistical_quantity_key == "ENSTROPHY_INHOMO_X")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Omega_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedEnstrophyWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Y_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
         else if (statistical_quantity_key == "SCAL_DISS_RAT_INT")
         {
             if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->chi_avg_computed))
             {
                 rti_rmi_statistics_utilities->
                     computeAveragedScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "SCAL_DIS_RAT_INHOMO_X")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->chi_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedScalarDissipationRateWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Y_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
                         patch_hierarchy,
                         data_context);
             }
@@ -6070,6 +6982,190 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
                             patch_hierarchy,
                             data_context);
                 }
+            }
+        }
+        else if (statistical_quantity_key == "TKE_PROD_INT")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->ddx_p_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedXDerivativeOfPressureWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->u_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->rho_u_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMomentumXWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+            {
+                if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->ddy_p_avg_computed))
+                {
+                    rti_rmi_statistics_utilities->
+                        computeAveragedYDerivativeOfPressureWithHomogeneityInYDirectionOrInYZPlane(
+                            patch_hierarchy,
+                            data_context);
+                }
+                
+                if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->v_avg_computed))
+                {
+                    rti_rmi_statistics_utilities->
+                        computeAveragedVelocityYWithHomogeneityInYDirectionOrInYZPlane(
+                            patch_hierarchy,
+                            data_context);
+                }
+                
+                if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->rho_v_avg_computed))
+                {
+                    rti_rmi_statistics_utilities->
+                        computeAveragedMomentumYWithHomogeneityInYDirectionOrInYZPlane(
+                            patch_hierarchy,
+                            data_context);
+                }
+            }
+            
+            if (d_dim == tbox::Dimension(3))
+            {
+                if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->ddz_p_avg_computed))
+                {
+                    rti_rmi_statistics_utilities->
+                        computeAveragedZDerivativeOfPressureWithHomogeneityInYZPlane(
+                            patch_hierarchy,
+                            data_context);
+                }
+                
+                if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->w_avg_computed))
+                {
+                    rti_rmi_statistics_utilities->
+                        computeAveragedVelocityZWithHomogeneityInYZPlane(
+                            patch_hierarchy,
+                            data_context);
+                }
+                
+                if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->rho_w_avg_computed))
+                {
+                    rti_rmi_statistics_utilities->
+                        computeAveragedMomentumZWithHomogeneityInYZPlane(
+                            patch_hierarchy,
+                            data_context);
+                }
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->rho_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+        }
+        else if (statistical_quantity_key == "TKE_PROD_INHOMO_X")
+        {
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->ddx_p_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedXDerivativeOfPressureWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->u_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedVelocityXWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->rho_u_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMomentumXWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+            {
+                if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->ddy_p_avg_computed))
+                {
+                    rti_rmi_statistics_utilities->
+                        computeAveragedYDerivativeOfPressureWithHomogeneityInYDirectionOrInYZPlane(
+                            patch_hierarchy,
+                            data_context);
+                }
+                
+                if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->v_avg_computed))
+                {
+                    rti_rmi_statistics_utilities->
+                        computeAveragedVelocityYWithHomogeneityInYDirectionOrInYZPlane(
+                            patch_hierarchy,
+                            data_context);
+                }
+                
+                if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->rho_v_avg_computed))
+                {
+                    rti_rmi_statistics_utilities->
+                        computeAveragedMomentumYWithHomogeneityInYDirectionOrInYZPlane(
+                            patch_hierarchy,
+                            data_context);
+                }
+            }
+            
+            if (d_dim == tbox::Dimension(3))
+            {
+                if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->ddz_p_avg_computed))
+                {
+                    rti_rmi_statistics_utilities->
+                        computeAveragedZDerivativeOfPressureWithHomogeneityInYZPlane(
+                            patch_hierarchy,
+                            data_context);
+                }
+                
+                if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->w_avg_computed))
+                {
+                    rti_rmi_statistics_utilities->
+                        computeAveragedVelocityZWithHomogeneityInYZPlane(
+                            patch_hierarchy,
+                            data_context);
+                }
+                
+                if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->rho_w_avg_computed))
+                {
+                    rti_rmi_statistics_utilities->
+                        computeAveragedMomentumZWithHomogeneityInYZPlane(
+                            patch_hierarchy,
+                            data_context);
+                }
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->rho_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
+            }
+            
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->Y_0_avg_computed))
+            {
+                rti_rmi_statistics_utilities->
+                    computeAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
+                        patch_hierarchy,
+                        data_context);
             }
         }
         else
@@ -6374,10 +7470,26 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                     patch_hierarchy,
                     data_context);
         }
+        else if (statistical_quantity_key == "ENSTROPHY_INHOMO_X")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleEnstrophyWithInhomogeneousXDirection(
+                    stat_dump_filename,
+                    patch_hierarchy,
+                    data_context);
+        }
         else if (statistical_quantity_key == "SCAL_DISS_RAT_INT")
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleScalarDissipationRateIntegrated(
+                    stat_dump_filename,
+                    patch_hierarchy,
+                    data_context);
+        }
+        else if (statistical_quantity_key == "SCAL_DIS_RAT_INHOMO_X")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleScalarDissipationRateWithInhomogeneousXDirection(
                     stat_dump_filename,
                     patch_hierarchy,
                     data_context);
@@ -6394,6 +7506,22 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         {
             rti_rmi_statistics_utilities->
                 outputEnsembleTurbulentMachNumberWithInhomogeneousXDirection(
+                    stat_dump_filename,
+                    patch_hierarchy,
+                    data_context);
+        }
+        else if (statistical_quantity_key == "TKE_PROD_INT")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleTKEProductionIntegrated(
+                    stat_dump_filename,
+                    patch_hierarchy,
+                    data_context);
+        }
+        else if (statistical_quantity_key == "TKE_PROD_INHOMO_X")
+        {
+            rti_rmi_statistics_utilities->
+                outputEnsembleTKEProductionWithInhomogeneousXDirection(
                     stat_dump_filename,
                     patch_hierarchy,
                     data_context);
