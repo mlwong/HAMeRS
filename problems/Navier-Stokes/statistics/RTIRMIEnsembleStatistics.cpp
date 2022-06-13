@@ -2948,7 +2948,7 @@ RTIRMIStatisticsUtilities::computeAveragedQuantiitesForTKEDissipationWithHomogen
                 use_derivative,
                 derivative_directions,
                 use_reciprocal,
-                0,
+                1,
                 patch_hierarchy,
                 data_context);
             
@@ -2979,7 +2979,7 @@ RTIRMIStatisticsUtilities::computeAveragedQuantiitesForTKEDissipationWithHomogen
                 use_derivative,
                 derivative_directions,
                 use_reciprocal,
-                0,
+                1,
                 patch_hierarchy,
                 data_context);
             
@@ -3010,7 +3010,7 @@ RTIRMIStatisticsUtilities::computeAveragedQuantiitesForTKEDissipationWithHomogen
                 use_derivative,
                 derivative_directions,
                 use_reciprocal,
-                0,
+                3,
                 patch_hierarchy,
                 data_context);
             
@@ -3221,7 +3221,7 @@ RTIRMIStatisticsUtilities::computeAveragedQuantiitesForTKEDissipationWithHomogen
                 use_derivative,
                 derivative_directions,
                 use_reciprocal,
-                0,
+                2,
                 patch_hierarchy,
                 data_context);
             
@@ -3252,7 +3252,7 @@ RTIRMIStatisticsUtilities::computeAveragedQuantiitesForTKEDissipationWithHomogen
                 use_derivative,
                 derivative_directions,
                 use_reciprocal,
-                0,
+                4,
                 patch_hierarchy,
                 data_context);
             
@@ -3283,7 +3283,7 @@ RTIRMIStatisticsUtilities::computeAveragedQuantiitesForTKEDissipationWithHomogen
                 use_derivative,
                 derivative_directions,
                 use_reciprocal,
-                0,
+                2,
                 patch_hierarchy,
                 data_context);
             
@@ -3314,7 +3314,7 @@ RTIRMIStatisticsUtilities::computeAveragedQuantiitesForTKEDissipationWithHomogen
                 use_derivative,
                 derivative_directions,
                 use_reciprocal,
-                0,
+                4,
                 patch_hierarchy,
                 data_context);
             
@@ -3345,7 +3345,7 @@ RTIRMIStatisticsUtilities::computeAveragedQuantiitesForTKEDissipationWithHomogen
                 use_derivative,
                 derivative_directions,
                 use_reciprocal,
-                0,
+                5,
                 patch_hierarchy,
                 data_context);
             
@@ -6727,6 +6727,8 @@ RTIRMIStatisticsUtilities::outputEnsembleEffectiveAtwoodNumberWithInhomogeneousX
         std::vector<double> rho_sq_avg_global(num_cells, double(0));
         std::vector<double> Y_0_avg_global(num_cells, double(0));
         
+        std::vector<double> rho_p_rho_p(num_cells, double(0));
+        
         for (int ri = 0; ri < num_realizations; ri++)
         {
             for (int i = 0; i < num_cells; i++)
@@ -6737,6 +6739,11 @@ RTIRMIStatisticsUtilities::outputEnsembleEffectiveAtwoodNumberWithInhomogeneousX
             }
         }
         
+        for (int i = 0; i < num_cells; i++)
+        {
+            rho_p_rho_p[i] = rho_sq_avg_global[i] - rho_avg_global[i]*rho_avg_global[i];
+        }
+        
         double At_sum = double(0);
         int count = 0;
         
@@ -6745,7 +6752,7 @@ RTIRMIStatisticsUtilities::outputEnsembleEffectiveAtwoodNumberWithInhomogeneousX
             const double mixing_metric = double(4)*Y_0_avg_global[i]*(double(1) - Y_0_avg_global[i]);
             if (mixing_metric > double(9)/double(10))
             {
-                At_sum += sqrt(rho_sq_avg_global[i])/rho_avg_global[i];
+                At_sum += sqrt(rho_p_rho_p[i])/rho_avg_global[i];
                 count++;
             }
         }
@@ -9832,7 +9839,7 @@ RTIRMIStatisticsUtilities::getAveragedQuantityWithShearStressComponentWithInhomo
                 
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    if (num_use_derivative > 0)
+                    if (use_derivative[qi])
                     {
                         num_subghosts_of_data.insert(
                             std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
@@ -10035,7 +10042,7 @@ RTIRMIStatisticsUtilities::getAveragedQuantityWithShearStressComponentWithInhomo
                                 - double(3)/double(20)*(u[idx_vel_x_RR] - u[idx_vel_x_LL])
                                 + double(3)/double(4)*(u[idx_vel_x_R] - u[idx_vel_x_L]))/dx[0];
                             
-                            tau_ij = (double(4)/double(3)*mu + mu_v)*dudx / ((double) n_overlapped);
+                            tau_ij = (double(4)/double(3)*mu + mu_v)*dudx;
                         }
                         else
                         {
@@ -10068,7 +10075,7 @@ RTIRMIStatisticsUtilities::getAveragedQuantityWithShearStressComponentWithInhomo
                                 {
                                     const int idx_qi = relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi];
                                     
-                                    avg *= u_qi[qi][idx_qi];
+                                    avg /= u_qi[qi][idx_qi];
                                 }
                             }
                             else
@@ -10077,7 +10084,7 @@ RTIRMIStatisticsUtilities::getAveragedQuantityWithShearStressComponentWithInhomo
                                 {
                                     const int idx_der = relative_idx_lo_0 + i;
                                     
-                                    avg /= der_qi[count_derivative][idx_der];
+                                    avg *= der_qi[count_derivative][idx_der];
                                     count_derivative++;
                                 }
                                 else
@@ -10228,7 +10235,7 @@ RTIRMIStatisticsUtilities::getAveragedQuantityWithShearStressComponentWithInhomo
                 
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    if (num_use_derivative > 0)
+                    if (use_derivative[qi])
                     {
                         num_subghosts_of_data.insert(
                             std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
@@ -10517,8 +10524,7 @@ RTIRMIStatisticsUtilities::getAveragedQuantityWithShearStressComponentWithInhomo
                                     - double(3)/double(20)*(v[idx_vel_y_TT] - v[idx_vel_y_BB])
                                     + double(3)/double(4)*(v[idx_vel_y_T] - v[idx_vel_y_B]))/dx[1];
                                 
-                                tau_ij = ((double(4)/double(3)*mu + mu_v)*dudx - (double(2)/double(3)*mu - mu_v)*dvdy)
-                                    *weight/((double) n_overlapped);
+                                tau_ij = (double(4)/double(3)*mu + mu_v)*dudx - (double(2)/double(3)*mu - mu_v)*dvdy;
                             }
                             else if (shear_stress_component_idx == 1)
                             {
@@ -10542,8 +10548,7 @@ RTIRMIStatisticsUtilities::getAveragedQuantityWithShearStressComponentWithInhomo
                                     - double(3)/double(20)*(u[idx_vel_y_TT] - u[idx_vel_y_BB])
                                     + double(3)/double(4)*(u[idx_vel_y_T] - u[idx_vel_y_B]))/dx[1];
                                 
-                                tau_ij = mu*(dudy + dvdx)
-                                    *weight/((double) n_overlapped);
+                                tau_ij = mu*(dudy + dvdx);
                             }
                             else if (shear_stress_component_idx == 3)
                             {
@@ -10572,8 +10577,7 @@ RTIRMIStatisticsUtilities::getAveragedQuantityWithShearStressComponentWithInhomo
                                     - double(3)/double(20)*(v[idx_vel_y_TT] - v[idx_vel_y_BB])
                                     + double(3)/double(4)*(v[idx_vel_y_T] - v[idx_vel_y_B]))/dx[1];
                                 
-                                tau_ij = ((double(4)/double(3)*mu + mu_v)*dvdy - (double(2)/double(3)*mu - mu_v)*dudx)
-                                    *weight/((double) n_overlapped);
+                                tau_ij = (double(4)/double(3)*mu + mu_v)*dvdy - (double(2)/double(3)*mu - mu_v)*dudx;
                             }
                             else
                             {
@@ -10781,7 +10785,7 @@ RTIRMIStatisticsUtilities::getAveragedQuantityWithShearStressComponentWithInhomo
                 
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    if (num_use_derivative > 0)
+                    if (use_derivative[qi])
                     {
                         num_subghosts_of_data.insert(
                             std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
@@ -11167,8 +11171,7 @@ RTIRMIStatisticsUtilities::getAveragedQuantityWithShearStressComponentWithInhomo
                                         - double(3)/double(20)*(w[idx_vel_z_FF] - w[idx_vel_z_BB])
                                         + double(3)/double(4)*(w[idx_vel_z_F] - w[idx_vel_z_B]))/dx[2];
                                     
-                                    tau_ij = ((double(4)/double(3)*mu + mu_v)*dudx - (double(2)/double(3)*mu - mu_v)*(dvdy + dwdz))
-                                        *weight/((double) n_overlapped);
+                                    tau_ij = (double(4)/double(3)*mu + mu_v)*dudx - (double(2)/double(3)*mu - mu_v)*(dvdy + dwdz);
                                 }
                                 else if (shear_stress_component_idx == 1)
                                 {
@@ -11252,8 +11255,7 @@ RTIRMIStatisticsUtilities::getAveragedQuantityWithShearStressComponentWithInhomo
                                         - double(3)/double(20)*(u[idx_vel_y_TT] - u[idx_vel_y_BB])
                                         + double(3)/double(4)*(u[idx_vel_y_T] - u[idx_vel_y_B]))/dx[1];
                                     
-                                    tau_ij = mu*(dudy + dvdx)
-                                        *weight/((double) n_overlapped);
+                                    tau_ij = mu*(dudy + dvdx);
                                 }
                                 else if (shear_stress_component_idx == 2)
                                 {
@@ -11337,8 +11339,7 @@ RTIRMIStatisticsUtilities::getAveragedQuantityWithShearStressComponentWithInhomo
                                         - double(3)/double(20)*(u[idx_vel_z_FF] - u[idx_vel_z_BB])
                                         + double(3)/double(4)*(u[idx_vel_z_F] - u[idx_vel_z_B]))/dx[2];
                                     
-                                    tau_ij = mu*(dudz + dwdx)
-                                        *weight/((double) n_overlapped);
+                                    tau_ij = mu*(dudz + dwdx);
                                 }
                                 else if (shear_stress_component_idx == 3)
                                 {
@@ -11461,8 +11462,7 @@ RTIRMIStatisticsUtilities::getAveragedQuantityWithShearStressComponentWithInhomo
                                         - double(3)/double(20)*(w[idx_vel_z_FF] - w[idx_vel_z_BB])
                                         + double(3)/double(4)*(w[idx_vel_z_F] - w[idx_vel_z_B]))/dx[2];
                                     
-                                    tau_ij = ((double(4)/double(3)*mu + mu_v)*dvdy - (double(2)/double(3)*mu - mu_v)*(dudx + dwdz))
-                                        *weight/((double) n_overlapped);
+                                    tau_ij = (double(4)/double(3)*mu + mu_v)*dvdy - (double(2)/double(3)*mu - mu_v)*(dudx + dwdz);
                                 }
                                 else if (shear_stress_component_idx == 4)
                                 {
@@ -11546,8 +11546,7 @@ RTIRMIStatisticsUtilities::getAveragedQuantityWithShearStressComponentWithInhomo
                                         - double(3)/double(20)*(v[idx_vel_z_FF] - v[idx_vel_z_BB])
                                         + double(3)/double(4)*(v[idx_vel_z_F] - v[idx_vel_z_B]))/dx[2];
                                     
-                                    tau_ij = mu*(dvdz + dwdy)
-                                        *weight/((double) n_overlapped);
+                                    tau_ij = mu*(dvdz + dwdy);
                                 }
                                 else if (shear_stress_component_idx == 5)
                                 {
@@ -11670,8 +11669,7 @@ RTIRMIStatisticsUtilities::getAveragedQuantityWithShearStressComponentWithInhomo
                                         - double(3)/double(20)*(w[idx_vel_z_FF] - w[idx_vel_z_BB])
                                         + double(3)/double(4)*(w[idx_vel_z_F] - w[idx_vel_z_B]))/dx[2];
                                     
-                                    tau_ij = ((double(4)/double(3)*mu + mu_v)*dwdz - (double(2)/double(3)*mu - mu_v)*(dudx + dvdy))
-                                        *weight/((double) n_overlapped);
+                                    tau_ij = (double(4)/double(3)*mu + mu_v)*dwdz - (double(2)/double(3)*mu - mu_v)*(dudx + dvdy);
                                 }
                                 else
                                 {
