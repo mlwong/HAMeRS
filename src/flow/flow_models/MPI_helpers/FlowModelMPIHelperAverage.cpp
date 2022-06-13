@@ -2857,7 +2857,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                 
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    if (use_derivative[qi])
+                    if (num_use_derivative > 0)
                     {
                         num_subghosts_of_data.insert(
                             std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
@@ -3156,7 +3156,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                 
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    if (use_derivative[qi])
+                    if (num_use_derivative > 0)
                     {
                         num_subghosts_of_data.insert(
                             std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
@@ -3500,7 +3500,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                 
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    if (use_derivative[qi])
+                    if (num_use_derivative > 0)
                     {
                         num_subghosts_of_data.insert(
                             std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
@@ -6963,7 +6963,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                 
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    if (use_derivative[qi])
+                    if (num_use_derivative > 0)
                     {
                         num_subghosts_of_data.insert(
                             std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
@@ -7307,7 +7307,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                 
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    if (use_derivative[qi])
+                    if (num_use_derivative > 0)
                     {
                         num_subghosts_of_data.insert(
                             std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
@@ -9685,7 +9685,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
                 
                 for (int qi = 0; qi < num_quantities; qi++)
                 {
-                    if (use_derivative[qi])
+                    if (num_use_derivative > 0)
                     {
                         num_subghosts_of_data.insert(
                             std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));

@@ -6816,6 +6816,12 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithShearStressComponentWithInhomogen
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    num_subghosts_of_data.insert(
+                        std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
+                }
+                
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
                 
@@ -6827,20 +6833,6 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithShearStressComponentWithInhomogen
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
-                
-                for (int qi = 0; qi < num_quantities; qi++)
-                {
-                    if (use_derivative[qi])
-                    {
-                        num_subghosts_of_data.insert(
-                            std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
-                    }
-                    else
-                    {
-                        num_subghosts_of_data.insert(
-                            std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
-                    }
-                }
                 
                 d_flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
@@ -7212,6 +7204,12 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithShearStressComponentWithInhomogen
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    num_subghosts_of_data.insert(
+                        std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
+                }
+                
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
                 
@@ -7223,20 +7221,6 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithShearStressComponentWithInhomogen
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
-                
-                for (int qi = 0; qi < num_quantities; qi++)
-                {
-                    if (use_derivative[qi])
-                    {
-                        num_subghosts_of_data.insert(
-                            std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
-                    }
-                    else
-                    {
-                        num_subghosts_of_data.insert(
-                            std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
-                    }
-                }
                 
                 d_flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
@@ -7762,6 +7746,12 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithShearStressComponentWithInhomogen
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    num_subghosts_of_data.insert(
+                        std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
+                }
+                
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
                 
@@ -7773,20 +7763,6 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithShearStressComponentWithInhomogen
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", hier::IntVector::getZero(d_dim)));
-                
-                for (int qi = 0; qi < num_quantities; qi++)
-                {
-                    if (use_derivative[qi])
-                    {
-                        num_subghosts_of_data.insert(
-                            std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
-                    }
-                    else
-                    {
-                        num_subghosts_of_data.insert(
-                            std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
-                    }
-                }
                 
                 d_flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
@@ -8985,6 +8961,12 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithDerivativeOfShearStressComponentW
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    num_subghosts_of_data.insert(
+                        std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
+                }
+                
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
                 
@@ -8996,20 +8978,6 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithDerivativeOfShearStressComponentW
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", num_ghosts_der));
-                
-                for (int qi = 0; qi < num_quantities; qi++)
-                {
-                    if (use_derivative[qi])
-                    {
-                        num_subghosts_of_data.insert(
-                            std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
-                    }
-                    else
-                    {
-                        num_subghosts_of_data.insert(
-                            std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
-                    }
-                }
                 
                 d_flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
@@ -9403,6 +9371,12 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithDerivativeOfShearStressComponentW
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    num_subghosts_of_data.insert(
+                        std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
+                }
+                
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
                 
@@ -9414,20 +9388,6 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithDerivativeOfShearStressComponentW
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", num_ghosts_der));
-                
-                for (int qi = 0; qi < num_quantities; qi++)
-                {
-                    if (use_derivative[qi])
-                    {
-                        num_subghosts_of_data.insert(
-                            std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
-                    }
-                    else
-                    {
-                        num_subghosts_of_data.insert(
-                            std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
-                    }
-                }
                 
                 d_flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
@@ -10239,6 +10199,12 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithDerivativeOfShearStressComponentW
                 
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
+                for (int qi = 0; qi < num_quantities; qi++)
+                {
+                    num_subghosts_of_data.insert(
+                        std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
+                }
+                
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts_der));
                 
@@ -10250,20 +10216,6 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithDerivativeOfShearStressComponentW
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("TEMPERATURE", num_ghosts_der));
-                
-                for (int qi = 0; qi < num_quantities; qi++)
-                {
-                    if (use_derivative[qi])
-                    {
-                        num_subghosts_of_data.insert(
-                            std::pair<std::string, hier::IntVector>(quantity_names[qi], num_ghosts_der));
-                    }
-                    else
-                    {
-                        num_subghosts_of_data.insert(
-                            std::pair<std::string, hier::IntVector>(quantity_names[qi], hier::IntVector::getZero(d_dim)));
-                    }
-                }
                 
                 d_flow_model_tmp->registerDerivedVariables(num_subghosts_of_data);
                 
