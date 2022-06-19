@@ -22,48 +22,84 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
         {
             rho_avg_computed     = false;
             rho_inv_avg_computed = false;
-            p_avg_computed       = false; // new
+            p_avg_computed       = false;
             u_avg_computed       = false;
+            v_avg_computed       = false;
+            w_avg_computed       = false;
             u_sq_avg_computed    = false;
             rho_u_avg_computed   = false;
+            rho_v_avg_computed   = false;
+            rho_w_avg_computed   = false;
             rho_u_u_avg_computed = false;
+            rho_v_v_avg_computed = false;
+            rho_w_w_avg_computed = false;
+            
+            rho_u_v_avg_computed = false;
+            rho_u_w_avg_computed = false;
             
             ddx_rho_avg_computed       = false;
             ddx_p_avg_computed         = false;
             ddx_u_avg_computed         = false;
+            ddx_v_avg_computed         = false;
+            ddx_w_avg_computed         = false;
             ddx_u_sq_avg_computed      = false;
             ddx_rho_u_avg_computed     = false;
+            ddx_rho_v_avg_computed     = false;
+            ddx_rho_w_avg_computed     = false;
             ddx_rho_u_u_avg_computed   = false;
-            ddx_rho_u_u_u_avg_computed = false; // new
-            ddx_u_p_avg_computed       = false; // new
+            ddx_rho_v_v_avg_computed   = false;
+            ddx_rho_w_w_avg_computed   = false;
+            ddx_rho_u_u_u_avg_computed = false;
+            ddx_u_p_avg_computed       = false;
             
-            ddy_u_avg_computed = false; // new
+            ddx_rho_u_v_avg_computed   = false;
+            ddx_rho_u_w_avg_computed   = false;
+            ddx_rho_u_v_v_avg_computed = false;
+            ddx_rho_u_w_w_avg_computed = false;
+            
+            ddy_u_avg_computed = false;
             ddy_v_avg_computed = false;
+            ddy_w_avg_computed = false;
             
-            ddz_u_avg_computed = false; // new
+            ddz_u_avg_computed = false;
+            ddz_v_avg_computed = false;
             ddz_w_avg_computed = false;
             
             rho_inv_ddx_p_avg_computed = false;
             
-            p_ddx_u_avg_computed = false; // new
+            p_ddx_u_avg_computed = false;
+            p_ddy_v_avg_computed = false;
+            p_ddz_w_avg_computed = false;
             
             u_ddx_u_avg_computed = false;
             u_ddy_v_avg_computed = false;
             u_ddz_w_avg_computed = false;
             
-            tau11_avg_computed = false; // new
-            tau12_avg_computed = false; // new
-            tau13_avg_computed = false; // new
+            tau11_avg_computed = false;
+            tau12_avg_computed = false;
+            tau13_avg_computed = false;
+            tau22_avg_computed = false;
+            tau23_avg_computed = false;
+            tau33_avg_computed = false;
             
-            u_tau11_avg_computed = false; // new
+            u_tau11_avg_computed = false;
+            v_tau12_avg_computed = false;
+            w_tau13_avg_computed = false;
             
             ddx_tau11_avg_computed = false;
             ddy_tau12_avg_computed = false;
             ddz_tau13_avg_computed = false;
             
-            tau11_ddx_u_avg_computed = false; // new
-            tau12_ddy_u_avg_computed = false; // new
-            tau13_ddz_u_avg_computed = false; // new
+            tau11_ddx_u_avg_computed = false;
+            tau12_ddy_u_avg_computed = false;
+            tau13_ddz_u_avg_computed = false;
+            
+            tau12_ddx_v_avg_computed = false;
+            tau22_ddy_v_avg_computed = false;
+            tau23_ddz_v_avg_computed = false;
+            tau13_ddx_w_avg_computed = false;
+            tau23_ddy_w_avg_computed = false;
+            tau33_ddz_w_avg_computed = false;
             
             rho_inv_ddx_tau11_avg_computed = false;
             rho_inv_ddy_tau12_avg_computed = false;
@@ -74,48 +110,84 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
         {
             rho_avg_realizations.clear();
             rho_inv_avg_realizations.clear();
-            p_avg_realizations.clear(); // new
+            p_avg_realizations.clear();
             u_avg_realizations.clear();
+            v_avg_realizations.clear();
+            w_avg_realizations.clear();
             u_sq_avg_realizations.clear();
             rho_u_avg_realizations.clear();
+            rho_v_avg_realizations.clear();
+            rho_w_avg_realizations.clear();
             rho_u_u_avg_realizations.clear();
+            rho_v_v_avg_realizations.clear();
+            rho_w_w_avg_realizations.clear();
             
+            rho_u_v_avg_realizations.clear();
+            rho_u_w_avg_realizations.clear();
+        
             ddx_rho_avg_realizations.clear();
             ddx_p_avg_realizations.clear();
             ddx_u_avg_realizations.clear();
+            ddx_v_avg_realizations.clear();
+            ddx_w_avg_realizations.clear();
             ddx_u_sq_avg_realizations.clear();
             ddx_rho_u_avg_realizations.clear();
+            ddx_rho_v_avg_realizations.clear();
+            ddx_rho_w_avg_realizations.clear();
             ddx_rho_u_u_avg_realizations.clear();
-            ddx_rho_u_u_u_avg_realizations.clear(); // new
-            ddx_u_p_avg_realizations.clear(); // new
+            ddx_rho_v_v_avg_realizations.clear();
+            ddx_rho_w_w_avg_realizations.clear();
+            ddx_rho_u_u_u_avg_realizations.clear();
+            ddx_u_p_avg_realizations.clear();
             
-            ddy_u_avg_realizations.clear(); // new
+            ddx_rho_u_v_avg_realizations.clear();
+            ddx_rho_u_w_avg_realizations.clear();
+            ddx_rho_u_v_v_avg_realizations.clear();
+            ddx_rho_u_w_w_avg_realizations.clear();
+            
+            ddy_u_avg_realizations.clear();
             ddy_v_avg_realizations.clear();
+            ddy_w_avg_realizations.clear();
             
-            ddz_u_avg_realizations.clear(); // new
+            ddz_u_avg_realizations.clear();
+            ddz_v_avg_realizations.clear();
             ddz_w_avg_realizations.clear();
             
             rho_inv_ddx_p_avg_realizations.clear();
             
-            p_ddx_u_avg_realizations.clear(); // new
+            p_ddx_u_avg_realizations.clear();
+            p_ddy_v_avg_realizations.clear();
+            p_ddz_w_avg_realizations.clear();
             
             u_ddx_u_avg_realizations.clear();
             u_ddy_v_avg_realizations.clear();
             u_ddz_w_avg_realizations.clear();
             
-            tau11_avg_realizations.clear(); // new
-            tau12_avg_realizations.clear(); // new
-            tau13_avg_realizations.clear(); // new
+            tau11_avg_realizations.clear();
+            tau12_avg_realizations.clear();
+            tau13_avg_realizations.clear();
+            tau22_avg_realizations.clear();
+            tau23_avg_realizations.clear();
+            tau33_avg_realizations.clear();
             
-            u_tau11_avg_realizations.clear(); // new
+            u_tau11_avg_realizations.clear();
+            v_tau12_avg_realizations.clear();
+            w_tau13_avg_realizations.clear();
             
             ddx_tau11_avg_realizations.clear();
             ddy_tau12_avg_realizations.clear();
             ddz_tau13_avg_realizations.clear();
             
-            tau11_ddx_u_avg_realizations.clear(); // new
-            tau12_ddy_u_avg_realizations.clear(); // new
-            tau13_ddz_u_avg_realizations.clear(); // new
+            tau11_ddx_u_avg_realizations.clear();
+            tau12_ddy_u_avg_realizations.clear();
+            tau13_ddz_u_avg_realizations.clear();
+            
+            tau12_ddx_v_avg_realizations.clear();
+            tau22_ddy_v_avg_realizations.clear();
+            tau23_ddz_v_avg_realizations.clear();
+            tau13_ddx_w_avg_realizations.clear();
+            tau23_ddy_w_avg_realizations.clear();
+            tau33_ddz_w_avg_realizations.clear();
             
             rho_inv_ddx_tau11_avg_realizations.clear();
             rho_inv_ddy_tau12_avg_realizations.clear();
@@ -128,48 +200,84 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
         // Number of realizalizations; number of cells.
         std::vector<std::vector<double> > rho_avg_realizations;
         std::vector<std::vector<double> > rho_inv_avg_realizations;
-        std::vector<std::vector<double> > p_avg_realizations; // new
+        std::vector<std::vector<double> > p_avg_realizations;
         std::vector<std::vector<double> > u_avg_realizations;
+        std::vector<std::vector<double> > v_avg_realizations;
+        std::vector<std::vector<double> > w_avg_realizations;
         std::vector<std::vector<double> > u_sq_avg_realizations;
         std::vector<std::vector<double> > rho_u_avg_realizations;
+        std::vector<std::vector<double> > rho_v_avg_realizations;
+        std::vector<std::vector<double> > rho_w_avg_realizations;
         std::vector<std::vector<double> > rho_u_u_avg_realizations;
+        std::vector<std::vector<double> > rho_v_v_avg_realizations;
+        std::vector<std::vector<double> > rho_w_w_avg_realizations;
+        
+        std::vector<std::vector<double> > rho_u_v_avg_realizations;
+        std::vector<std::vector<double> > rho_u_w_avg_realizations;
         
         std::vector<std::vector<double> > ddx_rho_avg_realizations;
         std::vector<std::vector<double> > ddx_p_avg_realizations;
         std::vector<std::vector<double> > ddx_u_avg_realizations;
+        std::vector<std::vector<double> > ddx_v_avg_realizations;
+        std::vector<std::vector<double> > ddx_w_avg_realizations;
         std::vector<std::vector<double> > ddx_u_sq_avg_realizations;
         std::vector<std::vector<double> > ddx_rho_u_avg_realizations;
+        std::vector<std::vector<double> > ddx_rho_v_avg_realizations;
+        std::vector<std::vector<double> > ddx_rho_w_avg_realizations;
         std::vector<std::vector<double> > ddx_rho_u_u_avg_realizations;
-        std::vector<std::vector<double> > ddx_rho_u_u_u_avg_realizations; // new
-        std::vector<std::vector<double> > ddx_u_p_avg_realizations; // new
+        std::vector<std::vector<double> > ddx_rho_v_v_avg_realizations;
+        std::vector<std::vector<double> > ddx_rho_w_w_avg_realizations;
+        std::vector<std::vector<double> > ddx_rho_u_u_u_avg_realizations;
+        std::vector<std::vector<double> > ddx_u_p_avg_realizations;
         
-        std::vector<std::vector<double> > ddy_u_avg_realizations; // new
+        std::vector<std::vector<double> > ddx_rho_u_v_avg_realizations;
+        std::vector<std::vector<double> > ddx_rho_u_w_avg_realizations;
+        std::vector<std::vector<double> > ddx_rho_u_v_v_avg_realizations;
+        std::vector<std::vector<double> > ddx_rho_u_w_w_avg_realizations;
+        
+        std::vector<std::vector<double> > ddy_u_avg_realizations;
         std::vector<std::vector<double> > ddy_v_avg_realizations;
+        std::vector<std::vector<double> > ddy_w_avg_realizations;
         
-        std::vector<std::vector<double> > ddz_u_avg_realizations; // new
+        std::vector<std::vector<double> > ddz_u_avg_realizations;
+        std::vector<std::vector<double> > ddz_v_avg_realizations;
         std::vector<std::vector<double> > ddz_w_avg_realizations;
         
         std::vector<std::vector<double> > rho_inv_ddx_p_avg_realizations;
         
-        std::vector<std::vector<double> > p_ddx_u_avg_realizations; // new
+        std::vector<std::vector<double> > p_ddx_u_avg_realizations;
+        std::vector<std::vector<double> > p_ddy_v_avg_realizations;
+        std::vector<std::vector<double> > p_ddz_w_avg_realizations;
         
         std::vector<std::vector<double> > u_ddx_u_avg_realizations;
         std::vector<std::vector<double> > u_ddy_v_avg_realizations;
         std::vector<std::vector<double> > u_ddz_w_avg_realizations;
         
-        std::vector<std::vector<double> > tau11_avg_realizations; // new
-        std::vector<std::vector<double> > tau12_avg_realizations; // new
-        std::vector<std::vector<double> > tau13_avg_realizations; // new
+        std::vector<std::vector<double> > tau11_avg_realizations;
+        std::vector<std::vector<double> > tau12_avg_realizations;
+        std::vector<std::vector<double> > tau13_avg_realizations;
+        std::vector<std::vector<double> > tau22_avg_realizations;
+        std::vector<std::vector<double> > tau23_avg_realizations;
+        std::vector<std::vector<double> > tau33_avg_realizations;
         
-        std::vector<std::vector<double> > u_tau11_avg_realizations; // new
+        std::vector<std::vector<double> > u_tau11_avg_realizations;
+        std::vector<std::vector<double> > v_tau12_avg_realizations;
+        std::vector<std::vector<double> > w_tau13_avg_realizations;
         
         std::vector<std::vector<double> > ddx_tau11_avg_realizations;
         std::vector<std::vector<double> > ddy_tau12_avg_realizations;
         std::vector<std::vector<double> > ddz_tau13_avg_realizations;
         
-        std::vector<std::vector<double> > tau11_ddx_u_avg_realizations; // new
-        std::vector<std::vector<double> > tau12_ddy_u_avg_realizations; // new
-        std::vector<std::vector<double> > tau13_ddz_u_avg_realizations; // new
+        std::vector<std::vector<double> > tau11_ddx_u_avg_realizations;
+        std::vector<std::vector<double> > tau12_ddy_u_avg_realizations;
+        std::vector<std::vector<double> > tau13_ddz_u_avg_realizations;
+        
+        std::vector<std::vector<double> > tau12_ddx_v_avg_realizations;
+        std::vector<std::vector<double> > tau22_ddy_v_avg_realizations;
+        std::vector<std::vector<double> > tau23_ddz_v_avg_realizations;
+        std::vector<std::vector<double> > tau13_ddx_w_avg_realizations;
+        std::vector<std::vector<double> > tau23_ddy_w_avg_realizations;
+        std::vector<std::vector<double> > tau33_ddz_w_avg_realizations;
         
         std::vector<std::vector<double> > rho_inv_ddx_tau11_avg_realizations;
         std::vector<std::vector<double> > rho_inv_ddy_tau12_avg_realizations;
@@ -179,48 +287,84 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
         
         bool rho_avg_computed;
         bool rho_inv_avg_computed;
-        bool p_avg_computed; // new
+        bool p_avg_computed;
         bool u_avg_computed;
+        bool v_avg_computed;
+        bool w_avg_computed;
         bool u_sq_avg_computed;
         bool rho_u_avg_computed;
+        bool rho_v_avg_computed;
+        bool rho_w_avg_computed;
         bool rho_u_u_avg_computed;
+        bool rho_v_v_avg_computed;
+        bool rho_w_w_avg_computed;
+        
+        bool rho_u_v_avg_computed;
+        bool rho_u_w_avg_computed;
         
         bool ddx_rho_avg_computed;
         bool ddx_p_avg_computed;
         bool ddx_u_avg_computed;
+        bool ddx_v_avg_computed;
+        bool ddx_w_avg_computed;
         bool ddx_u_sq_avg_computed;
         bool ddx_rho_u_avg_computed;
+        bool ddx_rho_v_avg_computed;
+        bool ddx_rho_w_avg_computed;
         bool ddx_rho_u_u_avg_computed;
-        bool ddx_rho_u_u_u_avg_computed; // new
-        bool ddx_u_p_avg_computed; // new
+        bool ddx_rho_v_v_avg_computed;
+        bool ddx_rho_w_w_avg_computed;
+        bool ddx_rho_u_u_u_avg_computed;
+        bool ddx_u_p_avg_computed;
         
-        bool ddy_u_avg_computed; // new
+        bool ddx_rho_u_v_avg_computed;
+        bool ddx_rho_u_w_avg_computed;
+        bool ddx_rho_u_v_v_avg_computed;
+        bool ddx_rho_u_w_w_avg_computed;
+        
+        bool ddy_u_avg_computed;
         bool ddy_v_avg_computed;
+        bool ddy_w_avg_computed;
         
-        bool ddz_u_avg_computed; // new
+        bool ddz_u_avg_computed;
+        bool ddz_v_avg_computed;
         bool ddz_w_avg_computed;
         
         bool rho_inv_ddx_p_avg_computed;
         
-        bool p_ddx_u_avg_computed; // new
+        bool p_ddx_u_avg_computed;
+        bool p_ddy_v_avg_computed;
+        bool p_ddz_w_avg_computed;
         
         bool u_ddx_u_avg_computed;
         bool u_ddy_v_avg_computed;
         bool u_ddz_w_avg_computed;
         
-        bool tau11_avg_computed; // new
-        bool tau12_avg_computed; // new
-        bool tau13_avg_computed; // new
+        bool tau11_avg_computed;
+        bool tau12_avg_computed;
+        bool tau13_avg_computed;
+        bool tau22_avg_computed;
+        bool tau23_avg_computed;
+        bool tau33_avg_computed;
         
-        bool u_tau11_avg_computed; // new
+        bool u_tau11_avg_computed;
+        bool v_tau12_avg_computed;
+        bool w_tau13_avg_computed;
         
         bool ddx_tau11_avg_computed;
         bool ddy_tau12_avg_computed;
         bool ddz_tau13_avg_computed;
         
-        bool tau11_ddx_u_avg_computed; // new
-        bool tau12_ddy_u_avg_computed; // new
-        bool tau13_ddz_u_avg_computed; // new
+        bool tau11_ddx_u_avg_computed;
+        bool tau12_ddy_u_avg_computed;
+        bool tau13_ddz_u_avg_computed;
+        
+        bool tau12_ddx_v_avg_computed;
+        bool tau22_ddy_v_avg_computed;
+        bool tau23_ddz_v_avg_computed;
+        bool tau13_ddx_w_avg_computed;
+        bool tau23_ddy_w_avg_computed;
+        bool tau33_ddz_w_avg_computed;
         
         bool rho_inv_ddx_tau11_avg_computed;
         bool rho_inv_ddy_tau12_avg_computed;
@@ -289,11 +433,20 @@ class RTIRMIBudgetsUtilities
             const double output_time) const;
         
         /*
-         * Output spatial profile of ensemble averaged density with assumed homogeneity in y-direction (2D) or
-         * yz-plane (3D) to a file.
+         * Output budget of Reynolds normal stress in y-direction with inhomogeneous x-direction to a file.
          */
         void
-        outputSpatialProfileEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
+        outputBudgetReynoldsNormalStressInYDirectionWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output budget of Reynolds normal stress in z-direction with inhomogeneous x-direction to a file.
+         */
+        void
+        outputBudgetReynoldsNormalStressInZDirectionWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -526,6 +679,36 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
     
     d_ensemble_statistics->u_avg_computed = true;
     
+    // Compute v_avg.
+    
+    if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+    {
+        std::vector<double> v_avg = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            "VELOCITY",
+            1,
+            data_context);
+        
+        std::vector<std::vector<double> >& v_avg_realizations = d_ensemble_statistics->v_avg_realizations;
+        v_avg_realizations.push_back(v_avg);
+        
+        d_ensemble_statistics->v_avg_computed = true;
+    }
+    
+    // Compute w_avg.
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        std::vector<double> w_avg = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            "VELOCITY",
+            2,
+            data_context);
+        
+        std::vector<std::vector<double> >& w_avg_realizations = d_ensemble_statistics->w_avg_realizations;
+        w_avg_realizations.push_back(w_avg);
+        
+        d_ensemble_statistics->w_avg_computed = true;
+    }
+    
     // Compute u_sq_avg.
     
     quantity_names.push_back("VELOCITY");
@@ -559,6 +742,36 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
     
     d_ensemble_statistics->rho_u_avg_computed = true;
     
+    // Compute rho_v_avg.
+    
+    if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+    {
+        std::vector<double> rho_v_avg = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            "MOMENTUM",
+            1,
+            data_context);
+        
+        std::vector<std::vector<double> >& rho_v_avg_realizations = d_ensemble_statistics->rho_v_avg_realizations;
+        rho_v_avg_realizations.push_back(rho_v_avg);
+        
+        d_ensemble_statistics->rho_v_avg_computed = true;
+    }
+    
+    // Compute rho_w_avg.
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        std::vector<double> rho_w_avg = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            "MOMENTUM",
+            2,
+            data_context);
+        
+        std::vector<std::vector<double> >& rho_w_avg_realizations = d_ensemble_statistics->rho_w_avg_realizations;
+        rho_w_avg_realizations.push_back(rho_w_avg);
+        
+        d_ensemble_statistics->rho_w_avg_computed = true;
+    }
+    
     // Compute rho_u_u_avg.
     
     quantity_names.push_back("DENSITY");
@@ -582,6 +795,114 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
     rho_u_u_avg_realizations.push_back(rho_u_u_avg_global);
     
     d_ensemble_statistics->rho_u_u_avg_computed = true;
+    
+    // Compute rho_v_v_avg.
+    
+    if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("DENSITY");
+        component_indices.push_back(0);
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        
+        std::vector<double> rho_v_v_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        
+        std::vector<std::vector<double> >& rho_v_v_avg_realizations = d_ensemble_statistics->rho_v_v_avg_realizations;
+        rho_v_v_avg_realizations.push_back(rho_v_v_avg_global);
+        
+        d_ensemble_statistics->rho_v_v_avg_computed = true;
+    }
+    
+    // Compute rho_w_w_avg.
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("DENSITY");
+        component_indices.push_back(0);
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(2);
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(2);
+        
+        std::vector<double> rho_w_w_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        
+        std::vector<std::vector<double> >& rho_w_w_avg_realizations = d_ensemble_statistics->rho_w_w_avg_realizations;
+        rho_w_w_avg_realizations.push_back(rho_w_w_avg_global);
+        
+        d_ensemble_statistics->rho_w_w_avg_computed = true;
+    }
+    
+    // Compute rho_u_v_avg.
+    
+    if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("DENSITY");
+        component_indices.push_back(0);
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(0);
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        
+        std::vector<double> rho_u_v_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        
+        std::vector<std::vector<double> >& rho_u_v_avg_realizations = d_ensemble_statistics->rho_u_v_avg_realizations;
+        rho_u_v_avg_realizations.push_back(rho_u_v_avg_global);
+        
+        d_ensemble_statistics->rho_u_v_avg_computed = true;
+    }
+    
+    // Compute rho_u_w_avg.
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("DENSITY");
+        component_indices.push_back(0);
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(0);
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(2);
+        
+        std::vector<double> rho_u_w_avg_global = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        
+        std::vector<std::vector<double> >& rho_u_w_avg_realizations = d_ensemble_statistics->rho_u_w_avg_realizations;
+        rho_u_w_avg_realizations.push_back(rho_u_w_avg_global);
+        
+        d_ensemble_statistics->rho_u_w_avg_computed = true;
+    }
     
     // Compute ddx_rho_avg.
     
@@ -652,6 +973,58 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
     
     d_ensemble_statistics->ddx_u_avg_computed = true;
     
+    // Computed ddx_v_avg.
+    
+    if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_reciprocal.push_back(false);
+        
+        std::vector<double> ddx_v_avg = MPI_helper_average.getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_reciprocal,
+            0,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& ddx_v_avg_realizations = d_ensemble_statistics->ddx_v_avg_realizations;
+        ddx_v_avg_realizations.push_back(ddx_v_avg);
+        
+        d_ensemble_statistics->ddx_v_avg_computed = true;
+    }
+    
+    // Computed ddx_w_avg.
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(2);
+        use_reciprocal.push_back(false);
+        
+        std::vector<double> ddx_w_avg = MPI_helper_average.getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_reciprocal,
+            0,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& ddx_w_avg_realizations = d_ensemble_statistics->ddx_w_avg_realizations;
+        ddx_w_avg_realizations.push_back(ddx_w_avg);
+        
+        d_ensemble_statistics->ddx_w_avg_computed = true;
+    }
+    
     // Computed dx_u_sq_avg.
     
     quantity_names.push_back("VELOCITY");
@@ -702,6 +1075,58 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
     
     d_ensemble_statistics->ddx_rho_u_avg_computed = true;
     
+    // Compute ddx_rho_v_avg.
+    
+    if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("MOMENTUM");
+        component_indices.push_back(1);
+        use_reciprocal.push_back(false);
+        
+        std::vector<double> ddx_rho_v_avg = MPI_helper_average.getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_reciprocal,
+            0,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& ddx_rho_v_avg_realizations = d_ensemble_statistics->ddx_rho_v_avg_realizations;
+        ddx_rho_v_avg_realizations.push_back(ddx_rho_v_avg);
+        
+        d_ensemble_statistics->ddx_rho_v_avg_computed = true;
+    }
+    
+    // Compute ddx_rho_w_avg.
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("MOMENTUM");
+        component_indices.push_back(2);
+        use_reciprocal.push_back(false);
+        
+        std::vector<double> ddx_rho_w_avg = MPI_helper_average.getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_reciprocal,
+            0,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& ddx_rho_w_avg_realizations = d_ensemble_statistics->ddx_rho_w_avg_realizations;
+        ddx_rho_w_avg_realizations.push_back(ddx_rho_w_avg);
+        
+        d_ensemble_statistics->ddx_rho_w_avg_computed = true;
+    }
+    
     // Compute ddx_rho_u_u_avg.
     
     quantity_names.push_back("MOMENTUM");
@@ -728,6 +1153,66 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
     ddx_rho_u_u_avg_realizations.push_back(ddx_rho_u_u_avg);
     
     d_ensemble_statistics->ddx_rho_u_u_avg_computed = true;
+    
+    // Compute ddx_rho_v_v_avg.
+    
+    if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("MOMENTUM");
+        component_indices.push_back(1);
+        use_reciprocal.push_back(false);
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_reciprocal.push_back(false);
+        
+        std::vector<double> ddx_rho_v_v_avg = MPI_helper_average.getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_reciprocal,
+            0,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& ddx_rho_v_v_avg_realizations = d_ensemble_statistics->ddx_rho_v_v_avg_realizations;
+        ddx_rho_v_v_avg_realizations.push_back(ddx_rho_v_v_avg);
+        
+        d_ensemble_statistics->ddx_rho_v_v_avg_computed = true;
+    }
+    
+    // Compute ddx_rho_w_w_avg.
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("MOMENTUM");
+        component_indices.push_back(2);
+        use_reciprocal.push_back(false);
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(2);
+        use_reciprocal.push_back(false);
+        
+        std::vector<double> ddx_rho_w_w_avg = MPI_helper_average.getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_reciprocal,
+            0,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& ddx_rho_w_w_avg_realizations = d_ensemble_statistics->ddx_rho_w_w_avg_realizations;
+        ddx_rho_w_w_avg_realizations.push_back(ddx_rho_w_w_avg);
+        
+        d_ensemble_statistics->ddx_rho_w_w_avg_computed = true;
+    }
     
     // Compute ddx_rho_u_u_u_avg.
     
@@ -785,6 +1270,134 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
     
     d_ensemble_statistics->ddx_u_p_avg_computed = true;
     
+    // Compute ddx_rho_u_v_avg.
+    
+    if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("MOMENTUM");
+        component_indices.push_back(0);
+        use_reciprocal.push_back(false);
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_reciprocal.push_back(false);
+        
+        std::vector<double> ddx_rho_u_v_avg = MPI_helper_average.getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_reciprocal,
+            0,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& ddx_rho_u_v_avg_realizations = d_ensemble_statistics->ddx_rho_u_v_avg_realizations;
+        ddx_rho_u_v_avg_realizations.push_back(ddx_rho_u_v_avg);
+        
+        d_ensemble_statistics->ddx_rho_u_v_avg_computed = true;
+    }
+    
+    // Compute ddx_rho_u_w_avg.
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("MOMENTUM");
+        component_indices.push_back(0);
+        use_reciprocal.push_back(false);
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(2);
+        use_reciprocal.push_back(false);
+        
+        std::vector<double> ddx_rho_u_w_avg = MPI_helper_average.getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_reciprocal,
+            0,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& ddx_rho_u_w_avg_realizations = d_ensemble_statistics->ddx_rho_u_w_avg_realizations;
+        ddx_rho_u_w_avg_realizations.push_back(ddx_rho_u_w_avg);
+        
+        d_ensemble_statistics->ddx_rho_u_w_avg_computed = true;
+    }
+    
+    // Compute ddx_rho_u_v_v_avg.
+    
+    if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("MOMENTUM");
+        component_indices.push_back(0);
+        use_reciprocal.push_back(false);
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_reciprocal.push_back(false);
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_reciprocal.push_back(false);
+        
+        std::vector<double> ddx_rho_u_v_v_avg = MPI_helper_average.getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_reciprocal,
+            0,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& ddx_rho_u_v_v_avg_realizations = d_ensemble_statistics->ddx_rho_u_v_v_avg_realizations;
+        ddx_rho_u_v_v_avg_realizations.push_back(ddx_rho_u_v_v_avg);
+        
+        d_ensemble_statistics->ddx_rho_u_v_v_avg_computed = true;
+    }
+    
+    // Compute ddx_rho_u_w_w_avg.
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("MOMENTUM");
+        component_indices.push_back(0);
+        use_reciprocal.push_back(false);
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(2);
+        use_reciprocal.push_back(false);
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(2);
+        use_reciprocal.push_back(false);
+        
+        std::vector<double> ddx_rho_u_w_w_avg = MPI_helper_average.getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_reciprocal,
+            0,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& ddx_rho_u_w_w_avg_realizations = d_ensemble_statistics->ddx_rho_u_w_w_avg_realizations;
+        ddx_rho_u_w_w_avg_realizations.push_back(ddx_rho_u_w_w_avg);
+        
+        d_ensemble_statistics->ddx_rho_u_w_w_avg_computed = true;
+    }
+    
     // Compute ddy_u_avg.
     
     if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
@@ -837,6 +1450,32 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
         d_ensemble_statistics->ddy_v_avg_computed = true;
     }
     
+    // Compute ddy_w_avg.
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(2);
+        use_reciprocal.push_back(false);
+    
+        std::vector<double> ddy_w_avg = MPI_helper_average.getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_reciprocal,
+            1,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& ddy_w_avg_realizations = d_ensemble_statistics->ddy_w_avg_realizations;
+        ddy_w_avg_realizations.push_back(ddy_w_avg);
+        
+        d_ensemble_statistics->ddy_w_avg_computed = true;
+    }
+    
     // Compute ddz_u_avg.
     
     if (d_dim == tbox::Dimension(3))
@@ -861,6 +1500,32 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
         ddz_u_avg_realizations.push_back(ddz_u_avg);
         
         d_ensemble_statistics->ddz_u_avg_computed = true;
+    }
+    
+    // Compute ddz_v_avg.
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_reciprocal.push_back(false);
+        
+        std::vector<double> ddz_v_avg = MPI_helper_average.getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_reciprocal,
+            2,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& ddz_v_avg_realizations = d_ensemble_statistics->ddz_v_avg_realizations;
+        ddz_v_avg_realizations.push_back(ddz_v_avg);
+        
+        d_ensemble_statistics->ddz_v_avg_computed = true;
     }
     
     // Compute ddz_w_avg.
@@ -952,6 +1617,72 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
     p_ddx_u_avg_realizations.push_back(p_ddx_u_avg);
     
     d_ensemble_statistics->p_ddx_u_avg_computed = true;
+    
+    // Compute p_ddy_v_avg.
+    
+    if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("PRESSURE");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        
+        std::vector<double> p_ddy_v_avg = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        std::vector<std::vector<double> >& p_ddy_v_avg_realizations = d_ensemble_statistics->p_ddy_v_avg_realizations;
+        p_ddy_v_avg_realizations.push_back(p_ddy_v_avg);
+        
+        d_ensemble_statistics->p_ddy_v_avg_computed = true;
+    }
+    
+    // Compute p_ddz_w_avg.
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("PRESSURE");
+        component_indices.push_back(0);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(2);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(2);
+        
+        std::vector<double> p_ddz_w_avg = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            d_num_ghosts_derivative,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        
+        std::vector<std::vector<double> >& p_ddz_w_avg_realizations = d_ensemble_statistics->p_ddz_w_avg_realizations;
+        p_ddz_w_avg_realizations.push_back(p_ddz_w_avg);
+        
+        d_ensemble_statistics->p_ddz_w_avg_computed = true;
+    }
     
     // Compute u_ddx_u_avg.
     
@@ -1091,6 +1822,51 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
         d_ensemble_statistics->tau13_avg_computed = true;
     }
     
+    // Compute tau22_avg.
+    
+    if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+    {
+        std::vector<double> tau22_avg = getAveragedShearStressComponentWithInhomogeneousXDirection(
+            3,
+            patch_hierarchy,
+            data_context);
+        
+        std::vector<std::vector<double> >& tau22_avg_realizations = d_ensemble_statistics->tau22_avg_realizations;
+        tau22_avg_realizations.push_back(tau22_avg);
+        
+        d_ensemble_statistics->tau22_avg_computed = true;
+    }
+    
+    // Compute tau23_avg.
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        std::vector<double> tau23_avg = getAveragedShearStressComponentWithInhomogeneousXDirection(
+            4,
+            patch_hierarchy,
+            data_context);
+        
+        std::vector<std::vector<double> >& tau23_avg_realizations = d_ensemble_statistics->tau23_avg_realizations;
+        tau23_avg_realizations.push_back(tau23_avg);
+        
+        d_ensemble_statistics->tau23_avg_computed = true;
+    }
+    
+    // Compute tau33_avg.
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        std::vector<double> tau33_avg = getAveragedShearStressComponentWithInhomogeneousXDirection(
+            5,
+            patch_hierarchy,
+            data_context);
+        
+        std::vector<std::vector<double> >& tau33_avg_realizations = d_ensemble_statistics->tau33_avg_realizations;
+        tau33_avg_realizations.push_back(tau33_avg);
+        
+        d_ensemble_statistics->tau33_avg_computed = true;
+    }
+    
     // Compute u_tau11_avg.
     
     quantity_names.push_back("VELOCITY");
@@ -1119,6 +1895,70 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
     u_tau11_avg_realizations.push_back(u_tau11_avg);
     
     d_ensemble_statistics->u_tau11_avg_computed = true;
+    
+    // Compute v_tau12_avg.
+    
+    if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        use_reciprocal.push_back(false);
+        
+        std::vector<double> v_tau12_avg = getAveragedQuantityWithShearStressComponentWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            use_reciprocal,
+            1,
+            patch_hierarchy,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& v_tau12_avg_realizations = d_ensemble_statistics->v_tau12_avg_realizations;
+        v_tau12_avg_realizations.push_back(v_tau12_avg);
+        
+        d_ensemble_statistics->v_tau12_avg_computed = true;
+    }
+    
+    // Compute w_tau13_avg.
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(2);
+        use_derivative.push_back(false);
+        derivative_directions.push_back(-1);
+        use_reciprocal.push_back(false);
+        
+        std::vector<double> w_tau13_avg = getAveragedQuantityWithShearStressComponentWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            use_reciprocal,
+            2,
+            patch_hierarchy,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& w_tau13_avg_realizations = d_ensemble_statistics->w_tau13_avg_realizations;
+        w_tau13_avg_realizations.push_back(w_tau13_avg);
+        
+        d_ensemble_statistics->w_tau13_avg_computed = true;
+    }
     
     // Compute ddx_tau11_avg.
     
@@ -1256,6 +2096,198 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
         tau13_ddz_u_avg_realizations.push_back(tau13_ddz_u_avg);
         
         d_ensemble_statistics->tau13_ddz_u_avg_computed = true;
+    }
+    
+    // Compute tau12_ddx_v_avg.
+    
+    if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        use_reciprocal.push_back(false);
+        
+        std::vector<double> tau12_ddx_v_avg = getAveragedQuantityWithShearStressComponentWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            use_reciprocal,
+            1,
+            patch_hierarchy,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& tau12_ddx_v_avg_realizations = d_ensemble_statistics->tau12_ddx_v_avg_realizations;
+        tau12_ddx_v_avg_realizations.push_back(tau12_ddx_v_avg);
+        
+        d_ensemble_statistics->tau12_ddx_v_avg_computed = true;
+    }
+    
+    // Compute tau22_ddy_v_avg.
+    
+    if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        use_reciprocal.push_back(false);
+        
+        std::vector<double> tau22_ddy_v_avg = getAveragedQuantityWithShearStressComponentWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            use_reciprocal,
+            3,
+            patch_hierarchy,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& tau22_ddy_v_avg_realizations = d_ensemble_statistics->tau22_ddy_v_avg_realizations;
+        tau22_ddy_v_avg_realizations.push_back(tau22_ddy_v_avg);
+        
+        d_ensemble_statistics->tau22_ddy_v_avg_computed = true;
+    }
+    
+    // Compute tau23_ddz_v_avg.
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(1);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(2);
+        use_reciprocal.push_back(false);
+        
+        std::vector<double> tau23_ddz_v_avg = getAveragedQuantityWithShearStressComponentWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            use_reciprocal,
+            4,
+            patch_hierarchy,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& tau23_ddz_v_avg_realizations = d_ensemble_statistics->tau23_ddz_v_avg_realizations;
+        tau23_ddz_v_avg_realizations.push_back(tau23_ddz_v_avg);
+        
+        d_ensemble_statistics->tau23_ddz_v_avg_computed = true;
+    }
+    
+    // Compute tau13_ddx_w_avg.
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(2);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(0);
+        use_reciprocal.push_back(false);
+        
+        std::vector<double> tau13_ddx_w_avg = getAveragedQuantityWithShearStressComponentWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            use_reciprocal,
+            2,
+            patch_hierarchy,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& tau13_ddx_w_avg_realizations = d_ensemble_statistics->tau13_ddx_w_avg_realizations;
+        tau13_ddx_w_avg_realizations.push_back(tau13_ddx_w_avg);
+        
+        d_ensemble_statistics->tau13_ddx_w_avg_computed = true;
+    }
+    
+    // Compute tau23_ddy_w_avg.
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(2);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(1);
+        use_reciprocal.push_back(false);
+        
+        std::vector<double> tau23_ddy_w_avg = getAveragedQuantityWithShearStressComponentWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            use_reciprocal,
+            4,
+            patch_hierarchy,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& tau23_ddy_w_avg_realizations = d_ensemble_statistics->tau23_ddy_w_avg_realizations;
+        tau23_ddy_w_avg_realizations.push_back(tau23_ddy_w_avg);
+        
+        d_ensemble_statistics->tau23_ddy_w_avg_computed = true;
+    }
+    
+    // Compute tau33_ddz_w_avg.
+    
+    if (d_dim == tbox::Dimension(3))
+    {
+        quantity_names.push_back("VELOCITY");
+        component_indices.push_back(2);
+        use_derivative.push_back(true);
+        derivative_directions.push_back(2);
+        use_reciprocal.push_back(false);
+        
+        std::vector<double> tau33_ddz_w_avg = getAveragedQuantityWithShearStressComponentWithInhomogeneousXDirection(
+            quantity_names,
+            component_indices,
+            use_derivative,
+            derivative_directions,
+            use_reciprocal,
+            5,
+            patch_hierarchy,
+            data_context);
+        
+        quantity_names.clear();
+        component_indices.clear();
+        use_derivative.clear();
+        derivative_directions.clear();
+        use_reciprocal.clear();
+        
+        std::vector<std::vector<double> >& tau33_ddz_w_avg_realizations = d_ensemble_statistics->tau33_ddz_w_avg_realizations;
+        tau33_ddz_w_avg_realizations.push_back(tau33_ddz_w_avg);
+        
+        d_ensemble_statistics->tau33_ddz_w_avg_computed = true;
     }
     
     // Compute rho_inv_ddx_tau11_avg.
@@ -1423,10 +2455,10 @@ RTIRMIBudgetsUtilities::outputBudgetTurbMassFluxXWithInhomogeneousXDirection(
         const std::vector<std::vector<double> >& rho_inv_ddy_tau12_avg_realizations = d_ensemble_statistics->rho_inv_ddy_tau12_avg_realizations;
         const std::vector<std::vector<double> >& rho_inv_ddz_tau13_avg_realizations = d_ensemble_statistics->rho_inv_ddz_tau13_avg_realizations;
         
-        const int num_realizations = static_cast<int>(rho_avg_realizations.size());
+        const int num_realizations = d_ensemble_statistics->getNumberOfEnsembles();
         
-        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
         TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(rho_avg_realizations.size()));
         
         const int num_cells = static_cast<int>(rho_avg_realizations[0].size());
         const double weight = double(1)/double(num_realizations);
@@ -1789,6 +2821,10 @@ RTIRMIBudgetsUtilities::outputBudgetTurbMassFluxXWithInhomogeneousXDirection(
             }
         }
         
+        /*
+         * Output budget.
+         */
+        
         f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
         if (!f_out.is_open())
         {
@@ -1900,10 +2936,10 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
         const std::vector<std::vector<double> >& tau12_ddy_u_avg_realizations = d_ensemble_statistics->tau12_ddy_u_avg_realizations;
         const std::vector<std::vector<double> >& tau13_ddz_u_avg_realizations = d_ensemble_statistics->tau13_ddz_u_avg_realizations;
         
-        const int num_realizations = static_cast<int>(rho_avg_realizations.size());
+        const int num_realizations = d_ensemble_statistics->getNumberOfEnsembles();
         
-        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
         TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(rho_avg_realizations.size()));
         
         const int num_cells = static_cast<int>(rho_avg_realizations[0].size());
         const double weight = double(1)/double(num_realizations);
@@ -2053,11 +3089,10 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
          */
         
         std::vector<double> ddx_rho_u_tilde_R11(num_cells, double(0));
-        
         for (int i = 0; i < num_cells; i++)
         {
-            const double ddx_R11_tilde = -(rho_R11[i]/(rho_avg_global[i]*rho_avg_global[i]))*ddx_rho_avg_global[i] + 
-                double(1)/rho_avg_global[i]*(ddx_rho_u_u_avg_global[i] - double(2)*u_tilde[i]*ddx_rho_u_avg_global[i] + 
+            const double ddx_R11_tilde = -(rho_R11[i]/(rho_avg_global[i]*rho_avg_global[i]))*ddx_rho_avg_global[i] +
+                double(1)/rho_avg_global[i]*(ddx_rho_u_u_avg_global[i] - double(2)*u_tilde[i]*ddx_rho_u_avg_global[i] +
                 u_tilde[i]*u_tilde[i]*ddx_rho_avg_global[i]);
             
             ddx_rho_u_tilde_R11[i] = rho_u_avg_global[i]*ddx_R11_tilde + R11[i]*ddx_rho_u_avg_global[i];
@@ -2068,7 +3103,6 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
          */
         
         std::vector<double> rho_a1_R11(rho_R11);
-        
         for (int i = 0; i < num_cells; i++)
         {
             rho_a1_R11[i] *= a1[i];
@@ -2083,7 +3117,6 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
          */
         
         std::vector<double> two_a1_ddx_p(ddx_p_avg_global);
-    
         for (int i = 0; i < num_cells; i++)
         {
             two_a1_ddx_p[i] *= (double(2)*a1[i]);
@@ -2094,7 +3127,6 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
          */
         
         std::vector<double> m_2a1_ddx_tau11(ddx_tau11_avg_global);
-    
         for (int i = 0; i < num_cells; i++)
         {
             m_2a1_ddx_tau11[i] *= (-double(2)*a1[i]);
@@ -2105,15 +3137,13 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
          */
     
         std::vector<double> ddx_u_tilde(num_cells, double(0));
-    
         for (int i = 0; i < num_cells; i++)
         {
             ddx_u_tilde[i] = ddx_rho_u_avg_global[i]/rho_avg_global[i] -
                 rho_u_avg_global[i]/(rho_avg_global[i]*rho_avg_global[i])*ddx_rho_avg_global[i];
         }
-    
+        
         std::vector<double> m_2rho_R11_ddx_u_tilde(ddx_u_tilde);
-    
         for (int i = 0; i < num_cells; i++)
         {
             m_2rho_R11_ddx_u_tilde[i] *= (-double(2)*rho_R11[i]);
@@ -2134,8 +3164,8 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
         /*
          * Compute term IV(2).
          */
-        std::vector<double> m_2ddx_u_p_p_p(num_cells, double(0));
         
+        std::vector<double> m_2ddx_u_p_p_p(num_cells, double(0));
         for (int i = 0; i < num_cells; i++)
         {
             m_2ddx_u_p_p_p[i] = -double(2)*(ddx_u_p_avg_global[i] - u_avg_global[i]*ddx_p_avg_global[i] -
@@ -2222,6 +3252,10 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
             }
         }
         
+        /*
+         * Output budget.
+         */
+        
         f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
         if (!f_out.is_open())
         {
@@ -2265,11 +3299,10 @@ RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInXDirectionWithInhomoge
 
 
 /*
- * Output spatial profile of ensemble averaged density with assumed homogeneity in y-direction (2D) or
- * yz-plane (3D) to a file.
+ * Output budget of Reynolds normal stress in y-direction with inhomogeneous x-direction to a file.
  */
 void
-RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
+RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInYDirectionWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -2279,16 +3312,338 @@ RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleAveragedDensityWithHomogenei
     TBOX_ASSERT(!stat_dump_filename.empty());
 #endif
     
+    if (d_dim == tbox::Dimension(1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The budget of Reynolds normal stress in y-direction cannot be outputted for 1D problem!"
+            << std::endl);
+    }
+    
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
     std::ofstream f_out;
     
+    MPIHelper MPI_helper = MPIHelper(
+        "MPI_helper",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy);
+    
+    const std::vector<double>& dx_vec = MPI_helper.getFinestRefinedDomainGridSpacing();
+    const double dx = dx_vec[0];
+    
     /*
-     * Output the spatial profile (only done by process 0).
+     * Output the spatial profiles (only done by process 0).
      */
     
     if (mpi.getRank() == 0)
     {
+        const std::vector<std::vector<double> >& rho_avg_realizations     = d_ensemble_statistics->rho_avg_realizations;
+        const std::vector<std::vector<double> >& p_avg_realizations       = d_ensemble_statistics->p_avg_realizations;
+        const std::vector<std::vector<double> >& u_avg_realizations       = d_ensemble_statistics->u_avg_realizations;
+        const std::vector<std::vector<double> >& v_avg_realizations       = d_ensemble_statistics->v_avg_realizations;
+        const std::vector<std::vector<double> >& rho_u_avg_realizations   = d_ensemble_statistics->rho_u_avg_realizations;
+        const std::vector<std::vector<double> >& rho_v_avg_realizations   = d_ensemble_statistics->rho_v_avg_realizations;
+        const std::vector<std::vector<double> >& rho_v_v_avg_realizations = d_ensemble_statistics->rho_v_v_avg_realizations;
+        
+        const std::vector<std::vector<double> >& rho_u_v_avg_realizations = d_ensemble_statistics->rho_u_v_avg_realizations;
+        
+        const std::vector<std::vector<double> >& ddx_rho_avg_realizations     = d_ensemble_statistics->ddx_rho_avg_realizations;
+        const std::vector<std::vector<double> >& ddx_v_avg_realizations       = d_ensemble_statistics->ddx_v_avg_realizations;
+        const std::vector<std::vector<double> >& ddx_rho_u_avg_realizations   = d_ensemble_statistics->ddx_rho_u_avg_realizations;
+        const std::vector<std::vector<double> >& ddx_rho_v_avg_realizations   = d_ensemble_statistics->ddx_rho_v_avg_realizations;
+        const std::vector<std::vector<double> >& ddx_rho_v_v_avg_realizations = d_ensemble_statistics->ddx_rho_v_v_avg_realizations;
+        
+        const std::vector<std::vector<double> >& ddx_rho_u_v_avg_realizations   = d_ensemble_statistics->ddx_rho_u_v_avg_realizations;
+        const std::vector<std::vector<double> >& ddx_rho_u_v_v_avg_realizations = d_ensemble_statistics->ddx_rho_u_v_v_avg_realizations;
+        
+        const std::vector<std::vector<double> >& ddy_v_avg_realizations = d_ensemble_statistics->ddy_v_avg_realizations;
+        
+        const std::vector<std::vector<double> >& ddz_v_avg_realizations = d_ensemble_statistics->ddz_v_avg_realizations;
+        
+        const std::vector<std::vector<double> >& p_ddy_v_avg_realizations = d_ensemble_statistics->p_ddy_v_avg_realizations;
+        
+        const std::vector<std::vector<double> >& tau12_avg_realizations = d_ensemble_statistics->tau12_avg_realizations;
+        const std::vector<std::vector<double> >& tau22_avg_realizations = d_ensemble_statistics->tau22_avg_realizations;
+        const std::vector<std::vector<double> >& tau23_avg_realizations = d_ensemble_statistics->tau23_avg_realizations;
+        
+        const std::vector<std::vector<double> >& v_tau12_avg_realizations = d_ensemble_statistics->v_tau12_avg_realizations;
+        
+        const std::vector<std::vector<double> >& tau12_ddx_v_avg_realizations = d_ensemble_statistics->tau12_ddx_v_avg_realizations;
+        const std::vector<std::vector<double> >& tau22_ddy_v_avg_realizations = d_ensemble_statistics->tau22_ddy_v_avg_realizations;
+        const std::vector<std::vector<double> >& tau23_ddz_v_avg_realizations = d_ensemble_statistics->tau23_ddz_v_avg_realizations;
+        
+        const int num_realizations = d_ensemble_statistics->getNumberOfEnsembles();
+        
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(rho_avg_realizations.size()));
+        
+        const int num_cells = static_cast<int>(rho_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> rho_avg_global(num_cells, double(0));
+        std::vector<double> p_avg_global(num_cells, double(0));
+        std::vector<double> u_avg_global(num_cells, double(0));
+        std::vector<double> v_avg_global(num_cells, double(0));
+        std::vector<double> rho_u_avg_global(num_cells, double(0));
+        std::vector<double> rho_v_avg_global(num_cells, double(0));
+        std::vector<double> rho_v_v_avg_global(num_cells, double(0));
+        
+        std::vector<double> rho_u_v_avg_global(num_cells, double(0));
+        
+        std::vector<double> ddx_rho_avg_global(num_cells, double(0));
+        std::vector<double> ddx_v_avg_global(num_cells, double(0));
+        std::vector<double> ddx_rho_u_avg_global(num_cells, double(0));
+        std::vector<double> ddx_rho_v_avg_global(num_cells, double(0));
+        std::vector<double> ddx_rho_v_v_avg_global(num_cells, double(0));
+        
+        std::vector<double> ddx_rho_u_v_avg_global(num_cells, double(0));
+        std::vector<double> ddx_rho_u_v_v_avg_global(num_cells, double(0));
+        
+        std::vector<double> ddy_v_avg_global(num_cells, double(0));
+        
+        std::vector<double> ddz_v_avg_global(num_cells, double(0));
+        
+        std::vector<double> p_ddy_v_avg_global(num_cells, double(0));
+        
+        std::vector<double> tau12_avg_global(num_cells, double(0));
+        std::vector<double> tau22_avg_global(num_cells, double(0));
+        std::vector<double> tau23_avg_global(num_cells, double(0));
+        
+        std::vector<double> v_tau12_avg_global(num_cells, double(0));
+        
+        std::vector<double> tau12_ddx_v_avg_global(num_cells, double(0));
+        std::vector<double> tau22_ddy_v_avg_global(num_cells, double(0));
+        std::vector<double> tau23_ddz_v_avg_global(num_cells, double(0));
+        
+        if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+        {
+            for (int ri = 0; ri < num_realizations; ri++)
+            {
+                for (int i = 0; i < num_cells; i++)
+                {
+                    rho_avg_global[i]     += weight*rho_avg_realizations[ri][i];
+                    p_avg_global[i]       += weight*p_avg_realizations[ri][i];
+                    u_avg_global[i]       += weight*u_avg_realizations[ri][i];
+                    v_avg_global[i]       += weight*v_avg_realizations[ri][i];
+                    rho_u_avg_global[i]   += weight*rho_u_avg_realizations[ri][i];
+                    rho_v_avg_global[i]   += weight*rho_v_avg_realizations[ri][i];
+                    rho_v_v_avg_global[i] += weight*rho_v_v_avg_realizations[ri][i];
+                    
+                    rho_u_v_avg_global[i] += weight*rho_u_v_avg_realizations[ri][i];
+                    
+                    ddx_rho_avg_global[i]     += weight*ddx_rho_avg_realizations[ri][i];
+                    ddx_v_avg_global[i]       += weight*ddx_v_avg_realizations[ri][i];
+                    ddx_rho_u_avg_global[i]   += weight*ddx_rho_u_avg_realizations[ri][i];
+                    ddx_rho_v_avg_global[i]   += weight*ddx_rho_v_avg_realizations[ri][i];
+                    ddx_rho_v_v_avg_global[i] += weight*ddx_rho_v_v_avg_realizations[ri][i];
+                    
+                    ddx_rho_u_v_avg_global[i]   += weight*ddx_rho_u_v_avg_realizations[ri][i];
+                    ddx_rho_u_v_v_avg_global[i] += weight*ddx_rho_u_v_v_avg_realizations[ri][i];
+                    
+                    ddy_v_avg_global[i] += weight*ddy_v_avg_realizations[ri][i];
+                    
+                    p_ddy_v_avg_global[i] += weight*p_ddy_v_avg_realizations[ri][i];
+                    
+                    tau12_avg_global[i] += weight*tau12_avg_realizations[ri][i];
+                    tau22_avg_global[i] += weight*tau22_avg_realizations[ri][i];
+                    
+                    v_tau12_avg_global[i] += weight*v_tau12_avg_realizations[ri][i];
+                    
+                    tau12_ddx_v_avg_global[i] += weight*tau12_ddx_v_avg_realizations[ri][i];
+                    tau22_ddy_v_avg_global[i] += weight*tau22_ddy_v_avg_realizations[ri][i];
+                }
+            }
+        }
+        
+        if (d_dim == tbox::Dimension(3))
+        {
+            for (int ri = 0; ri < num_realizations; ri++)
+            {
+                for (int i = 0; i < num_cells; i++)
+                {
+                    ddz_v_avg_global[i] += weight*ddz_v_avg_realizations[ri][i];
+                    
+                    tau23_avg_global[i] += weight*tau23_avg_realizations[ri][i];
+                    
+                    tau23_ddz_v_avg_global[i] += weight*tau22_ddy_v_avg_realizations[ri][i];
+                }
+            }
+        }
+        
+        /*
+         * Compute u_tilde.
+         */
+        
+        std::vector<double> u_tilde(rho_u_avg_global);
+        for (int i = 0; i < num_cells; i++)
+        {
+            u_tilde[i] /= rho_avg_global[i];
+        }
+        
+        /*
+         * Compute v_tilde.
+         */
+        
+        std::vector<double> v_tilde(rho_v_avg_global);
+        for (int i = 0; i < num_cells; i++)
+        {
+            v_tilde[i] /= rho_avg_global[i];
+        }
+        
+        /*
+         * Compute a1.
+         */
+        
+        std::vector<double> rho_p_u_p(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            rho_p_u_p[i] = rho_u_avg_global[i] - rho_avg_global[i]*u_avg_global[i];
+        }
+        
+        std::vector<double> a1(rho_p_u_p);
+        for (int i = 0; i < num_cells; i++)
+        {
+            a1[i] /= rho_avg_global[i];
+        }
+        
+        /*
+         * Compute R22.
+         */
+        
+        std::vector<double> rho_R22(num_cells, double(0));
+        std::vector<double> R22(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            const double v_tilde       = rho_v_avg_global[i]/rho_avg_global[i];
+            const double rho_v_pp_v_pp = rho_v_v_avg_global[i] - rho_v_avg_global[i]*v_tilde;
+            
+            rho_R22[i] = rho_v_pp_v_pp;
+            R22[i]     = rho_v_pp_v_pp/rho_avg_global[i];
+        }
+        
+        /*
+         * Compute term II.
+         */
+        
+        std::vector<double> ddx_rho_u_tilde_R22(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            const double ddx_R22_tilde = -(rho_R22[i]/(rho_avg_global[i]*rho_avg_global[i]))*ddx_rho_avg_global[i] +
+                double(1)/rho_avg_global[i]*(ddx_rho_v_v_avg_global[i] - double(2)*v_tilde[i]*ddx_rho_v_avg_global[i] +
+                v_tilde[i]*v_tilde[i]*ddx_rho_avg_global[i]);
+            
+            ddx_rho_u_tilde_R22[i] = rho_u_avg_global[i]*ddx_R22_tilde + R22[i]*ddx_rho_u_avg_global[i];
+        }
+        
+        /*
+         * Compute term II in moving frame of mixing layer.
+         */
+        
+        std::vector<double> rho_a1_R22(rho_R22);
+        for (int i = 0; i < num_cells; i++)
+        {
+            rho_a1_R22[i] *= a1[i];
+        }
+        
+        std::vector<double> ddx_rho_a1_R22 = computeDerivativeOfVector1D(
+            rho_a1_R22,
+            dx);
+        
+        /*
+         * Compute term IV(1).
+         */
+        
+        std::vector<double> ddx_v_tilde(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            ddx_v_tilde[i] = ddx_rho_v_avg_global[i]/rho_avg_global[i] - rho_v_avg_global[i]/
+                (rho_avg_global[i]*rho_avg_global[i])*ddx_rho_avg_global[i];
+        }
+        
+        std::vector<double> m_ddx_rho_v_pp_v_pp_u_pp(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            m_ddx_rho_v_pp_v_pp_u_pp[i] = -(ddx_rho_u_v_v_avg_global[i] - double(2)*rho_u_v_avg_global[i]*ddx_v_tilde[i] -
+                double(2)*v_tilde[i]*ddx_rho_u_v_avg_global[i] + v_tilde[i]*v_tilde[i]*ddx_rho_u_avg_global[i] +
+                double(2)*rho_u_avg_global[i]*v_tilde[i]*ddx_v_tilde[i] - ddx_rho_u_tilde_R22[i]);
+        }
+        
+        /*
+         * Compute term IV(2).
+         */
+        
+        std::vector<double> v_p_tau12_p(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            v_p_tau12_p[i] = v_tau12_avg_global[i] - v_avg_global[i]*tau12_avg_global[i];
+        }
+        
+        std::vector<double> two_ddx_v_p_tau12_p = computeDerivativeOfVector1D(
+            v_p_tau12_p,
+            dx);
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            two_ddx_v_p_tau12_p[i] *= double(2);
+        }
+        
+        /*
+         * Compute term V.
+         */
+        
+        std::vector<double> two_p_p_ddy_v_p(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            two_p_p_ddy_v_p[i] = double(2)*(p_ddy_v_avg_global[i] - p_avg_global[i]*ddy_v_avg_global[i]);
+        }
+        
+        /*
+         * Compute term VI.
+         */
+        
+        std::vector<double> tau12_p_ddx_v_p(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            tau12_p_ddx_v_p[i] = tau12_ddx_v_avg_global[i] - tau12_avg_global[i]*ddx_v_avg_global[i];
+        }
+        
+        std::vector<double> tau22_p_ddy_v_p(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            tau22_p_ddy_v_p[i] = tau22_ddy_v_avg_global[i] - tau22_avg_global[i]*ddy_v_avg_global[i];
+        }
+        
+        std::vector<double> tau23_p_ddz_v_p(num_cells, double(0));
+        if (d_dim == tbox::Dimension(3))
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                tau23_p_ddz_v_p[i] = tau23_ddz_v_avg_global[i] - tau23_avg_global[i]*ddz_v_avg_global[i];
+            }
+        }
+        
+        std::vector<double> m_2tau_2i_p_ddxi_v_p(num_cells, double(0));
+        if (d_dim == tbox::Dimension(2))
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                m_2tau_2i_p_ddxi_v_p[i] = -double(2)*(tau12_p_ddx_v_p[i] + tau22_p_ddy_v_p[i]);
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                m_2tau_2i_p_ddxi_v_p[i] = -double(2)*(tau12_p_ddx_v_p[i] + tau22_p_ddy_v_p[i] + tau23_p_ddz_v_p[i]);
+            }
+        }
+        
+        /*
+         * Output budget.
+         */
+        
         f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
         if (!f_out.is_open())
         {
@@ -2298,29 +3653,377 @@ RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleAveragedDensityWithHomogenei
                 << std::endl);
         }
         
-        const std::vector<std::vector<double> >& rho_avg_realizations =
-            d_ensemble_statistics->rho_avg_realizations;
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&rho_R22[0], sizeof(double)*rho_R22.size());
+        // Term II.
+        f_out.write((char*)&ddx_rho_u_tilde_R22[0], sizeof(double)*ddx_rho_u_tilde_R22.size());
         
-        const int num_realizations = static_cast<int>(rho_avg_realizations.size());
+        // Term IV(1).
+        f_out.write((char*)&m_ddx_rho_v_pp_v_pp_u_pp[0], sizeof(double)*m_ddx_rho_v_pp_v_pp_u_pp.size());
+        // Term IV(2).
+        f_out.write((char*)&two_ddx_v_p_tau12_p[0], sizeof(double)*two_ddx_v_p_tau12_p.size());
         
-        TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
+        // Term V.
+        f_out.write((char*)&two_p_p_ddy_v_p[0], sizeof(double)*two_p_p_ddy_v_p.size());
+        
+        // Term VI.
+        f_out.write((char*)&m_2tau_2i_p_ddxi_v_p[0], sizeof(double)*m_2tau_2i_p_ddxi_v_p.size());
+        
+        // Term II in moving frame of mixing layer.
+        f_out.write((char*)&ddx_rho_a1_R22[0], sizeof(double)*ddx_rho_a1_R22.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output budget of Reynolds normal stress in z-direction with inhomogeneous x-direction to a file.
+ */
+void
+RTIRMIBudgetsUtilities::outputBudgetReynoldsNormalStressInZDirectionWithInhomogeneousXDirection(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_dim == tbox::Dimension(1) || d_dim == tbox::Dimension(2))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The budget of Reynolds normal stress in z-direction cannot be outputted for 1D or 2D problem!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    MPIHelper MPI_helper = MPIHelper(
+        "MPI_helper",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy);
+    
+    const std::vector<double>& dx_vec = MPI_helper.getFinestRefinedDomainGridSpacing();
+    const double dx = dx_vec[0];
+    
+    /*
+     * Output the spatial profiles (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        const std::vector<std::vector<double> >& rho_avg_realizations     = d_ensemble_statistics->rho_avg_realizations;
+        const std::vector<std::vector<double> >& p_avg_realizations       = d_ensemble_statistics->p_avg_realizations;
+        const std::vector<std::vector<double> >& u_avg_realizations       = d_ensemble_statistics->u_avg_realizations;
+        const std::vector<std::vector<double> >& w_avg_realizations       = d_ensemble_statistics->w_avg_realizations;
+        const std::vector<std::vector<double> >& rho_u_avg_realizations   = d_ensemble_statistics->rho_u_avg_realizations;
+        const std::vector<std::vector<double> >& rho_w_avg_realizations   = d_ensemble_statistics->rho_w_avg_realizations;
+        const std::vector<std::vector<double> >& rho_w_w_avg_realizations = d_ensemble_statistics->rho_w_w_avg_realizations;
+        
+        const std::vector<std::vector<double> >& rho_u_w_avg_realizations = d_ensemble_statistics->rho_u_w_avg_realizations;
+        
+        const std::vector<std::vector<double> >& ddx_rho_avg_realizations     = d_ensemble_statistics->ddx_rho_avg_realizations;
+        const std::vector<std::vector<double> >& ddx_w_avg_realizations       = d_ensemble_statistics->ddx_w_avg_realizations;
+        const std::vector<std::vector<double> >& ddx_rho_u_avg_realizations   = d_ensemble_statistics->ddx_rho_u_avg_realizations;
+        const std::vector<std::vector<double> >& ddx_rho_w_avg_realizations   = d_ensemble_statistics->ddx_rho_w_avg_realizations;
+        const std::vector<std::vector<double> >& ddx_rho_w_w_avg_realizations = d_ensemble_statistics->ddx_rho_w_w_avg_realizations;
+        
+        const std::vector<std::vector<double> >& ddx_rho_u_w_avg_realizations   = d_ensemble_statistics->ddx_rho_u_w_avg_realizations;
+        const std::vector<std::vector<double> >& ddx_rho_u_w_w_avg_realizations = d_ensemble_statistics->ddx_rho_u_w_w_avg_realizations;
+        
+        const std::vector<std::vector<double> >& ddy_w_avg_realizations = d_ensemble_statistics->ddy_w_avg_realizations;
+        
+        const std::vector<std::vector<double> >& ddz_w_avg_realizations = d_ensemble_statistics->ddz_w_avg_realizations;
+        
+        const std::vector<std::vector<double> >& p_ddz_w_avg_realizations = d_ensemble_statistics->p_ddz_w_avg_realizations;
+        
+        const std::vector<std::vector<double> >& tau13_avg_realizations = d_ensemble_statistics->tau13_avg_realizations;
+        const std::vector<std::vector<double> >& tau23_avg_realizations = d_ensemble_statistics->tau23_avg_realizations;
+        const std::vector<std::vector<double> >& tau33_avg_realizations = d_ensemble_statistics->tau33_avg_realizations;
+        
+        const std::vector<std::vector<double> >& w_tau13_avg_realizations = d_ensemble_statistics->w_tau13_avg_realizations;
+        
+        const std::vector<std::vector<double> >& tau13_ddx_w_avg_realizations = d_ensemble_statistics->tau13_ddx_w_avg_realizations;
+        const std::vector<std::vector<double> >& tau23_ddy_w_avg_realizations = d_ensemble_statistics->tau23_ddy_w_avg_realizations;
+        const std::vector<std::vector<double> >& tau33_ddz_w_avg_realizations = d_ensemble_statistics->tau33_ddz_w_avg_realizations;
+        
+        const int num_realizations = d_ensemble_statistics->getNumberOfEnsembles();
+        
         TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(rho_avg_realizations.size()));
         
         const int num_cells = static_cast<int>(rho_avg_realizations[0].size());
         const double weight = double(1)/double(num_realizations);
         
         std::vector<double> rho_avg_global(num_cells, double(0));
+        std::vector<double> p_avg_global(num_cells, double(0));
+        std::vector<double> u_avg_global(num_cells, double(0));
+        std::vector<double> w_avg_global(num_cells, double(0));
+        std::vector<double> rho_u_avg_global(num_cells, double(0));
+        std::vector<double> rho_w_avg_global(num_cells, double(0));
+        std::vector<double> rho_w_w_avg_global(num_cells, double(0));
         
-        for (int ri = 0; ri < num_realizations; ri++)
+        std::vector<double> rho_u_w_avg_global(num_cells, double(0));
+        
+        std::vector<double> ddx_rho_avg_global(num_cells, double(0));
+        std::vector<double> ddx_w_avg_global(num_cells, double(0));
+        std::vector<double> ddx_rho_u_avg_global(num_cells, double(0));
+        std::vector<double> ddx_rho_w_avg_global(num_cells, double(0));
+        std::vector<double> ddx_rho_w_w_avg_global(num_cells, double(0));
+        
+        std::vector<double> ddx_rho_u_w_avg_global(num_cells, double(0));
+        std::vector<double> ddx_rho_u_w_w_avg_global(num_cells, double(0));
+        
+        std::vector<double> ddy_w_avg_global(num_cells, double(0));
+        
+        std::vector<double> ddz_w_avg_global(num_cells, double(0));
+        
+        std::vector<double> p_ddz_w_avg_global(num_cells, double(0));
+        
+        std::vector<double> tau13_avg_global(num_cells, double(0));
+        std::vector<double> tau23_avg_global(num_cells, double(0));
+        std::vector<double> tau33_avg_global(num_cells, double(0));
+        
+        std::vector<double> w_tau13_avg_global(num_cells, double(0));
+        
+        std::vector<double> tau13_ddx_w_avg_global(num_cells, double(0));
+        std::vector<double> tau23_ddy_w_avg_global(num_cells, double(0));
+        std::vector<double> tau33_ddz_w_avg_global(num_cells, double(0));
+        
+        if (d_dim == tbox::Dimension(3))
         {
-            for (int i = 0; i < num_cells; i++)
+            for (int ri = 0; ri < num_realizations; ri++)
             {
-                rho_avg_global[i] += weight*rho_avg_realizations[ri][i];
+                for (int i = 0; i < num_cells; i++)
+                {
+                    rho_avg_global[i]     += weight*rho_avg_realizations[ri][i];
+                    p_avg_global[i]       += weight*p_avg_realizations[ri][i];
+                    u_avg_global[i]       += weight*u_avg_realizations[ri][i];
+                    w_avg_global[i]       += weight*w_avg_realizations[ri][i];
+                    rho_u_avg_global[i]   += weight*rho_u_avg_realizations[ri][i];
+                    rho_w_avg_global[i]   += weight*rho_w_avg_realizations[ri][i];
+                    rho_w_w_avg_global[i] += weight*rho_w_w_avg_realizations[ri][i];
+                    
+                    rho_u_w_avg_global[i] += weight*rho_u_w_avg_realizations[ri][i];
+                    
+                    ddx_rho_avg_global[i]     += weight*ddx_rho_avg_realizations[ri][i];
+                    ddx_w_avg_global[i]       += weight*ddx_w_avg_realizations[ri][i];
+                    ddx_rho_u_avg_global[i]   += weight*ddx_rho_u_avg_realizations[ri][i];
+                    ddx_rho_w_avg_global[i]   += weight*ddx_rho_w_avg_realizations[ri][i];
+                    ddx_rho_w_w_avg_global[i] += weight*ddx_rho_w_w_avg_realizations[ri][i];
+                    
+                    ddx_rho_u_w_avg_global[i]   += weight*ddx_rho_u_w_avg_realizations[ri][i];
+                    ddx_rho_u_w_w_avg_global[i] += weight*ddx_rho_u_w_w_avg_realizations[ri][i];
+                    
+                    ddy_w_avg_global[i] += weight*ddy_w_avg_realizations[ri][i];
+                    
+                    ddz_w_avg_global[i] += weight*ddz_w_avg_realizations[ri][i];
+                    
+                    p_ddz_w_avg_global[i] += weight*p_ddz_w_avg_realizations[ri][i];
+                    
+                    tau13_avg_global[i] += weight*tau13_avg_realizations[ri][i];
+                    tau23_avg_global[i] += weight*tau23_avg_realizations[ri][i];
+                    tau33_avg_global[i] += weight*tau33_avg_realizations[ri][i];
+                    
+                    w_tau13_avg_global[i] += weight*w_tau13_avg_realizations[ri][i];
+                    
+                    tau13_ddx_w_avg_global[i] += weight*tau13_ddx_w_avg_realizations[ri][i];
+                    tau23_ddy_w_avg_global[i] += weight*tau23_ddy_w_avg_realizations[ri][i];
+                    tau33_ddz_w_avg_global[i] += weight*tau33_ddz_w_avg_realizations[ri][i];
+                }
             }
         }
         
+        /*
+         * Compute u_tilde.
+         */
+        
+        std::vector<double> u_tilde(rho_u_avg_global);
+        for (int i = 0; i < num_cells; i++)
+        {
+            u_tilde[i] /= rho_avg_global[i];
+        }
+        
+        /*
+         * Compute w_tilde.
+         */
+        
+        std::vector<double> w_tilde(rho_w_avg_global);
+        for (int i = 0; i < num_cells; i++)
+        {
+            w_tilde[i] /= rho_avg_global[i];
+        }
+        
+        /*
+         * Compute a1.
+         */
+        
+        std::vector<double> rho_p_u_p(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            rho_p_u_p[i] = rho_u_avg_global[i] - rho_avg_global[i]*u_avg_global[i];
+        }
+        
+        std::vector<double> a1(rho_p_u_p);
+        for (int i = 0; i < num_cells; i++)
+        {
+            a1[i] /= rho_avg_global[i];
+        }
+        
+        /*
+         * Compute R33.
+         */
+        
+        std::vector<double> rho_R33(num_cells, double(0));
+        std::vector<double> R33(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            const double w_tilde       = rho_w_avg_global[i]/rho_avg_global[i];
+            const double rho_w_pp_w_pp = rho_w_w_avg_global[i] - rho_w_avg_global[i]*w_tilde;
+            
+            rho_R33[i] = rho_w_pp_w_pp;
+            R33[i]     = rho_w_pp_w_pp/rho_avg_global[i];
+        }
+        
+        /*
+         * Compute term II.
+         */
+        
+        std::vector<double> ddx_rho_u_tilde_R33(num_cells, double(0));
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            const double ddx_R33_tilde = -(rho_R33[i]/(rho_avg_global[i]*rho_avg_global[i]))*ddx_rho_avg_global[i] + 
+                double(1)/rho_avg_global[i]*(ddx_rho_w_w_avg_global[i] - double(2)*w_tilde[i]*ddx_rho_w_avg_global[i] + 
+                w_tilde[i]*w_tilde[i]*ddx_rho_avg_global[i]);
+            
+            ddx_rho_u_tilde_R33[i] = rho_u_avg_global[i]*ddx_R33_tilde + R33[i]*ddx_rho_u_avg_global[i];
+        }
+        
+        /*
+         * Compute term II in moving frame of mixing layer.
+         */
+        
+        std::vector<double> rho_a1_R33(rho_R33);
+        for (int i = 0; i < num_cells; i++)
+        {
+            rho_a1_R33[i] *= a1[i];
+        }
+        
+        std::vector<double> ddx_rho_a1_R33 = computeDerivativeOfVector1D(
+            rho_a1_R33,
+            dx);
+        
+        /*
+         * Compute term IV(1).
+         */
+        
+        std::vector<double> ddx_w_tilde(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            ddx_w_tilde[i] = ddx_rho_w_avg_global[i]/rho_avg_global[i] - rho_w_avg_global[i]/
+                (rho_avg_global[i]*rho_avg_global[i])*ddx_rho_avg_global[i];
+        }
+        
+        std::vector<double> m_ddx_rho_w_pp_w_pp_u_pp(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            m_ddx_rho_w_pp_w_pp_u_pp[i] = -(ddx_rho_u_w_w_avg_global[i] - double(2)*rho_u_w_avg_global[i]*ddx_w_tilde[i] -
+                double(2)*w_tilde[i]*ddx_rho_u_w_avg_global[i] + w_tilde[i]*w_tilde[i]*ddx_rho_u_avg_global[i] +
+                double(2)*rho_u_avg_global[i]*w_tilde[i]*ddx_w_tilde[i] - ddx_rho_u_tilde_R33[i]);
+        }
+        
+        std::vector<double> w_p_tau13_p(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            w_p_tau13_p[i] = w_tau13_avg_global[i] - w_avg_global[i]*tau13_avg_global[i];
+        }
+        
+        std::vector<double> two_ddx_w_p_tau13_p = computeDerivativeOfVector1D(
+            w_p_tau13_p,
+            dx);
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            two_ddx_w_p_tau13_p[i] *= double(2);
+        }
+        
+        /*
+         * Compute term V.
+         */
+        
+        std::vector<double> two_p_p_ddz_w_p(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            two_p_p_ddz_w_p[i] = double(2)*(p_ddz_w_avg_global[i] - p_avg_global[i]*ddz_w_avg_global[i]);
+        }
+        
+        /*
+         * Compute term VI.
+         */
+        
+        std::vector<double> tau13_p_ddx_w_p(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            tau13_p_ddx_w_p[i] = tau13_ddx_w_avg_global[i] - tau13_avg_global[i]*ddx_w_avg_global[i];
+        }
+        
+        std::vector<double> tau23_p_ddy_w_p(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            tau23_p_ddy_w_p[i] = tau23_ddy_w_avg_global[i] - tau23_avg_global[i]*ddy_w_avg_global[i];
+        }
+        
+        std::vector<double> tau33_p_ddz_w_p(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            tau33_p_ddz_w_p[i] = tau33_ddz_w_avg_global[i] - tau33_avg_global[i]*ddz_w_avg_global[i];
+        }
+        
+        std::vector<double> m_2tau_3i_p_ddxi_w_p(num_cells, double(0));
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            m_2tau_3i_p_ddxi_w_p[i] = -double(2)*(tau13_p_ddx_w_p[i] + tau23_p_ddy_w_p[i] + tau33_p_ddz_w_p[i]);
+        }
+        
+        /*
+         * Output budget.
+         */
+        
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
         f_out.write((char*)&output_time, sizeof(double));
-        f_out.write((char*)&rho_avg_global[0], sizeof(double)*rho_avg_global.size());
+        f_out.write((char*)&rho_R33[0], sizeof(double)*rho_R33.size());
+        // Term II.
+        f_out.write((char*)&ddx_rho_u_tilde_R33[0], sizeof(double)*ddx_rho_u_tilde_R33.size());
+        
+        // Term IV(1).
+        f_out.write((char*)&m_ddx_rho_w_pp_w_pp_u_pp[0], sizeof(double)*m_ddx_rho_w_pp_w_pp_u_pp.size());
+        // Term IV(2).
+        f_out.write((char*)&two_ddx_w_p_tau13_p[0], sizeof(double)*two_ddx_w_p_tau13_p.size());
+        
+        // Term V.
+        f_out.write((char*)&two_p_p_ddz_w_p[0], sizeof(double)*two_p_p_ddz_w_p.size());
+        
+        // Term VI.
+        f_out.write((char*)&m_2tau_3i_p_ddxi_w_p[0], sizeof(double)*m_2tau_3i_p_ddxi_w_p.size());
+        
+        // Term II in moving frame of mixing layer.
+        f_out.write((char*)&ddx_rho_a1_R33[0], sizeof(double)*ddx_rho_a1_R33.size());
         
         f_out.close();
     }
@@ -11987,7 +13690,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
         
         // Spatial profiles.
         if (statistical_quantity_key == "rho_a1_budget_SP" ||
-            statistical_quantity_key == "rho_R11_budget_SP")
+            statistical_quantity_key == "rho_R11_budget_SP" ||
+            statistical_quantity_key == "rho_R22_budget_SP" ||
+            statistical_quantity_key == "rho_R33_budget_SP")
         {
             rti_rmi_budgets_utilities->
                 computeAveragedQuantitiesWithHomogeneityInYDirectionOrInYZPlane(
@@ -12059,6 +13764,24 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
             rti_rmi_budgets_utilities->
                 outputBudgetReynoldsNormalStressInXDirectionWithInhomogeneousXDirection(
                     "rho_R11_budget.dat",
+                    patch_hierarchy,
+                    data_context,
+                    output_time);
+        }
+        else if (statistical_quantity_key == "rho_R22_budget_SP")
+        {
+            rti_rmi_budgets_utilities->
+                outputBudgetReynoldsNormalStressInYDirectionWithInhomogeneousXDirection(
+                    "rho_R22_budget.dat",
+                    patch_hierarchy,
+                    data_context,
+                    output_time);
+        }
+        else if (statistical_quantity_key == "rho_R33_budget_SP")
+        {
+            rti_rmi_budgets_utilities->
+                outputBudgetReynoldsNormalStressInZDirectionWithInhomogeneousXDirection(
+                    "rho_R33_budget.dat",
                     patch_hierarchy,
                     data_context,
                     output_time);
