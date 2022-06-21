@@ -413,6 +413,16 @@ class RTIRMIBudgetsUtilities
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
+         * Output budget of Favre mean TKE with inhomogeneous x-direction to a file.
+         */
+        void
+        outputBudgetFavreMeanTKEWithInhomogeneousXDirection(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
          * Output budget of turbulent mass flux in x-direction with inhomogeneous x-direction to a file.
          */
         void
@@ -529,6 +539,11 @@ class RTIRMIBudgetsUtilities
             const int shear_stress_derivative_direction,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
+        
+        /*
+         * Get gravity vector from the flow model database.
+         */
+        std::vector<double> getGravityVector() const;
         
         /*
          * Compute the one-dimensional derivative given a vector.
@@ -2387,6 +2402,275 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
         rho_inv_ddz_tau13_avg_realizations.push_back(rho_inv_ddz_tau13_avg);
         
         d_ensemble_statistics->rho_inv_ddz_tau13_avg_computed = true;
+    }
+}
+
+
+/*
+ * Output budget of Favre mean TKE with inhomogeneous x-direction to a file.
+ */
+void
+RTIRMIBudgetsUtilities::outputBudgetFavreMeanTKEWithInhomogeneousXDirection(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    MPIHelper MPI_helper = MPIHelper(
+        "MPI_helper",
+        d_dim,
+        d_grid_geometry,
+        patch_hierarchy);
+    
+    const std::vector<double>& dx_vec = MPI_helper.getFinestRefinedDomainGridSpacing();
+    const double dx = dx_vec[0];
+    
+    /*
+     * Output the spatial profiles (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        const std::vector<std::vector<double> >& rho_avg_realizations     = d_ensemble_statistics->rho_avg_realizations;
+        
+        // UNFINISHED!
+        
+        const int num_realizations = d_ensemble_statistics->getNumberOfEnsembles();
+        
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(rho_avg_realizations.size()));
+        
+        const int num_cells = static_cast<int>(rho_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> rho_avg_global(num_cells, double(0));
+        std::vector<double> u_avg_global(num_cells, double(0));
+        std::vector<double> rho_u_avg_global(num_cells, double(0));
+        std::vector<double> rho_v_avg_global(num_cells, double(0));
+        std::vector<double> rho_w_avg_global(num_cells, double(0));
+        std::vector<double> rho_u_u_avg_global(num_cells, double(0));
+        
+        std::vector<double> ddx_rho_avg_global(num_cells, double(0));
+        std::vector<double> ddx_p_avg_global(num_cells, double(0));
+        std::vector<double> ddx_rho_u_avg_global(num_cells, double(0));
+        std::vector<double> ddx_rho_u_u_avg_global(num_cells, double(0));
+        
+        std::vector<double> ddx_tau11_avg_global(num_cells, double(0));
+        
+        // UNFINISHED!
+        
+
+        /*
+         * Compute u_tilde, v_tilde and w_tilde.
+         */
+        
+        std::vector<double> u_tilde(rho_u_avg_global);
+        std::vector<double> v_tilde(rho_v_avg_global);
+        std::vector<double> w_tilde(rho_w_avg_global);
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            u_tilde[i] /= rho_avg_global[i];
+        }
+        
+        if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                v_tilde[i] /= rho_avg_global[i];
+            }
+        }
+        
+        if (d_dim == tbox::Dimension(3))
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                w_tilde[i] /= rho_avg_global[i];
+            }
+        }
+        
+        /*
+         * Compute a1.
+         */
+        
+        std::vector<double> rho_p_u_p(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            rho_p_u_p[i] = rho_u_avg_global[i] - rho_avg_global[i]*u_avg_global[i];
+        }
+        
+        std::vector<double> a1(rho_p_u_p);
+        for (int i = 0; i < num_cells; i++)
+        {
+            a1[i] /= rho_avg_global[i];
+        }
+        
+        /*
+         * Compute R11.
+         */
+        
+        std::vector<double> rho_R11(num_cells, double(0));
+        std::vector<double> R11(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            const double u_tilde       = rho_u_avg_global[i]/rho_avg_global[i];
+            const double rho_u_pp_u_pp = rho_u_u_avg_global[i] - rho_u_avg_global[i]*u_tilde;
+            
+            rho_R11[i] = rho_u_pp_u_pp;
+            R11[i]     = rho_u_pp_u_pp/rho_avg_global[i];
+        }
+        
+        /*
+         * Compute K.
+         */
+        
+        std::vector<double> K(num_cells, double(0));
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            K[i] += u_tilde[i]*u_tilde[i];
+        }
+        
+        if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                K[i] += v_tilde[i]*v_tilde[i];
+            }
+        }
+        
+        if (d_dim == tbox::Dimension(3))
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                K[i] += w_tilde[i]*w_tilde[i];
+            }
+        }
+        
+        /*
+         * Compute term II.
+         */
+        
+        std::vector<double> rho_u_tilde_K(rho_u_avg_global);
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            rho_u_tilde_K[i] *= K[i];
+        }
+        
+        std::vector<double> ddx_rho_u_tilde_K = computeDerivativeOfVector1D(
+            rho_u_tilde_K,
+            dx);
+        
+        /*
+         * Compute term II in moving frame of mixing layer.
+         */
+        
+        std::vector<double> rho_a1_K(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            rho_a1_K[i] = rho_avg_global[i]*a1[i]*K[i];
+        }
+        
+        std::vector<double> ddx_rho_a1_K = computeDerivativeOfVector1D(
+            rho_a1_K,
+            dx);
+        
+        /*
+         * Compute term III.
+         */
+        
+        std::vector<double> g = getGravityVector();
+        
+        std::vector<double> rho_ui_gi(num_cells, double(0));
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            rho_ui_gi[i] += u_tilde[i]*g[0];
+        }
+        
+        if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                rho_ui_gi[i] += v_tilde[i]*g[1];
+            }
+        }
+        
+        if (d_dim == tbox::Dimension(3))
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                rho_ui_gi[i] += w_tilde[i]*g[2];
+            }
+        }
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            rho_ui_gi[i] *= rho_avg_global[i];
+        }
+        
+        /*
+         * Compute term IV.
+         */
+        
+        std::vector<double> m_ddx_rho_u_tilde_R11(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            const double ddx_R11_tilde = -(rho_R11[i]/(rho_avg_global[i]*rho_avg_global[i]))*ddx_rho_avg_global[i] +
+                double(1)/rho_avg_global[i]*(ddx_rho_u_u_avg_global[i] - double(2)*u_tilde[i]*ddx_rho_u_avg_global[i] +
+                u_tilde[i]*u_tilde[i]*ddx_rho_avg_global[i]);
+            
+            m_ddx_rho_u_tilde_R11[i] = -(rho_u_avg_global[i]*ddx_R11_tilde + R11[i]*ddx_rho_u_avg_global[i]);
+        }
+        
+        /*
+         * Compute term V(1).
+         */
+        
+        std::vector<double> m_u_tilde_ddx_p(ddx_p_avg_global);
+        for (int i = 0; i < num_cells; i++)
+        {
+            m_u_tilde_ddx_p[i] *= (-u_tilde[i]);
+        }
+        
+        /*
+         * Compute term V(2).
+         */
+    
+        std::vector<double> ddx_u_tilde(num_cells, double(0));
+        for (int i = 0; i < num_cells; i++)
+        {
+            ddx_u_tilde[i] = ddx_rho_u_avg_global[i]/rho_avg_global[i] -
+                rho_u_avg_global[i]/(rho_avg_global[i]*rho_avg_global[i])*ddx_rho_avg_global[i];
+        }
+        
+        std::vector<double> rho_R11_ddx_u_tilde(ddx_u_tilde);
+        for (int i = 0; i < num_cells; i++)
+        {
+            rho_R11_ddx_u_tilde[i] *= rho_R11[i];
+        }
+        
+        /*
+         * Compute term VI.
+         */
+        
+        std::vector<double> u_tilde_ddx_tau11(ddx_tau11_avg_global);
+        for (int i = 0; i < num_cells; i++)
+        {
+            u_tilde_ddx_tau11[i] *= u_tilde[i];
+        }
+        
+        // UNFINISHED!
+        
     }
 }
 
@@ -13588,6 +13872,96 @@ RTIRMIBudgetsUtilities::getAveragedQuantityWithDerivativeOfShearStressComponentW
     }
     
     return averaged_quantity;
+}
+
+
+/*
+ * Get gravity vector from the flow model database.
+ */
+std::vector<double>
+RTIRMIBudgetsUtilities::getGravityVector() const
+{
+    HAMERS_SHARED_PTR<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    
+    const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db = d_flow_model_tmp->getFlowModelDatabase();
+    
+    std::vector<double> gravity(d_dim.getValue(), double(0));
+    
+    bool has_source_terms = false;
+    if (flow_model_db->keyExists("has_source_terms"))
+    {
+        has_source_terms = flow_model_db->getBool("has_source_terms");
+    }
+    else if (flow_model_db->keyExists("d_has_source_terms"))
+    {
+        has_source_terms = flow_model_db->getBool("d_has_source_terms");
+    }
+    
+    bool has_gravity = false;
+    if (has_source_terms)
+    {
+        HAMERS_SHARED_PTR<tbox::Database> source_terms_db;
+        
+        if (flow_model_db->keyExists("Source_terms"))
+        {
+            source_terms_db = flow_model_db->getDatabase("Source_terms");
+        }
+        else if (flow_model_db->keyExists("d_source_terms"))
+        {
+            source_terms_db = flow_model_db->getDatabase("d_source_terms");
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "No key 'Source_terms'/'d_source_terms' found in data for flow model."
+                << std::endl);
+        }
+        
+        if (source_terms_db->keyExists("has_gravity"))
+        {
+            has_gravity = source_terms_db->getBool("has_gravity");
+            if (has_gravity)
+            {
+                if (source_terms_db->keyExists("gravity"))
+                {
+                    source_terms_db->getVector("gravity", gravity);
+                }
+                else
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": "
+                        << "No key 'gravity' found in data for source terms."
+                        << std::endl);
+                }
+            }
+        }
+        else if (source_terms_db->keyExists("d_has_gravity"))
+        {
+            has_gravity = source_terms_db->getBool("d_has_gravity");
+            if (has_gravity)
+            {
+                if (source_terms_db->keyExists("d_gravity"))
+                {
+                    source_terms_db->getVector("d_gravity", gravity);
+                }
+                else
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": "
+                        << "No key 'd_gravity' found in data for source terms."
+                        << std::endl);
+                }
+            }
+        }
+        
+        if (has_gravity)
+        {
+            TBOX_ASSERT(gravity.size() == d_dim.getValue())
+        }
+    }
+    
+    return gravity;
 }
 
 
