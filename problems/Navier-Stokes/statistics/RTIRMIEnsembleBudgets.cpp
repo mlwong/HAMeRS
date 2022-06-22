@@ -20,6 +20,7 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
         
         void setVariablesNotComputed()
         {
+            Y_0_avg_computed     = false;
             rho_avg_computed     = false;
             rho_inv_avg_computed = false;
             p_avg_computed       = false;
@@ -108,6 +109,7 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
         
         void clearAllData()
         {
+            Y_0_avg_realizations.clear();
             rho_avg_realizations.clear();
             rho_inv_avg_realizations.clear();
             p_avg_realizations.clear();
@@ -198,6 +200,7 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
         
         // Scratch arrays.
         // Number of realizalizations; number of cells.
+        std::vector<std::vector<double> > Y_0_avg_realizations;
         std::vector<std::vector<double> > rho_avg_realizations;
         std::vector<std::vector<double> > rho_inv_avg_realizations;
         std::vector<std::vector<double> > p_avg_realizations;
@@ -285,6 +288,7 @@ class EnsembleBudgetsRTIRMI: public EnsembleStatistics
         
         // Whether the scratch arrays are filled.
         
+        bool Y_0_avg_computed;
         bool rho_avg_computed;
         bool rho_inv_avg_computed;
         bool p_avg_computed;
@@ -411,6 +415,28 @@ class RTIRMIBudgetsUtilities
         computeAveragedQuantitiesWithHomogeneityInYDirectionOrInYZPlane(
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Output spatial profile of ensemble averaged mass fraction with assumed homogeneity in y-direction (2D) or
+         * yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
+        
+        /*
+         * Output spatial profile of ensemble averaged density with assumed homogeneity in y-direction (2D) or
+         * yz-plane (3D) to a file.
+         */
+        void
+        outputSpatialProfileEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
+            const std::string& stat_dump_filename,
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double output_time) const;
         
         /*
          * Output budget of Favre mean TKE with inhomogeneous x-direction to a file.
@@ -645,6 +671,18 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
     std::vector<int> derivative_directions;
     std::vector<bool> use_reciprocal;
     std::vector<bool> use_derivative;
+    
+    // Compute Y_0_avg.
+    
+    std::vector<double> Y_0_avg = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        "MASS_FRACTIONS",
+        0,
+        data_context);
+    
+    std::vector<std::vector<double> >& Y_0_avg_realizations = d_ensemble_statistics->Y_0_avg_realizations;
+    Y_0_avg_realizations.push_back(Y_0_avg);
+    
+    d_ensemble_statistics->Y_0_avg_computed = true;
     
     // Compute rho_avg.
     
@@ -2407,6 +2445,132 @@ RTIRMIBudgetsUtilities::computeAveragedQuantitiesWithHomogeneityInYDirectionOrIn
 
 
 /*
+ * Output spatial profile of ensemble averaged mass fraction with assumed homogeneity in y-direction (2D) or
+ * yz-plane (3D) to a file.
+ */
+void
+RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& Y_0_avg_realizations =
+            d_ensemble_statistics->Y_0_avg_realizations;
+        
+        const int num_realizations = d_ensemble_statistics->getNumberOfEnsembles();
+        
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(Y_0_avg_realizations.size()));
+        
+        const int num_cells = static_cast<int>(Y_0_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> Y_0_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                Y_0_avg_global[i] += weight*Y_0_avg_realizations[ri][i];
+            }
+        }
+        
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&Y_0_avg_global[0], sizeof(double)*Y_0_avg_global.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output spatial profile of ensemble averaged density with assumed homogeneity in y-direction (2D) or
+ * yz-plane (3D) to a file.
+ */
+void
+RTIRMIBudgetsUtilities::outputSpatialProfileEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
+    const std::string& stat_dump_filename,
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+    const double output_time) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    /*
+     * Output the spatial profile (only done by process 0).
+     */
+    
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        const std::vector<std::vector<double> >& rho_avg_realizations =
+            d_ensemble_statistics->rho_avg_realizations;
+        
+        const int num_realizations = d_ensemble_statistics->getNumberOfEnsembles();
+        
+        TBOX_ASSERT(num_realizations > 0);
+        TBOX_ASSERT(num_realizations == static_cast<int>(rho_avg_realizations.size()));
+        
+        const int num_cells = static_cast<int>(rho_avg_realizations[0].size());
+        const double weight = double(1)/double(num_realizations);
+        
+        std::vector<double> rho_avg_global(num_cells, double(0));
+        
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                rho_avg_global[i] += weight*rho_avg_realizations[ri][i];
+            }
+        }
+        
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&rho_avg_global[0], sizeof(double)*rho_avg_global.size());
+        
+        f_out.close();
+    }
+}
+
+
+/*
  * Output budget of Favre mean TKE with inhomogeneous x-direction to a file.
  */
 void
@@ -2440,8 +2604,18 @@ RTIRMIBudgetsUtilities::outputBudgetFavreMeanTKEWithInhomogeneousXDirection(
     if (mpi.getRank() == 0)
     {
         const std::vector<std::vector<double> >& rho_avg_realizations     = d_ensemble_statistics->rho_avg_realizations;
+        const std::vector<std::vector<double> >& u_avg_realizations       = d_ensemble_statistics->u_avg_realizations;
+        const std::vector<std::vector<double> >& rho_u_avg_realizations   = d_ensemble_statistics->rho_u_avg_realizations;
+        const std::vector<std::vector<double> >& rho_v_avg_realizations   = d_ensemble_statistics->rho_v_avg_realizations;
+        const std::vector<std::vector<double> >& rho_w_avg_realizations   = d_ensemble_statistics->rho_w_avg_realizations;
+        const std::vector<std::vector<double> >& rho_u_u_avg_realizations = d_ensemble_statistics->rho_u_u_avg_realizations;
         
-        // UNFINISHED!
+        const std::vector<std::vector<double> >& ddx_rho_avg_realizations     = d_ensemble_statistics->ddx_rho_avg_realizations;
+        const std::vector<std::vector<double> >& ddx_p_avg_realizations       = d_ensemble_statistics->ddx_p_avg_realizations;
+        const std::vector<std::vector<double> >& ddx_rho_u_avg_realizations   = d_ensemble_statistics->ddx_rho_u_avg_realizations;
+        const std::vector<std::vector<double> >& ddx_rho_u_u_avg_realizations = d_ensemble_statistics->ddx_rho_u_u_avg_realizations;
+        
+        const std::vector<std::vector<double> >& ddx_tau11_avg_realizations = d_ensemble_statistics->ddx_tau11_avg_realizations;
         
         const int num_realizations = d_ensemble_statistics->getNumberOfEnsembles();
         
@@ -2465,9 +2639,46 @@ RTIRMIBudgetsUtilities::outputBudgetFavreMeanTKEWithInhomogeneousXDirection(
         
         std::vector<double> ddx_tau11_avg_global(num_cells, double(0));
         
-        // UNFINISHED!
+        for (int ri = 0; ri < num_realizations; ri++)
+        {
+            for (int i = 0; i < num_cells; i++)
+            {
+                rho_avg_global[i]     += weight*rho_avg_realizations[ri][i];
+                u_avg_global[i]       += weight*u_avg_realizations[ri][i];
+                rho_u_avg_global[i]   += weight*rho_u_avg_realizations[ri][i];
+                rho_u_u_avg_global[i] += weight*rho_u_u_avg_realizations[ri][i];
+                
+                ddx_rho_avg_global[i]     += weight*ddx_rho_avg_realizations[ri][i];
+                ddx_p_avg_global[i]       += weight*ddx_p_avg_realizations[ri][i];
+                ddx_rho_u_avg_global[i]   += weight*ddx_rho_u_avg_realizations[ri][i];
+                ddx_rho_u_u_avg_global[i] += weight*ddx_rho_u_u_avg_realizations[ri][i];
+                
+                ddx_tau11_avg_global[i] += weight*ddx_tau11_avg_realizations[ri][i];
+            }
+        }
         
-
+        if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
+        {
+            for (int ri = 0; ri < num_realizations; ri++)
+            {
+                for (int i = 0; i < num_cells; i++)
+                {
+                    rho_v_avg_global[i] += weight*rho_v_avg_realizations[ri][i];
+                }
+            }
+        }
+        
+        if (d_dim == tbox::Dimension(3))
+        {
+            for (int ri = 0; ri < num_realizations; ri++)
+            {
+                for (int i = 0; i < num_cells; i++)
+                {
+                    rho_w_avg_global[i] += weight*rho_w_avg_realizations[ri][i];
+                }
+            }
+        }
+        
         /*
          * Compute u_tilde, v_tilde and w_tilde.
          */
@@ -2532,6 +2743,7 @@ RTIRMIBudgetsUtilities::outputBudgetFavreMeanTKEWithInhomogeneousXDirection(
          * Compute K.
          */
         
+        std::vector<double> rho_K(num_cells, double(0));
         std::vector<double> K(num_cells, double(0));
         
         for (int i = 0; i < num_cells; i++)
@@ -2553,6 +2765,12 @@ RTIRMIBudgetsUtilities::outputBudgetFavreMeanTKEWithInhomogeneousXDirection(
             {
                 K[i] += w_tilde[i]*w_tilde[i];
             }
+        }
+        
+        for (int i = 0; i < num_cells; i++)
+        {
+            K[i]     *= double(1)/double(2);
+            rho_K[i]  = rho_avg_global[i]*K[i]; 
         }
         
         /*
@@ -2669,8 +2887,42 @@ RTIRMIBudgetsUtilities::outputBudgetFavreMeanTKEWithInhomogeneousXDirection(
             u_tilde_ddx_tau11[i] *= u_tilde[i];
         }
         
-        // UNFINISHED!
+        /*
+         * Output budget.
+         */
         
+        f_out.open(stat_dump_filename, std::ios_base::app | std::ios::out | std::ios::binary);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        f_out.write((char*)&output_time, sizeof(double));
+        f_out.write((char*)&rho_K[0], sizeof(double)*rho_K.size());
+        // Term II.
+        f_out.write((char*)&ddx_rho_u_tilde_K[0], sizeof(double)*ddx_rho_u_tilde_K.size());
+        
+        // Term III.
+        f_out.write((char*)&rho_ui_gi[0], sizeof(double)*rho_ui_gi.size());
+        
+        // Term IV.
+        f_out.write((char*)&m_ddx_rho_u_tilde_R11[0], sizeof(double)*m_ddx_rho_u_tilde_R11.size());
+        
+        // Term V(1).
+        f_out.write((char*)&m_u_tilde_ddx_p[0], sizeof(double)*m_u_tilde_ddx_p.size());
+        // Term V(2).
+        f_out.write((char*)&rho_R11_ddx_u_tilde[0], sizeof(double)*rho_R11_ddx_u_tilde.size());
+        
+        // Term VI.
+        f_out.write((char*)&u_tilde_ddx_tau11[0], sizeof(double)*u_tilde_ddx_tau11.size());
+        
+        // Term II in moving frame of mixing layer.
+        f_out.write((char*)&ddx_rho_a1_K[0], sizeof(double)*ddx_rho_a1_K.size());
+        
+        f_out.close();
     }
 }
 
@@ -14063,7 +14315,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
         std::string statistical_quantity_key = d_statistical_quantities[qi];
         
         // Spatial profiles.
-        if (statistical_quantity_key == "rho_a1_budget_SP" ||
+        if (statistical_quantity_key == "MASS_FRACTION_AVG_SP" ||
+            statistical_quantity_key == "DENSITY_AVG_SP" ||
+            statistical_quantity_key == "rho_a1_budget_SP" ||
+            statistical_quantity_key == "rho_K_budget_SP" ||
             statistical_quantity_key == "rho_R11_budget_SP" ||
             statistical_quantity_key == "rho_R22_budget_SP" ||
             statistical_quantity_key == "rho_R33_budget_SP")
@@ -14124,11 +14379,38 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         std::string statistical_quantity_key = d_statistical_quantities[qi];
         
         // Spatial profiles.
-        if (statistical_quantity_key == "rho_a1_budget_SP")
+        if (statistical_quantity_key == "MASS_FRACTION_AVG_SP")
+        {
+            rti_rmi_budgets_utilities->
+                outputSpatialProfileEnsembleAveragedMassFractionWithHomogeneityInYDirectionOrInYZPlane(
+                    "Y_avg.dat",
+                    patch_hierarchy,
+                    data_context,
+                    output_time);
+        }
+        else if (statistical_quantity_key == "DENSITY_AVG_SP")
+        {
+            rti_rmi_budgets_utilities->
+                outputSpatialProfileEnsembleAveragedDensityWithHomogeneityInYDirectionOrInYZPlane(
+                    "rho_avg.dat",
+                    patch_hierarchy,
+                    data_context,
+                    output_time);
+        }
+        else if (statistical_quantity_key == "rho_a1_budget_SP")
         {
             rti_rmi_budgets_utilities->
                 outputBudgetTurbMassFluxXWithInhomogeneousXDirection(
                     "rho_a1_budget.dat",
+                    patch_hierarchy,
+                    data_context,
+                    output_time);
+        }
+        else if (statistical_quantity_key == "rho_K_budget_SP")
+        {
+            rti_rmi_budgets_utilities->
+                outputBudgetFavreMeanTKEWithInhomogeneousXDirection(
+                    "rho_K_budget.dat",
                     patch_hierarchy,
                     data_context,
                     output_time);
