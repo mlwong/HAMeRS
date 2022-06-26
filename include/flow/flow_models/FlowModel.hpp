@@ -73,6 +73,7 @@ class FlowModel:
                 d_grid_geometry(grid_geometry),
                 d_num_species(num_species),
                 d_num_eqn(num_eqn),
+                d_flow_model_db(flow_model_db),
                 d_num_ghosts(-hier::IntVector::getOne(d_dim)),
                 d_patch(nullptr),
                 d_interior_box(hier::Box::getEmptyBox(d_dim)),
@@ -81,9 +82,7 @@ class FlowModel:
                 d_ghostcell_dims(hier::IntVector::getZero(d_dim)),
                 d_subdomain_box(hier::Box::getEmptyBox(d_dim)),
                 d_derived_cell_data_computed(false)
-        {
-            NULL_USE(flow_model_db);
-        }
+        {}
         
         virtual ~FlowModel() {}
         
@@ -102,6 +101,17 @@ class FlowModel:
         {
             return d_num_eqn;
         }
+        
+        
+        /*
+         * Get the database for flow model.
+         */
+        const HAMERS_SHARED_PTR<tbox::Database>&
+        getFlowModelDatabase() const
+        {
+            return d_flow_model_db;
+        }
+        
         
         /*
          * Return the form of each equation.
@@ -455,6 +465,11 @@ class FlowModel:
          * Number of equations.
          */
         const int d_num_eqn;
+        
+        /*
+         * Database for flow model.
+         */
+        const HAMERS_SHARED_PTR<tbox::Database> d_flow_model_db;
         
         /*
          * HAMERS_SHARED_PTR to EquationOfStateMixingRules.

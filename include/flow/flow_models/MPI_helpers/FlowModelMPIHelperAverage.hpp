@@ -71,6 +71,18 @@ class FlowModelMPIHelperAverage: public FlowModelMPIHelper
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
+         * Compute averaged value (on product of variable derivatives) with only x direction as inhomogeneous direction.
+         */
+        std::vector<double> getAveragedQuantityWithInhomogeneousXDirection(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const std::vector<bool>& use_derivative,
+            const std::vector<int>& derivative_directions,
+            const std::vector<bool>& use_reciprocal,
+            const int num_ghosts_derivative,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
          * Compute averaged derivative of value (on product of variables) with only x direction as inhomogeneous direction.
          */
         std::vector<double> getAveragedDerivativeOfQuantityWithInhomogeneousXDirection(
@@ -126,6 +138,18 @@ class FlowModelMPIHelperAverage: public FlowModelMPIHelper
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
+         * Compute averaged value (on product of variable derivatives) with only y direction as inhomogeneous direction.
+         */
+        std::vector<double> getAveragedQuantityWithInhomogeneousYDirection(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const std::vector<bool>& use_derivative,
+            const std::vector<int>& derivative_directions,
+            const std::vector<bool>& use_reciprocal,
+            const int num_ghosts_derivative,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
          * Compute averaged derivative of value (on product of variables) with only y direction as inhomogeneous direction.
          */
         std::vector<double> getAveragedDerivativeOfQuantityWithInhomogeneousYDirection(
@@ -177,6 +201,18 @@ class FlowModelMPIHelperAverage: public FlowModelMPIHelper
             const std::vector<int>& component_indices,
             const std::vector<bool>& use_derivative,
             const std::vector<int>& derivative_directions,
+            const int num_ghosts_derivative,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
+        
+        /*
+         * Compute averaged value (on product of variable derivatives) with only z direction as inhomogeneous direction.
+         */
+        std::vector<double> getAveragedQuantityWithInhomogeneousZDirection(
+            const std::vector<std::string>& quantity_names,
+            const std::vector<int>& component_indices,
+            const std::vector<bool>& use_derivative,
+            const std::vector<int>& derivative_directions,
+            const std::vector<bool>& use_reciprocal,
             const int num_ghosts_derivative,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         

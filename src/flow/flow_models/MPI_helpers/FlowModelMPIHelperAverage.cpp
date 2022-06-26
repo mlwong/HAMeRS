@@ -1942,6 +1942,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
     int num_quantities = static_cast<int>(quantity_names.size());
     
     TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
+    TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
     
     std::vector<double> averaged_quantity;
     
@@ -2664,6 +2665,39 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
     TBOX_ASSERT(static_cast<int>(use_derivative.size()) == num_quantities);
     TBOX_ASSERT(static_cast<int>(derivative_directions.size()) == num_quantities);
     
+    std::vector<bool> use_reciprocal(num_quantities, false);
+    
+    return getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_derivative,
+        derivative_directions,
+        use_reciprocal,
+        num_ghosts_derivative,
+        data_context);
+}
+
+
+/*
+ * Compute averaged value (on product of variable derivatives) with only x direction as inhomogeneous direction.
+ */
+std::vector<double>
+FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
+    const std::vector<std::string>& quantity_names,
+    const std::vector<int>& component_indices,
+    const std::vector<bool>& use_derivative,
+    const std::vector<int>& derivative_directions,
+    const std::vector<bool>& use_reciprocal,
+    const int num_ghosts_derivative,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    int num_quantities = static_cast<int>(quantity_names.size());
+    
+    TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
+    TBOX_ASSERT(static_cast<int>(use_derivative.size()) == num_quantities);
+    TBOX_ASSERT(static_cast<int>(derivative_directions.size()) == num_quantities);
+    TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
+    
     int num_use_derivative = 0;
     
     if (d_dim == tbox::Dimension(1))
@@ -2961,17 +2995,37 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                         count_derivative = 0;
                         for (int qi = 0; qi < num_quantities; qi++)
                         {
-                            if (use_derivative[qi])
+                            if (use_reciprocal[qi])
                             {
-                                const int idx_der = relative_idx_lo_0 + i;
-                                
-                                avg *= der_qi[count_derivative][idx_der];
+                                if (use_derivative[qi])
+                                {
+                                    const int idx_der = relative_idx_lo_0 + i;
+                                    
+                                    avg /= der_qi[count_derivative][idx_der];
+                                    count_derivative++;
+                                }
+                                else
+                                {
+                                    const int idx_qi = relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi];
+                                    
+                                    avg /= u_qi[qi][idx_qi];
+                                }
                             }
                             else
                             {
-                                const int idx_qi = relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi];
-                                
-                                avg *= u_qi[qi][idx_qi];
+                                if (use_derivative[qi])
+                                {
+                                    const int idx_der = relative_idx_lo_0 + i;
+                                    
+                                    avg *= der_qi[count_derivative][idx_der];
+                                    count_derivative++;
+                                }
+                                else
+                                {
+                                    const int idx_qi = relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi];
+                                    
+                                    avg *= u_qi[qi][idx_qi];
+                                }
                             }
                         }
                         
@@ -3270,21 +3324,43 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                             count_derivative = 0;
                             for (int qi = 0; qi < num_quantities; qi++)
                             {
-                                if (use_derivative[qi])
+                                if (use_reciprocal[qi])
                                 {
-                                    const int idx_der = (relative_idx_lo_0 + i) +
-                                        (relative_idx_lo_1 + j)*patch_interior_dim_0;
-                                    
-                                    avg *= der_qi[count_derivative][idx_der];
-                                    
-                                    count_derivative++;
+                                    if (use_derivative[qi])
+                                    {
+                                        const int idx_der = (relative_idx_lo_0 + i) +
+                                            (relative_idx_lo_1 + j)*patch_interior_dim_0;
+                                        
+                                        avg /= der_qi[count_derivative][idx_der];
+                                        
+                                        count_derivative++;
+                                    }
+                                    else
+                                    {
+                                        const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
+                                        
+                                        avg /= u_qi[qi][idx_qi];
+                                    }
                                 }
                                 else
                                 {
-                                    const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
-                                    
-                                    avg *= u_qi[qi][idx_qi];
+                                    if (use_derivative[qi])
+                                    {
+                                        const int idx_der = (relative_idx_lo_0 + i) +
+                                            (relative_idx_lo_1 + j)*patch_interior_dim_0;
+                                        
+                                        avg *= der_qi[count_derivative][idx_der];
+                                        
+                                        count_derivative++;
+                                    }
+                                    else
+                                    {
+                                        const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
+                                        
+                                        avg *= u_qi[qi][idx_qi];
+                                    }
                                 }
                             }
                             
@@ -3616,25 +3692,51 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousXDirection(
                                 count_derivative = 0;
                                 for (int qi = 0; qi < num_quantities; qi++)
                                 {
-                                    if (use_derivative[qi])
+                                    if (use_reciprocal[qi])
                                     {
-                                        const int idx_der = (relative_idx_lo_0 + i) +
-                                            (relative_idx_lo_1 + j)*patch_interior_dim_0 +
-                                            (relative_idx_lo_2 + k)*patch_interior_dim_0*
-                                                patch_interior_dim_1;
-                                        
-                                        avg *= der_qi[count_derivative][idx_der];
-                                        
-                                        count_derivative++;
+                                        if (use_derivative[qi])
+                                        {
+                                            const int idx_der = (relative_idx_lo_0 + i) +
+                                                (relative_idx_lo_1 + j)*patch_interior_dim_0 +
+                                                (relative_idx_lo_2 + k)*patch_interior_dim_0*
+                                                    patch_interior_dim_1;
+                                            
+                                            avg /= der_qi[count_derivative][idx_der];
+                                            
+                                            count_derivative++;
+                                        }
+                                        else
+                                        {
+                                            const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                                (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                                (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                    ghostcell_dim_1_u_qi[qi];
+                                            
+                                            avg /= u_qi[qi][idx_qi];
+                                        }
                                     }
                                     else
                                     {
-                                        const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
-                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
-                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
-                                                ghostcell_dim_1_u_qi[qi];
-                                        
-                                        avg *= u_qi[qi][idx_qi];
+                                        if (use_derivative[qi])
+                                        {
+                                            const int idx_der = (relative_idx_lo_0 + i) +
+                                                (relative_idx_lo_1 + j)*patch_interior_dim_0 +
+                                                (relative_idx_lo_2 + k)*patch_interior_dim_0*
+                                                    patch_interior_dim_1;
+                                            
+                                            avg *= der_qi[count_derivative][idx_der];
+                                            
+                                            count_derivative++;
+                                        }
+                                        else
+                                        {
+                                            const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                                (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                                (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                    ghostcell_dim_1_u_qi[qi];
+                                            
+                                            avg *= u_qi[qi][idx_qi];
+                                        }
                                     }
                                 }
                                 
@@ -6136,6 +6238,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
     int num_quantities = static_cast<int>(quantity_names.size());
     
     TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
+    TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
     
     std::vector<double> averaged_quantity;
     
@@ -6665,6 +6768,39 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
     TBOX_ASSERT(static_cast<int>(use_derivative.size()) == num_quantities);
     TBOX_ASSERT(static_cast<int>(derivative_directions.size()) == num_quantities);
     
+    std::vector<bool> use_reciprocal(num_quantities, false);
+    
+    return getAveragedQuantityWithInhomogeneousYDirection(
+        quantity_names,
+        component_indices,
+        use_derivative,
+        derivative_directions,
+        use_reciprocal,
+        num_ghosts_derivative,
+        data_context);
+}
+
+
+/*
+ * Compute averaged value (on product of variable derivatives) with only y direction as inhomogeneous direction.
+ */
+std::vector<double>
+FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
+    const std::vector<std::string>& quantity_names,
+    const std::vector<int>& component_indices,
+    const std::vector<bool>& use_derivative,
+    const std::vector<int>& derivative_directions,
+    const std::vector<bool>& use_reciprocal,
+    const int num_ghosts_derivative,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    int num_quantities = static_cast<int>(quantity_names.size());
+    
+    TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
+    TBOX_ASSERT(static_cast<int>(use_derivative.size()) == num_quantities);
+    TBOX_ASSERT(static_cast<int>(derivative_directions.size()) == num_quantities);
+    TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
+    
     int num_use_derivative = 0;
     
     if (d_dim == tbox::Dimension(1))
@@ -6995,21 +7131,43 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                             count_derivative = 0;
                             for (int qi = 0; qi < num_quantities; qi++)
                             {
-                                if (use_derivative[qi])
+                                if (use_reciprocal[qi])
                                 {
-                                    const int idx_der = (relative_idx_lo_0 + i) +
-                                        (relative_idx_lo_1 + j)*patch_interior_dim_0;
-                                    
-                                    avg *= der_qi[count_derivative][idx_der];
-                                    
-                                    count_derivative++;
+                                    if (use_derivative[qi])
+                                    {
+                                        const int idx_der = (relative_idx_lo_0 + i) +
+                                            (relative_idx_lo_1 + j)*patch_interior_dim_0;
+                                        
+                                        avg /= der_qi[count_derivative][idx_der];
+                                        
+                                        count_derivative++;
+                                    }
+                                    else
+                                    {
+                                        const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
+                                        
+                                        avg /= u_qi[qi][idx_qi];
+                                    }
                                 }
                                 else
                                 {
-                                    const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
-                                    
-                                    avg *= u_qi[qi][idx_qi];
+                                    if (use_derivative[qi])
+                                    {
+                                        const int idx_der = (relative_idx_lo_0 + i) +
+                                            (relative_idx_lo_1 + j)*patch_interior_dim_0;
+                                        
+                                        avg *= der_qi[count_derivative][idx_der];
+                                        
+                                        count_derivative++;
+                                    }
+                                    else
+                                    {
+                                        const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi];
+                                        
+                                        avg *= u_qi[qi][idx_qi];
+                                    }
                                 }
                             }
                             
@@ -7341,25 +7499,51 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousYDirection(
                                 count_derivative = 0;
                                 for (int qi = 0; qi < num_quantities; qi++)
                                 {
-                                    if (use_derivative[qi])
+                                    if (use_reciprocal[qi])
                                     {
-                                        const int idx_der = (relative_idx_lo_0 + i) +
-                                            (relative_idx_lo_1 + j)*patch_interior_dim_0 +
-                                            (relative_idx_lo_2 + k)*patch_interior_dim_0*
-                                                patch_interior_dim_1;
-                                        
-                                        avg *= der_qi[count_derivative][idx_der];
-                                        
-                                        count_derivative++;
+                                        if (use_derivative[qi])
+                                        {
+                                            const int idx_der = (relative_idx_lo_0 + i) +
+                                                (relative_idx_lo_1 + j)*patch_interior_dim_0 +
+                                                (relative_idx_lo_2 + k)*patch_interior_dim_0*
+                                                    patch_interior_dim_1;
+                                            
+                                            avg /= der_qi[count_derivative][idx_der];
+                                            
+                                            count_derivative++;
+                                        }
+                                        else
+                                        {
+                                            const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                                (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                                (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                    ghostcell_dim_1_u_qi[qi];
+                                            
+                                            avg /= u_qi[qi][idx_qi];
+                                        }
                                     }
                                     else
                                     {
-                                        const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
-                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
-                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
-                                                ghostcell_dim_1_u_qi[qi];
-                                        
-                                        avg *= u_qi[qi][idx_qi];
+                                        if (use_derivative[qi])
+                                        {
+                                            const int idx_der = (relative_idx_lo_0 + i) +
+                                                (relative_idx_lo_1 + j)*patch_interior_dim_0 +
+                                                (relative_idx_lo_2 + k)*patch_interior_dim_0*
+                                                    patch_interior_dim_1;
+                                            
+                                            avg *= der_qi[count_derivative][idx_der];
+                                            
+                                            count_derivative++;
+                                        }
+                                        else
+                                        {
+                                            const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                                (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                                (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                    ghostcell_dim_1_u_qi[qi];
+                                            
+                                            avg *= u_qi[qi][idx_qi];
+                                        }
                                     }
                                 }
                                 
@@ -9000,6 +9184,7 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
     int num_quantities = static_cast<int>(quantity_names.size());
     
     TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
+    TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
     
     std::vector<double> averaged_quantity;
     
@@ -9306,6 +9491,39 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
     TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
     TBOX_ASSERT(static_cast<int>(use_derivative.size()) == num_quantities);
     TBOX_ASSERT(static_cast<int>(derivative_directions.size()) == num_quantities);
+    
+    std::vector<bool> use_reciprocal(num_quantities, false);
+    
+    return getAveragedQuantityWithInhomogeneousZDirection(
+        quantity_names,
+        component_indices,
+        use_derivative,
+        derivative_directions,
+        use_reciprocal,
+        num_ghosts_derivative,
+        data_context);
+}
+
+
+/*
+ * Compute averaged value (on product of variable derivatives) with only z direction as inhomogeneous direction.
+ */
+std::vector<double>
+FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
+    const std::vector<std::string>& quantity_names,
+    const std::vector<int>& component_indices,
+    const std::vector<bool>& use_derivative,
+    const std::vector<int>& derivative_directions,
+    const std::vector<bool>& use_reciprocal,
+    const int num_ghosts_derivative,
+    const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
+{
+    int num_quantities = static_cast<int>(quantity_names.size());
+    
+    TBOX_ASSERT(static_cast<int>(component_indices.size()) == num_quantities);
+    TBOX_ASSERT(static_cast<int>(use_derivative.size()) == num_quantities);
+    TBOX_ASSERT(static_cast<int>(derivative_directions.size()) == num_quantities);
+    TBOX_ASSERT(static_cast<int>(use_reciprocal.size()) == num_quantities);
     
     int num_use_derivative = 0;
     
@@ -9659,25 +9877,51 @@ FlowModelMPIHelperAverage::getAveragedQuantityWithInhomogeneousZDirection(
                                 count_derivative = 0;
                                 for (int qi = 0; qi < num_quantities; qi++)
                                 {
-                                    if (use_derivative[qi])
+                                    if (use_reciprocal[qi])
                                     {
-                                        const int idx_der = (relative_idx_lo_0 + i) +
-                                            (relative_idx_lo_1 + j)*patch_interior_dim_0 +
-                                            (relative_idx_lo_2 + k)*patch_interior_dim_0*
-                                                patch_interior_dim_1;
-                                        
-                                        avg *= der_qi[count_derivative][idx_der];
-                                        
-                                        count_derivative++;
+                                        if (use_derivative[qi])
+                                        {
+                                            const int idx_der = (relative_idx_lo_0 + i) +
+                                                (relative_idx_lo_1 + j)*patch_interior_dim_0 +
+                                                (relative_idx_lo_2 + k)*patch_interior_dim_0*
+                                                    patch_interior_dim_1;
+                                            
+                                            avg /= der_qi[count_derivative][idx_der];
+                                            
+                                            count_derivative++;
+                                        }
+                                        else
+                                        {
+                                            const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                                (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                                (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                    ghostcell_dim_1_u_qi[qi];
+                                            
+                                            avg /= u_qi[qi][idx_qi];
+                                        }
                                     }
                                     else
                                     {
-                                        const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
-                                            (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
-                                            (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
-                                                ghostcell_dim_1_u_qi[qi];
-                                        
-                                        avg *= u_qi[qi][idx_qi];
+                                        if (use_derivative[qi])
+                                        {
+                                            const int idx_der = (relative_idx_lo_0 + i) +
+                                                (relative_idx_lo_1 + j)*patch_interior_dim_0 +
+                                                (relative_idx_lo_2 + k)*patch_interior_dim_0*
+                                                    patch_interior_dim_1;
+                                            
+                                            avg *= der_qi[count_derivative][idx_der];
+                                            
+                                            count_derivative++;
+                                        }
+                                        else
+                                        {
+                                            const int idx_qi = (relative_idx_lo_0 + i + num_ghosts_0_u_qi[qi]) +
+                                                (relative_idx_lo_1 + j + num_ghosts_1_u_qi[qi])*ghostcell_dim_0_u_qi[qi] +
+                                                (relative_idx_lo_2 + k + num_ghosts_2_u_qi[qi])*ghostcell_dim_0_u_qi[qi]*
+                                                    ghostcell_dim_1_u_qi[qi];
+                                            
+                                            avg *= u_qi[qi][idx_qi];
+                                        }
                                     }
                                 }
                                 
