@@ -49,9 +49,9 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
             
             // For computing baroclinic torque.
             
-            B1_avg_computed = false;
-            B2_avg_computed = false;
-            B3_avg_computed = false;
+            B1_sq_avg_computed = false;
+            B2_sq_avg_computed = false;
+            B3_sq_avg_computed = false;
             
             // For computing TKE dissipation.
             
@@ -128,9 +128,9 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
             
             // For computing baroclinic torque.
             
-            B1_avg_realizations.clear();
-            B2_avg_realizations.clear();
-            B3_avg_realizations.clear();
+            B1_sq_avg_realizations.clear();
+            B2_sq_avg_realizations.clear();
+            B3_sq_avg_realizations.clear();
             
             // For computing TKE dissipation.
             
@@ -203,9 +203,9 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
         
         // For computing baroclinic torque.
         
-        std::vector<std::vector<double> > B1_avg_realizations;
-        std::vector<std::vector<double> > B2_avg_realizations;
-        std::vector<std::vector<double> > B3_avg_realizations;
+        std::vector<std::vector<double> > B1_sq_avg_realizations;
+        std::vector<std::vector<double> > B2_sq_avg_realizations;
+        std::vector<std::vector<double> > B3_sq_avg_realizations;
         
         // For computing TKE dissipation.
         
@@ -275,9 +275,9 @@ class EnsembleStatisticsRTIRMI: public EnsembleStatistics
         
         // For computing baroclinic torque.
         
-        bool B1_avg_computed;
-        bool B2_avg_computed;
-        bool B3_avg_computed;
+        bool B1_sq_avg_computed;
+        bool B2_sq_avg_computed;
+        bool B3_sq_avg_computed;
         
         // For computing TKE dissipation.
         
@@ -573,26 +573,27 @@ class RTIRMIStatisticsUtilities
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
-         * Computed averaged baroclinic torque in z-direction with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+         * Computed averaged squared baroclinic torque in z-direction with assumed homogeneity in y-direction (2D)
+         * or yz-plane (3D).
          */
         void
-        computeAveragedBaroclinicTorqueZWithHomogeneityInYDirectionOrInYZPlane(
+        computeAveragedSquaredBaroclinicTorqueZWithHomogeneityInYDirectionOrInYZPlane(
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
-         * Computed averaged baroclinic torque in x-direction with assumed homogeneity in yz-plane (3D).
+         * Computed averaged squared baroclinic torque in x-direction with assumed homogeneity in yz-plane (3D).
          */
         void
-        computeAveragedBaroclinicTorqueXWithHomogeneityInYZPlane(
+        computeAveragedSquaredBaroclinicTorqueXWithHomogeneityInYZPlane(
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
         /*
-         * Computed averaged baroclinic torque in y-direction with assumed homogeneity in yz-plane (3D).
+         * Computed averaged squared baroclinic torque in y-direction with assumed homogeneity in yz-plane (3D).
          */
         void
-        computeAveragedBaroclinicTorqueYWithHomogeneityInYZPlane(
+        computeAveragedSquaredBaroclinicTorqueYWithHomogeneityInYZPlane(
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context);
         
@@ -815,33 +816,33 @@ class RTIRMIStatisticsUtilities
             const double output_time) const;
         
         /*
-         * Output spatial profile of ensemble averaged baroclinic torque in z-direction with assumed homogeneity in
+         * Output spatial profile of ensemble RMS of baroclinic torque in z-direction with assumed homogeneity in
          * y-direction (2D) or yz-plane (3D) to a file.
          */
         void
-        outputSpatialProfileEnsembleAveragedBaroclinicTorqueZWithHomogeneityInYDirectionOrInYZPlane(
+        outputSpatialProfileEnsembleRMSBaroclinicTorqueZWithHomogeneityInYDirectionOrInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
-         * Output spatial profile of ensemble averaged baroclinic torque in x-direction with assumed homogeneity in
+         * Output spatial profile of ensemble RMS of baroclinic torque in x-direction with assumed homogeneity in
          * yz-plane (3D) to a file.
          */
         void
-        outputSpatialProfileEnsembleAveragedBaroclinicTorqueXWithHomogeneityInYZPlane(
+        outputSpatialProfileEnsembleRMSBaroclinicTorqueXWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) const;
         
         /*
-         * Output spatial profile of ensemble averaged baroclinic torque in y-direction with assumed homogeneity in
+         * Output spatial profile of ensemble RMS of baroclinic torque in y-direction with assumed homogeneity in
          * yz-plane (3D) to a file.
          */
         void
-        outputSpatialProfileEnsembleAveragedBaroclinicTorqueYWithHomogeneityInYZPlane(
+        outputSpatialProfileEnsembleRMSBaroclinicTorqueYWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -1041,58 +1042,58 @@ class RTIRMIStatisticsUtilities
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
-         * Output ensemble baroclinic torque in z-direction integrated to a file.
+         * Output ensemble RMS of baroclinic torque in z-direction integrated to a file.
          */
         void
-        outputEnsembleBaroclinicTorqueZIntegrated(
+        outputEnsembleRMSBaroclinicTorqueZIntegrated(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
-         * Output mean of ensemble baroclinic torque in z-direction in mixing layer with assumed homogeneity in
+         * Output mean of ensemble RMS of baroclinic torque in z-direction in mixing layer with assumed homogeneity in
          * y-direction (2D) or yz-plane (3D) to a file.
          */
         void
-        outputEnsembleBaroclinicTorqueZMeanWithInhomogeneousXDirection(
+        outputEnsembleRMSBaroclinicTorqueZMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
-         * Output ensemble baroclinic torque in x-direction integrated to a file.
+         * Output ensemble RMS of baroclinic torque in x-direction integrated to a file.
          */
         void
-        outputEnsembleBaroclinicTorqueXIntegrated(
+        outputEnsembleRMSBaroclinicTorqueXIntegrated(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
-         * Output mean of ensemble baroclinic torque in x-direction in mixing layer with assumed homogeneity in
+         * Output mean of ensemble RMS of baroclinic torque in x-direction in mixing layer with assumed homogeneity in
          * yz-plane (3D) to a file.
          */
         void
-        outputEnsembleBaroclinicTorqueXMeanWithInhomogeneousXDirection(
+        outputEnsembleRMSBaroclinicTorqueXMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
-         * Output ensemble baroclinic torque in y-direction integrated to a file.
+         * Output ensemble RMS of baroclinic torque in y-direction integrated to a file.
          */
         void
-        outputEnsembleBaroclinicTorqueYIntegrated(
+        outputEnsembleRMSBaroclinicTorqueYIntegrated(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
         
         /*
-         * Output mean of ensemble baroclinic torque in y-direction in mixing layer with assumed homogeneity in
+         * Output mean of ensemble RMS of baroclinic torque in y-direction in mixing layer with assumed homogeneity in
          * yz-plane (3D) to a file.
          */
         void
-        outputEnsembleBaroclinicTorqueYMeanWithInhomogeneousXDirection(
+        outputEnsembleRMSBaroclinicTorqueYMeanWithInhomogeneousXDirection(
             const std::string& stat_dump_filename,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const;
@@ -3031,10 +3032,11 @@ RTIRMIStatisticsUtilities::computeAveragedZDerivativeOfPressureWithHomogeneityIn
 
 
 /*
- * Computed averaged baroclinic torque in z-direction with assumed homogeneity in y-direction (2D) or yz-plane (3D).
+ * Computed averaged squared baroclinic torque in z-direction with assumed homogeneity in y-direction (2D)
+ * or yz-plane (3D).
  */
 void
-RTIRMIStatisticsUtilities::computeAveragedBaroclinicTorqueZWithHomogeneityInYDirectionOrInYZPlane(
+RTIRMIStatisticsUtilities::computeAveragedSquaredBaroclinicTorqueZWithHomogeneityInYDirectionOrInYZPlane(
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
@@ -3042,7 +3044,7 @@ RTIRMIStatisticsUtilities::computeAveragedBaroclinicTorqueZWithHomogeneityInYDir
     {
         TBOX_ERROR(d_object_name
             << ": "
-            << "There is no 'BARO_TQ_Z_AVG_SP' for one-dimensional problem."
+            << "There is no 'BARO_TQ_Z_RMS_SP' for one-dimensional problem."
             << std::endl);
     }
     
@@ -3085,8 +3087,32 @@ RTIRMIStatisticsUtilities::computeAveragedBaroclinicTorqueZWithHomogeneityInYDir
     
     quantity_names.push_back("DENSITY");
     component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
     use_derivative.push_back(true);
     derivative_directions.push_back(0);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(0);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(1);
     use_reciprocal.push_back(false);
     
     quantity_names.push_back("PRESSURE");
@@ -3124,8 +3150,32 @@ RTIRMIStatisticsUtilities::computeAveragedBaroclinicTorqueZWithHomogeneityInYDir
     
     quantity_names.push_back("DENSITY");
     component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
     use_derivative.push_back(true);
     derivative_directions.push_back(1);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(1);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(0);
     use_reciprocal.push_back(false);
     
     quantity_names.push_back("PRESSURE");
@@ -3149,22 +3199,87 @@ RTIRMIStatisticsUtilities::computeAveragedBaroclinicTorqueZWithHomogeneityInYDir
     derivative_directions.clear();
     use_reciprocal.clear();
     
-    std::vector<double> B3_full(finest_level_dims[0], double(0));
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(0);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(1);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(0);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(1);
+    use_reciprocal.push_back(false);
+    
+    std::vector<double> B3_part_3 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_derivative,
+        derivative_directions,
+        use_reciprocal,
+        d_num_ghosts_derivative,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_derivative.clear();
+    derivative_directions.clear();
+    use_reciprocal.clear();
+    
+    std::vector<double> B3_sq_avg(finest_level_dims[0], double(0));
     for (int i = 0; i < finest_level_dims[0]; i++)
     {
-        B3_full[i] = B3_part_1[i] - B3_part_2[i];
+        B3_sq_avg[i] = B3_part_1[i] + B3_part_2[i] - double(2)*B3_part_3[i];
     }
     
-    std::vector<std::vector<double> >& B3_avg_realizations = d_ensemble_statistics->B3_avg_realizations;
-    B3_avg_realizations.push_back(B3_full);
+    std::vector<std::vector<double> >& B3_sq_avg_realizations = d_ensemble_statistics->B3_sq_avg_realizations;
+    B3_sq_avg_realizations.push_back(B3_sq_avg);
+    
+    d_ensemble_statistics->B3_sq_avg_computed = true;
 }
 
 
 /*
- * Computed averaged baroclinic torque in x-direction with assumed homogeneity in yz-plane (3D).
+ * Computed averaged squared baroclinic torque in x-direction with assumed homogeneity in yz-plane (3D).
  */
 void
-RTIRMIStatisticsUtilities::computeAveragedBaroclinicTorqueXWithHomogeneityInYZPlane(
+RTIRMIStatisticsUtilities::computeAveragedSquaredBaroclinicTorqueXWithHomogeneityInYZPlane(
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
@@ -3172,7 +3287,7 @@ RTIRMIStatisticsUtilities::computeAveragedBaroclinicTorqueXWithHomogeneityInYZPl
     {
         TBOX_ERROR(d_object_name
             << ": "
-            << "There is no 'BARO_TQ_X_AVG_SP' for one-dimensional or two-dimensional problem."
+            << "There is no 'BARO_TQ_X_RMS_SP' for one-dimensional or two-dimensional problem."
             << std::endl);
     }
     
@@ -3215,8 +3330,32 @@ RTIRMIStatisticsUtilities::computeAveragedBaroclinicTorqueXWithHomogeneityInYZPl
     
     quantity_names.push_back("DENSITY");
     component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
     use_derivative.push_back(true);
     derivative_directions.push_back(1);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(1);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(2);
     use_reciprocal.push_back(false);
     
     quantity_names.push_back("PRESSURE");
@@ -3254,8 +3393,32 @@ RTIRMIStatisticsUtilities::computeAveragedBaroclinicTorqueXWithHomogeneityInYZPl
     
     quantity_names.push_back("DENSITY");
     component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
     use_derivative.push_back(true);
     derivative_directions.push_back(2);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(2);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(1);
     use_reciprocal.push_back(false);
     
     quantity_names.push_back("PRESSURE");
@@ -3279,22 +3442,88 @@ RTIRMIStatisticsUtilities::computeAveragedBaroclinicTorqueXWithHomogeneityInYZPl
     derivative_directions.clear();
     use_reciprocal.clear();
     
-    std::vector<double> B1_full(finest_level_dims[0], double(0));
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(1);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(2);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(1);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(2);
+    use_reciprocal.push_back(false);
+    
+    std::vector<double> B1_part_3 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_derivative,
+        derivative_directions,
+        use_reciprocal,
+        d_num_ghosts_derivative,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_derivative.clear();
+    derivative_directions.clear();
+    use_reciprocal.clear();
+    
+    
+    std::vector<double> B1_sq_avg(finest_level_dims[0], double(0));
     for (int i = 0; i < finest_level_dims[0]; i++)
     {
-        B1_full[i] = B1_part_1[i] - B1_part_2[i];
+        B1_sq_avg[i] = B1_part_1[i] + B1_part_2[i] - double(2)*B1_part_3[i];
     }
     
-    std::vector<std::vector<double> >& B1_avg_realizations = d_ensemble_statistics->B1_avg_realizations;
-    B1_avg_realizations.push_back(B1_full);
+    std::vector<std::vector<double> >& B1_sq_avg_realizations = d_ensemble_statistics->B1_sq_avg_realizations;
+    B1_sq_avg_realizations.push_back(B1_sq_avg);
+    
+    d_ensemble_statistics->B1_sq_avg_computed = true;
 }
 
 
 /*
- * Computed averaged baroclinic torque in y-direction with assumed homogeneity in yz-plane (3D).
+ * Computed averaged squared baroclinic torque in y-direction with assumed homogeneity in yz-plane (3D).
  */
 void
-RTIRMIStatisticsUtilities::computeAveragedBaroclinicTorqueYWithHomogeneityInYZPlane(
+RTIRMIStatisticsUtilities::computeAveragedSquaredBaroclinicTorqueYWithHomogeneityInYZPlane(
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context)
 {
@@ -3302,7 +3531,7 @@ RTIRMIStatisticsUtilities::computeAveragedBaroclinicTorqueYWithHomogeneityInYZPl
     {
         TBOX_ERROR(d_object_name
             << ": "
-            << "There is no 'BARO_TQ_Y_AVG_SP' for one-dimensional or two-dimensional problem."
+            << "There is no 'BARO_TQ_Y_RMS_SP' for one-dimensional or two-dimensional problem."
             << std::endl);
     }
     
@@ -3345,8 +3574,32 @@ RTIRMIStatisticsUtilities::computeAveragedBaroclinicTorqueYWithHomogeneityInYZPl
     
     quantity_names.push_back("DENSITY");
     component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
     use_derivative.push_back(true);
     derivative_directions.push_back(2);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(2);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(0);
     use_reciprocal.push_back(false);
     
     quantity_names.push_back("PRESSURE");
@@ -3384,8 +3637,32 @@ RTIRMIStatisticsUtilities::computeAveragedBaroclinicTorqueYWithHomogeneityInYZPl
     
     quantity_names.push_back("DENSITY");
     component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
     use_derivative.push_back(true);
     derivative_directions.push_back(0);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(0);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(2);
     use_reciprocal.push_back(false);
     
     quantity_names.push_back("PRESSURE");
@@ -3409,14 +3686,79 @@ RTIRMIStatisticsUtilities::computeAveragedBaroclinicTorqueYWithHomogeneityInYZPl
     derivative_directions.clear();
     use_reciprocal.clear();
     
-    std::vector<double> B2_full(finest_level_dims[0], double(0));
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(false);
+    derivative_directions.push_back(-1);
+    use_reciprocal.push_back(true);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(0);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("DENSITY");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(2);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(0);
+    use_reciprocal.push_back(false);
+    
+    quantity_names.push_back("PRESSURE");
+    component_indices.push_back(0);
+    use_derivative.push_back(true);
+    derivative_directions.push_back(2);
+    use_reciprocal.push_back(false);
+    
+    std::vector<double> B2_part_3 = MPI_helper_average.getAveragedQuantityWithInhomogeneousXDirection(
+        quantity_names,
+        component_indices,
+        use_derivative,
+        derivative_directions,
+        use_reciprocal,
+        d_num_ghosts_derivative,
+        data_context);
+    
+    quantity_names.clear();
+    component_indices.clear();
+    use_derivative.clear();
+    derivative_directions.clear();
+    use_reciprocal.clear();
+    
+    std::vector<double> B2_sq_avg(finest_level_dims[0], double(0));
     for (int i = 0; i < finest_level_dims[0]; i++)
     {
-        B2_full[i] = B2_part_1[i] - B2_part_2[i];
+        B2_sq_avg[i] = B2_part_1[i] + B2_part_2[i] - double(2)*B2_part_3[i];
     }
     
-    std::vector<std::vector<double> >& B2_avg_realizations = d_ensemble_statistics->B2_avg_realizations;
-    B2_avg_realizations.push_back(B2_full);
+    std::vector<std::vector<double> >& B2_sq_avg_realizations = d_ensemble_statistics->B2_sq_avg_realizations;
+    B2_sq_avg_realizations.push_back(B2_sq_avg);
+    
+    d_ensemble_statistics->B2_sq_avg_computed = true;
 }
 
 
@@ -5384,11 +5726,11 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedScalarDissipation
 
 
 /*
- * Output spatial profile of ensemble averaged baroclinic torque in z-direction with assumed homogeneity in
+ * Output spatial profile of ensemble RMS of baroclinic torque in z-direction with assumed homogeneity in
  * y-direction (2D) or yz-plane (3D) to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedBaroclinicTorqueZWithHomogeneityInYDirectionOrInYZPlane(
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleRMSBaroclinicTorqueZWithHomogeneityInYDirectionOrInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -5417,29 +5759,34 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedBaroclinicTorqueZ
                 << std::endl);
         }
         
-        const std::vector<std::vector<double> >& B3_avg_realizations =
-            d_ensemble_statistics->B3_avg_realizations;
+        const std::vector<std::vector<double> >& B3_sq_avg_realizations =
+            d_ensemble_statistics->B3_sq_avg_realizations;
         
-        const int num_realizations = static_cast<int>(B3_avg_realizations.size());
+        const int num_realizations = static_cast<int>(B3_sq_avg_realizations.size());
         
         TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
         TBOX_ASSERT(num_realizations > 0);
         
-        const int num_cells = static_cast<int>(B3_avg_realizations[0].size());
+        const int num_cells = static_cast<int>(B3_sq_avg_realizations[0].size());
         const double weight = double(1)/double(num_realizations);
         
-        std::vector<double> B3_avg_global(num_cells, double(0));
+        std::vector<double> B3_rms_global(num_cells, double(0));
         
         for (int ri = 0; ri < num_realizations; ri++)
         {
             for (int i = 0; i < num_cells; i++)
             {
-                B3_avg_global[i] += weight*B3_avg_realizations[ri][i];
+                B3_rms_global[i] += weight*B3_sq_avg_realizations[ri][i];
             }
         }
         
+        for (int i = 0; i < num_cells; i++)
+        {
+            B3_rms_global[i] = sqrt(B3_rms_global[i]);
+        }
+        
         f_out.write((char*)&output_time, sizeof(double));
-        f_out.write((char*)&B3_avg_global[0], sizeof(double)*B3_avg_global.size());
+        f_out.write((char*)&B3_rms_global[0], sizeof(double)*B3_rms_global.size());
         
         f_out.close();
     }
@@ -5447,11 +5794,11 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedBaroclinicTorqueZ
 
 
 /*
- * Output spatial profile of ensemble averaged baroclinic torque in x-direction with assumed homogeneity in
+ * Output spatial profile of ensemble RMS of baroclinic torque in x-direction with assumed homogeneity in
  * yz-plane (3D) to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedBaroclinicTorqueXWithHomogeneityInYZPlane(
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleRMSBaroclinicTorqueXWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -5480,29 +5827,34 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedBaroclinicTorqueX
                 << std::endl);
         }
         
-        const std::vector<std::vector<double> >& B1_avg_realizations =
-            d_ensemble_statistics->B1_avg_realizations;
+        const std::vector<std::vector<double> >& B1_sq_avg_realizations =
+            d_ensemble_statistics->B1_sq_avg_realizations;
         
-        const int num_realizations = static_cast<int>(B1_avg_realizations.size());
+        const int num_realizations = static_cast<int>(B1_sq_avg_realizations.size());
         
         TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
         TBOX_ASSERT(num_realizations > 0);
         
-        const int num_cells = static_cast<int>(B1_avg_realizations[0].size());
+        const int num_cells = static_cast<int>(B1_sq_avg_realizations[0].size());
         const double weight = double(1)/double(num_realizations);
         
-        std::vector<double> B1_avg_global(num_cells, double(0));
+        std::vector<double> B1_rms_global(num_cells, double(0));
         
         for (int ri = 0; ri < num_realizations; ri++)
         {
             for (int i = 0; i < num_cells; i++)
             {
-                B1_avg_global[i] += weight*B1_avg_realizations[ri][i];
+                B1_rms_global[i] += weight*B1_sq_avg_realizations[ri][i];
             }
         }
         
+        for (int i = 0; i < num_cells; i++)
+        {
+            B1_rms_global[i] = sqrt(B1_rms_global[i]);
+        }
+        
         f_out.write((char*)&output_time, sizeof(double));
-        f_out.write((char*)&B1_avg_global[0], sizeof(double)*B1_avg_global.size());
+        f_out.write((char*)&B1_rms_global[0], sizeof(double)*B1_rms_global.size());
         
         f_out.close();
     }
@@ -5510,11 +5862,11 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedBaroclinicTorqueX
 
 
 /*
- * Output spatial profile of ensemble averaged baroclinic torque in y-direction with assumed homogeneity in
+ * Output spatial profile of ensemble RMS of baroclinic torque in y-direction with assumed homogeneity in
  * yz-plane (3D) to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedBaroclinicTorqueYWithHomogeneityInYZPlane(
+RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleRMSBaroclinicTorqueYWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
@@ -5543,29 +5895,34 @@ RTIRMIStatisticsUtilities::outputSpatialProfileEnsembleAveragedBaroclinicTorqueY
                 << std::endl);
         }
         
-        const std::vector<std::vector<double> >& B2_avg_realizations =
-            d_ensemble_statistics->B2_avg_realizations;
+        const std::vector<std::vector<double> >& B2_sq_avg_realizations =
+            d_ensemble_statistics->B2_sq_avg_realizations;
         
-        const int num_realizations = static_cast<int>(B2_avg_realizations.size());
+        const int num_realizations = static_cast<int>(B2_sq_avg_realizations.size());
         
         TBOX_ASSERT(d_ensemble_statistics->getNumberOfEnsembles() == num_realizations);
         TBOX_ASSERT(num_realizations > 0);
         
-        const int num_cells = static_cast<int>(B2_avg_realizations[0].size());
+        const int num_cells = static_cast<int>(B2_sq_avg_realizations[0].size());
         const double weight = double(1)/double(num_realizations);
         
-        std::vector<double> B2_avg_global(num_cells, double(0));
+        std::vector<double> B2_rms_global(num_cells, double(0));
         
         for (int ri = 0; ri < num_realizations; ri++)
         {
             for (int i = 0; i < num_cells; i++)
             {
-                B2_avg_global[i] += weight*B2_avg_realizations[ri][i];
+                B2_rms_global[i] += weight*B2_sq_avg_realizations[ri][i];
             }
         }
         
+        for (int i = 0; i < num_cells; i++)
+        {
+            B2_rms_global[i] = sqrt(B2_rms_global[i]);
+        }
+        
         f_out.write((char*)&output_time, sizeof(double));
-        f_out.write((char*)&B2_avg_global[0], sizeof(double)*B2_avg_global.size());
+        f_out.write((char*)&B2_rms_global[0], sizeof(double)*B2_rms_global.size());
         
         f_out.close();
     }
@@ -7890,10 +8247,10 @@ RTIRMIStatisticsUtilities::outputEnsembleEffectiveAtwoodNumberWithInhomogeneousX
 
 
 /*
- * Output ensemble baroclinic torque in z-direction integrated to a file.
+ * Output ensemble RMS of baroclinic torque in z-direction integrated to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleBaroclinicTorqueZIntegrated(
+RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueZIntegrated(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
@@ -7929,31 +8286,31 @@ RTIRMIStatisticsUtilities::outputEnsembleBaroclinicTorqueZIntegrated(
                 << std::endl);
         }
         
-        const std::vector<std::vector<double> >& B3_avg_realizations =
-            d_ensemble_statistics->rho_avg_realizations;
+        const std::vector<std::vector<double> >& B3_sq_avg_realizations =
+            d_ensemble_statistics->B3_sq_avg_realizations;
         
         const int num_realizations = d_ensemble_statistics->getNumberOfEnsembles();
         
         TBOX_ASSERT(num_realizations > 0);
-        TBOX_ASSERT(num_realizations == static_cast<int>(B3_avg_realizations.size()));
+        TBOX_ASSERT(num_realizations == static_cast<int>(B3_sq_avg_realizations.size()));
         
-        const int num_cells = static_cast<int>(B3_avg_realizations[0].size());
+        const int num_cells = static_cast<int>(B3_sq_avg_realizations[0].size());
         const double weight = double(1)/double(num_realizations);
         
-        std::vector<double> B3_avg_global(num_cells, double(0));
+        std::vector<double> B3_sq_avg_global(num_cells, double(0));
         
         for (int ri = 0; ri < num_realizations; ri++)
         {
             for (int i = 0; i < num_cells; i++)
             {
-                B3_avg_global[i] += weight*B3_avg_realizations[ri][i];
+                B3_sq_avg_global[i] += weight*B3_sq_avg_realizations[ri][i];
             }
         }
         
-        double B3_integrated_global = double(0);
+        double B3_rms_integrated_global = double(0);
         for (int i = 0; i < num_cells; i++)
         {
-            B3_integrated_global += B3_avg_global[i]*dx_finest[0];
+            B3_rms_integrated_global += sqrt(B3_sq_avg_global[i])*dx_finest[0];
         }
         
         const double* x_lo = d_grid_geometry->getXLower();
@@ -7961,17 +8318,17 @@ RTIRMIStatisticsUtilities::outputEnsembleBaroclinicTorqueZIntegrated(
         if (d_dim == tbox::Dimension(2))
         {
             const double L_y = x_hi[1] - x_lo[1];
-            B3_integrated_global *= L_y;
+            B3_rms_integrated_global *= L_y;
         }
         else if (d_dim == tbox::Dimension(3))
         {
             const double L_y = x_hi[1] - x_lo[1];
             const double L_z = x_hi[2] - x_lo[2];
-            B3_integrated_global *= (L_y*L_z);
+            B3_rms_integrated_global *= (L_y*L_z);
         }
         
         f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-              << "\t" << B3_integrated_global;
+              << "\t" << B3_rms_integrated_global;
         
         f_out.close();
     }
@@ -7979,11 +8336,11 @@ RTIRMIStatisticsUtilities::outputEnsembleBaroclinicTorqueZIntegrated(
 
 
 /*
- * Output mean of ensemble baroclinic torque in z-direction in mixing layer with assumed homogeneity in
+ * Output mean of ensemble RMS of baroclinic torque in z-direction in mixing layer with assumed homogeneity in
  * y-direction (2D) or yz-plane (3D) to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleBaroclinicTorqueZMeanWithInhomogeneousXDirection(
+RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueZMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
@@ -8011,8 +8368,8 @@ RTIRMIStatisticsUtilities::outputEnsembleBaroclinicTorqueZMeanWithInhomogeneousX
                 << std::endl);
         }
         
-        const std::vector<std::vector<double> >& B3_avg_realizations =
-            d_ensemble_statistics->rho_avg_realizations;
+        const std::vector<std::vector<double> >& B3_sq_avg_realizations =
+            d_ensemble_statistics->B3_sq_avg_realizations;
         
         const std::vector<std::vector<double> >& Y_0_avg_realizations =
             d_ensemble_statistics->Y_0_avg_realizations;
@@ -8020,40 +8377,40 @@ RTIRMIStatisticsUtilities::outputEnsembleBaroclinicTorqueZMeanWithInhomogeneousX
         const int num_realizations = d_ensemble_statistics->getNumberOfEnsembles();
         
         TBOX_ASSERT(num_realizations > 0);
-        TBOX_ASSERT(num_realizations == static_cast<int>(B3_avg_realizations.size()));
+        TBOX_ASSERT(num_realizations == static_cast<int>(B3_sq_avg_realizations.size()));
         TBOX_ASSERT(num_realizations == static_cast<int>(Y_0_avg_realizations.size()));
         
-        const int num_cells = static_cast<int>(B3_avg_realizations[0].size());
+        const int num_cells = static_cast<int>(B3_sq_avg_realizations[0].size());
         const double weight = double(1)/double(num_realizations);
         
-        std::vector<double> B3_avg_global(num_cells, double(0));
+        std::vector<double> B3_sq_avg_global(num_cells, double(0));
         std::vector<double> Y_0_avg_global(num_cells, double(0));
         
         for (int ri = 0; ri < num_realizations; ri++)
         {
             for (int i = 0; i < num_cells; i++)
             {
-                B3_avg_global[i]  += weight*B3_avg_realizations[ri][i];
-                Y_0_avg_global[i] += weight*Y_0_avg_realizations[ri][i];
+                B3_sq_avg_global[i] += weight*B3_sq_avg_realizations[ri][i];
+                Y_0_avg_global[i]   += weight*Y_0_avg_realizations[ri][i];
             }
         }
         
-        double B3_sum = double(0);
+        double B3_rms_sum = double(0);
         int count = 0;
         for (int i = 0; i < num_cells; i++)
         {
             const double mixing_metric = double(4)*Y_0_avg_global[i]*(double(1) - Y_0_avg_global[i]);
             if (mixing_metric > double(9)/double(10))
             {
-                B3_sum += B3_avg_global[i];
+                B3_rms_sum += sqrt(B3_sq_avg_global[i]);
                 count++;
             }
         }
         
-        const double B3_mean = B3_sum/count;
+        const double B3_rms_mean = B3_rms_sum/count;
         
         f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-              << "\t" << B3_mean;
+              << "\t" << B3_rms_mean;
         
         f_out.close();
     }
@@ -8061,10 +8418,10 @@ RTIRMIStatisticsUtilities::outputEnsembleBaroclinicTorqueZMeanWithInhomogeneousX
 
 
 /*
- * Output ensemble baroclinic torque in x-direction integrated to a file.
+ * Output ensemble RMS of baroclinic torque in x-direction integrated to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleBaroclinicTorqueXIntegrated(
+RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueXIntegrated(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
@@ -8100,31 +8457,31 @@ RTIRMIStatisticsUtilities::outputEnsembleBaroclinicTorqueXIntegrated(
                 << std::endl);
         }
         
-        const std::vector<std::vector<double> >& B1_avg_realizations =
-            d_ensemble_statistics->rho_avg_realizations;
+        const std::vector<std::vector<double> >& B1_sq_avg_realizations =
+            d_ensemble_statistics->B1_sq_avg_realizations;
         
         const int num_realizations = d_ensemble_statistics->getNumberOfEnsembles();
         
         TBOX_ASSERT(num_realizations > 0);
-        TBOX_ASSERT(num_realizations == static_cast<int>(B1_avg_realizations.size()));
+        TBOX_ASSERT(num_realizations == static_cast<int>(B1_sq_avg_realizations.size()));
         
-        const int num_cells = static_cast<int>(B1_avg_realizations[0].size());
+        const int num_cells = static_cast<int>(B1_sq_avg_realizations[0].size());
         const double weight = double(1)/double(num_realizations);
         
-        std::vector<double> B1_avg_global(num_cells, double(0));
+        std::vector<double> B1_sq_avg_global(num_cells, double(0));
         
         for (int ri = 0; ri < num_realizations; ri++)
         {
             for (int i = 0; i < num_cells; i++)
             {
-                B1_avg_global[i] += weight*B1_avg_realizations[ri][i];
+                B1_sq_avg_global[i] += weight*B1_sq_avg_realizations[ri][i];
             }
         }
         
-        double B1_integrated_global = double(0);
+        double B1_rms_integrated_global = double(0);
         for (int i = 0; i < num_cells; i++)
         {
-            B1_integrated_global += B1_avg_global[i]*dx_finest[0];
+            B1_rms_integrated_global += sqrt(B1_sq_avg_global[i])*dx_finest[0];
         }
         
         const double* x_lo = d_grid_geometry->getXLower();
@@ -8132,17 +8489,17 @@ RTIRMIStatisticsUtilities::outputEnsembleBaroclinicTorqueXIntegrated(
         if (d_dim == tbox::Dimension(2))
         {
             const double L_y = x_hi[1] - x_lo[1];
-            B1_integrated_global *= L_y;
+            B1_rms_integrated_global *= L_y;
         }
         else if (d_dim == tbox::Dimension(3))
         {
             const double L_y = x_hi[1] - x_lo[1];
             const double L_z = x_hi[2] - x_lo[2];
-            B1_integrated_global *= (L_y*L_z);
+            B1_rms_integrated_global *= (L_y*L_z);
         }
         
         f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-              << "\t" << B1_integrated_global;
+              << "\t" << B1_rms_integrated_global;
         
         f_out.close();
     }
@@ -8150,11 +8507,11 @@ RTIRMIStatisticsUtilities::outputEnsembleBaroclinicTorqueXIntegrated(
 
 
 /*
- * Output mean of ensemble baroclinic torque in x-direction in mixing layer with assumed homogeneity in
+ * Output mean of ensemble RMS of baroclinic torque in x-direction in mixing layer with assumed homogeneity in
  * yz-plane (3D) to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleBaroclinicTorqueXMeanWithInhomogeneousXDirection(
+RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueXMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
@@ -8182,8 +8539,8 @@ RTIRMIStatisticsUtilities::outputEnsembleBaroclinicTorqueXMeanWithInhomogeneousX
                 << std::endl);
         }
         
-        const std::vector<std::vector<double> >& B1_avg_realizations =
-            d_ensemble_statistics->rho_avg_realizations;
+        const std::vector<std::vector<double> >& B1_sq_avg_realizations =
+            d_ensemble_statistics->B1_sq_avg_realizations;
         
         const std::vector<std::vector<double> >& Y_0_avg_realizations =
             d_ensemble_statistics->Y_0_avg_realizations;
@@ -8191,40 +8548,40 @@ RTIRMIStatisticsUtilities::outputEnsembleBaroclinicTorqueXMeanWithInhomogeneousX
         const int num_realizations = d_ensemble_statistics->getNumberOfEnsembles();
         
         TBOX_ASSERT(num_realizations > 0);
-        TBOX_ASSERT(num_realizations == static_cast<int>(B1_avg_realizations.size()));
+        TBOX_ASSERT(num_realizations == static_cast<int>(B1_sq_avg_realizations.size()));
         TBOX_ASSERT(num_realizations == static_cast<int>(Y_0_avg_realizations.size()));
         
-        const int num_cells = static_cast<int>(B1_avg_realizations[0].size());
+        const int num_cells = static_cast<int>(B1_sq_avg_realizations[0].size());
         const double weight = double(1)/double(num_realizations);
         
-        std::vector<double> B1_avg_global(num_cells, double(0));
+        std::vector<double> B1_sq_avg_global(num_cells, double(0));
         std::vector<double> Y_0_avg_global(num_cells, double(0));
         
         for (int ri = 0; ri < num_realizations; ri++)
         {
             for (int i = 0; i < num_cells; i++)
             {
-                B1_avg_global[i]  += weight*B1_avg_realizations[ri][i];
-                Y_0_avg_global[i] += weight*Y_0_avg_realizations[ri][i];
+                B1_sq_avg_global[i] += weight*B1_sq_avg_realizations[ri][i];
+                Y_0_avg_global[i]   += weight*Y_0_avg_realizations[ri][i];
             }
         }
         
-        double B1_sum = double(0);
+        double B1_rms_sum = double(0);
         int count = 0;
         for (int i = 0; i < num_cells; i++)
         {
             const double mixing_metric = double(4)*Y_0_avg_global[i]*(double(1) - Y_0_avg_global[i]);
             if (mixing_metric > double(9)/double(10))
             {
-                B1_sum += B1_avg_global[i];
+                B1_rms_sum += sqrt(B1_sq_avg_global[i]);
                 count++;
             }
         }
         
-        const double B1_mean = B1_sum/count;
+        const double B1_rms_mean = B1_rms_sum/count;
         
         f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-              << "\t" << B1_mean;
+              << "\t" << B1_rms_mean;
         
         f_out.close();
     }
@@ -8232,10 +8589,10 @@ RTIRMIStatisticsUtilities::outputEnsembleBaroclinicTorqueXMeanWithInhomogeneousX
 
 
 /*
- * Output ensemble baroclinic torque in y-direction integrated to a file.
+ * Output ensemble RMS of baroclinic torque in y-direction integrated to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleBaroclinicTorqueYIntegrated(
+RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueYIntegrated(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
@@ -8271,31 +8628,31 @@ RTIRMIStatisticsUtilities::outputEnsembleBaroclinicTorqueYIntegrated(
                 << std::endl);
         }
         
-        const std::vector<std::vector<double> >& B2_avg_realizations =
-            d_ensemble_statistics->rho_avg_realizations;
+        const std::vector<std::vector<double> >& B2_sq_avg_realizations =
+            d_ensemble_statistics->B2_sq_avg_realizations;
         
         const int num_realizations = d_ensemble_statistics->getNumberOfEnsembles();
         
         TBOX_ASSERT(num_realizations > 0);
-        TBOX_ASSERT(num_realizations == static_cast<int>(B2_avg_realizations.size()));
+        TBOX_ASSERT(num_realizations == static_cast<int>(B2_sq_avg_realizations.size()));
         
-        const int num_cells = static_cast<int>(B2_avg_realizations[0].size());
+        const int num_cells = static_cast<int>(B2_sq_avg_realizations[0].size());
         const double weight = double(1)/double(num_realizations);
         
-        std::vector<double> B2_avg_global(num_cells, double(0));
+        std::vector<double> B2_sq_avg_global(num_cells, double(0));
         
         for (int ri = 0; ri < num_realizations; ri++)
         {
             for (int i = 0; i < num_cells; i++)
             {
-                B2_avg_global[i] += weight*B2_avg_realizations[ri][i];
+                B2_sq_avg_global[i] += weight*B2_sq_avg_realizations[ri][i];
             }
         }
         
-        double B2_integrated_global = double(0);
+        double B2_rms_integrated_global = double(0);
         for (int i = 0; i < num_cells; i++)
         {
-            B2_integrated_global += B2_avg_global[i]*dx_finest[0];
+            B2_rms_integrated_global += sqrt(B2_sq_avg_global[i])*dx_finest[0];
         }
         
         const double* x_lo = d_grid_geometry->getXLower();
@@ -8303,17 +8660,17 @@ RTIRMIStatisticsUtilities::outputEnsembleBaroclinicTorqueYIntegrated(
         if (d_dim == tbox::Dimension(2))
         {
             const double L_y = x_hi[1] - x_lo[1];
-            B2_integrated_global *= L_y;
+            B2_rms_integrated_global *= L_y;
         }
         else if (d_dim == tbox::Dimension(3))
         {
             const double L_y = x_hi[1] - x_lo[1];
             const double L_z = x_hi[2] - x_lo[2];
-            B2_integrated_global *= (L_y*L_z);
+            B2_rms_integrated_global *= (L_y*L_z);
         }
         
         f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-              << "\t" << B2_integrated_global;
+              << "\t" << B2_rms_integrated_global;
         
         f_out.close();
     }
@@ -8321,11 +8678,11 @@ RTIRMIStatisticsUtilities::outputEnsembleBaroclinicTorqueYIntegrated(
 
 
 /*
- * Output mean of ensemble baroclinic torque in y-direction in mixing layer with assumed homogeneity in
+ * Output mean of ensemble RMS of baroclinic torque in y-direction in mixing layer with assumed homogeneity in
  * yz-plane (3D) to a file.
  */
 void
-RTIRMIStatisticsUtilities::outputEnsembleBaroclinicTorqueYMeanWithInhomogeneousXDirection(
+RTIRMIStatisticsUtilities::outputEnsembleRMSBaroclinicTorqueYMeanWithInhomogeneousXDirection(
     const std::string& stat_dump_filename,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
     const HAMERS_SHARED_PTR<hier::VariableContext>& data_context) const
@@ -8353,8 +8710,8 @@ RTIRMIStatisticsUtilities::outputEnsembleBaroclinicTorqueYMeanWithInhomogeneousX
                 << std::endl);
         }
         
-        const std::vector<std::vector<double> >& B2_avg_realizations =
-            d_ensemble_statistics->rho_avg_realizations;
+        const std::vector<std::vector<double> >& B2_sq_avg_realizations =
+            d_ensemble_statistics->B2_sq_avg_realizations;
         
         const std::vector<std::vector<double> >& Y_0_avg_realizations =
             d_ensemble_statistics->Y_0_avg_realizations;
@@ -8362,40 +8719,40 @@ RTIRMIStatisticsUtilities::outputEnsembleBaroclinicTorqueYMeanWithInhomogeneousX
         const int num_realizations = d_ensemble_statistics->getNumberOfEnsembles();
         
         TBOX_ASSERT(num_realizations > 0);
-        TBOX_ASSERT(num_realizations == static_cast<int>(B2_avg_realizations.size()));
+        TBOX_ASSERT(num_realizations == static_cast<int>(B2_sq_avg_realizations.size()));
         TBOX_ASSERT(num_realizations == static_cast<int>(Y_0_avg_realizations.size()));
         
-        const int num_cells = static_cast<int>(B2_avg_realizations[0].size());
+        const int num_cells = static_cast<int>(B2_sq_avg_realizations[0].size());
         const double weight = double(1)/double(num_realizations);
         
-        std::vector<double> B2_avg_global(num_cells, double(0));
+        std::vector<double> B2_sq_avg_global(num_cells, double(0));
         std::vector<double> Y_0_avg_global(num_cells, double(0));
         
         for (int ri = 0; ri < num_realizations; ri++)
         {
             for (int i = 0; i < num_cells; i++)
             {
-                B2_avg_global[i]  += weight*B2_avg_realizations[ri][i];
-                Y_0_avg_global[i] += weight*Y_0_avg_realizations[ri][i];
+                B2_sq_avg_global[i] += weight*B2_sq_avg_realizations[ri][i];
+                Y_0_avg_global[i]   += weight*Y_0_avg_realizations[ri][i];
             }
         }
         
-        double B2_sum = double(0);
+        double B2_rms_sum = double(0);
         int count = 0;
         for (int i = 0; i < num_cells; i++)
         {
             const double mixing_metric = double(4)*Y_0_avg_global[i]*(double(1) - Y_0_avg_global[i]);
             if (mixing_metric > double(9)/double(10))
             {
-                B2_sum += B2_avg_global[i];
+                B2_rms_sum += sqrt(B2_sq_avg_global[i]);
                 count++;
             }
         }
         
-        const double B2_mean = B2_sum/count;
+        const double B2_rms_mean = B2_rms_sum/count;
         
         f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
-              << "\t" << B2_mean;
+              << "\t" << B2_rms_mean;
         
         f_out.close();
     }
@@ -17129,32 +17486,32 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
                         data_context);
             }
         }
-        else if (statistical_quantity_key == "BARO_TQ_Z_AVG_SP")
+        else if (statistical_quantity_key == "BARO_TQ_Z_RMS_SP")
         {
-            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->B3_avg_computed))
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->B3_sq_avg_computed))
             {
                 rti_rmi_statistics_utilities->
-                    computeAveragedBaroclinicTorqueZWithHomogeneityInYDirectionOrInYZPlane(
+                    computeAveragedSquaredBaroclinicTorqueZWithHomogeneityInYDirectionOrInYZPlane(
                         patch_hierarchy,
                         data_context);
             }
         }
-        else if (statistical_quantity_key == "BARO_TQ_X_AVG_SP")
+        else if (statistical_quantity_key == "BARO_TQ_X_RMS_SP")
         {
-            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->B1_avg_computed))
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->B1_sq_avg_computed))
             {
                 rti_rmi_statistics_utilities->
-                    computeAveragedBaroclinicTorqueXWithHomogeneityInYZPlane(
+                    computeAveragedSquaredBaroclinicTorqueXWithHomogeneityInYZPlane(
                         patch_hierarchy,
                         data_context);
             }
         }
-        else if (statistical_quantity_key == "BARO_TQ_Y_AVG_SP")
+        else if (statistical_quantity_key == "BARO_TQ_Y_RMS_SP")
         {
-            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->B2_avg_computed))
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->B2_sq_avg_computed))
             {
                 rti_rmi_statistics_utilities->
-                    computeAveragedBaroclinicTorqueYWithHomogeneityInYZPlane(
+                    computeAveragedSquaredBaroclinicTorqueYWithHomogeneityInYZPlane(
                         patch_hierarchy,
                         data_context);
             }
@@ -17776,20 +18133,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
         }
         else if (statistical_quantity_key == "BARO_TQ_Z_INT")
         {
-            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->B3_avg_computed))
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->B3_sq_avg_computed))
             {
                 rti_rmi_statistics_utilities->
-                    computeAveragedBaroclinicTorqueZWithHomogeneityInYDirectionOrInYZPlane(
+                    computeAveragedSquaredBaroclinicTorqueZWithHomogeneityInYDirectionOrInYZPlane(
                         patch_hierarchy,
                         data_context);
             }
         }
         else if (statistical_quantity_key == "BARO_TQ_Z_MEAN_INHO_X")
         {
-            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->B3_avg_computed))
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->B3_sq_avg_computed))
             {
                 rti_rmi_statistics_utilities->
-                    computeAveragedBaroclinicTorqueZWithHomogeneityInYDirectionOrInYZPlane(
+                    computeAveragedSquaredBaroclinicTorqueZWithHomogeneityInYDirectionOrInYZPlane(
                         patch_hierarchy,
                         data_context);
             }
@@ -17804,20 +18161,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
         }
         else if (statistical_quantity_key == "BARO_TQ_X_INT")
         {
-            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->B1_avg_computed))
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->B1_sq_avg_computed))
             {
                 rti_rmi_statistics_utilities->
-                    computeAveragedBaroclinicTorqueXWithHomogeneityInYZPlane(
+                    computeAveragedSquaredBaroclinicTorqueXWithHomogeneityInYZPlane(
                         patch_hierarchy,
                         data_context);
             }
         }
         else if (statistical_quantity_key == "BARO_TQ_X_MEAN_INHO_X")
         {
-            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->B1_avg_computed))
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->B1_sq_avg_computed))
             {
                 rti_rmi_statistics_utilities->
-                    computeAveragedBaroclinicTorqueXWithHomogeneityInYZPlane(
+                    computeAveragedSquaredBaroclinicTorqueXWithHomogeneityInYZPlane(
                         patch_hierarchy,
                         data_context);
             }
@@ -17832,20 +18189,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::computeStatisticalQuantities(
         }
         else if (statistical_quantity_key == "BARO_TQ_Y_INT")
         {
-            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->B2_avg_computed))
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->B2_sq_avg_computed))
             {
                 rti_rmi_statistics_utilities->
-                    computeAveragedBaroclinicTorqueYWithHomogeneityInYZPlane(
+                    computeAveragedSquaredBaroclinicTorqueYWithHomogeneityInYZPlane(
                         patch_hierarchy,
                         data_context);
             }
         }
         else if (statistical_quantity_key == "BARO_TQ_Y_MEAN_INHO_X")
         {
-            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->B2_avg_computed))
+            if (!(rti_rmi_statistics_utilities->d_ensemble_statistics->B2_sq_avg_computed))
             {
                 rti_rmi_statistics_utilities->
-                    computeAveragedBaroclinicTorqueYWithHomogeneityInYZPlane(
+                    computeAveragedSquaredBaroclinicTorqueYWithHomogeneityInYZPlane(
                         patch_hierarchy,
                         data_context);
             }
@@ -18464,29 +18821,29 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                     data_context,
                     output_time);
         }
-        else if (statistical_quantity_key == "BARO_TQ_Z_AVG_SP")
+        else if (statistical_quantity_key == "BARO_TQ_Z_RMS_SP")
         {
             rti_rmi_statistics_utilities->
-                outputSpatialProfileEnsembleAveragedBaroclinicTorqueZWithHomogeneityInYDirectionOrInYZPlane(
-                    "B3_avg.dat",
+                outputSpatialProfileEnsembleRMSBaroclinicTorqueZWithHomogeneityInYDirectionOrInYZPlane(
+                    "B3_rms.dat",
                     patch_hierarchy,
                     data_context,
                     output_time);
         }
-        else if (statistical_quantity_key == "BARO_TQ_X_AVG_SP")
+        else if (statistical_quantity_key == "BARO_TQ_X_RMS_SP")
         {
             rti_rmi_statistics_utilities->
-                outputSpatialProfileEnsembleAveragedBaroclinicTorqueXWithHomogeneityInYZPlane(
-                    "B1_avg.dat",
+                outputSpatialProfileEnsembleRMSBaroclinicTorqueXWithHomogeneityInYZPlane(
+                    "B1_rms.dat",
                     patch_hierarchy,
                     data_context,
                     output_time);
         }
-        else if (statistical_quantity_key == "BARO_TQ_Y_AVG_SP")
+        else if (statistical_quantity_key == "BARO_TQ_Y_RMS_SP")
         {
             rti_rmi_statistics_utilities->
-                outputSpatialProfileEnsembleAveragedBaroclinicTorqueYWithHomogeneityInYZPlane(
-                    "B2_avg.dat",
+                outputSpatialProfileEnsembleRMSBaroclinicTorqueYWithHomogeneityInYZPlane(
+                    "B2_rms.dat",
                     patch_hierarchy,
                     data_context,
                     output_time);
@@ -18655,7 +19012,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "BARO_TQ_Z_INT")
         {
             rti_rmi_statistics_utilities->
-                outputEnsembleBaroclinicTorqueZIntegrated(
+                outputEnsembleRMSBaroclinicTorqueZIntegrated(
                     stat_dump_filename,
                     patch_hierarchy,
                     data_context);
@@ -18663,7 +19020,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "BARO_TQ_Z_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
-                outputEnsembleBaroclinicTorqueZMeanWithInhomogeneousXDirection(
+                outputEnsembleRMSBaroclinicTorqueZMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
                     patch_hierarchy,
                     data_context);
@@ -18671,7 +19028,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "BARO_TQ_X_INT")
         {
             rti_rmi_statistics_utilities->
-                outputEnsembleBaroclinicTorqueXIntegrated(
+                outputEnsembleRMSBaroclinicTorqueXIntegrated(
                     stat_dump_filename,
                     patch_hierarchy,
                     data_context);
@@ -18679,7 +19036,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "BARO_TQ_X_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
-                outputEnsembleBaroclinicTorqueXMeanWithInhomogeneousXDirection(
+                outputEnsembleRMSBaroclinicTorqueXMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
                     patch_hierarchy,
                     data_context);
@@ -18687,7 +19044,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "BARO_TQ_Y_INT")
         {
             rti_rmi_statistics_utilities->
-                outputEnsembleBaroclinicTorqueYIntegrated(
+                outputEnsembleRMSBaroclinicTorqueYIntegrated(
                     stat_dump_filename,
                     patch_hierarchy,
                     data_context);
@@ -18695,7 +19052,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "BARO_TQ_Y_MEAN_INHO_X")
         {
             rti_rmi_statistics_utilities->
-                outputEnsembleBaroclinicTorqueYMeanWithInhomogeneousXDirection(
+                outputEnsembleRMSBaroclinicTorqueYMeanWithInhomogeneousXDirection(
                     stat_dump_filename,
                     patch_hierarchy,
                     data_context);
