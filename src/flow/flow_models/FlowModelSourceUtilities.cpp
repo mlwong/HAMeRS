@@ -50,8 +50,6 @@ FlowModelSourceUtilities::FlowModelSourceUtilities(
                 << std::endl);
         }
         
-        bool special_source_exterior = false;
-        
         if (source_terms_db->keyExists("has_special_source_terms"))
         {
             d_has_special_source_terms = source_terms_db->getBool("has_special_source_terms");
