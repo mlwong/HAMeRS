@@ -102,6 +102,19 @@ ConvectiveFluxReconstructorManager::ConvectiveFluxReconstructorManager(
             flow_model,
             convective_flux_reconstructor_db));
     }
+    else if (convective_flux_reconstructor_str == "CENTRAL")
+    {
+        d_convective_flux_reconstructor_type = CONVECTIVE_FLUX_RECONSTRUCTOR::CENTRAL;
+        
+        d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorCentral(
+            "d_convective_flux_reconstructor",
+            dim,
+            grid_geometry,
+            flow_model->getNumberOfEquations(),
+            flow_model_type,
+            flow_model,
+            convective_flux_reconstructor_db));
+    }
     else if (convective_flux_reconstructor_str == "DRP4")
     {
         d_convective_flux_reconstructor_type = CONVECTIVE_FLUX_RECONSTRUCTOR::DRP4;
@@ -115,11 +128,11 @@ ConvectiveFluxReconstructorManager::ConvectiveFluxReconstructorManager(
             flow_model,
             convective_flux_reconstructor_db));
     }
-    else if (convective_flux_reconstructor_str == "CENTRAL")
+    else if (convective_flux_reconstructor_str == "KEP")
     {
-        d_convective_flux_reconstructor_type = CONVECTIVE_FLUX_RECONSTRUCTOR::CENTRAL;
+        d_convective_flux_reconstructor_type = CONVECTIVE_FLUX_RECONSTRUCTOR::KEP;
         
-        d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorCentral(
+        d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorKEP(
             "d_convective_flux_reconstructor",
             dim,
             grid_geometry,

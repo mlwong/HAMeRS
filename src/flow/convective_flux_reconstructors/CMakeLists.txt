@@ -12,6 +12,7 @@ set(convective_flux_reconstructors_source_files
     ./WCNS56/ConvectiveFluxReconstructorWCNS6-Test.cpp
     ./central/ConvectiveFluxReconstructorCentral.cpp
     ./central/ConvectiveFluxReconstructorDRP4.cpp
+    ./central/ConvectiveFluxReconstructorKEP.cpp
 )
 
 # Create a library called convective_flux_reconstructors which includes the 

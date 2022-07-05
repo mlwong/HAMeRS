@@ -10,6 +10,7 @@
 #include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS6-Test.hpp"
 #include "flow/convective_flux_reconstructors/central/ConvectiveFluxReconstructorCentral.hpp"
 #include "flow/convective_flux_reconstructors/central/ConvectiveFluxReconstructorDRP4.hpp"
+#include "flow/convective_flux_reconstructors/central/ConvectiveFluxReconstructorKEP.hpp"
 
 #include <map>
 #include <string>
@@ -24,7 +25,8 @@ namespace CONVECTIVE_FLUX_RECONSTRUCTOR
                 WCNS6_LD_HLLC_HLL,
                 WCNS6_TEST,
                 CENTRAL,
-                DRP4 };
+                DRP4,
+                KEP };
 }
 
 /*
@@ -46,6 +48,7 @@ inline std::ostream& operator<<(std::ostream& os, const CONVECTIVE_FLUX_RECONSTR
         INSERT_ELEMENT(CONVECTIVE_FLUX_RECONSTRUCTOR::WCNS6_TEST);
         INSERT_ELEMENT(CONVECTIVE_FLUX_RECONSTRUCTOR::CENTRAL);
         INSERT_ELEMENT(CONVECTIVE_FLUX_RECONSTRUCTOR::DRP4);
+        INSERT_ELEMENT(CONVECTIVE_FLUX_RECONSTRUCTOR::KEP);
 #undef INSERT_ELEMENT
     }
     

@@ -391,7 +391,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
         
         if (d_has_advective_eqn_form)
         {
-            HAMERS_SHARED_PTR<pdat::CellData<double> > velocity= d_flow_model->getCellData("VELOCITY");
+            HAMERS_SHARED_PTR<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
             
             hier::IntVector num_subghosts_velocity = velocity->getGhostCellWidth();
             const int num_subghosts_0_velocity = num_subghosts_velocity[0];
@@ -981,7 +981,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
         
         if (d_has_advective_eqn_form)
         {
-            HAMERS_SHARED_PTR<pdat::CellData<double> > velocity= d_flow_model->getCellData("VELOCITY");
+            HAMERS_SHARED_PTR<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
             
             hier::IntVector num_subghosts_velocity = velocity->getGhostCellWidth();
             hier::IntVector subghostcell_dims_velocity = velocity->getGhostBox().numberCells();
@@ -2180,7 +2180,7 @@ ConvectiveFluxReconstructorCentral::computeConvectiveFluxAndSourceOnPatch(
         
         if (d_has_advective_eqn_form)
         {
-            HAMERS_SHARED_PTR<pdat::CellData<double> > velocity= d_flow_model->getCellData("VELOCITY");
+            HAMERS_SHARED_PTR<pdat::CellData<double> > velocity = d_flow_model->getCellData("VELOCITY");
             
             hier::IntVector num_subghosts_velocity = velocity->getGhostCellWidth();
             hier::IntVector subghostcell_dims_velocity = velocity->getGhostBox().numberCells();
