@@ -94,6 +94,84 @@ class ConvectiveFluxReconstructorKEP: public ConvectiveFluxReconstructor
             const double dt) const;
         
         /*
+         * Add linear term to convective flux in y-direction.
+         */
+        void
+        addLinearTermToConvectiveFluxY(
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_f,
+            const int component_idx_flux,
+            const int component_idx_f,
+            const double dt) const;
+        
+        /*
+         * Add quadratic term to convective flux in y-direction.
+         */
+        void
+        addQuadraticTermToConvectiveFluxY(
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_f,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_g,
+            const int component_idx_flux,
+            const int component_idx_f,
+            const int component_idx_g,
+            const double dt) const;
+        
+        /*
+         * Add cubic term to convective flux in y-direction.
+         */
+        void
+        addCubicTermToConvectiveFluxY(
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_f,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_g,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_h,
+            const int component_idx_flux,
+            const int component_idx_f,
+            const int component_idx_g,
+            const int component_idx_h,
+            const double dt) const;
+        
+        /*
+         * Add linear term to convective flux in z-direction.
+         */
+        void
+        addLinearTermToConvectiveFluxZ(
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_f,
+            const int component_idx_flux,
+            const int component_idx_f,
+            const double dt) const;
+        
+        /*
+         * Add quadratic term to convective flux in z-direction.
+         */
+        void
+        addQuadraticTermToConvectiveFluxZ(
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_f,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_g,
+            const int component_idx_flux,
+            const int component_idx_f,
+            const int component_idx_g,
+            const double dt) const;
+        
+        /*
+         * Add cubic term to convective flux in z-direction.
+         */
+        void
+        addCubicTermToConvectiveFluxZ(
+            HAMERS_SHARED_PTR<pdat::SideData<double> >& data_convective_flux,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_f,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_g,
+            const HAMERS_SHARED_PTR<pdat::CellData<double> >& data_h,
+            const int component_idx_flux,
+            const int component_idx_f,
+            const int component_idx_g,
+            const int component_idx_h,
+            const double dt) const;
+        
+        /*
          * Options of the scheme.
          */
         int d_stencil_width;
