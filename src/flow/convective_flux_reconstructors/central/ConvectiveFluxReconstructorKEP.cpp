@@ -449,12 +449,12 @@ ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch(
     
     if (d_dim == tbox::Dimension(1))
     {
-        /*
-         * Reconstruct flux in x-direction.
-         */
-        
         if (d_flow_model_type == FLOW_MODEL::SINGLE_SPECIES)
         {
+            /*
+             * Reconstruct flux in x-direction.
+             */
+            
             // Density equation.
             
             addQuadraticTermToConvectiveFluxX(convective_flux,
@@ -500,6 +500,10 @@ ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch(
         {
             const int num_species = d_flow_model->getNumberOfSpecies();
             
+            /*
+             * Reconstruct flux in x-direction.
+             */
+            
             // Partial density equations.
             
             for (int si = 0; si < num_species; si++)
@@ -508,7 +512,7 @@ ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch(
                     density,
                     velocity,
                     mass_fractions,
-                    0,
+                    si,
                     0,
                     0,
                     si,
@@ -548,11 +552,680 @@ ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch(
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        
+        if (d_flow_model_type == FLOW_MODEL::SINGLE_SPECIES)
+        {
+            /*
+             * Reconstruct flux in x-direction.
+             */
+            
+            // Density equation.
+            
+            addQuadraticTermToConvectiveFluxX(convective_flux,
+                density,
+                velocity,
+                0,
+                0,
+                0,
+                dt);
+            
+            // Momentum equation in x-direction.
+            
+            addLinearTermToConvectiveFluxX(convective_flux,
+                pressure,
+                1,
+                0,
+                dt);
+            
+            addCubicTermToConvectiveFluxX(convective_flux,
+                density,
+                velocity,
+                velocity,
+                1,
+                0,
+                0,
+                0,
+                dt);
+            
+            // Momentum equation in y-direction.
+            
+            addCubicTermToConvectiveFluxX(convective_flux,
+                density,
+                velocity,
+                velocity,
+                2,
+                0,
+                1,
+                0,
+                dt);
+            
+            // Total energy equation.
+            
+            addCubicTermToConvectiveFluxX(convective_flux,
+                density,
+                velocity,
+                specific_total_enthalpy,
+                3,
+                0,
+                0,
+                0,
+                dt);
+            
+            /*
+             * Reconstruct flux in y-direction.
+             */
+            
+            // Density equation.
+            
+            addQuadraticTermToConvectiveFluxY(convective_flux,
+                density,
+                velocity,
+                0,
+                0,
+                1,
+                dt);
+            
+            // Momentum equation in x-direction.
+            
+            addCubicTermToConvectiveFluxY(convective_flux,
+                density,
+                velocity,
+                velocity,
+                1,
+                0,
+                0,
+                1,
+                dt);
+            
+            // Momentum equation in y-direction.
+            
+            addLinearTermToConvectiveFluxY(convective_flux,
+                pressure,
+                2,
+                0,
+                dt);
+            
+            addCubicTermToConvectiveFluxY(convective_flux,
+                density,
+                velocity,
+                velocity,
+                2,
+                0,
+                1,
+                1,
+                dt);
+            
+            // Total energy equation.
+            
+            addCubicTermToConvectiveFluxY(convective_flux,
+                density,
+                velocity,
+                specific_total_enthalpy,
+                3,
+                0,
+                1,
+                0,
+                dt);
+        }
+        else if (d_flow_model_type == FLOW_MODEL::FOUR_EQN_CONSERVATIVE ||
+                 d_flow_model_type == FLOW_MODEL::FIVE_EQN_ALLAIRE)
+        {
+            const int num_species = d_flow_model->getNumberOfSpecies();
+            
+            /*
+             * Reconstruct flux in x-direction.
+             */
+            
+            // Partial density equations.
+            
+            for (int si = 0; si < num_species; si++)
+            {
+                addCubicTermToConvectiveFluxX(convective_flux,
+                    density,
+                    velocity,
+                    mass_fractions,
+                    si,
+                    0,
+                    0,
+                    si,
+                    dt);
+            }
+            
+            // Momentum equation in x-direction.
+            
+            addLinearTermToConvectiveFluxX(convective_flux,
+                pressure,
+                num_species,
+                0,
+                dt);
+            
+            addCubicTermToConvectiveFluxX(convective_flux,
+                density,
+                velocity,
+                velocity,
+                num_species,
+                0,
+                0,
+                0,
+                dt);
+            
+            // Momentum equation in y-direction.
+            
+            addCubicTermToConvectiveFluxX(convective_flux,
+                density,
+                velocity,
+                velocity,
+                num_species + 1,
+                0,
+                1,
+                0,
+                dt);
+            
+            // Total energy equation.
+            
+            addCubicTermToConvectiveFluxX(convective_flux,
+                density,
+                velocity,
+                specific_total_enthalpy,
+                num_species + 2,
+                0,
+                0,
+                0,
+                dt);
+            
+            /*
+             * Reconstruct flux in y-direction.
+             */
+            
+            // Partial density equations.
+            
+            for (int si = 0; si < num_species; si++)
+            {
+                addCubicTermToConvectiveFluxY(convective_flux,
+                    density,
+                    velocity,
+                    mass_fractions,
+                    si,
+                    0,
+                    1,
+                    si,
+                    dt);
+            }
+            
+            // Momentum equation in x-direction.
+            
+            addCubicTermToConvectiveFluxY(convective_flux,
+                density,
+                velocity,
+                velocity,
+                num_species,
+                0,
+                0,
+                1,
+                dt);
+            
+            // Momentum equation in y-direction.
+            
+            addLinearTermToConvectiveFluxY(convective_flux,
+                pressure,
+                num_species + 1,
+                0,
+                dt);
+            
+            addCubicTermToConvectiveFluxY(convective_flux,
+                density,
+                velocity,
+                velocity,
+                num_species + 1,
+                0,
+                1,
+                1,
+                dt);
+            
+            // Total energy equation.
+            
+            addCubicTermToConvectiveFluxY(convective_flux,
+                density,
+                velocity,
+                specific_total_enthalpy,
+                num_species + 2,
+                0,
+                1,
+                0,
+                dt);
+        }
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        
+        if (d_flow_model_type == FLOW_MODEL::SINGLE_SPECIES)
+        {
+            /*
+             * Reconstruct flux in x-direction.
+             */
+            
+            // Density equation.
+            
+            addQuadraticTermToConvectiveFluxX(convective_flux,
+                density,
+                velocity,
+                0,
+                0,
+                0,
+                dt);
+            
+            // Momentum equation in x-direction.
+            
+            addLinearTermToConvectiveFluxX(convective_flux,
+                pressure,
+                1,
+                0,
+                dt);
+            
+            addCubicTermToConvectiveFluxX(convective_flux,
+                density,
+                velocity,
+                velocity,
+                1,
+                0,
+                0,
+                0,
+                dt);
+            
+            // Momentum equation in y-direction.
+            
+            addCubicTermToConvectiveFluxX(convective_flux,
+                density,
+                velocity,
+                velocity,
+                2,
+                0,
+                1,
+                0,
+                dt);
+            
+            // Momentum equation in z-direction.
+            
+            addCubicTermToConvectiveFluxX(convective_flux,
+                density,
+                velocity,
+                velocity,
+                3,
+                0,
+                2,
+                0,
+                dt);
+            
+            // Total energy equation.
+            
+            addCubicTermToConvectiveFluxX(convective_flux,
+                density,
+                velocity,
+                specific_total_enthalpy,
+                4,
+                0,
+                0,
+                0,
+                dt);
+            
+            /*
+             * Reconstruct flux in y-direction.
+             */
+            
+            // Density equation.
+            
+            addQuadraticTermToConvectiveFluxY(convective_flux,
+                density,
+                velocity,
+                0,
+                0,
+                1,
+                dt);
+            
+            // Momentum equation in x-direction.
+            
+            addCubicTermToConvectiveFluxY(convective_flux,
+                density,
+                velocity,
+                velocity,
+                1,
+                0,
+                0,
+                1,
+                dt);
+            
+            // Momentum equation in y-direction.
+            
+            addLinearTermToConvectiveFluxY(convective_flux,
+                pressure,
+                2,
+                0,
+                dt);
+            
+            addCubicTermToConvectiveFluxY(convective_flux,
+                density,
+                velocity,
+                velocity,
+                2,
+                0,
+                1,
+                1,
+                dt);
+            
+            // Momentum equation in z-direction.
+            
+            addCubicTermToConvectiveFluxY(convective_flux,
+                density,
+                velocity,
+                velocity,
+                3,
+                0,
+                2,
+                1,
+                dt);
+            
+            // Total energy equation.
+            
+            addCubicTermToConvectiveFluxY(convective_flux,
+                density,
+                velocity,
+                specific_total_enthalpy,
+                4,
+                0,
+                1,
+                0,
+                dt);
+            
+            /*
+             * Reconstruct flux in z-direction.
+             */
+            
+            // Density equation.
+            
+            addQuadraticTermToConvectiveFluxZ(convective_flux,
+                density,
+                velocity,
+                0,
+                0,
+                2,
+                dt);
+            
+            // Momentum equation in x-direction.
+            
+            addCubicTermToConvectiveFluxZ(convective_flux,
+                density,
+                velocity,
+                velocity,
+                1,
+                0,
+                0,
+                2,
+                dt);
+            
+            // Momentum equation in y-direction.
+            
+            addCubicTermToConvectiveFluxZ(convective_flux,
+                density,
+                velocity,
+                velocity,
+                2,
+                0,
+                1,
+                2,
+                dt);
+            
+            // Momentum equation in z-direction.
+            
+            addLinearTermToConvectiveFluxZ(convective_flux,
+                pressure,
+                3,
+                0,
+                dt);
+            
+            addCubicTermToConvectiveFluxZ(convective_flux,
+                density,
+                velocity,
+                velocity,
+                3,
+                0,
+                2,
+                2,
+                dt);
+            
+            // Total energy equation.
+            
+            addCubicTermToConvectiveFluxZ(convective_flux,
+                density,
+                velocity,
+                specific_total_enthalpy,
+                4,
+                0,
+                2,
+                0,
+                dt);
+        }
+        else if (d_flow_model_type == FLOW_MODEL::FOUR_EQN_CONSERVATIVE ||
+                 d_flow_model_type == FLOW_MODEL::FIVE_EQN_ALLAIRE)
+        {
+            const int num_species = d_flow_model->getNumberOfSpecies();
+            
+            /*
+             * Reconstruct flux in x-direction.
+             */
+             
+            // Partial density equations.
+            
+            for (int si = 0; si < num_species; si++)
+            {
+                addCubicTermToConvectiveFluxX(convective_flux,
+                    density,
+                    velocity,
+                    mass_fractions,
+                    si,
+                    0,
+                    0,
+                    si,
+                    dt);
+            }
+            
+            // Momentum equation in x-direction.
+            
+            addLinearTermToConvectiveFluxX(convective_flux,
+                pressure,
+                num_species,
+                0,
+                dt);
+            
+            addCubicTermToConvectiveFluxX(convective_flux,
+                density,
+                velocity,
+                velocity,
+                num_species,
+                0,
+                0,
+                0,
+                dt);
+            
+            // Momentum equation in y-direction.
+            
+            addCubicTermToConvectiveFluxX(convective_flux,
+                density,
+                velocity,
+                velocity,
+                num_species + 1,
+                0,
+                1,
+                0,
+                dt);
+            
+            // Momentum equation in z-direction.
+            
+            addCubicTermToConvectiveFluxX(convective_flux,
+                density,
+                velocity,
+                velocity,
+                num_species + 2,
+                0,
+                2,
+                0,
+                dt);
+            
+            // Total energy equation.
+            
+            addCubicTermToConvectiveFluxX(convective_flux,
+                density,
+                velocity,
+                specific_total_enthalpy,
+                num_species + 3,
+                0,
+                0,
+                0,
+                dt);
+            
+            /*
+             * Reconstruct flux in y-direction.
+             */
+            
+            // Partial density equations.
+            
+            for (int si = 0; si < num_species; si++)
+            {
+                addCubicTermToConvectiveFluxY(convective_flux,
+                    density,
+                    velocity,
+                    mass_fractions,
+                    si,
+                    0,
+                    1,
+                    si,
+                    dt);
+            }
+            
+            // Momentum equation in x-direction.
+            
+            addCubicTermToConvectiveFluxY(convective_flux,
+                density,
+                velocity,
+                velocity,
+                num_species,
+                0,
+                0,
+                1,
+                dt);
+            
+            // Momentum equation in y-direction.
+            
+            addLinearTermToConvectiveFluxY(convective_flux,
+                pressure,
+                num_species + 1,
+                0,
+                dt);
+            
+            addCubicTermToConvectiveFluxY(convective_flux,
+                density,
+                velocity,
+                velocity,
+                num_species + 1,
+                0,
+                1,
+                1,
+                dt);
+            
+            // Momentum equation in z-direction.
+            
+            addCubicTermToConvectiveFluxY(convective_flux,
+                density,
+                velocity,
+                velocity,
+                num_species + 2,
+                0,
+                2,
+                1,
+                dt);
+            
+            // Total energy equation.
+            
+            addCubicTermToConvectiveFluxY(convective_flux,
+                density,
+                velocity,
+                specific_total_enthalpy,
+                num_species + 3,
+                0,
+                1,
+                0,
+                dt);
+            
+            /*
+             * Reconstruct flux in z-direction.
+             */
+            
+            // Partial density equations.
+            
+            for (int si = 0; si < num_species; si++)
+            {
+                addCubicTermToConvectiveFluxZ(convective_flux,
+                    density,
+                    velocity,
+                    mass_fractions,
+                    si,
+                    0,
+                    2,
+                    si,
+                    dt);
+            }
+            
+            // Momentum equation in x-direction.
+            
+            addCubicTermToConvectiveFluxZ(convective_flux,
+                density,
+                velocity,
+                velocity,
+                num_species,
+                0,
+                0,
+                2,
+                dt);
+            
+            // Momentum equation in y-direction.
+            
+            addCubicTermToConvectiveFluxZ(convective_flux,
+                density,
+                velocity,
+                velocity,
+                num_species + 1,
+                0,
+                1,
+                2,
+                dt);
+            
+            // Momentum equation in z-direction.
+            
+            addLinearTermToConvectiveFluxZ(convective_flux,
+                pressure,
+                num_species + 2,
+                0,
+                dt);
+            
+            addCubicTermToConvectiveFluxZ(convective_flux,
+                density,
+                velocity,
+                velocity,
+                num_species + 2,
+                0,
+                2,
+                2,
+                dt);
+            
+            // Total energy equation.
+            
+            addCubicTermToConvectiveFluxZ(convective_flux,
+                density,
+                velocity,
+                specific_total_enthalpy,
+                num_species + 3,
+                0,
+                2,
+                0,
+                dt);
+        }
     }
     
     /*
