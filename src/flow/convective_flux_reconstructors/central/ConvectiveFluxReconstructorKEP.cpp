@@ -447,6 +447,10 @@ ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch(
         }
     }
     
+    /*
+     * Compute the flux.
+     */
+    
     if (d_dim == tbox::Dimension(1))
     {
         if (d_flow_model_type == FLOW_MODEL::SINGLE_SPECIES)
@@ -1229,6 +1233,20 @@ ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch(
     }
     
     /*
+     * Compute the source.
+     */
+    
+    if (d_flow_model_type == FLOW_MODEL::FIVE_EQN_ALLAIRE)
+    {
+        addSourceTermsForVolumeFractionEquations(
+            source,
+            velocity,
+            volume_fractions,
+            dx,
+            dt);
+    }
+    
+    /*
      * Unregister the patch and data of all registered derived cell variables in the flow model.
      */
     
@@ -1269,7 +1287,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the dimensions.
+         * Get the dimension.
          */
         
         const int interior_dim_0 = interior_dims[0];
@@ -1287,6 +1305,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
+                
                 const int idx_face_x = i;
                 
                 const int idx_f_L = i - 1 + num_ghosts_0_f;
@@ -1304,6 +1323,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
+                
                 const int idx_face_x = i;
                 
                 const int idx_f_LL = i - 2 + num_ghosts_0_f;
@@ -1325,6 +1345,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
+                
                 const int idx_face_x = i;
                 
                 const int idx_f_LLL = i - 3 + num_ghosts_0_f;
@@ -1351,6 +1372,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
+                
                 const int idx_face_x = i;
                 
                 const int idx_f_LLLL = i - 4 + num_ghosts_0_f;
@@ -1383,6 +1405,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
+                
                 const int idx_face_x = i;
                 
                 const int idx_f_LLLLL = i - 5 + num_ghosts_0_f;
@@ -1422,6 +1445,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
+                
                 const int idx_face_x = i;
                 
                 const int idx_f_LLLLLL = i - 6 + num_ghosts_0_f;
@@ -1790,6 +1814,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
+                        
                         const int idx_face_x = i +
                             j*(interior_dim_0 + 1) +
                             k*(interior_dim_0 + 1)*interior_dim_1;
@@ -1822,6 +1847,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
+                        
                         const int idx_face_x = i +
                             j*(interior_dim_0 + 1) +
                             k*(interior_dim_0 + 1)*interior_dim_1;
@@ -1866,6 +1892,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
+                        
                         const int idx_face_x = i +
                             j*(interior_dim_0 + 1) +
                             k*(interior_dim_0 + 1)*interior_dim_1;
@@ -1923,6 +1950,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
+                        
                         const int idx_face_x = i +
                             j*(interior_dim_0 + 1) +
                             k*(interior_dim_0 + 1)*interior_dim_1;
@@ -1994,6 +2022,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
+                        
                         const int idx_face_x = i +
                             j*(interior_dim_0 + 1) +
                             k*(interior_dim_0 + 1)*interior_dim_1;
@@ -2080,6 +2109,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
+                        
                         const int idx_face_x = i +
                             j*(interior_dim_0 + 1) +
                             k*(interior_dim_0 + 1)*interior_dim_1;
@@ -2196,6 +2226,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
 #endif
     
     // Get the dimensions of the ghost cell boxes.
+    
     const hier::Box ghost_box_f = data_f->getGhostBox();
     const hier::IntVector ghostcell_dims_f = ghost_box_f.numberCells();
     const hier::IntVector num_ghosts_f = data_f->getGhostCellWidth();
@@ -2217,7 +2248,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the dimensions.
+         * Get the dimension.
          */
         
         const int interior_dim_0 = interior_dims[0];
@@ -2236,6 +2267,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
+                
                 const int idx_face_x = i;
                 
                 const int idx_f_L = i - 1 + num_ghosts_0_f;
@@ -2256,6 +2288,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
+                
                 const int idx_face_x = i;
                 
                 const int idx_f_LL = i - 2 + num_ghosts_0_f;
@@ -2282,6 +2315,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
+                
                 const int idx_face_x = i;
                 
                 const int idx_f_LLL = i - 3 + num_ghosts_0_f;
@@ -2315,6 +2349,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
+                
                 const int idx_face_x = i;
                 
                 const int idx_f_LLLL = i - 4 + num_ghosts_0_f;
@@ -2356,6 +2391,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
+                
                 const int idx_face_x = i;
                 
                 const int idx_f_LLLLL = i - 5 + num_ghosts_0_f;
@@ -2406,6 +2442,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
+                
                 const int idx_face_x = i;
                 
                 const int idx_f_LLLLLL = i - 6 + num_ghosts_0_f;
@@ -2923,6 +2960,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
+                        
                         const int idx_face_x = i +
                             j*(interior_dim_0 + 1) +
                             k*(interior_dim_0 + 1)*interior_dim_1;
@@ -2965,6 +3003,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
+                        
                         const int idx_face_x = i +
                             j*(interior_dim_0 + 1) +
                             k*(interior_dim_0 + 1)*interior_dim_1;
@@ -3029,6 +3068,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
+                        
                         const int idx_face_x = i +
                             j*(interior_dim_0 + 1) +
                             k*(interior_dim_0 + 1)*interior_dim_1;
@@ -3116,6 +3156,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
+                        
                         const int idx_face_x = i +
                             j*(interior_dim_0 + 1) +
                             k*(interior_dim_0 + 1)*interior_dim_1;
@@ -3227,6 +3268,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
+                        
                         const int idx_face_x = i +
                             j*(interior_dim_0 + 1) +
                             k*(interior_dim_0 + 1)*interior_dim_1;
@@ -3363,6 +3405,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
+                        
                         const int idx_face_x = i +
                             j*(interior_dim_0 + 1) +
                             k*(interior_dim_0 + 1)*interior_dim_1;
@@ -3542,6 +3585,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
 #endif
     
     // Get the dimensions of the ghost cell boxes.
+    
     const hier::Box ghost_box_f = data_f->getGhostBox();
     const hier::IntVector ghostcell_dims_f = ghost_box_f.numberCells();
     const hier::IntVector num_ghosts_f = data_f->getGhostCellWidth();
@@ -3568,7 +3612,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the dimensions.
+         * Get the dimension.
          */
         
         const int interior_dim_0 = interior_dims[0];
@@ -3588,6 +3632,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
+                
                 const int idx_face_x = i;
                 
                 const int idx_f_L = i - 1 + num_ghosts_0_f;
@@ -3611,6 +3656,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
+                
                 const int idx_face_x = i;
                 
                 const int idx_f_LL = i - 2 + num_ghosts_0_f;
@@ -3642,6 +3688,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
+                
                 const int idx_face_x = i;
                 
                 const int idx_f_LLL = i - 3 + num_ghosts_0_f;
@@ -3682,6 +3729,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
+                
                 const int idx_face_x = i;
                 
                 const int idx_f_LLLL = i - 4 + num_ghosts_0_f;
@@ -3732,6 +3780,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
+                
                 const int idx_face_x = i;
                 
                 const int idx_f_LLLLL = i - 5 + num_ghosts_0_f;
@@ -3793,6 +3842,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
+                
                 const int idx_face_x = i;
                 
                 const int idx_f_LLLLLL = i - 6 + num_ghosts_0_f;
@@ -4459,6 +4509,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
+                        
                         const int idx_face_x = i +
                             j*(interior_dim_0 + 1) +
                             k*(interior_dim_0 + 1)*interior_dim_1;
@@ -4511,6 +4562,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
+                        
                         const int idx_face_x = i +
                             j*(interior_dim_0 + 1) +
                             k*(interior_dim_0 + 1)*interior_dim_1;
@@ -4595,6 +4647,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
+                        
                         const int idx_face_x = i +
                             j*(interior_dim_0 + 1) +
                             k*(interior_dim_0 + 1)*interior_dim_1;
@@ -4712,6 +4765,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
+                        
                         const int idx_face_x = i +
                             j*(interior_dim_0 + 1) +
                             k*(interior_dim_0 + 1)*interior_dim_1;
@@ -4863,6 +4917,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
+                        
                         const int idx_face_x = i +
                             j*(interior_dim_0 + 1) +
                             k*(interior_dim_0 + 1)*interior_dim_1;
@@ -5049,6 +5104,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
+                        
                         const int idx_face_x = i +
                             j*(interior_dim_0 + 1) +
                             k*(interior_dim_0 + 1)*interior_dim_1;
@@ -6037,6 +6093,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
 #endif
     
     // Get the dimensions of the ghost cell boxes.
+    
     const hier::Box ghost_box_f = data_f->getGhostBox();
     const hier::IntVector ghostcell_dims_f = ghost_box_f.numberCells();
     const hier::IntVector num_ghosts_f = data_f->getGhostCellWidth();
@@ -7140,6 +7197,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
 #endif
     
     // Get the dimensions of the ghost cell boxes.
+    
     const hier::Box ghost_box_f = data_f->getGhostBox();
     const hier::IntVector ghostcell_dims_f = ghost_box_f.numberCells();
     const hier::IntVector num_ghosts_f = data_f->getGhostCellWidth();
@@ -9051,6 +9109,7 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ(
 #endif
     
     // Get the dimensions of the ghost cell boxes.
+    
     const hier::Box ghost_box_f = data_f->getGhostBox();
     const hier::IntVector ghostcell_dims_f = ghost_box_f.numberCells();
     const hier::IntVector num_ghosts_f = data_f->getGhostCellWidth();
@@ -9733,6 +9792,7 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ(
 #endif
     
     // Get the dimensions of the ghost cell boxes.
+    
     const hier::Box ghost_box_f = data_f->getGhostBox();
     const hier::IntVector ghostcell_dims_f = ghost_box_f.numberCells();
     const hier::IntVector num_ghosts_f = data_f->getGhostCellWidth();
@@ -10596,3 +10656,1688 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ(
         }
     }
 }
+
+
+/*
+ * Add source terms for the advection equations of volume fractions.
+ * (for five-equation model by Allaire et al.)
+ */
+void
+ConvectiveFluxReconstructorKEP::addSourceTermsForVolumeFractionEquations(
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_source,
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity,
+    HAMERS_SHARED_PTR<pdat::CellData<double> > data_volume_fractions,
+    const double* const dx,
+    const double dt) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(d_has_advective_eqn_form);
+#endif
+    
+    const hier::Box interior_box = data_source->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_velocity->getBox().isSpatiallyEqual(interior_box));
+    TBOX_ASSERT(data_volume_fractions->getBox().isSpatiallyEqual(interior_box));
+#endif
+    
+    const int num_species = data_volume_fractions->getDepth();
+    
+    // Get the dimensions of the ghost cell boxes.
+    
+    const hier::Box ghost_box_velocity = data_velocity->getGhostBox();
+    const hier::IntVector ghostcell_dims_velocity = ghost_box_velocity.numberCells();
+    const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+    
+    const hier::Box ghost_box_volume_fractions = data_volume_fractions->getGhostBox();
+    const hier::IntVector ghostcell_dims_volume_fractions = ghost_box_volume_fractions.numberCells();
+    const hier::IntVector num_ghosts_volume_fractions = data_volume_fractions->getGhostCellWidth();
+    
+    /*
+     * Get the pointers to the data.
+     */
+    
+    std::vector<double*> Z;
+    Z.reserve(num_species);
+    for (int si = 0; si < num_species; si++)
+    {
+        Z.push_back(data_volume_fractions->getPointer(si));
+    }
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        /*
+         * Get the dimension.
+         */
+        
+        const int interior_dim_0 = interior_dims[0];
+        
+        /*
+         * Get the numbers of ghost cells.
+         */
+        
+        const int num_ghosts_0_velocity         = num_ghosts_velocity[0];
+        const int num_ghosts_0_volume_fractions = num_ghosts_volume_fractions[0];
+        
+        /*
+         * Get the pointers to velocity component.
+         */
+        
+        double* u = data_velocity->getPointer(0);
+        
+        for (int si = 0; si < num_species; si++)
+        {
+            const int ei = d_num_eqn + d_dim.getValue() + 1 + si;
+            
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(d_eqn_form[ei] == EQN_FORM::ADVECTIVE);
+#endif
+            double* S = data_source->getPointer(ei);
+            
+            if (d_stencil_width == 3)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    
+                    const int idx_cell_source = i;
+                    
+                    const int idx_cell_velocity = i + num_ghosts_0_velocity;
+                    
+                    const int idx_cell_volume_fractions_x_L = i - 1 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_R = i + 1 + num_ghosts_0_volume_fractions;
+                    
+                    S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                        d_coef_a*(Z[si][idx_cell_volume_fractions_x_R] - Z[si][idx_cell_volume_fractions_x_L])
+                        )/dx[0]
+                        );
+                }
+            }
+            else if (d_stencil_width == 5)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    
+                    const int idx_cell_source = i;
+                    
+                    const int idx_cell_velocity = i + num_ghosts_0_velocity;
+                    
+                    const int idx_cell_volume_fractions_x_LL = i - 2 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_L  = i - 1 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_R  = i + 1 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_RR = i + 2 + num_ghosts_0_volume_fractions;
+                    
+                    S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                        d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]  - Z[si][idx_cell_volume_fractions_x_L]) +
+                        d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR] - Z[si][idx_cell_volume_fractions_x_LL])
+                        )/dx[0]
+                        );
+                }
+            }
+            else if (d_stencil_width == 7)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    
+                    const int idx_cell_source = i;
+                    
+                    const int idx_cell_velocity = i + num_ghosts_0_velocity;
+                    
+                    const int idx_cell_volume_fractions_x_LLL = i - 3 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_LL  = i - 2 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_L   = i - 1 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_R   = i + 1 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_RR  = i + 2 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_RRR = i + 3 + num_ghosts_0_volume_fractions;
+                    
+                    S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                        d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]   - Z[si][idx_cell_volume_fractions_x_L]) +
+                        d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR]  - Z[si][idx_cell_volume_fractions_x_LL]) +
+                        d_coef_c*(Z[si][idx_cell_volume_fractions_x_RRR] - Z[si][idx_cell_volume_fractions_x_LLL])
+                        )/dx[0]
+                        );
+                }
+            }
+            else if (d_stencil_width == 9)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    
+                    const int idx_cell_source = i;
+                    
+                    const int idx_cell_velocity = i + num_ghosts_0_velocity;
+                    
+                    const int idx_cell_volume_fractions_x_LLLL = i - 4 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_LLL  = i - 3 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_LL   = i - 2 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_L    = i - 1 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_R    = i + 1 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_RR   = i + 2 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_RRR  = i + 3 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_RRRR = i + 4 + num_ghosts_0_volume_fractions;
+                    
+                    S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                        d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]    - Z[si][idx_cell_volume_fractions_x_L]) +
+                        d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR]   - Z[si][idx_cell_volume_fractions_x_LL]) +
+                        d_coef_c*(Z[si][idx_cell_volume_fractions_x_RRR]  - Z[si][idx_cell_volume_fractions_x_LLL]) +
+                        d_coef_d*(Z[si][idx_cell_volume_fractions_x_RRRR] - Z[si][idx_cell_volume_fractions_x_LLLL])
+                        )/dx[0]
+                        );
+                }
+            }
+            else if (d_stencil_width == 11)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    
+                    const int idx_cell_source = i;
+                    
+                    const int idx_cell_velocity = i + num_ghosts_0_velocity;
+                    
+                    const int idx_cell_volume_fractions_x_LLLLL = i - 5 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_LLLL  = i - 4 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_LLL   = i - 3 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_LL    = i - 2 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_L     = i - 1 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_R     = i + 1 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_RR    = i + 2 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_RRR   = i + 3 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_RRRR  = i + 4 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_RRRRR = i + 5 + num_ghosts_0_volume_fractions;
+                    
+                    S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                        d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]     - Z[si][idx_cell_volume_fractions_x_L]) +
+                        d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR]    - Z[si][idx_cell_volume_fractions_x_LL]) +
+                        d_coef_c*(Z[si][idx_cell_volume_fractions_x_RRR]   - Z[si][idx_cell_volume_fractions_x_LLL]) +
+                        d_coef_d*(Z[si][idx_cell_volume_fractions_x_RRRR]  - Z[si][idx_cell_volume_fractions_x_LLLL]) +
+                        d_coef_e*(Z[si][idx_cell_volume_fractions_x_RRRRR] - Z[si][idx_cell_volume_fractions_x_LLLLL])
+                        )/dx[0]
+                        );
+                }
+            }
+            else if (d_stencil_width == 13)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    
+                    const int idx_cell_source = i;
+                    
+                    const int idx_cell_velocity = i + num_ghosts_0_velocity;
+                    
+                    const int idx_cell_volume_fractions_x_LLLLLL = i - 6 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_LLLLL  = i - 5 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_LLLL   = i - 4 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_LLL    = i - 3 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_LL     = i - 2 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_L      = i - 1 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_R      = i + 1 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_RR     = i + 2 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_RRR    = i + 3 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_RRRR   = i + 4 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_RRRRR  = i + 5 + num_ghosts_0_volume_fractions;
+                    const int idx_cell_volume_fractions_x_RRRRRR = i + 6 + num_ghosts_0_volume_fractions;
+                    
+                    S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                        d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]      - Z[si][idx_cell_volume_fractions_x_L]) +
+                        d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR]     - Z[si][idx_cell_volume_fractions_x_LL]) +
+                        d_coef_c*(Z[si][idx_cell_volume_fractions_x_RRR]    - Z[si][idx_cell_volume_fractions_x_LLL]) +
+                        d_coef_d*(Z[si][idx_cell_volume_fractions_x_RRRR]   - Z[si][idx_cell_volume_fractions_x_LLLL]) +
+                        d_coef_e*(Z[si][idx_cell_volume_fractions_x_RRRRR]  - Z[si][idx_cell_volume_fractions_x_LLLLL]) +
+                        d_coef_f*(Z[si][idx_cell_volume_fractions_x_RRRRRR] - Z[si][idx_cell_volume_fractions_x_LLLLLL])
+                        )/dx[0]
+                        );
+                }
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        /*
+         * Get the dimensions.
+         */
+        
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        
+        /*
+         * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
+         */
+        
+        const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+        const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+        const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+        
+        const int num_ghosts_0_volume_fractions = num_ghosts_volume_fractions[0];
+        const int num_ghosts_1_volume_fractions = num_ghosts_volume_fractions[1];
+        const int ghostcell_dim_0_volume_fractions = ghostcell_dims_volume_fractions[0];
+        
+        /*
+         * Get the pointers to velocity components.
+         */
+        
+        double* u = data_velocity->getPointer(0);
+        double* v = data_velocity->getPointer(1);
+        
+        for (int si = 0; si < num_species; si++)
+        {
+            const int ei = d_num_eqn + d_dim.getValue() + 1 + si;
+            
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(d_eqn_form[ei] == EQN_FORM::ADVECTIVE);
+#endif
+            double* S = data_source->getPointer(ei);
+            
+            if (d_stencil_width == 3)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        
+                        const int idx_cell_source = i +
+                            j*interior_dim_0;
+                        
+                        const int idx_cell_velocity = (i + num_ghosts_0_velocity) +
+                            (j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                        
+                        const int idx_cell_volume_fractions_x_L = (i - 1 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_R = (i + 1 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_B = (i + num_ghosts_0_volume_fractions) +
+                            (j - 1 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_T = (i + num_ghosts_0_volume_fractions) +
+                            (j + 1 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                            d_coef_a*(Z[si][idx_cell_volume_fractions_x_R] - Z[si][idx_cell_volume_fractions_x_L])
+                            )/dx[0] +
+                            dt*v[idx_cell_velocity]*(
+                            d_coef_a*(Z[si][idx_cell_volume_fractions_y_T] - Z[si][idx_cell_volume_fractions_y_B])
+                            )/dx[1]
+                            );
+                    }
+                }
+            }
+            else if (d_stencil_width == 5)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        
+                        const int idx_cell_source = i +
+                            j*interior_dim_0;
+                        
+                        const int idx_cell_velocity = (i + num_ghosts_0_velocity) +
+                            (j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                        
+                        const int idx_cell_volume_fractions_x_LL = (i - 2 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_L  = (i - 1 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_R  = (i + 1 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_RR = (i + 2 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_BB = (i + num_ghosts_0_volume_fractions) +
+                            (j - 2 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_B  = (i + num_ghosts_0_volume_fractions) +
+                            (j - 1 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_T  = (i + num_ghosts_0_volume_fractions) +
+                            (j + 1 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_TT = (i + num_ghosts_0_volume_fractions) +
+                            (j + 2 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                            d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]  - Z[si][idx_cell_volume_fractions_x_L]) +
+                            d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR] - Z[si][idx_cell_volume_fractions_x_LL])
+                            )/dx[0] +
+                            dt*v[idx_cell_velocity]*(
+                            d_coef_a*(Z[si][idx_cell_volume_fractions_y_T]  - Z[si][idx_cell_volume_fractions_y_B]) +
+                            d_coef_b*(Z[si][idx_cell_volume_fractions_y_TT] - Z[si][idx_cell_volume_fractions_y_BB])
+                            )/dx[1]
+                            );
+                    }
+                }
+            }
+            else if (d_stencil_width == 7)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        
+                        const int idx_cell_source = i +
+                            j*interior_dim_0;
+                        
+                        const int idx_cell_velocity = (i + num_ghosts_0_velocity) +
+                            (j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                        
+                        const int idx_cell_volume_fractions_x_LLL = (i - 3 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_LL  = (i - 2 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_L   = (i - 1 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_R   = (i + 1 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_RR  = (i + 2 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_RRR = (i + 3 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_BBB = (i + num_ghosts_0_volume_fractions) +
+                            (j - 3 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_BB  = (i + num_ghosts_0_volume_fractions) +
+                            (j - 2 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_B   = (i + num_ghosts_0_volume_fractions) +
+                            (j - 1 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_T   = (i + num_ghosts_0_volume_fractions) +
+                            (j + 1 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_TT  = (i + num_ghosts_0_volume_fractions) +
+                            (j + 2 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_TTT = (i + num_ghosts_0_volume_fractions) +
+                            (j + 3 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                            d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]   - Z[si][idx_cell_volume_fractions_x_L]) +
+                            d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR]  - Z[si][idx_cell_volume_fractions_x_LL]) +
+                            d_coef_c*(Z[si][idx_cell_volume_fractions_x_RRR] - Z[si][idx_cell_volume_fractions_x_LLL])
+                            )/dx[0] +
+                            dt*v[idx_cell_velocity]*(
+                            d_coef_a*(Z[si][idx_cell_volume_fractions_y_T]   - Z[si][idx_cell_volume_fractions_y_B]) +
+                            d_coef_b*(Z[si][idx_cell_volume_fractions_y_TT]  - Z[si][idx_cell_volume_fractions_y_BB]) +
+                            d_coef_c*(Z[si][idx_cell_volume_fractions_y_TTT] - Z[si][idx_cell_volume_fractions_y_BBB])
+                            )/dx[1]
+                            );
+                    }
+                }
+            }
+            else if (d_stencil_width == 9)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        
+                        const int idx_cell_source = i +
+                            j*interior_dim_0;
+                        
+                        const int idx_cell_velocity = (i + num_ghosts_0_velocity) +
+                            (j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                        
+                        const int idx_cell_volume_fractions_x_LLLL = (i - 4 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_LLL  = (i - 3 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_LL   = (i - 2 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_L    = (i - 1 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_R    = (i + 1 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_RR   = (i + 2 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_RRR  = (i + 3 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_RRRR = (i + 4 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_BBBB = (i + num_ghosts_0_volume_fractions) +
+                            (j - 4 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_BBB  = (i + num_ghosts_0_volume_fractions) +
+                            (j - 3 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_BB   = (i + num_ghosts_0_volume_fractions) +
+                            (j - 2 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_B    = (i + num_ghosts_0_volume_fractions) +
+                            (j - 1 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_T    = (i + num_ghosts_0_volume_fractions) +
+                            (j + 1 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_TT   = (i + num_ghosts_0_volume_fractions) +
+                            (j + 2 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_TTT  = (i + num_ghosts_0_volume_fractions) +
+                            (j + 3 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_TTTT = (i + num_ghosts_0_volume_fractions) +
+                            (j + 4 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                            d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]    - Z[si][idx_cell_volume_fractions_x_L]) +
+                            d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR]   - Z[si][idx_cell_volume_fractions_x_LL]) +
+                            d_coef_c*(Z[si][idx_cell_volume_fractions_x_RRR]  - Z[si][idx_cell_volume_fractions_x_LLL]) +
+                            d_coef_d*(Z[si][idx_cell_volume_fractions_x_RRRR] - Z[si][idx_cell_volume_fractions_x_LLLL])
+                            )/dx[0] +
+                            dt*v[idx_cell_velocity]*(
+                            d_coef_a*(Z[si][idx_cell_volume_fractions_y_T]    - Z[si][idx_cell_volume_fractions_y_B]) +
+                            d_coef_b*(Z[si][idx_cell_volume_fractions_y_TT]   - Z[si][idx_cell_volume_fractions_y_BB]) +
+                            d_coef_c*(Z[si][idx_cell_volume_fractions_y_TTT]  - Z[si][idx_cell_volume_fractions_y_BBB]) +
+                            d_coef_d*(Z[si][idx_cell_volume_fractions_y_TTTT] - Z[si][idx_cell_volume_fractions_y_BBBB])
+                            )/dx[1]
+                            );
+                    }
+                }
+            }
+            else if (d_stencil_width == 11)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        
+                        const int idx_cell_source = i +
+                            j*interior_dim_0;
+                        
+                        const int idx_cell_velocity = (i + num_ghosts_0_velocity) +
+                            (j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                        
+                        const int idx_cell_volume_fractions_x_LLLLL = (i - 5 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_LLLL  = (i - 4 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_LLL   = (i - 3 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_LL    = (i - 2 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_L     = (i - 1 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_R     = (i + 1 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_RR    = (i + 2 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_RRR   = (i + 3 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_RRRR  = (i + 4 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_RRRRR = (i + 5 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_BBBBB = (i + num_ghosts_0_volume_fractions) +
+                            (j - 5 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_BBBB  = (i + num_ghosts_0_volume_fractions) +
+                            (j - 4 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_BBB   = (i + num_ghosts_0_volume_fractions) +
+                            (j - 3 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_BB    = (i + num_ghosts_0_volume_fractions) +
+                            (j - 2 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_B     = (i + num_ghosts_0_volume_fractions) +
+                            (j - 1 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_T     = (i + num_ghosts_0_volume_fractions) +
+                            (j + 1 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_TT    = (i + num_ghosts_0_volume_fractions) +
+                            (j + 2 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_TTT   = (i + num_ghosts_0_volume_fractions) +
+                            (j + 3 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_TTTT  = (i + num_ghosts_0_volume_fractions) +
+                            (j + 4 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_TTTTT = (i + num_ghosts_0_volume_fractions) +
+                            (j + 5 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                            d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]     - Z[si][idx_cell_volume_fractions_x_L]) +
+                            d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR]    - Z[si][idx_cell_volume_fractions_x_LL]) +
+                            d_coef_c*(Z[si][idx_cell_volume_fractions_x_RRR]   - Z[si][idx_cell_volume_fractions_x_LLL]) +
+                            d_coef_d*(Z[si][idx_cell_volume_fractions_x_RRRR]  - Z[si][idx_cell_volume_fractions_x_LLLL]) +
+                            d_coef_e*(Z[si][idx_cell_volume_fractions_x_RRRRR] - Z[si][idx_cell_volume_fractions_x_LLLLL])
+                            )/dx[0] +
+                            dt*v[idx_cell_velocity]*(
+                            d_coef_a*(Z[si][idx_cell_volume_fractions_y_T]     - Z[si][idx_cell_volume_fractions_y_B]) +
+                            d_coef_b*(Z[si][idx_cell_volume_fractions_y_TT]    - Z[si][idx_cell_volume_fractions_y_BB]) +
+                            d_coef_c*(Z[si][idx_cell_volume_fractions_y_TTT]   - Z[si][idx_cell_volume_fractions_y_BBB]) +
+                            d_coef_d*(Z[si][idx_cell_volume_fractions_y_TTTT]  - Z[si][idx_cell_volume_fractions_y_BBBB]) +
+                            d_coef_e*(Z[si][idx_cell_volume_fractions_y_TTTTT] - Z[si][idx_cell_volume_fractions_y_BBBBB])
+                            )/dx[1]
+                            );
+                    }
+                }
+            }
+            else if (d_stencil_width == 13)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        
+                        const int idx_cell_source = i +
+                            j*interior_dim_0;
+                        
+                        const int idx_cell_velocity = (i + num_ghosts_0_velocity) +
+                            (j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                        
+                        const int idx_cell_volume_fractions_x_LLLLLL = (i - 6 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_LLLLL  = (i - 5 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_LLLL   = (i - 4 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_LLL    = (i - 3 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_LL     = (i - 2 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_L      = (i - 1 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_R      = (i + 1 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_RR     = (i + 2 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_RRR    = (i + 3 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_RRRR   = (i + 4 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_RRRRR  = (i + 5 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_x_RRRRRR = (i + 6 + num_ghosts_0_volume_fractions) +
+                            (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_BBBBBB = (i + num_ghosts_0_volume_fractions) +
+                            (j - 6 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_BBBBB  = (i + num_ghosts_0_volume_fractions) +
+                            (j - 5 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_BBBB   = (i + num_ghosts_0_volume_fractions) +
+                            (j - 4 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_BBB    = (i + num_ghosts_0_volume_fractions) +
+                            (j - 3 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_BB     = (i + num_ghosts_0_volume_fractions) +
+                            (j - 2 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_B      = (i + num_ghosts_0_volume_fractions) +
+                            (j - 1 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_T      = (i + num_ghosts_0_volume_fractions) +
+                            (j + 1 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_TT     = (i + num_ghosts_0_volume_fractions) +
+                            (j + 2 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_TTT    = (i + num_ghosts_0_volume_fractions) +
+                            (j + 3 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_TTTT   = (i + num_ghosts_0_volume_fractions) +
+                            (j + 4 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_TTTTT  = (i + num_ghosts_0_volume_fractions) +
+                            (j + 5 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        const int idx_cell_volume_fractions_y_TTTTTT = (i + num_ghosts_0_volume_fractions) +
+                            (j + 6 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
+                        
+                        S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                            d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]      - Z[si][idx_cell_volume_fractions_x_L]) +
+                            d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR]     - Z[si][idx_cell_volume_fractions_x_LL]) +
+                            d_coef_c*(Z[si][idx_cell_volume_fractions_x_RRR]    - Z[si][idx_cell_volume_fractions_x_LLL]) +
+                            d_coef_d*(Z[si][idx_cell_volume_fractions_x_RRRR]   - Z[si][idx_cell_volume_fractions_x_LLLL]) +
+                            d_coef_e*(Z[si][idx_cell_volume_fractions_x_RRRRR]  - Z[si][idx_cell_volume_fractions_x_LLLLL]) +
+                            d_coef_f*(Z[si][idx_cell_volume_fractions_x_RRRRRR] - Z[si][idx_cell_volume_fractions_x_LLLLLL])
+                            )/dx[0] +
+                            dt*v[idx_cell_velocity]*(
+                            d_coef_a*(Z[si][idx_cell_volume_fractions_y_T]      - Z[si][idx_cell_volume_fractions_y_B]) +
+                            d_coef_b*(Z[si][idx_cell_volume_fractions_y_TT]     - Z[si][idx_cell_volume_fractions_y_BB]) +
+                            d_coef_c*(Z[si][idx_cell_volume_fractions_y_TTT]    - Z[si][idx_cell_volume_fractions_y_BBB]) +
+                            d_coef_d*(Z[si][idx_cell_volume_fractions_y_TTTT]   - Z[si][idx_cell_volume_fractions_y_BBBB]) +
+                            d_coef_e*(Z[si][idx_cell_volume_fractions_y_TTTTT]  - Z[si][idx_cell_volume_fractions_y_BBBBB]) +
+                            d_coef_f*(Z[si][idx_cell_volume_fractions_y_TTTTTT] - Z[si][idx_cell_volume_fractions_y_BBBBBB])
+                            )/dx[1]
+                            );
+                    }
+                }
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        /*
+         * Get the dimensions.
+         */
+        
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        const int interior_dim_2 = interior_dims[2];
+        
+        /*
+         * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
+         */
+        
+        const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+        const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+        const int num_ghosts_2_velocity = num_ghosts_velocity[2];
+        const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+        const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+        
+        const int num_ghosts_0_volume_fractions = num_ghosts_volume_fractions[0];
+        const int num_ghosts_1_volume_fractions = num_ghosts_volume_fractions[1];
+        const int num_ghosts_2_volume_fractions = num_ghosts_volume_fractions[2];
+        const int ghostcell_dim_0_volume_fractions = ghostcell_dims_volume_fractions[0];
+        const int ghostcell_dim_1_volume_fractions = ghostcell_dims_volume_fractions[1];
+        
+        /*
+         * Get the pointers to velocity components.
+         */
+        
+        double* u = data_velocity->getPointer(0);
+        double* v = data_velocity->getPointer(1);
+        double* w = data_velocity->getPointer(2);
+        
+        for (int si = 0; si < num_species; si++)
+        {
+            const int ei = d_num_eqn + d_dim.getValue() + 1 + si;
+            
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(d_eqn_form[ei] == EQN_FORM::ADVECTIVE);
+#endif
+            double* S = data_source->getPointer(ei);
+            
+            if (d_stencil_width == 3)
+            {
+               for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            
+                            const int idx_cell_source = i +
+                                j*interior_dim_0 +
+                                k*interior_dim_0*
+                                    interior_dim_1;
+                            
+                            const int idx_cell_velocity = (i + num_ghosts_0_velocity) +
+                                (j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                (k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                    ghostcell_dim_1_velocity;
+                            
+                            const int idx_cell_volume_fractions_x_L = (i - 1 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_R = (i + 1 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_B = (i + num_ghosts_0_volume_fractions) +
+                                (j - 1 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_T = (i + num_ghosts_0_volume_fractions) +
+                                (j + 1 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_B = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k - 1 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_F = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + 1 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                                d_coef_a*(Z[si][idx_cell_volume_fractions_x_R] - Z[si][idx_cell_volume_fractions_x_L])
+                                )/dx[0] +
+                                dt*v[idx_cell_velocity]*(
+                                d_coef_a*(Z[si][idx_cell_volume_fractions_y_T] - Z[si][idx_cell_volume_fractions_y_B])
+                                )/dx[1] +
+                                dt*w[idx_cell_velocity]*(
+                                d_coef_a*(Z[si][idx_cell_volume_fractions_z_F] - Z[si][idx_cell_volume_fractions_z_B])
+                                )/dx[2]
+                                );
+                        }
+                    }
+                }
+            }
+            else if (d_stencil_width == 5)
+            {
+               for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            
+                            const int idx_cell_source = i +
+                                j*interior_dim_0 +
+                                k*interior_dim_0*
+                                    interior_dim_1;
+                            
+                            const int idx_cell_velocity = (i + num_ghosts_0_velocity) +
+                                (j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                (k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                    ghostcell_dim_1_velocity;
+                            
+                            const int idx_cell_volume_fractions_x_LL = (i - 2 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_L  = (i - 1 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_R  = (i + 1 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_RR = (i + 2 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_BB = (i + num_ghosts_0_volume_fractions) +
+                                (j - 2 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_B  = (i + num_ghosts_0_volume_fractions) +
+                                (j - 1 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_T  = (i + num_ghosts_0_volume_fractions) +
+                                (j + 1 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_TT = (i + num_ghosts_0_volume_fractions) +
+                                (j + 2 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_BB = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k - 2 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_B  = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k - 1 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_F  = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + 1 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_FF = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + 2 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                                d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]  - Z[si][idx_cell_volume_fractions_x_L]) +
+                                d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR] - Z[si][idx_cell_volume_fractions_x_LL])
+                                )/dx[0] +
+                                dt*v[idx_cell_velocity]*(
+                                d_coef_a*(Z[si][idx_cell_volume_fractions_y_T]  - Z[si][idx_cell_volume_fractions_y_B]) +
+                                d_coef_b*(Z[si][idx_cell_volume_fractions_y_TT] - Z[si][idx_cell_volume_fractions_y_BB])
+                                )/dx[1] +
+                                dt*w[idx_cell_velocity]*(
+                                d_coef_a*(Z[si][idx_cell_volume_fractions_z_F]  - Z[si][idx_cell_volume_fractions_z_B]) +
+                                d_coef_b*(Z[si][idx_cell_volume_fractions_z_FF] - Z[si][idx_cell_volume_fractions_z_BB])
+                                )/dx[2]
+                                );
+                        }
+                    }
+                }
+            }
+            else if (d_stencil_width == 7)
+            {
+               for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            
+                            const int idx_cell_source = i +
+                                j*interior_dim_0 +
+                                k*interior_dim_0*
+                                    interior_dim_1;
+                            
+                            const int idx_cell_velocity = (i + num_ghosts_0_velocity) +
+                                (j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                (k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                    ghostcell_dim_1_velocity;
+                            
+                            const int idx_cell_volume_fractions_x_LLL = (i - 3 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_LL  = (i - 2 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_L   = (i - 1 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_R   = (i + 1 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_RR  = (i + 2 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_RRR = (i + 3 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_BBB = (i + num_ghosts_0_volume_fractions) +
+                                (j - 3 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_BB  = (i + num_ghosts_0_volume_fractions) +
+                                (j - 2 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_B   = (i + num_ghosts_0_volume_fractions) +
+                                (j - 1 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_T   = (i + num_ghosts_0_volume_fractions) +
+                                (j + 1 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_TT  = (i + num_ghosts_0_volume_fractions) +
+                                (j + 2 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_TTT = (i + num_ghosts_0_volume_fractions) +
+                                (j + 3 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_BBB = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k - 3 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_BB  = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k - 2 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_B   = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k - 1 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_F   = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + 1 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_FF  = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + 2 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_FFF = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + 3 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                                d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]   - Z[si][idx_cell_volume_fractions_x_L]) +
+                                d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR]  - Z[si][idx_cell_volume_fractions_x_LL]) +
+                                d_coef_c*(Z[si][idx_cell_volume_fractions_x_RRR] - Z[si][idx_cell_volume_fractions_x_LLL])
+                                )/dx[0] +
+                                dt*v[idx_cell_velocity]*(
+                                d_coef_a*(Z[si][idx_cell_volume_fractions_y_T]   - Z[si][idx_cell_volume_fractions_y_B]) +
+                                d_coef_b*(Z[si][idx_cell_volume_fractions_y_TT]  - Z[si][idx_cell_volume_fractions_y_BB]) +
+                                d_coef_c*(Z[si][idx_cell_volume_fractions_y_TTT] - Z[si][idx_cell_volume_fractions_y_BBB])
+                                )/dx[1] +
+                                dt*w[idx_cell_velocity]*(
+                                d_coef_a*(Z[si][idx_cell_volume_fractions_z_F]   - Z[si][idx_cell_volume_fractions_z_B]) +
+                                d_coef_b*(Z[si][idx_cell_volume_fractions_z_FF]  - Z[si][idx_cell_volume_fractions_z_BB]) +
+                                d_coef_c*(Z[si][idx_cell_volume_fractions_z_FFF] - Z[si][idx_cell_volume_fractions_z_BBB])
+                                )/dx[2]
+                                );
+                        }
+                    }
+                }
+            }
+            else if (d_stencil_width == 9)
+            {
+               for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            
+                            const int idx_cell_source = i +
+                                j*interior_dim_0 +
+                                k*interior_dim_0*
+                                    interior_dim_1;
+                            
+                            const int idx_cell_velocity = (i + num_ghosts_0_velocity) +
+                                (j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                (k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                    ghostcell_dim_1_velocity;
+                            
+                            const int idx_cell_volume_fractions_x_LLLL = (i - 4 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_LLL  = (i - 3 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_LL   = (i - 2 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_L    = (i - 1 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_R    = (i + 1 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_RR   = (i + 2 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_RRR  = (i + 3 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_RRRR = (i + 4 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_BBBB = (i + num_ghosts_0_volume_fractions) +
+                                (j - 4 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_BBB  = (i + num_ghosts_0_volume_fractions) +
+                                (j - 3 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_BB   = (i + num_ghosts_0_volume_fractions) +
+                                (j - 2 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_B    = (i + num_ghosts_0_volume_fractions) +
+                                (j - 1 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_T    = (i + num_ghosts_0_volume_fractions) +
+                                (j + 1 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_TT   = (i + num_ghosts_0_volume_fractions) +
+                                (j + 2 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_TTT  = (i + num_ghosts_0_volume_fractions) +
+                                (j + 3 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_TTTT = (i + num_ghosts_0_volume_fractions) +
+                                (j + 4 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_BBBB = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k - 4 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_BBB  = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k - 3 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_BB   = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k - 2 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_B    = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k - 1 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_F    = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + 1 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_FF   = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + 2 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_FFF  = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + 3 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_FFFF = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + 4 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                                d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]    - Z[si][idx_cell_volume_fractions_x_L]) +
+                                d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR]   - Z[si][idx_cell_volume_fractions_x_LL]) +
+                                d_coef_c*(Z[si][idx_cell_volume_fractions_x_RRR]  - Z[si][idx_cell_volume_fractions_x_LLL]) +
+                                d_coef_d*(Z[si][idx_cell_volume_fractions_x_RRRR] - Z[si][idx_cell_volume_fractions_x_LLLL])
+                                )/dx[0] +
+                                dt*v[idx_cell_velocity]*(
+                                d_coef_a*(Z[si][idx_cell_volume_fractions_y_T]    - Z[si][idx_cell_volume_fractions_y_B]) +
+                                d_coef_b*(Z[si][idx_cell_volume_fractions_y_TT]   - Z[si][idx_cell_volume_fractions_y_BB]) +
+                                d_coef_c*(Z[si][idx_cell_volume_fractions_y_TTT]  - Z[si][idx_cell_volume_fractions_y_BBB]) +
+                                d_coef_d*(Z[si][idx_cell_volume_fractions_y_TTTT] - Z[si][idx_cell_volume_fractions_y_BBBB])
+                                )/dx[1] +
+                                dt*w[idx_cell_velocity]*(
+                                d_coef_a*(Z[si][idx_cell_volume_fractions_z_F]    - Z[si][idx_cell_volume_fractions_z_B]) +
+                                d_coef_b*(Z[si][idx_cell_volume_fractions_z_FF]   - Z[si][idx_cell_volume_fractions_z_BB]) +
+                                d_coef_c*(Z[si][idx_cell_volume_fractions_z_FFF]  - Z[si][idx_cell_volume_fractions_z_BBB]) +
+                                d_coef_d*(Z[si][idx_cell_volume_fractions_z_FFFF] - Z[si][idx_cell_volume_fractions_z_BBBB])
+                                )/dx[2]
+                                );
+                        }
+                    }
+                }
+            }
+            else if (d_stencil_width == 11)
+            {
+               for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            
+                            const int idx_cell_source = i +
+                                j*interior_dim_0 +
+                                k*interior_dim_0*
+                                    interior_dim_1;
+                            
+                            const int idx_cell_velocity = (i + num_ghosts_0_velocity) +
+                                (j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                (k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                    ghostcell_dim_1_velocity;
+                            
+                            const int idx_cell_volume_fractions_x_LLLLL = (i - 5 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_LLLL  = (i - 4 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_LLL   = (i - 3 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_LL    = (i - 2 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_L     = (i - 1 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_R     = (i + 1 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_RR    = (i + 2 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_RRR   = (i + 3 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_RRRR  = (i + 4 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_RRRRR = (i + 5 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_BBBBB = (i + num_ghosts_0_volume_fractions) +
+                                (j - 5 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_BBBB  = (i + num_ghosts_0_volume_fractions) +
+                                (j - 4 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_BBB   = (i + num_ghosts_0_volume_fractions) +
+                                (j - 3 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_BB    = (i + num_ghosts_0_volume_fractions) +
+                                (j - 2 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_B     = (i + num_ghosts_0_volume_fractions) +
+                                (j - 1 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_T     = (i + num_ghosts_0_volume_fractions) +
+                                (j + 1 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_TT    = (i + num_ghosts_0_volume_fractions) +
+                                (j + 2 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_TTT   = (i + num_ghosts_0_volume_fractions) +
+                                (j + 3 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_TTTT  = (i + num_ghosts_0_volume_fractions) +
+                                (j + 4 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_TTTTT = (i + num_ghosts_0_volume_fractions) +
+                                (j + 5 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_BBBBB = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k - 5 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_BBBB  = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k - 4 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_BBB   = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k - 3 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_BB    = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k - 2 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_B     = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k - 1 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_F     = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + 1 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_FF    = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + 2 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_FFF   = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + 3 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_FFFF  = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + 4 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_FFFFF = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + 5 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                                d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]     - Z[si][idx_cell_volume_fractions_x_L]) +
+                                d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR]    - Z[si][idx_cell_volume_fractions_x_LL]) +
+                                d_coef_c*(Z[si][idx_cell_volume_fractions_x_RRR]   - Z[si][idx_cell_volume_fractions_x_LLL]) +
+                                d_coef_d*(Z[si][idx_cell_volume_fractions_x_RRRR]  - Z[si][idx_cell_volume_fractions_x_LLLL]) +
+                                d_coef_e*(Z[si][idx_cell_volume_fractions_x_RRRRR] - Z[si][idx_cell_volume_fractions_x_LLLLL])
+                                )/dx[0] +
+                                dt*v[idx_cell_velocity]*(
+                                d_coef_a*(Z[si][idx_cell_volume_fractions_y_T]     - Z[si][idx_cell_volume_fractions_y_B]) +
+                                d_coef_b*(Z[si][idx_cell_volume_fractions_y_TT]    - Z[si][idx_cell_volume_fractions_y_BB]) +
+                                d_coef_c*(Z[si][idx_cell_volume_fractions_y_TTT]   - Z[si][idx_cell_volume_fractions_y_BBB]) +
+                                d_coef_d*(Z[si][idx_cell_volume_fractions_y_TTTT]  - Z[si][idx_cell_volume_fractions_y_BBBB]) +
+                                d_coef_e*(Z[si][idx_cell_volume_fractions_y_TTTTT] - Z[si][idx_cell_volume_fractions_y_BBBBB])
+                                )/dx[1] +
+                                dt*w[idx_cell_velocity]*(
+                                d_coef_a*(Z[si][idx_cell_volume_fractions_z_F]     - Z[si][idx_cell_volume_fractions_z_B]) +
+                                d_coef_b*(Z[si][idx_cell_volume_fractions_z_FF]    - Z[si][idx_cell_volume_fractions_z_BB]) +
+                                d_coef_c*(Z[si][idx_cell_volume_fractions_z_FFF]   - Z[si][idx_cell_volume_fractions_z_BBB]) +
+                                d_coef_d*(Z[si][idx_cell_volume_fractions_z_FFFF]  - Z[si][idx_cell_volume_fractions_z_BBBB]) +
+                                d_coef_e*(Z[si][idx_cell_volume_fractions_z_FFFFF] - Z[si][idx_cell_volume_fractions_z_BBBBB])
+                                )/dx[2]
+                                );
+                        }
+                    }
+                }
+            }
+            else if (d_stencil_width == 13)
+            {
+               for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            
+                            const int idx_cell_source = i +
+                                j*interior_dim_0 +
+                                k*interior_dim_0*
+                                    interior_dim_1;
+                            
+                            const int idx_cell_velocity = (i + num_ghosts_0_velocity) +
+                                (j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                (k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                    ghostcell_dim_1_velocity;
+                            
+                            const int idx_cell_volume_fractions_x_LLLLLL = (i - 6 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_LLLLL  = (i - 5 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_LLLL   = (i - 4 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_LLL    = (i - 3 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_LL     = (i - 2 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_L      = (i - 1 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_R      = (i + 1 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_RR     = (i + 2 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_RRR    = (i + 3 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_RRRR   = (i + 4 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_RRRRR  = (i + 5 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_x_RRRRRR = (i + 6 + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_BBBBBB = (i + num_ghosts_0_volume_fractions) +
+                                (j - 6 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_BBBBB  = (i + num_ghosts_0_volume_fractions) +
+                                (j - 5 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_BBBB   = (i + num_ghosts_0_volume_fractions) +
+                                (j - 4 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_BBB    = (i + num_ghosts_0_volume_fractions) +
+                                (j - 3 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_BB     = (i + num_ghosts_0_volume_fractions) +
+                                (j - 2 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_B      = (i + num_ghosts_0_volume_fractions) +
+                                (j - 1 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_T      = (i + num_ghosts_0_volume_fractions) +
+                                (j + 1 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_TT     = (i + num_ghosts_0_volume_fractions) +
+                                (j + 2 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_TTT    = (i + num_ghosts_0_volume_fractions) +
+                                (j + 3 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_TTTT   = (i + num_ghosts_0_volume_fractions) +
+                                (j + 4 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_TTTTT  = (i + num_ghosts_0_volume_fractions) +
+                                (j + 5 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_y_TTTTTT = (i + num_ghosts_0_volume_fractions) +
+                                (j + 6 + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_BBBBBB = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k - 6 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_BBBBB  = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k - 5 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_BBBB   = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k - 4 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_BBB    = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k - 3 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_BB     = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k - 2 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_B      = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k - 1 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_F      = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + 1 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_FF     = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + 2 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_FFF    = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + 3 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_FFFF   = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + 4 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_FFFFF  = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + 5 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            const int idx_cell_volume_fractions_z_FFFFFF = (i + num_ghosts_0_volume_fractions) +
+                                (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions +
+                                (k + 6 + num_ghosts_2_volume_fractions)*ghostcell_dim_0_volume_fractions*
+                                    ghostcell_dim_1_volume_fractions;
+                            
+                            S[idx_cell_source] -= (dt*u[idx_cell_velocity]*(
+                                d_coef_a*(Z[si][idx_cell_volume_fractions_x_R]      - Z[si][idx_cell_volume_fractions_x_L]) +
+                                d_coef_b*(Z[si][idx_cell_volume_fractions_x_RR]     - Z[si][idx_cell_volume_fractions_x_LL]) +
+                                d_coef_c*(Z[si][idx_cell_volume_fractions_x_RRR]    - Z[si][idx_cell_volume_fractions_x_LLL]) +
+                                d_coef_d*(Z[si][idx_cell_volume_fractions_x_RRRR]   - Z[si][idx_cell_volume_fractions_x_LLLL]) +
+                                d_coef_e*(Z[si][idx_cell_volume_fractions_x_RRRRR]  - Z[si][idx_cell_volume_fractions_x_LLLLL]) +
+                                d_coef_f*(Z[si][idx_cell_volume_fractions_x_RRRRRR] - Z[si][idx_cell_volume_fractions_x_LLLLLL])
+                                )/dx[0] +
+                                dt*v[idx_cell_velocity]*(
+                                d_coef_a*(Z[si][idx_cell_volume_fractions_y_T]      - Z[si][idx_cell_volume_fractions_y_B]) +
+                                d_coef_b*(Z[si][idx_cell_volume_fractions_y_TT]     - Z[si][idx_cell_volume_fractions_y_BB]) +
+                                d_coef_c*(Z[si][idx_cell_volume_fractions_y_TTT]    - Z[si][idx_cell_volume_fractions_y_BBB]) +
+                                d_coef_d*(Z[si][idx_cell_volume_fractions_y_TTTT]   - Z[si][idx_cell_volume_fractions_y_BBBB]) +
+                                d_coef_e*(Z[si][idx_cell_volume_fractions_y_TTTTT]  - Z[si][idx_cell_volume_fractions_y_BBBBB]) +
+                                d_coef_f*(Z[si][idx_cell_volume_fractions_y_TTTTTT] - Z[si][idx_cell_volume_fractions_y_BBBBBB])
+                                )/dx[1] +
+                                dt*w[idx_cell_velocity]*(
+                                d_coef_a*(Z[si][idx_cell_volume_fractions_z_F]      - Z[si][idx_cell_volume_fractions_z_B]) +
+                                d_coef_b*(Z[si][idx_cell_volume_fractions_z_FF]     - Z[si][idx_cell_volume_fractions_z_BB]) +
+                                d_coef_c*(Z[si][idx_cell_volume_fractions_z_FFF]    - Z[si][idx_cell_volume_fractions_z_BBB]) +
+                                d_coef_d*(Z[si][idx_cell_volume_fractions_z_FFFF]   - Z[si][idx_cell_volume_fractions_z_BBBB]) +
+                                d_coef_e*(Z[si][idx_cell_volume_fractions_z_FFFFF]  - Z[si][idx_cell_volume_fractions_z_BBBBB]) +
+                                d_coef_f*(Z[si][idx_cell_volume_fractions_z_FFFFFF] - Z[si][idx_cell_volume_fractions_z_BBBBBB])
+                                )/dx[2]
+                                );
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
