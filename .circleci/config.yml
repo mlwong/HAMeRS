@@ -38,7 +38,7 @@ jobs:
           name: install_HDF5
           command: sh circleci/install-hdf5.sh
       - save_cache:
-          key: hdf5-cache
+          key: hdf5-cache-{{ .Environment.variableName }}
           paths:
             - ${HDF5_ROOT}
   
@@ -46,13 +46,14 @@ jobs:
     docker:
       - image: cimg/base:2022.07
 
-    environment:
-      CC: mpicc
-      CXX: mpicxx
-      F77: mpif77
-
     steps:
       - checkout
+      - run:
+          name: "Install libraries"
+          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
+      - run:
+          name: "Check compiler"
+          command: which mpicc; which mpicxx; which mpif77
       - run:
           name: "Setup environment variables"
           command: >-
