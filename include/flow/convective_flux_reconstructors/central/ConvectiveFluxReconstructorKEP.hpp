@@ -172,11 +172,11 @@ class ConvectiveFluxReconstructorKEP: public ConvectiveFluxReconstructor
             const double dt) const;
         
         /*
-         * Add source terms for the advection equations of volume fractions.
+         * Add source terms to the advection equations of volume fractions.
          * (for five-equation model by Allaire et al.)
          */
         void
-        addSourceTermsForVolumeFractionEquations(
+        addSourceTermsToVolumeFractionEquations(
             HAMERS_SHARED_PTR<pdat::CellData<double> > data_source,
             HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity,
             HAMERS_SHARED_PTR<pdat::CellData<double> > data_volume_fractions,

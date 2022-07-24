@@ -380,6 +380,8 @@ ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch(
     
     // Compute the specific total enthalpy.
     
+    t_reconstruct_flux->start();
+    
     if (d_dim == tbox::Dimension(1))
     {
         /*
@@ -534,9 +536,13 @@ ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch(
         }
     }
     
+    t_reconstruct_flux->stop();
+    
     /*
      * Compute the flux.
      */
+    
+    t_reconstruct_flux->start();
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -1319,19 +1325,25 @@ ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch(
         }
     }
     
+    t_reconstruct_flux->stop();
+    
     /*
      * Compute the source.
      */
     
+    t_compute_source->start();
+    
     if (d_flow_model_type == FLOW_MODEL::FIVE_EQN_ALLAIRE)
     {
-        addSourceTermsForVolumeFractionEquations(
+        addSourceTermsToVolumeFractionEquations(
             source,
             velocity,
             volume_fractions,
             dx,
             dt);
     }
+    
+    t_compute_source->stop();
     
     /*
      * Unregister the patch and data of all registered derived cell variables in the flow model.
@@ -10746,11 +10758,11 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ(
 
 
 /*
- * Add source terms for the advection equations of volume fractions.
+ * Add source terms to the advection equations of volume fractions.
  * (for five-equation model by Allaire et al.)
  */
 void
-ConvectiveFluxReconstructorKEP::addSourceTermsForVolumeFractionEquations(
+ConvectiveFluxReconstructorKEP::addSourceTermsToVolumeFractionEquations(
     HAMERS_SHARED_PTR<pdat::CellData<double> > data_source,
     HAMERS_SHARED_PTR<pdat::CellData<double> > data_velocity,
     HAMERS_SHARED_PTR<pdat::CellData<double> > data_volume_fractions,
