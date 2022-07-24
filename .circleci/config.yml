@@ -39,7 +39,7 @@ jobs:
             echo 'export HAMERS_ROOT=${PWD}' >> $BASH_ENV
       - run:
           name: install_HDF5
-          command: mkdir $HDF5_ROOT; touch $HDF5_ROOT/abc.txt # sh circleci/install-hdf5.sh
+          command: sh circleci/install-hdf5.sh
       - save_cache:
           key: hdf5_cache
           paths:
