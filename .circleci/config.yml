@@ -41,7 +41,7 @@ jobs:
       - checkout
       - run:
           name: "Install libraries"
-          command: sudo apt-get update && sudo apt-get install libboost-all-dev openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
+          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
       - run:
           name: "Check compiler"
           command: which mpicc; which mpicxx; which mpif77
@@ -53,9 +53,6 @@ jobs:
             echo 'export SAMRAI_ROOT_WITH_BOOST=${PWD}/SAMRAI_WITH_BOOST' >> $BASH_ENV &&
             echo 'export HAMERS_ROOT=${PWD}' >> $BASH_ENV
             echo 'export BOOST_ROOT=/usr/lib/x86_64-linux-gnu/' >> $BASH_ENV
-      - run:
-          name: "Find boost"
-          command: ls /usr/lib/x86_64-linux-gnu/
       - run:
           name: install_HDF5
           command: sh circleci/install-hdf5.sh
@@ -77,7 +74,10 @@ jobs:
       - checkout
       - run:
           name: "Install libraries"
-          command: sudo apt-get update && sudo apt-get install libboost-all-dev openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
+          command: >-
+            sudo apt-get update &&
+            sudo apt install libboost1.67-dev libboost-thread1.67-dev libboost-program-options1.67-dev libboost-system1.67-dev libboost-math1.67-dev libboost-test1.67-dev libboost-python1.67-dev &&
+            sudo apt install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
       - run:
           name: "Check compiler"
           command: which mpicc; which mpicxx; which mpif77
@@ -92,7 +92,6 @@ jobs:
             echo 'export SAMRAI_ROOT_NO_BOOST=${PWD}/SAMRAI_NO_BOOST' >> $BASH_ENV &&
             echo 'export SAMRAI_ROOT_WITH_BOOST=${PWD}/SAMRAI_WITH_BOOST' >> $BASH_ENV &&
             echo 'export HAMERS_ROOT=${PWD}' >> $BASH_ENV
-            echo 'export BOOST_ROOT=/usr/lib/x86_64-linux-gnu/' >> $BASH_ENV
       - run:
           name: install_HAMeRS_with_Boost
           command: sh circleci/install-SAMRAI_with_Boost.sh; sh circleci/install-HAMeRS_with_Boost.sh
