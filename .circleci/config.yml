@@ -43,7 +43,7 @@ jobs:
       - save_cache:
           key: hdf5-cache-{{ .Environment.variableName }}
           paths:
-            - ${HDF5_ROOT}
+            - hdf5
 
   build_HAMeRS_with_boost:
     docker:
