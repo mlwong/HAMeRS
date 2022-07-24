@@ -128,6 +128,7 @@ Euler::Euler(
         d_dim,
         d_grid_geometry,
         d_flow_model->getNumberOfEquations(),
+        d_flow_model_manager->getFlowModelType(),
         d_flow_model,
         d_convective_flux_reconstructor_db,
         d_convective_flux_reconstructor_str));

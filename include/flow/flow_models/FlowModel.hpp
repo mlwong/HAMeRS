@@ -102,7 +102,6 @@ class FlowModel:
             return d_num_eqn;
         }
         
-        
         /*
          * Get the database for flow model.
          */
@@ -111,7 +110,6 @@ class FlowModel:
         {
             return d_flow_model_db;
         }
-        
         
         /*
          * Return the form of each equation.
