@@ -22,13 +22,10 @@ jobs:
       - checkout
       - run:
           name: "Setup environment variable HDF5_ROOT"
-          command: echo 'export HDF5_ROOT=${CIRCLE_WORKING_DIRECTORY}/hdf5' >> $BASH_ENV
+          command: echo 'export HDF5_ROOT=${PWD}/hdf5' >> $BASH_ENV
       - run:
           name: "Echo hdf5 root"
           command: echo $HDF5_ROOT
-      - run:
-          name: "Echo PWD"
-          command: echo $PWD
       - run:
           name: install_HDF5
           command: sh circleci/install-hdf5.sh
