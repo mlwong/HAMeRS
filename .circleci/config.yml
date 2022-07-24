@@ -9,7 +9,7 @@ workflows:
 jobs:
   build_HDF5:
     docker:
-      - image: cimg/hamers # Primary execution image
+      - image: cimg/node:17.2.0 # Primary execution image
         auth:
           username: mydockerhub-user
           password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
