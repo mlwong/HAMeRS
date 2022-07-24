@@ -15,6 +15,7 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_eqn,
+            const FLOW_MODEL::TYPE& flow_model_type,
             const HAMERS_SHARED_PTR<FlowModel>& flow_model,
             const HAMERS_SHARED_PTR<tbox::Database>& convective_flux_reconstructor_db);
         

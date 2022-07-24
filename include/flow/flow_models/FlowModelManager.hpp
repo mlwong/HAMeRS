@@ -27,6 +27,7 @@ class FlowModelManager
     public:
         FlowModelManager(
             const std::string& object_name,
+            const std::string& project_name,
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
@@ -62,6 +63,11 @@ class FlowModelManager
          * The object name is used for error/warning reporting.
          */
         const std::string d_object_name;
+        
+        /*
+         * Name of the project.
+         */
+        std::string d_project_name;
         
         /*
          * Problem dimension.

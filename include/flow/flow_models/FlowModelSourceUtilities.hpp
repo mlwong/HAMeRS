@@ -6,6 +6,7 @@
 #include "HAMeRS_memory.hpp"
 
 #include "flow/flow_models/FlowModel.hpp"
+#include "flow/flow_models/FlowModelSpecialSourceTerms.hpp"
 
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/pdat/CellData.h"
@@ -19,6 +20,7 @@ class FlowModelSourceUtilities
     public:
         FlowModelSourceUtilities(
             const std::string& object_name,
+            const std::string& project_name,
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
@@ -94,11 +96,40 @@ class FlowModelSourceUtilities
         putToRestart(
             const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
         
-protected:
+    protected:
+        /*
+         * Compute special source terms.
+         */
+        void
+        computeSpecialSourceTermsOnPatch(
+            const HAMERS_SHARED_PTR<pdat::CellVariable<double> >& variable_source,
+            const double time,
+            const double dt,
+            const int RK_step_number);
+        
+        /*
+         * Put the characteristics of base class into the restart database.
+         */
+        void
+        putToRestartBase(
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
+        
+        /*
+         * Put the characteristics of base class into the restart source database.
+         */
+        void
+        putToRestartSourceBase(
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_source_terms_db) const;
+        
         /*
          * The object name is used for error/warning reporting.
          */
         const std::string d_object_name;
+        
+        /*
+         * Name of the project.
+         */
+        std::string d_project_name;
         
         /*
          * Problem dimension.
@@ -124,6 +155,16 @@ protected:
          * Whether there are source terms.
          */
         bool d_has_source_terms;
+        
+        /*
+         * Whether there are special source terms.
+         */
+        bool d_has_special_source_terms;
+        
+        /*
+         * Special source terms object.
+         */
+        HAMERS_SHARED_PTR<FlowModelSpecialSourceTerms> d_special_source_terms;
         
         /* 
          * Whether all derived cell data related to this class is computed in full domain or sub-domain.

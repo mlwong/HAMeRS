@@ -61,16 +61,19 @@ class FlowModel:
     public:
         FlowModel(
             const std::string& object_name,
+            const std::string& project_name,
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
             const int& num_eqn,
             const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db):
                 d_object_name(object_name),
+                d_project_name(project_name),
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
                 d_num_species(num_species),
                 d_num_eqn(num_eqn),
+                d_flow_model_db(flow_model_db),
                 d_num_ghosts(-hier::IntVector::getOne(d_dim)),
                 d_patch(nullptr),
                 d_interior_box(hier::Box::getEmptyBox(d_dim)),
@@ -79,9 +82,7 @@ class FlowModel:
                 d_ghostcell_dims(hier::IntVector::getZero(d_dim)),
                 d_subdomain_box(hier::Box::getEmptyBox(d_dim)),
                 d_derived_cell_data_computed(false)
-        {
-            NULL_USE(flow_model_db);
-        }
+        {}
         
         virtual ~FlowModel() {}
         
@@ -99,6 +100,15 @@ class FlowModel:
         int getNumberOfEquations() const
         {
             return d_num_eqn;
+        }
+        
+        /*
+         * Get the database for flow model.
+         */
+        const HAMERS_SHARED_PTR<tbox::Database>&
+        getFlowModelDatabase() const
+        {
+            return d_flow_model_db;
         }
         
         /*
@@ -425,6 +435,11 @@ class FlowModel:
         const std::string d_object_name;
         
         /*
+         * Name of the project.
+         */
+        std::string d_project_name;
+        
+        /*
          * Problem dimension.
          */
         const tbox::Dimension d_dim;
@@ -448,6 +463,11 @@ class FlowModel:
          * Number of equations.
          */
         const int d_num_eqn;
+        
+        /*
+         * Database for flow model.
+         */
+        const HAMERS_SHARED_PTR<tbox::Database> d_flow_model_db;
         
         /*
          * HAMERS_SHARED_PTR to EquationOfStateMixingRules.

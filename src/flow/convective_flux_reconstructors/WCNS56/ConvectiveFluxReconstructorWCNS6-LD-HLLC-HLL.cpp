@@ -324,6 +324,7 @@ ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL::ConvectiveFluxReconstructorWCNS6_L
     const tbox::Dimension& dim,
     const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_eqn,
+    const FLOW_MODEL::TYPE& flow_model_type,
     const HAMERS_SHARED_PTR<FlowModel>& flow_model,
     const HAMERS_SHARED_PTR<tbox::Database>& convective_flux_reconstructor_db):
         ConvectiveFluxReconstructorWCNS56(
@@ -331,6 +332,7 @@ ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL::ConvectiveFluxReconstructorWCNS6_L
             dim,
             grid_geometry,
             num_eqn,
+            flow_model_type,
             flow_model,
             convective_flux_reconstructor_db)
 {

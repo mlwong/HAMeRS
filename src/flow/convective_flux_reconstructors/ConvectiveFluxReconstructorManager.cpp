@@ -5,6 +5,7 @@ ConvectiveFluxReconstructorManager::ConvectiveFluxReconstructorManager(
     const tbox::Dimension& dim,
     const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_eqn,
+    const FLOW_MODEL::TYPE& flow_model_type,
     const HAMERS_SHARED_PTR<FlowModel>& flow_model,
     const HAMERS_SHARED_PTR<tbox::Database>& convective_flux_reconstructor_db,
     const std::string& convective_flux_reconstructor_str):
@@ -19,6 +20,7 @@ ConvectiveFluxReconstructorManager::ConvectiveFluxReconstructorManager(
             dim,
             grid_geometry,
             flow_model->getNumberOfEquations(),
+            flow_model_type,
             flow_model,
             convective_flux_reconstructor_db));
     }
@@ -31,6 +33,7 @@ ConvectiveFluxReconstructorManager::ConvectiveFluxReconstructorManager(
             dim,
             grid_geometry,
             flow_model->getNumberOfEquations(),
+            flow_model_type,
             flow_model,
             convective_flux_reconstructor_db));
     }
@@ -43,6 +46,7 @@ ConvectiveFluxReconstructorManager::ConvectiveFluxReconstructorManager(
             dim,
             grid_geometry,
             flow_model->getNumberOfEquations(),
+            flow_model_type,
             flow_model,
             convective_flux_reconstructor_db));
     }
@@ -55,6 +59,7 @@ ConvectiveFluxReconstructorManager::ConvectiveFluxReconstructorManager(
             dim,
             grid_geometry,
             flow_model->getNumberOfEquations(),
+            flow_model_type,
             flow_model,
             convective_flux_reconstructor_db));
     }
@@ -67,6 +72,7 @@ ConvectiveFluxReconstructorManager::ConvectiveFluxReconstructorManager(
             dim,
             grid_geometry,
             flow_model->getNumberOfEquations(),
+            flow_model_type,
             flow_model,
             convective_flux_reconstructor_db));
     }
@@ -79,6 +85,7 @@ ConvectiveFluxReconstructorManager::ConvectiveFluxReconstructorManager(
             dim,
             grid_geometry,
             flow_model->getNumberOfEquations(),
+            flow_model_type,
             flow_model,
             convective_flux_reconstructor_db));
     }
@@ -91,18 +98,7 @@ ConvectiveFluxReconstructorManager::ConvectiveFluxReconstructorManager(
             dim,
             grid_geometry,
             flow_model->getNumberOfEquations(),
-            flow_model,
-            convective_flux_reconstructor_db));
-    }
-    else if (convective_flux_reconstructor_str == "DRP4")
-    {
-        d_convective_flux_reconstructor_type = CONVECTIVE_FLUX_RECONSTRUCTOR::DRP4;
-        
-        d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorDRP4(
-            "d_convective_flux_reconstructor",
-            dim,
-            grid_geometry,
-            flow_model->getNumberOfEquations(),
+            flow_model_type,
             flow_model,
             convective_flux_reconstructor_db));
     }
@@ -115,6 +111,33 @@ ConvectiveFluxReconstructorManager::ConvectiveFluxReconstructorManager(
             dim,
             grid_geometry,
             flow_model->getNumberOfEquations(),
+            flow_model_type,
+            flow_model,
+            convective_flux_reconstructor_db));
+    }
+    else if (convective_flux_reconstructor_str == "DRP4")
+    {
+        d_convective_flux_reconstructor_type = CONVECTIVE_FLUX_RECONSTRUCTOR::DRP4;
+        
+        d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorDRP4(
+            "d_convective_flux_reconstructor",
+            dim,
+            grid_geometry,
+            flow_model->getNumberOfEquations(),
+            flow_model_type,
+            flow_model,
+            convective_flux_reconstructor_db));
+    }
+    else if (convective_flux_reconstructor_str == "KEP")
+    {
+        d_convective_flux_reconstructor_type = CONVECTIVE_FLUX_RECONSTRUCTOR::KEP;
+        
+        d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorKEP(
+            "d_convective_flux_reconstructor",
+            dim,
+            grid_geometry,
+            flow_model->getNumberOfEquations(),
+            flow_model_type,
             flow_model,
             convective_flux_reconstructor_db));
     }

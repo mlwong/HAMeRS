@@ -12,6 +12,7 @@ class FlowModelFourEqnConservative: public FlowModel
     public:
         FlowModelFourEqnConservative(
             const std::string& object_name,
+            const std::string& project_name,
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,

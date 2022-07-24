@@ -109,6 +109,7 @@ NavierStokes::NavierStokes(
     
     d_flow_model_manager.reset(new FlowModelManager(
         "d_flow_model_manager",
+        d_project_name,
         d_dim,
         d_grid_geometry,
         d_num_species,
@@ -126,6 +127,7 @@ NavierStokes::NavierStokes(
         d_dim,
         d_grid_geometry,
         d_flow_model->getNumberOfEquations(),
+        d_flow_model_manager->getFlowModelType(),
         d_flow_model,
         d_convective_flux_reconstructor_db,
         d_convective_flux_reconstructor_str));
@@ -284,52 +286,6 @@ NavierStokes::NavierStokes(
     
     d_variable_source = HAMERS_SHARED_PTR<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(dim, "source", d_flow_model->getNumberOfEquations()));
-    
-    if ((!d_stat_dump_filename.empty()))
-    {
-        d_flow_model->setupStatisticsUtilities();
-        
-        const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
-        if (mpi.getRank() == 0)
-        {
-            std::ofstream f_out;
-            f_out.open(d_stat_dump_filename.c_str(), std::ios::app);
-            
-            if (!f_out.is_open())
-            {
-                TBOX_ERROR(d_object_name
-                    << ": "
-                    << "Failed to open file to output statistics!"
-                    << std::endl);
-            }
-            
-            f_out << "TIME                 ";
-            f_out.close();
-        }
-        
-        HAMERS_SHARED_PTR<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
-            d_flow_model->getFlowModelStatisticsUtilities();
-        
-        flow_model_statistics_utilities->outputStatisticalQuantitiesNames(
-            d_stat_dump_filename);
-        
-        if (mpi.getRank() == 0)
-        {
-            std::ofstream f_out;
-            f_out.open(d_stat_dump_filename.c_str(), std::ios::app);
-            
-            if (!f_out.is_open())
-            {
-                TBOX_ERROR(d_object_name
-                    << ": "
-                    << "Failed to open file to output statistics!"
-                    << std::endl);
-            }
-            
-            f_out << std::endl;
-            f_out.close();
-        }
-    }
 }
 
 
@@ -3552,6 +3508,80 @@ NavierStokes::filterStatisticsVariables(
 
 
 /**
+ * Output the header of statistics.
+ */
+void
+NavierStokes::outputHeaderStatistics()
+{
+    if ((!d_stat_dump_filename.empty()))
+    {
+        d_flow_model->setupStatisticsUtilities();
+        
+        const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+        if (mpi.getRank() == 0)
+        {
+            std::ofstream f_out;
+            f_out.open(d_stat_dump_filename.c_str(), std::ios::app);
+            
+            if (!f_out.is_open())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "Failed to open file to output statistics!"
+                    << std::endl);
+            }
+            
+            f_out << "# TIME               ";
+            f_out.close();
+        }
+        
+        HAMERS_SHARED_PTR<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
+            d_flow_model->getFlowModelStatisticsUtilities();
+        
+        flow_model_statistics_utilities->outputStatisticalQuantitiesNames(
+            d_stat_dump_filename);
+        
+        if (mpi.getRank() == 0)
+        {
+            std::ofstream f_out;
+            f_out.open(d_stat_dump_filename.c_str(), std::ios::app);
+            
+            if (!f_out.is_open())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "Failed to open file to output statistics!"
+                    << std::endl);
+            }
+            
+            f_out << std::endl;
+            f_out.close();
+        }
+    }
+}
+
+
+/**
+ * Compute the statistics of data.
+ */
+void
+NavierStokes::computeDataStatistics(
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const double statistics_data_time)
+{
+    d_flow_model->setupStatisticsUtilities();
+    
+    HAMERS_SHARED_PTR<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
+        d_flow_model->getFlowModelStatisticsUtilities();
+    
+    flow_model_statistics_utilities->computeStatisticalQuantities(
+        patch_hierarchy,
+        getDataContext(),
+        statistics_data_time);
+}
+
+
+/**
  * Output the statistics of data.
  */
 void
@@ -3608,6 +3638,36 @@ NavierStokes::outputDataStatistics(
             f_out.close();
         }
     }
+}
+
+
+/**
+ * Get object of storing ensemble statistics.
+ */
+HAMERS_SHARED_PTR<EnsembleStatistics>
+NavierStokes::getEnsembleStatistics()
+{
+    d_flow_model->setupStatisticsUtilities();
+    
+    HAMERS_SHARED_PTR<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
+        d_flow_model->getFlowModelStatisticsUtilities();
+    
+    return flow_model_statistics_utilities->getEnsembleStatistics();
+}
+
+
+/**
+ * Set object of storing ensemble statistics.
+ */
+void
+NavierStokes::setEnsembleStatistics(const HAMERS_SHARED_PTR<EnsembleStatistics> ensemble_statistics)
+{
+    d_flow_model->setupStatisticsUtilities();
+    
+    HAMERS_SHARED_PTR<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
+        d_flow_model->getFlowModelStatisticsUtilities();
+    
+    flow_model_statistics_utilities->setEnsembleStatistics(ensemble_statistics);
 }
 
 

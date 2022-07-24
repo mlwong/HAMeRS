@@ -5,6 +5,7 @@ set(flow_models_source_files
     FlowModel.cpp
     FlowModelDiffusiveFluxUtilities.cpp
     FlowModelSourceUtilities.cpp
+    FlowModelSpecialSourceTerms.cpp
     ./MPI_helpers/FlowModelMPIHelper.cpp
     ./MPI_helpers/FlowModelMPIHelperMaxMin.cpp
     ./MPI_helpers/FlowModelMPIHelperAverage.cpp

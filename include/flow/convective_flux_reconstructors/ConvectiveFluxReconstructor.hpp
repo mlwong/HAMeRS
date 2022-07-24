@@ -28,6 +28,7 @@ class ConvectiveFluxReconstructor
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_eqn,
+            const FLOW_MODEL::TYPE& flow_model_type,
             const HAMERS_SHARED_PTR<FlowModel>& flow_model,
             const HAMERS_SHARED_PTR<tbox::Database>& convective_flux_reconstructor_db):
                 d_object_name(object_name),
@@ -35,6 +36,7 @@ class ConvectiveFluxReconstructor
                 d_grid_geometry(grid_geometry),
                 d_num_conv_ghosts(hier::IntVector::getZero(d_dim)),
                 d_num_eqn(num_eqn),
+                d_flow_model_type(flow_model_type),
                 d_flow_model(flow_model),
                 d_convective_flux_reconstructor_db(convective_flux_reconstructor_db)
         {}
@@ -103,6 +105,11 @@ class ConvectiveFluxReconstructor
          * Number of equations.
          */
         const int d_num_eqn;
+        
+        /*
+         * Flow model type.
+         */
+        const FLOW_MODEL::TYPE d_flow_model_type;
         
         /*
          * Flow model.

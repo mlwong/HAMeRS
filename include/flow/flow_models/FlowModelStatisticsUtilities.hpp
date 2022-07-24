@@ -7,6 +7,7 @@
 
 #include "flow/flow_models/FlowModel.hpp"
 #include "util/derivatives/DerivativeFirstOrder.hpp"
+#include "util/ensemble_statistics/EnsembleStatistics.hpp"
 
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 
@@ -26,7 +27,8 @@ class FlowModelStatisticsUtilities
                 d_object_name(object_name),
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
-                d_num_species(num_species)
+                d_num_species(num_species),
+                d_is_ensemble_statistics_initialized(false)
         {
             /*
              * Get the names of statistical quantities to output.
@@ -103,6 +105,20 @@ class FlowModelStatisticsUtilities
         }
         
         /*
+         * Compute statisitcal quantities.
+         */
+        virtual void
+        computeStatisticalQuantities(
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const double statistics_data_time)
+        {
+            NULL_USE(patch_hierarchy);
+            NULL_USE(data_context);
+            NULL_USE(statistics_data_time);
+        }
+        
+        /*
          * Output names of statistical quantities to output to a file.
          */
         virtual void
@@ -118,6 +134,33 @@ class FlowModelStatisticsUtilities
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
             const double output_time) = 0;
+        
+        /*
+         * Get object of storing ensemble statistics.
+         */
+        HAMERS_SHARED_PTR<EnsembleStatistics>
+        getEnsembleStatistics()
+        {
+            if (d_is_ensemble_statistics_initialized == false)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "The ensemble statistics object is not initialized yet!"
+                    << std::endl);
+            }
+            
+            return d_ensemble_statistics;
+        }
+        
+        /*
+         * Set object of storing ensemble statistics.
+         */
+        void
+        setEnsembleStatistics(const HAMERS_SHARED_PTR<EnsembleStatistics> ensemble_statistics)
+        {
+            d_ensemble_statistics = ensemble_statistics;
+            d_is_ensemble_statistics_initialized = true;
+        }
         
     protected:
         /*
@@ -150,6 +193,12 @@ class FlowModelStatisticsUtilities
          */
         std::vector<std::string> d_statistical_quantities;
         
+        /*
+         * Store ensemble statistics.
+         */
+        HAMERS_SHARED_PTR<EnsembleStatistics> d_ensemble_statistics;
+        
+        bool d_is_ensemble_statistics_initialized;
 };
 
 #endif /* FLOW_MODEL_STATISTICS_UTILITIES_HPP */
