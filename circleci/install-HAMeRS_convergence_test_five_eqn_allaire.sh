@@ -5,5 +5,5 @@ cd ../../..
 mkdir build_convergence_test_five_eqn_allaire
 cd build_convergence_test_five_eqn_allaire
 export SAMRAI_ROOT=$SAMRAI_ROOT_NO_BOOST; cmake .. -DHAMERS_USE_BOOST=OFF -DHAMERS_ENABLE_SIMD=OFF
-make
+make -j 4
 cd ..
