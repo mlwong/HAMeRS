@@ -44,7 +44,7 @@ jobs:
           name: install_HDF5
           command: sh circleci/install-hdf5.sh
       - save_cache:
-          key: hdf5_cache-{{ .BuildNum }}
+          key: hdf5_cache
           paths:
             - hdf5
       - run:
@@ -66,7 +66,7 @@ jobs:
       - restore_cache:
           name: "Restore HDF5 cache"
           keys:
-            - hdf5_cache-{{ .BuildNum }}
+            - hdf5_cache-
       - run:
           name: "Checking hdf5"
           command: ls hdf5
@@ -96,7 +96,7 @@ jobs:
       - restore_cache:
           name: "Restore HDF5 cache"
           keys:
-            - hdf5_cache-{{ .BuildNum }}
+            - hdf5_cache-
       - run:
           name: "Checking hdf5"
           command: ls hdf5
@@ -111,7 +111,7 @@ jobs:
           name: install_HAMeRS
           command: sh circleci/install-SAMRAI.sh; sh circleci/install-HAMeRS_convergence_test_single_species.sh; sh circleci/install-HAMeRS_convergence_test_five_eqn_allaire.sh
       - save_cache:
-          key: HAMeRS_cache-{{ .BuildNum }}
+          key: HAMeRS_cache
           paths:
             - SAMRAI_NO_BOOST
             - build_convergence_test_single_species
@@ -132,11 +132,11 @@ jobs:
       - restore_cache:
           name: "Restore HDF5 cache"
           keys:
-            - hdf5_cache-{{ .BuildNum }}
+            - hdf5_cache-
       - restore_cache:
           name: "Restore HAMeRS cache"
           keys:
-            - HAMeRS_cache-{{ .BuildNum }}
+            - HAMeRS_cache-
       - run:
           name: "Setup environment variables"
           command: >-
@@ -147,5 +147,139 @@ jobs:
       - run:
           name: test
           command: ./build_convergence_test_single_species/src/test/test_mixing_rules
-          
 
+  test_2D_convergence_single_species:
+    docker:
+      - image: cimg/base:2022.07
+
+    steps:
+      - checkout
+      - run:
+          name: "Install libraries"
+          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
+      - run:
+          name: "Check compiler"
+          command: which mpicc; which mpicxx; which mpif77
+      - restore_cache:
+          name: "Restore HDF5 cache"
+          keys:
+            - hdf5_cache-
+      - restore_cache:
+          name: "Restore HAMeRS cache"
+          keys:
+            - HAMeRS_cache-
+      - run:
+          name: "Setup environment variables"
+          command: >-
+            echo 'export HDF5_ROOT=${PWD}/hdf5' >> $BASH_ENV &&
+            echo 'export SAMRAI_ROOT_NO_BOOST=${PWD}/SAMRAI_NO_BOOST' >> $BASH_ENV &&
+            echo 'export SAMRAI_ROOT_WITH_BOOST=${PWD}/SAMRAI_WITH_BOOST' >> $BASH_ENV &&
+            echo 'export HAMERS_ROOT=${PWD}' >> $BASH_ENV
+      - run:
+          name: test
+          command: cd tests/2D_convergence_test_single_species; python3 convergence_test.py
+      - run:
+          name: test
+          command: python3 convergence_test_KEP.py
+
+  test_3D_convergence_single_species:
+    docker:
+      - image: cimg/base:2022.07
+
+    steps:
+      - checkout
+      - run:
+          name: "Install libraries"
+          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
+      - run:
+          name: "Check compiler"
+          command: which mpicc; which mpicxx; which mpif77
+      - restore_cache:
+          name: "Restore HDF5 cache"
+          keys:
+            - hdf5_cache-
+      - restore_cache:
+          name: "Restore HAMeRS cache"
+          keys:
+            - HAMeRS_cache-
+      - run:
+          name: "Setup environment variables"
+          command: >-
+            echo 'export HDF5_ROOT=${PWD}/hdf5' >> $BASH_ENV &&
+            echo 'export SAMRAI_ROOT_NO_BOOST=${PWD}/SAMRAI_NO_BOOST' >> $BASH_ENV &&
+            echo 'export SAMRAI_ROOT_WITH_BOOST=${PWD}/SAMRAI_WITH_BOOST' >> $BASH_ENV &&
+            echo 'export HAMERS_ROOT=${PWD}' >> $BASH_ENV
+      - run:
+          name: test
+          command: cd tests/3D_convergence_test_single_species; python3 convergence_test.py
+      - run:
+          name: test
+          command: python3 convergence_test_KEP.py
+
+  test_2D_convergence_five_eqn_allaire:
+    docker:
+      - image: cimg/base:2022.07
+
+    steps:
+      - checkout
+      - run:
+          name: "Install libraries"
+          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
+      - run:
+          name: "Check compiler"
+          command: which mpicc; which mpicxx; which mpif77
+      - restore_cache:
+          name: "Restore HDF5 cache"
+          keys:
+            - hdf5_cache-
+      - restore_cache:
+          name: "Restore HAMeRS cache"
+          keys:
+            - HAMeRS_cache-
+      - run:
+          name: "Setup environment variables"
+          command: >-
+            echo 'export HDF5_ROOT=${PWD}/hdf5' >> $BASH_ENV &&
+            echo 'export SAMRAI_ROOT_NO_BOOST=${PWD}/SAMRAI_NO_BOOST' >> $BASH_ENV &&
+            echo 'export SAMRAI_ROOT_WITH_BOOST=${PWD}/SAMRAI_WITH_BOOST' >> $BASH_ENV &&
+            echo 'export HAMERS_ROOT=${PWD}' >> $BASH_ENV
+      - run:
+          name: test
+          command: cd tests/2D_convergence_test_five_eqn_allaire; python3 convergence_test.py
+      - run:
+          name: test
+          command: python3 convergence_test_KEP.py
+
+  test_3D_convergence_five_eqn_allaire:
+    docker:
+      - image: cimg/base:2022.07
+
+    steps:
+      - checkout
+      - run:
+          name: "Install libraries"
+          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
+      - run:
+          name: "Check compiler"
+          command: which mpicc; which mpicxx; which mpif77
+      - restore_cache:
+          name: "Restore HDF5 cache"
+          keys:
+            - hdf5_cache-
+      - restore_cache:
+          name: "Restore HAMeRS cache"
+          keys:
+            - HAMeRS_cache-
+      - run:
+          name: "Setup environment variables"
+          command: >-
+            echo 'export HDF5_ROOT=${PWD}/hdf5' >> $BASH_ENV &&
+            echo 'export SAMRAI_ROOT_NO_BOOST=${PWD}/SAMRAI_NO_BOOST' >> $BASH_ENV &&
+            echo 'export SAMRAI_ROOT_WITH_BOOST=${PWD}/SAMRAI_WITH_BOOST' >> $BASH_ENV &&
+            echo 'export HAMERS_ROOT=${PWD}' >> $BASH_ENV
+      - run:
+          name: test
+          command: cd tests/3D_convergence_test_five_eqn_allaire; python3 convergence_test.py
+      - run:
+          name: test
+          command: python3 convergence_test_KEP.py
