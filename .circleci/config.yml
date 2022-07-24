@@ -27,5 +27,8 @@ jobs:
           name: "Echo hdf5 root"
           command: echo $HDF5_ROOT
       - run:
+          name: "Echo PWD"
+          command: echo $PWD
+      - run:
           name: install_HDF5
           command: sh circleci/install-hdf5.sh
