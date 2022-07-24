@@ -57,6 +57,10 @@ jobs:
       - run:
           name: "Check compiler"
           command: which mpicc; which mpicxx; which mpif77
+      - restore_cache:
+          name: "Restore HDF5 cache"
+          keys:
+            - hdf5_cache-{{ checksum "package-lock.json" }}-{{ .Environment.variableName }}
       - run:
           name: "Check environment variables"
           command: >-
@@ -64,10 +68,6 @@ jobs:
             echo $SAMRAI_ROOT_NO_BOOST &&
             echo $SAMRAI_ROOT_WITH_BOOST &&
             echo $HAMERS_ROOT
-      - restore_cache:
-          name: "Restore HDF5 cache"
-          keys:
-            - hdf5_cache-{{ checksum "package-lock.json" }}-{{ .Environment.variableName }}
       - run:
           name: install_HAMeRS_with_Boost
           command: sh circleci/install-SAMRAI_with_Boost.sh; sh circleci/install-HAMeRS_with_Boost.sh
@@ -84,6 +84,10 @@ jobs:
       - run:
           name: "Check compiler"
           command: which mpicc; which mpicxx; which mpif77
+      - restore_cache:
+          name: "Restore HDF5 cache"
+          keys:
+            - hdf5_cache-{{ checksum "package-lock.json" }}-{{ .Environment.variableName }}
       - run:
           name: "Check environment variables"
           command: >-
@@ -91,10 +95,6 @@ jobs:
             echo $SAMRAI_ROOT_NO_BOOST &&
             echo $SAMRAI_ROOT_WITH_BOOST &&
             echo $HAMERS_ROOT
-      - restore_cache:
-          name: "Restore HDF5 cache"
-          keys:
-            - hdf5_cache-{{ checksum "package-lock.json" }}-{{ .Environment.variableName }}
       - run:
           name: install_HAMeRS
           command: sh circleci/install-SAMRAI.sh; sh circleci/install-HAMeRS_convergence_test_single_species.sh; sh circleci/install-HAMeRS_convergence_test_five_eqn_allaire.sh
