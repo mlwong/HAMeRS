@@ -14,6 +14,18 @@ workflows:
       - tests:
           requires:
             - build_HAMeRS
+      - test_2D_convergence_single_species:
+          requires:
+            - build_HAMeRS
+      - test_3D_convergence_single_species:
+          requires:
+            - build_HAMeRS
+      - test_2D_convergence_five_eqn_allaire:
+          requires:
+            - build_HAMeRS
+      - test_3D_convergence_five_eqn_allaire:
+          requires:
+            - build_HAMeRS
 
 jobs:
   build_HDF5:
@@ -44,7 +56,7 @@ jobs:
           name: install_HDF5
           command: sh circleci/install-hdf5.sh
       - save_cache:
-          key: hdf5_cache
+          key: hdf5_cache-{{ .Environment.CIRCLE_SHA1 }}
           paths:
             - hdf5
       - run:
@@ -66,7 +78,7 @@ jobs:
       - restore_cache:
           name: "Restore HDF5 cache"
           keys:
-            - hdf5_cache-
+            - hdf5_cache-{{ .Environment.CIRCLE_SHA1 }}
       - run:
           name: "Checking hdf5"
           command: ls hdf5
@@ -96,7 +108,7 @@ jobs:
       - restore_cache:
           name: "Restore HDF5 cache"
           keys:
-            - hdf5_cache-
+            - hdf5_cache-{{ .Environment.CIRCLE_SHA1 }}
       - run:
           name: "Checking hdf5"
           command: ls hdf5
@@ -111,7 +123,7 @@ jobs:
           name: install_HAMeRS
           command: sh circleci/install-SAMRAI.sh; sh circleci/install-HAMeRS_convergence_test_single_species.sh; sh circleci/install-HAMeRS_convergence_test_five_eqn_allaire.sh
       - save_cache:
-          key: HAMeRS_cache
+          key: HAMeRS_cache-{{ .Environment.CIRCLE_SHA1 }}
           paths:
             - SAMRAI_NO_BOOST
             - build_convergence_test_single_species
@@ -132,11 +144,11 @@ jobs:
       - restore_cache:
           name: "Restore HDF5 cache"
           keys:
-            - hdf5_cache-
+            - hdf5_cache-{{ .Environment.CIRCLE_SHA1 }}
       - restore_cache:
           name: "Restore HAMeRS cache"
           keys:
-            - HAMeRS_cache-
+            - HAMeRS_cache-{{ .Environment.CIRCLE_SHA1 }}
       - run:
           name: "Setup environment variables"
           command: >-
@@ -163,11 +175,11 @@ jobs:
       - restore_cache:
           name: "Restore HDF5 cache"
           keys:
-            - hdf5_cache-
+            - hdf5_cache-{{ .Environment.CIRCLE_SHA1 }}
       - restore_cache:
           name: "Restore HAMeRS cache"
           keys:
-            - HAMeRS_cache-
+            - HAMeRS_cache-{{ .Environment.CIRCLE_SHA1 }}
       - run:
           name: "Setup environment variables"
           command: >-
@@ -197,11 +209,11 @@ jobs:
       - restore_cache:
           name: "Restore HDF5 cache"
           keys:
-            - hdf5_cache-
+            - hdf5_cache-{{ .Environment.CIRCLE_SHA1 }}
       - restore_cache:
           name: "Restore HAMeRS cache"
           keys:
-            - HAMeRS_cache-
+            - HAMeRS_cache-{{ .Environment.CIRCLE_SHA1 }}
       - run:
           name: "Setup environment variables"
           command: >-
@@ -231,11 +243,11 @@ jobs:
       - restore_cache:
           name: "Restore HDF5 cache"
           keys:
-            - hdf5_cache-
+            - hdf5_cache-{{ .Environment.CIRCLE_SHA1 }}
       - restore_cache:
           name: "Restore HAMeRS cache"
           keys:
-            - HAMeRS_cache-
+            - HAMeRS_cache-{{ .Environment.CIRCLE_SHA1 }}
       - run:
           name: "Setup environment variables"
           command: >-
@@ -265,11 +277,11 @@ jobs:
       - restore_cache:
           name: "Restore HDF5 cache"
           keys:
-            - hdf5_cache-
+            - hdf5_cache-{{ .Environment.CIRCLE_SHA1 }}
       - restore_cache:
           name: "Restore HAMeRS cache"
           keys:
-            - HAMeRS_cache-
+            - HAMeRS_cache-{{ .Environment.CIRCLE_SHA1 }}
       - run:
           name: "Setup environment variables"
           command: >-
