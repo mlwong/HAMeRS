@@ -59,19 +59,21 @@ jobs:
           key: hdf5_cache-{{ .Environment.CIRCLE_SHA1 }}
           paths:
             - hdf5
-      - run:
-          name: "Checking hdf5"
-          command: ls hdf5
 
   build_HAMeRS_with_boost:
     docker:
       - image: cimg/base:2022.07
 
+    environment:
+      CC: mpicc
+      CXX: mpicxx
+      F77: mpif77
+
     steps:
       - checkout
       - run:
           name: "Install libraries"
-          command: sudo apt-get update && sudo apt-get install libboost-all-dev openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
+          command: sudo apt-get update && sudo apt-get install libboost1.68-dev openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
       - run:
           name: "Check compiler"
           command: which mpicc; which mpicxx; which mpif77
@@ -79,9 +81,6 @@ jobs:
           name: "Restore HDF5 cache"
           keys:
             - hdf5_cache-{{ .Environment.CIRCLE_SHA1 }}
-      - run:
-          name: "Checking hdf5"
-          command: ls hdf5
       - run:
           name: "Setup environment variables"
           command: >-
@@ -97,6 +96,11 @@ jobs:
     docker:
       - image: cimg/base:2022.07
 
+    environment:
+      CC: mpicc
+      CXX: mpicxx
+      F77: mpif77
+
     steps:
       - checkout
       - run:
@@ -109,9 +113,6 @@ jobs:
           name: "Restore HDF5 cache"
           keys:
             - hdf5_cache-{{ .Environment.CIRCLE_SHA1 }}
-      - run:
-          name: "Checking hdf5"
-          command: ls hdf5
       - run:
           name: "Setup environment variables"
           command: >-
@@ -132,6 +133,11 @@ jobs:
   tests:
     docker:
       - image: cimg/base:2022.07
+
+    environment:
+      CC: mpicc
+      CXX: mpicxx
+      F77: mpif77
 
     steps:
       - checkout
@@ -163,6 +169,11 @@ jobs:
   test_2D_convergence_single_species:
     docker:
       - image: cimg/base:2022.07
+
+    environment:
+      CC: mpicc
+      CXX: mpicxx
+      F77: mpif77
 
     steps:
       - checkout
@@ -198,6 +209,11 @@ jobs:
     docker:
       - image: cimg/base:2022.07
 
+    environment:
+      CC: mpicc
+      CXX: mpicxx
+      F77: mpif77
+
     steps:
       - checkout
       - run:
@@ -232,6 +248,11 @@ jobs:
     docker:
       - image: cimg/base:2022.07
 
+    environment:
+      CC: mpicc
+      CXX: mpicxx
+      F77: mpif77
+
     steps:
       - checkout
       - run:
@@ -265,6 +286,11 @@ jobs:
   test_3D_convergence_five_eqn_allaire:
     docker:
       - image: cimg/base:2022.07
+
+    environment:
+      CC: mpicc
+      CXX: mpicxx
+      F77: mpif77
 
     steps:
       - checkout
