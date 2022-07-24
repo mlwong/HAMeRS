@@ -5,6 +5,7 @@ workflows:
   build:
     jobs:
       - build_HDF5
+      - build_HAMeRS
 
 jobs:
   build_HDF5:
@@ -24,7 +25,7 @@ jobs:
             export CXX=mpicxx &&
             export F77=mpif77
       - run:
-          name: "Setup environment variable HDF5_ROOT"
+          name: "Setup environment variables"
           command: >-
             echo 'export HDF5_ROOT=${PWD}/hdf5' >> $BASH_ENV &&
             echo 'export SAMRAI_ROOT_NO_BOOST=${PWD}/SAMRAI_NO_BOOST' >> $BASH_ENV &&
@@ -33,3 +34,18 @@ jobs:
       - run:
           name: install_HDF5
           command: sh circleci/install-hdf5.sh
+  
+  build_HAMeRS:
+    docker:
+      - image: cimg/node:17.2.0 # Primary execution image
+        auth:
+          username: mydockerhub-user
+          password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
+    steps:
+      - checkout
+      - run:
+          name: install_HAMeRS_with_Boost
+          command: sh circleci/install-SAMRAI_with_Boost.sh; sh circleci/install-HAMeRS_with_Boost.sh
+      - run:
+          name: install_HAMeRS
+          command: sh circleci/install-SAMRAI.sh; sh circleci/install-HAMeRS_convergence_test_single_species.sh; sh circleci/install-HAMeRS_convergence_test_five_eqn_allaire.sh
