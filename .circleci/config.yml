@@ -52,9 +52,10 @@ jobs:
             echo 'export SAMRAI_ROOT_NO_BOOST=${PWD}/SAMRAI_NO_BOOST' >> $BASH_ENV &&
             echo 'export SAMRAI_ROOT_WITH_BOOST=${PWD}/SAMRAI_WITH_BOOST' >> $BASH_ENV &&
             echo 'export HAMERS_ROOT=${PWD}' >> $BASH_ENV
+            echo 'export BOOST_ROOT=/usr/lib/x86_64-linux-gnu/' >> $BASH_ENV
       - run:
           name: "Find boost"
-          command: ls /usr/lib/boost
+          command: ls /usr/lib/x86_64-linux-gnu/
       - run:
           name: install_HDF5
           command: sh circleci/install-hdf5.sh
@@ -91,6 +92,7 @@ jobs:
             echo 'export SAMRAI_ROOT_NO_BOOST=${PWD}/SAMRAI_NO_BOOST' >> $BASH_ENV &&
             echo 'export SAMRAI_ROOT_WITH_BOOST=${PWD}/SAMRAI_WITH_BOOST' >> $BASH_ENV &&
             echo 'export HAMERS_ROOT=${PWD}' >> $BASH_ENV
+            echo 'export BOOST_ROOT=/usr/lib/x86_64-linux-gnu/' >> $BASH_ENV
       - run:
           name: install_HAMeRS_with_Boost
           command: sh circleci/install-SAMRAI_with_Boost.sh; sh circleci/install-HAMeRS_with_Boost.sh
