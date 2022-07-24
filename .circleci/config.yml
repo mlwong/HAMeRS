@@ -11,6 +11,9 @@ workflows:
       - build_HAMeRS:
           requires:
             - build_HDF5
+      - tests:
+          requires:
+            - build_HAMeRS
 
 jobs:
   build_HDF5:
@@ -44,6 +47,9 @@ jobs:
           key: hdf5_cache
           paths:
             - hdf5
+      - run:
+          name: "Checking hdf5"
+          command: ls hdf5
 
   build_HAMeRS_with_boost:
     docker:
@@ -98,3 +104,42 @@ jobs:
       - run:
           name: install_HAMeRS
           command: sh circleci/install-SAMRAI.sh; sh circleci/install-HAMeRS_convergence_test_single_species.sh; sh circleci/install-HAMeRS_convergence_test_five_eqn_allaire.sh
+      - save_cache:
+          key: HAMeRS_cache
+          paths:
+            - SAMRAI_NO_BOOST
+            - build_convergence_test_single_species
+            - build_convergence_test_five_eqn_allaire
+
+  tests:
+    docker:
+      - image: cimg/base:2022.07
+
+    steps:
+      - checkout
+      - run:
+          name: "Install libraries"
+          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
+      - run:
+          name: "Check compiler"
+          command: which mpicc; which mpicxx; which mpif77
+      - restore_cache:
+          name: "Restore HDF5 cache"
+          keys:
+            - hdf5_cache
+      - restore_cache:
+          name: "Restore HAMeRS cache"
+          keys:
+            - HAMeRS_cache
+      - run:
+          name: "Setup environment variables"
+          command: >-
+            echo 'export HDF5_ROOT=${PWD}/hdf5' >> $BASH_ENV &&
+            echo 'export SAMRAI_ROOT_NO_BOOST=${PWD}/SAMRAI_NO_BOOST' >> $BASH_ENV &&
+            echo 'export SAMRAI_ROOT_WITH_BOOST=${PWD}/SAMRAI_WITH_BOOST' >> $BASH_ENV &&
+            echo 'export HAMERS_ROOT=${PWD}' >> $BASH_ENV
+      - run:
+          name: test
+          command: ./build_convergence_test_single_species/src/test/test_mixing_rules
+          
+
