@@ -39,9 +39,9 @@ jobs:
             echo 'export HAMERS_ROOT=${PWD}' >> $BASH_ENV
       - run:
           name: install_HDF5
-          command: sh circleci/install-hdf5.sh
+          command: mkdir $HDF5_ROOT; touch $HDF5_ROOT/abc.txt # sh circleci/install-hdf5.sh
       - save_cache:
-          key: hdf5_cache-{{ checksum "package-lock.json" }}-{{ .Environment.variableName }}
+          key: hdf5_cache-{{ .Environment.variableName }}
           paths:
             - hdf5
 
@@ -60,7 +60,7 @@ jobs:
       - restore_cache:
           name: "Restore HDF5 cache"
           keys:
-            - hdf5_cache-{{ checksum "package-lock.json" }}-{{ .Environment.variableName }}
+            - hdf5_cache-{{ .Environment.variableName }}
       - run:
           name: "Check environment variables"
           command: >-
@@ -87,7 +87,7 @@ jobs:
       - restore_cache:
           name: "Restore HDF5 cache"
           keys:
-            - hdf5_cache-{{ checksum "package-lock.json" }}-{{ .Environment.variableName }}
+            - hdf5_cache-{{ .Environment.variableName }}
       - run:
           name: "Check environment variables"
           command: >-
