@@ -16,19 +16,20 @@ jobs:
         auth:
           username: mydockerhub-user
           password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
+
+    environment:
+      CC: mpicc
+      CXX: mpicxx
+      F77: mpif77
+
     steps:
       - checkout
       - run:
-          name: "Setup compilers"
-          command: >-
-            test -n $CC  && unset CC &&
-            test -n $CXX && unset CXX &&
-            export CC=mpicc &&
-            export CXX=mpicxx &&
-            export F77=mpif77
+          name: "Install libraries"
+          command: sudo apt-get install openmpi-bin openmpi-common libopenmpi-dev libgtk2.0-dev
       - run:
           name: "Check compiler"
-          command: which gcc
+          command: which mpicc; which mpicxx; which mpif77
       - run:
           name: "Setup environment variables"
           command: >-
