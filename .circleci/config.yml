@@ -71,7 +71,7 @@ jobs:
       - checkout
       - run:
           name: "Install libraries"
-          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
+          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev libboost-all-dev
       - run:
           name: "Check compiler"
           command: which mpicc; which mpicxx; which mpif77
