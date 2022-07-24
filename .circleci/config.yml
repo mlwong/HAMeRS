@@ -41,7 +41,7 @@ jobs:
           name: install_HDF5
           command: mkdir $HDF5_ROOT; touch $HDF5_ROOT/abc.txt # sh circleci/install-hdf5.sh
       - save_cache:
-          key: hdf5_cache-{{ .Environment.variableName }}
+          key: hdf5_cache
           paths:
             - hdf5
 
@@ -60,14 +60,14 @@ jobs:
       - restore_cache:
           name: "Restore HDF5 cache"
           keys:
-            - hdf5_cache-{{ .Environment.variableName }}
+            - hdf5_cache
       - run:
-          name: "Check environment variables"
+          name: "Setup environment variables"
           command: >-
-            echo $HDF5_ROOT &&
-            echo $SAMRAI_ROOT_NO_BOOST &&
-            echo $SAMRAI_ROOT_WITH_BOOST &&
-            echo $HAMERS_ROOT
+            echo 'export HDF5_ROOT=${PWD}/hdf5' >> $BASH_ENV &&
+            echo 'export SAMRAI_ROOT_NO_BOOST=${PWD}/SAMRAI_NO_BOOST' >> $BASH_ENV &&
+            echo 'export SAMRAI_ROOT_WITH_BOOST=${PWD}/SAMRAI_WITH_BOOST' >> $BASH_ENV &&
+            echo 'export HAMERS_ROOT=${PWD}' >> $BASH_ENV
       - run:
           name: install_HAMeRS_with_Boost
           command: sh circleci/install-SAMRAI_with_Boost.sh; sh circleci/install-HAMeRS_with_Boost.sh
@@ -87,14 +87,14 @@ jobs:
       - restore_cache:
           name: "Restore HDF5 cache"
           keys:
-            - hdf5_cache-{{ .Environment.variableName }}
+            - hdf5_cache
       - run:
-          name: "Check environment variables"
+          name: "Setup environment variables"
           command: >-
-            echo $HDF5_ROOT &&
-            echo $SAMRAI_ROOT_NO_BOOST &&
-            echo $SAMRAI_ROOT_WITH_BOOST &&
-            echo $HAMERS_ROOT
+            echo 'export HDF5_ROOT=${PWD}/hdf5' >> $BASH_ENV &&
+            echo 'export SAMRAI_ROOT_NO_BOOST=${PWD}/SAMRAI_NO_BOOST' >> $BASH_ENV &&
+            echo 'export SAMRAI_ROOT_WITH_BOOST=${PWD}/SAMRAI_WITH_BOOST' >> $BASH_ENV &&
+            echo 'export HAMERS_ROOT=${PWD}' >> $BASH_ENV
       - run:
           name: install_HAMeRS
           command: sh circleci/install-SAMRAI.sh; sh circleci/install-HAMeRS_convergence_test_single_species.sh; sh circleci/install-HAMeRS_convergence_test_five_eqn_allaire.sh
