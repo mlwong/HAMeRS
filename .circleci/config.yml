@@ -73,7 +73,7 @@ jobs:
       - checkout
       - run:
           name: "Install libraries"
-          command: sudo apt-get update && sudo apt-get install libboost1.68-dev openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
+          command: sudo apt-get update && sudo apt-get install libboost-all-dev openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
       - run:
           name: "Check compiler"
           command: which mpicc; which mpicxx; which mpif77
@@ -88,6 +88,9 @@ jobs:
             echo 'export SAMRAI_ROOT_NO_BOOST=${PWD}/SAMRAI_NO_BOOST' >> $BASH_ENV &&
             echo 'export SAMRAI_ROOT_WITH_BOOST=${PWD}/SAMRAI_WITH_BOOST' >> $BASH_ENV &&
             echo 'export HAMERS_ROOT=${PWD}' >> $BASH_ENV
+      - run:
+          name: find boost
+          command: ls /usr/include/boost
       - run:
           name: install_HAMeRS_with_Boost
           command: sh circleci/install-SAMRAI_with_Boost.sh; sh circleci/install-HAMeRS_with_Boost.sh
