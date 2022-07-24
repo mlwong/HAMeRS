@@ -29,11 +29,15 @@ jobs:
           command: >-
             echo 'export HDF5_ROOT=${PWD}/hdf5' >> $BASH_ENV &&
             echo 'export SAMRAI_ROOT_NO_BOOST=${PWD}/SAMRAI_NO_BOOST' >> $BASH_ENV &&
-            echo 'export SAMRAI_ROOT_WITH_BOOST=${TRAVIS_BUILD_DIR}/SAMRAI_WITH_BOOST' >> $BASH_ENV &&
-            echo 'export HAMERS_ROOT=${TRAVIS_BUILD_DIR}' >> $BASH_ENV
+            echo 'export SAMRAI_ROOT_WITH_BOOST=${PWD}/SAMRAI_WITH_BOOST' >> $BASH_ENV &&
+            echo 'export HAMERS_ROOT=${PWD}' >> $BASH_ENV
       - run:
           name: install_HDF5
           command: sh circleci/install-hdf5.sh
+      - save_cache:
+          key: hdf5-cache
+          paths:
+            - ${HDF5_ROOT}
   
   build_HAMeRS:
     docker:
@@ -43,6 +47,25 @@ jobs:
           password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
     steps:
       - checkout
+      - run:
+          name: "Setup compilers"
+          command: >-
+            test -n $CC  && unset CC &&
+            test -n $CXX && unset CXX &&
+            export CC=mpicc &&
+            export CXX=mpicxx &&
+            export F77=mpif77
+      - run:
+          name: "Setup environment variables"
+          command: >-
+            echo 'export HDF5_ROOT=${PWD}/hdf5' >> $BASH_ENV &&
+            echo 'export SAMRAI_ROOT_NO_BOOST=${PWD}/SAMRAI_NO_BOOST' >> $BASH_ENV &&
+            echo 'export SAMRAI_ROOT_WITH_BOOST=${PWD}/SAMRAI_WITH_BOOST' >> $BASH_ENV &&
+            echo 'export HAMERS_ROOT=${PWD}' >> $BASH_ENV
+      - restore_cache:
+          name: "Restore HDF5 cache"
+          keys:
+            - hdf5-cache
       - run:
           name: install_HAMeRS_with_Boost
           command: sh circleci/install-SAMRAI_with_Boost.sh; sh circleci/install-HAMeRS_with_Boost.sh
