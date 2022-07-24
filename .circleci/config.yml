@@ -44,7 +44,7 @@ jobs:
           name: install_HDF5
           command: sh circleci/install-hdf5.sh
       - save_cache:
-          key: hdf5_cache
+          key: hdf5_cache-{{ .BuildNum }}
           paths:
             - hdf5
       - run:
@@ -66,7 +66,7 @@ jobs:
       - restore_cache:
           name: "Restore HDF5 cache"
           keys:
-            - hdf5_cache
+            - hdf5_cache-{{ .BuildNum }}
       - run:
           name: "Checking hdf5"
           command: ls hdf5
@@ -96,7 +96,7 @@ jobs:
       - restore_cache:
           name: "Restore HDF5 cache"
           keys:
-            - hdf5_cache
+            - hdf5_cache-{{ .BuildNum }}
       - run:
           name: "Checking hdf5"
           command: ls hdf5
@@ -111,7 +111,7 @@ jobs:
           name: install_HAMeRS
           command: sh circleci/install-SAMRAI.sh; sh circleci/install-HAMeRS_convergence_test_single_species.sh; sh circleci/install-HAMeRS_convergence_test_five_eqn_allaire.sh
       - save_cache:
-          key: HAMeRS_cache
+          key: HAMeRS_cache-{{ .BuildNum }}
           paths:
             - SAMRAI_NO_BOOST
             - build_convergence_test_single_species
@@ -132,11 +132,11 @@ jobs:
       - restore_cache:
           name: "Restore HDF5 cache"
           keys:
-            - hdf5_cache
+            - hdf5_cache-{{ .BuildNum }}
       - restore_cache:
           name: "Restore HAMeRS cache"
           keys:
-            - HAMeRS_cache
+            - HAMeRS_cache-{{ .BuildNum }}
       - run:
           name: "Setup environment variables"
           command: >-
