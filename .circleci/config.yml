@@ -1,60 +1,28 @@
-language: cpp
+version: 2.1
 
-sudo: enabled
-
-dist: trusty
-
-os:
-  - linux
-
-addons:
-  apt:
-    packages:
-      - gfortran 
-      - libboost-all-dev
-      - python3
-      - python3-numpy
-
-compiler:
-  - gcc
-
-env:
-  - HDF5_ROOT=${CIRCLE_WORKING_DIRECTORY}/hdf5 SAMRAI_ROOT_NO_BOOST=${CIRCLE_WORKING_DIRECTORY}/SAMRAI_NO_BOOST SAMRAI_ROOT_WITH_BOOST=${CIRCLE_WORKING_DIRECTORY}/SAMRAI_WITH_BOOST HAMERS_ROOT=${CIRCLE_WORKING_DIRECTORY}
-
-before_install:
-  - test -n $CC  && unset CC
-  - test -n $CXX && unset CXX
-  - export CC=mpicc
-  - export CXX=mpicxx
-  - export F77=mpif77
-
-stages:
-  - install_HDF5
-  - install_HAMeRS
-  - test
-
-cache:
-  directories:
-    - ${HDF5_ROOT}
-    - ${SAMRAI_ROOT_NO_BOOST}
-    - ${HAMERS_ROOT}/build_convergence_test_single_species
-    - ${HAMERS_ROOT}/build_convergence_test_five_eqn_allaire
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build_HDF5
 
 jobs:
-  include:
-    - stage: install_HDF5
-      script: sh circleci/install-hdf5.sh
-    - stage: install_HAMeRS
-      script: sh circleci/install-SAMRAI_with_Boost.sh; sh circleci/install-HAMeRS_with_Boost.sh
-    -
-      script: sh circleci/install-SAMRAI.sh; sh circleci/install-HAMeRS_convergence_test_single_species.sh; sh circleci/install-HAMeRS_convergence_test_five_eqn_allaire.sh
-    - stage: test
-      script: ./build_convergence_test_single_species/src/test/test_mixing_rules
-    -
-      script: cd tests/2D_convergence_test_single_species; python3 convergence_test.py
-    -
-      script: cd tests/3D_convergence_test_single_species; python3 convergence_test.py
-    -
-      script: cd tests/2D_convergence_test_five_eqn_allaire; python3 convergence_test.py
-    -
-      script: cd tests/3D_convergence_test_five_eqn_allaire; python3 convergence_test.py
+  build_HDF5:
+    working_directory: ~/mern-starter
+    docker:
+      - image: cimg/node:17.2.0 # Primary execution image
+        auth:
+          username: mydockerhub-user
+          password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
+      - image: mongo:3.4.4         # Service/dependency image
+        auth:
+          username: mydockerhub-user
+          password: $DOCKERHUB_PASSWORD  # context / project UI env-var
+    steps:
+      - checkout
+      - run:
+          name: "Setup custom environment variables"
+          command: HDF5_ROOT=${CIRCLE_WORKING_DIRECTORY}/hdf5
+      - run:
+          name: install_HDF5
+          command: sh circleci/install-hdf5.sh
