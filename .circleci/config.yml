@@ -71,7 +71,7 @@ jobs:
       - checkout
       - run:
           name: "Install libraries"
-          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev libboost-all-dev
+          command: sudo apt-get update && sudo apt-get install libboost-all-dev openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
       - run:
           name: "Check compiler"
           command: which mpicc; which mpicxx; which mpif77
@@ -168,7 +168,7 @@ jobs:
       - checkout
       - run:
           name: "Install libraries"
-          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
+          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev python3 python3-numpy
       - run:
           name: "Check compiler"
           command: which mpicc; which mpicxx; which mpif77
@@ -202,7 +202,7 @@ jobs:
       - checkout
       - run:
           name: "Install libraries"
-          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
+          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev python3 python3-numpy
       - run:
           name: "Check compiler"
           command: which mpicc; which mpicxx; which mpif77
@@ -236,7 +236,7 @@ jobs:
       - checkout
       - run:
           name: "Install libraries"
-          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
+          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev python3 python3-numpy
       - run:
           name: "Check compiler"
           command: which mpicc; which mpicxx; which mpif77
@@ -270,7 +270,7 @@ jobs:
       - checkout
       - run:
           name: "Install libraries"
-          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
+          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev python3 python3-numpy
       - run:
           name: "Check compiler"
           command: which mpicc; which mpicxx; which mpif77
