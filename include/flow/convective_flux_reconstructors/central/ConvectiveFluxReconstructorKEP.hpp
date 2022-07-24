@@ -186,7 +186,9 @@ class ConvectiveFluxReconstructorKEP: public ConvectiveFluxReconstructor
         /*
          * Options of the scheme.
          */
+        bool d_use_DRP4;
         int d_stencil_width;
+        int d_order;
         
         /*
          * Forms of equations.

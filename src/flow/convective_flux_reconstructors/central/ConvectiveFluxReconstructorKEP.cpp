@@ -25,10 +25,62 @@ ConvectiveFluxReconstructorKEP::ConvectiveFluxReconstructorKEP(
             flow_model,
             convective_flux_reconstructor_db)
 {
-    d_stencil_width = d_convective_flux_reconstructor_db->
-        getIntegerWithDefault("stencil_width", 3);
-    d_stencil_width = d_convective_flux_reconstructor_db->
-        getIntegerWithDefault("d_stencil_width", d_stencil_width);
+    d_use_DRP4 = d_convective_flux_reconstructor_db->
+        getBoolWithDefault("use_DRP4", false);
+    d_use_DRP4 = d_convective_flux_reconstructor_db->
+        getBoolWithDefault("d_use_DRP4", d_use_DRP4);
+    
+    if (d_use_DRP4)
+    {
+        d_stencil_width = d_convective_flux_reconstructor_db->
+            getIntegerWithDefault("stencil_width", 9);
+        d_stencil_width = d_convective_flux_reconstructor_db->
+            getIntegerWithDefault("d_stencil_width", d_stencil_width);
+        d_order = 4;
+        
+        if (d_stencil_width < 9 || d_stencil_width > 13)
+        {
+            TBOX_ERROR("ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch:"
+                " Only 9-point, 11-point, 13-point stencil KEP schemes are implemented!");
+        }
+    }
+    else
+    {
+        d_order = d_convective_flux_reconstructor_db->
+            getIntegerWithDefault("order", 2);
+        d_order = d_convective_flux_reconstructor_db->
+            getIntegerWithDefault("d_order", d_order);
+        
+        if (d_order == 2)
+        {
+            d_stencil_width = 3;
+        }
+        else if (d_order == 4)
+        {
+            d_stencil_width = 5;
+        }
+        else if (d_order == 6)
+        {
+            d_stencil_width = 7;
+        }
+        else if (d_order == 8)
+        {
+            d_stencil_width = 9;
+        }
+        else if (d_order == 10)
+        {
+            d_stencil_width = 11;
+        }
+        else if (d_order == 12)
+        {
+            d_stencil_width = 13;
+        }
+        else
+        {
+            TBOX_ERROR("ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch:"
+                " Only 3-point, 5-point, 7-point, 9-point, 11-point, 13-point stencil central schemes are implemented!");
+        }
+    }
     
     d_coef_a = double(0);
     d_coef_b = double(0);
@@ -37,61 +89,94 @@ ConvectiveFluxReconstructorKEP::ConvectiveFluxReconstructorKEP(
     d_coef_e = double(0);
     d_coef_f = double(0);
     
-    if (d_stencil_width == 3)
+    if (d_use_DRP4)
     {
-        d_num_conv_ghosts = hier::IntVector::getOne(d_dim);
-        
-        d_coef_a = double(1)/double(2);
-    }
-    else if (d_stencil_width == 5)
-    {
-        d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*2;
-        
-        d_coef_a =  double(2)/double(3);
-        d_coef_b = -double(1)/double(12);
-    }
-    else if (d_stencil_width == 7)
-    {
-        d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*3;
-        
-        d_coef_a =  double(3)/double(4);
-        d_coef_b = -double(3)/double(20);
-        d_coef_c =  double(1)/double(60);
-    }
-    else if (d_stencil_width == 9)
-    {
-        d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*4;
-        
-        d_coef_a =  double(4)/double(5);
-        d_coef_b = -double(1)/double(5);
-        d_coef_c =  double(4)/double(105);
-        d_coef_d = -double(1)/double(280);
-    }
-    else if (d_stencil_width == 11)
-    {
-        d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*5;
-        
-        d_coef_a =  double(5)/double(6);
-        d_coef_b = -double(5)/double(21);
-        d_coef_c =  double(5)/double(84);
-        d_coef_d = -double(5)/double(504);
-        d_coef_e =  double(1)/double(1260);
-    }
-    else if (d_stencil_width == 13)
-    {
-        d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*6;
-        
-        d_coef_a =  double(6)/double(7);
-        d_coef_b = -double(15)/double(56);
-        d_coef_c =  double(5)/double(63);
-        d_coef_d = -double(1)/double(56);
-        d_coef_e =  double(3)/double(1155);
-        d_coef_f = -double(1)/double(5544);
+        if (d_stencil_width == 9)
+        {
+            d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*4;
+            
+            d_coef_a = double( 0.841570125482);
+            d_coef_b = double(-0.244678631765);
+            d_coef_c = double( 0.059463584768);
+            d_coef_d = double(-0.007650904064);
+        }
+        else if (d_stencil_width == 11)
+        {
+            d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*5;
+            
+            d_coef_a = double( 0.872756993962);
+            d_coef_b = double(-0.286511173973);
+            d_coef_c = double( 0.090320001280);
+            d_coef_d = double(-0.020779405824);
+            d_coef_e = double( 0.002484594688);
+        }
+        else if (d_stencil_width == 13)
+        {
+            d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*6;
+            
+            d_coef_a = double( 0.907646591371);
+            d_coef_b = double(-0.337048393268);
+            d_coef_c = double( 0.133442885327);
+            d_coef_d = double(-0.045246480208);
+            d_coef_e = double( 0.011169294114);
+            d_coef_f = double(-0.001456501759);
+        }
     }
     else
     {
-        TBOX_ERROR("ConvectiveFluxReconstructorKEP::computeConvectiveFluxAndSourceOnPatch:"
-            " Only 3-point, 5-point, 7-point, 9-point, 11-point, 13-point stencil central schemes are implemented!");
+        // Use traditional central schemes.
+        
+        if (d_stencil_width == 3)
+        {
+            d_num_conv_ghosts = hier::IntVector::getOne(d_dim);
+            
+            d_coef_a = double(1)/double(2);
+        }
+        else if (d_stencil_width == 5)
+        {
+            d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*2;
+            
+            d_coef_a =  double(2)/double(3);
+            d_coef_b = -double(1)/double(12);
+        }
+        else if (d_stencil_width == 7)
+        {
+            d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*3;
+            
+            d_coef_a =  double(3)/double(4);
+            d_coef_b = -double(3)/double(20);
+            d_coef_c =  double(1)/double(60);
+        }
+        else if (d_stencil_width == 9)
+        {
+            d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*4;
+            
+            d_coef_a =  double(4)/double(5);
+            d_coef_b = -double(1)/double(5);
+            d_coef_c =  double(4)/double(105);
+            d_coef_d = -double(1)/double(280);
+        }
+        else if (d_stencil_width == 11)
+        {
+            d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*5;
+            
+            d_coef_a =  double(5)/double(6);
+            d_coef_b = -double(5)/double(21);
+            d_coef_c =  double(5)/double(84);
+            d_coef_d = -double(5)/double(504);
+            d_coef_e =  double(1)/double(1260);
+        }
+        else if (d_stencil_width == 13)
+        {
+            d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*6;
+            
+            d_coef_a =  double(6)/double(7);
+            d_coef_b = -double(15)/double(56);
+            d_coef_c =  double(5)/double(63);
+            d_coef_d = -double(1)/double(56);
+            d_coef_e =  double(3)/double(1155);
+            d_coef_f = -double(1)/double(5544);
+        }
     }
     
     d_eqn_form = d_flow_model->getEquationsForm();
@@ -151,7 +236,9 @@ void
 ConvectiveFluxReconstructorKEP::putToRestart(
    const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
+    restart_db->putBool("d_use_DRP4", d_use_DRP4);
     restart_db->putInteger("d_stencil_width", d_stencil_width);
+    restart_db->putInteger("d_order", d_order);
 }
 
 
@@ -1312,7 +1399,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                 const int idx_f_R = i     + num_ghosts_0_f;
                 
                 F_face_x[idx_face_x] += dt*(
-                    (d_coef_a*(f[idx_f_L] + f[idx_f_R])));
+                    d_coef_a*(f[idx_f_L] + f[idx_f_R]));
             }
         }
         else if (d_stencil_width == 5)
@@ -1332,8 +1419,8 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                 const int idx_f_RR = i + 1 + num_ghosts_0_f;
                 
                 F_face_x[idx_face_x] += dt*(
-                    (d_coef_a*(f[idx_f_L]  + f[idx_f_R] )) +
-                    (d_coef_b*(f[idx_f_LL] + f[idx_f_R] )  +
+                    d_coef_a*((f[idx_f_L]  + f[idx_f_R] )) +
+                    d_coef_b*((f[idx_f_LL] + f[idx_f_R] )  +
                               (f[idx_f_L]  + f[idx_f_RR])));
             }
         }
@@ -1356,10 +1443,10 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                 const int idx_f_RRR = i + 2 + num_ghosts_0_f;
                 
                 F_face_x[idx_face_x] += dt*(
-                    (d_coef_a*(f[idx_f_L]   + f[idx_f_R]  )) +
-                    (d_coef_b*(f[idx_f_LL]  + f[idx_f_R]  )  +
+                    d_coef_a*((f[idx_f_L]   + f[idx_f_R]  )) +
+                    d_coef_b*((f[idx_f_LL]  + f[idx_f_R]  )  +
                               (f[idx_f_L]   + f[idx_f_RR] )) +
-                    (d_coef_c*(f[idx_f_LLL] + f[idx_f_R]  )  +
+                    d_coef_c*((f[idx_f_LLL] + f[idx_f_R]  )  +
                               (f[idx_f_LL]  + f[idx_f_RR] )  +
                               (f[idx_f_L]   + f[idx_f_RRR])));
             }
@@ -1385,13 +1472,13 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                 const int idx_f_RRRR = i + 3 + num_ghosts_0_f;
                 
                 F_face_x[idx_face_x] += dt*(
-                    (d_coef_a*(f[idx_f_L]    + f[idx_f_R]   )) +
-                    (d_coef_b*(f[idx_f_LL]   + f[idx_f_R]   )  +
+                    d_coef_a*((f[idx_f_L]    + f[idx_f_R]   )) +
+                    d_coef_b*((f[idx_f_LL]   + f[idx_f_R]   )  +
                               (f[idx_f_L]    + f[idx_f_RR]  )) +
-                    (d_coef_c*(f[idx_f_LLL]  + f[idx_f_R]   )  +
+                    d_coef_c*((f[idx_f_LLL]  + f[idx_f_R]   )  +
                               (f[idx_f_LL]   + f[idx_f_RR]  )  +
                               (f[idx_f_L]    + f[idx_f_RRR] )) +
-                    (d_coef_d*(f[idx_f_LLLL] + f[idx_f_R]   )  +
+                    d_coef_d*((f[idx_f_LLLL] + f[idx_f_R]   )  +
                               (f[idx_f_LLL]  + f[idx_f_RR]  )  +
                               (f[idx_f_LL]   + f[idx_f_RRR] )  +
                               (f[idx_f_L]    + f[idx_f_RRRR])));
@@ -1420,17 +1507,17 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                 const int idx_f_RRRRR = i + 4 + num_ghosts_0_f;
                 
                 F_face_x[idx_face_x] += dt*(
-                    (d_coef_a*(f[idx_f_L]     + f[idx_f_R]    )) +
-                    (d_coef_b*(f[idx_f_LL]    + f[idx_f_R]    )  +
+                    d_coef_a*((f[idx_f_L]     + f[idx_f_R]    )) +
+                    d_coef_b*((f[idx_f_LL]    + f[idx_f_R]    )  +
                               (f[idx_f_L]     + f[idx_f_RR]   )) +
-                    (d_coef_c*(f[idx_f_LLL]   + f[idx_f_R]    )  +
+                    d_coef_c*((f[idx_f_LLL]   + f[idx_f_R]    )  +
                               (f[idx_f_LL]    + f[idx_f_RR]   )  +
                               (f[idx_f_L]     + f[idx_f_RRR]  )) +
-                    (d_coef_d*(f[idx_f_LLLL]  + f[idx_f_R]    )  +
+                    d_coef_d*((f[idx_f_LLLL]  + f[idx_f_R]    )  +
                               (f[idx_f_LLL]   + f[idx_f_RR]   )  +
                               (f[idx_f_LL]    + f[idx_f_RRR]  )  +
                               (f[idx_f_L]     + f[idx_f_RRRR] )) +
-                    (d_coef_e*(f[idx_f_LLLLL] + f[idx_f_R]    )  +
+                    d_coef_e*((f[idx_f_LLLLL] + f[idx_f_R]    )  +
                               (f[idx_f_LLLL]  + f[idx_f_RR]   )  +
                               (f[idx_f_LLL]   + f[idx_f_RRR]  )  +
                               (f[idx_f_LL]    + f[idx_f_RRRR] )  +
@@ -1462,22 +1549,22 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                 const int idx_f_RRRRRR = i + 5 + num_ghosts_0_f;
                 
                 F_face_x[idx_face_x] += dt*(
-                    (d_coef_a*(f[idx_f_L]      + f[idx_f_R]     )) +
-                    (d_coef_b*(f[idx_f_LL]     + f[idx_f_R]     )  +
+                    d_coef_a*((f[idx_f_L]      + f[idx_f_R]     )) +
+                    d_coef_b*((f[idx_f_LL]     + f[idx_f_R]     )  +
                               (f[idx_f_L]      + f[idx_f_RR]    )) +
-                    (d_coef_c*(f[idx_f_LLL]    + f[idx_f_R]     )  +
+                    d_coef_c*((f[idx_f_LLL]    + f[idx_f_R]     )  +
                               (f[idx_f_LL]     + f[idx_f_RR]    )  +
                               (f[idx_f_L]      + f[idx_f_RRR]   )) +
-                    (d_coef_d*(f[idx_f_LLLL]   + f[idx_f_R]     )  +
+                    d_coef_d*((f[idx_f_LLLL]   + f[idx_f_R]     )  +
                               (f[idx_f_LLL]    + f[idx_f_RR]    )  +
                               (f[idx_f_LL]     + f[idx_f_RRR]   )  +
                               (f[idx_f_L]      + f[idx_f_RRRR]  )) +
-                    (d_coef_e*(f[idx_f_LLLLL]  + f[idx_f_R]     )  +
+                    d_coef_e*((f[idx_f_LLLLL]  + f[idx_f_R]     )  +
                               (f[idx_f_LLLL]   + f[idx_f_RR]    )  +
                               (f[idx_f_LLL]    + f[idx_f_RRR]   )  +
                               (f[idx_f_LL]     + f[idx_f_RRRR]  )  +
                               (f[idx_f_L]      + f[idx_f_RRRRR] )) +
-                    (d_coef_f*(f[idx_f_LLLLLL] + f[idx_f_R]     )  +
+                    d_coef_f*((f[idx_f_LLLLLL] + f[idx_f_R]     )  +
                               (f[idx_f_LLLLL]  + f[idx_f_RR]    )  +
                               (f[idx_f_LLLL]   + f[idx_f_RRR]   )  +
                               (f[idx_f_LLL]    + f[idx_f_RRRR]  )  +
@@ -1522,7 +1609,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                         (j + num_ghosts_1_f)*ghostcell_dim_0_f;
                     
                     F_face_x[idx_face_x] += dt*(
-                        (d_coef_a*(f[idx_f_L] + f[idx_f_R])));
+                        d_coef_a*(f[idx_f_L] + f[idx_f_R]));
                 }
             }
         }
@@ -1551,8 +1638,8 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                         (j + num_ghosts_1_f)*ghostcell_dim_0_f;
                     
                     F_face_x[idx_face_x] += dt*(
-                        (d_coef_a*(f[idx_f_L]  + f[idx_f_R] )) +
-                        (d_coef_b*(f[idx_f_LL] + f[idx_f_R] )  +
+                        d_coef_a*((f[idx_f_L]  + f[idx_f_R] )) +
+                        d_coef_b*((f[idx_f_LL] + f[idx_f_R] )  +
                                   (f[idx_f_L]  + f[idx_f_RR])));
                 }
             }
@@ -1588,10 +1675,10 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                         (j + num_ghosts_1_f)*ghostcell_dim_0_f;
                     
                     F_face_x[idx_face_x] += dt*(
-                        (d_coef_a*(f[idx_f_L]   + f[idx_f_R]  )) +
-                        (d_coef_b*(f[idx_f_LL]  + f[idx_f_R]  )  +
+                        d_coef_a*((f[idx_f_L]   + f[idx_f_R]  )) +
+                        d_coef_b*((f[idx_f_LL]  + f[idx_f_R]  )  +
                                   (f[idx_f_L]   + f[idx_f_RR] )) +
-                        (d_coef_c*(f[idx_f_LLL] + f[idx_f_R]  )  +
+                        d_coef_c*((f[idx_f_LLL] + f[idx_f_R]  )  +
                                   (f[idx_f_LL]  + f[idx_f_RR] )  +
                                   (f[idx_f_L]   + f[idx_f_RRR])));
                 }
@@ -1634,13 +1721,13 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                         (j + num_ghosts_1_f)*ghostcell_dim_0_f;
                     
                     F_face_x[idx_face_x] += dt*(
-                        (d_coef_a*(f[idx_f_L]    + f[idx_f_R]   )) +
-                        (d_coef_b*(f[idx_f_LL]   + f[idx_f_R]   )  +
+                        d_coef_a*((f[idx_f_L]    + f[idx_f_R]   )) +
+                        d_coef_b*((f[idx_f_LL]   + f[idx_f_R]   )  +
                                   (f[idx_f_L]    + f[idx_f_RR]  )) +
-                        (d_coef_c*(f[idx_f_LLL]  + f[idx_f_R]   )  +
+                        d_coef_c*((f[idx_f_LLL]  + f[idx_f_R]   )  +
                                   (f[idx_f_LL]   + f[idx_f_RR]  )  +
                                   (f[idx_f_L]    + f[idx_f_RRR] )) +
-                        (d_coef_d*(f[idx_f_LLLL] + f[idx_f_R]   )  +
+                        d_coef_d*((f[idx_f_LLLL] + f[idx_f_R]   )  +
                                   (f[idx_f_LLL]  + f[idx_f_RR]  )  +
                                   (f[idx_f_LL]   + f[idx_f_RRR] )  +
                                   (f[idx_f_L]    + f[idx_f_RRRR])));
@@ -1690,17 +1777,17 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                         (j + num_ghosts_1_f)*ghostcell_dim_0_f;
                     
                     F_face_x[idx_face_x] += dt*(
-                        (d_coef_a*(f[idx_f_L]     + f[idx_f_R]    )) +
-                        (d_coef_b*(f[idx_f_LL]    + f[idx_f_R]    )  +
+                        d_coef_a*((f[idx_f_L]     + f[idx_f_R]    )) +
+                        d_coef_b*((f[idx_f_LL]    + f[idx_f_R]    )  +
                                   (f[idx_f_L]     + f[idx_f_RR]   )) +
-                        (d_coef_c*(f[idx_f_LLL]   + f[idx_f_R]    )  +
+                        d_coef_c*((f[idx_f_LLL]   + f[idx_f_R]    )  +
                                   (f[idx_f_LL]    + f[idx_f_RR]   )  +
                                   (f[idx_f_L]     + f[idx_f_RRR]  )) +
-                        (d_coef_d*(f[idx_f_LLLL]  + f[idx_f_R]    )  +
+                        d_coef_d*((f[idx_f_LLLL]  + f[idx_f_R]    )  +
                                   (f[idx_f_LLL]   + f[idx_f_RR]   )  +
                                   (f[idx_f_LL]    + f[idx_f_RRR]  )  +
                                   (f[idx_f_L]     + f[idx_f_RRRR] )) +
-                        (d_coef_e*(f[idx_f_LLLLL] + f[idx_f_R]    )  +
+                        d_coef_e*((f[idx_f_LLLLL] + f[idx_f_R]    )  +
                                   (f[idx_f_LLLL]  + f[idx_f_RR]   )  +
                                   (f[idx_f_LLL]   + f[idx_f_RRR]  )  +
                                   (f[idx_f_LL]    + f[idx_f_RRRR] )  +
@@ -1757,22 +1844,22 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                         (j + num_ghosts_1_f)*ghostcell_dim_0_f;
                     
                     F_face_x[idx_face_x] += dt*(
-                        (d_coef_a*(f[idx_f_L]      + f[idx_f_R]     )) +
-                        (d_coef_b*(f[idx_f_LL]     + f[idx_f_R]     )  +
+                        d_coef_a*((f[idx_f_L]      + f[idx_f_R]     )) +
+                        d_coef_b*((f[idx_f_LL]     + f[idx_f_R]     )  +
                                   (f[idx_f_L]      + f[idx_f_RR]    )) +
-                        (d_coef_c*(f[idx_f_LLL]    + f[idx_f_R]     )  +
+                        d_coef_c*((f[idx_f_LLL]    + f[idx_f_R]     )  +
                                   (f[idx_f_LL]     + f[idx_f_RR]    )  +
                                   (f[idx_f_L]      + f[idx_f_RRR]   )) +
-                        (d_coef_d*(f[idx_f_LLLL]   + f[idx_f_R]     )  +
+                        d_coef_d*((f[idx_f_LLLL]   + f[idx_f_R]     )  +
                                   (f[idx_f_LLL]    + f[idx_f_RR]    )  +
                                   (f[idx_f_LL]     + f[idx_f_RRR]   )  +
                                   (f[idx_f_L]      + f[idx_f_RRRR]  )) +
-                        (d_coef_e*(f[idx_f_LLLLL]  + f[idx_f_R]     )  +
+                        d_coef_e*((f[idx_f_LLLLL]  + f[idx_f_R]     )  +
                                   (f[idx_f_LLLL]   + f[idx_f_RR]    )  +
                                   (f[idx_f_LLL]    + f[idx_f_RRR]   )  +
                                   (f[idx_f_LL]     + f[idx_f_RRRR]  )  +
                                   (f[idx_f_L]      + f[idx_f_RRRRR] )) +
-                        (d_coef_f*(f[idx_f_LLLLLL] + f[idx_f_R]     )  +
+                        d_coef_f*((f[idx_f_LLLLLL] + f[idx_f_R]     )  +
                                   (f[idx_f_LLLLL]  + f[idx_f_RR]    )  +
                                   (f[idx_f_LLLL]   + f[idx_f_RRR]   )  +
                                   (f[idx_f_LLL]    + f[idx_f_RRRR]  )  +
@@ -1830,7 +1917,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                                 ghostcell_dim_1_f;
                         
                         F_face_x[idx_face_x] += dt*(
-                            (d_coef_a*(f[idx_f_L] + f[idx_f_R])));
+                            d_coef_a*(f[idx_f_L] + f[idx_f_R]));
                     }
                 }
             }
@@ -1873,8 +1960,8 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                                 ghostcell_dim_1_f;
                         
                         F_face_x[idx_face_x] += dt*(
-                            (d_coef_a*(f[idx_f_L]  + f[idx_f_R] )) +
-                            (d_coef_b*(f[idx_f_LL] + f[idx_f_R] )  +
+                            d_coef_a*((f[idx_f_L]  + f[idx_f_R] )) +
+                            d_coef_b*((f[idx_f_LL] + f[idx_f_R] )  +
                                       (f[idx_f_L]  + f[idx_f_RR])));
                     }
                 }
@@ -1928,10 +2015,10 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                                 ghostcell_dim_1_f;
                         
                         F_face_x[idx_face_x] += dt*(
-                            (d_coef_a*(f[idx_f_L]   + f[idx_f_R]  )) +
-                            (d_coef_b*(f[idx_f_LL]  + f[idx_f_R]  )  +
+                            d_coef_a*((f[idx_f_L]   + f[idx_f_R]  )) +
+                            d_coef_b*((f[idx_f_LL]  + f[idx_f_R]  )  +
                                       (f[idx_f_L]   + f[idx_f_RR] )) +
-                            (d_coef_c*(f[idx_f_LLL] + f[idx_f_R]  )  +
+                            d_coef_c*((f[idx_f_LLL] + f[idx_f_R]  )  +
                                       (f[idx_f_LL]  + f[idx_f_RR] )  +
                                       (f[idx_f_L]   + f[idx_f_RRR])));
                     }
@@ -1996,13 +2083,13 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                                 ghostcell_dim_1_f;
                         
                         F_face_x[idx_face_x] += dt*(
-                            (d_coef_a*(f[idx_f_L]    + f[idx_f_R]   )) +
-                            (d_coef_b*(f[idx_f_LL]   + f[idx_f_R]   )  +
+                            d_coef_a*((f[idx_f_L]    + f[idx_f_R]   )) +
+                            d_coef_b*((f[idx_f_LL]   + f[idx_f_R]   )  +
                                       (f[idx_f_L]    + f[idx_f_RR]  )) +
-                            (d_coef_c*(f[idx_f_LLL]  + f[idx_f_R]   )  +
+                            d_coef_c*((f[idx_f_LLL]  + f[idx_f_R]   )  +
                                       (f[idx_f_LL]   + f[idx_f_RR]  )  +
                                       (f[idx_f_L]    + f[idx_f_RRR] )) +
-                            (d_coef_d*(f[idx_f_LLLL] + f[idx_f_R]   )  +
+                            d_coef_d*((f[idx_f_LLLL] + f[idx_f_R]   )  +
                                       (f[idx_f_LLL]  + f[idx_f_RR]  )  +
                                       (f[idx_f_LL]   + f[idx_f_RRR] )  +
                                       (f[idx_f_L]    + f[idx_f_RRRR])));
@@ -2078,17 +2165,17 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                                 ghostcell_dim_1_f;
                         
                         F_face_x[idx_face_x] += dt*(
-                            (d_coef_a*(f[idx_f_L]     + f[idx_f_R]    )) +
-                            (d_coef_b*(f[idx_f_LL]    + f[idx_f_R]    )  +
+                            d_coef_a*((f[idx_f_L]     + f[idx_f_R]    )) +
+                            d_coef_b*((f[idx_f_LL]    + f[idx_f_R]    )  +
                                       (f[idx_f_L]     + f[idx_f_RR]   )) +
-                            (d_coef_c*(f[idx_f_LLL]   + f[idx_f_R]    )  +
+                            d_coef_c*((f[idx_f_LLL]   + f[idx_f_R]    )  +
                                       (f[idx_f_LL]    + f[idx_f_RR]   )  +
                                       (f[idx_f_L]     + f[idx_f_RRR]  )) +
-                            (d_coef_d*(f[idx_f_LLLL]  + f[idx_f_R]    )  +
+                            d_coef_d*((f[idx_f_LLLL]  + f[idx_f_R]    )  +
                                       (f[idx_f_LLL]   + f[idx_f_RR]   )  +
                                       (f[idx_f_LL]    + f[idx_f_RRR]  )  +
                                       (f[idx_f_L]     + f[idx_f_RRRR] )) +
-                            (d_coef_e*(f[idx_f_LLLLL] + f[idx_f_R]    )  +
+                            d_coef_e*((f[idx_f_LLLLL] + f[idx_f_R]    )  +
                                       (f[idx_f_LLLL]  + f[idx_f_RR]   )  +
                                       (f[idx_f_LLL]   + f[idx_f_RRR]  )  +
                                       (f[idx_f_LL]    + f[idx_f_RRRR] )  +
@@ -2175,22 +2262,22 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxX(
                                 ghostcell_dim_1_f;
                         
                         F_face_x[idx_face_x] += dt*(
-                            (d_coef_a*(f[idx_f_L]      + f[idx_f_R]     )) +
-                            (d_coef_b*(f[idx_f_LL]     + f[idx_f_R]     )  +
+                            d_coef_a*((f[idx_f_L]      + f[idx_f_R]     )) +
+                            d_coef_b*((f[idx_f_LL]     + f[idx_f_R]     )  +
                                       (f[idx_f_L]      + f[idx_f_RR]    )) +
-                            (d_coef_c*(f[idx_f_LLL]    + f[idx_f_R]     )  +
+                            d_coef_c*((f[idx_f_LLL]    + f[idx_f_R]     )  +
                                       (f[idx_f_LL]     + f[idx_f_RR]    )  +
                                       (f[idx_f_L]      + f[idx_f_RRR]   )) +
-                            (d_coef_d*(f[idx_f_LLLL]   + f[idx_f_R]     )  +
+                            d_coef_d*((f[idx_f_LLLL]   + f[idx_f_R]     )  +
                                       (f[idx_f_LLL]    + f[idx_f_RR]    )  +
                                       (f[idx_f_LL]     + f[idx_f_RRR]   )  +
                                       (f[idx_f_L]      + f[idx_f_RRRR]  )) +
-                            (d_coef_e*(f[idx_f_LLLLL]  + f[idx_f_R]     )  +
+                            d_coef_e*((f[idx_f_LLLLL]  + f[idx_f_R]     )  +
                                       (f[idx_f_LLLL]   + f[idx_f_RR]    )  +
                                       (f[idx_f_LLL]    + f[idx_f_RRR]   )  +
                                       (f[idx_f_LL]     + f[idx_f_RRRR]  )  +
                                       (f[idx_f_L]      + f[idx_f_RRRRR] )) +
-                            (d_coef_f*(f[idx_f_LLLLLL] + f[idx_f_R]     )  +
+                            d_coef_f*((f[idx_f_LLLLLL] + f[idx_f_R]     )  +
                                       (f[idx_f_LLLLL]  + f[idx_f_RR]    )  +
                                       (f[idx_f_LLLL]   + f[idx_f_RRR]   )  +
                                       (f[idx_f_LLL]    + f[idx_f_RRRR]  )  +
@@ -2276,8 +2363,8 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                 const int idx_g_L = i - 1 + num_ghosts_0_g;
                 const int idx_g_R = i     + num_ghosts_0_g;
                 
-                F_face_x[idx_face_x] += dt*(
-                    half*(d_coef_a*(f[idx_f_L] + f[idx_f_R])*(g[idx_g_L] + g[idx_g_R])));
+                F_face_x[idx_face_x] += dt*half*(
+                    d_coef_a*(f[idx_f_L] + f[idx_f_R])*(g[idx_g_L] + g[idx_g_R]));
             }
         }
         else if (d_stencil_width == 5)
@@ -2301,10 +2388,10 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                 const int idx_g_R  = i     + num_ghosts_0_g;
                 const int idx_g_RR = i + 1 + num_ghosts_0_g;
                 
-                F_face_x[idx_face_x] += dt*(
-                    half*(d_coef_a*(f[idx_f_L]  + f[idx_f_R] )*(g[idx_g_L]  + g[idx_g_R] )) +
-                    half*(d_coef_b*(f[idx_f_LL] + f[idx_f_R] )*(g[idx_g_LL] + g[idx_g_R] )  +
-                                   (f[idx_f_L]  + f[idx_f_RR])*(g[idx_g_L]  + g[idx_g_RR])));
+                F_face_x[idx_face_x] += dt*half*(
+                    d_coef_a*((f[idx_f_L]  + f[idx_f_R] )*(g[idx_g_L]  + g[idx_g_R] )) +
+                    d_coef_b*((f[idx_f_LL] + f[idx_f_R] )*(g[idx_g_LL] + g[idx_g_R] )  +
+                              (f[idx_f_L]  + f[idx_f_RR])*(g[idx_g_L]  + g[idx_g_RR])));
             }
         }
         else if (d_stencil_width == 7)
@@ -2332,13 +2419,13 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                 const int idx_g_RR  = i + 1 + num_ghosts_0_g;
                 const int idx_g_RRR = i + 2 + num_ghosts_0_g;
                 
-                F_face_x[idx_face_x] += dt*(
-                    half*(d_coef_a*(f[idx_f_L]   + f[idx_f_R]  )*(g[idx_g_L]   + g[idx_g_R]  )) +
-                    half*(d_coef_b*(f[idx_f_LL]  + f[idx_f_R]  )*(g[idx_g_LL]  + g[idx_g_R]  )  +
-                                   (f[idx_f_L]   + f[idx_f_RR] )*(g[idx_g_L]   + g[idx_g_RR] )) +
-                    half*(d_coef_c*(f[idx_f_LLL] + f[idx_f_R]  )*(g[idx_g_LLL] + g[idx_g_R]  )  +
-                                   (f[idx_f_LL]  + f[idx_f_RR] )*(g[idx_g_LL]  + g[idx_g_RR] )  +
-                                   (f[idx_f_L]   + f[idx_f_RRR])*(g[idx_g_L]   + g[idx_g_RRR])));
+                F_face_x[idx_face_x] += dt*half*(
+                    d_coef_a*((f[idx_f_L]   + f[idx_f_R]  )*(g[idx_g_L]   + g[idx_g_R]  )) +
+                    d_coef_b*((f[idx_f_LL]  + f[idx_f_R]  )*(g[idx_g_LL]  + g[idx_g_R]  )  +
+                              (f[idx_f_L]   + f[idx_f_RR] )*(g[idx_g_L]   + g[idx_g_RR] )) +
+                    d_coef_c*((f[idx_f_LLL] + f[idx_f_R]  )*(g[idx_g_LLL] + g[idx_g_R]  )  +
+                              (f[idx_f_LL]  + f[idx_f_RR] )*(g[idx_g_LL]  + g[idx_g_RR] )  +
+                              (f[idx_f_L]   + f[idx_f_RRR])*(g[idx_g_L]   + g[idx_g_RRR])));
             }
         }
         else if (d_stencil_width == 9)
@@ -2370,17 +2457,17 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                 const int idx_g_RRR  = i + 2 + num_ghosts_0_g;
                 const int idx_g_RRRR = i + 3 + num_ghosts_0_g;
                 
-                F_face_x[idx_face_x] += dt*(
-                    half*(d_coef_a*(f[idx_f_L]    + f[idx_f_R]   )*(g[idx_g_L]    + g[idx_g_R]   )) +
-                    half*(d_coef_b*(f[idx_f_LL]   + f[idx_f_R]   )*(g[idx_g_LL]   + g[idx_g_R]   )  +
-                                   (f[idx_f_L]    + f[idx_f_RR]  )*(g[idx_g_L]    + g[idx_g_RR]  )) +
-                    half*(d_coef_c*(f[idx_f_LLL]  + f[idx_f_R]   )*(g[idx_g_LLL]  + g[idx_g_R]   )  +
-                                   (f[idx_f_LL]   + f[idx_f_RR]  )*(g[idx_g_LL]   + g[idx_g_RR]  )  +
-                                   (f[idx_f_L]    + f[idx_f_RRR] )*(g[idx_g_L]    + g[idx_g_RRR] )) +
-                    half*(d_coef_d*(f[idx_f_LLLL] + f[idx_f_R]   )*(g[idx_g_LLLL] + g[idx_g_R]   )  +
-                                   (f[idx_f_LLL]  + f[idx_f_RR]  )*(g[idx_g_LLL]  + g[idx_g_RR]  )  +
-                                   (f[idx_f_LL]   + f[idx_f_RRR] )*(g[idx_g_LL]   + g[idx_g_RRR] )  +
-                                   (f[idx_f_L]    + f[idx_f_RRRR])*(g[idx_g_L]    + g[idx_g_RRRR])));
+                F_face_x[idx_face_x] += dt*half*(
+                    d_coef_a*((f[idx_f_L]    + f[idx_f_R]   )*(g[idx_g_L]    + g[idx_g_R]   )) +
+                    d_coef_b*((f[idx_f_LL]   + f[idx_f_R]   )*(g[idx_g_LL]   + g[idx_g_R]   )  +
+                              (f[idx_f_L]    + f[idx_f_RR]  )*(g[idx_g_L]    + g[idx_g_RR]  )) +
+                    d_coef_c*((f[idx_f_LLL]  + f[idx_f_R]   )*(g[idx_g_LLL]  + g[idx_g_R]   )  +
+                              (f[idx_f_LL]   + f[idx_f_RR]  )*(g[idx_g_LL]   + g[idx_g_RR]  )  +
+                              (f[idx_f_L]    + f[idx_f_RRR] )*(g[idx_g_L]    + g[idx_g_RRR] )) +
+                    d_coef_d*((f[idx_f_LLLL] + f[idx_f_R]   )*(g[idx_g_LLLL] + g[idx_g_R]   )  +
+                              (f[idx_f_LLL]  + f[idx_f_RR]  )*(g[idx_g_LLL]  + g[idx_g_RR]  )  +
+                              (f[idx_f_LL]   + f[idx_f_RRR] )*(g[idx_g_LL]   + g[idx_g_RRR] )  +
+                              (f[idx_f_L]    + f[idx_f_RRRR])*(g[idx_g_L]    + g[idx_g_RRRR])));
             }
         }
         else if (d_stencil_width == 11)
@@ -2416,22 +2503,22 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                 const int idx_g_RRRR  = i + 3 + num_ghosts_0_g;
                 const int idx_g_RRRRR = i + 4 + num_ghosts_0_g;
                 
-                F_face_x[idx_face_x] += dt*(
-                    half*(d_coef_a*(f[idx_f_L]     + f[idx_f_R]    )*(g[idx_g_L]     + g[idx_g_R]    )) +
-                    half*(d_coef_b*(f[idx_f_LL]    + f[idx_f_R]    )*(g[idx_g_LL]    + g[idx_g_R]    )  +
-                                   (f[idx_f_L]     + f[idx_f_RR]   )*(g[idx_g_L]     + g[idx_g_RR]   )) +
-                    half*(d_coef_c*(f[idx_f_LLL]   + f[idx_f_R]    )*(g[idx_g_LLL]   + g[idx_g_R]    )  +
-                                   (f[idx_f_LL]    + f[idx_f_RR]   )*(g[idx_g_LL]    + g[idx_g_RR]   )  +
-                                   (f[idx_f_L]     + f[idx_f_RRR]  )*(g[idx_g_L]     + g[idx_g_RRR]  )) +
-                    half*(d_coef_d*(f[idx_f_LLLL]  + f[idx_f_R]    )*(g[idx_g_LLLL]  + g[idx_g_R]    )  +
-                                   (f[idx_f_LLL]   + f[idx_f_RR]   )*(g[idx_g_LLL]   + g[idx_g_RR]   )  +
-                                   (f[idx_f_LL]    + f[idx_f_RRR]  )*(g[idx_g_LL]    + g[idx_g_RRR]  )  +
-                                   (f[idx_f_L]     + f[idx_f_RRRR] )*(g[idx_g_L]     + g[idx_g_RRRR] )) +
-                    half*(d_coef_e*(f[idx_f_LLLLL] + f[idx_f_R]    )*(g[idx_g_LLLLL] + g[idx_g_R]    )  +
-                                   (f[idx_f_LLLL]  + f[idx_f_RR]   )*(g[idx_g_LLLL]  + g[idx_g_RR]   )  +
-                                   (f[idx_f_LLL]   + f[idx_f_RRR]  )*(g[idx_g_LLL]   + g[idx_g_RRR]  )  +
-                                   (f[idx_f_LL]    + f[idx_f_RRRR] )*(g[idx_g_LL]    + g[idx_g_RRRR] )  +
-                                   (f[idx_f_L]     + f[idx_f_RRRRR])*(g[idx_g_L]     + g[idx_g_RRRRR])));
+                F_face_x[idx_face_x] += dt*half*(
+                    d_coef_a*((f[idx_f_L]     + f[idx_f_R]    )*(g[idx_g_L]     + g[idx_g_R]    )) +
+                    d_coef_b*((f[idx_f_LL]    + f[idx_f_R]    )*(g[idx_g_LL]    + g[idx_g_R]    )  +
+                              (f[idx_f_L]     + f[idx_f_RR]   )*(g[idx_g_L]     + g[idx_g_RR]   )) +
+                    d_coef_c*((f[idx_f_LLL]   + f[idx_f_R]    )*(g[idx_g_LLL]   + g[idx_g_R]    )  +
+                              (f[idx_f_LL]    + f[idx_f_RR]   )*(g[idx_g_LL]    + g[idx_g_RR]   )  +
+                              (f[idx_f_L]     + f[idx_f_RRR]  )*(g[idx_g_L]     + g[idx_g_RRR]  )) +
+                    d_coef_d*((f[idx_f_LLLL]  + f[idx_f_R]    )*(g[idx_g_LLLL]  + g[idx_g_R]    )  +
+                              (f[idx_f_LLL]   + f[idx_f_RR]   )*(g[idx_g_LLL]   + g[idx_g_RR]   )  +
+                              (f[idx_f_LL]    + f[idx_f_RRR]  )*(g[idx_g_LL]    + g[idx_g_RRR]  )  +
+                              (f[idx_f_L]     + f[idx_f_RRRR] )*(g[idx_g_L]     + g[idx_g_RRRR] )) +
+                    d_coef_e*((f[idx_f_LLLLL] + f[idx_f_R]    )*(g[idx_g_LLLLL] + g[idx_g_R]    )  +
+                              (f[idx_f_LLLL]  + f[idx_f_RR]   )*(g[idx_g_LLLL]  + g[idx_g_RR]   )  +
+                              (f[idx_f_LLL]   + f[idx_f_RRR]  )*(g[idx_g_LLL]   + g[idx_g_RRR]  )  +
+                              (f[idx_f_LL]    + f[idx_f_RRRR] )*(g[idx_g_LL]    + g[idx_g_RRRR] )  +
+                              (f[idx_f_L]     + f[idx_f_RRRRR])*(g[idx_g_L]     + g[idx_g_RRRRR])));
             }
         }
         else if (d_stencil_width == 13)
@@ -2471,28 +2558,28 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                 const int idx_g_RRRRR  = i + 4 + num_ghosts_0_g;
                 const int idx_g_RRRRRR = i + 5 + num_ghosts_0_g;
                 
-                F_face_x[idx_face_x] += dt*(
-                    half*(d_coef_a*(f[idx_f_L]      + f[idx_f_R]     )*(g[idx_g_L]      + g[idx_g_R]     )) +
-                    half*(d_coef_b*(f[idx_f_LL]     + f[idx_f_R]     )*(g[idx_g_LL]     + g[idx_g_R]     )  +
-                                   (f[idx_f_L]      + f[idx_f_RR]    )*(g[idx_g_L]      + g[idx_g_RR]    )) +
-                    half*(d_coef_c*(f[idx_f_LLL]    + f[idx_f_R]     )*(g[idx_g_LLL]    + g[idx_g_R]     )  +
-                                   (f[idx_f_LL]     + f[idx_f_RR]    )*(g[idx_g_LL]     + g[idx_g_RR]    )  +
-                                   (f[idx_f_L]      + f[idx_f_RRR]   )*(g[idx_g_L]      + g[idx_g_RRR]   )) +
-                    half*(d_coef_d*(f[idx_f_LLLL]   + f[idx_f_R]     )*(g[idx_g_LLLL]   + g[idx_g_R]     )  +
-                                   (f[idx_f_LLL]    + f[idx_f_RR]    )*(g[idx_g_LLL]    + g[idx_g_RR]    )  +
-                                   (f[idx_f_LL]     + f[idx_f_RRR]   )*(g[idx_g_LL]     + g[idx_g_RRR]   )  +
-                                   (f[idx_f_L]      + f[idx_f_RRRR]  )*(g[idx_g_L]      + g[idx_g_RRRR]  )) +
-                    half*(d_coef_e*(f[idx_f_LLLLL]  + f[idx_f_R]     )*(g[idx_g_LLLLL]  + g[idx_g_R]     )  +
-                                   (f[idx_f_LLLL]   + f[idx_f_RR]    )*(g[idx_g_LLLL]   + g[idx_g_RR]    )  +
-                                   (f[idx_f_LLL]    + f[idx_f_RRR]   )*(g[idx_g_LLL]    + g[idx_g_RRR]   )  +
-                                   (f[idx_f_LL]     + f[idx_f_RRRR]  )*(g[idx_g_LL]     + g[idx_g_RRRR]  )  +
-                                   (f[idx_f_L]      + f[idx_f_RRRRR] )*(g[idx_g_L]      + g[idx_g_RRRRR] )) +
-                    half*(d_coef_f*(f[idx_f_LLLLLL] + f[idx_f_R]     )*(g[idx_g_LLLLLL] + g[idx_g_R]     )  +
-                                   (f[idx_f_LLLLL]  + f[idx_f_RR]    )*(g[idx_g_LLLLL]  + g[idx_g_RR]    )  +
-                                   (f[idx_f_LLLL]   + f[idx_f_RRR]   )*(g[idx_g_LLLL]   + g[idx_g_RRR]   )  +
-                                   (f[idx_f_LLL]    + f[idx_f_RRRR]  )*(g[idx_g_LLL]    + g[idx_g_RRRR]  )  +
-                                   (f[idx_f_LL]     + f[idx_f_RRRRR] )*(g[idx_g_LL]     + g[idx_g_RRRRR] )  +
-                                   (f[idx_f_L]      + f[idx_f_RRRRRR])*(g[idx_g_L]      + g[idx_g_RRRRRR])));
+                F_face_x[idx_face_x] += dt*half*(
+                    d_coef_a*((f[idx_f_L]      + f[idx_f_R]     )*(g[idx_g_L]      + g[idx_g_R]     )) +
+                    d_coef_b*((f[idx_f_LL]     + f[idx_f_R]     )*(g[idx_g_LL]     + g[idx_g_R]     )  +
+                              (f[idx_f_L]      + f[idx_f_RR]    )*(g[idx_g_L]      + g[idx_g_RR]    )) +
+                    d_coef_c*((f[idx_f_LLL]    + f[idx_f_R]     )*(g[idx_g_LLL]    + g[idx_g_R]     )  +
+                              (f[idx_f_LL]     + f[idx_f_RR]    )*(g[idx_g_LL]     + g[idx_g_RR]    )  +
+                              (f[idx_f_L]      + f[idx_f_RRR]   )*(g[idx_g_L]      + g[idx_g_RRR]   )) +
+                    d_coef_d*((f[idx_f_LLLL]   + f[idx_f_R]     )*(g[idx_g_LLLL]   + g[idx_g_R]     )  +
+                              (f[idx_f_LLL]    + f[idx_f_RR]    )*(g[idx_g_LLL]    + g[idx_g_RR]    )  +
+                              (f[idx_f_LL]     + f[idx_f_RRR]   )*(g[idx_g_LL]     + g[idx_g_RRR]   )  +
+                              (f[idx_f_L]      + f[idx_f_RRRR]  )*(g[idx_g_L]      + g[idx_g_RRRR]  )) +
+                    d_coef_e*((f[idx_f_LLLLL]  + f[idx_f_R]     )*(g[idx_g_LLLLL]  + g[idx_g_R]     )  +
+                              (f[idx_f_LLLL]   + f[idx_f_RR]    )*(g[idx_g_LLLL]   + g[idx_g_RR]    )  +
+                              (f[idx_f_LLL]    + f[idx_f_RRR]   )*(g[idx_g_LLL]    + g[idx_g_RRR]   )  +
+                              (f[idx_f_LL]     + f[idx_f_RRRR]  )*(g[idx_g_LL]     + g[idx_g_RRRR]  )  +
+                              (f[idx_f_L]      + f[idx_f_RRRRR] )*(g[idx_g_L]      + g[idx_g_RRRRR] )) +
+                    d_coef_f*((f[idx_f_LLLLLL] + f[idx_f_R]     )*(g[idx_g_LLLLLL] + g[idx_g_R]     )  +
+                              (f[idx_f_LLLLL]  + f[idx_f_RR]    )*(g[idx_g_LLLLL]  + g[idx_g_RR]    )  +
+                              (f[idx_f_LLLL]   + f[idx_f_RRR]   )*(g[idx_g_LLLL]   + g[idx_g_RRR]   )  +
+                              (f[idx_f_LLL]    + f[idx_f_RRRR]  )*(g[idx_g_LLL]    + g[idx_g_RRRR]  )  +
+                              (f[idx_f_LL]     + f[idx_f_RRRRR] )*(g[idx_g_LL]     + g[idx_g_RRRRR] )  +
+                              (f[idx_f_L]      + f[idx_f_RRRRRR])*(g[idx_g_L]      + g[idx_g_RRRRRR])));
             }
         }
     }
@@ -2541,8 +2628,8 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                     const int idx_g_R = (i + num_ghosts_0_g) +
                         (j + num_ghosts_1_g)*ghostcell_dim_0_g;
                     
-                    F_face_x[idx_face_x] += dt*(
-                        half*(d_coef_a*(f[idx_f_L] + f[idx_f_R])*(g[idx_g_L] + g[idx_g_R])));
+                    F_face_x[idx_face_x] += dt*half*(
+                        d_coef_a*(f[idx_f_L] + f[idx_f_R])*(g[idx_g_L] + g[idx_g_R]));
                 }
             }
         }
@@ -2582,10 +2669,10 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                     const int idx_g_RR = (i + 1 + num_ghosts_0_g) +
                         (j + num_ghosts_1_g)*ghostcell_dim_0_g;
                     
-                    F_face_x[idx_face_x] += dt*(
-                        half*(d_coef_a*(f[idx_f_L]  + f[idx_f_R] )*(g[idx_g_L]  + g[idx_g_R] )) +
-                        half*(d_coef_b*(f[idx_f_LL] + f[idx_f_R] )*(g[idx_g_LL] + g[idx_g_R] )  +
-                                       (f[idx_f_L]  + f[idx_f_RR])*(g[idx_g_L]  + g[idx_g_RR])));
+                    F_face_x[idx_face_x] += dt*half*(
+                        d_coef_a*((f[idx_f_L]  + f[idx_f_R] )*(g[idx_g_L]  + g[idx_g_R] )) +
+                        d_coef_b*((f[idx_f_LL] + f[idx_f_R] )*(g[idx_g_LL] + g[idx_g_R] )  +
+                                  (f[idx_f_L]  + f[idx_f_RR])*(g[idx_g_L]  + g[idx_g_RR])));
                 }
             }
         }
@@ -2637,13 +2724,13 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                     const int idx_g_RRR = (i + 2 + num_ghosts_0_g) +
                         (j + num_ghosts_1_g)*ghostcell_dim_0_g;
                     
-                    F_face_x[idx_face_x] += dt*(
-                        half*(d_coef_a*(f[idx_f_L]   + f[idx_f_R]  )*(g[idx_g_L]   + g[idx_g_R]  )) +
-                        half*(d_coef_b*(f[idx_f_LL]  + f[idx_f_R]  )*(g[idx_g_LL]  + g[idx_g_R]  )  +
-                                       (f[idx_f_L]   + f[idx_f_RR] )*(g[idx_g_L]   + g[idx_g_RR] )) +
-                        half*(d_coef_c*(f[idx_f_LLL] + f[idx_f_R]  )*(g[idx_g_LLL] + g[idx_g_R]  )  +
-                                       (f[idx_f_LL]  + f[idx_f_RR] )*(g[idx_g_LL]  + g[idx_g_RR] )  +
-                                       (f[idx_f_L]   + f[idx_f_RRR])*(g[idx_g_L]   + g[idx_g_RRR])));
+                    F_face_x[idx_face_x] += dt*half*(
+                        d_coef_a*((f[idx_f_L]   + f[idx_f_R]  )*(g[idx_g_L]   + g[idx_g_R]  )) +
+                        d_coef_b*((f[idx_f_LL]  + f[idx_f_R]  )*(g[idx_g_LL]  + g[idx_g_R]  )  +
+                                  (f[idx_f_L]   + f[idx_f_RR] )*(g[idx_g_L]   + g[idx_g_RR] )) +
+                        d_coef_c*((f[idx_f_LLL] + f[idx_f_R]  )*(g[idx_g_LLL] + g[idx_g_R]  )  +
+                                  (f[idx_f_LL]  + f[idx_f_RR] )*(g[idx_g_LL]  + g[idx_g_RR] )  +
+                                  (f[idx_f_L]   + f[idx_f_RRR])*(g[idx_g_L]   + g[idx_g_RRR])));
                 }
             }
         }
@@ -2707,17 +2794,17 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                     const int idx_g_RRRR = (i + 3 + num_ghosts_0_g) +
                         (j + num_ghosts_1_g)*ghostcell_dim_0_g;
                     
-                    F_face_x[idx_face_x] += dt*(
-                        half*(d_coef_a*(f[idx_f_L]    + f[idx_f_R]   )*(g[idx_g_L]    + g[idx_g_R]   )) +
-                        half*(d_coef_b*(f[idx_f_LL]   + f[idx_f_R]   )*(g[idx_g_LL]   + g[idx_g_R]   )  +
-                                       (f[idx_f_L]    + f[idx_f_RR]  )*(g[idx_g_L]    + g[idx_g_RR]  )) +
-                        half*(d_coef_c*(f[idx_f_LLL]  + f[idx_f_R]   )*(g[idx_g_LLL]  + g[idx_g_R]   )  +
-                                       (f[idx_f_LL]   + f[idx_f_RR]  )*(g[idx_g_LL]   + g[idx_g_RR]  )  +
-                                       (f[idx_f_L]    + f[idx_f_RRR] )*(g[idx_g_L]    + g[idx_g_RRR] )) +
-                        half*(d_coef_d*(f[idx_f_LLLL] + f[idx_f_R]   )*(g[idx_g_LLLL] + g[idx_g_R]   )  +
-                                       (f[idx_f_LLL]  + f[idx_f_RR]  )*(g[idx_g_LLL]  + g[idx_g_RR]  )  +
-                                       (f[idx_f_LL]   + f[idx_f_RRR] )*(g[idx_g_LL]   + g[idx_g_RRR] )  +
-                                       (f[idx_f_L]    + f[idx_f_RRRR])*(g[idx_g_L]    + g[idx_g_RRRR])));
+                    F_face_x[idx_face_x] += dt*half*(
+                        d_coef_a*((f[idx_f_L]    + f[idx_f_R]   )*(g[idx_g_L]    + g[idx_g_R]   )) +
+                        d_coef_b*((f[idx_f_LL]   + f[idx_f_R]   )*(g[idx_g_LL]   + g[idx_g_R]   )  +
+                                  (f[idx_f_L]    + f[idx_f_RR]  )*(g[idx_g_L]    + g[idx_g_RR]  )) +
+                        d_coef_c*((f[idx_f_LLL]  + f[idx_f_R]   )*(g[idx_g_LLL]  + g[idx_g_R]   )  +
+                                  (f[idx_f_LL]   + f[idx_f_RR]  )*(g[idx_g_LL]   + g[idx_g_RR]  )  +
+                                  (f[idx_f_L]    + f[idx_f_RRR] )*(g[idx_g_L]    + g[idx_g_RRR] )) +
+                        d_coef_d*((f[idx_f_LLLL] + f[idx_f_R]   )*(g[idx_g_LLLL] + g[idx_g_R]   )  +
+                                  (f[idx_f_LLL]  + f[idx_f_RR]  )*(g[idx_g_LLL]  + g[idx_g_RR]  )  +
+                                  (f[idx_f_LL]   + f[idx_f_RRR] )*(g[idx_g_LL]   + g[idx_g_RRR] )  +
+                                  (f[idx_f_L]    + f[idx_f_RRRR])*(g[idx_g_L]    + g[idx_g_RRRR])));
                 }
             }
         }
@@ -2793,22 +2880,22 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                     const int idx_g_RRRRR = (i + 4 + num_ghosts_0_g) +
                         (j + num_ghosts_1_g)*ghostcell_dim_0_g;
                     
-                    F_face_x[idx_face_x] += dt*(
-                        half*(d_coef_a*(f[idx_f_L]     + f[idx_f_R]    )*(g[idx_g_L]     + g[idx_g_R]    )) +
-                        half*(d_coef_b*(f[idx_f_LL]    + f[idx_f_R]    )*(g[idx_g_LL]    + g[idx_g_R]    )  +
-                                       (f[idx_f_L]     + f[idx_f_RR]   )*(g[idx_g_L]     + g[idx_g_RR]   )) +
-                        half*(d_coef_c*(f[idx_f_LLL]   + f[idx_f_R]    )*(g[idx_g_LLL]   + g[idx_g_R]    )  +
-                                       (f[idx_f_LL]    + f[idx_f_RR]   )*(g[idx_g_LL]    + g[idx_g_RR]   )  +
-                                       (f[idx_f_L]     + f[idx_f_RRR]  )*(g[idx_g_L]     + g[idx_g_RRR]  )) +
-                        half*(d_coef_d*(f[idx_f_LLLL]  + f[idx_f_R]    )*(g[idx_g_LLLL]  + g[idx_g_R]    )  +
-                                       (f[idx_f_LLL]   + f[idx_f_RR]   )*(g[idx_g_LLL]   + g[idx_g_RR]   )  +
-                                       (f[idx_f_LL]    + f[idx_f_RRR]  )*(g[idx_g_LL]    + g[idx_g_RRR]  )  +
-                                       (f[idx_f_L]     + f[idx_f_RRRR] )*(g[idx_g_L]     + g[idx_g_RRRR] )) +
-                        half*(d_coef_e*(f[idx_f_LLLLL] + f[idx_f_R]    )*(g[idx_g_LLLLL] + g[idx_g_R]    )  +
-                                       (f[idx_f_LLLL]  + f[idx_f_RR]   )*(g[idx_g_LLLL]  + g[idx_g_RR]   )  +
-                                       (f[idx_f_LLL]   + f[idx_f_RRR]  )*(g[idx_g_LLL]   + g[idx_g_RRR]  )  +
-                                       (f[idx_f_LL]    + f[idx_f_RRRR] )*(g[idx_g_LL]    + g[idx_g_RRRR] )  +
-                                       (f[idx_f_L]     + f[idx_f_RRRRR])*(g[idx_g_L]     + g[idx_g_RRRRR])));
+                    F_face_x[idx_face_x] += dt*half*(
+                        d_coef_a*((f[idx_f_L]     + f[idx_f_R]    )*(g[idx_g_L]     + g[idx_g_R]    )) +
+                        d_coef_b*((f[idx_f_LL]    + f[idx_f_R]    )*(g[idx_g_LL]    + g[idx_g_R]    )  +
+                                  (f[idx_f_L]     + f[idx_f_RR]   )*(g[idx_g_L]     + g[idx_g_RR]   )) +
+                        d_coef_c*((f[idx_f_LLL]   + f[idx_f_R]    )*(g[idx_g_LLL]   + g[idx_g_R]    )  +
+                                  (f[idx_f_LL]    + f[idx_f_RR]   )*(g[idx_g_LL]    + g[idx_g_RR]   )  +
+                                  (f[idx_f_L]     + f[idx_f_RRR]  )*(g[idx_g_L]     + g[idx_g_RRR]  )) +
+                        d_coef_d*((f[idx_f_LLLL]  + f[idx_f_R]    )*(g[idx_g_LLLL]  + g[idx_g_R]    )  +
+                                  (f[idx_f_LLL]   + f[idx_f_RR]   )*(g[idx_g_LLL]   + g[idx_g_RR]   )  +
+                                  (f[idx_f_LL]    + f[idx_f_RRR]  )*(g[idx_g_LL]    + g[idx_g_RRR]  )  +
+                                  (f[idx_f_L]     + f[idx_f_RRRR] )*(g[idx_g_L]     + g[idx_g_RRRR] )) +
+                        d_coef_e*((f[idx_f_LLLLL] + f[idx_f_R]    )*(g[idx_g_LLLLL] + g[idx_g_R]    )  +
+                                  (f[idx_f_LLLL]  + f[idx_f_RR]   )*(g[idx_g_LLLL]  + g[idx_g_RR]   )  +
+                                  (f[idx_f_LLL]   + f[idx_f_RRR]  )*(g[idx_g_LLL]   + g[idx_g_RRR]  )  +
+                                  (f[idx_f_LL]    + f[idx_f_RRRR] )*(g[idx_g_LL]    + g[idx_g_RRRR] )  +
+                                  (f[idx_f_L]     + f[idx_f_RRRRR])*(g[idx_g_L]     + g[idx_g_RRRRR])));
                 }
             }
         }
@@ -2896,28 +2983,28 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                     const int idx_g_RRRRRR = (i + 5 + num_ghosts_0_g) +
                         (j + num_ghosts_1_g)*ghostcell_dim_0_g;
                     
-                    F_face_x[idx_face_x] += dt*(
-                        half*(d_coef_a*(f[idx_f_L]      + f[idx_f_R]     )*(g[idx_g_L]      + g[idx_g_R]     )) +
-                        half*(d_coef_b*(f[idx_f_LL]     + f[idx_f_R]     )*(g[idx_g_LL]     + g[idx_g_R]     )  +
-                                       (f[idx_f_L]      + f[idx_f_RR]    )*(g[idx_g_L]      + g[idx_g_RR]    )) +
-                        half*(d_coef_c*(f[idx_f_LLL]    + f[idx_f_R]     )*(g[idx_g_LLL]    + g[idx_g_R]     )  +
-                                       (f[idx_f_LL]     + f[idx_f_RR]    )*(g[idx_g_LL]     + g[idx_g_RR]    )  +
-                                       (f[idx_f_L]      + f[idx_f_RRR]   )*(g[idx_g_L]      + g[idx_g_RRR]   )) +
-                        half*(d_coef_d*(f[idx_f_LLLL]   + f[idx_f_R]     )*(g[idx_g_LLLL]   + g[idx_g_R]     )  +
-                                       (f[idx_f_LLL]    + f[idx_f_RR]    )*(g[idx_g_LLL]    + g[idx_g_RR]    )  +
-                                       (f[idx_f_LL]     + f[idx_f_RRR]   )*(g[idx_g_LL]     + g[idx_g_RRR]   )  +
-                                       (f[idx_f_L]      + f[idx_f_RRRR]  )*(g[idx_g_L]      + g[idx_g_RRRR]  )) +
-                        half*(d_coef_e*(f[idx_f_LLLLL]  + f[idx_f_R]     )*(g[idx_g_LLLLL]  + g[idx_g_R]     )  +
-                                       (f[idx_f_LLLL]   + f[idx_f_RR]    )*(g[idx_g_LLLL]   + g[idx_g_RR]    )  +
-                                       (f[idx_f_LLL]    + f[idx_f_RRR]   )*(g[idx_g_LLL]    + g[idx_g_RRR]   )  +
-                                       (f[idx_f_LL]     + f[idx_f_RRRR]  )*(g[idx_g_LL]     + g[idx_g_RRRR]  )  +
-                                       (f[idx_f_L]      + f[idx_f_RRRRR] )*(g[idx_g_L]      + g[idx_g_RRRRR] )) +
-                        half*(d_coef_f*(f[idx_f_LLLLLL] + f[idx_f_R]     )*(g[idx_g_LLLLLL] + g[idx_g_R]     )  +
-                                       (f[idx_f_LLLLL]  + f[idx_f_RR]    )*(g[idx_g_LLLLL]  + g[idx_g_RR]    )  +
-                                       (f[idx_f_LLLL]   + f[idx_f_RRR]   )*(g[idx_g_LLLL]   + g[idx_g_RRR]   )  +
-                                       (f[idx_f_LLL]    + f[idx_f_RRRR]  )*(g[idx_g_LLL]    + g[idx_g_RRRR]  )  +
-                                       (f[idx_f_LL]     + f[idx_f_RRRRR] )*(g[idx_g_LL]     + g[idx_g_RRRRR] )  +
-                                       (f[idx_f_L]      + f[idx_f_RRRRRR])*(g[idx_g_L]      + g[idx_g_RRRRRR])));
+                    F_face_x[idx_face_x] += dt*half*(
+                        d_coef_a*((f[idx_f_L]      + f[idx_f_R]     )*(g[idx_g_L]      + g[idx_g_R]     )) +
+                        d_coef_b*((f[idx_f_LL]     + f[idx_f_R]     )*(g[idx_g_LL]     + g[idx_g_R]     )  +
+                                  (f[idx_f_L]      + f[idx_f_RR]    )*(g[idx_g_L]      + g[idx_g_RR]    )) +
+                        d_coef_c*((f[idx_f_LLL]    + f[idx_f_R]     )*(g[idx_g_LLL]    + g[idx_g_R]     )  +
+                                  (f[idx_f_LL]     + f[idx_f_RR]    )*(g[idx_g_LL]     + g[idx_g_RR]    )  +
+                                  (f[idx_f_L]      + f[idx_f_RRR]   )*(g[idx_g_L]      + g[idx_g_RRR]   )) +
+                        d_coef_d*((f[idx_f_LLLL]   + f[idx_f_R]     )*(g[idx_g_LLLL]   + g[idx_g_R]     )  +
+                                  (f[idx_f_LLL]    + f[idx_f_RR]    )*(g[idx_g_LLL]    + g[idx_g_RR]    )  +
+                                  (f[idx_f_LL]     + f[idx_f_RRR]   )*(g[idx_g_LL]     + g[idx_g_RRR]   )  +
+                                  (f[idx_f_L]      + f[idx_f_RRRR]  )*(g[idx_g_L]      + g[idx_g_RRRR]  )) +
+                        d_coef_e*((f[idx_f_LLLLL]  + f[idx_f_R]     )*(g[idx_g_LLLLL]  + g[idx_g_R]     )  +
+                                  (f[idx_f_LLLL]   + f[idx_f_RR]    )*(g[idx_g_LLLL]   + g[idx_g_RR]    )  +
+                                  (f[idx_f_LLL]    + f[idx_f_RRR]   )*(g[idx_g_LLL]    + g[idx_g_RRR]   )  +
+                                  (f[idx_f_LL]     + f[idx_f_RRRR]  )*(g[idx_g_LL]     + g[idx_g_RRRR]  )  +
+                                  (f[idx_f_L]      + f[idx_f_RRRRR] )*(g[idx_g_L]      + g[idx_g_RRRRR] )) +
+                        d_coef_f*((f[idx_f_LLLLLL] + f[idx_f_R]     )*(g[idx_g_LLLLLL] + g[idx_g_R]     )  +
+                                  (f[idx_f_LLLLL]  + f[idx_f_RR]    )*(g[idx_g_LLLLL]  + g[idx_g_RR]    )  +
+                                  (f[idx_f_LLLL]   + f[idx_f_RRR]   )*(g[idx_g_LLLL]   + g[idx_g_RRR]   )  +
+                                  (f[idx_f_LLL]    + f[idx_f_RRRR]  )*(g[idx_g_LLL]    + g[idx_g_RRRR]  )  +
+                                  (f[idx_f_LL]     + f[idx_f_RRRRR] )*(g[idx_g_LL]     + g[idx_g_RRRRR] )  +
+                                  (f[idx_f_L]      + f[idx_f_RRRRRR])*(g[idx_g_L]      + g[idx_g_RRRRRR])));
                 }
             }
         }
@@ -2985,8 +3072,8 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_x[idx_face_x] += dt*(
-                            half*(d_coef_a*(f[idx_f_L] + f[idx_f_R])*(g[idx_g_L] + g[idx_g_R])));
+                        F_face_x[idx_face_x] += dt*half*(
+                            d_coef_a*(f[idx_f_L] + f[idx_f_R])*(g[idx_g_L] + g[idx_g_R]));
                     }
                 }
             }
@@ -3048,10 +3135,10 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_x[idx_face_x] += dt*(
-                            half*(d_coef_a*(f[idx_f_L]  + f[idx_f_R] )*(g[idx_g_L]  + g[idx_g_R] )) +
-                            half*(d_coef_b*(f[idx_f_LL] + f[idx_f_R] )*(g[idx_g_LL] + g[idx_g_R] )  +
-                                           (f[idx_f_L]  + f[idx_f_RR])*(g[idx_g_L]  + g[idx_g_RR])));
+                        F_face_x[idx_face_x] += dt*half*(
+                            d_coef_a*((f[idx_f_L]  + f[idx_f_R] )*(g[idx_g_L]  + g[idx_g_R] )) +
+                            d_coef_b*((f[idx_f_LL] + f[idx_f_R] )*(g[idx_g_LL] + g[idx_g_R] )  +
+                                      (f[idx_f_L]  + f[idx_f_RR])*(g[idx_g_L]  + g[idx_g_RR])));
                     }
                 }
             }
@@ -3133,13 +3220,13 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_x[idx_face_x] += dt*(
-                            half*(d_coef_a*(f[idx_f_L]   + f[idx_f_R]  )*(g[idx_g_L]   + g[idx_g_R]  )) +
-                            half*(d_coef_b*(f[idx_f_LL]  + f[idx_f_R]  )*(g[idx_g_LL]  + g[idx_g_R]  )  +
-                                           (f[idx_f_L]   + f[idx_f_RR] )*(g[idx_g_L]   + g[idx_g_RR] )) +
-                            half*(d_coef_c*(f[idx_f_LLL] + f[idx_f_R]  )*(g[idx_g_LLL] + g[idx_g_R]  )  +
-                                           (f[idx_f_LL]  + f[idx_f_RR] )*(g[idx_g_LL]  + g[idx_g_RR] )  +
-                                           (f[idx_f_L]   + f[idx_f_RRR])*(g[idx_g_L]   + g[idx_g_RRR])));
+                        F_face_x[idx_face_x] += dt*half*(
+                            d_coef_a*((f[idx_f_L]   + f[idx_f_R]  )*(g[idx_g_L]   + g[idx_g_R]  )) +
+                            d_coef_b*((f[idx_f_LL]  + f[idx_f_R]  )*(g[idx_g_LL]  + g[idx_g_R]  )  +
+                                      (f[idx_f_L]   + f[idx_f_RR] )*(g[idx_g_L]   + g[idx_g_RR] )) +
+                            d_coef_c*((f[idx_f_LLL] + f[idx_f_R]  )*(g[idx_g_LLL] + g[idx_g_R]  )  +
+                                      (f[idx_f_LL]  + f[idx_f_RR] )*(g[idx_g_LL]  + g[idx_g_RR] )  +
+                                      (f[idx_f_L]   + f[idx_f_RRR])*(g[idx_g_L]   + g[idx_g_RRR])));
                     }
                 }
             }
@@ -3241,17 +3328,17 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_x[idx_face_x] += dt*(
-                            half*(d_coef_a*(f[idx_f_L]    + f[idx_f_R]   )*(g[idx_g_L]    + g[idx_g_R]   )) +
-                            half*(d_coef_b*(f[idx_f_LL]   + f[idx_f_R]   )*(g[idx_g_LL]   + g[idx_g_R]   )  +
-                                           (f[idx_f_L]    + f[idx_f_RR]  )*(g[idx_g_L]    + g[idx_g_RR]  )) +
-                            half*(d_coef_c*(f[idx_f_LLL]  + f[idx_f_R]   )*(g[idx_g_LLL]  + g[idx_g_R]   )  +
-                                           (f[idx_f_LL]   + f[idx_f_RR]  )*(g[idx_g_LL]   + g[idx_g_RR]  )  +
-                                           (f[idx_f_L]    + f[idx_f_RRR] )*(g[idx_g_L]    + g[idx_g_RRR] )) +
-                            half*(d_coef_d*(f[idx_f_LLLL] + f[idx_f_R]   )*(g[idx_g_LLLL] + g[idx_g_R]   )  +
-                                           (f[idx_f_LLL]  + f[idx_f_RR]  )*(g[idx_g_LLL]  + g[idx_g_RR]  )  +
-                                           (f[idx_f_LL]   + f[idx_f_RRR] )*(g[idx_g_LL]   + g[idx_g_RRR] )  +
-                                           (f[idx_f_L]    + f[idx_f_RRRR])*(g[idx_g_L]    + g[idx_g_RRRR])));
+                        F_face_x[idx_face_x] += dt*half*(
+                            d_coef_a*((f[idx_f_L]    + f[idx_f_R]   )*(g[idx_g_L]    + g[idx_g_R]   )) +
+                            d_coef_b*((f[idx_f_LL]   + f[idx_f_R]   )*(g[idx_g_LL]   + g[idx_g_R]   )  +
+                                      (f[idx_f_L]    + f[idx_f_RR]  )*(g[idx_g_L]    + g[idx_g_RR]  )) +
+                            d_coef_c*((f[idx_f_LLL]  + f[idx_f_R]   )*(g[idx_g_LLL]  + g[idx_g_R]   )  +
+                                      (f[idx_f_LL]   + f[idx_f_RR]  )*(g[idx_g_LL]   + g[idx_g_RR]  )  +
+                                      (f[idx_f_L]    + f[idx_f_RRR] )*(g[idx_g_L]    + g[idx_g_RRR] )) +
+                            d_coef_d*((f[idx_f_LLLL] + f[idx_f_R]   )*(g[idx_g_LLLL] + g[idx_g_R]   )  +
+                                      (f[idx_f_LLL]  + f[idx_f_RR]  )*(g[idx_g_LLL]  + g[idx_g_RR]  )  +
+                                      (f[idx_f_LL]   + f[idx_f_RRR] )*(g[idx_g_LL]   + g[idx_g_RRR] )  +
+                                      (f[idx_f_L]    + f[idx_f_RRRR])*(g[idx_g_L]    + g[idx_g_RRRR])));
                     }
                 }
             }
@@ -3373,22 +3460,22 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_x[idx_face_x] += dt*(
-                            half*(d_coef_a*(f[idx_f_L]     + f[idx_f_R]    )*(g[idx_g_L]     + g[idx_g_R]    )) +
-                            half*(d_coef_b*(f[idx_f_LL]    + f[idx_f_R]    )*(g[idx_g_LL]    + g[idx_g_R]    )  +
-                                           (f[idx_f_L]     + f[idx_f_RR]   )*(g[idx_g_L]     + g[idx_g_RR]   )) +
-                            half*(d_coef_c*(f[idx_f_LLL]   + f[idx_f_R]    )*(g[idx_g_LLL]   + g[idx_g_R]    )  +
-                                           (f[idx_f_LL]    + f[idx_f_RR]   )*(g[idx_g_LL]    + g[idx_g_RR]   )  +
-                                           (f[idx_f_L]     + f[idx_f_RRR]  )*(g[idx_g_L]     + g[idx_g_RRR]  )) +
-                            half*(d_coef_d*(f[idx_f_LLLL]  + f[idx_f_R]    )*(g[idx_g_LLLL]  + g[idx_g_R]    )  +
-                                           (f[idx_f_LLL]   + f[idx_f_RR]   )*(g[idx_g_LLL]   + g[idx_g_RR]   )  +
-                                           (f[idx_f_LL]    + f[idx_f_RRR]  )*(g[idx_g_LL]    + g[idx_g_RRR]  )  +
-                                           (f[idx_f_L]     + f[idx_f_RRRR] )*(g[idx_g_L]     + g[idx_g_RRRR] )) +
-                            half*(d_coef_e*(f[idx_f_LLLLL] + f[idx_f_R]    )*(g[idx_g_LLLLL] + g[idx_g_R]    )  +
-                                           (f[idx_f_LLLL]  + f[idx_f_RR]   )*(g[idx_g_LLLL]  + g[idx_g_RR]   )  +
-                                           (f[idx_f_LLL]   + f[idx_f_RRR]  )*(g[idx_g_LLL]   + g[idx_g_RRR]  )  +
-                                           (f[idx_f_LL]    + f[idx_f_RRRR] )*(g[idx_g_LL]    + g[idx_g_RRRR] )  +
-                                           (f[idx_f_L]     + f[idx_f_RRRRR])*(g[idx_g_L]     + g[idx_g_RRRRR])));
+                        F_face_x[idx_face_x] += dt*half*(
+                            d_coef_a*((f[idx_f_L]     + f[idx_f_R]    )*(g[idx_g_L]     + g[idx_g_R]    )) +
+                            d_coef_b*((f[idx_f_LL]    + f[idx_f_R]    )*(g[idx_g_LL]    + g[idx_g_R]    )  +
+                                      (f[idx_f_L]     + f[idx_f_RR]   )*(g[idx_g_L]     + g[idx_g_RR]   )) +
+                            d_coef_c*((f[idx_f_LLL]   + f[idx_f_R]    )*(g[idx_g_LLL]   + g[idx_g_R]    )  +
+                                      (f[idx_f_LL]    + f[idx_f_RR]   )*(g[idx_g_LL]    + g[idx_g_RR]   )  +
+                                      (f[idx_f_L]     + f[idx_f_RRR]  )*(g[idx_g_L]     + g[idx_g_RRR]  )) +
+                            d_coef_d*((f[idx_f_LLLL]  + f[idx_f_R]    )*(g[idx_g_LLLL]  + g[idx_g_R]    )  +
+                                      (f[idx_f_LLL]   + f[idx_f_RR]   )*(g[idx_g_LLL]   + g[idx_g_RR]   )  +
+                                      (f[idx_f_LL]    + f[idx_f_RRR]  )*(g[idx_g_LL]    + g[idx_g_RRR]  )  +
+                                      (f[idx_f_L]     + f[idx_f_RRRR] )*(g[idx_g_L]     + g[idx_g_RRRR] )) +
+                            d_coef_e*((f[idx_f_LLLLL] + f[idx_f_R]    )*(g[idx_g_LLLLL] + g[idx_g_R]    )  +
+                                      (f[idx_f_LLLL]  + f[idx_f_RR]   )*(g[idx_g_LLLL]  + g[idx_g_RR]   )  +
+                                      (f[idx_f_LLL]   + f[idx_f_RRR]  )*(g[idx_g_LLL]   + g[idx_g_RRR]  )  +
+                                      (f[idx_f_LL]    + f[idx_f_RRRR] )*(g[idx_g_LL]    + g[idx_g_RRRR] )  +
+                                      (f[idx_f_L]     + f[idx_f_RRRRR])*(g[idx_g_L]     + g[idx_g_RRRRR])));
                     }
                 }
             }
@@ -3530,28 +3617,28 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxX(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_x[idx_face_x] += dt*(
-                            half*(d_coef_a*(f[idx_f_L]      + f[idx_f_R]     )*(g[idx_g_L]      + g[idx_g_R]     )) +
-                            half*(d_coef_b*(f[idx_f_LL]     + f[idx_f_R]     )*(g[idx_g_LL]     + g[idx_g_R]     )  +
-                                           (f[idx_f_L]      + f[idx_f_RR]    )*(g[idx_g_L]      + g[idx_g_RR]    )) +
-                            half*(d_coef_c*(f[idx_f_LLL]    + f[idx_f_R]     )*(g[idx_g_LLL]    + g[idx_g_R]     )  +
-                                           (f[idx_f_LL]     + f[idx_f_RR]    )*(g[idx_g_LL]     + g[idx_g_RR]    )  +
-                                           (f[idx_f_L]      + f[idx_f_RRR]   )*(g[idx_g_L]      + g[idx_g_RRR]   )) +
-                            half*(d_coef_d*(f[idx_f_LLLL]   + f[idx_f_R]     )*(g[idx_g_LLLL]   + g[idx_g_R]     )  +
-                                           (f[idx_f_LLL]    + f[idx_f_RR]    )*(g[idx_g_LLL]    + g[idx_g_RR]    )  +
-                                           (f[idx_f_LL]     + f[idx_f_RRR]   )*(g[idx_g_LL]     + g[idx_g_RRR]   )  +
-                                           (f[idx_f_L]      + f[idx_f_RRRR]  )*(g[idx_g_L]      + g[idx_g_RRRR]  )) +
-                            half*(d_coef_e*(f[idx_f_LLLLL]  + f[idx_f_R]     )*(g[idx_g_LLLLL]  + g[idx_g_R]     )  +
-                                           (f[idx_f_LLLL]   + f[idx_f_RR]    )*(g[idx_g_LLLL]   + g[idx_g_RR]    )  +
-                                           (f[idx_f_LLL]    + f[idx_f_RRR]   )*(g[idx_g_LLL]    + g[idx_g_RRR]   )  +
-                                           (f[idx_f_LL]     + f[idx_f_RRRR]  )*(g[idx_g_LL]     + g[idx_g_RRRR]  )  +
-                                           (f[idx_f_L]      + f[idx_f_RRRRR] )*(g[idx_g_L]      + g[idx_g_RRRRR] )) +
-                            half*(d_coef_f*(f[idx_f_LLLLLL] + f[idx_f_R]     )*(g[idx_g_LLLLLL] + g[idx_g_R]     )  +
-                                           (f[idx_f_LLLLL]  + f[idx_f_RR]    )*(g[idx_g_LLLLL]  + g[idx_g_RR]    )  +
-                                           (f[idx_f_LLLL]   + f[idx_f_RRR]   )*(g[idx_g_LLLL]   + g[idx_g_RRR]   )  +
-                                           (f[idx_f_LLL]    + f[idx_f_RRRR]  )*(g[idx_g_LLL]    + g[idx_g_RRRR]  )  +
-                                           (f[idx_f_LL]     + f[idx_f_RRRRR] )*(g[idx_g_LL]     + g[idx_g_RRRRR] )  +
-                                           (f[idx_f_L]      + f[idx_f_RRRRRR])*(g[idx_g_L]      + g[idx_g_RRRRRR])));
+                        F_face_x[idx_face_x] += dt*half*(
+                            d_coef_a*((f[idx_f_L]      + f[idx_f_R]     )*(g[idx_g_L]      + g[idx_g_R]     )) +
+                            d_coef_b*((f[idx_f_LL]     + f[idx_f_R]     )*(g[idx_g_LL]     + g[idx_g_R]     )  +
+                                      (f[idx_f_L]      + f[idx_f_RR]    )*(g[idx_g_L]      + g[idx_g_RR]    )) +
+                            d_coef_c*((f[idx_f_LLL]    + f[idx_f_R]     )*(g[idx_g_LLL]    + g[idx_g_R]     )  +
+                                      (f[idx_f_LL]     + f[idx_f_RR]    )*(g[idx_g_LL]     + g[idx_g_RR]    )  +
+                                      (f[idx_f_L]      + f[idx_f_RRR]   )*(g[idx_g_L]      + g[idx_g_RRR]   )) +
+                            d_coef_d*((f[idx_f_LLLL]   + f[idx_f_R]     )*(g[idx_g_LLLL]   + g[idx_g_R]     )  +
+                                      (f[idx_f_LLL]    + f[idx_f_RR]    )*(g[idx_g_LLL]    + g[idx_g_RR]    )  +
+                                      (f[idx_f_LL]     + f[idx_f_RRR]   )*(g[idx_g_LL]     + g[idx_g_RRR]   )  +
+                                      (f[idx_f_L]      + f[idx_f_RRRR]  )*(g[idx_g_L]      + g[idx_g_RRRR]  )) +
+                            d_coef_e*((f[idx_f_LLLLL]  + f[idx_f_R]     )*(g[idx_g_LLLLL]  + g[idx_g_R]     )  +
+                                      (f[idx_f_LLLL]   + f[idx_f_RR]    )*(g[idx_g_LLLL]   + g[idx_g_RR]    )  +
+                                      (f[idx_f_LLL]    + f[idx_f_RRR]   )*(g[idx_g_LLL]    + g[idx_g_RRR]   )  +
+                                      (f[idx_f_LL]     + f[idx_f_RRRR]  )*(g[idx_g_LL]     + g[idx_g_RRRR]  )  +
+                                      (f[idx_f_L]      + f[idx_f_RRRRR] )*(g[idx_g_L]      + g[idx_g_RRRRR] )) +
+                            d_coef_f*((f[idx_f_LLLLLL] + f[idx_f_R]     )*(g[idx_g_LLLLLL] + g[idx_g_R]     )  +
+                                      (f[idx_f_LLLLL]  + f[idx_f_RR]    )*(g[idx_g_LLLLL]  + g[idx_g_RR]    )  +
+                                      (f[idx_f_LLLL]   + f[idx_f_RRR]   )*(g[idx_g_LLLL]   + g[idx_g_RRR]   )  +
+                                      (f[idx_f_LLL]    + f[idx_f_RRRR]  )*(g[idx_g_LLL]    + g[idx_g_RRRR]  )  +
+                                      (f[idx_f_LL]     + f[idx_f_RRRRR] )*(g[idx_g_LL]     + g[idx_g_RRRRR] )  +
+                                      (f[idx_f_L]      + f[idx_f_RRRRRR])*(g[idx_g_L]      + g[idx_g_RRRRRR])));
                     }
                 }
             }
@@ -3644,8 +3731,8 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                 const int idx_h_L = i - 1 + num_ghosts_0_h;
                 const int idx_h_R = i     + num_ghosts_0_h;
                 
-                F_face_x[idx_face_x] += dt*(
-                    quarter*(d_coef_a*(f[idx_f_L] + f[idx_f_R])*(g[idx_g_L] + g[idx_g_R])*(h[idx_h_L] + h[idx_h_R])));
+                F_face_x[idx_face_x] += dt*quarter*(
+                    d_coef_a*(f[idx_f_L] + f[idx_f_R])*(g[idx_g_L] + g[idx_g_R])*(h[idx_h_L] + h[idx_h_R]));
             }
         }
         else if (d_stencil_width == 5)
@@ -3674,10 +3761,10 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                 const int idx_h_R  = i     + num_ghosts_0_h;
                 const int idx_h_RR = i + 1 + num_ghosts_0_h;
                 
-                F_face_x[idx_face_x] += dt*(
-                    quarter*(d_coef_a*(f[idx_f_L]  + f[idx_f_R] )*(g[idx_g_L]  + g[idx_g_R] )*(h[idx_h_L]  + h[idx_h_R] )) +
-                    quarter*(d_coef_b*(f[idx_f_LL] + f[idx_f_R] )*(g[idx_g_LL] + g[idx_g_R] )*(h[idx_h_LL] + h[idx_h_R] )  +
-                                      (f[idx_f_L]  + f[idx_f_RR])*(g[idx_g_L]  + g[idx_g_RR])*(h[idx_h_L]  + h[idx_h_RR])));
+                F_face_x[idx_face_x] += dt*quarter*(
+                    d_coef_a*((f[idx_f_L]  + f[idx_f_R] )*(g[idx_g_L]  + g[idx_g_R] )*(h[idx_h_L]  + h[idx_h_R] )) +
+                    d_coef_b*((f[idx_f_LL] + f[idx_f_R] )*(g[idx_g_LL] + g[idx_g_R] )*(h[idx_h_LL] + h[idx_h_R] )  +
+                              (f[idx_f_L]  + f[idx_f_RR])*(g[idx_g_L]  + g[idx_g_RR])*(h[idx_h_L]  + h[idx_h_RR])));
             }
         }
         else if (d_stencil_width == 7)
@@ -3712,13 +3799,13 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                 const int idx_h_RR  = i + 1 + num_ghosts_0_h;
                 const int idx_h_RRR = i + 2 + num_ghosts_0_h;
                 
-                F_face_x[idx_face_x] += dt*(
-                    quarter*(d_coef_a*(f[idx_f_L]   + f[idx_f_R]  )*(g[idx_g_L]   + g[idx_g_R]  )*(h[idx_h_L]   + h[idx_h_R]  )) +
-                    quarter*(d_coef_b*(f[idx_f_LL]  + f[idx_f_R]  )*(g[idx_g_LL]  + g[idx_g_R]  )*(h[idx_h_LL]  + h[idx_h_R]  )  +
-                                      (f[idx_f_L]   + f[idx_f_RR] )*(g[idx_g_L]   + g[idx_g_RR] )*(h[idx_h_L]   + h[idx_h_RR] )) +
-                    quarter*(d_coef_c*(f[idx_f_LLL] + f[idx_f_R]  )*(g[idx_g_LLL] + g[idx_g_R]  )*(h[idx_h_LLL] + h[idx_h_R]  )  +
-                                      (f[idx_f_LL]  + f[idx_f_RR] )*(g[idx_g_LL]  + g[idx_g_RR] )*(h[idx_h_LL]  + h[idx_h_RR] )  +
-                                      (f[idx_f_L]   + f[idx_f_RRR])*(g[idx_g_L]   + g[idx_g_RRR])*(h[idx_h_L]   + h[idx_h_RRR])));
+                F_face_x[idx_face_x] += dt*quarter*(
+                    d_coef_a*((f[idx_f_L]   + f[idx_f_R]  )*(g[idx_g_L]   + g[idx_g_R]  )*(h[idx_h_L]   + h[idx_h_R]  )) +
+                    d_coef_b*((f[idx_f_LL]  + f[idx_f_R]  )*(g[idx_g_LL]  + g[idx_g_R]  )*(h[idx_h_LL]  + h[idx_h_R]  )  +
+                              (f[idx_f_L]   + f[idx_f_RR] )*(g[idx_g_L]   + g[idx_g_RR] )*(h[idx_h_L]   + h[idx_h_RR] )) +
+                    d_coef_c*((f[idx_f_LLL] + f[idx_f_R]  )*(g[idx_g_LLL] + g[idx_g_R]  )*(h[idx_h_LLL] + h[idx_h_R]  )  +
+                              (f[idx_f_LL]  + f[idx_f_RR] )*(g[idx_g_LL]  + g[idx_g_RR] )*(h[idx_h_LL]  + h[idx_h_RR] )  +
+                              (f[idx_f_L]   + f[idx_f_RRR])*(g[idx_g_L]   + g[idx_g_RRR])*(h[idx_h_L]   + h[idx_h_RRR])));
             }
         }
         else if (d_stencil_width == 9)
@@ -3759,17 +3846,17 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                 const int idx_h_RRR  = i + 2 + num_ghosts_0_h;
                 const int idx_h_RRRR = i + 3 + num_ghosts_0_h;
                 
-                F_face_x[idx_face_x] += dt*(
-                    quarter*(d_coef_a*(f[idx_f_L]    + f[idx_f_R]   )*(g[idx_g_L]    + g[idx_g_R]   )*(h[idx_h_L]    + h[idx_h_R]   )) +
-                    quarter*(d_coef_b*(f[idx_f_LL]   + f[idx_f_R]   )*(g[idx_g_LL]   + g[idx_g_R]   )*(h[idx_h_LL]   + h[idx_h_R]   )  +
-                                      (f[idx_f_L]    + f[idx_f_RR]  )*(g[idx_g_L]    + g[idx_g_RR]  )*(h[idx_h_L]    + h[idx_h_RR]  )) +
-                    quarter*(d_coef_c*(f[idx_f_LLL]  + f[idx_f_R]   )*(g[idx_g_LLL]  + g[idx_g_R]   )*(h[idx_h_LLL]  + h[idx_h_R]   )  +
-                                      (f[idx_f_LL]   + f[idx_f_RR]  )*(g[idx_g_LL]   + g[idx_g_RR]  )*(h[idx_h_LL]   + h[idx_h_RR]  )  +
-                                      (f[idx_f_L]    + f[idx_f_RRR] )*(g[idx_g_L]    + g[idx_g_RRR] )*(h[idx_h_L]    + h[idx_h_RRR] )) +
-                    quarter*(d_coef_d*(f[idx_f_LLLL] + f[idx_f_R]   )*(g[idx_g_LLLL] + g[idx_g_R]   )*(h[idx_h_LLLL] + h[idx_h_R]   )  +
-                                      (f[idx_f_LLL]  + f[idx_f_RR]  )*(g[idx_g_LLL]  + g[idx_g_RR]  )*(h[idx_h_LLL]  + h[idx_h_RR]  )  +
-                                      (f[idx_f_LL]   + f[idx_f_RRR] )*(g[idx_g_LL]   + g[idx_g_RRR] )*(h[idx_h_LL]   + h[idx_h_RRR] )  +
-                                      (f[idx_f_L]    + f[idx_f_RRRR])*(g[idx_g_L]    + g[idx_g_RRRR])*(h[idx_h_L]    + h[idx_h_RRRR])));
+                F_face_x[idx_face_x] += dt*quarter*(
+                    d_coef_a*((f[idx_f_L]    + f[idx_f_R]   )*(g[idx_g_L]    + g[idx_g_R]   )*(h[idx_h_L]    + h[idx_h_R]   )) +
+                    d_coef_b*((f[idx_f_LL]   + f[idx_f_R]   )*(g[idx_g_LL]   + g[idx_g_R]   )*(h[idx_h_LL]   + h[idx_h_R]   )  +
+                              (f[idx_f_L]    + f[idx_f_RR]  )*(g[idx_g_L]    + g[idx_g_RR]  )*(h[idx_h_L]    + h[idx_h_RR]  )) +
+                    d_coef_c*((f[idx_f_LLL]  + f[idx_f_R]   )*(g[idx_g_LLL]  + g[idx_g_R]   )*(h[idx_h_LLL]  + h[idx_h_R]   )  +
+                              (f[idx_f_LL]   + f[idx_f_RR]  )*(g[idx_g_LL]   + g[idx_g_RR]  )*(h[idx_h_LL]   + h[idx_h_RR]  )  +
+                              (f[idx_f_L]    + f[idx_f_RRR] )*(g[idx_g_L]    + g[idx_g_RRR] )*(h[idx_h_L]    + h[idx_h_RRR] )) +
+                    d_coef_d*((f[idx_f_LLLL] + f[idx_f_R]   )*(g[idx_g_LLLL] + g[idx_g_R]   )*(h[idx_h_LLLL] + h[idx_h_R]   )  +
+                              (f[idx_f_LLL]  + f[idx_f_RR]  )*(g[idx_g_LLL]  + g[idx_g_RR]  )*(h[idx_h_LLL]  + h[idx_h_RR]  )  +
+                              (f[idx_f_LL]   + f[idx_f_RRR] )*(g[idx_g_LL]   + g[idx_g_RRR] )*(h[idx_h_LL]   + h[idx_h_RRR] )  +
+                              (f[idx_f_L]    + f[idx_f_RRRR])*(g[idx_g_L]    + g[idx_g_RRRR])*(h[idx_h_L]    + h[idx_h_RRRR])));
             }
         }
         else if (d_stencil_width == 11)
@@ -3816,22 +3903,22 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                 const int idx_h_RRRR  = i + 3 + num_ghosts_0_h;
                 const int idx_h_RRRRR = i + 4 + num_ghosts_0_h;
                 
-                F_face_x[idx_face_x] += dt*(
-                    quarter*(d_coef_a*(f[idx_f_L]     + f[idx_f_R]    )*(g[idx_g_L]     + g[idx_g_R]    )*(h[idx_h_L]     + h[idx_h_R]    )) +
-                    quarter*(d_coef_b*(f[idx_f_LL]    + f[idx_f_R]    )*(g[idx_g_LL]    + g[idx_g_R]    )*(h[idx_h_LL]    + h[idx_h_R]    )  +
-                                      (f[idx_f_L]     + f[idx_f_RR]   )*(g[idx_g_L]     + g[idx_g_RR]   )*(h[idx_h_L]     + h[idx_h_RR]   )) +
-                    quarter*(d_coef_c*(f[idx_f_LLL]   + f[idx_f_R]    )*(g[idx_g_LLL]   + g[idx_g_R]    )*(h[idx_h_LLL]   + h[idx_h_R]    )  +
-                                      (f[idx_f_LL]    + f[idx_f_RR]   )*(g[idx_g_LL]    + g[idx_g_RR]   )*(h[idx_h_LL]    + h[idx_h_RR]   )  +
-                                      (f[idx_f_L]     + f[idx_f_RRR]  )*(g[idx_g_L]     + g[idx_g_RRR]  )*(h[idx_h_L]     + h[idx_h_RRR]  )) +
-                    quarter*(d_coef_d*(f[idx_f_LLLL]  + f[idx_f_R]    )*(g[idx_g_LLLL]  + g[idx_g_R]    )*(h[idx_h_LLLL]  + h[idx_h_R]    )  +
-                                      (f[idx_f_LLL]   + f[idx_f_RR]   )*(g[idx_g_LLL]   + g[idx_g_RR]   )*(h[idx_h_LLL]   + h[idx_h_RR]   )  +
-                                      (f[idx_f_LL]    + f[idx_f_RRR]  )*(g[idx_g_LL]    + g[idx_g_RRR]  )*(h[idx_h_LL]    + h[idx_h_RRR]  )  +
-                                      (f[idx_f_L]     + f[idx_f_RRRR] )*(g[idx_g_L]     + g[idx_g_RRRR] )*(h[idx_h_L]     + h[idx_h_RRRR] )) +
-                    quarter*(d_coef_e*(f[idx_f_LLLLL] + f[idx_f_R]    )*(g[idx_g_LLLLL] + g[idx_g_R]    )*(h[idx_h_LLLLL] + h[idx_h_R]    )  +
-                                      (f[idx_f_LLLL]  + f[idx_f_RR]   )*(g[idx_g_LLLL]  + g[idx_g_RR]   )*(h[idx_h_LLLL]  + h[idx_h_RR]   )  +
-                                      (f[idx_f_LLL]   + f[idx_f_RRR]  )*(g[idx_g_LLL]   + g[idx_g_RRR]  )*(h[idx_h_LLL]   + h[idx_h_RRR]  )  +
-                                      (f[idx_f_LL]    + f[idx_f_RRRR] )*(g[idx_g_LL]    + g[idx_g_RRRR] )*(h[idx_h_LL]    + h[idx_h_RRRR] )  +
-                                      (f[idx_f_L]     + f[idx_f_RRRRR])*(g[idx_g_L]     + g[idx_g_RRRRR])*(h[idx_h_L]     + h[idx_h_RRRRR])));
+                F_face_x[idx_face_x] += dt*quarter*(
+                    d_coef_a*((f[idx_f_L]     + f[idx_f_R]    )*(g[idx_g_L]     + g[idx_g_R]    )*(h[idx_h_L]     + h[idx_h_R]    )) +
+                    d_coef_b*((f[idx_f_LL]    + f[idx_f_R]    )*(g[idx_g_LL]    + g[idx_g_R]    )*(h[idx_h_LL]    + h[idx_h_R]    )  +
+                              (f[idx_f_L]     + f[idx_f_RR]   )*(g[idx_g_L]     + g[idx_g_RR]   )*(h[idx_h_L]     + h[idx_h_RR]   )) +
+                    d_coef_c*((f[idx_f_LLL]   + f[idx_f_R]    )*(g[idx_g_LLL]   + g[idx_g_R]    )*(h[idx_h_LLL]   + h[idx_h_R]    )  +
+                              (f[idx_f_LL]    + f[idx_f_RR]   )*(g[idx_g_LL]    + g[idx_g_RR]   )*(h[idx_h_LL]    + h[idx_h_RR]   )  +
+                              (f[idx_f_L]     + f[idx_f_RRR]  )*(g[idx_g_L]     + g[idx_g_RRR]  )*(h[idx_h_L]     + h[idx_h_RRR]  )) +
+                    d_coef_d*((f[idx_f_LLLL]  + f[idx_f_R]    )*(g[idx_g_LLLL]  + g[idx_g_R]    )*(h[idx_h_LLLL]  + h[idx_h_R]    )  +
+                              (f[idx_f_LLL]   + f[idx_f_RR]   )*(g[idx_g_LLL]   + g[idx_g_RR]   )*(h[idx_h_LLL]   + h[idx_h_RR]   )  +
+                              (f[idx_f_LL]    + f[idx_f_RRR]  )*(g[idx_g_LL]    + g[idx_g_RRR]  )*(h[idx_h_LL]    + h[idx_h_RRR]  )  +
+                              (f[idx_f_L]     + f[idx_f_RRRR] )*(g[idx_g_L]     + g[idx_g_RRRR] )*(h[idx_h_L]     + h[idx_h_RRRR] )) +
+                    d_coef_e*((f[idx_f_LLLLL] + f[idx_f_R]    )*(g[idx_g_LLLLL] + g[idx_g_R]    )*(h[idx_h_LLLLL] + h[idx_h_R]    )  +
+                              (f[idx_f_LLLL]  + f[idx_f_RR]   )*(g[idx_g_LLLL]  + g[idx_g_RR]   )*(h[idx_h_LLLL]  + h[idx_h_RR]   )  +
+                              (f[idx_f_LLL]   + f[idx_f_RRR]  )*(g[idx_g_LLL]   + g[idx_g_RRR]  )*(h[idx_h_LLL]   + h[idx_h_RRR]  )  +
+                              (f[idx_f_LL]    + f[idx_f_RRRR] )*(g[idx_g_LL]    + g[idx_g_RRRR] )*(h[idx_h_LL]    + h[idx_h_RRRR] )  +
+                              (f[idx_f_L]     + f[idx_f_RRRRR])*(g[idx_g_L]     + g[idx_g_RRRRR])*(h[idx_h_L]     + h[idx_h_RRRRR])));
             }
         }
         else if (d_stencil_width == 13)
@@ -3884,28 +3971,28 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                 const int idx_h_RRRRR  = i + 4 + num_ghosts_0_h;
                 const int idx_h_RRRRRR = i + 5 + num_ghosts_0_h;
                 
-                F_face_x[idx_face_x] += dt*(
-                    quarter*(d_coef_a*(f[idx_f_L]      + f[idx_f_R]     )*(g[idx_g_L]      + g[idx_g_R]     )*(h[idx_h_L]      + h[idx_h_R]     )) +
-                    quarter*(d_coef_b*(f[idx_f_LL]     + f[idx_f_R]     )*(g[idx_g_LL]     + g[idx_g_R]     )*(h[idx_h_LL]     + h[idx_h_R]     )  +
-                                      (f[idx_f_L]      + f[idx_f_RR]    )*(g[idx_g_L]      + g[idx_g_RR]    )*(h[idx_h_L]      + h[idx_h_RR]    )) +
-                    quarter*(d_coef_c*(f[idx_f_LLL]    + f[idx_f_R]     )*(g[idx_g_LLL]    + g[idx_g_R]     )*(h[idx_h_LLL]    + h[idx_h_R]     )  +
-                                      (f[idx_f_LL]     + f[idx_f_RR]    )*(g[idx_g_LL]     + g[idx_g_RR]    )*(h[idx_h_LL]     + h[idx_h_RR]    )  +
-                                      (f[idx_f_L]      + f[idx_f_RRR]   )*(g[idx_g_L]      + g[idx_g_RRR]   )*(h[idx_h_L]      + h[idx_h_RRR]   )) +
-                    quarter*(d_coef_d*(f[idx_f_LLLL]   + f[idx_f_R]     )*(g[idx_g_LLLL]   + g[idx_g_R]     )*(h[idx_h_LLLL]   + h[idx_h_R]     )  +
-                                      (f[idx_f_LLL]    + f[idx_f_RR]    )*(g[idx_g_LLL]    + g[idx_g_RR]    )*(h[idx_h_LLL]    + h[idx_h_RR]    )  +
-                                      (f[idx_f_LL]     + f[idx_f_RRR]   )*(g[idx_g_LL]     + g[idx_g_RRR]   )*(h[idx_h_LL]     + h[idx_h_RRR]   )  +
-                                      (f[idx_f_L]      + f[idx_f_RRRR]  )*(g[idx_g_L]      + g[idx_g_RRRR]  )*(h[idx_h_L]      + h[idx_h_RRRR]  )) +
-                    quarter*(d_coef_e*(f[idx_f_LLLLL]  + f[idx_f_R]     )*(g[idx_g_LLLLL]  + g[idx_g_R]     )*(h[idx_h_LLLLL]  + h[idx_h_R]     )  +
-                                      (f[idx_f_LLLL]   + f[idx_f_RR]    )*(g[idx_g_LLLL]   + g[idx_g_RR]    )*(h[idx_h_LLLL]   + h[idx_h_RR]    )  +
-                                      (f[idx_f_LLL]    + f[idx_f_RRR]   )*(g[idx_g_LLL]    + g[idx_g_RRR]   )*(h[idx_h_LLL]    + h[idx_h_RRR]   )  +
-                                      (f[idx_f_LL]     + f[idx_f_RRRR]  )*(g[idx_g_LL]     + g[idx_g_RRRR]  )*(h[idx_h_LL]     + h[idx_h_RRRR]  )  +
-                                      (f[idx_f_L]      + f[idx_f_RRRRR] )*(g[idx_g_L]      + g[idx_g_RRRRR] )*(h[idx_h_L]      + h[idx_h_RRRRR] )) +
-                    quarter*(d_coef_f*(f[idx_f_LLLLLL] + f[idx_f_R]     )*(g[idx_g_LLLLLL] + g[idx_g_R]     )*(h[idx_h_LLLLLL] + h[idx_h_R]     )  +
-                                      (f[idx_f_LLLLL]  + f[idx_f_RR]    )*(g[idx_g_LLLLL]  + g[idx_g_RR]    )*(h[idx_h_LLLLL]  + h[idx_h_RR]    )  +
-                                      (f[idx_f_LLLL]   + f[idx_f_RRR]   )*(g[idx_g_LLLL]   + g[idx_g_RRR]   )*(h[idx_h_LLLL]   + h[idx_h_RRR]   )  +
-                                      (f[idx_f_LLL]    + f[idx_f_RRRR]  )*(g[idx_g_LLL]    + g[idx_g_RRRR]  )*(h[idx_h_LLL]    + h[idx_h_RRRR]  )  +
-                                      (f[idx_f_LL]     + f[idx_f_RRRRR] )*(g[idx_g_LL]     + g[idx_g_RRRRR] )*(h[idx_h_LL]     + h[idx_h_RRRRR] )  +
-                                      (f[idx_f_L]      + f[idx_f_RRRRRR])*(g[idx_g_L]      + g[idx_g_RRRRRR])*(h[idx_h_L]      + h[idx_h_RRRRRR])));
+                F_face_x[idx_face_x] += dt*quarter*(
+                    d_coef_a*((f[idx_f_L]      + f[idx_f_R]     )*(g[idx_g_L]      + g[idx_g_R]     )*(h[idx_h_L]      + h[idx_h_R]     )) +
+                    d_coef_b*((f[idx_f_LL]     + f[idx_f_R]     )*(g[idx_g_LL]     + g[idx_g_R]     )*(h[idx_h_LL]     + h[idx_h_R]     )  +
+                              (f[idx_f_L]      + f[idx_f_RR]    )*(g[idx_g_L]      + g[idx_g_RR]    )*(h[idx_h_L]      + h[idx_h_RR]    )) +
+                    d_coef_c*((f[idx_f_LLL]    + f[idx_f_R]     )*(g[idx_g_LLL]    + g[idx_g_R]     )*(h[idx_h_LLL]    + h[idx_h_R]     )  +
+                              (f[idx_f_LL]     + f[idx_f_RR]    )*(g[idx_g_LL]     + g[idx_g_RR]    )*(h[idx_h_LL]     + h[idx_h_RR]    )  +
+                              (f[idx_f_L]      + f[idx_f_RRR]   )*(g[idx_g_L]      + g[idx_g_RRR]   )*(h[idx_h_L]      + h[idx_h_RRR]   )) +
+                    d_coef_d*((f[idx_f_LLLL]   + f[idx_f_R]     )*(g[idx_g_LLLL]   + g[idx_g_R]     )*(h[idx_h_LLLL]   + h[idx_h_R]     )  +
+                              (f[idx_f_LLL]    + f[idx_f_RR]    )*(g[idx_g_LLL]    + g[idx_g_RR]    )*(h[idx_h_LLL]    + h[idx_h_RR]    )  +
+                              (f[idx_f_LL]     + f[idx_f_RRR]   )*(g[idx_g_LL]     + g[idx_g_RRR]   )*(h[idx_h_LL]     + h[idx_h_RRR]   )  +
+                              (f[idx_f_L]      + f[idx_f_RRRR]  )*(g[idx_g_L]      + g[idx_g_RRRR]  )*(h[idx_h_L]      + h[idx_h_RRRR]  )) +
+                    d_coef_e*((f[idx_f_LLLLL]  + f[idx_f_R]     )*(g[idx_g_LLLLL]  + g[idx_g_R]     )*(h[idx_h_LLLLL]  + h[idx_h_R]     )  +
+                              (f[idx_f_LLLL]   + f[idx_f_RR]    )*(g[idx_g_LLLL]   + g[idx_g_RR]    )*(h[idx_h_LLLL]   + h[idx_h_RR]    )  +
+                              (f[idx_f_LLL]    + f[idx_f_RRR]   )*(g[idx_g_LLL]    + g[idx_g_RRR]   )*(h[idx_h_LLL]    + h[idx_h_RRR]   )  +
+                              (f[idx_f_LL]     + f[idx_f_RRRR]  )*(g[idx_g_LL]     + g[idx_g_RRRR]  )*(h[idx_h_LL]     + h[idx_h_RRRR]  )  +
+                              (f[idx_f_L]      + f[idx_f_RRRRR] )*(g[idx_g_L]      + g[idx_g_RRRRR] )*(h[idx_h_L]      + h[idx_h_RRRRR] )) +
+                    d_coef_f*((f[idx_f_LLLLLL] + f[idx_f_R]     )*(g[idx_g_LLLLLL] + g[idx_g_R]     )*(h[idx_h_LLLLLL] + h[idx_h_R]     )  +
+                              (f[idx_f_LLLLL]  + f[idx_f_RR]    )*(g[idx_g_LLLLL]  + g[idx_g_RR]    )*(h[idx_h_LLLLL]  + h[idx_h_RR]    )  +
+                              (f[idx_f_LLLL]   + f[idx_f_RRR]   )*(g[idx_g_LLLL]   + g[idx_g_RRR]   )*(h[idx_h_LLLL]   + h[idx_h_RRR]   )  +
+                              (f[idx_f_LLL]    + f[idx_f_RRRR]  )*(g[idx_g_LLL]    + g[idx_g_RRRR]  )*(h[idx_h_LLL]    + h[idx_h_RRRR]  )  +
+                              (f[idx_f_LL]     + f[idx_f_RRRRR] )*(g[idx_g_LL]     + g[idx_g_RRRRR] )*(h[idx_h_LL]     + h[idx_h_RRRRR] )  +
+                              (f[idx_f_L]      + f[idx_f_RRRRRR])*(g[idx_g_L]      + g[idx_g_RRRRRR])*(h[idx_h_L]      + h[idx_h_RRRRRR])));
             }
         }
     }
@@ -3964,8 +4051,8 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                     const int idx_h_R = (i + num_ghosts_0_h) +
                         (j + num_ghosts_1_h)*ghostcell_dim_0_h;
                     
-                    F_face_x[idx_face_x] += dt*(
-                        quarter*(d_coef_a*(f[idx_f_L] + f[idx_f_R])*(g[idx_g_L] + g[idx_g_R])*(h[idx_h_L] + h[idx_h_R])));
+                    F_face_x[idx_face_x] += dt*quarter*(
+                        d_coef_a*(f[idx_f_L] + f[idx_f_R])*(g[idx_g_L] + g[idx_g_R])*(h[idx_h_L] + h[idx_h_R]));
                 }
             }
         }
@@ -4017,10 +4104,10 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                     const int idx_h_RR = (i + 1 + num_ghosts_0_h) +
                         (j + num_ghosts_1_h)*ghostcell_dim_0_h;
                     
-                    F_face_x[idx_face_x] += dt*(
-                        quarter*(d_coef_a*(f[idx_f_L]  + f[idx_f_R] )*(g[idx_g_L]  + g[idx_g_R] )*(h[idx_h_L]  + h[idx_h_R] )) +
-                        quarter*(d_coef_b*(f[idx_f_LL] + f[idx_f_R] )*(g[idx_g_LL] + g[idx_g_R] )*(h[idx_h_LL] + h[idx_h_R] )  +
-                                          (f[idx_f_L]  + f[idx_f_RR])*(g[idx_g_L]  + g[idx_g_RR])*(h[idx_h_L]  + h[idx_h_RR])));
+                    F_face_x[idx_face_x] += dt*quarter*(
+                        d_coef_a*((f[idx_f_L]  + f[idx_f_R] )*(g[idx_g_L]  + g[idx_g_R] )*(h[idx_h_L]  + h[idx_h_R] )) +
+                        d_coef_b*((f[idx_f_LL] + f[idx_f_R] )*(g[idx_g_LL] + g[idx_g_R] )*(h[idx_h_LL] + h[idx_h_R] )  +
+                                  (f[idx_f_L]  + f[idx_f_RR])*(g[idx_g_L]  + g[idx_g_RR])*(h[idx_h_L]  + h[idx_h_RR])));
                 }
             }
         }
@@ -4090,13 +4177,13 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                     const int idx_h_RRR = (i + 2 + num_ghosts_0_h) +
                         (j + num_ghosts_1_h)*ghostcell_dim_0_h;
                     
-                    F_face_x[idx_face_x] += dt*(
-                        quarter*(d_coef_a*(f[idx_f_L]   + f[idx_f_R]  )*(g[idx_g_L]   + g[idx_g_R]  )*(h[idx_h_L]   + h[idx_h_R]  )) +
-                        quarter*(d_coef_b*(f[idx_f_LL]  + f[idx_f_R]  )*(g[idx_g_LL]  + g[idx_g_R]  )*(h[idx_h_LL]  + h[idx_h_R]  )  +
-                                          (f[idx_f_L]   + f[idx_f_RR] )*(g[idx_g_L]   + g[idx_g_RR] )*(h[idx_h_L]   + h[idx_h_RR] )) +
-                        quarter*(d_coef_c*(f[idx_f_LLL] + f[idx_f_R]  )*(g[idx_g_LLL] + g[idx_g_R]  )*(h[idx_h_LLL] + h[idx_h_R]  )  +
-                                          (f[idx_f_LL]  + f[idx_f_RR] )*(g[idx_g_LL]  + g[idx_g_RR] )*(h[idx_h_LL]  + h[idx_h_RR] )  +
-                                          (f[idx_f_L]   + f[idx_f_RRR])*(g[idx_g_L]   + g[idx_g_RRR])*(h[idx_h_L]   + h[idx_h_RRR])));
+                    F_face_x[idx_face_x] += dt*quarter*(
+                        d_coef_a*((f[idx_f_L]   + f[idx_f_R]  )*(g[idx_g_L]   + g[idx_g_R]  )*(h[idx_h_L]   + h[idx_h_R]  )) +
+                        d_coef_b*((f[idx_f_LL]  + f[idx_f_R]  )*(g[idx_g_LL]  + g[idx_g_R]  )*(h[idx_h_LL]  + h[idx_h_R]  )  +
+                                  (f[idx_f_L]   + f[idx_f_RR] )*(g[idx_g_L]   + g[idx_g_RR] )*(h[idx_h_L]   + h[idx_h_RR] )) +
+                        d_coef_c*((f[idx_f_LLL] + f[idx_f_R]  )*(g[idx_g_LLL] + g[idx_g_R]  )*(h[idx_h_LLL] + h[idx_h_R]  )  +
+                                  (f[idx_f_LL]  + f[idx_f_RR] )*(g[idx_g_LL]  + g[idx_g_RR] )*(h[idx_h_LL]  + h[idx_h_RR] )  +
+                                  (f[idx_f_L]   + f[idx_f_RRR])*(g[idx_g_L]   + g[idx_g_RRR])*(h[idx_h_L]   + h[idx_h_RRR])));
                 }
             }
         }
@@ -4184,17 +4271,17 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                     const int idx_h_RRRR = (i + 3 + num_ghosts_0_h) +
                         (j + num_ghosts_1_h)*ghostcell_dim_0_h;
                     
-                    F_face_x[idx_face_x] += dt*(
-                        quarter*(d_coef_a*(f[idx_f_L]    + f[idx_f_R]   )*(g[idx_g_L]    + g[idx_g_R]   )*(h[idx_h_L]    + h[idx_h_R]   )) +
-                        quarter*(d_coef_b*(f[idx_f_LL]   + f[idx_f_R]   )*(g[idx_g_LL]   + g[idx_g_R]   )*(h[idx_h_LL]   + h[idx_h_R]   )  +
-                                          (f[idx_f_L]    + f[idx_f_RR]  )*(g[idx_g_L]    + g[idx_g_RR]  )*(h[idx_h_L]    + h[idx_h_RR]  )) +
-                        quarter*(d_coef_c*(f[idx_f_LLL]  + f[idx_f_R]   )*(g[idx_g_LLL]  + g[idx_g_R]   )*(h[idx_h_LLL]  + h[idx_h_R]   )  +
-                                          (f[idx_f_LL]   + f[idx_f_RR]  )*(g[idx_g_LL]   + g[idx_g_RR]  )*(h[idx_h_LL]   + h[idx_h_RR]  )  +
-                                          (f[idx_f_L]    + f[idx_f_RRR] )*(g[idx_g_L]    + g[idx_g_RRR] )*(h[idx_h_L]    + h[idx_h_RRR] )) +
-                        quarter*(d_coef_d*(f[idx_f_LLLL] + f[idx_f_R]   )*(g[idx_g_LLLL] + g[idx_g_R]   )*(h[idx_h_LLLL] + h[idx_h_R]   )  +
-                                          (f[idx_f_LLL]  + f[idx_f_RR]  )*(g[idx_g_LLL]  + g[idx_g_RR]  )*(h[idx_h_LLL]  + h[idx_h_RR]  )  +
-                                          (f[idx_f_LL]   + f[idx_f_RRR] )*(g[idx_g_LL]   + g[idx_g_RRR] )*(h[idx_h_LL]   + h[idx_h_RRR] )  +
-                                          (f[idx_f_L]    + f[idx_f_RRRR])*(g[idx_g_L]    + g[idx_g_RRRR])*(h[idx_h_L]    + h[idx_h_RRRR])));
+                    F_face_x[idx_face_x] += dt*quarter*(
+                        d_coef_a*((f[idx_f_L]    + f[idx_f_R]   )*(g[idx_g_L]    + g[idx_g_R]   )*(h[idx_h_L]    + h[idx_h_R]   )) +
+                        d_coef_b*((f[idx_f_LL]   + f[idx_f_R]   )*(g[idx_g_LL]   + g[idx_g_R]   )*(h[idx_h_LL]   + h[idx_h_R]   )  +
+                                  (f[idx_f_L]    + f[idx_f_RR]  )*(g[idx_g_L]    + g[idx_g_RR]  )*(h[idx_h_L]    + h[idx_h_RR]  )) +
+                        d_coef_c*((f[idx_f_LLL]  + f[idx_f_R]   )*(g[idx_g_LLL]  + g[idx_g_R]   )*(h[idx_h_LLL]  + h[idx_h_R]   )  +
+                                  (f[idx_f_LL]   + f[idx_f_RR]  )*(g[idx_g_LL]   + g[idx_g_RR]  )*(h[idx_h_LL]   + h[idx_h_RR]  )  +
+                                  (f[idx_f_L]    + f[idx_f_RRR] )*(g[idx_g_L]    + g[idx_g_RRR] )*(h[idx_h_L]    + h[idx_h_RRR] )) +
+                        d_coef_d*((f[idx_f_LLLL] + f[idx_f_R]   )*(g[idx_g_LLLL] + g[idx_g_R]   )*(h[idx_h_LLLL] + h[idx_h_R]   )  +
+                                  (f[idx_f_LLL]  + f[idx_f_RR]  )*(g[idx_g_LLL]  + g[idx_g_RR]  )*(h[idx_h_LLL]  + h[idx_h_RR]  )  +
+                                  (f[idx_f_LL]   + f[idx_f_RRR] )*(g[idx_g_LL]   + g[idx_g_RRR] )*(h[idx_h_LL]   + h[idx_h_RRR] )  +
+                                  (f[idx_f_L]    + f[idx_f_RRRR])*(g[idx_g_L]    + g[idx_g_RRRR])*(h[idx_h_L]    + h[idx_h_RRRR])));
                 }
             }
         }
@@ -4300,22 +4387,22 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                     const int idx_h_RRRRR = (i + 4 + num_ghosts_0_h) +
                         (j + num_ghosts_1_h)*ghostcell_dim_0_h;
                     
-                    F_face_x[idx_face_x] += dt*(
-                        quarter*(d_coef_a*(f[idx_f_L]     + f[idx_f_R]    )*(g[idx_g_L]     + g[idx_g_R]    )*(h[idx_h_L]     + h[idx_h_R]    )) +
-                        quarter*(d_coef_b*(f[idx_f_LL]    + f[idx_f_R]    )*(g[idx_g_LL]    + g[idx_g_R]    )*(h[idx_h_LL]    + h[idx_h_R]    )  +
-                                          (f[idx_f_L]     + f[idx_f_RR]   )*(g[idx_g_L]     + g[idx_g_RR]   )*(h[idx_h_L]     + h[idx_h_RR]   )) +
-                        quarter*(d_coef_c*(f[idx_f_LLL]   + f[idx_f_R]    )*(g[idx_g_LLL]   + g[idx_g_R]    )*(h[idx_h_LLL]   + h[idx_h_R]    )  +
-                                          (f[idx_f_LL]    + f[idx_f_RR]   )*(g[idx_g_LL]    + g[idx_g_RR]   )*(h[idx_h_LL]    + h[idx_h_RR]   )  +
-                                          (f[idx_f_L]     + f[idx_f_RRR]  )*(g[idx_g_L]     + g[idx_g_RRR]  )*(h[idx_h_L]     + h[idx_h_RRR]  )) +
-                        quarter*(d_coef_d*(f[idx_f_LLLL]  + f[idx_f_R]    )*(g[idx_g_LLLL]  + g[idx_g_R]    )*(h[idx_h_LLLL]  + h[idx_h_R]    )  +
-                                          (f[idx_f_LLL]   + f[idx_f_RR]   )*(g[idx_g_LLL]   + g[idx_g_RR]   )*(h[idx_h_LLL]   + h[idx_h_RR]   )  +
-                                          (f[idx_f_LL]    + f[idx_f_RRR]  )*(g[idx_g_LL]    + g[idx_g_RRR]  )*(h[idx_h_LL]    + h[idx_h_RRR]  )  +
-                                          (f[idx_f_L]     + f[idx_f_RRRR] )*(g[idx_g_L]     + g[idx_g_RRRR] )*(h[idx_h_L]     + h[idx_h_RRRR] )) +
-                        quarter*(d_coef_e*(f[idx_f_LLLLL] + f[idx_f_R]    )*(g[idx_g_LLLLL] + g[idx_g_R]    )*(h[idx_h_LLLLL] + h[idx_h_R]    )  +
-                                          (f[idx_f_LLLL]  + f[idx_f_RR]   )*(g[idx_g_LLLL]  + g[idx_g_RR]   )*(h[idx_h_LLLL]  + h[idx_h_RR]   )  +
-                                          (f[idx_f_LLL]   + f[idx_f_RRR]  )*(g[idx_g_LLL]   + g[idx_g_RRR]  )*(h[idx_h_LLL]   + h[idx_h_RRR]  )  +
-                                          (f[idx_f_LL]    + f[idx_f_RRRR] )*(g[idx_g_LL]    + g[idx_g_RRRR] )*(h[idx_h_LL]    + h[idx_h_RRRR] )  +
-                                          (f[idx_f_L]     + f[idx_f_RRRRR])*(g[idx_g_L]     + g[idx_g_RRRRR])*(h[idx_h_L]     + h[idx_h_RRRRR])));
+                    F_face_x[idx_face_x] += dt*quarter*(
+                        d_coef_a*((f[idx_f_L]     + f[idx_f_R]    )*(g[idx_g_L]     + g[idx_g_R]    )*(h[idx_h_L]     + h[idx_h_R]    )) +
+                        d_coef_b*((f[idx_f_LL]    + f[idx_f_R]    )*(g[idx_g_LL]    + g[idx_g_R]    )*(h[idx_h_LL]    + h[idx_h_R]    )  +
+                                  (f[idx_f_L]     + f[idx_f_RR]   )*(g[idx_g_L]     + g[idx_g_RR]   )*(h[idx_h_L]     + h[idx_h_RR]   )) +
+                        d_coef_c*((f[idx_f_LLL]   + f[idx_f_R]    )*(g[idx_g_LLL]   + g[idx_g_R]    )*(h[idx_h_LLL]   + h[idx_h_R]    )  +
+                                  (f[idx_f_LL]    + f[idx_f_RR]   )*(g[idx_g_LL]    + g[idx_g_RR]   )*(h[idx_h_LL]    + h[idx_h_RR]   )  +
+                                  (f[idx_f_L]     + f[idx_f_RRR]  )*(g[idx_g_L]     + g[idx_g_RRR]  )*(h[idx_h_L]     + h[idx_h_RRR]  )) +
+                        d_coef_d*((f[idx_f_LLLL]  + f[idx_f_R]    )*(g[idx_g_LLLL]  + g[idx_g_R]    )*(h[idx_h_LLLL]  + h[idx_h_R]    )  +
+                                  (f[idx_f_LLL]   + f[idx_f_RR]   )*(g[idx_g_LLL]   + g[idx_g_RR]   )*(h[idx_h_LLL]   + h[idx_h_RR]   )  +
+                                  (f[idx_f_LL]    + f[idx_f_RRR]  )*(g[idx_g_LL]    + g[idx_g_RRR]  )*(h[idx_h_LL]    + h[idx_h_RRR]  )  +
+                                  (f[idx_f_L]     + f[idx_f_RRRR] )*(g[idx_g_L]     + g[idx_g_RRRR] )*(h[idx_h_L]     + h[idx_h_RRRR] )) +
+                        d_coef_e*((f[idx_f_LLLLL] + f[idx_f_R]    )*(g[idx_g_LLLLL] + g[idx_g_R]    )*(h[idx_h_LLLLL] + h[idx_h_R]    )  +
+                                  (f[idx_f_LLLL]  + f[idx_f_RR]   )*(g[idx_g_LLLL]  + g[idx_g_RR]   )*(h[idx_h_LLLL]  + h[idx_h_RR]   )  +
+                                  (f[idx_f_LLL]   + f[idx_f_RRR]  )*(g[idx_g_LLL]   + g[idx_g_RRR]  )*(h[idx_h_LLL]   + h[idx_h_RRR]  )  +
+                                  (f[idx_f_LL]    + f[idx_f_RRRR] )*(g[idx_g_LL]    + g[idx_g_RRRR] )*(h[idx_h_LL]    + h[idx_h_RRRR] )  +
+                                  (f[idx_f_L]     + f[idx_f_RRRRR])*(g[idx_g_L]     + g[idx_g_RRRRR])*(h[idx_h_L]     + h[idx_h_RRRRR])));
                 }
             }
         }
@@ -4439,28 +4526,28 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                     const int idx_h_RRRRRR = (i + 5 + num_ghosts_0_h) +
                         (j + num_ghosts_1_h)*ghostcell_dim_0_h;
                     
-                    F_face_x[idx_face_x] += dt*(
-                        quarter*(d_coef_a*(f[idx_f_L]      + f[idx_f_R]     )*(g[idx_g_L]      + g[idx_g_R]     )*(h[idx_h_L]      + h[idx_h_R]     )) +
-                        quarter*(d_coef_b*(f[idx_f_LL]     + f[idx_f_R]     )*(g[idx_g_LL]     + g[idx_g_R]     )*(h[idx_h_LL]     + h[idx_h_R]     )  +
-                                          (f[idx_f_L]      + f[idx_f_RR]    )*(g[idx_g_L]      + g[idx_g_RR]    )*(h[idx_h_L]      + h[idx_h_RR]    )) +
-                        quarter*(d_coef_c*(f[idx_f_LLL]    + f[idx_f_R]     )*(g[idx_g_LLL]    + g[idx_g_R]     )*(h[idx_h_LLL]    + h[idx_h_R]     )  +
-                                          (f[idx_f_LL]     + f[idx_f_RR]    )*(g[idx_g_LL]     + g[idx_g_RR]    )*(h[idx_h_LL]     + h[idx_h_RR]    )  +
-                                          (f[idx_f_L]      + f[idx_f_RRR]   )*(g[idx_g_L]      + g[idx_g_RRR]   )*(h[idx_h_L]      + h[idx_h_RRR]   )) +
-                        quarter*(d_coef_d*(f[idx_f_LLLL]   + f[idx_f_R]     )*(g[idx_g_LLLL]   + g[idx_g_R]     )*(h[idx_h_LLLL]   + h[idx_h_R]     )  +
-                                          (f[idx_f_LLL]    + f[idx_f_RR]    )*(g[idx_g_LLL]    + g[idx_g_RR]    )*(h[idx_h_LLL]    + h[idx_h_RR]    )  +
-                                          (f[idx_f_LL]     + f[idx_f_RRR]   )*(g[idx_g_LL]     + g[idx_g_RRR]   )*(h[idx_h_LL]     + h[idx_h_RRR]   )  +
-                                          (f[idx_f_L]      + f[idx_f_RRRR]  )*(g[idx_g_L]      + g[idx_g_RRRR]  )*(h[idx_h_L]      + h[idx_h_RRRR]  )) +
-                        quarter*(d_coef_e*(f[idx_f_LLLLL]  + f[idx_f_R]     )*(g[idx_g_LLLLL]  + g[idx_g_R]     )*(h[idx_h_LLLLL]  + h[idx_h_R]     )  +
-                                          (f[idx_f_LLLL]   + f[idx_f_RR]    )*(g[idx_g_LLLL]   + g[idx_g_RR]    )*(h[idx_h_LLLL]   + h[idx_h_RR]    )  +
-                                          (f[idx_f_LLL]    + f[idx_f_RRR]   )*(g[idx_g_LLL]    + g[idx_g_RRR]   )*(h[idx_h_LLL]    + h[idx_h_RRR]   )  +
-                                          (f[idx_f_LL]     + f[idx_f_RRRR]  )*(g[idx_g_LL]     + g[idx_g_RRRR]  )*(h[idx_h_LL]     + h[idx_h_RRRR]  )  +
-                                          (f[idx_f_L]      + f[idx_f_RRRRR] )*(g[idx_g_L]      + g[idx_g_RRRRR] )*(h[idx_h_L]      + h[idx_h_RRRRR] )) +
-                        quarter*(d_coef_f*(f[idx_f_LLLLLL] + f[idx_f_R]     )*(g[idx_g_LLLLLL] + g[idx_g_R]     )*(h[idx_h_LLLLLL] + h[idx_h_R]     )  +
-                                          (f[idx_f_LLLLL]  + f[idx_f_RR]    )*(g[idx_g_LLLLL]  + g[idx_g_RR]    )*(h[idx_h_LLLLL]  + h[idx_h_RR]    )  +
-                                          (f[idx_f_LLLL]   + f[idx_f_RRR]   )*(g[idx_g_LLLL]   + g[idx_g_RRR]   )*(h[idx_h_LLLL]   + h[idx_h_RRR]   )  +
-                                          (f[idx_f_LLL]    + f[idx_f_RRRR]  )*(g[idx_g_LLL]    + g[idx_g_RRRR]  )*(h[idx_h_LLL]    + h[idx_h_RRRR]  )  +
-                                          (f[idx_f_LL]     + f[idx_f_RRRRR] )*(g[idx_g_LL]     + g[idx_g_RRRRR] )*(h[idx_h_LL]     + h[idx_h_RRRRR] )  +
-                                          (f[idx_f_L]      + f[idx_f_RRRRRR])*(g[idx_g_L]      + g[idx_g_RRRRRR])*(h[idx_h_L]      + h[idx_h_RRRRRR])));
+                    F_face_x[idx_face_x] += dt*quarter*(
+                        d_coef_a*((f[idx_f_L]      + f[idx_f_R]     )*(g[idx_g_L]      + g[idx_g_R]     )*(h[idx_h_L]      + h[idx_h_R]     )) +
+                        d_coef_b*((f[idx_f_LL]     + f[idx_f_R]     )*(g[idx_g_LL]     + g[idx_g_R]     )*(h[idx_h_LL]     + h[idx_h_R]     )  +
+                                  (f[idx_f_L]      + f[idx_f_RR]    )*(g[idx_g_L]      + g[idx_g_RR]    )*(h[idx_h_L]      + h[idx_h_RR]    )) +
+                        d_coef_c*((f[idx_f_LLL]    + f[idx_f_R]     )*(g[idx_g_LLL]    + g[idx_g_R]     )*(h[idx_h_LLL]    + h[idx_h_R]     )  +
+                                  (f[idx_f_LL]     + f[idx_f_RR]    )*(g[idx_g_LL]     + g[idx_g_RR]    )*(h[idx_h_LL]     + h[idx_h_RR]    )  +
+                                  (f[idx_f_L]      + f[idx_f_RRR]   )*(g[idx_g_L]      + g[idx_g_RRR]   )*(h[idx_h_L]      + h[idx_h_RRR]   )) +
+                        d_coef_d*((f[idx_f_LLLL]   + f[idx_f_R]     )*(g[idx_g_LLLL]   + g[idx_g_R]     )*(h[idx_h_LLLL]   + h[idx_h_R]     )  +
+                                  (f[idx_f_LLL]    + f[idx_f_RR]    )*(g[idx_g_LLL]    + g[idx_g_RR]    )*(h[idx_h_LLL]    + h[idx_h_RR]    )  +
+                                  (f[idx_f_LL]     + f[idx_f_RRR]   )*(g[idx_g_LL]     + g[idx_g_RRR]   )*(h[idx_h_LL]     + h[idx_h_RRR]   )  +
+                                  (f[idx_f_L]      + f[idx_f_RRRR]  )*(g[idx_g_L]      + g[idx_g_RRRR]  )*(h[idx_h_L]      + h[idx_h_RRRR]  )) +
+                        d_coef_e*((f[idx_f_LLLLL]  + f[idx_f_R]     )*(g[idx_g_LLLLL]  + g[idx_g_R]     )*(h[idx_h_LLLLL]  + h[idx_h_R]     )  +
+                                  (f[idx_f_LLLL]   + f[idx_f_RR]    )*(g[idx_g_LLLL]   + g[idx_g_RR]    )*(h[idx_h_LLLL]   + h[idx_h_RR]    )  +
+                                  (f[idx_f_LLL]    + f[idx_f_RRR]   )*(g[idx_g_LLL]    + g[idx_g_RRR]   )*(h[idx_h_LLL]    + h[idx_h_RRR]   )  +
+                                  (f[idx_f_LL]     + f[idx_f_RRRR]  )*(g[idx_g_LL]     + g[idx_g_RRRR]  )*(h[idx_h_LL]     + h[idx_h_RRRR]  )  +
+                                  (f[idx_f_L]      + f[idx_f_RRRRR] )*(g[idx_g_L]      + g[idx_g_RRRRR] )*(h[idx_h_L]      + h[idx_h_RRRRR] )) +
+                        d_coef_f*((f[idx_f_LLLLLL] + f[idx_f_R]     )*(g[idx_g_LLLLLL] + g[idx_g_R]     )*(h[idx_h_LLLLLL] + h[idx_h_R]     )  +
+                                  (f[idx_f_LLLLL]  + f[idx_f_RR]    )*(g[idx_g_LLLLL]  + g[idx_g_RR]    )*(h[idx_h_LLLLL]  + h[idx_h_RR]    )  +
+                                  (f[idx_f_LLLL]   + f[idx_f_RRR]   )*(g[idx_g_LLLL]   + g[idx_g_RRR]   )*(h[idx_h_LLLL]   + h[idx_h_RRR]   )  +
+                                  (f[idx_f_LLL]    + f[idx_f_RRRR]  )*(g[idx_g_LLL]    + g[idx_g_RRRR]  )*(h[idx_h_LLL]    + h[idx_h_RRRR]  )  +
+                                  (f[idx_f_LL]     + f[idx_f_RRRRR] )*(g[idx_g_LL]     + g[idx_g_RRRRR] )*(h[idx_h_LL]     + h[idx_h_RRRRR] )  +
+                                  (f[idx_f_L]      + f[idx_f_RRRRRR])*(g[idx_g_L]      + g[idx_g_RRRRRR])*(h[idx_h_L]      + h[idx_h_RRRRRR])));
                 }
             }
         }
@@ -4544,8 +4631,8 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_x[idx_face_x] += dt*(
-                            quarter*(d_coef_a*(f[idx_f_L] + f[idx_f_R])*(g[idx_g_L] + g[idx_g_R])*(h[idx_h_L] + h[idx_h_R])));
+                        F_face_x[idx_face_x] += dt*quarter*(
+                            d_coef_a*(f[idx_f_L] + f[idx_f_R])*(g[idx_g_L] + g[idx_g_R])*(h[idx_h_L] + h[idx_h_R]));
                     }
                 }
             }
@@ -4627,10 +4714,10 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_x[idx_face_x] += dt*(
-                            quarter*(d_coef_a*(f[idx_f_L]  + f[idx_f_R] )*(g[idx_g_L]  + g[idx_g_R] )*(h[idx_h_L]  + h[idx_h_R] )) +
-                            quarter*(d_coef_b*(f[idx_f_LL] + f[idx_f_R] )*(g[idx_g_LL] + g[idx_g_R] )*(h[idx_h_LL] + h[idx_h_R] )  +
-                                              (f[idx_f_L]  + f[idx_f_RR])*(g[idx_g_L]  + g[idx_g_RR])*(h[idx_h_L]  + h[idx_h_RR])));
+                        F_face_x[idx_face_x] += dt*quarter*(
+                            d_coef_a*((f[idx_f_L]  + f[idx_f_R] )*(g[idx_g_L]  + g[idx_g_R] )*(h[idx_h_L]  + h[idx_h_R] )) +
+                            d_coef_b*((f[idx_f_LL] + f[idx_f_R] )*(g[idx_g_LL] + g[idx_g_R] )*(h[idx_h_LL] + h[idx_h_R] )  +
+                                      (f[idx_f_L]  + f[idx_f_RR])*(g[idx_g_L]  + g[idx_g_RR])*(h[idx_h_L]  + h[idx_h_RR])));
                     }
                 }
             }
@@ -4742,13 +4829,13 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_x[idx_face_x] += dt*(
-                            quarter*(d_coef_a*(f[idx_f_L]   + f[idx_f_R]  )*(g[idx_g_L]   + g[idx_g_R]  )*(h[idx_h_L]   + h[idx_h_R]  )) +
-                            quarter*(d_coef_b*(f[idx_f_LL]  + f[idx_f_R]  )*(g[idx_g_LL]  + g[idx_g_R]  )*(h[idx_h_LL]  + h[idx_h_R]  )  +
-                                              (f[idx_f_L]   + f[idx_f_RR] )*(g[idx_g_L]   + g[idx_g_RR] )*(h[idx_h_L]   + h[idx_h_RR] )) +
-                            quarter*(d_coef_c*(f[idx_f_LLL] + f[idx_f_R]  )*(g[idx_g_LLL] + g[idx_g_R]  )*(h[idx_h_LLL] + h[idx_h_R]  )  +
-                                              (f[idx_f_LL]  + f[idx_f_RR] )*(g[idx_g_LL]  + g[idx_g_RR] )*(h[idx_h_LL]  + h[idx_h_RR] )  +
-                                              (f[idx_f_L]   + f[idx_f_RRR])*(g[idx_g_L]   + g[idx_g_RRR])*(h[idx_h_L]   + h[idx_h_RRR])));
+                        F_face_x[idx_face_x] += dt*quarter*(
+                            d_coef_a*((f[idx_f_L]   + f[idx_f_R]  )*(g[idx_g_L]   + g[idx_g_R]  )*(h[idx_h_L]   + h[idx_h_R]  )) +
+                            d_coef_b*((f[idx_f_LL]  + f[idx_f_R]  )*(g[idx_g_LL]  + g[idx_g_R]  )*(h[idx_h_LL]  + h[idx_h_R]  )  +
+                                      (f[idx_f_L]   + f[idx_f_RR] )*(g[idx_g_L]   + g[idx_g_RR] )*(h[idx_h_L]   + h[idx_h_RR] )) +
+                            d_coef_c*((f[idx_f_LLL] + f[idx_f_R]  )*(g[idx_g_LLL] + g[idx_g_R]  )*(h[idx_h_LLL] + h[idx_h_R]  )  +
+                                      (f[idx_f_LL]  + f[idx_f_RR] )*(g[idx_g_LL]  + g[idx_g_RR] )*(h[idx_h_LL]  + h[idx_h_RR] )  +
+                                      (f[idx_f_L]   + f[idx_f_RRR])*(g[idx_g_L]   + g[idx_g_RRR])*(h[idx_h_L]   + h[idx_h_RRR])));
                     }
                 }
             }
@@ -4890,17 +4977,17 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_x[idx_face_x] += dt*(
-                            quarter*(d_coef_a*(f[idx_f_L]    + f[idx_f_R]   )*(g[idx_g_L]    + g[idx_g_R]   )*(h[idx_h_L]    + h[idx_h_R]   )) +
-                            quarter*(d_coef_b*(f[idx_f_LL]   + f[idx_f_R]   )*(g[idx_g_LL]   + g[idx_g_R]   )*(h[idx_h_LL]   + h[idx_h_R]   )  +
-                                              (f[idx_f_L]    + f[idx_f_RR]  )*(g[idx_g_L]    + g[idx_g_RR]  )*(h[idx_h_L]    + h[idx_h_RR]  )) +
-                            quarter*(d_coef_c*(f[idx_f_LLL]  + f[idx_f_R]   )*(g[idx_g_LLL]  + g[idx_g_R]   )*(h[idx_h_LLL]  + h[idx_h_R]   )  +
-                                              (f[idx_f_LL]   + f[idx_f_RR]  )*(g[idx_g_LL]   + g[idx_g_RR]  )*(h[idx_h_LL]   + h[idx_h_RR]  )  +
-                                              (f[idx_f_L]    + f[idx_f_RRR] )*(g[idx_g_L]    + g[idx_g_RRR] )*(h[idx_h_L]    + h[idx_h_RRR] )) +
-                            quarter*(d_coef_d*(f[idx_f_LLLL] + f[idx_f_R]   )*(g[idx_g_LLLL] + g[idx_g_R]   )*(h[idx_h_LLLL] + h[idx_h_R]   )  +
-                                              (f[idx_f_LLL]  + f[idx_f_RR]  )*(g[idx_g_LLL]  + g[idx_g_RR]  )*(h[idx_h_LLL]  + h[idx_h_RR]  )  +
-                                              (f[idx_f_LL]   + f[idx_f_RRR] )*(g[idx_g_LL]   + g[idx_g_RRR] )*(h[idx_h_LL]   + h[idx_h_RRR] )  +
-                                              (f[idx_f_L]    + f[idx_f_RRRR])*(g[idx_g_L]    + g[idx_g_RRRR])*(h[idx_h_L]    + h[idx_h_RRRR])));
+                        F_face_x[idx_face_x] += dt*quarter*(
+                            d_coef_a*((f[idx_f_L]    + f[idx_f_R]   )*(g[idx_g_L]    + g[idx_g_R]   )*(h[idx_h_L]    + h[idx_h_R]   )) +
+                            d_coef_b*((f[idx_f_LL]   + f[idx_f_R]   )*(g[idx_g_LL]   + g[idx_g_R]   )*(h[idx_h_LL]   + h[idx_h_R]   )  +
+                                      (f[idx_f_L]    + f[idx_f_RR]  )*(g[idx_g_L]    + g[idx_g_RR]  )*(h[idx_h_L]    + h[idx_h_RR]  )) +
+                            d_coef_c*((f[idx_f_LLL]  + f[idx_f_R]   )*(g[idx_g_LLL]  + g[idx_g_R]   )*(h[idx_h_LLL]  + h[idx_h_R]   )  +
+                                      (f[idx_f_LL]   + f[idx_f_RR]  )*(g[idx_g_LL]   + g[idx_g_RR]  )*(h[idx_h_LL]   + h[idx_h_RR]  )  +
+                                      (f[idx_f_L]    + f[idx_f_RRR] )*(g[idx_g_L]    + g[idx_g_RRR] )*(h[idx_h_L]    + h[idx_h_RRR] )) +
+                            d_coef_d*((f[idx_f_LLLL] + f[idx_f_R]   )*(g[idx_g_LLLL] + g[idx_g_R]   )*(h[idx_h_LLLL] + h[idx_h_R]   )  +
+                                      (f[idx_f_LLL]  + f[idx_f_RR]  )*(g[idx_g_LLL]  + g[idx_g_RR]  )*(h[idx_h_LLL]  + h[idx_h_RR]  )  +
+                                      (f[idx_f_LL]   + f[idx_f_RRR] )*(g[idx_g_LL]   + g[idx_g_RRR] )*(h[idx_h_LL]   + h[idx_h_RRR] )  +
+                                      (f[idx_f_L]    + f[idx_f_RRRR])*(g[idx_g_L]    + g[idx_g_RRRR])*(h[idx_h_L]    + h[idx_h_RRRR])));
                     }
                 }
             }
@@ -5072,22 +5159,22 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_x[idx_face_x] += dt*(
-                            quarter*(d_coef_a*(f[idx_f_L]     + f[idx_f_R]    )*(g[idx_g_L]     + g[idx_g_R]    )*(h[idx_h_L]     + h[idx_h_R]    )) +
-                            quarter*(d_coef_b*(f[idx_f_LL]    + f[idx_f_R]    )*(g[idx_g_LL]    + g[idx_g_R]    )*(h[idx_h_LL]    + h[idx_h_R]    )  +
-                                              (f[idx_f_L]     + f[idx_f_RR]   )*(g[idx_g_L]     + g[idx_g_RR]   )*(h[idx_h_L]     + h[idx_h_RR]   )) +
-                            quarter*(d_coef_c*(f[idx_f_LLL]   + f[idx_f_R]    )*(g[idx_g_LLL]   + g[idx_g_R]    )*(h[idx_h_LLL]   + h[idx_h_R]    )  +
-                                              (f[idx_f_LL]    + f[idx_f_RR]   )*(g[idx_g_LL]    + g[idx_g_RR]   )*(h[idx_h_LL]    + h[idx_h_RR]   )  +
-                                              (f[idx_f_L]     + f[idx_f_RRR]  )*(g[idx_g_L]     + g[idx_g_RRR]  )*(h[idx_h_L]     + h[idx_h_RRR]  )) +
-                            quarter*(d_coef_d*(f[idx_f_LLLL]  + f[idx_f_R]    )*(g[idx_g_LLLL]  + g[idx_g_R]    )*(h[idx_h_LLLL]  + h[idx_h_R]    )  +
-                                              (f[idx_f_LLL]   + f[idx_f_RR]   )*(g[idx_g_LLL]   + g[idx_g_RR]   )*(h[idx_h_LLL]   + h[idx_h_RR]   )  +
-                                              (f[idx_f_LL]    + f[idx_f_RRR]  )*(g[idx_g_LL]    + g[idx_g_RRR]  )*(h[idx_h_LL]    + h[idx_h_RRR]  )  +
-                                              (f[idx_f_L]     + f[idx_f_RRRR] )*(g[idx_g_L]     + g[idx_g_RRRR] )*(h[idx_h_L]     + h[idx_h_RRRR] )) +
-                            quarter*(d_coef_e*(f[idx_f_LLLLL] + f[idx_f_R]    )*(g[idx_g_LLLLL] + g[idx_g_R]    )*(h[idx_h_LLLLL] + h[idx_h_R]    )  +
-                                              (f[idx_f_LLLL]  + f[idx_f_RR]   )*(g[idx_g_LLLL]  + g[idx_g_RR]   )*(h[idx_h_LLLL]  + h[idx_h_RR]   )  +
-                                              (f[idx_f_LLL]   + f[idx_f_RRR]  )*(g[idx_g_LLL]   + g[idx_g_RRR]  )*(h[idx_h_LLL]   + h[idx_h_RRR]  )  +
-                                              (f[idx_f_LL]    + f[idx_f_RRRR] )*(g[idx_g_LL]    + g[idx_g_RRRR] )*(h[idx_h_LL]    + h[idx_h_RRRR] )  +
-                                              (f[idx_f_L]     + f[idx_f_RRRRR])*(g[idx_g_L]     + g[idx_g_RRRRR])*(h[idx_h_L]     + h[idx_h_RRRRR])));
+                        F_face_x[idx_face_x] += dt*quarter*(
+                            d_coef_a*((f[idx_f_L]     + f[idx_f_R]    )*(g[idx_g_L]     + g[idx_g_R]    )*(h[idx_h_L]     + h[idx_h_R]    )) +
+                            d_coef_b*((f[idx_f_LL]    + f[idx_f_R]    )*(g[idx_g_LL]    + g[idx_g_R]    )*(h[idx_h_LL]    + h[idx_h_R]    )  +
+                                      (f[idx_f_L]     + f[idx_f_RR]   )*(g[idx_g_L]     + g[idx_g_RR]   )*(h[idx_h_L]     + h[idx_h_RR]   )) +
+                            d_coef_c*((f[idx_f_LLL]   + f[idx_f_R]    )*(g[idx_g_LLL]   + g[idx_g_R]    )*(h[idx_h_LLL]   + h[idx_h_R]    )  +
+                                      (f[idx_f_LL]    + f[idx_f_RR]   )*(g[idx_g_LL]    + g[idx_g_RR]   )*(h[idx_h_LL]    + h[idx_h_RR]   )  +
+                                      (f[idx_f_L]     + f[idx_f_RRR]  )*(g[idx_g_L]     + g[idx_g_RRR]  )*(h[idx_h_L]     + h[idx_h_RRR]  )) +
+                            d_coef_d*((f[idx_f_LLLL]  + f[idx_f_R]    )*(g[idx_g_LLLL]  + g[idx_g_R]    )*(h[idx_h_LLLL]  + h[idx_h_R]    )  +
+                                      (f[idx_f_LLL]   + f[idx_f_RR]   )*(g[idx_g_LLL]   + g[idx_g_RR]   )*(h[idx_h_LLL]   + h[idx_h_RR]   )  +
+                                      (f[idx_f_LL]    + f[idx_f_RRR]  )*(g[idx_g_LL]    + g[idx_g_RRR]  )*(h[idx_h_LL]    + h[idx_h_RRR]  )  +
+                                      (f[idx_f_L]     + f[idx_f_RRRR] )*(g[idx_g_L]     + g[idx_g_RRRR] )*(h[idx_h_L]     + h[idx_h_RRRR] )) +
+                            d_coef_e*((f[idx_f_LLLLL] + f[idx_f_R]    )*(g[idx_g_LLLLL] + g[idx_g_R]    )*(h[idx_h_LLLLL] + h[idx_h_R]    )  +
+                                      (f[idx_f_LLLL]  + f[idx_f_RR]   )*(g[idx_g_LLLL]  + g[idx_g_RR]   )*(h[idx_h_LLLL]  + h[idx_h_RR]   )  +
+                                      (f[idx_f_LLL]   + f[idx_f_RRR]  )*(g[idx_g_LLL]   + g[idx_g_RRR]  )*(h[idx_h_LLL]   + h[idx_h_RRR]  )  +
+                                      (f[idx_f_LL]    + f[idx_f_RRRR] )*(g[idx_g_LL]    + g[idx_g_RRRR] )*(h[idx_h_LL]    + h[idx_h_RRRR] )  +
+                                      (f[idx_f_L]     + f[idx_f_RRRRR])*(g[idx_g_L]     + g[idx_g_RRRRR])*(h[idx_h_L]     + h[idx_h_RRRRR])));
                     }
                 }
             }
@@ -5289,28 +5376,28 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxX(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_x[idx_face_x] += dt*(
-                            quarter*(d_coef_a*(f[idx_f_L]      + f[idx_f_R]     )*(g[idx_g_L]      + g[idx_g_R]     )*(h[idx_h_L]      + h[idx_h_R]     )) +
-                            quarter*(d_coef_b*(f[idx_f_LL]     + f[idx_f_R]     )*(g[idx_g_LL]     + g[idx_g_R]     )*(h[idx_h_LL]     + h[idx_h_R]     )  +
-                                              (f[idx_f_L]      + f[idx_f_RR]    )*(g[idx_g_L]      + g[idx_g_RR]    )*(h[idx_h_L]      + h[idx_h_RR]    )) +
-                            quarter*(d_coef_c*(f[idx_f_LLL]    + f[idx_f_R]     )*(g[idx_g_LLL]    + g[idx_g_R]     )*(h[idx_h_LLL]    + h[idx_h_R]     )  +
-                                              (f[idx_f_LL]     + f[idx_f_RR]    )*(g[idx_g_LL]     + g[idx_g_RR]    )*(h[idx_h_LL]     + h[idx_h_RR]    )  +
-                                              (f[idx_f_L]      + f[idx_f_RRR]   )*(g[idx_g_L]      + g[idx_g_RRR]   )*(h[idx_h_L]      + h[idx_h_RRR]   )) +
-                            quarter*(d_coef_d*(f[idx_f_LLLL]   + f[idx_f_R]     )*(g[idx_g_LLLL]   + g[idx_g_R]     )*(h[idx_h_LLLL]   + h[idx_h_R]     )  +
-                                              (f[idx_f_LLL]    + f[idx_f_RR]    )*(g[idx_g_LLL]    + g[idx_g_RR]    )*(h[idx_h_LLL]    + h[idx_h_RR]    )  +
-                                              (f[idx_f_LL]     + f[idx_f_RRR]   )*(g[idx_g_LL]     + g[idx_g_RRR]   )*(h[idx_h_LL]     + h[idx_h_RRR]   )  +
-                                              (f[idx_f_L]      + f[idx_f_RRRR]  )*(g[idx_g_L]      + g[idx_g_RRRR]  )*(h[idx_h_L]      + h[idx_h_RRRR]  )) +
-                            quarter*(d_coef_e*(f[idx_f_LLLLL]  + f[idx_f_R]     )*(g[idx_g_LLLLL]  + g[idx_g_R]     )*(h[idx_h_LLLLL]  + h[idx_h_R]     )  +
-                                              (f[idx_f_LLLL]   + f[idx_f_RR]    )*(g[idx_g_LLLL]   + g[idx_g_RR]    )*(h[idx_h_LLLL]   + h[idx_h_RR]    )  +
-                                              (f[idx_f_LLL]    + f[idx_f_RRR]   )*(g[idx_g_LLL]    + g[idx_g_RRR]   )*(h[idx_h_LLL]    + h[idx_h_RRR]   )  +
-                                              (f[idx_f_LL]     + f[idx_f_RRRR]  )*(g[idx_g_LL]     + g[idx_g_RRRR]  )*(h[idx_h_LL]     + h[idx_h_RRRR]  )  +
-                                              (f[idx_f_L]      + f[idx_f_RRRRR] )*(g[idx_g_L]      + g[idx_g_RRRRR] )*(h[idx_h_L]      + h[idx_h_RRRRR] )) +
-                            quarter*(d_coef_f*(f[idx_f_LLLLLL] + f[idx_f_R]     )*(g[idx_g_LLLLLL] + g[idx_g_R]     )*(h[idx_h_LLLLLL] + h[idx_h_R]     )  +
-                                              (f[idx_f_LLLLL]  + f[idx_f_RR]    )*(g[idx_g_LLLLL]  + g[idx_g_RR]    )*(h[idx_h_LLLLL]  + h[idx_h_RR]    )  +
-                                              (f[idx_f_LLLL]   + f[idx_f_RRR]   )*(g[idx_g_LLLL]   + g[idx_g_RRR]   )*(h[idx_h_LLLL]   + h[idx_h_RRR]   )  +
-                                              (f[idx_f_LLL]    + f[idx_f_RRRR]  )*(g[idx_g_LLL]    + g[idx_g_RRRR]  )*(h[idx_h_LLL]    + h[idx_h_RRRR]  )  +
-                                              (f[idx_f_LL]     + f[idx_f_RRRRR] )*(g[idx_g_LL]     + g[idx_g_RRRRR] )*(h[idx_h_LL]     + h[idx_h_RRRRR] )  +
-                                              (f[idx_f_L]      + f[idx_f_RRRRRR])*(g[idx_g_L]      + g[idx_g_RRRRRR])*(h[idx_h_L]      + h[idx_h_RRRRRR])));
+                        F_face_x[idx_face_x] += dt*quarter*(
+                            d_coef_a*((f[idx_f_L]      + f[idx_f_R]     )*(g[idx_g_L]      + g[idx_g_R]     )*(h[idx_h_L]      + h[idx_h_R]     )) +
+                            d_coef_b*((f[idx_f_LL]     + f[idx_f_R]     )*(g[idx_g_LL]     + g[idx_g_R]     )*(h[idx_h_LL]     + h[idx_h_R]     )  +
+                                      (f[idx_f_L]      + f[idx_f_RR]    )*(g[idx_g_L]      + g[idx_g_RR]    )*(h[idx_h_L]      + h[idx_h_RR]    )) +
+                            d_coef_c*((f[idx_f_LLL]    + f[idx_f_R]     )*(g[idx_g_LLL]    + g[idx_g_R]     )*(h[idx_h_LLL]    + h[idx_h_R]     )  +
+                                      (f[idx_f_LL]     + f[idx_f_RR]    )*(g[idx_g_LL]     + g[idx_g_RR]    )*(h[idx_h_LL]     + h[idx_h_RR]    )  +
+                                      (f[idx_f_L]      + f[idx_f_RRR]   )*(g[idx_g_L]      + g[idx_g_RRR]   )*(h[idx_h_L]      + h[idx_h_RRR]   )) +
+                            d_coef_d*((f[idx_f_LLLL]   + f[idx_f_R]     )*(g[idx_g_LLLL]   + g[idx_g_R]     )*(h[idx_h_LLLL]   + h[idx_h_R]     )  +
+                                      (f[idx_f_LLL]    + f[idx_f_RR]    )*(g[idx_g_LLL]    + g[idx_g_RR]    )*(h[idx_h_LLL]    + h[idx_h_RR]    )  +
+                                      (f[idx_f_LL]     + f[idx_f_RRR]   )*(g[idx_g_LL]     + g[idx_g_RRR]   )*(h[idx_h_LL]     + h[idx_h_RRR]   )  +
+                                      (f[idx_f_L]      + f[idx_f_RRRR]  )*(g[idx_g_L]      + g[idx_g_RRRR]  )*(h[idx_h_L]      + h[idx_h_RRRR]  )) +
+                            d_coef_e*((f[idx_f_LLLLL]  + f[idx_f_R]     )*(g[idx_g_LLLLL]  + g[idx_g_R]     )*(h[idx_h_LLLLL]  + h[idx_h_R]     )  +
+                                      (f[idx_f_LLLL]   + f[idx_f_RR]    )*(g[idx_g_LLLL]   + g[idx_g_RR]    )*(h[idx_h_LLLL]   + h[idx_h_RR]    )  +
+                                      (f[idx_f_LLL]    + f[idx_f_RRR]   )*(g[idx_g_LLL]    + g[idx_g_RRR]   )*(h[idx_h_LLL]    + h[idx_h_RRR]   )  +
+                                      (f[idx_f_LL]     + f[idx_f_RRRR]  )*(g[idx_g_LL]     + g[idx_g_RRRR]  )*(h[idx_h_LL]     + h[idx_h_RRRR]  )  +
+                                      (f[idx_f_L]      + f[idx_f_RRRRR] )*(g[idx_g_L]      + g[idx_g_RRRRR] )*(h[idx_h_L]      + h[idx_h_RRRRR] )) +
+                            d_coef_f*((f[idx_f_LLLLLL] + f[idx_f_R]     )*(g[idx_g_LLLLLL] + g[idx_g_R]     )*(h[idx_h_LLLLLL] + h[idx_h_R]     )  +
+                                      (f[idx_f_LLLLL]  + f[idx_f_RR]    )*(g[idx_g_LLLLL]  + g[idx_g_RR]    )*(h[idx_h_LLLLL]  + h[idx_h_RR]    )  +
+                                      (f[idx_f_LLLL]   + f[idx_f_RRR]   )*(g[idx_g_LLLL]   + g[idx_g_RRR]   )*(h[idx_h_LLLL]   + h[idx_h_RRR]   )  +
+                                      (f[idx_f_LLL]    + f[idx_f_RRRR]  )*(g[idx_g_LLL]    + g[idx_g_RRRR]  )*(h[idx_h_LLL]    + h[idx_h_RRRR]  )  +
+                                      (f[idx_f_LL]     + f[idx_f_RRRRR] )*(g[idx_g_LL]     + g[idx_g_RRRRR] )*(h[idx_h_LL]     + h[idx_h_RRRRR] )  +
+                                      (f[idx_f_L]      + f[idx_f_RRRRRR])*(g[idx_g_L]      + g[idx_g_RRRRRR])*(h[idx_h_L]      + h[idx_h_RRRRRR])));
                     }
                 }
             }
@@ -5393,7 +5480,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
                         (j + num_ghosts_1_f)*ghostcell_dim_0_f;
                     
                     F_face_y[idx_face_y] += dt*(
-                        (d_coef_a*(f[idx_f_B] + f[idx_f_T])));
+                        d_coef_a*(f[idx_f_B] + f[idx_f_T]));
                 }
             }
         }
@@ -5422,8 +5509,8 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
                         (j + 1 + num_ghosts_1_f)*ghostcell_dim_0_f;
                     
                     F_face_y[idx_face_y] += dt*(
-                        (d_coef_a*(f[idx_f_B]  + f[idx_f_T] )) +
-                        (d_coef_b*(f[idx_f_BB] + f[idx_f_T] )  +
+                        d_coef_a*((f[idx_f_B]  + f[idx_f_T] )) +
+                        d_coef_b*((f[idx_f_BB] + f[idx_f_T] )  +
                                   (f[idx_f_B]  + f[idx_f_TT])));
                 }
             }
@@ -5459,10 +5546,10 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
                         (j + 2 + num_ghosts_1_f)*ghostcell_dim_0_f;
                     
                     F_face_y[idx_face_y] += dt*(
-                        (d_coef_a*(f[idx_f_B]   + f[idx_f_T]  )) +
-                        (d_coef_b*(f[idx_f_BB]  + f[idx_f_T]  )  +
+                        d_coef_a*((f[idx_f_B]   + f[idx_f_T]  )) +
+                        d_coef_b*((f[idx_f_BB]  + f[idx_f_T]  )  +
                                   (f[idx_f_B]   + f[idx_f_TT] )) +
-                        (d_coef_c*(f[idx_f_BBB] + f[idx_f_T]  )  +
+                        d_coef_c*((f[idx_f_BBB] + f[idx_f_T]  )  +
                                   (f[idx_f_BB]  + f[idx_f_TT] )  +
                                   (f[idx_f_B]   + f[idx_f_TTT])));
                 }
@@ -5505,13 +5592,13 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
                         (j + 3 + num_ghosts_1_f)*ghostcell_dim_0_f;
                     
                     F_face_y[idx_face_y] += dt*(
-                        (d_coef_a*(f[idx_f_B]    + f[idx_f_T]   )) +
-                        (d_coef_b*(f[idx_f_BB]   + f[idx_f_T]   )  +
+                        d_coef_a*((f[idx_f_B]    + f[idx_f_T]   )) +
+                        d_coef_b*((f[idx_f_BB]   + f[idx_f_T]   )  +
                                   (f[idx_f_B]    + f[idx_f_TT]  )) +
-                        (d_coef_c*(f[idx_f_BBB]  + f[idx_f_T]   )  +
+                        d_coef_c*((f[idx_f_BBB]  + f[idx_f_T]   )  +
                                   (f[idx_f_BB]   + f[idx_f_TT]  )  +
                                   (f[idx_f_B]    + f[idx_f_TTT] )) +
-                        (d_coef_d*(f[idx_f_BBBB] + f[idx_f_T]   )  +
+                        d_coef_d*((f[idx_f_BBBB] + f[idx_f_T]   )  +
                                   (f[idx_f_BBB]  + f[idx_f_TT]  )  +
                                   (f[idx_f_BB]   + f[idx_f_TTT] )  +
                                   (f[idx_f_B]    + f[idx_f_TTTT])));
@@ -5561,17 +5648,17 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
                         (j + 4 + num_ghosts_1_f)*ghostcell_dim_0_f;
                     
                     F_face_y[idx_face_y] += dt*(
-                        (d_coef_a*(f[idx_f_B]     + f[idx_f_T]    )) +
-                        (d_coef_b*(f[idx_f_BB]    + f[idx_f_T]    )  +
+                        d_coef_a*((f[idx_f_B]     + f[idx_f_T]    )) +
+                        d_coef_b*((f[idx_f_BB]    + f[idx_f_T]    )  +
                                   (f[idx_f_B]     + f[idx_f_TT]   )) +
-                        (d_coef_c*(f[idx_f_BBB]   + f[idx_f_T]    )  +
+                        d_coef_c*((f[idx_f_BBB]   + f[idx_f_T]    )  +
                                   (f[idx_f_BB]    + f[idx_f_TT]   )  +
                                   (f[idx_f_B]     + f[idx_f_TTT]  )) +
-                        (d_coef_d*(f[idx_f_BBBB]  + f[idx_f_T]    )  +
+                        d_coef_d*((f[idx_f_BBBB]  + f[idx_f_T]    )  +
                                   (f[idx_f_BBB]   + f[idx_f_TT]   )  +
                                   (f[idx_f_BB]    + f[idx_f_TTT]  )  +
                                   (f[idx_f_B]     + f[idx_f_TTTT] )) +
-                        (d_coef_e*(f[idx_f_BBBBB] + f[idx_f_T]    )  +
+                        d_coef_e*((f[idx_f_BBBBB] + f[idx_f_T]    )  +
                                   (f[idx_f_BBBB]  + f[idx_f_TT]   )  +
                                   (f[idx_f_BBB]   + f[idx_f_TTT]  )  +
                                   (f[idx_f_BB]    + f[idx_f_TTTT] )  +
@@ -5628,22 +5715,22 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
                         (j + 5 + num_ghosts_1_f)*ghostcell_dim_0_f;
                     
                     F_face_y[idx_face_y] += dt*(
-                        (d_coef_a*(f[idx_f_B]      + f[idx_f_T]     )) +
-                        (d_coef_b*(f[idx_f_BB]     + f[idx_f_T]     )  +
+                        d_coef_a*((f[idx_f_B]      + f[idx_f_T]     )) +
+                        d_coef_b*((f[idx_f_BB]     + f[idx_f_T]     )  +
                                   (f[idx_f_B]      + f[idx_f_TT]    )) +
-                        (d_coef_c*(f[idx_f_BBB]    + f[idx_f_T]     )  +
+                        d_coef_c*((f[idx_f_BBB]    + f[idx_f_T]     )  +
                                   (f[idx_f_BB]     + f[idx_f_TT]    )  +
                                   (f[idx_f_B]      + f[idx_f_TTT]   )) +
-                        (d_coef_d*(f[idx_f_BBBB]   + f[idx_f_T]     )  +
+                        d_coef_d*((f[idx_f_BBBB]   + f[idx_f_T]     )  +
                                   (f[idx_f_BBB]    + f[idx_f_TT]    )  +
                                   (f[idx_f_BB]     + f[idx_f_TTT]   )  +
                                   (f[idx_f_B]      + f[idx_f_TTTT]  )) +
-                        (d_coef_e*(f[idx_f_BBBBB]  + f[idx_f_T]     )  +
+                        d_coef_e*((f[idx_f_BBBBB]  + f[idx_f_T]     )  +
                                   (f[idx_f_BBBB]   + f[idx_f_TT]    )  +
                                   (f[idx_f_BBB]    + f[idx_f_TTT]   )  +
                                   (f[idx_f_BB]     + f[idx_f_TTTT]  )  +
                                   (f[idx_f_B]      + f[idx_f_TTTTT] )) +
-                        (d_coef_f*(f[idx_f_BBBBBB] + f[idx_f_T]     )  +
+                        d_coef_f*((f[idx_f_BBBBBB] + f[idx_f_T]     )  +
                                   (f[idx_f_BBBBB]  + f[idx_f_TT]    )  +
                                   (f[idx_f_BBBB]   + f[idx_f_TTT]   )  +
                                   (f[idx_f_BBB]    + f[idx_f_TTTT]  )  +
@@ -5699,7 +5786,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
                                 ghostcell_dim_1_f;
                         
                         F_face_y[idx_face_y] += dt*(
-                            (d_coef_a*(f[idx_f_B] + f[idx_f_T])));
+                            d_coef_a*(f[idx_f_B] + f[idx_f_T]));
                     }
                 }
             }
@@ -5740,8 +5827,8 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
                                 ghostcell_dim_1_f;
                         
                         F_face_y[idx_face_y] += dt*(
-                            (d_coef_a*(f[idx_f_B]  + f[idx_f_T] )) +
-                            (d_coef_b*(f[idx_f_BB] + f[idx_f_T] )  +
+                            d_coef_a*((f[idx_f_B]  + f[idx_f_T] )) +
+                            d_coef_b*((f[idx_f_BB] + f[idx_f_T] )  +
                                       (f[idx_f_B]  + f[idx_f_TT])));
                     }
                 }
@@ -5793,10 +5880,10 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
                                 ghostcell_dim_1_f;
                         
                         F_face_y[idx_face_y] += dt*(
-                            (d_coef_a*(f[idx_f_B]   + f[idx_f_T]  )) +
-                            (d_coef_b*(f[idx_f_BB]  + f[idx_f_T]  )  +
+                            d_coef_a*((f[idx_f_B]   + f[idx_f_T]  )) +
+                            d_coef_b*((f[idx_f_BB]  + f[idx_f_T]  )  +
                                       (f[idx_f_B]   + f[idx_f_TT] )) +
-                            (d_coef_c*(f[idx_f_BBB] + f[idx_f_T]  )  +
+                            d_coef_c*((f[idx_f_BBB] + f[idx_f_T]  )  +
                                       (f[idx_f_BB]  + f[idx_f_TT] )  +
                                       (f[idx_f_B]   + f[idx_f_TTT])));
                     }
@@ -5859,13 +5946,13 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
                                 ghostcell_dim_1_f;
                         
                         F_face_y[idx_face_y] += dt*(
-                            (d_coef_a*(f[idx_f_B]    + f[idx_f_T]   )) +
-                            (d_coef_b*(f[idx_f_BB]   + f[idx_f_T]   )  +
+                            d_coef_a*((f[idx_f_B]    + f[idx_f_T]   )) +
+                            d_coef_b*((f[idx_f_BB]   + f[idx_f_T]   )  +
                                       (f[idx_f_B]    + f[idx_f_TT]  )) +
-                            (d_coef_c*(f[idx_f_BBB]  + f[idx_f_T]   )  +
+                            d_coef_c*((f[idx_f_BBB]  + f[idx_f_T]   )  +
                                       (f[idx_f_BB]   + f[idx_f_TT]  )  +
                                       (f[idx_f_B]    + f[idx_f_TTT] )) +
-                            (d_coef_d*(f[idx_f_BBBB] + f[idx_f_T]   )  +
+                            d_coef_d*((f[idx_f_BBBB] + f[idx_f_T]   )  +
                                       (f[idx_f_BBB]  + f[idx_f_TT]  )  +
                                       (f[idx_f_BB]   + f[idx_f_TTT] )  +
                                       (f[idx_f_B]    + f[idx_f_TTTT])));
@@ -5939,17 +6026,17 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
                                 ghostcell_dim_1_f;
                         
                         F_face_y[idx_face_y] += dt*(
-                            (d_coef_a*(f[idx_f_B]     + f[idx_f_T]    )) +
-                            (d_coef_b*(f[idx_f_BB]    + f[idx_f_T]    )  +
+                            d_coef_a*((f[idx_f_B]     + f[idx_f_T]    )) +
+                            d_coef_b*((f[idx_f_BB]    + f[idx_f_T]    )  +
                                       (f[idx_f_B]     + f[idx_f_TT]   )) +
-                            (d_coef_c*(f[idx_f_BBB]   + f[idx_f_T]    )  +
+                            d_coef_c*((f[idx_f_BBB]   + f[idx_f_T]    )  +
                                       (f[idx_f_BB]    + f[idx_f_TT]   )  +
                                       (f[idx_f_B]     + f[idx_f_TTT]  )) +
-                            (d_coef_d*(f[idx_f_BBBB]  + f[idx_f_T]    )  +
+                            d_coef_d*((f[idx_f_BBBB]  + f[idx_f_T]    )  +
                                       (f[idx_f_BBB]   + f[idx_f_TT]   )  +
                                       (f[idx_f_BB]    + f[idx_f_TTT]  )  +
                                       (f[idx_f_B]     + f[idx_f_TTTT] )) +
-                            (d_coef_e*(f[idx_f_BBBBB] + f[idx_f_T]    )  +
+                            d_coef_e*((f[idx_f_BBBBB] + f[idx_f_T]    )  +
                                       (f[idx_f_BBBB]  + f[idx_f_TT]   )  +
                                       (f[idx_f_BBB]   + f[idx_f_TTT]  )  +
                                       (f[idx_f_BB]    + f[idx_f_TTTT] )  +
@@ -6034,22 +6121,22 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxY(
                                 ghostcell_dim_1_f;
                         
                         F_face_y[idx_face_y] += dt*(
-                            (d_coef_a*(f[idx_f_B]      + f[idx_f_T]     )) +
-                            (d_coef_b*(f[idx_f_BB]     + f[idx_f_T]     )  +
+                            d_coef_a*((f[idx_f_B]      + f[idx_f_T]     )) +
+                            d_coef_b*((f[idx_f_BB]     + f[idx_f_T]     )  +
                                       (f[idx_f_B]      + f[idx_f_TT]    )) +
-                            (d_coef_c*(f[idx_f_BBB]    + f[idx_f_T]     )  +
+                            d_coef_c*((f[idx_f_BBB]    + f[idx_f_T]     )  +
                                       (f[idx_f_BB]     + f[idx_f_TT]    )  +
                                       (f[idx_f_B]      + f[idx_f_TTT]   )) +
-                            (d_coef_d*(f[idx_f_BBBB]   + f[idx_f_T]     )  +
+                            d_coef_d*((f[idx_f_BBBB]   + f[idx_f_T]     )  +
                                       (f[idx_f_BBB]    + f[idx_f_TT]    )  +
                                       (f[idx_f_BB]     + f[idx_f_TTT]   )  +
                                       (f[idx_f_B]      + f[idx_f_TTTT]  )) +
-                            (d_coef_e*(f[idx_f_BBBBB]  + f[idx_f_T]     )  +
+                            d_coef_e*((f[idx_f_BBBBB]  + f[idx_f_T]     )  +
                                       (f[idx_f_BBBB]   + f[idx_f_TT]    )  +
                                       (f[idx_f_BBB]    + f[idx_f_TTT]   )  +
                                       (f[idx_f_BB]     + f[idx_f_TTTT]  )  +
                                       (f[idx_f_B]      + f[idx_f_TTTTT] )) +
-                            (d_coef_f*(f[idx_f_BBBBBB] + f[idx_f_T]     )  +
+                            d_coef_f*((f[idx_f_BBBBBB] + f[idx_f_T]     )  +
                                       (f[idx_f_BBBBB]  + f[idx_f_TT]    )  +
                                       (f[idx_f_BBBB]   + f[idx_f_TTT]   )  +
                                       (f[idx_f_BBB]    + f[idx_f_TTTT]  )  +
@@ -6157,8 +6244,8 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
                     const int idx_g_T = (i + num_ghosts_0_g) +
                         (j + num_ghosts_1_g)*ghostcell_dim_0_g;
                     
-                    F_face_y[idx_face_y] += dt*(
-                        half*(d_coef_a*(f[idx_f_B] + f[idx_f_T])*(g[idx_g_B] + g[idx_g_T])));
+                    F_face_y[idx_face_y] += dt*half*(
+                        d_coef_a*(f[idx_f_B] + f[idx_f_T])*(g[idx_g_B] + g[idx_g_T]));
                 }
             }
         }
@@ -6198,10 +6285,10 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
                     const int idx_g_TT = (i + num_ghosts_0_g) +
                         (j + 1 + num_ghosts_1_g)*ghostcell_dim_0_g;
                     
-                    F_face_y[idx_face_y] += dt*(
-                        half*(d_coef_a*(f[idx_f_B]  + f[idx_f_T] )*(g[idx_g_B]  + g[idx_g_T] )) +
-                        half*(d_coef_b*(f[idx_f_BB] + f[idx_f_T] )*(g[idx_g_BB] + g[idx_g_T] )  +
-                                       (f[idx_f_B]  + f[idx_f_TT])*(g[idx_g_B]  + g[idx_g_TT])));
+                    F_face_y[idx_face_y] += dt*half*(
+                        d_coef_a*((f[idx_f_B]  + f[idx_f_T] )*(g[idx_g_B]  + g[idx_g_T] )) +
+                        d_coef_b*((f[idx_f_BB] + f[idx_f_T] )*(g[idx_g_BB] + g[idx_g_T] )  +
+                                  (f[idx_f_B]  + f[idx_f_TT])*(g[idx_g_B]  + g[idx_g_TT])));
                 }
             }
         }
@@ -6253,13 +6340,13 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
                     const int idx_g_TTT = (i + num_ghosts_0_g) +
                         (j + 2 + num_ghosts_1_g)*ghostcell_dim_0_g;
                     
-                    F_face_y[idx_face_y] += dt*(
-                        half*(d_coef_a*(f[idx_f_B]   + f[idx_f_T]  )*(g[idx_g_B]   + g[idx_g_T]  )) +
-                        half*(d_coef_b*(f[idx_f_BB]  + f[idx_f_T]  )*(g[idx_g_BB]  + g[idx_g_T]  )  +
-                                       (f[idx_f_B]   + f[idx_f_TT] )*(g[idx_g_B]   + g[idx_g_TT] )) +
-                        half*(d_coef_c*(f[idx_f_BBB] + f[idx_f_T]  )*(g[idx_g_BBB] + g[idx_g_T]  )  +
-                                       (f[idx_f_BB]  + f[idx_f_TT] )*(g[idx_g_BB]  + g[idx_g_TT] )  +
-                                       (f[idx_f_B]   + f[idx_f_TTT])*(g[idx_g_B]   + g[idx_g_TTT])));
+                    F_face_y[idx_face_y] += dt*half*(
+                        d_coef_a*((f[idx_f_B]   + f[idx_f_T]  )*(g[idx_g_B]   + g[idx_g_T]  )) +
+                        d_coef_b*((f[idx_f_BB]  + f[idx_f_T]  )*(g[idx_g_BB]  + g[idx_g_T]  )  +
+                                  (f[idx_f_B]   + f[idx_f_TT] )*(g[idx_g_B]   + g[idx_g_TT] )) +
+                        d_coef_c*((f[idx_f_BBB] + f[idx_f_T]  )*(g[idx_g_BBB] + g[idx_g_T]  )  +
+                                  (f[idx_f_BB]  + f[idx_f_TT] )*(g[idx_g_BB]  + g[idx_g_TT] )  +
+                                  (f[idx_f_B]   + f[idx_f_TTT])*(g[idx_g_B]   + g[idx_g_TTT])));
                 }
             }
         }
@@ -6323,17 +6410,17 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
                     const int idx_g_TTTT = (i + num_ghosts_0_g) +
                         (j + 3 + num_ghosts_1_g)*ghostcell_dim_0_g;
                     
-                    F_face_y[idx_face_y] += dt*(
-                        half*(d_coef_a*(f[idx_f_B]    + f[idx_f_T]   )*(g[idx_g_B]    + g[idx_g_T]   )) +
-                        half*(d_coef_b*(f[idx_f_BB]   + f[idx_f_T]   )*(g[idx_g_BB]   + g[idx_g_T]   )  +
-                                       (f[idx_f_B]    + f[idx_f_TT]  )*(g[idx_g_B]    + g[idx_g_TT]  )) +
-                        half*(d_coef_c*(f[idx_f_BBB]  + f[idx_f_T]   )*(g[idx_g_BBB]  + g[idx_g_T]   )  +
-                                       (f[idx_f_BB]   + f[idx_f_TT]  )*(g[idx_g_BB]   + g[idx_g_TT]  )  +
-                                       (f[idx_f_B]    + f[idx_f_TTT] )*(g[idx_g_B]    + g[idx_g_TTT] )) +
-                        half*(d_coef_d*(f[idx_f_BBBB] + f[idx_f_T]   )*(g[idx_g_BBBB] + g[idx_g_T]   )  +
-                                       (f[idx_f_BBB]  + f[idx_f_TT]  )*(g[idx_g_BBB]  + g[idx_g_TT]  )  +
-                                       (f[idx_f_BB]   + f[idx_f_TTT] )*(g[idx_g_BB]   + g[idx_g_TTT] )  +
-                                       (f[idx_f_B]    + f[idx_f_TTTT])*(g[idx_g_B]    + g[idx_g_TTTT])));
+                    F_face_y[idx_face_y] += dt*half*(
+                        d_coef_a*((f[idx_f_B]    + f[idx_f_T]   )*(g[idx_g_B]    + g[idx_g_T]   )) +
+                        d_coef_b*((f[idx_f_BB]   + f[idx_f_T]   )*(g[idx_g_BB]   + g[idx_g_T]   )  +
+                                  (f[idx_f_B]    + f[idx_f_TT]  )*(g[idx_g_B]    + g[idx_g_TT]  )) +
+                        d_coef_c*((f[idx_f_BBB]  + f[idx_f_T]   )*(g[idx_g_BBB]  + g[idx_g_T]   )  +
+                                  (f[idx_f_BB]   + f[idx_f_TT]  )*(g[idx_g_BB]   + g[idx_g_TT]  )  +
+                                  (f[idx_f_B]    + f[idx_f_TTT] )*(g[idx_g_B]    + g[idx_g_TTT] )) +
+                        d_coef_d*((f[idx_f_BBBB] + f[idx_f_T]   )*(g[idx_g_BBBB] + g[idx_g_T]   )  +
+                                  (f[idx_f_BBB]  + f[idx_f_TT]  )*(g[idx_g_BBB]  + g[idx_g_TT]  )  +
+                                  (f[idx_f_BB]   + f[idx_f_TTT] )*(g[idx_g_BB]   + g[idx_g_TTT] )  +
+                                  (f[idx_f_B]    + f[idx_f_TTTT])*(g[idx_g_B]    + g[idx_g_TTTT])));
                 }
             }
         }
@@ -6409,22 +6496,22 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
                     const int idx_g_TTTTT = (i + num_ghosts_0_g) +
                         (j + 4 + num_ghosts_1_g)*ghostcell_dim_0_g;
                     
-                    F_face_y[idx_face_y] += dt*(
-                        half*(d_coef_a*(f[idx_f_B]     + f[idx_f_T]    )*(g[idx_g_B]     + g[idx_g_T]    )) +
-                        half*(d_coef_b*(f[idx_f_BB]    + f[idx_f_T]    )*(g[idx_g_BB]    + g[idx_g_T]    )  +
-                                       (f[idx_f_B]     + f[idx_f_TT]   )*(g[idx_g_B]     + g[idx_g_TT]   )) +
-                        half*(d_coef_c*(f[idx_f_BBB]   + f[idx_f_T]    )*(g[idx_g_BBB]   + g[idx_g_T]    )  +
-                                       (f[idx_f_BB]    + f[idx_f_TT]   )*(g[idx_g_BB]    + g[idx_g_TT]   )  +
-                                       (f[idx_f_B]     + f[idx_f_TTT]  )*(g[idx_g_B]     + g[idx_g_TTT]  )) +
-                        half*(d_coef_d*(f[idx_f_BBBB]  + f[idx_f_T]    )*(g[idx_g_BBBB]  + g[idx_g_T]    )  +
-                                       (f[idx_f_BBB]   + f[idx_f_TT]   )*(g[idx_g_BBB]   + g[idx_g_TT]   )  +
-                                       (f[idx_f_BB]    + f[idx_f_TTT]  )*(g[idx_g_BB]    + g[idx_g_TTT]  )  +
-                                       (f[idx_f_B]     + f[idx_f_TTTT] )*(g[idx_g_B]     + g[idx_g_TTTT] )) +
-                        half*(d_coef_e*(f[idx_f_BBBBB] + f[idx_f_T]    )*(g[idx_g_BBBBB] + g[idx_g_T]    )  +
-                                       (f[idx_f_BBBB]  + f[idx_f_TT]   )*(g[idx_g_BBBB]  + g[idx_g_TT]   )  +
-                                       (f[idx_f_BBB]   + f[idx_f_TTT]  )*(g[idx_g_BBB]   + g[idx_g_TTT]  )  +
-                                       (f[idx_f_BB]    + f[idx_f_TTTT] )*(g[idx_g_BB]    + g[idx_g_TTTT] )  +
-                                       (f[idx_f_B]     + f[idx_f_TTTTT])*(g[idx_g_B]     + g[idx_g_TTTTT])));
+                    F_face_y[idx_face_y] += dt*half*(
+                        d_coef_a*((f[idx_f_B]     + f[idx_f_T]    )*(g[idx_g_B]     + g[idx_g_T]    )) +
+                        d_coef_b*((f[idx_f_BB]    + f[idx_f_T]    )*(g[idx_g_BB]    + g[idx_g_T]    )  +
+                                  (f[idx_f_B]     + f[idx_f_TT]   )*(g[idx_g_B]     + g[idx_g_TT]   )) +
+                        d_coef_c*((f[idx_f_BBB]   + f[idx_f_T]    )*(g[idx_g_BBB]   + g[idx_g_T]    )  +
+                                  (f[idx_f_BB]    + f[idx_f_TT]   )*(g[idx_g_BB]    + g[idx_g_TT]   )  +
+                                  (f[idx_f_B]     + f[idx_f_TTT]  )*(g[idx_g_B]     + g[idx_g_TTT]  )) +
+                        d_coef_d*((f[idx_f_BBBB]  + f[idx_f_T]    )*(g[idx_g_BBBB]  + g[idx_g_T]    )  +
+                                  (f[idx_f_BBB]   + f[idx_f_TT]   )*(g[idx_g_BBB]   + g[idx_g_TT]   )  +
+                                  (f[idx_f_BB]    + f[idx_f_TTT]  )*(g[idx_g_BB]    + g[idx_g_TTT]  )  +
+                                  (f[idx_f_B]     + f[idx_f_TTTT] )*(g[idx_g_B]     + g[idx_g_TTTT] )) +
+                        d_coef_e*((f[idx_f_BBBBB] + f[idx_f_T]    )*(g[idx_g_BBBBB] + g[idx_g_T]    )  +
+                                  (f[idx_f_BBBB]  + f[idx_f_TT]   )*(g[idx_g_BBBB]  + g[idx_g_TT]   )  +
+                                  (f[idx_f_BBB]   + f[idx_f_TTT]  )*(g[idx_g_BBB]   + g[idx_g_TTT]  )  +
+                                  (f[idx_f_BB]    + f[idx_f_TTTT] )*(g[idx_g_BB]    + g[idx_g_TTTT] )  +
+                                  (f[idx_f_B]     + f[idx_f_TTTTT])*(g[idx_g_B]     + g[idx_g_TTTTT])));
                 }
             }
         }
@@ -6512,28 +6599,28 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
                     const int idx_g_TTTTTT = (i + num_ghosts_0_g) +
                         (j + 5 + num_ghosts_1_g)*ghostcell_dim_0_g;
                     
-                    F_face_y[idx_face_y] += dt*(
-                        half*(d_coef_a*(f[idx_f_B]      + f[idx_f_T]     )*(g[idx_g_B]      + g[idx_g_T]     )) +
-                        half*(d_coef_b*(f[idx_f_BB]     + f[idx_f_T]     )*(g[idx_g_BB]     + g[idx_g_T]     )  +
-                                       (f[idx_f_B]      + f[idx_f_TT]    )*(g[idx_g_B]      + g[idx_g_TT]    )) +
-                        half*(d_coef_c*(f[idx_f_BBB]    + f[idx_f_T]     )*(g[idx_g_BBB]    + g[idx_g_T]     )  +
-                                       (f[idx_f_BB]     + f[idx_f_TT]    )*(g[idx_g_BB]     + g[idx_g_TT]    )  +
-                                       (f[idx_f_B]      + f[idx_f_TTT]   )*(g[idx_g_B]      + g[idx_g_TTT]   )) +
-                        half*(d_coef_d*(f[idx_f_BBBB]   + f[idx_f_T]     )*(g[idx_g_BBBB]   + g[idx_g_T]     )  +
-                                       (f[idx_f_BBB]    + f[idx_f_TT]    )*(g[idx_g_BBB]    + g[idx_g_TT]    )  +
-                                       (f[idx_f_BB]     + f[idx_f_TTT]   )*(g[idx_g_BB]     + g[idx_g_TTT]   )  +
-                                       (f[idx_f_B]      + f[idx_f_TTTT]  )*(g[idx_g_B]      + g[idx_g_TTTT]  )) +
-                        half*(d_coef_e*(f[idx_f_BBBBB]  + f[idx_f_T]     )*(g[idx_g_BBBBB]  + g[idx_g_T]     )  +
-                                       (f[idx_f_BBBB]   + f[idx_f_TT]    )*(g[idx_g_BBBB]   + g[idx_g_TT]    )  +
-                                       (f[idx_f_BBB]    + f[idx_f_TTT]   )*(g[idx_g_BBB]    + g[idx_g_TTT]   )  +
-                                       (f[idx_f_BB]     + f[idx_f_TTTT]  )*(g[idx_g_BB]     + g[idx_g_TTTT]  )  +
-                                       (f[idx_f_B]      + f[idx_f_TTTTT] )*(g[idx_g_B]      + g[idx_g_TTTTT] )) +
-                        half*(d_coef_f*(f[idx_f_BBBBBB] + f[idx_f_T]     )*(g[idx_g_BBBBBB] + g[idx_g_T]     )  +
-                                       (f[idx_f_BBBBB]  + f[idx_f_TT]    )*(g[idx_g_BBBBB]  + g[idx_g_TT]    )  +
-                                       (f[idx_f_BBBB]   + f[idx_f_TTT]   )*(g[idx_g_BBBB]   + g[idx_g_TTT]   )  +
-                                       (f[idx_f_BBB]    + f[idx_f_TTTT]  )*(g[idx_g_BBB]    + g[idx_g_TTTT]  )  +
-                                       (f[idx_f_BB]     + f[idx_f_TTTTT] )*(g[idx_g_BB]     + g[idx_g_TTTTT] )  +
-                                       (f[idx_f_B]      + f[idx_f_TTTTTT])*(g[idx_g_B]      + g[idx_g_TTTTTT])));
+                    F_face_y[idx_face_y] += dt*half*(
+                        d_coef_a*((f[idx_f_B]      + f[idx_f_T]     )*(g[idx_g_B]      + g[idx_g_T]     )) +
+                        d_coef_b*((f[idx_f_BB]     + f[idx_f_T]     )*(g[idx_g_BB]     + g[idx_g_T]     )  +
+                                  (f[idx_f_B]      + f[idx_f_TT]    )*(g[idx_g_B]      + g[idx_g_TT]    )) +
+                        d_coef_c*((f[idx_f_BBB]    + f[idx_f_T]     )*(g[idx_g_BBB]    + g[idx_g_T]     )  +
+                                  (f[idx_f_BB]     + f[idx_f_TT]    )*(g[idx_g_BB]     + g[idx_g_TT]    )  +
+                                  (f[idx_f_B]      + f[idx_f_TTT]   )*(g[idx_g_B]      + g[idx_g_TTT]   )) +
+                        d_coef_d*((f[idx_f_BBBB]   + f[idx_f_T]     )*(g[idx_g_BBBB]   + g[idx_g_T]     )  +
+                                  (f[idx_f_BBB]    + f[idx_f_TT]    )*(g[idx_g_BBB]    + g[idx_g_TT]    )  +
+                                  (f[idx_f_BB]     + f[idx_f_TTT]   )*(g[idx_g_BB]     + g[idx_g_TTT]   )  +
+                                  (f[idx_f_B]      + f[idx_f_TTTT]  )*(g[idx_g_B]      + g[idx_g_TTTT]  )) +
+                        d_coef_e*((f[idx_f_BBBBB]  + f[idx_f_T]     )*(g[idx_g_BBBBB]  + g[idx_g_T]     )  +
+                                  (f[idx_f_BBBB]   + f[idx_f_TT]    )*(g[idx_g_BBBB]   + g[idx_g_TT]    )  +
+                                  (f[idx_f_BBB]    + f[idx_f_TTT]   )*(g[idx_g_BBB]    + g[idx_g_TTT]   )  +
+                                  (f[idx_f_BB]     + f[idx_f_TTTT]  )*(g[idx_g_BB]     + g[idx_g_TTTT]  )  +
+                                  (f[idx_f_B]      + f[idx_f_TTTTT] )*(g[idx_g_B]      + g[idx_g_TTTTT] )) +
+                        d_coef_f*((f[idx_f_BBBBBB] + f[idx_f_T]     )*(g[idx_g_BBBBBB] + g[idx_g_T]     )  +
+                                  (f[idx_f_BBBBB]  + f[idx_f_TT]    )*(g[idx_g_BBBBB]  + g[idx_g_TT]    )  +
+                                  (f[idx_f_BBBB]   + f[idx_f_TTT]   )*(g[idx_g_BBBB]   + g[idx_g_TTT]   )  +
+                                  (f[idx_f_BBB]    + f[idx_f_TTTT]  )*(g[idx_g_BBB]    + g[idx_g_TTTT]  )  +
+                                  (f[idx_f_BB]     + f[idx_f_TTTTT] )*(g[idx_g_BB]     + g[idx_g_TTTTT] )  +
+                                  (f[idx_f_B]      + f[idx_f_TTTTTT])*(g[idx_g_B]      + g[idx_g_TTTTTT])));
                 }
             }
         }
@@ -6599,8 +6686,8 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_y[idx_face_y] += dt*(
-                            half*(d_coef_a*(f[idx_f_B] + f[idx_f_T])*(g[idx_g_B] + g[idx_g_T])));
+                        F_face_y[idx_face_y] += dt*half*(
+                            d_coef_a*(f[idx_f_B] + f[idx_f_T])*(g[idx_g_B] + g[idx_g_T]));
                     }
                 }
             }
@@ -6660,10 +6747,10 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_y[idx_face_y] += dt*(
-                            half*(d_coef_a*(f[idx_f_B]  + f[idx_f_T] )*(g[idx_g_B]  + g[idx_g_T] )) +
-                            half*(d_coef_b*(f[idx_f_BB] + f[idx_f_T] )*(g[idx_g_BB] + g[idx_g_T] )  +
-                                           (f[idx_f_B]  + f[idx_f_TT])*(g[idx_g_B]  + g[idx_g_TT])));
+                        F_face_y[idx_face_y] += dt*half*(
+                            d_coef_a*((f[idx_f_B]  + f[idx_f_T] )*(g[idx_g_B]  + g[idx_g_T] )) +
+                            d_coef_b*((f[idx_f_BB] + f[idx_f_T] )*(g[idx_g_BB] + g[idx_g_T] )  +
+                                      (f[idx_f_B]  + f[idx_f_TT])*(g[idx_g_B]  + g[idx_g_TT])));
                     }
                 }
             }
@@ -6743,13 +6830,13 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_y[idx_face_y] += dt*(
-                            half*(d_coef_a*(f[idx_f_B]   + f[idx_f_T]  )*(g[idx_g_B]   + g[idx_g_T]  )) +
-                            half*(d_coef_b*(f[idx_f_BB]  + f[idx_f_T]  )*(g[idx_g_BB]  + g[idx_g_T]  )  +
-                                           (f[idx_f_B]   + f[idx_f_TT] )*(g[idx_g_B]   + g[idx_g_TT] )) +
-                            half*(d_coef_c*(f[idx_f_BBB] + f[idx_f_T]  )*(g[idx_g_BBB] + g[idx_g_T]  )  +
-                                           (f[idx_f_BB]  + f[idx_f_TT] )*(g[idx_g_BB]  + g[idx_g_TT] )  +
-                                           (f[idx_f_B]   + f[idx_f_TTT])*(g[idx_g_B]   + g[idx_g_TTT])));
+                        F_face_y[idx_face_y] += dt*half*(
+                            d_coef_a*((f[idx_f_B]   + f[idx_f_T]  )*(g[idx_g_B]   + g[idx_g_T]  )) +
+                            d_coef_b*((f[idx_f_BB]  + f[idx_f_T]  )*(g[idx_g_BB]  + g[idx_g_T]  )  +
+                                      (f[idx_f_B]   + f[idx_f_TT] )*(g[idx_g_B]   + g[idx_g_TT] )) +
+                            d_coef_c*((f[idx_f_BBB] + f[idx_f_T]  )*(g[idx_g_BBB] + g[idx_g_T]  )  +
+                                      (f[idx_f_BB]  + f[idx_f_TT] )*(g[idx_g_BB]  + g[idx_g_TT] )  +
+                                      (f[idx_f_B]   + f[idx_f_TTT])*(g[idx_g_B]   + g[idx_g_TTT])));
                     }
                 }
             }
@@ -6849,17 +6936,17 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_y[idx_face_y] += dt*(
-                            half*(d_coef_a*(f[idx_f_B]    + f[idx_f_T]   )*(g[idx_g_B]    + g[idx_g_T]   )) +
-                            half*(d_coef_b*(f[idx_f_BB]   + f[idx_f_T]   )*(g[idx_g_BB]   + g[idx_g_T]   )  +
-                                           (f[idx_f_B]    + f[idx_f_TT]  )*(g[idx_g_B]    + g[idx_g_TT]  )) +
-                            half*(d_coef_c*(f[idx_f_BBB]  + f[idx_f_T]   )*(g[idx_g_BBB]  + g[idx_g_T]   )  +
-                                           (f[idx_f_BB]   + f[idx_f_TT]  )*(g[idx_g_BB]   + g[idx_g_TT]  )  +
-                                           (f[idx_f_B]    + f[idx_f_TTT] )*(g[idx_g_B]    + g[idx_g_TTT] )) +
-                            half*(d_coef_d*(f[idx_f_BBBB] + f[idx_f_T]   )*(g[idx_g_BBBB] + g[idx_g_T]   )  +
-                                           (f[idx_f_BBB]  + f[idx_f_TT]  )*(g[idx_g_BBB]  + g[idx_g_TT]  )  +
-                                           (f[idx_f_BB]   + f[idx_f_TTT] )*(g[idx_g_BB]   + g[idx_g_TTT] )  +
-                                           (f[idx_f_B]    + f[idx_f_TTTT])*(g[idx_g_B]    + g[idx_g_TTTT])));
+                        F_face_y[idx_face_y] += dt*half*(
+                            d_coef_a*((f[idx_f_B]    + f[idx_f_T]   )*(g[idx_g_B]    + g[idx_g_T]   )) +
+                            d_coef_b*((f[idx_f_BB]   + f[idx_f_T]   )*(g[idx_g_BB]   + g[idx_g_T]   )  +
+                                      (f[idx_f_B]    + f[idx_f_TT]  )*(g[idx_g_B]    + g[idx_g_TT]  )) +
+                            d_coef_c*((f[idx_f_BBB]  + f[idx_f_T]   )*(g[idx_g_BBB]  + g[idx_g_T]   )  +
+                                      (f[idx_f_BB]   + f[idx_f_TT]  )*(g[idx_g_BB]   + g[idx_g_TT]  )  +
+                                      (f[idx_f_B]    + f[idx_f_TTT] )*(g[idx_g_B]    + g[idx_g_TTT] )) +
+                            d_coef_d*((f[idx_f_BBBB] + f[idx_f_T]   )*(g[idx_g_BBBB] + g[idx_g_T]   )  +
+                                      (f[idx_f_BBB]  + f[idx_f_TT]  )*(g[idx_g_BBB]  + g[idx_g_TT]  )  +
+                                      (f[idx_f_BB]   + f[idx_f_TTT] )*(g[idx_g_BB]   + g[idx_g_TTT] )  +
+                                      (f[idx_f_B]    + f[idx_f_TTTT])*(g[idx_g_B]    + g[idx_g_TTTT])));
                     }
                 }
             }
@@ -6979,22 +7066,22 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_y[idx_face_y] += dt*(
-                            half*(d_coef_a*(f[idx_f_B]     + f[idx_f_T]    )*(g[idx_g_B]     + g[idx_g_T]    )) +
-                            half*(d_coef_b*(f[idx_f_BB]    + f[idx_f_T]    )*(g[idx_g_BB]    + g[idx_g_T]    )  +
-                                           (f[idx_f_B]     + f[idx_f_TT]   )*(g[idx_g_B]     + g[idx_g_TT]   )) +
-                            half*(d_coef_c*(f[idx_f_BBB]   + f[idx_f_T]    )*(g[idx_g_BBB]   + g[idx_g_T]    )  +
-                                           (f[idx_f_BB]    + f[idx_f_TT]   )*(g[idx_g_BB]    + g[idx_g_TT]   )  +
-                                           (f[idx_f_B]     + f[idx_f_TTT]  )*(g[idx_g_B]     + g[idx_g_TTT]  )) +
-                            half*(d_coef_d*(f[idx_f_BBBB]  + f[idx_f_T]    )*(g[idx_g_BBBB]  + g[idx_g_T]    )  +
-                                           (f[idx_f_BBB]   + f[idx_f_TT]   )*(g[idx_g_BBB]   + g[idx_g_TT]   )  +
-                                           (f[idx_f_BB]    + f[idx_f_TTT]  )*(g[idx_g_BB]    + g[idx_g_TTT]  )  +
-                                           (f[idx_f_B]     + f[idx_f_TTTT] )*(g[idx_g_B]     + g[idx_g_TTTT] )) +
-                            half*(d_coef_e*(f[idx_f_BBBBB] + f[idx_f_T]    )*(g[idx_g_BBBBB] + g[idx_g_T]    )  +
-                                           (f[idx_f_BBBB]  + f[idx_f_TT]   )*(g[idx_g_BBBB]  + g[idx_g_TT]   )  +
-                                           (f[idx_f_BBB]   + f[idx_f_TTT]  )*(g[idx_g_BBB]   + g[idx_g_TTT]  )  +
-                                           (f[idx_f_BB]    + f[idx_f_TTTT] )*(g[idx_g_BB]    + g[idx_g_TTTT] )  +
-                                           (f[idx_f_B]     + f[idx_f_TTTTT])*(g[idx_g_B]     + g[idx_g_TTTTT])));
+                        F_face_y[idx_face_y] += dt*half*(
+                            d_coef_a*((f[idx_f_B]     + f[idx_f_T]    )*(g[idx_g_B]     + g[idx_g_T]    )) +
+                            d_coef_b*((f[idx_f_BB]    + f[idx_f_T]    )*(g[idx_g_BB]    + g[idx_g_T]    )  +
+                                      (f[idx_f_B]     + f[idx_f_TT]   )*(g[idx_g_B]     + g[idx_g_TT]   )) +
+                            d_coef_c*((f[idx_f_BBB]   + f[idx_f_T]    )*(g[idx_g_BBB]   + g[idx_g_T]    )  +
+                                      (f[idx_f_BB]    + f[idx_f_TT]   )*(g[idx_g_BB]    + g[idx_g_TT]   )  +
+                                      (f[idx_f_B]     + f[idx_f_TTT]  )*(g[idx_g_B]     + g[idx_g_TTT]  )) +
+                            d_coef_d*((f[idx_f_BBBB]  + f[idx_f_T]    )*(g[idx_g_BBBB]  + g[idx_g_T]    )  +
+                                      (f[idx_f_BBB]   + f[idx_f_TT]   )*(g[idx_g_BBB]   + g[idx_g_TT]   )  +
+                                      (f[idx_f_BB]    + f[idx_f_TTT]  )*(g[idx_g_BB]    + g[idx_g_TTT]  )  +
+                                      (f[idx_f_B]     + f[idx_f_TTTT] )*(g[idx_g_B]     + g[idx_g_TTTT] )) +
+                            d_coef_e*((f[idx_f_BBBBB] + f[idx_f_T]    )*(g[idx_g_BBBBB] + g[idx_g_T]    )  +
+                                      (f[idx_f_BBBB]  + f[idx_f_TT]   )*(g[idx_g_BBBB]  + g[idx_g_TT]   )  +
+                                      (f[idx_f_BBB]   + f[idx_f_TTT]  )*(g[idx_g_BBB]   + g[idx_g_TTT]  )  +
+                                      (f[idx_f_BB]    + f[idx_f_TTTT] )*(g[idx_g_BB]    + g[idx_g_TTTT] )  +
+                                      (f[idx_f_B]     + f[idx_f_TTTTT])*(g[idx_g_B]     + g[idx_g_TTTTT])));
                     }
                 }
             }
@@ -7134,28 +7221,28 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxY(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_y[idx_face_y] += dt*(
-                            half*(d_coef_a*(f[idx_f_B]      + f[idx_f_T]     )*(g[idx_g_B]      + g[idx_g_T]     )) +
-                            half*(d_coef_b*(f[idx_f_BB]     + f[idx_f_T]     )*(g[idx_g_BB]     + g[idx_g_T]     )  +
-                                           (f[idx_f_B]      + f[idx_f_TT]    )*(g[idx_g_B]      + g[idx_g_TT]    )) +
-                            half*(d_coef_c*(f[idx_f_BBB]    + f[idx_f_T]     )*(g[idx_g_BBB]    + g[idx_g_T]     )  +
-                                           (f[idx_f_BB]     + f[idx_f_TT]    )*(g[idx_g_BB]     + g[idx_g_TT]    )  +
-                                           (f[idx_f_B]      + f[idx_f_TTT]   )*(g[idx_g_B]      + g[idx_g_TTT]   )) +
-                            half*(d_coef_d*(f[idx_f_BBBB]   + f[idx_f_T]     )*(g[idx_g_BBBB]   + g[idx_g_T]     )  +
-                                           (f[idx_f_BBB]    + f[idx_f_TT]    )*(g[idx_g_BBB]    + g[idx_g_TT]    )  +
-                                           (f[idx_f_BB]     + f[idx_f_TTT]   )*(g[idx_g_BB]     + g[idx_g_TTT]   )  +
-                                           (f[idx_f_B]      + f[idx_f_TTTT]  )*(g[idx_g_B]      + g[idx_g_TTTT]  )) +
-                            half*(d_coef_e*(f[idx_f_BBBBB]  + f[idx_f_T]     )*(g[idx_g_BBBBB]  + g[idx_g_T]     )  +
-                                           (f[idx_f_BBBB]   + f[idx_f_TT]    )*(g[idx_g_BBBB]   + g[idx_g_TT]    )  +
-                                           (f[idx_f_BBB]    + f[idx_f_TTT]   )*(g[idx_g_BBB]    + g[idx_g_TTT]   )  +
-                                           (f[idx_f_BB]     + f[idx_f_TTTT]  )*(g[idx_g_BB]     + g[idx_g_TTTT]  )  +
-                                           (f[idx_f_B]      + f[idx_f_TTTTT] )*(g[idx_g_B]      + g[idx_g_TTTTT] )) +
-                            half*(d_coef_f*(f[idx_f_BBBBBB] + f[idx_f_T]     )*(g[idx_g_BBBBBB] + g[idx_g_T]     )  +
-                                           (f[idx_f_BBBBB]  + f[idx_f_TT]    )*(g[idx_g_BBBBB]  + g[idx_g_TT]    )  +
-                                           (f[idx_f_BBBB]   + f[idx_f_TTT]   )*(g[idx_g_BBBB]   + g[idx_g_TTT]   )  +
-                                           (f[idx_f_BBB]    + f[idx_f_TTTT]  )*(g[idx_g_BBB]    + g[idx_g_TTTT]  )  +
-                                           (f[idx_f_BB]     + f[idx_f_TTTTT] )*(g[idx_g_BB]     + g[idx_g_TTTTT] )  +
-                                           (f[idx_f_B]      + f[idx_f_TTTTTT])*(g[idx_g_B]      + g[idx_g_TTTTTT])));
+                        F_face_y[idx_face_y] += dt*half*(
+                            d_coef_a*((f[idx_f_B]      + f[idx_f_T]     )*(g[idx_g_B]      + g[idx_g_T]     )) +
+                            d_coef_b*((f[idx_f_BB]     + f[idx_f_T]     )*(g[idx_g_BB]     + g[idx_g_T]     )  +
+                                      (f[idx_f_B]      + f[idx_f_TT]    )*(g[idx_g_B]      + g[idx_g_TT]    )) +
+                            d_coef_c*((f[idx_f_BBB]    + f[idx_f_T]     )*(g[idx_g_BBB]    + g[idx_g_T]     )  +
+                                      (f[idx_f_BB]     + f[idx_f_TT]    )*(g[idx_g_BB]     + g[idx_g_TT]    )  +
+                                      (f[idx_f_B]      + f[idx_f_TTT]   )*(g[idx_g_B]      + g[idx_g_TTT]   )) +
+                            d_coef_d*((f[idx_f_BBBB]   + f[idx_f_T]     )*(g[idx_g_BBBB]   + g[idx_g_T]     )  +
+                                      (f[idx_f_BBB]    + f[idx_f_TT]    )*(g[idx_g_BBB]    + g[idx_g_TT]    )  +
+                                      (f[idx_f_BB]     + f[idx_f_TTT]   )*(g[idx_g_BB]     + g[idx_g_TTT]   )  +
+                                      (f[idx_f_B]      + f[idx_f_TTTT]  )*(g[idx_g_B]      + g[idx_g_TTTT]  )) +
+                            d_coef_e*((f[idx_f_BBBBB]  + f[idx_f_T]     )*(g[idx_g_BBBBB]  + g[idx_g_T]     )  +
+                                      (f[idx_f_BBBB]   + f[idx_f_TT]    )*(g[idx_g_BBBB]   + g[idx_g_TT]    )  +
+                                      (f[idx_f_BBB]    + f[idx_f_TTT]   )*(g[idx_g_BBB]    + g[idx_g_TTT]   )  +
+                                      (f[idx_f_BB]     + f[idx_f_TTTT]  )*(g[idx_g_BB]     + g[idx_g_TTTT]  )  +
+                                      (f[idx_f_B]      + f[idx_f_TTTTT] )*(g[idx_g_B]      + g[idx_g_TTTTT] )) +
+                            d_coef_f*((f[idx_f_BBBBBB] + f[idx_f_T]     )*(g[idx_g_BBBBBB] + g[idx_g_T]     )  +
+                                      (f[idx_f_BBBBB]  + f[idx_f_TT]    )*(g[idx_g_BBBBB]  + g[idx_g_TT]    )  +
+                                      (f[idx_f_BBBB]   + f[idx_f_TTT]   )*(g[idx_g_BBBB]   + g[idx_g_TTT]   )  +
+                                      (f[idx_f_BBB]    + f[idx_f_TTTT]  )*(g[idx_g_BBB]    + g[idx_g_TTTT]  )  +
+                                      (f[idx_f_BB]     + f[idx_f_TTTTT] )*(g[idx_g_BB]     + g[idx_g_TTTTT] )  +
+                                      (f[idx_f_B]      + f[idx_f_TTTTTT])*(g[idx_g_B]      + g[idx_g_TTTTTT])));
                     }
                 }
             }
@@ -7276,8 +7363,8 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
                     const int idx_h_T = (i + num_ghosts_0_h) +
                         (j + num_ghosts_1_h)*ghostcell_dim_0_h;
                     
-                    F_face_y[idx_face_y] += dt*(
-                        quarter*(d_coef_a*(f[idx_f_B] + f[idx_f_T])*(g[idx_g_B] + g[idx_g_T])*(h[idx_h_B] + h[idx_h_T])));
+                    F_face_y[idx_face_y] += dt*quarter*(
+                        d_coef_a*(f[idx_f_B] + f[idx_f_T])*(g[idx_g_B] + g[idx_g_T])*(h[idx_h_B] + h[idx_h_T]));
                 }
             }
         }
@@ -7329,10 +7416,10 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
                     const int idx_h_TT = (i + num_ghosts_0_h) +
                         (j + 1 + num_ghosts_1_h)*ghostcell_dim_0_h;
                     
-                    F_face_y[idx_face_y] += dt*(
-                        quarter*(d_coef_a*(f[idx_f_B]  + f[idx_f_T] )*(g[idx_g_B]  + g[idx_g_T] )*(h[idx_h_B]  + h[idx_h_T] )) +
-                        quarter*(d_coef_b*(f[idx_f_BB] + f[idx_f_T] )*(g[idx_g_BB] + g[idx_g_T] )*(h[idx_h_BB] + h[idx_h_T] )  +
-                                          (f[idx_f_B]  + f[idx_f_TT])*(g[idx_g_B]  + g[idx_g_TT])*(h[idx_h_B]  + h[idx_h_TT])));
+                    F_face_y[idx_face_y] += dt*quarter*(
+                        d_coef_a*((f[idx_f_B]  + f[idx_f_T] )*(g[idx_g_B]  + g[idx_g_T] )*(h[idx_h_B]  + h[idx_h_T] )) +
+                        d_coef_b*((f[idx_f_BB] + f[idx_f_T] )*(g[idx_g_BB] + g[idx_g_T] )*(h[idx_h_BB] + h[idx_h_T] )  +
+                                  (f[idx_f_B]  + f[idx_f_TT])*(g[idx_g_B]  + g[idx_g_TT])*(h[idx_h_B]  + h[idx_h_TT])));
                 }
             }
         }
@@ -7402,13 +7489,13 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
                     const int idx_h_TTT = (i + num_ghosts_0_h) +
                         (j + 2 + num_ghosts_1_h)*ghostcell_dim_0_h;
                     
-                    F_face_y[idx_face_y] += dt*(
-                        quarter*(d_coef_a*(f[idx_f_B]   + f[idx_f_T]  )*(g[idx_g_B]   + g[idx_g_T]  )*(h[idx_h_B]   + h[idx_h_T]  )) +
-                        quarter*(d_coef_b*(f[idx_f_BB]  + f[idx_f_T]  )*(g[idx_g_BB]  + g[idx_g_T]  )*(h[idx_h_BB]  + h[idx_h_T]  )  +
-                                          (f[idx_f_B]   + f[idx_f_TT] )*(g[idx_g_B]   + g[idx_g_TT] )*(h[idx_h_B]   + h[idx_h_TT] )) +
-                        quarter*(d_coef_c*(f[idx_f_BBB] + f[idx_f_T]  )*(g[idx_g_BBB] + g[idx_g_T]  )*(h[idx_h_BBB] + h[idx_h_T]  )  +
-                                          (f[idx_f_BB]  + f[idx_f_TT] )*(g[idx_g_BB]  + g[idx_g_TT] )*(h[idx_h_BB]  + h[idx_h_TT] )  +
-                                          (f[idx_f_B]   + f[idx_f_TTT])*(g[idx_g_B]   + g[idx_g_TTT])*(h[idx_h_B]   + h[idx_h_TTT])));
+                    F_face_y[idx_face_y] += dt*quarter*(
+                        d_coef_a*((f[idx_f_B]   + f[idx_f_T]  )*(g[idx_g_B]   + g[idx_g_T]  )*(h[idx_h_B]   + h[idx_h_T]  )) +
+                        d_coef_b*((f[idx_f_BB]  + f[idx_f_T]  )*(g[idx_g_BB]  + g[idx_g_T]  )*(h[idx_h_BB]  + h[idx_h_T]  )  +
+                                  (f[idx_f_B]   + f[idx_f_TT] )*(g[idx_g_B]   + g[idx_g_TT] )*(h[idx_h_B]   + h[idx_h_TT] )) +
+                        d_coef_c*((f[idx_f_BBB] + f[idx_f_T]  )*(g[idx_g_BBB] + g[idx_g_T]  )*(h[idx_h_BBB] + h[idx_h_T]  )  +
+                                  (f[idx_f_BB]  + f[idx_f_TT] )*(g[idx_g_BB]  + g[idx_g_TT] )*(h[idx_h_BB]  + h[idx_h_TT] )  +
+                                  (f[idx_f_B]   + f[idx_f_TTT])*(g[idx_g_B]   + g[idx_g_TTT])*(h[idx_h_B]   + h[idx_h_TTT])));
                 }
             }
         }
@@ -7496,17 +7583,17 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
                     const int idx_h_TTTT = (i + num_ghosts_0_h) +
                         (j + 3 + num_ghosts_1_h)*ghostcell_dim_0_h;
                     
-                    F_face_y[idx_face_y] += dt*(
-                        quarter*(d_coef_a*(f[idx_f_B]    + f[idx_f_T]   )*(g[idx_g_B]    + g[idx_g_T]   )*(h[idx_h_B]    + h[idx_h_T]   )) +
-                        quarter*(d_coef_b*(f[idx_f_BB]   + f[idx_f_T]   )*(g[idx_g_BB]   + g[idx_g_T]   )*(h[idx_h_BB]   + h[idx_h_T]   )  +
-                                          (f[idx_f_B]    + f[idx_f_TT]  )*(g[idx_g_B]    + g[idx_g_TT]  )*(h[idx_h_B]    + h[idx_h_TT]  )) +
-                        quarter*(d_coef_c*(f[idx_f_BBB]  + f[idx_f_T]   )*(g[idx_g_BBB]  + g[idx_g_T]   )*(h[idx_h_BBB]  + h[idx_h_T]   )  +
-                                          (f[idx_f_BB]   + f[idx_f_TT]  )*(g[idx_g_BB]   + g[idx_g_TT]  )*(h[idx_h_BB]   + h[idx_h_TT]  )  +
-                                          (f[idx_f_B]    + f[idx_f_TTT] )*(g[idx_g_B]    + g[idx_g_TTT] )*(h[idx_h_B]    + h[idx_h_TTT] )) +
-                        quarter*(d_coef_d*(f[idx_f_BBBB] + f[idx_f_T]   )*(g[idx_g_BBBB] + g[idx_g_T]   )*(h[idx_h_BBBB] + h[idx_h_T]   )  +
-                                          (f[idx_f_BBB]  + f[idx_f_TT]  )*(g[idx_g_BBB]  + g[idx_g_TT]  )*(h[idx_h_BBB]  + h[idx_h_TT]  )  +
-                                          (f[idx_f_BB]   + f[idx_f_TTT] )*(g[idx_g_BB]   + g[idx_g_TTT] )*(h[idx_h_BB]   + h[idx_h_TTT] )  +
-                                          (f[idx_f_B]    + f[idx_f_TTTT])*(g[idx_g_B]    + g[idx_g_TTTT])*(h[idx_h_B]    + h[idx_h_TTTT])));
+                    F_face_y[idx_face_y] += dt*quarter*(
+                        d_coef_a*((f[idx_f_B]    + f[idx_f_T]   )*(g[idx_g_B]    + g[idx_g_T]   )*(h[idx_h_B]    + h[idx_h_T]   )) +
+                        d_coef_b*((f[idx_f_BB]   + f[idx_f_T]   )*(g[idx_g_BB]   + g[idx_g_T]   )*(h[idx_h_BB]   + h[idx_h_T]   )  +
+                                  (f[idx_f_B]    + f[idx_f_TT]  )*(g[idx_g_B]    + g[idx_g_TT]  )*(h[idx_h_B]    + h[idx_h_TT]  )) +
+                        d_coef_c*((f[idx_f_BBB]  + f[idx_f_T]   )*(g[idx_g_BBB]  + g[idx_g_T]   )*(h[idx_h_BBB]  + h[idx_h_T]   )  +
+                                  (f[idx_f_BB]   + f[idx_f_TT]  )*(g[idx_g_BB]   + g[idx_g_TT]  )*(h[idx_h_BB]   + h[idx_h_TT]  )  +
+                                  (f[idx_f_B]    + f[idx_f_TTT] )*(g[idx_g_B]    + g[idx_g_TTT] )*(h[idx_h_B]    + h[idx_h_TTT] )) +
+                        d_coef_d*((f[idx_f_BBBB] + f[idx_f_T]   )*(g[idx_g_BBBB] + g[idx_g_T]   )*(h[idx_h_BBBB] + h[idx_h_T]   )  +
+                                  (f[idx_f_BBB]  + f[idx_f_TT]  )*(g[idx_g_BBB]  + g[idx_g_TT]  )*(h[idx_h_BBB]  + h[idx_h_TT]  )  +
+                                  (f[idx_f_BB]   + f[idx_f_TTT] )*(g[idx_g_BB]   + g[idx_g_TTT] )*(h[idx_h_BB]   + h[idx_h_TTT] )  +
+                                  (f[idx_f_B]    + f[idx_f_TTTT])*(g[idx_g_B]    + g[idx_g_TTTT])*(h[idx_h_B]    + h[idx_h_TTTT])));
                 }
             }
         }
@@ -7612,22 +7699,22 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
                     const int idx_h_TTTTT = (i + num_ghosts_0_h) +
                         (j + 4 + num_ghosts_1_h)*ghostcell_dim_0_h;
                     
-                    F_face_y[idx_face_y] += dt*(
-                        quarter*(d_coef_a*(f[idx_f_B]     + f[idx_f_T]    )*(g[idx_g_B]     + g[idx_g_T]    )*(h[idx_h_B]     + h[idx_h_T]    )) +
-                        quarter*(d_coef_b*(f[idx_f_BB]    + f[idx_f_T]    )*(g[idx_g_BB]    + g[idx_g_T]    )*(h[idx_h_BB]    + h[idx_h_T]    )  +
-                                          (f[idx_f_B]     + f[idx_f_TT]   )*(g[idx_g_B]     + g[idx_g_TT]   )*(h[idx_h_B]     + h[idx_h_TT]   )) +
-                        quarter*(d_coef_c*(f[idx_f_BBB]   + f[idx_f_T]    )*(g[idx_g_BBB]   + g[idx_g_T]    )*(h[idx_h_BBB]   + h[idx_h_T]    )  +
-                                          (f[idx_f_BB]    + f[idx_f_TT]   )*(g[idx_g_BB]    + g[idx_g_TT]   )*(h[idx_h_BB]    + h[idx_h_TT]   )  +
-                                          (f[idx_f_B]     + f[idx_f_TTT]  )*(g[idx_g_B]     + g[idx_g_TTT]  )*(h[idx_h_B]     + h[idx_h_TTT]  )) +
-                        quarter*(d_coef_d*(f[idx_f_BBBB]  + f[idx_f_T]    )*(g[idx_g_BBBB]  + g[idx_g_T]    )*(h[idx_h_BBBB]  + h[idx_h_T]    )  +
-                                          (f[idx_f_BBB]   + f[idx_f_TT]   )*(g[idx_g_BBB]   + g[idx_g_TT]   )*(h[idx_h_BBB]   + h[idx_h_TT]   )  +
-                                          (f[idx_f_BB]    + f[idx_f_TTT]  )*(g[idx_g_BB]    + g[idx_g_TTT]  )*(h[idx_h_BB]    + h[idx_h_TTT]  )  +
-                                          (f[idx_f_B]     + f[idx_f_TTTT] )*(g[idx_g_B]     + g[idx_g_TTTT] )*(h[idx_h_B]     + h[idx_h_TTTT] )) +
-                        quarter*(d_coef_e*(f[idx_f_BBBBB] + f[idx_f_T]    )*(g[idx_g_BBBBB] + g[idx_g_T]    )*(h[idx_h_BBBBB] + h[idx_h_T]    )  +
-                                          (f[idx_f_BBBB]  + f[idx_f_TT]   )*(g[idx_g_BBBB]  + g[idx_g_TT]   )*(h[idx_h_BBBB]  + h[idx_h_TT]   )  +
-                                          (f[idx_f_BBB]   + f[idx_f_TTT]  )*(g[idx_g_BBB]   + g[idx_g_TTT]  )*(h[idx_h_BBB]   + h[idx_h_TTT]  )  +
-                                          (f[idx_f_BB]    + f[idx_f_TTTT] )*(g[idx_g_BB]    + g[idx_g_TTTT] )*(h[idx_h_BB]    + h[idx_h_TTTT] )  +
-                                          (f[idx_f_B]     + f[idx_f_TTTTT])*(g[idx_g_B]     + g[idx_g_TTTTT])*(h[idx_h_B]     + h[idx_h_TTTTT])));
+                    F_face_y[idx_face_y] += dt*quarter*(
+                        d_coef_a*((f[idx_f_B]     + f[idx_f_T]    )*(g[idx_g_B]     + g[idx_g_T]    )*(h[idx_h_B]     + h[idx_h_T]    )) +
+                        d_coef_b*((f[idx_f_BB]    + f[idx_f_T]    )*(g[idx_g_BB]    + g[idx_g_T]    )*(h[idx_h_BB]    + h[idx_h_T]    )  +
+                                  (f[idx_f_B]     + f[idx_f_TT]   )*(g[idx_g_B]     + g[idx_g_TT]   )*(h[idx_h_B]     + h[idx_h_TT]   )) +
+                        d_coef_c*((f[idx_f_BBB]   + f[idx_f_T]    )*(g[idx_g_BBB]   + g[idx_g_T]    )*(h[idx_h_BBB]   + h[idx_h_T]    )  +
+                                  (f[idx_f_BB]    + f[idx_f_TT]   )*(g[idx_g_BB]    + g[idx_g_TT]   )*(h[idx_h_BB]    + h[idx_h_TT]   )  +
+                                  (f[idx_f_B]     + f[idx_f_TTT]  )*(g[idx_g_B]     + g[idx_g_TTT]  )*(h[idx_h_B]     + h[idx_h_TTT]  )) +
+                        d_coef_d*((f[idx_f_BBBB]  + f[idx_f_T]    )*(g[idx_g_BBBB]  + g[idx_g_T]    )*(h[idx_h_BBBB]  + h[idx_h_T]    )  +
+                                  (f[idx_f_BBB]   + f[idx_f_TT]   )*(g[idx_g_BBB]   + g[idx_g_TT]   )*(h[idx_h_BBB]   + h[idx_h_TT]   )  +
+                                  (f[idx_f_BB]    + f[idx_f_TTT]  )*(g[idx_g_BB]    + g[idx_g_TTT]  )*(h[idx_h_BB]    + h[idx_h_TTT]  )  +
+                                  (f[idx_f_B]     + f[idx_f_TTTT] )*(g[idx_g_B]     + g[idx_g_TTTT] )*(h[idx_h_B]     + h[idx_h_TTTT] )) +
+                        d_coef_e*((f[idx_f_BBBBB] + f[idx_f_T]    )*(g[idx_g_BBBBB] + g[idx_g_T]    )*(h[idx_h_BBBBB] + h[idx_h_T]    )  +
+                                  (f[idx_f_BBBB]  + f[idx_f_TT]   )*(g[idx_g_BBBB]  + g[idx_g_TT]   )*(h[idx_h_BBBB]  + h[idx_h_TT]   )  +
+                                  (f[idx_f_BBB]   + f[idx_f_TTT]  )*(g[idx_g_BBB]   + g[idx_g_TTT]  )*(h[idx_h_BBB]   + h[idx_h_TTT]  )  +
+                                  (f[idx_f_BB]    + f[idx_f_TTTT] )*(g[idx_g_BB]    + g[idx_g_TTTT] )*(h[idx_h_BB]    + h[idx_h_TTTT] )  +
+                                  (f[idx_f_B]     + f[idx_f_TTTTT])*(g[idx_g_B]     + g[idx_g_TTTTT])*(h[idx_h_B]     + h[idx_h_TTTTT])));
                 }
             }
         }
@@ -7751,28 +7838,28 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
                     const int idx_h_TTTTTT = (i + num_ghosts_0_h) +
                         (j + 5 + num_ghosts_1_h)*ghostcell_dim_0_h;
                     
-                    F_face_y[idx_face_y] += dt*(
-                        quarter*(d_coef_a*(f[idx_f_B]      + f[idx_f_T]     )*(g[idx_g_B]      + g[idx_g_T]     )*(h[idx_h_B]      + h[idx_h_T]     )) +
-                        quarter*(d_coef_b*(f[idx_f_BB]     + f[idx_f_T]     )*(g[idx_g_BB]     + g[idx_g_T]     )*(h[idx_h_BB]     + h[idx_h_T]     )  +
-                                          (f[idx_f_B]      + f[idx_f_TT]    )*(g[idx_g_B]      + g[idx_g_TT]    )*(h[idx_h_B]      + h[idx_h_TT]    )) +
-                        quarter*(d_coef_c*(f[idx_f_BBB]    + f[idx_f_T]     )*(g[idx_g_BBB]    + g[idx_g_T]     )*(h[idx_h_BBB]    + h[idx_h_T]     )  +
-                                          (f[idx_f_BB]     + f[idx_f_TT]    )*(g[idx_g_BB]     + g[idx_g_TT]    )*(h[idx_h_BB]     + h[idx_h_TT]    )  +
-                                          (f[idx_f_B]      + f[idx_f_TTT]   )*(g[idx_g_B]      + g[idx_g_TTT]   )*(h[idx_h_B]      + h[idx_h_TTT]   )) +
-                        quarter*(d_coef_d*(f[idx_f_BBBB]   + f[idx_f_T]     )*(g[idx_g_BBBB]   + g[idx_g_T]     )*(h[idx_h_BBBB]   + h[idx_h_T]     )  +
-                                          (f[idx_f_BBB]    + f[idx_f_TT]    )*(g[idx_g_BBB]    + g[idx_g_TT]    )*(h[idx_h_BBB]    + h[idx_h_TT]    )  +
-                                          (f[idx_f_BB]     + f[idx_f_TTT]   )*(g[idx_g_BB]     + g[idx_g_TTT]   )*(h[idx_h_BB]     + h[idx_h_TTT]   )  +
-                                          (f[idx_f_B]      + f[idx_f_TTTT]  )*(g[idx_g_B]      + g[idx_g_TTTT]  )*(h[idx_h_B]      + h[idx_h_TTTT]  )) +
-                        quarter*(d_coef_e*(f[idx_f_BBBBB]  + f[idx_f_T]     )*(g[idx_g_BBBBB]  + g[idx_g_T]     )*(h[idx_h_BBBBB]  + h[idx_h_T]     )  +
-                                          (f[idx_f_BBBB]   + f[idx_f_TT]    )*(g[idx_g_BBBB]   + g[idx_g_TT]    )*(h[idx_h_BBBB]   + h[idx_h_TT]    )  +
-                                          (f[idx_f_BBB]    + f[idx_f_TTT]   )*(g[idx_g_BBB]    + g[idx_g_TTT]   )*(h[idx_h_BBB]    + h[idx_h_TTT]   )  +
-                                          (f[idx_f_BB]     + f[idx_f_TTTT]  )*(g[idx_g_BB]     + g[idx_g_TTTT]  )*(h[idx_h_BB]     + h[idx_h_TTTT]  )  +
-                                          (f[idx_f_B]      + f[idx_f_TTTTT] )*(g[idx_g_B]      + g[idx_g_TTTTT] )*(h[idx_h_B]      + h[idx_h_TTTTT] )) +
-                        quarter*(d_coef_f*(f[idx_f_BBBBBB] + f[idx_f_T]     )*(g[idx_g_BBBBBB] + g[idx_g_T]     )*(h[idx_h_BBBBBB] + h[idx_h_T]     )  +
-                                          (f[idx_f_BBBBB]  + f[idx_f_TT]    )*(g[idx_g_BBBBB]  + g[idx_g_TT]    )*(h[idx_h_BBBBB]  + h[idx_h_TT]    )  +
-                                          (f[idx_f_BBBB]   + f[idx_f_TTT]   )*(g[idx_g_BBBB]   + g[idx_g_TTT]   )*(h[idx_h_BBBB]   + h[idx_h_TTT]   )  +
-                                          (f[idx_f_BBB]    + f[idx_f_TTTT]  )*(g[idx_g_BBB]    + g[idx_g_TTTT]  )*(h[idx_h_BBB]    + h[idx_h_TTTT]  )  +
-                                          (f[idx_f_BB]     + f[idx_f_TTTTT] )*(g[idx_g_BB]     + g[idx_g_TTTTT] )*(h[idx_h_BB]     + h[idx_h_TTTTT] )  +
-                                          (f[idx_f_B]      + f[idx_f_TTTTTT])*(g[idx_g_B]      + g[idx_g_TTTTTT])*(h[idx_h_B]      + h[idx_h_TTTTTT])));
+                    F_face_y[idx_face_y] += dt*quarter*(
+                        d_coef_a*((f[idx_f_B]      + f[idx_f_T]     )*(g[idx_g_B]      + g[idx_g_T]     )*(h[idx_h_B]      + h[idx_h_T]     )) +
+                        d_coef_b*((f[idx_f_BB]     + f[idx_f_T]     )*(g[idx_g_BB]     + g[idx_g_T]     )*(h[idx_h_BB]     + h[idx_h_T]     )  +
+                                  (f[idx_f_B]      + f[idx_f_TT]    )*(g[idx_g_B]      + g[idx_g_TT]    )*(h[idx_h_B]      + h[idx_h_TT]    )) +
+                        d_coef_c*((f[idx_f_BBB]    + f[idx_f_T]     )*(g[idx_g_BBB]    + g[idx_g_T]     )*(h[idx_h_BBB]    + h[idx_h_T]     )  +
+                                  (f[idx_f_BB]     + f[idx_f_TT]    )*(g[idx_g_BB]     + g[idx_g_TT]    )*(h[idx_h_BB]     + h[idx_h_TT]    )  +
+                                  (f[idx_f_B]      + f[idx_f_TTT]   )*(g[idx_g_B]      + g[idx_g_TTT]   )*(h[idx_h_B]      + h[idx_h_TTT]   )) +
+                        d_coef_d*((f[idx_f_BBBB]   + f[idx_f_T]     )*(g[idx_g_BBBB]   + g[idx_g_T]     )*(h[idx_h_BBBB]   + h[idx_h_T]     )  +
+                                  (f[idx_f_BBB]    + f[idx_f_TT]    )*(g[idx_g_BBB]    + g[idx_g_TT]    )*(h[idx_h_BBB]    + h[idx_h_TT]    )  +
+                                  (f[idx_f_BB]     + f[idx_f_TTT]   )*(g[idx_g_BB]     + g[idx_g_TTT]   )*(h[idx_h_BB]     + h[idx_h_TTT]   )  +
+                                  (f[idx_f_B]      + f[idx_f_TTTT]  )*(g[idx_g_B]      + g[idx_g_TTTT]  )*(h[idx_h_B]      + h[idx_h_TTTT]  )) +
+                        d_coef_e*((f[idx_f_BBBBB]  + f[idx_f_T]     )*(g[idx_g_BBBBB]  + g[idx_g_T]     )*(h[idx_h_BBBBB]  + h[idx_h_T]     )  +
+                                  (f[idx_f_BBBB]   + f[idx_f_TT]    )*(g[idx_g_BBBB]   + g[idx_g_TT]    )*(h[idx_h_BBBB]   + h[idx_h_TT]    )  +
+                                  (f[idx_f_BBB]    + f[idx_f_TTT]   )*(g[idx_g_BBB]    + g[idx_g_TTT]   )*(h[idx_h_BBB]    + h[idx_h_TTT]   )  +
+                                  (f[idx_f_BB]     + f[idx_f_TTTT]  )*(g[idx_g_BB]     + g[idx_g_TTTT]  )*(h[idx_h_BB]     + h[idx_h_TTTT]  )  +
+                                  (f[idx_f_B]      + f[idx_f_TTTTT] )*(g[idx_g_B]      + g[idx_g_TTTTT] )*(h[idx_h_B]      + h[idx_h_TTTTT] )) +
+                        d_coef_f*((f[idx_f_BBBBBB] + f[idx_f_T]     )*(g[idx_g_BBBBBB] + g[idx_g_T]     )*(h[idx_h_BBBBBB] + h[idx_h_T]     )  +
+                                  (f[idx_f_BBBBB]  + f[idx_f_TT]    )*(g[idx_g_BBBBB]  + g[idx_g_TT]    )*(h[idx_h_BBBBB]  + h[idx_h_TT]    )  +
+                                  (f[idx_f_BBBB]   + f[idx_f_TTT]   )*(g[idx_g_BBBB]   + g[idx_g_TTT]   )*(h[idx_h_BBBB]   + h[idx_h_TTT]   )  +
+                                  (f[idx_f_BBB]    + f[idx_f_TTTT]  )*(g[idx_g_BBB]    + g[idx_g_TTTT]  )*(h[idx_h_BBB]    + h[idx_h_TTTT]  )  +
+                                  (f[idx_f_BB]     + f[idx_f_TTTTT] )*(g[idx_g_BB]     + g[idx_g_TTTTT] )*(h[idx_h_BB]     + h[idx_h_TTTTT] )  +
+                                  (f[idx_f_B]      + f[idx_f_TTTTTT])*(g[idx_g_B]      + g[idx_g_TTTTTT])*(h[idx_h_B]      + h[idx_h_TTTTTT])));
                 }
             }
         }
@@ -7854,8 +7941,8 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_y[idx_face_y] += dt*(
-                            quarter*(d_coef_a*(f[idx_f_B] + f[idx_f_T])*(g[idx_g_B] + g[idx_g_T])*(h[idx_h_B] + h[idx_h_T])));
+                        F_face_y[idx_face_y] += dt*quarter*(
+                            d_coef_a*(f[idx_f_B] + f[idx_f_T])*(g[idx_g_B] + g[idx_g_T])*(h[idx_h_B] + h[idx_h_T]));
                     }
                 }
             }
@@ -7935,10 +8022,10 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_y[idx_face_y] += dt*(
-                            quarter*(d_coef_a*(f[idx_f_B]  + f[idx_f_T] )*(g[idx_g_B]  + g[idx_g_T] )*(h[idx_h_B]  + h[idx_h_T] )) +
-                            quarter*(d_coef_b*(f[idx_f_BB] + f[idx_f_T] )*(g[idx_g_BB] + g[idx_g_T] )*(h[idx_h_BB] + h[idx_h_T] )  +
-                                              (f[idx_f_B]  + f[idx_f_TT])*(g[idx_g_B]  + g[idx_g_TT])*(h[idx_h_B]  + h[idx_h_TT])));
+                        F_face_y[idx_face_y] += dt*quarter*(
+                            d_coef_a*((f[idx_f_B]  + f[idx_f_T] )*(g[idx_g_B]  + g[idx_g_T] )*(h[idx_h_B]  + h[idx_h_T] )) +
+                            d_coef_b*((f[idx_f_BB] + f[idx_f_T] )*(g[idx_g_BB] + g[idx_g_T] )*(h[idx_h_BB] + h[idx_h_T] )  +
+                                      (f[idx_f_B]  + f[idx_f_TT])*(g[idx_g_B]  + g[idx_g_TT])*(h[idx_h_B]  + h[idx_h_TT])));
                     }
                 }
             }
@@ -8048,13 +8135,13 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_y[idx_face_y] += dt*(
-                            quarter*(d_coef_a*(f[idx_f_B]   + f[idx_f_T]  )*(g[idx_g_B]   + g[idx_g_T]  )*(h[idx_h_B]   + h[idx_h_T]  )) +
-                            quarter*(d_coef_b*(f[idx_f_BB]  + f[idx_f_T]  )*(g[idx_g_BB]  + g[idx_g_T]  )*(h[idx_h_BB]  + h[idx_h_T]  )  +
-                                              (f[idx_f_B]   + f[idx_f_TT] )*(g[idx_g_B]   + g[idx_g_TT] )*(h[idx_h_B]   + h[idx_h_TT] )) +
-                            quarter*(d_coef_c*(f[idx_f_BBB] + f[idx_f_T]  )*(g[idx_g_BBB] + g[idx_g_T]  )*(h[idx_h_BBB] + h[idx_h_T]  )  +
-                                              (f[idx_f_BB]  + f[idx_f_TT] )*(g[idx_g_BB]  + g[idx_g_TT] )*(h[idx_h_BB]  + h[idx_h_TT] )  +
-                                              (f[idx_f_B]   + f[idx_f_TTT])*(g[idx_g_B]   + g[idx_g_TTT])*(h[idx_h_B]   + h[idx_h_TTT])));
+                        F_face_y[idx_face_y] += dt*quarter*(
+                            d_coef_a*((f[idx_f_B]   + f[idx_f_T]  )*(g[idx_g_B]   + g[idx_g_T]  )*(h[idx_h_B]   + h[idx_h_T]  )) +
+                            d_coef_b*((f[idx_f_BB]  + f[idx_f_T]  )*(g[idx_g_BB]  + g[idx_g_T]  )*(h[idx_h_BB]  + h[idx_h_T]  )  +
+                                      (f[idx_f_B]   + f[idx_f_TT] )*(g[idx_g_B]   + g[idx_g_TT] )*(h[idx_h_B]   + h[idx_h_TT] )) +
+                            d_coef_c*((f[idx_f_BBB] + f[idx_f_T]  )*(g[idx_g_BBB] + g[idx_g_T]  )*(h[idx_h_BBB] + h[idx_h_T]  )  +
+                                      (f[idx_f_BB]  + f[idx_f_TT] )*(g[idx_g_BB]  + g[idx_g_TT] )*(h[idx_h_BB]  + h[idx_h_TT] )  +
+                                      (f[idx_f_B]   + f[idx_f_TTT])*(g[idx_g_B]   + g[idx_g_TTT])*(h[idx_h_B]   + h[idx_h_TTT])));
                     }
                 }
             }
@@ -8194,17 +8281,17 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_y[idx_face_y] += dt*(
-                            quarter*(d_coef_a*(f[idx_f_B]    + f[idx_f_T]   )*(g[idx_g_B]    + g[idx_g_T]   )*(h[idx_h_B]    + h[idx_h_T]   )) +
-                            quarter*(d_coef_b*(f[idx_f_BB]   + f[idx_f_T]   )*(g[idx_g_BB]   + g[idx_g_T]   )*(h[idx_h_BB]   + h[idx_h_T]   )  +
-                                              (f[idx_f_B]    + f[idx_f_TT]  )*(g[idx_g_B]    + g[idx_g_TT]  )*(h[idx_h_B]    + h[idx_h_TT]  )) +
-                            quarter*(d_coef_c*(f[idx_f_BBB]  + f[idx_f_T]   )*(g[idx_g_BBB]  + g[idx_g_T]   )*(h[idx_h_BBB]  + h[idx_h_T]   )  +
-                                              (f[idx_f_BB]   + f[idx_f_TT]  )*(g[idx_g_BB]   + g[idx_g_TT]  )*(h[idx_h_BB]   + h[idx_h_TT]  )  +
-                                              (f[idx_f_B]    + f[idx_f_TTT] )*(g[idx_g_B]    + g[idx_g_TTT] )*(h[idx_h_B]    + h[idx_h_TTT] )) +
-                            quarter*(d_coef_d*(f[idx_f_BBBB] + f[idx_f_T]   )*(g[idx_g_BBBB] + g[idx_g_T]   )*(h[idx_h_BBBB] + h[idx_h_T]   )  +
-                                              (f[idx_f_BBB]  + f[idx_f_TT]  )*(g[idx_g_BBB]  + g[idx_g_TT]  )*(h[idx_h_BBB]  + h[idx_h_TT]  )  +
-                                              (f[idx_f_BB]   + f[idx_f_TTT] )*(g[idx_g_BB]   + g[idx_g_TTT] )*(h[idx_h_BB]   + h[idx_h_TTT] )  +
-                                              (f[idx_f_B]    + f[idx_f_TTTT])*(g[idx_g_B]    + g[idx_g_TTTT])*(h[idx_h_B]    + h[idx_h_TTTT])));
+                        F_face_y[idx_face_y] += dt*quarter*(
+                            d_coef_a*((f[idx_f_B]    + f[idx_f_T]   )*(g[idx_g_B]    + g[idx_g_T]   )*(h[idx_h_B]    + h[idx_h_T]   )) +
+                            d_coef_b*((f[idx_f_BB]   + f[idx_f_T]   )*(g[idx_g_BB]   + g[idx_g_T]   )*(h[idx_h_BB]   + h[idx_h_T]   )  +
+                                      (f[idx_f_B]    + f[idx_f_TT]  )*(g[idx_g_B]    + g[idx_g_TT]  )*(h[idx_h_B]    + h[idx_h_TT]  )) +
+                            d_coef_c*((f[idx_f_BBB]  + f[idx_f_T]   )*(g[idx_g_BBB]  + g[idx_g_T]   )*(h[idx_h_BBB]  + h[idx_h_T]   )  +
+                                      (f[idx_f_BB]   + f[idx_f_TT]  )*(g[idx_g_BB]   + g[idx_g_TT]  )*(h[idx_h_BB]   + h[idx_h_TT]  )  +
+                                      (f[idx_f_B]    + f[idx_f_TTT] )*(g[idx_g_B]    + g[idx_g_TTT] )*(h[idx_h_B]    + h[idx_h_TTT] )) +
+                            d_coef_d*((f[idx_f_BBBB] + f[idx_f_T]   )*(g[idx_g_BBBB] + g[idx_g_T]   )*(h[idx_h_BBBB] + h[idx_h_T]   )  +
+                                      (f[idx_f_BBB]  + f[idx_f_TT]  )*(g[idx_g_BBB]  + g[idx_g_TT]  )*(h[idx_h_BBB]  + h[idx_h_TT]  )  +
+                                      (f[idx_f_BB]   + f[idx_f_TTT] )*(g[idx_g_BB]   + g[idx_g_TTT] )*(h[idx_h_BB]   + h[idx_h_TTT] )  +
+                                      (f[idx_f_B]    + f[idx_f_TTTT])*(g[idx_g_B]    + g[idx_g_TTTT])*(h[idx_h_B]    + h[idx_h_TTTT])));
                     }
                 }
             }
@@ -8374,22 +8461,22 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_y[idx_face_y] += dt*(
-                            quarter*(d_coef_a*(f[idx_f_B]     + f[idx_f_T]    )*(g[idx_g_B]     + g[idx_g_T]    )*(h[idx_h_B]     + h[idx_h_T]    )) +
-                            quarter*(d_coef_b*(f[idx_f_BB]    + f[idx_f_T]    )*(g[idx_g_BB]    + g[idx_g_T]    )*(h[idx_h_BB]    + h[idx_h_T]    )  +
-                                              (f[idx_f_B]     + f[idx_f_TT]   )*(g[idx_g_B]     + g[idx_g_TT]   )*(h[idx_h_B]     + h[idx_h_TT]   )) +
-                            quarter*(d_coef_c*(f[idx_f_BBB]   + f[idx_f_T]    )*(g[idx_g_BBB]   + g[idx_g_T]    )*(h[idx_h_BBB]   + h[idx_h_T]    )  +
-                                              (f[idx_f_BB]    + f[idx_f_TT]   )*(g[idx_g_BB]    + g[idx_g_TT]   )*(h[idx_h_BB]    + h[idx_h_TT]   )  +
-                                              (f[idx_f_B]     + f[idx_f_TTT]  )*(g[idx_g_B]     + g[idx_g_TTT]  )*(h[idx_h_B]     + h[idx_h_TTT]  )) +
-                            quarter*(d_coef_d*(f[idx_f_BBBB]  + f[idx_f_T]    )*(g[idx_g_BBBB]  + g[idx_g_T]    )*(h[idx_h_BBBB]  + h[idx_h_T]    )  +
-                                              (f[idx_f_BBB]   + f[idx_f_TT]   )*(g[idx_g_BBB]   + g[idx_g_TT]   )*(h[idx_h_BBB]   + h[idx_h_TT]   )  +
-                                              (f[idx_f_BB]    + f[idx_f_TTT]  )*(g[idx_g_BB]    + g[idx_g_TTT]  )*(h[idx_h_BB]    + h[idx_h_TTT]  )  +
-                                              (f[idx_f_B]     + f[idx_f_TTTT] )*(g[idx_g_B]     + g[idx_g_TTTT] )*(h[idx_h_B]     + h[idx_h_TTTT] )) +
-                            quarter*(d_coef_e*(f[idx_f_BBBBB] + f[idx_f_T]    )*(g[idx_g_BBBBB] + g[idx_g_T]    )*(h[idx_h_BBBBB] + h[idx_h_T]    )  +
-                                              (f[idx_f_BBBB]  + f[idx_f_TT]   )*(g[idx_g_BBBB]  + g[idx_g_TT]   )*(h[idx_h_BBBB]  + h[idx_h_TT]   )  +
-                                              (f[idx_f_BBB]   + f[idx_f_TTT]  )*(g[idx_g_BBB]   + g[idx_g_TTT]  )*(h[idx_h_BBB]   + h[idx_h_TTT]  )  +
-                                              (f[idx_f_BB]    + f[idx_f_TTTT] )*(g[idx_g_BB]    + g[idx_g_TTTT] )*(h[idx_h_BB]    + h[idx_h_TTTT] )  +
-                                              (f[idx_f_B]     + f[idx_f_TTTTT])*(g[idx_g_B]     + g[idx_g_TTTTT])*(h[idx_h_B]     + h[idx_h_TTTTT])));
+                        F_face_y[idx_face_y] += dt*quarter*(
+                            d_coef_a*((f[idx_f_B]     + f[idx_f_T]    )*(g[idx_g_B]     + g[idx_g_T]    )*(h[idx_h_B]     + h[idx_h_T]    )) +
+                            d_coef_b*((f[idx_f_BB]    + f[idx_f_T]    )*(g[idx_g_BB]    + g[idx_g_T]    )*(h[idx_h_BB]    + h[idx_h_T]    )  +
+                                      (f[idx_f_B]     + f[idx_f_TT]   )*(g[idx_g_B]     + g[idx_g_TT]   )*(h[idx_h_B]     + h[idx_h_TT]   )) +
+                            d_coef_c*((f[idx_f_BBB]   + f[idx_f_T]    )*(g[idx_g_BBB]   + g[idx_g_T]    )*(h[idx_h_BBB]   + h[idx_h_T]    )  +
+                                      (f[idx_f_BB]    + f[idx_f_TT]   )*(g[idx_g_BB]    + g[idx_g_TT]   )*(h[idx_h_BB]    + h[idx_h_TT]   )  +
+                                      (f[idx_f_B]     + f[idx_f_TTT]  )*(g[idx_g_B]     + g[idx_g_TTT]  )*(h[idx_h_B]     + h[idx_h_TTT]  )) +
+                            d_coef_d*((f[idx_f_BBBB]  + f[idx_f_T]    )*(g[idx_g_BBBB]  + g[idx_g_T]    )*(h[idx_h_BBBB]  + h[idx_h_T]    )  +
+                                      (f[idx_f_BBB]   + f[idx_f_TT]   )*(g[idx_g_BBB]   + g[idx_g_TT]   )*(h[idx_h_BBB]   + h[idx_h_TT]   )  +
+                                      (f[idx_f_BB]    + f[idx_f_TTT]  )*(g[idx_g_BB]    + g[idx_g_TTT]  )*(h[idx_h_BB]    + h[idx_h_TTT]  )  +
+                                      (f[idx_f_B]     + f[idx_f_TTTT] )*(g[idx_g_B]     + g[idx_g_TTTT] )*(h[idx_h_B]     + h[idx_h_TTTT] )) +
+                            d_coef_e*((f[idx_f_BBBBB] + f[idx_f_T]    )*(g[idx_g_BBBBB] + g[idx_g_T]    )*(h[idx_h_BBBBB] + h[idx_h_T]    )  +
+                                      (f[idx_f_BBBB]  + f[idx_f_TT]   )*(g[idx_g_BBBB]  + g[idx_g_TT]   )*(h[idx_h_BBBB]  + h[idx_h_TT]   )  +
+                                      (f[idx_f_BBB]   + f[idx_f_TTT]  )*(g[idx_g_BBB]   + g[idx_g_TTT]  )*(h[idx_h_BBB]   + h[idx_h_TTT]  )  +
+                                      (f[idx_f_BB]    + f[idx_f_TTTT] )*(g[idx_g_BB]    + g[idx_g_TTTT] )*(h[idx_h_BB]    + h[idx_h_TTTT] )  +
+                                      (f[idx_f_B]     + f[idx_f_TTTTT])*(g[idx_g_B]     + g[idx_g_TTTTT])*(h[idx_h_B]     + h[idx_h_TTTTT])));
                     }
                 }
             }
@@ -8589,28 +8676,28 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxY(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_y[idx_face_y] += dt*(
-                            quarter*(d_coef_a*(f[idx_f_B]      + f[idx_f_T]     )*(g[idx_g_B]      + g[idx_g_T]     )*(h[idx_h_B]      + h[idx_h_T]     )) +
-                            quarter*(d_coef_b*(f[idx_f_BB]     + f[idx_f_T]     )*(g[idx_g_BB]     + g[idx_g_T]     )*(h[idx_h_BB]     + h[idx_h_T]     )  +
-                                              (f[idx_f_B]      + f[idx_f_TT]    )*(g[idx_g_B]      + g[idx_g_TT]    )*(h[idx_h_B]      + h[idx_h_TT]    )) +
-                            quarter*(d_coef_c*(f[idx_f_BBB]    + f[idx_f_T]     )*(g[idx_g_BBB]    + g[idx_g_T]     )*(h[idx_h_BBB]    + h[idx_h_T]     )  +
-                                              (f[idx_f_BB]     + f[idx_f_TT]    )*(g[idx_g_BB]     + g[idx_g_TT]    )*(h[idx_h_BB]     + h[idx_h_TT]    )  +
-                                              (f[idx_f_B]      + f[idx_f_TTT]   )*(g[idx_g_B]      + g[idx_g_TTT]   )*(h[idx_h_B]      + h[idx_h_TTT]   )) +
-                            quarter*(d_coef_d*(f[idx_f_BBBB]   + f[idx_f_T]     )*(g[idx_g_BBBB]   + g[idx_g_T]     )*(h[idx_h_BBBB]   + h[idx_h_T]     )  +
-                                              (f[idx_f_BBB]    + f[idx_f_TT]    )*(g[idx_g_BBB]    + g[idx_g_TT]    )*(h[idx_h_BBB]    + h[idx_h_TT]    )  +
-                                              (f[idx_f_BB]     + f[idx_f_TTT]   )*(g[idx_g_BB]     + g[idx_g_TTT]   )*(h[idx_h_BB]     + h[idx_h_TTT]   )  +
-                                              (f[idx_f_B]      + f[idx_f_TTTT]  )*(g[idx_g_B]      + g[idx_g_TTTT]  )*(h[idx_h_B]      + h[idx_h_TTTT]  )) +
-                            quarter*(d_coef_e*(f[idx_f_BBBBB]  + f[idx_f_T]     )*(g[idx_g_BBBBB]  + g[idx_g_T]     )*(h[idx_h_BBBBB]  + h[idx_h_T]     )  +
-                                              (f[idx_f_BBBB]   + f[idx_f_TT]    )*(g[idx_g_BBBB]   + g[idx_g_TT]    )*(h[idx_h_BBBB]   + h[idx_h_TT]    )  +
-                                              (f[idx_f_BBB]    + f[idx_f_TTT]   )*(g[idx_g_BBB]    + g[idx_g_TTT]   )*(h[idx_h_BBB]    + h[idx_h_TTT]   )  +
-                                              (f[idx_f_BB]     + f[idx_f_TTTT]  )*(g[idx_g_BB]     + g[idx_g_TTTT]  )*(h[idx_h_BB]     + h[idx_h_TTTT]  )  +
-                                              (f[idx_f_B]      + f[idx_f_TTTTT] )*(g[idx_g_B]      + g[idx_g_TTTTT] )*(h[idx_h_B]      + h[idx_h_TTTTT] )) +
-                            quarter*(d_coef_f*(f[idx_f_BBBBBB] + f[idx_f_T]     )*(g[idx_g_BBBBBB] + g[idx_g_T]     )*(h[idx_h_BBBBBB] + h[idx_h_T]     )  +
-                                              (f[idx_f_BBBBB]  + f[idx_f_TT]    )*(g[idx_g_BBBBB]  + g[idx_g_TT]    )*(h[idx_h_BBBBB]  + h[idx_h_TT]    )  +
-                                              (f[idx_f_BBBB]   + f[idx_f_TTT]   )*(g[idx_g_BBBB]   + g[idx_g_TTT]   )*(h[idx_h_BBBB]   + h[idx_h_TTT]   )  +
-                                              (f[idx_f_BBB]    + f[idx_f_TTTT]  )*(g[idx_g_BBB]    + g[idx_g_TTTT]  )*(h[idx_h_BBB]    + h[idx_h_TTTT]  )  +
-                                              (f[idx_f_BB]     + f[idx_f_TTTTT] )*(g[idx_g_BB]     + g[idx_g_TTTTT] )*(h[idx_h_BB]     + h[idx_h_TTTTT] )  +
-                                              (f[idx_f_B]      + f[idx_f_TTTTTT])*(g[idx_g_B]      + g[idx_g_TTTTTT])*(h[idx_h_B]      + h[idx_h_TTTTTT])));
+                        F_face_y[idx_face_y] += dt*quarter*(
+                            d_coef_a*((f[idx_f_B]      + f[idx_f_T]     )*(g[idx_g_B]      + g[idx_g_T]     )*(h[idx_h_B]      + h[idx_h_T]     )) +
+                            d_coef_b*((f[idx_f_BB]     + f[idx_f_T]     )*(g[idx_g_BB]     + g[idx_g_T]     )*(h[idx_h_BB]     + h[idx_h_T]     )  +
+                                      (f[idx_f_B]      + f[idx_f_TT]    )*(g[idx_g_B]      + g[idx_g_TT]    )*(h[idx_h_B]      + h[idx_h_TT]    )) +
+                            d_coef_c*((f[idx_f_BBB]    + f[idx_f_T]     )*(g[idx_g_BBB]    + g[idx_g_T]     )*(h[idx_h_BBB]    + h[idx_h_T]     )  +
+                                      (f[idx_f_BB]     + f[idx_f_TT]    )*(g[idx_g_BB]     + g[idx_g_TT]    )*(h[idx_h_BB]     + h[idx_h_TT]    )  +
+                                      (f[idx_f_B]      + f[idx_f_TTT]   )*(g[idx_g_B]      + g[idx_g_TTT]   )*(h[idx_h_B]      + h[idx_h_TTT]   )) +
+                            d_coef_d*((f[idx_f_BBBB]   + f[idx_f_T]     )*(g[idx_g_BBBB]   + g[idx_g_T]     )*(h[idx_h_BBBB]   + h[idx_h_T]     )  +
+                                      (f[idx_f_BBB]    + f[idx_f_TT]    )*(g[idx_g_BBB]    + g[idx_g_TT]    )*(h[idx_h_BBB]    + h[idx_h_TT]    )  +
+                                      (f[idx_f_BB]     + f[idx_f_TTT]   )*(g[idx_g_BB]     + g[idx_g_TTT]   )*(h[idx_h_BB]     + h[idx_h_TTT]   )  +
+                                      (f[idx_f_B]      + f[idx_f_TTTT]  )*(g[idx_g_B]      + g[idx_g_TTTT]  )*(h[idx_h_B]      + h[idx_h_TTTT]  )) +
+                            d_coef_e*((f[idx_f_BBBBB]  + f[idx_f_T]     )*(g[idx_g_BBBBB]  + g[idx_g_T]     )*(h[idx_h_BBBBB]  + h[idx_h_T]     )  +
+                                      (f[idx_f_BBBB]   + f[idx_f_TT]    )*(g[idx_g_BBBB]   + g[idx_g_TT]    )*(h[idx_h_BBBB]   + h[idx_h_TT]    )  +
+                                      (f[idx_f_BBB]    + f[idx_f_TTT]   )*(g[idx_g_BBB]    + g[idx_g_TTT]   )*(h[idx_h_BBB]    + h[idx_h_TTT]   )  +
+                                      (f[idx_f_BB]     + f[idx_f_TTTT]  )*(g[idx_g_BB]     + g[idx_g_TTTT]  )*(h[idx_h_BB]     + h[idx_h_TTTT]  )  +
+                                      (f[idx_f_B]      + f[idx_f_TTTTT] )*(g[idx_g_B]      + g[idx_g_TTTTT] )*(h[idx_h_B]      + h[idx_h_TTTTT] )) +
+                            d_coef_f*((f[idx_f_BBBBBB] + f[idx_f_T]     )*(g[idx_g_BBBBBB] + g[idx_g_T]     )*(h[idx_h_BBBBBB] + h[idx_h_T]     )  +
+                                      (f[idx_f_BBBBB]  + f[idx_f_TT]    )*(g[idx_g_BBBBB]  + g[idx_g_TT]    )*(h[idx_h_BBBBB]  + h[idx_h_TT]    )  +
+                                      (f[idx_f_BBBB]   + f[idx_f_TTT]   )*(g[idx_g_BBBB]   + g[idx_g_TTT]   )*(h[idx_h_BBBB]   + h[idx_h_TTT]   )  +
+                                      (f[idx_f_BBB]    + f[idx_f_TTTT]  )*(g[idx_g_BBB]    + g[idx_g_TTTT]  )*(h[idx_h_BBB]    + h[idx_h_TTTT]  )  +
+                                      (f[idx_f_BB]     + f[idx_f_TTTTT] )*(g[idx_g_BB]     + g[idx_g_TTTTT] )*(h[idx_h_BB]     + h[idx_h_TTTTT] )  +
+                                      (f[idx_f_B]      + f[idx_f_TTTTTT])*(g[idx_g_B]      + g[idx_g_TTTTTT])*(h[idx_h_B]      + h[idx_h_TTTTTT])));
                     }
                 }
             }
@@ -8709,7 +8796,7 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxZ(
                                 ghostcell_dim_1_f;
                         
                         F_face_z[idx_face_z] += dt*(
-                            (d_coef_a*(f[idx_f_B] + f[idx_f_F])));
+                            d_coef_a*(f[idx_f_B] + f[idx_f_F]));
                     }
                 }
             }
@@ -8750,8 +8837,8 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxZ(
                                 ghostcell_dim_1_f;
                         
                         F_face_z[idx_face_z] += dt*(
-                            (d_coef_a*(f[idx_f_B]  + f[idx_f_F] )) +
-                            (d_coef_b*(f[idx_f_BB] + f[idx_f_F] )  +
+                            d_coef_a*((f[idx_f_B]  + f[idx_f_F] )) +
+                            d_coef_b*((f[idx_f_BB] + f[idx_f_F] )  +
                                       (f[idx_f_B]  + f[idx_f_FF])));
                     }
                 }
@@ -8803,10 +8890,10 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxZ(
                                 ghostcell_dim_1_f;
                         
                         F_face_z[idx_face_z] += dt*(
-                            (d_coef_a*(f[idx_f_B]   + f[idx_f_F]  )) +
-                            (d_coef_b*(f[idx_f_BB]  + f[idx_f_F]  )  +
+                            d_coef_a*((f[idx_f_B]   + f[idx_f_F]  )) +
+                            d_coef_b*((f[idx_f_BB]  + f[idx_f_F]  )  +
                                       (f[idx_f_B]   + f[idx_f_FF] )) +
-                            (d_coef_c*(f[idx_f_BBB] + f[idx_f_F]  )  +
+                            d_coef_c*((f[idx_f_BBB] + f[idx_f_F]  )  +
                                       (f[idx_f_BB]  + f[idx_f_FF] )  +
                                       (f[idx_f_B]   + f[idx_f_FFF])));
                     }
@@ -8869,13 +8956,13 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxZ(
                                 ghostcell_dim_1_f;
                         
                         F_face_z[idx_face_z] += dt*(
-                            (d_coef_a*(f[idx_f_B]    + f[idx_f_F]   )) +
-                            (d_coef_b*(f[idx_f_BB]   + f[idx_f_F]   )  +
+                            d_coef_a*((f[idx_f_B]    + f[idx_f_F]   )) +
+                            d_coef_b*((f[idx_f_BB]   + f[idx_f_F]   )  +
                                       (f[idx_f_B]    + f[idx_f_FF]  )) +
-                            (d_coef_c*(f[idx_f_BBB]  + f[idx_f_F]   )  +
+                            d_coef_c*((f[idx_f_BBB]  + f[idx_f_F]   )  +
                                       (f[idx_f_BB]   + f[idx_f_FF]  )  +
                                       (f[idx_f_B]    + f[idx_f_FFF] )) +
-                            (d_coef_d*(f[idx_f_BBBB] + f[idx_f_F]   )  +
+                            d_coef_d*((f[idx_f_BBBB] + f[idx_f_F]   )  +
                                       (f[idx_f_BBB]  + f[idx_f_FF]  )  +
                                       (f[idx_f_BB]   + f[idx_f_FFF] )  +
                                       (f[idx_f_B]    + f[idx_f_FFFF])));
@@ -8949,17 +9036,17 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxZ(
                                 ghostcell_dim_1_f;
                         
                         F_face_z[idx_face_z] += dt*(
-                            (d_coef_a*(f[idx_f_B]     + f[idx_f_F]    )) +
-                            (d_coef_b*(f[idx_f_BB]    + f[idx_f_F]    )  +
+                            d_coef_a*((f[idx_f_B]     + f[idx_f_F]    )) +
+                            d_coef_b*((f[idx_f_BB]    + f[idx_f_F]    )  +
                                       (f[idx_f_B]     + f[idx_f_FF]   )) +
-                            (d_coef_c*(f[idx_f_BBB]   + f[idx_f_F]    )  +
+                            d_coef_c*((f[idx_f_BBB]   + f[idx_f_F]    )  +
                                       (f[idx_f_BB]    + f[idx_f_FF]   )  +
                                       (f[idx_f_B]     + f[idx_f_FFF]  )) +
-                            (d_coef_d*(f[idx_f_BBBB]  + f[idx_f_F]    )  +
+                            d_coef_d*((f[idx_f_BBBB]  + f[idx_f_F]    )  +
                                       (f[idx_f_BBB]   + f[idx_f_FF]   )  +
                                       (f[idx_f_BB]    + f[idx_f_FFF]  )  +
                                       (f[idx_f_B]     + f[idx_f_FFFF] )) +
-                            (d_coef_e*(f[idx_f_BBBBB] + f[idx_f_F]    )  +
+                            d_coef_e*((f[idx_f_BBBBB] + f[idx_f_F]    )  +
                                       (f[idx_f_BBBB]  + f[idx_f_FF]   )  +
                                       (f[idx_f_BBB]   + f[idx_f_FFF]  )  +
                                       (f[idx_f_BB]    + f[idx_f_FFFF] )  +
@@ -9044,22 +9131,22 @@ ConvectiveFluxReconstructorKEP::addLinearTermToConvectiveFluxZ(
                                 ghostcell_dim_1_f;
                         
                         F_face_z[idx_face_z] += dt*(
-                            (d_coef_a*(f[idx_f_B]      + f[idx_f_F]     )) +
-                            (d_coef_b*(f[idx_f_BB]     + f[idx_f_F]     )  +
+                            d_coef_a*((f[idx_f_B]      + f[idx_f_F]     )) +
+                            d_coef_b*((f[idx_f_BB]     + f[idx_f_F]     )  +
                                       (f[idx_f_B]      + f[idx_f_FF]    )) +
-                            (d_coef_c*(f[idx_f_BBB]    + f[idx_f_F]     )  +
+                            d_coef_c*((f[idx_f_BBB]    + f[idx_f_F]     )  +
                                       (f[idx_f_BB]     + f[idx_f_FF]    )  +
                                       (f[idx_f_B]      + f[idx_f_FFF]   )) +
-                            (d_coef_d*(f[idx_f_BBBB]   + f[idx_f_F]     )  +
+                            d_coef_d*((f[idx_f_BBBB]   + f[idx_f_F]     )  +
                                       (f[idx_f_BBB]    + f[idx_f_FF]    )  +
                                       (f[idx_f_BB]     + f[idx_f_FFF]   )  +
                                       (f[idx_f_B]      + f[idx_f_FFFF]  )) +
-                            (d_coef_e*(f[idx_f_BBBBB]  + f[idx_f_F]     )  +
+                            d_coef_e*((f[idx_f_BBBBB]  + f[idx_f_F]     )  +
                                       (f[idx_f_BBBB]   + f[idx_f_FF]    )  +
                                       (f[idx_f_BBB]    + f[idx_f_FFF]   )  +
                                       (f[idx_f_BB]     + f[idx_f_FFFF]  )  +
                                       (f[idx_f_B]      + f[idx_f_FFFFF] )) +
-                            (d_coef_f*(f[idx_f_BBBBBB] + f[idx_f_F]     )  +
+                            d_coef_f*((f[idx_f_BBBBBB] + f[idx_f_F]     )  +
                                       (f[idx_f_BBBBB]  + f[idx_f_FF]    )  +
                                       (f[idx_f_BBBB]   + f[idx_f_FFF]   )  +
                                       (f[idx_f_BBB]    + f[idx_f_FFFF]  )  +
@@ -9189,8 +9276,8 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ(
                             (k + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_z[idx_face_z] += dt*(
-                            half*(d_coef_a*(f[idx_f_B] + f[idx_f_F])*(g[idx_g_B] + g[idx_g_F])));
+                        F_face_z[idx_face_z] += dt*half*(
+                            d_coef_a*(f[idx_f_B] + f[idx_f_F])*(g[idx_g_B] + g[idx_g_F]));
                     }
                 }
             }
@@ -9250,10 +9337,10 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ(
                             (k + 1 + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_z[idx_face_z] += dt*(
-                            half*(d_coef_a*(f[idx_f_B]  + f[idx_f_F] )*(g[idx_g_B]  + g[idx_g_F] )) +
-                            half*(d_coef_b*(f[idx_f_BB] + f[idx_f_F] )*(g[idx_g_BB] + g[idx_g_F] )  +
-                                           (f[idx_f_B]  + f[idx_f_FF])*(g[idx_g_B]  + g[idx_g_FF])));
+                        F_face_z[idx_face_z] += dt*half*(
+                            d_coef_a*((f[idx_f_B]  + f[idx_f_F] )*(g[idx_g_B]  + g[idx_g_F] )) +
+                            d_coef_b*((f[idx_f_BB] + f[idx_f_F] )*(g[idx_g_BB] + g[idx_g_F] )  +
+                                      (f[idx_f_B]  + f[idx_f_FF])*(g[idx_g_B]  + g[idx_g_FF])));
                     }
                 }
             }
@@ -9333,13 +9420,13 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ(
                             (k + 2 + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_z[idx_face_z] += dt*(
-                            half*(d_coef_a*(f[idx_f_B]   + f[idx_f_F]  )*(g[idx_g_B]   + g[idx_g_F]  )) +
-                            half*(d_coef_b*(f[idx_f_BB]  + f[idx_f_F]  )*(g[idx_g_BB]  + g[idx_g_F]  )  +
-                                           (f[idx_f_B]   + f[idx_f_FF] )*(g[idx_g_B]   + g[idx_g_FF] )) +
-                            half*(d_coef_c*(f[idx_f_BBB] + f[idx_f_F]  )*(g[idx_g_BBB] + g[idx_g_F]  )  +
-                                           (f[idx_f_BB]  + f[idx_f_FF] )*(g[idx_g_BB]  + g[idx_g_FF] )  +
-                                           (f[idx_f_B]   + f[idx_f_FFF])*(g[idx_g_B]   + g[idx_g_FFF])));
+                        F_face_z[idx_face_z] += dt*half*(
+                            d_coef_a*((f[idx_f_B]   + f[idx_f_F]  )*(g[idx_g_B]   + g[idx_g_F]  )) +
+                            d_coef_b*((f[idx_f_BB]  + f[idx_f_F]  )*(g[idx_g_BB]  + g[idx_g_F]  )  +
+                                      (f[idx_f_B]   + f[idx_f_FF] )*(g[idx_g_B]   + g[idx_g_FF] )) +
+                            d_coef_c*((f[idx_f_BBB] + f[idx_f_F]  )*(g[idx_g_BBB] + g[idx_g_F]  )  +
+                                      (f[idx_f_BB]  + f[idx_f_FF] )*(g[idx_g_BB]  + g[idx_g_FF] )  +
+                                      (f[idx_f_B]   + f[idx_f_FFF])*(g[idx_g_B]   + g[idx_g_FFF])));
                     }
                 }
             }
@@ -9439,17 +9526,17 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ(
                             (k + 3 + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_z[idx_face_z] += dt*(
-                            half*(d_coef_a*(f[idx_f_B]    + f[idx_f_F]   )*(g[idx_g_B]    + g[idx_g_F]   )) +
-                            half*(d_coef_b*(f[idx_f_BB]   + f[idx_f_F]   )*(g[idx_g_BB]   + g[idx_g_F]   )  +
-                                           (f[idx_f_B]    + f[idx_f_FF]  )*(g[idx_g_B]    + g[idx_g_FF]  )) +
-                            half*(d_coef_c*(f[idx_f_BBB]  + f[idx_f_F]   )*(g[idx_g_BBB]  + g[idx_g_F]   )  +
-                                           (f[idx_f_BB]   + f[idx_f_FF]  )*(g[idx_g_BB]   + g[idx_g_FF]  )  +
-                                           (f[idx_f_B]    + f[idx_f_FFF] )*(g[idx_g_B]    + g[idx_g_FFF] )) +
-                            half*(d_coef_d*(f[idx_f_BBBB] + f[idx_f_F]   )*(g[idx_g_BBBB] + g[idx_g_F]   )  +
-                                           (f[idx_f_BBB]  + f[idx_f_FF]  )*(g[idx_g_BBB]  + g[idx_g_FF]  )  +
-                                           (f[idx_f_BB]   + f[idx_f_FFF] )*(g[idx_g_BB]   + g[idx_g_FFF] )  +
-                                           (f[idx_f_B]    + f[idx_f_FFFF])*(g[idx_g_B]    + g[idx_g_FFFF])));
+                        F_face_z[idx_face_z] += dt*half*(
+                            d_coef_a*((f[idx_f_B]    + f[idx_f_F]   )*(g[idx_g_B]    + g[idx_g_F]   )) +
+                            d_coef_b*((f[idx_f_BB]   + f[idx_f_F]   )*(g[idx_g_BB]   + g[idx_g_F]   )  +
+                                      (f[idx_f_B]    + f[idx_f_FF]  )*(g[idx_g_B]    + g[idx_g_FF]  )) +
+                            d_coef_c*((f[idx_f_BBB]  + f[idx_f_F]   )*(g[idx_g_BBB]  + g[idx_g_F]   )  +
+                                      (f[idx_f_BB]   + f[idx_f_FF]  )*(g[idx_g_BB]   + g[idx_g_FF]  )  +
+                                      (f[idx_f_B]    + f[idx_f_FFF] )*(g[idx_g_B]    + g[idx_g_FFF] )) +
+                            d_coef_d*((f[idx_f_BBBB] + f[idx_f_F]   )*(g[idx_g_BBBB] + g[idx_g_F]   )  +
+                                      (f[idx_f_BBB]  + f[idx_f_FF]  )*(g[idx_g_BBB]  + g[idx_g_FF]  )  +
+                                      (f[idx_f_BB]   + f[idx_f_FFF] )*(g[idx_g_BB]   + g[idx_g_FFF] )  +
+                                      (f[idx_f_B]    + f[idx_f_FFFF])*(g[idx_g_B]    + g[idx_g_FFFF])));
                     }
                 }
             }
@@ -9569,22 +9656,22 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ(
                             (k + 4 + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_z[idx_face_z] += dt*(
-                            half*(d_coef_a*(f[idx_f_B]     + f[idx_f_F]    )*(g[idx_g_B]     + g[idx_g_F]    )) +
-                            half*(d_coef_b*(f[idx_f_BB]    + f[idx_f_F]    )*(g[idx_g_BB]    + g[idx_g_F]    )  +
-                                           (f[idx_f_B]     + f[idx_f_FF]   )*(g[idx_g_B]     + g[idx_g_FF]   )) +
-                            half*(d_coef_c*(f[idx_f_BBB]   + f[idx_f_F]    )*(g[idx_g_BBB]   + g[idx_g_F]    )  +
-                                           (f[idx_f_BB]    + f[idx_f_FF]   )*(g[idx_g_BB]    + g[idx_g_FF]   )  +
-                                           (f[idx_f_B]     + f[idx_f_FFF]  )*(g[idx_g_B]     + g[idx_g_FFF]  )) +
-                            half*(d_coef_d*(f[idx_f_BBBB]  + f[idx_f_F]    )*(g[idx_g_BBBB]  + g[idx_g_F]    )  +
-                                           (f[idx_f_BBB]   + f[idx_f_FF]   )*(g[idx_g_BBB]   + g[idx_g_FF]   )  +
-                                           (f[idx_f_BB]    + f[idx_f_FFF]  )*(g[idx_g_BB]    + g[idx_g_FFF]  )  +
-                                           (f[idx_f_B]     + f[idx_f_FFFF] )*(g[idx_g_B]     + g[idx_g_FFFF] )) +
-                            half*(d_coef_e*(f[idx_f_BBBBB] + f[idx_f_F]    )*(g[idx_g_BBBBB] + g[idx_g_F]    )  +
-                                           (f[idx_f_BBBB]  + f[idx_f_FF]   )*(g[idx_g_BBBB]  + g[idx_g_FF]   )  +
-                                           (f[idx_f_BBB]   + f[idx_f_FFF]  )*(g[idx_g_BBB]   + g[idx_g_FFF]  )  +
-                                           (f[idx_f_BB]    + f[idx_f_FFFF] )*(g[idx_g_BB]    + g[idx_g_FFFF] )  +
-                                           (f[idx_f_B]     + f[idx_f_FFFFF])*(g[idx_g_B]     + g[idx_g_FFFFF])));
+                        F_face_z[idx_face_z] += dt*half*(
+                            d_coef_a*((f[idx_f_B]     + f[idx_f_F]    )*(g[idx_g_B]     + g[idx_g_F]    )) +
+                            d_coef_b*((f[idx_f_BB]    + f[idx_f_F]    )*(g[idx_g_BB]    + g[idx_g_F]    )  +
+                                      (f[idx_f_B]     + f[idx_f_FF]   )*(g[idx_g_B]     + g[idx_g_FF]   )) +
+                            d_coef_c*((f[idx_f_BBB]   + f[idx_f_F]    )*(g[idx_g_BBB]   + g[idx_g_F]    )  +
+                                      (f[idx_f_BB]    + f[idx_f_FF]   )*(g[idx_g_BB]    + g[idx_g_FF]   )  +
+                                      (f[idx_f_B]     + f[idx_f_FFF]  )*(g[idx_g_B]     + g[idx_g_FFF]  )) +
+                            d_coef_d*((f[idx_f_BBBB]  + f[idx_f_F]    )*(g[idx_g_BBBB]  + g[idx_g_F]    )  +
+                                      (f[idx_f_BBB]   + f[idx_f_FF]   )*(g[idx_g_BBB]   + g[idx_g_FF]   )  +
+                                      (f[idx_f_BB]    + f[idx_f_FFF]  )*(g[idx_g_BB]    + g[idx_g_FFF]  )  +
+                                      (f[idx_f_B]     + f[idx_f_FFFF] )*(g[idx_g_B]     + g[idx_g_FFFF] )) +
+                            d_coef_e*((f[idx_f_BBBBB] + f[idx_f_F]    )*(g[idx_g_BBBBB] + g[idx_g_F]    )  +
+                                      (f[idx_f_BBBB]  + f[idx_f_FF]   )*(g[idx_g_BBBB]  + g[idx_g_FF]   )  +
+                                      (f[idx_f_BBB]   + f[idx_f_FFF]  )*(g[idx_g_BBB]   + g[idx_g_FFF]  )  +
+                                      (f[idx_f_BB]    + f[idx_f_FFFF] )*(g[idx_g_BB]    + g[idx_g_FFFF] )  +
+                                      (f[idx_f_B]     + f[idx_f_FFFFF])*(g[idx_g_B]     + g[idx_g_FFFFF])));
                     }
                 }
             }
@@ -9724,28 +9811,28 @@ ConvectiveFluxReconstructorKEP::addQuadraticTermToConvectiveFluxZ(
                             (k + 5 + num_ghosts_2_g)*ghostcell_dim_0_g*
                                 ghostcell_dim_1_g;
                         
-                        F_face_z[idx_face_z] += dt*(
-                            half*(d_coef_a*(f[idx_f_B]      + f[idx_f_F]     )*(g[idx_g_B]      + g[idx_g_F]     )) +
-                            half*(d_coef_b*(f[idx_f_BB]     + f[idx_f_F]     )*(g[idx_g_BB]     + g[idx_g_F]     )  +
-                                           (f[idx_f_B]      + f[idx_f_FF]    )*(g[idx_g_B]      + g[idx_g_FF]    )) +
-                            half*(d_coef_c*(f[idx_f_BBB]    + f[idx_f_F]     )*(g[idx_g_BBB]    + g[idx_g_F]     )  +
-                                           (f[idx_f_BB]     + f[idx_f_FF]    )*(g[idx_g_BB]     + g[idx_g_FF]    )  +
-                                           (f[idx_f_B]      + f[idx_f_FFF]   )*(g[idx_g_B]      + g[idx_g_FFF]   )) +
-                            half*(d_coef_d*(f[idx_f_BBBB]   + f[idx_f_F]     )*(g[idx_g_BBBB]   + g[idx_g_F]     )  +
-                                           (f[idx_f_BBB]    + f[idx_f_FF]    )*(g[idx_g_BBB]    + g[idx_g_FF]    )  +
-                                           (f[idx_f_BB]     + f[idx_f_FFF]   )*(g[idx_g_BB]     + g[idx_g_FFF]   )  +
-                                           (f[idx_f_B]      + f[idx_f_FFFF]  )*(g[idx_g_B]      + g[idx_g_FFFF]  )) +
-                            half*(d_coef_e*(f[idx_f_BBBBB]  + f[idx_f_F]     )*(g[idx_g_BBBBB]  + g[idx_g_F]     )  +
-                                           (f[idx_f_BBBB]   + f[idx_f_FF]    )*(g[idx_g_BBBB]   + g[idx_g_FF]    )  +
-                                           (f[idx_f_BBB]    + f[idx_f_FFF]   )*(g[idx_g_BBB]    + g[idx_g_FFF]   )  +
-                                           (f[idx_f_BB]     + f[idx_f_FFFF]  )*(g[idx_g_BB]     + g[idx_g_FFFF]  )  +
-                                           (f[idx_f_B]      + f[idx_f_FFFFF] )*(g[idx_g_B]      + g[idx_g_FFFFF] )) +
-                            half*(d_coef_f*(f[idx_f_BBBBBB] + f[idx_f_F]     )*(g[idx_g_BBBBBB] + g[idx_g_F]     )  +
-                                           (f[idx_f_BBBBB]  + f[idx_f_FF]    )*(g[idx_g_BBBBB]  + g[idx_g_FF]    )  +
-                                           (f[idx_f_BBBB]   + f[idx_f_FFF]   )*(g[idx_g_BBBB]   + g[idx_g_FFF]   )  +
-                                           (f[idx_f_BBB]    + f[idx_f_FFFF]  )*(g[idx_g_BBB]    + g[idx_g_FFFF]  )  +
-                                           (f[idx_f_BB]     + f[idx_f_FFFFF] )*(g[idx_g_BB]     + g[idx_g_FFFFF] )  +
-                                           (f[idx_f_B]      + f[idx_f_FFFFFF])*(g[idx_g_B]      + g[idx_g_FFFFFF])));
+                        F_face_z[idx_face_z] += dt*half*(
+                            d_coef_a*((f[idx_f_B]      + f[idx_f_F]     )*(g[idx_g_B]      + g[idx_g_F]     )) +
+                            d_coef_b*((f[idx_f_BB]     + f[idx_f_F]     )*(g[idx_g_BB]     + g[idx_g_F]     )  +
+                                      (f[idx_f_B]      + f[idx_f_FF]    )*(g[idx_g_B]      + g[idx_g_FF]    )) +
+                            d_coef_c*((f[idx_f_BBB]    + f[idx_f_F]     )*(g[idx_g_BBB]    + g[idx_g_F]     )  +
+                                      (f[idx_f_BB]     + f[idx_f_FF]    )*(g[idx_g_BB]     + g[idx_g_FF]    )  +
+                                      (f[idx_f_B]      + f[idx_f_FFF]   )*(g[idx_g_B]      + g[idx_g_FFF]   )) +
+                            d_coef_d*((f[idx_f_BBBB]   + f[idx_f_F]     )*(g[idx_g_BBBB]   + g[idx_g_F]     )  +
+                                      (f[idx_f_BBB]    + f[idx_f_FF]    )*(g[idx_g_BBB]    + g[idx_g_FF]    )  +
+                                      (f[idx_f_BB]     + f[idx_f_FFF]   )*(g[idx_g_BB]     + g[idx_g_FFF]   )  +
+                                      (f[idx_f_B]      + f[idx_f_FFFF]  )*(g[idx_g_B]      + g[idx_g_FFFF]  )) +
+                            d_coef_e*((f[idx_f_BBBBB]  + f[idx_f_F]     )*(g[idx_g_BBBBB]  + g[idx_g_F]     )  +
+                                      (f[idx_f_BBBB]   + f[idx_f_FF]    )*(g[idx_g_BBBB]   + g[idx_g_FF]    )  +
+                                      (f[idx_f_BBB]    + f[idx_f_FFF]   )*(g[idx_g_BBB]    + g[idx_g_FFF]   )  +
+                                      (f[idx_f_BB]     + f[idx_f_FFFF]  )*(g[idx_g_BB]     + g[idx_g_FFFF]  )  +
+                                      (f[idx_f_B]      + f[idx_f_FFFFF] )*(g[idx_g_B]      + g[idx_g_FFFFF] )) +
+                            d_coef_f*((f[idx_f_BBBBBB] + f[idx_f_F]     )*(g[idx_g_BBBBBB] + g[idx_g_F]     )  +
+                                      (f[idx_f_BBBBB]  + f[idx_f_FF]    )*(g[idx_g_BBBBB]  + g[idx_g_FF]    )  +
+                                      (f[idx_f_BBBB]   + f[idx_f_FFF]   )*(g[idx_g_BBBB]   + g[idx_g_FFF]   )  +
+                                      (f[idx_f_BBB]    + f[idx_f_FFFF]  )*(g[idx_g_BBB]    + g[idx_g_FFFF]  )  +
+                                      (f[idx_f_BB]     + f[idx_f_FFFFF] )*(g[idx_g_BB]     + g[idx_g_FFFFF] )  +
+                                      (f[idx_f_B]      + f[idx_f_FFFFFF])*(g[idx_g_B]      + g[idx_g_FFFFFF])));
                     }
                 }
             }
@@ -9893,8 +9980,8 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ(
                             (k + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_z[idx_face_z] += dt*(
-                            quarter*(d_coef_a*(f[idx_f_B] + f[idx_f_F])*(g[idx_g_B] + g[idx_g_F])*(h[idx_h_B] + h[idx_h_F])));
+                        F_face_z[idx_face_z] += dt*quarter*(
+                            d_coef_a*(f[idx_f_B] + f[idx_f_F])*(g[idx_g_B] + g[idx_g_F])*(h[idx_h_B] + h[idx_h_F]));
                     }
                 }
             }
@@ -9974,10 +10061,10 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ(
                             (k + 1 + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_z[idx_face_z] += dt*(
-                            quarter*(d_coef_a*(f[idx_f_B]  + f[idx_f_F] )*(g[idx_g_B]  + g[idx_g_F] )*(h[idx_h_B]  + h[idx_h_F] )) +
-                            quarter*(d_coef_b*(f[idx_f_BB] + f[idx_f_F] )*(g[idx_g_BB] + g[idx_g_F] )*(h[idx_h_BB] + h[idx_h_F] )  +
-                                              (f[idx_f_B]  + f[idx_f_FF])*(g[idx_g_B]  + g[idx_g_FF])*(h[idx_h_B]  + h[idx_h_FF])));
+                        F_face_z[idx_face_z] += dt*quarter*(
+                            d_coef_a*((f[idx_f_B]  + f[idx_f_F] )*(g[idx_g_B]  + g[idx_g_F] )*(h[idx_h_B]  + h[idx_h_F] )) +
+                            d_coef_b*((f[idx_f_BB] + f[idx_f_F] )*(g[idx_g_BB] + g[idx_g_F] )*(h[idx_h_BB] + h[idx_h_F] )  +
+                                      (f[idx_f_B]  + f[idx_f_FF])*(g[idx_g_B]  + g[idx_g_FF])*(h[idx_h_B]  + h[idx_h_FF])));
                     }
                 }
             }
@@ -10087,13 +10174,13 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ(
                             (k + 2 + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_z[idx_face_z] += dt*(
-                            quarter*(d_coef_a*(f[idx_f_B]   + f[idx_f_F]  )*(g[idx_g_B]   + g[idx_g_F]  )*(h[idx_h_B]   + h[idx_h_F]  )) +
-                            quarter*(d_coef_b*(f[idx_f_BB]  + f[idx_f_F]  )*(g[idx_g_BB]  + g[idx_g_F]  )*(h[idx_h_BB]  + h[idx_h_F]  )  +
-                                              (f[idx_f_B]   + f[idx_f_FF] )*(g[idx_g_B]   + g[idx_g_FF] )*(h[idx_h_B]   + h[idx_h_FF] )) +
-                            quarter*(d_coef_c*(f[idx_f_BBB] + f[idx_f_F]  )*(g[idx_g_BBB] + g[idx_g_F]  )*(h[idx_h_BBB] + h[idx_h_F]  )  +
-                                              (f[idx_f_BB]  + f[idx_f_FF] )*(g[idx_g_BB]  + g[idx_g_FF] )*(h[idx_h_BB]  + h[idx_h_FF] )  +
-                                              (f[idx_f_B]   + f[idx_f_FFF])*(g[idx_g_B]   + g[idx_g_FFF])*(h[idx_h_B]   + h[idx_h_FFF])));
+                        F_face_z[idx_face_z] += dt*quarter*(
+                            d_coef_a*((f[idx_f_B]   + f[idx_f_F]  )*(g[idx_g_B]   + g[idx_g_F]  )*(h[idx_h_B]   + h[idx_h_F]  )) +
+                            d_coef_b*((f[idx_f_BB]  + f[idx_f_F]  )*(g[idx_g_BB]  + g[idx_g_F]  )*(h[idx_h_BB]  + h[idx_h_F]  )  +
+                                      (f[idx_f_B]   + f[idx_f_FF] )*(g[idx_g_B]   + g[idx_g_FF] )*(h[idx_h_B]   + h[idx_h_FF] )) +
+                            d_coef_c*((f[idx_f_BBB] + f[idx_f_F]  )*(g[idx_g_BBB] + g[idx_g_F]  )*(h[idx_h_BBB] + h[idx_h_F]  )  +
+                                      (f[idx_f_BB]  + f[idx_f_FF] )*(g[idx_g_BB]  + g[idx_g_FF] )*(h[idx_h_BB]  + h[idx_h_FF] )  +
+                                      (f[idx_f_B]   + f[idx_f_FFF])*(g[idx_g_B]   + g[idx_g_FFF])*(h[idx_h_B]   + h[idx_h_FFF])));
                     }
                 }
             }
@@ -10233,17 +10320,17 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ(
                             (k + 3 + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_z[idx_face_z] += dt*(
-                            quarter*(d_coef_a*(f[idx_f_B]    + f[idx_f_F]   )*(g[idx_g_B]    + g[idx_g_F]   )*(h[idx_h_B]    + h[idx_h_F]   )) +
-                            quarter*(d_coef_b*(f[idx_f_BB]   + f[idx_f_F]   )*(g[idx_g_BB]   + g[idx_g_F]   )*(h[idx_h_BB]   + h[idx_h_F]   )  +
-                                              (f[idx_f_B]    + f[idx_f_FF]  )*(g[idx_g_B]    + g[idx_g_FF]  )*(h[idx_h_B]    + h[idx_h_FF]  )) +
-                            quarter*(d_coef_c*(f[idx_f_BBB]  + f[idx_f_F]   )*(g[idx_g_BBB]  + g[idx_g_F]   )*(h[idx_h_BBB]  + h[idx_h_F]   )  +
-                                              (f[idx_f_BB]   + f[idx_f_FF]  )*(g[idx_g_BB]   + g[idx_g_FF]  )*(h[idx_h_BB]   + h[idx_h_FF]  )  +
-                                              (f[idx_f_B]    + f[idx_f_FFF] )*(g[idx_g_B]    + g[idx_g_FFF] )*(h[idx_h_B]    + h[idx_h_FFF] )) +
-                            quarter*(d_coef_d*(f[idx_f_BBBB] + f[idx_f_F]   )*(g[idx_g_BBBB] + g[idx_g_F]   )*(h[idx_h_BBBB] + h[idx_h_F]   )  +
-                                              (f[idx_f_BBB]  + f[idx_f_FF]  )*(g[idx_g_BBB]  + g[idx_g_FF]  )*(h[idx_h_BBB]  + h[idx_h_FF]  )  +
-                                              (f[idx_f_BB]   + f[idx_f_FFF] )*(g[idx_g_BB]   + g[idx_g_FFF] )*(h[idx_h_BB]   + h[idx_h_FFF] )  +
-                                              (f[idx_f_B]    + f[idx_f_FFFF])*(g[idx_g_B]    + g[idx_g_FFFF])*(h[idx_h_B]    + h[idx_h_FFFF])));
+                        F_face_z[idx_face_z] += dt*quarter*(
+                            d_coef_a*((f[idx_f_B]    + f[idx_f_F]   )*(g[idx_g_B]    + g[idx_g_F]   )*(h[idx_h_B]    + h[idx_h_F]   )) +
+                            d_coef_b*((f[idx_f_BB]   + f[idx_f_F]   )*(g[idx_g_BB]   + g[idx_g_F]   )*(h[idx_h_BB]   + h[idx_h_F]   )  +
+                                      (f[idx_f_B]    + f[idx_f_FF]  )*(g[idx_g_B]    + g[idx_g_FF]  )*(h[idx_h_B]    + h[idx_h_FF]  )) +
+                            d_coef_c*((f[idx_f_BBB]  + f[idx_f_F]   )*(g[idx_g_BBB]  + g[idx_g_F]   )*(h[idx_h_BBB]  + h[idx_h_F]   )  +
+                                      (f[idx_f_BB]   + f[idx_f_FF]  )*(g[idx_g_BB]   + g[idx_g_FF]  )*(h[idx_h_BB]   + h[idx_h_FF]  )  +
+                                      (f[idx_f_B]    + f[idx_f_FFF] )*(g[idx_g_B]    + g[idx_g_FFF] )*(h[idx_h_B]    + h[idx_h_FFF] )) +
+                            d_coef_d*((f[idx_f_BBBB] + f[idx_f_F]   )*(g[idx_g_BBBB] + g[idx_g_F]   )*(h[idx_h_BBBB] + h[idx_h_F]   )  +
+                                      (f[idx_f_BBB]  + f[idx_f_FF]  )*(g[idx_g_BBB]  + g[idx_g_FF]  )*(h[idx_h_BBB]  + h[idx_h_FF]  )  +
+                                      (f[idx_f_BB]   + f[idx_f_FFF] )*(g[idx_g_BB]   + g[idx_g_FFF] )*(h[idx_h_BB]   + h[idx_h_FFF] )  +
+                                      (f[idx_f_B]    + f[idx_f_FFFF])*(g[idx_g_B]    + g[idx_g_FFFF])*(h[idx_h_B]    + h[idx_h_FFFF])));
                     }
                 }
             }
@@ -10413,22 +10500,22 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ(
                             (k + 4 + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_z[idx_face_z] += dt*(
-                            quarter*(d_coef_a*(f[idx_f_B]     + f[idx_f_F]    )*(g[idx_g_B]     + g[idx_g_F]    )*(h[idx_h_B]     + h[idx_h_F]    )) +
-                            quarter*(d_coef_b*(f[idx_f_BB]    + f[idx_f_F]    )*(g[idx_g_BB]    + g[idx_g_F]    )*(h[idx_h_BB]    + h[idx_h_F]    )  +
-                                              (f[idx_f_B]     + f[idx_f_FF]   )*(g[idx_g_B]     + g[idx_g_FF]   )*(h[idx_h_B]     + h[idx_h_FF]   )) +
-                            quarter*(d_coef_c*(f[idx_f_BBB]   + f[idx_f_F]    )*(g[idx_g_BBB]   + g[idx_g_F]    )*(h[idx_h_BBB]   + h[idx_h_F]    )  +
-                                              (f[idx_f_BB]    + f[idx_f_FF]   )*(g[idx_g_BB]    + g[idx_g_FF]   )*(h[idx_h_BB]    + h[idx_h_FF]   )  +
-                                              (f[idx_f_B]     + f[idx_f_FFF]  )*(g[idx_g_B]     + g[idx_g_FFF]  )*(h[idx_h_B]     + h[idx_h_FFF]  )) +
-                            quarter*(d_coef_d*(f[idx_f_BBBB]  + f[idx_f_F]    )*(g[idx_g_BBBB]  + g[idx_g_F]    )*(h[idx_h_BBBB]  + h[idx_h_F]    )  +
-                                              (f[idx_f_BBB]   + f[idx_f_FF]   )*(g[idx_g_BBB]   + g[idx_g_FF]   )*(h[idx_h_BBB]   + h[idx_h_FF]   )  +
-                                              (f[idx_f_BB]    + f[idx_f_FFF]  )*(g[idx_g_BB]    + g[idx_g_FFF]  )*(h[idx_h_BB]    + h[idx_h_FFF]  )  +
-                                              (f[idx_f_B]     + f[idx_f_FFFF] )*(g[idx_g_B]     + g[idx_g_FFFF] )*(h[idx_h_B]     + h[idx_h_FFFF] )) +
-                            quarter*(d_coef_e*(f[idx_f_BBBBB] + f[idx_f_F]    )*(g[idx_g_BBBBB] + g[idx_g_F]    )*(h[idx_h_BBBBB] + h[idx_h_F]    )  +
-                                              (f[idx_f_BBBB]  + f[idx_f_FF]   )*(g[idx_g_BBBB]  + g[idx_g_FF]   )*(h[idx_h_BBBB]  + h[idx_h_FF]   )  +
-                                              (f[idx_f_BBB]   + f[idx_f_FFF]  )*(g[idx_g_BBB]   + g[idx_g_FFF]  )*(h[idx_h_BBB]   + h[idx_h_FFF]  )  +
-                                              (f[idx_f_BB]    + f[idx_f_FFFF] )*(g[idx_g_BB]    + g[idx_g_FFFF] )*(h[idx_h_BB]    + h[idx_h_FFFF] )  +
-                                              (f[idx_f_B]     + f[idx_f_FFFFF])*(g[idx_g_B]     + g[idx_g_FFFFF])*(h[idx_h_B]     + h[idx_h_FFFFF])));
+                        F_face_z[idx_face_z] += dt*quarter*(
+                            d_coef_a*((f[idx_f_B]     + f[idx_f_F]    )*(g[idx_g_B]     + g[idx_g_F]    )*(h[idx_h_B]     + h[idx_h_F]    )) +
+                            d_coef_b*((f[idx_f_BB]    + f[idx_f_F]    )*(g[idx_g_BB]    + g[idx_g_F]    )*(h[idx_h_BB]    + h[idx_h_F]    )  +
+                                      (f[idx_f_B]     + f[idx_f_FF]   )*(g[idx_g_B]     + g[idx_g_FF]   )*(h[idx_h_B]     + h[idx_h_FF]   )) +
+                            d_coef_c*((f[idx_f_BBB]   + f[idx_f_F]    )*(g[idx_g_BBB]   + g[idx_g_F]    )*(h[idx_h_BBB]   + h[idx_h_F]    )  +
+                                      (f[idx_f_BB]    + f[idx_f_FF]   )*(g[idx_g_BB]    + g[idx_g_FF]   )*(h[idx_h_BB]    + h[idx_h_FF]   )  +
+                                      (f[idx_f_B]     + f[idx_f_FFF]  )*(g[idx_g_B]     + g[idx_g_FFF]  )*(h[idx_h_B]     + h[idx_h_FFF]  )) +
+                            d_coef_d*((f[idx_f_BBBB]  + f[idx_f_F]    )*(g[idx_g_BBBB]  + g[idx_g_F]    )*(h[idx_h_BBBB]  + h[idx_h_F]    )  +
+                                      (f[idx_f_BBB]   + f[idx_f_FF]   )*(g[idx_g_BBB]   + g[idx_g_FF]   )*(h[idx_h_BBB]   + h[idx_h_FF]   )  +
+                                      (f[idx_f_BB]    + f[idx_f_FFF]  )*(g[idx_g_BB]    + g[idx_g_FFF]  )*(h[idx_h_BB]    + h[idx_h_FFF]  )  +
+                                      (f[idx_f_B]     + f[idx_f_FFFF] )*(g[idx_g_B]     + g[idx_g_FFFF] )*(h[idx_h_B]     + h[idx_h_FFFF] )) +
+                            d_coef_e*((f[idx_f_BBBBB] + f[idx_f_F]    )*(g[idx_g_BBBBB] + g[idx_g_F]    )*(h[idx_h_BBBBB] + h[idx_h_F]    )  +
+                                      (f[idx_f_BBBB]  + f[idx_f_FF]   )*(g[idx_g_BBBB]  + g[idx_g_FF]   )*(h[idx_h_BBBB]  + h[idx_h_FF]   )  +
+                                      (f[idx_f_BBB]   + f[idx_f_FFF]  )*(g[idx_g_BBB]   + g[idx_g_FFF]  )*(h[idx_h_BBB]   + h[idx_h_FFF]  )  +
+                                      (f[idx_f_BB]    + f[idx_f_FFFF] )*(g[idx_g_BB]    + g[idx_g_FFFF] )*(h[idx_h_BB]    + h[idx_h_FFFF] )  +
+                                      (f[idx_f_B]     + f[idx_f_FFFFF])*(g[idx_g_B]     + g[idx_g_FFFFF])*(h[idx_h_B]     + h[idx_h_FFFFF])));
                     }
                 }
             }
@@ -10628,28 +10715,28 @@ ConvectiveFluxReconstructorKEP::addCubicTermToConvectiveFluxZ(
                             (k + 5 + num_ghosts_2_h)*ghostcell_dim_0_h*
                                 ghostcell_dim_1_h;
                         
-                        F_face_z[idx_face_z] += dt*(
-                            quarter*(d_coef_a*(f[idx_f_B]      + f[idx_f_F]     )*(g[idx_g_B]      + g[idx_g_F]     )*(h[idx_h_B]      + h[idx_h_F]     )) +
-                            quarter*(d_coef_b*(f[idx_f_BB]     + f[idx_f_F]     )*(g[idx_g_BB]     + g[idx_g_F]     )*(h[idx_h_BB]     + h[idx_h_F]     )  +
-                                              (f[idx_f_B]      + f[idx_f_FF]    )*(g[idx_g_B]      + g[idx_g_FF]    )*(h[idx_h_B]      + h[idx_h_FF]    )) +
-                            quarter*(d_coef_c*(f[idx_f_BBB]    + f[idx_f_F]     )*(g[idx_g_BBB]    + g[idx_g_F]     )*(h[idx_h_BBB]    + h[idx_h_F]     )  +
-                                              (f[idx_f_BB]     + f[idx_f_FF]    )*(g[idx_g_BB]     + g[idx_g_FF]    )*(h[idx_h_BB]     + h[idx_h_FF]    )  +
-                                              (f[idx_f_B]      + f[idx_f_FFF]   )*(g[idx_g_B]      + g[idx_g_FFF]   )*(h[idx_h_B]      + h[idx_h_FFF]   )) +
-                            quarter*(d_coef_d*(f[idx_f_BBBB]   + f[idx_f_F]     )*(g[idx_g_BBBB]   + g[idx_g_F]     )*(h[idx_h_BBBB]   + h[idx_h_F]     )  +
-                                              (f[idx_f_BBB]    + f[idx_f_FF]    )*(g[idx_g_BBB]    + g[idx_g_FF]    )*(h[idx_h_BBB]    + h[idx_h_FF]    )  +
-                                              (f[idx_f_BB]     + f[idx_f_FFF]   )*(g[idx_g_BB]     + g[idx_g_FFF]   )*(h[idx_h_BB]     + h[idx_h_FFF]   )  +
-                                              (f[idx_f_B]      + f[idx_f_FFFF]  )*(g[idx_g_B]      + g[idx_g_FFFF]  )*(h[idx_h_B]      + h[idx_h_FFFF]  )) +
-                            quarter*(d_coef_e*(f[idx_f_BBBBB]  + f[idx_f_F]     )*(g[idx_g_BBBBB]  + g[idx_g_F]     )*(h[idx_h_BBBBB]  + h[idx_h_F]     )  +
-                                              (f[idx_f_BBBB]   + f[idx_f_FF]    )*(g[idx_g_BBBB]   + g[idx_g_FF]    )*(h[idx_h_BBBB]   + h[idx_h_FF]    )  +
-                                              (f[idx_f_BBB]    + f[idx_f_FFF]   )*(g[idx_g_BBB]    + g[idx_g_FFF]   )*(h[idx_h_BBB]    + h[idx_h_FFF]   )  +
-                                              (f[idx_f_BB]     + f[idx_f_FFFF]  )*(g[idx_g_BB]     + g[idx_g_FFFF]  )*(h[idx_h_BB]     + h[idx_h_FFFF]  )  +
-                                              (f[idx_f_B]      + f[idx_f_FFFFF] )*(g[idx_g_B]      + g[idx_g_FFFFF] )*(h[idx_h_B]      + h[idx_h_FFFFF] )) +
-                            quarter*(d_coef_f*(f[idx_f_BBBBBB] + f[idx_f_F]     )*(g[idx_g_BBBBBB] + g[idx_g_F]     )*(h[idx_h_BBBBBB] + h[idx_h_F]     )  +
-                                              (f[idx_f_BBBBB]  + f[idx_f_FF]    )*(g[idx_g_BBBBB]  + g[idx_g_FF]    )*(h[idx_h_BBBBB]  + h[idx_h_FF]    )  +
-                                              (f[idx_f_BBBB]   + f[idx_f_FFF]   )*(g[idx_g_BBBB]   + g[idx_g_FFF]   )*(h[idx_h_BBBB]   + h[idx_h_FFF]   )  +
-                                              (f[idx_f_BBB]    + f[idx_f_FFFF]  )*(g[idx_g_BBB]    + g[idx_g_FFFF]  )*(h[idx_h_BBB]    + h[idx_h_FFFF]  )  +
-                                              (f[idx_f_BB]     + f[idx_f_FFFFF] )*(g[idx_g_BB]     + g[idx_g_FFFFF] )*(h[idx_h_BB]     + h[idx_h_FFFFF] )  +
-                                              (f[idx_f_B]      + f[idx_f_FFFFFF])*(g[idx_g_B]      + g[idx_g_FFFFFF])*(h[idx_h_B]      + h[idx_h_FFFFFF])));
+                        F_face_z[idx_face_z] += dt*quarter*(
+                            d_coef_a*((f[idx_f_B]      + f[idx_f_F]     )*(g[idx_g_B]      + g[idx_g_F]     )*(h[idx_h_B]      + h[idx_h_F]     )) +
+                            d_coef_b*((f[idx_f_BB]     + f[idx_f_F]     )*(g[idx_g_BB]     + g[idx_g_F]     )*(h[idx_h_BB]     + h[idx_h_F]     )  +
+                                      (f[idx_f_B]      + f[idx_f_FF]    )*(g[idx_g_B]      + g[idx_g_FF]    )*(h[idx_h_B]      + h[idx_h_FF]    )) +
+                            d_coef_c*((f[idx_f_BBB]    + f[idx_f_F]     )*(g[idx_g_BBB]    + g[idx_g_F]     )*(h[idx_h_BBB]    + h[idx_h_F]     )  +
+                                      (f[idx_f_BB]     + f[idx_f_FF]    )*(g[idx_g_BB]     + g[idx_g_FF]    )*(h[idx_h_BB]     + h[idx_h_FF]    )  +
+                                      (f[idx_f_B]      + f[idx_f_FFF]   )*(g[idx_g_B]      + g[idx_g_FFF]   )*(h[idx_h_B]      + h[idx_h_FFF]   )) +
+                            d_coef_d*((f[idx_f_BBBB]   + f[idx_f_F]     )*(g[idx_g_BBBB]   + g[idx_g_F]     )*(h[idx_h_BBBB]   + h[idx_h_F]     )  +
+                                      (f[idx_f_BBB]    + f[idx_f_FF]    )*(g[idx_g_BBB]    + g[idx_g_FF]    )*(h[idx_h_BBB]    + h[idx_h_FF]    )  +
+                                      (f[idx_f_BB]     + f[idx_f_FFF]   )*(g[idx_g_BB]     + g[idx_g_FFF]   )*(h[idx_h_BB]     + h[idx_h_FFF]   )  +
+                                      (f[idx_f_B]      + f[idx_f_FFFF]  )*(g[idx_g_B]      + g[idx_g_FFFF]  )*(h[idx_h_B]      + h[idx_h_FFFF]  )) +
+                            d_coef_e*((f[idx_f_BBBBB]  + f[idx_f_F]     )*(g[idx_g_BBBBB]  + g[idx_g_F]     )*(h[idx_h_BBBBB]  + h[idx_h_F]     )  +
+                                      (f[idx_f_BBBB]   + f[idx_f_FF]    )*(g[idx_g_BBBB]   + g[idx_g_FF]    )*(h[idx_h_BBBB]   + h[idx_h_FF]    )  +
+                                      (f[idx_f_BBB]    + f[idx_f_FFF]   )*(g[idx_g_BBB]    + g[idx_g_FFF]   )*(h[idx_h_BBB]    + h[idx_h_FFF]   )  +
+                                      (f[idx_f_BB]     + f[idx_f_FFFF]  )*(g[idx_g_BB]     + g[idx_g_FFFF]  )*(h[idx_h_BB]     + h[idx_h_FFFF]  )  +
+                                      (f[idx_f_B]      + f[idx_f_FFFFF] )*(g[idx_g_B]      + g[idx_g_FFFFF] )*(h[idx_h_B]      + h[idx_h_FFFFF] )) +
+                            d_coef_f*((f[idx_f_BBBBBB] + f[idx_f_F]     )*(g[idx_g_BBBBBB] + g[idx_g_F]     )*(h[idx_h_BBBBBB] + h[idx_h_F]     )  +
+                                      (f[idx_f_BBBBB]  + f[idx_f_FF]    )*(g[idx_g_BBBBB]  + g[idx_g_FF]    )*(h[idx_h_BBBBB]  + h[idx_h_FF]    )  +
+                                      (f[idx_f_BBBB]   + f[idx_f_FFF]   )*(g[idx_g_BBBB]   + g[idx_g_FFF]   )*(h[idx_h_BBBB]   + h[idx_h_FFF]   )  +
+                                      (f[idx_f_BBB]    + f[idx_f_FFFF]  )*(g[idx_g_BBB]    + g[idx_g_FFFF]  )*(h[idx_h_BBB]    + h[idx_h_FFFF]  )  +
+                                      (f[idx_f_BB]     + f[idx_f_FFFFF] )*(g[idx_g_BB]     + g[idx_g_FFFFF] )*(h[idx_h_BB]     + h[idx_h_FFFFF] )  +
+                                      (f[idx_f_B]      + f[idx_f_FFFFFF])*(g[idx_g_B]      + g[idx_g_FFFFFF])*(h[idx_h_B]      + h[idx_h_FFFFFF])));
                     }
                 }
             }
