@@ -21,7 +21,7 @@ dt_base = 0.0001*dx_base
 num_steps_base = 1
 
 # executable_path = "../../../build/src/exec/main"
-executable_path = "../../../build_convergence_test_single_species/src/exec/main"
+executable_path = "../../../build_convergence_test_five_eqn_allaire/src/exec/main"
 
 input_file_template = """
 Application = "Euler"
@@ -29,13 +29,13 @@ Application = "Euler"
 Euler
 {{
     // Name of project
-    project_name = "3D convergence test single-species"
+    project_name = "3D convergence test five-eqn by Allaire"
 
     // Number of species
-    num_species = 1
+    num_species = 2
 
     // Flow model to use
-    flow_model = "SINGLE_SPECIES"
+    flow_model = "FIVE_EQN_ALLAIRE"
 
     Flow_model
     {{
@@ -44,8 +44,8 @@ Euler
 
         Equation_of_state_mixing_rules
         {{
-            species_gamma = 1.4
-            species_R     = 1.0
+            species_gamma = 1.6, 1.4
+            species_R     = 1.0, 1.0
         }}
     }}
 
@@ -70,7 +70,7 @@ Main
     dim = 3
 
     // Base name of log file
-    base_name = "3D_convergence_test_single_species"
+    base_name = "3D_convergence_test_five_eqn_allaire"
 
     // Whether all nodes log to individual files,
     // if false only node 0 will log
@@ -82,7 +82,7 @@ Main
     // Frequency at which to dump viz output (0 to turn off)
     viz_dump_interval = 0.02
     // Name of directory in which to place viz output
-    viz_dump_dirname = "viz_3D_convergence_test_single_species"
+    viz_dump_dirname = "viz_3D_convergence_test_five_eqn_allaire"
     // Number of processors which write to each viz file
     visit_number_procs_per_file = 1
 
@@ -207,7 +207,7 @@ for scheme in convective_flux_schemes:
         dx_level        = dx_base/factor
         dt_level        = dt_base/factor
         num_steps_level = num_steps_base*factor
-
+        
         level_dir = "./" + scheme + "_N_" + str(N_x_level)
         if not os.path.isdir(level_dir):
             os.mkdir(level_dir)
@@ -220,9 +220,9 @@ for scheme in convective_flux_schemes:
 
         os.chdir(level_dir)
         os.system(executable_path + " input_3D_convergence_single_species.txt")
-        output_L1 = subprocess.check_output('grep "L1_error" 3D_convergence_test_single_species.log.0000000', shell=True)
-        output_L2 = subprocess.check_output('grep "L2_error" 3D_convergence_test_single_species.log.0000000', shell=True)
-        output_Linf = subprocess.check_output('grep "Linf_error" 3D_convergence_test_single_species.log.0000000', shell=True)
+        output_L1 = subprocess.check_output('grep "L1_error" 3D_convergence_test_five_eqn_allaire.log.0000000', shell=True)
+        output_L2 = subprocess.check_output('grep "L2_error" 3D_convergence_test_five_eqn_allaire.log.0000000', shell=True)
+        output_Linf = subprocess.check_output('grep "Linf_error" 3D_convergence_test_five_eqn_allaire.log.0000000', shell=True)
 
         L1_error = float(output_L1.split()[1])
         L1_errors.append(L1_error)

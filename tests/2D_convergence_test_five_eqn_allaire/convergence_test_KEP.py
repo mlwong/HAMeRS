@@ -18,10 +18,10 @@ num_grid_levels = 4
 N_base  = 8
 dx_base = 2.0/N_base
 dt_base = 0.0001*dx_base
-num_steps_base = 1
+num_steps_base = 8
 
 # executable_path = "../../../build/src/exec/main"
-executable_path = "../../../build_convergence_test_single_species/src/exec/main"
+executable_path = "../../../build_convergence_test_five_eqn_allaire/src/exec/main"
 
 input_file_template = """
 Application = "Euler"
@@ -29,13 +29,13 @@ Application = "Euler"
 Euler
 {{
     // Name of project
-    project_name = "3D convergence test single-species"
+    project_name = "2D convergence test five-eqn by Allaire"
 
     // Number of species
-    num_species = 1
+    num_species = 2
 
     // Flow model to use
-    flow_model = "SINGLE_SPECIES"
+    flow_model = "FIVE_EQN_ALLAIRE"
 
     Flow_model
     {{
@@ -44,8 +44,8 @@ Euler
 
         Equation_of_state_mixing_rules
         {{
-            species_gamma = 1.4
-            species_R     = 1.0
+            species_gamma = 1.6, 1.4
+            species_R     = 1.0, 1.0
         }}
     }}
 
@@ -67,10 +67,10 @@ Euler
 Main
 {{
     // Dimension of problem
-    dim = 3
+    dim = 2
 
     // Base name of log file
-    base_name = "3D_convergence_test_single_species"
+    base_name = "2D_convergence_test_five_eqn_allaire"
 
     // Whether all nodes log to individual files,
     // if false only node 0 will log
@@ -82,7 +82,7 @@ Main
     // Frequency at which to dump viz output (0 to turn off)
     viz_dump_interval = 0.02
     // Name of directory in which to place viz output
-    viz_dump_dirname = "viz_3D_convergence_test_single_species"
+    viz_dump_dirname = "viz_2D_convergence_test_five_eqn_allaire"
     // Number of processors which write to each viz file
     visit_number_procs_per_file = 1
 
@@ -94,12 +94,12 @@ Main
 
 CartesianGeometry
 {{
-    domain_boxes = [(0, 0, 0), ({:d}, {:d}, {:d})] // Lower and upper indices of compuational domain
-    x_lo         = -1.0, -1.0, -1.0 // Lower end of computational domain
-    x_up         =  1.0,  1.0,  1.0 // Upper end of computational domain
+    domain_boxes = [(0, 0), ({:d}, {:d})] // Lower and upper indices of compuational domain
+    x_lo         = -1.0, -1.0 // Lower end of computational domain
+    x_up         =  1.0,  1.0 // Upper end of computational domain
 
     // Periodic_dimension. A non-zero value indicates that the direction is periodic
-    periodic_dimension = 1, 1, 1
+    periodic_dimension = 1, 1
 }}
 
 ExtendedTagAndInitialize
@@ -117,12 +117,12 @@ PatchHierarchy
 
     largest_patch_size
     {{
-        level_0 = 8, 8, 8
+        level_0 = 8, 8
     }}
 
     smallest_patch_size
     {{
-        level_0 = 8, 8, 8
+        level_0 = 8, 8
     }}
 }}
 
@@ -203,26 +203,25 @@ for scheme in convective_flux_schemes:
 
         N_x_level       = N_base*factor
         N_y_level       = N_base*factor
-        N_z_level       = N_base*factor
         dx_level        = dx_base/factor
         dt_level        = dt_base/factor
         num_steps_level = num_steps_base*factor
-
+        
         level_dir = "./" + scheme + "_N_" + str(N_x_level)
         if not os.path.isdir(level_dir):
             os.mkdir(level_dir)
 
-        input_file = open(level_dir + "/input_3D_convergence_single_species.txt", "w")
+        input_file = open(level_dir + "/input_2D_convergence_single_species.txt", "w")
 
-        input_file.write(input_file_template.format(scheme_name, use_DRP4, stencil_width, order, (N_x_level - 1), (N_y_level - 1), (N_z_level - 1), dt_level, num_steps_level))
+        input_file.write(input_file_template.format(scheme_name, use_DRP4, stencil_width, order, (N_x_level - 1), (N_y_level - 1), dt_level, num_steps_level))
 
         input_file.close()
 
         os.chdir(level_dir)
-        os.system(executable_path + " input_3D_convergence_single_species.txt")
-        output_L1 = subprocess.check_output('grep "L1_error" 3D_convergence_test_single_species.log.0000000', shell=True)
-        output_L2 = subprocess.check_output('grep "L2_error" 3D_convergence_test_single_species.log.0000000', shell=True)
-        output_Linf = subprocess.check_output('grep "Linf_error" 3D_convergence_test_single_species.log.0000000', shell=True)
+        os.system(executable_path + " input_2D_convergence_single_species.txt")
+        output_L1 = subprocess.check_output('grep "L1_error" 2D_convergence_test_five_eqn_allaire.log.0000000', shell=True)
+        output_L2 = subprocess.check_output('grep "L2_error" 2D_convergence_test_five_eqn_allaire.log.0000000', shell=True)
+        output_Linf = subprocess.check_output('grep "Linf_error" 2D_convergence_test_five_eqn_allaire.log.0000000', shell=True)
 
         L1_error = float(output_L1.split()[1])
         L1_errors.append(L1_error)
@@ -280,9 +279,9 @@ for scheme in convective_flux_schemes:
         N_x_level = N_base*factor
 
         if level == 0:
-            print("  %21s %24.16e %24.16e %24.16e" % ( str(N_x_level) + "^3        ", L1_errors[level], L2_errors[level], Linf_errors[level] ) )
+            print("  %21s %24.16e %24.16e %24.16e" % ( str(N_x_level) + "^2        ", L1_errors[level], L2_errors[level], Linf_errors[level] ) )
         else:
-            print("  %21s %24.16e %24.16e %24.16e %24.16e %24.16e %24.16e" % ( str(N_x_level) + "^3        ", L1_errors[level], L2_errors[level], Linf_errors[level], L1_convergence_rates[level], L2_convergence_rates[level], Linf_convergence_rates[level] ) )
+            print("  %21s %24.16e %24.16e %24.16e %24.16e %24.16e %24.16e" % ( str(N_x_level) + "^2        ", L1_errors[level], L2_errors[level], Linf_errors[level], L1_convergence_rates[level], L2_convergence_rates[level], Linf_convergence_rates[level] ) )
 
     assert L2_convergence_rates[num_grid_levels_scheme - 1] > L2_convergence_rates_schemes_expected[count]
     count += 1

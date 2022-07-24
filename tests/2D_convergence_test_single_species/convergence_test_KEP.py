@@ -20,8 +20,8 @@ dx_base = 2.0/N_base
 dt_base = 0.0001*dx_base
 num_steps_base = 4
 
-executable_path = "../../../build/src/exec/main"
-# executable_path = "../../../build_convergence_test_single_species/src/exec/main"
+# executable_path = "../../../build/src/exec/main"
+executable_path = "../../../build_convergence_test_single_species/src/exec/main"
 
 input_file_template = """
 Application = "Euler"

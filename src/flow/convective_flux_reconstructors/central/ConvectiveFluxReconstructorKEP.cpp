@@ -10813,13 +10813,14 @@ ConvectiveFluxReconstructorKEP::addSourceTermsForVolumeFractionEquations(
         
         double* u = data_velocity->getPointer(0);
         
-        for (int si = 0; si < num_species; si++)
+        for (int si = 0; si < num_species - 1; si++)
         {
-            const int ei = d_num_eqn + d_dim.getValue() + 1 + si;
+            const int ei = num_species + d_dim.getValue() + 1 + si;
             
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
             TBOX_ASSERT(d_eqn_form[ei] == EQN_FORM::ADVECTIVE);
 #endif
+            
             double* S = data_source->getPointer(ei);
             
             if (d_stencil_width == 3)
@@ -11029,13 +11030,14 @@ ConvectiveFluxReconstructorKEP::addSourceTermsForVolumeFractionEquations(
         double* u = data_velocity->getPointer(0);
         double* v = data_velocity->getPointer(1);
         
-        for (int si = 0; si < num_species; si++)
+        for (int si = 0; si < num_species - 1; si++)
         {
-            const int ei = d_num_eqn + d_dim.getValue() + 1 + si;
+            const int ei = num_species + d_dim.getValue() + 1 + si;
             
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
             TBOX_ASSERT(d_eqn_form[ei] == EQN_FORM::ADVECTIVE);
 #endif
+            
             double* S = data_source->getPointer(ei);
             
             if (d_stencil_width == 3)
@@ -11518,13 +11520,14 @@ ConvectiveFluxReconstructorKEP::addSourceTermsForVolumeFractionEquations(
         double* v = data_velocity->getPointer(1);
         double* w = data_velocity->getPointer(2);
         
-        for (int si = 0; si < num_species; si++)
+        for (int si = 0; si < num_species - 1; si++)
         {
-            const int ei = d_num_eqn + d_dim.getValue() + 1 + si;
+            const int ei = num_species + d_dim.getValue() + 1 + si;
             
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
             TBOX_ASSERT(d_eqn_form[ei] == EQN_FORM::ADVECTIVE);
 #endif
+            
             double* S = data_source->getPointer(ei);
             
             if (d_stencil_width == 3)
