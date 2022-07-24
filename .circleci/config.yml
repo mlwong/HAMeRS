@@ -5,6 +5,9 @@ workflows:
   build:
     jobs:
       - build_HDF5
+      - build_HAMeRS_with_boost:
+          requires:
+            - build_HDF5
       - build_HAMeRS:
           requires:
             - build_HDF5
@@ -41,7 +44,34 @@ jobs:
           key: hdf5-cache-{{ .Environment.variableName }}
           paths:
             - ${HDF5_ROOT}
-  
+
+  build_HAMeRS_with_boost:
+    docker:
+      - image: cimg/base:2022.07
+
+    steps:
+      - checkout
+      - run:
+          name: "Install libraries"
+          command: sudo apt-get update && sudo apt-get install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
+      - run:
+          name: "Check compiler"
+          command: which mpicc; which mpicxx; which mpif77
+      - run:
+          name: "Check environment variables"
+          command: >-
+            echo $HDF5_ROOT &&
+            echo $SAMRAI_ROOT_NO_BOOST &&
+            echo $SAMRAI_ROOT_WITH_BOOST &&
+            echo $HAMERS_ROOT=${PWD}'
+      - restore_cache:
+          name: "Restore HDF5 cache"
+          keys:
+            - hdf5-cache-{{ .Environment.variableName }}
+      - run:
+          name: install_HAMeRS_with_Boost
+          command: sh circleci/install-SAMRAI_with_Boost.sh; sh circleci/install-HAMeRS_with_Boost.sh
+
   build_HAMeRS:
     docker:
       - image: cimg/base:2022.07
@@ -55,19 +85,16 @@ jobs:
           name: "Check compiler"
           command: which mpicc; which mpicxx; which mpif77
       - run:
-          name: "Setup environment variables"
+          name: "Check environment variables"
           command: >-
-            echo 'export HDF5_ROOT=${PWD}/hdf5' >> $BASH_ENV &&
-            echo 'export SAMRAI_ROOT_NO_BOOST=${PWD}/SAMRAI_NO_BOOST' >> $BASH_ENV &&
-            echo 'export SAMRAI_ROOT_WITH_BOOST=${PWD}/SAMRAI_WITH_BOOST' >> $BASH_ENV &&
-            echo 'export HAMERS_ROOT=${PWD}' >> $BASH_ENV
+            echo $HDF5_ROOT &&
+            echo $SAMRAI_ROOT_NO_BOOST &&
+            echo $SAMRAI_ROOT_WITH_BOOST &&
+            echo $HAMERS_ROOT=${PWD}'
       - restore_cache:
           name: "Restore HDF5 cache"
           keys:
-            - hdf5-cache
-      - run:
-          name: install_HAMeRS_with_Boost
-          command: sh circleci/install-SAMRAI_with_Boost.sh; sh circleci/install-HAMeRS_with_Boost.sh
+            - hdf5-cache-{{ .Environment.variableName }}
       - run:
           name: install_HAMeRS
           command: sh circleci/install-SAMRAI.sh; sh circleci/install-HAMeRS_convergence_test_single_species.sh; sh circleci/install-HAMeRS_convergence_test_five_eqn_allaire.sh
