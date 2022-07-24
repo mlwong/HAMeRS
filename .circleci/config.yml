@@ -68,6 +68,9 @@ jobs:
           keys:
             - hdf5_cache
       - run:
+          name: "Checking hdf5"
+          command: ls hdf5
+      - run:
           name: "Setup environment variables"
           command: >-
             echo 'export HDF5_ROOT=${PWD}/hdf5' >> $BASH_ENV &&
@@ -94,6 +97,9 @@ jobs:
           name: "Restore HDF5 cache"
           keys:
             - hdf5_cache
+      - run:
+          name: "Checking hdf5"
+          command: ls hdf5
       - run:
           name: "Setup environment variables"
           command: >-
