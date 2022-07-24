@@ -5,7 +5,9 @@ workflows:
   build:
     jobs:
       - build_HDF5
-      - build_HAMeRS
+      - build_HAMeRS:
+          requires:
+            - build_HDF5
 
 jobs:
   build_HDF5:
