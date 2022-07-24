@@ -24,5 +24,8 @@ jobs:
           name: "Setup custom environment variables"
           command: HDF5_ROOT=${CIRCLE_WORKING_DIRECTORY}/hdf5
       - run:
+          name: "Echo hdf5 root"
+          command: echo $HDF5_ROOT
+      - run:
           name: install_HDF5
           command: sh circleci/install-hdf5.sh
