@@ -5,9 +5,9 @@ workflows:
   build:
     jobs:
       - build_HDF5
-      - build_HAMeRS_with_boost:
-          requires:
-            - build_HDF5
+      # - build_HAMeRS_with_boost:
+      #     requires:
+      #       - build_HDF5
       - build_HAMeRS:
           requires:
             - build_HDF5
@@ -61,40 +61,40 @@ jobs:
           paths:
             - hdf5
 
-  build_HAMeRS_with_boost:
-    docker:
-      - image: cimg/base:2022.07
+  # build_HAMeRS_with_boost:
+  #   docker:
+  #     - image: cimg/base:2022.07
 
-    environment:
-      CC: mpicc
-      CXX: mpicxx
-      F77: mpif77
+  #   environment:
+  #     CC: mpicc
+  #     CXX: mpicxx
+  #     F77: mpif77
 
-    steps:
-      - checkout
-      - run:
-          name: "Install libraries"
-          command: >-
-            sudo apt-get update &&
-            sudo apt install libboost1.67-dev libboost-thread1.67-dev libboost-program-options1.67-dev libboost-system1.67-dev libboost-math1.67-dev libboost-test1.67-dev libboost-python1.67-dev &&
-            sudo apt install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
-      - run:
-          name: "Check compiler"
-          command: which mpicc; which mpicxx; which mpif77
-      - restore_cache:
-          name: "Restore HDF5 cache"
-          keys:
-            - hdf5_cache-{{ .Environment.CIRCLE_SHA1 }}
-      - run:
-          name: "Setup environment variables"
-          command: >-
-            echo 'export HDF5_ROOT=${PWD}/hdf5' >> $BASH_ENV &&
-            echo 'export SAMRAI_ROOT_NO_BOOST=${PWD}/SAMRAI_NO_BOOST' >> $BASH_ENV &&
-            echo 'export SAMRAI_ROOT_WITH_BOOST=${PWD}/SAMRAI_WITH_BOOST' >> $BASH_ENV &&
-            echo 'export HAMERS_ROOT=${PWD}' >> $BASH_ENV
-      - run:
-          name: install_HAMeRS_with_Boost
-          command: sh circleci/install-SAMRAI_with_Boost.sh; sh circleci/install-HAMeRS_with_Boost.sh
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: "Install libraries"
+  #         command: >-
+  #           sudo apt-get update &&
+  #           sudo apt install libboost1.67-dev libboost-thread1.67-dev libboost-program-options1.67-dev libboost-system1.67-dev libboost-math1.67-dev libboost-test1.67-dev libboost-python1.67-dev &&
+  #           sudo apt install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev
+  #     - run:
+  #         name: "Check compiler"
+  #         command: which mpicc; which mpicxx; which mpif77
+  #     - restore_cache:
+  #         name: "Restore HDF5 cache"
+  #         keys:
+  #           - hdf5_cache-{{ .Environment.CIRCLE_SHA1 }}
+  #     - run:
+  #         name: "Setup environment variables"
+  #         command: >-
+  #           echo 'export HDF5_ROOT=${PWD}/hdf5' >> $BASH_ENV &&
+  #           echo 'export SAMRAI_ROOT_NO_BOOST=${PWD}/SAMRAI_NO_BOOST' >> $BASH_ENV &&
+  #           echo 'export SAMRAI_ROOT_WITH_BOOST=${PWD}/SAMRAI_WITH_BOOST' >> $BASH_ENV &&
+  #           echo 'export HAMERS_ROOT=${PWD}' >> $BASH_ENV
+  #     - run:
+  #         name: install_HAMeRS_with_Boost
+  #         command: sh circleci/install-SAMRAI_with_Boost.sh; sh circleci/install-HAMeRS_with_Boost.sh
 
   build_HAMeRS:
     docker:
@@ -207,7 +207,7 @@ jobs:
           command: cd tests/2D_convergence_test_single_species; python3 convergence_test.py
       - run:
           name: test
-          command: python3 convergence_test_KEP.py
+          command: cd tests/2D_convergence_test_single_species; python3 convergence_test_KEP.py
 
   test_3D_convergence_single_species:
     docker:
@@ -246,7 +246,7 @@ jobs:
           command: cd tests/3D_convergence_test_single_species; python3 convergence_test.py
       - run:
           name: test
-          command: python3 convergence_test_KEP.py
+          command: cd tests/3D_convergence_test_single_species; python3 convergence_test_KEP.py
 
   test_2D_convergence_five_eqn_allaire:
     docker:
@@ -285,7 +285,7 @@ jobs:
           command: cd tests/2D_convergence_test_five_eqn_allaire; python3 convergence_test.py
       - run:
           name: test
-          command: python3 convergence_test_KEP.py
+          command: cd tests/2D_convergence_test_five_eqn_allaire; python3 convergence_test_KEP.py
 
   test_3D_convergence_five_eqn_allaire:
     docker:
@@ -324,4 +324,4 @@ jobs:
           command: cd tests/3D_convergence_test_five_eqn_allaire; python3 convergence_test.py
       - run:
           name: test
-          command: python3 convergence_test_KEP.py
+          command: cd tests/3D_convergence_test_five_eqn_allaire; python3 convergence_test_KEP.py
