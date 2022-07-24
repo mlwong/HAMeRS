@@ -26,6 +26,8 @@ jobs:
             export CC=mpicc &&
             export CXX=mpicxx &&
             export F77=mpif77
+      - run: "Check compiler"
+        command: which mpicxx
       - run:
           name: "Setup environment variables"
           command: >-
