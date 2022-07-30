@@ -3,6 +3,7 @@
 #include "flow/flow_models/five-eqn_Allaire/FlowModelBasicUtilitiesFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelBoundaryUtilitiesFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelDiffusiveFluxUtilitiesFiveEqnAllaire.hpp"
+#include "flow/flow_models/five-eqn_Allaire/FlowModelMonitoringStatisticsUtilitiesFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelRiemannSolverFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelSourceUtilitiesFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelStatisticsUtilitiesFiveEqnAllaire.hpp"
@@ -327,6 +328,27 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
         d_equation_of_state_mixing_rules));
     
     /*
+     * Initialize boundary utilities object.
+     */
+    d_flow_model_boundary_utilities.reset(
+        new FlowModelBoundaryUtilitiesFiveEqnAllaire(
+            "d_flow_model_boundary_utilities",
+            d_dim,
+            d_num_species,
+            d_num_eqn,
+            d_equation_of_state_mixing_rules));
+    
+    /*
+     * Initialize monitoring statistics utilities object.
+     */
+    d_flow_model_monitoring_statistics_utilities.reset(new FlowModelMonitoringStatisticsUtilitiesFiveEqnAllaire(
+        "d_flow_model_monitoring_statistics_utilities",
+        d_dim,
+        d_grid_geometry,
+        d_num_species,
+        flow_model_db));
+    
+    /*
      * Initialize statistics utilities object.
      */
     d_flow_model_statistics_utilities.reset(new FlowModelStatisticsUtilitiesFiveEqnAllaire(
@@ -338,17 +360,6 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
         d_equation_of_state_mixing_rules,
         d_equation_of_shear_viscosity_mixing_rules,
         d_equation_of_bulk_viscosity_mixing_rules));
-    
-    /*
-     * Initialize boundary utilities object.
-     */
-    d_flow_model_boundary_utilities.reset(
-        new FlowModelBoundaryUtilitiesFiveEqnAllaire(
-            "d_flow_model_boundary_utilities",
-            d_dim,
-            d_num_species,
-            d_num_eqn,
-            d_equation_of_state_mixing_rules));
     
     /*
      * Initialize pointers to species cell data.
@@ -385,6 +396,8 @@ void
 FlowModelFiveEqnAllaire::putToRestart(
     const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
+    putToRestartBase(restart_db);
+    
     /*
      * Put the properties of d_equation_of_state_mixing_rules into the restart database.
      */
@@ -427,6 +440,11 @@ FlowModelFiveEqnAllaire::putToRestart(
      * Put the properties of d_flow_model_source_utilities into the restart database.
      */
     d_flow_model_source_utilities->putToRestart(restart_db);
+    
+    /*
+     * Put the properties of d_flow_model_monitoring_statistics_utilities into the restart database.
+     */
+    d_flow_model_monitoring_statistics_utilities->putToRestart(restart_db);
     
     /*
      * Put the properties of d_flow_model_statistics_utilities into the restart database.

@@ -422,9 +422,10 @@ class NavierStokes:
          * Print data statistics (max/min conservative variables).
          */
         void
-        printDataStatistics(
+        computeAndPrintDataStatistics(
             std::ostream& os,
-            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const;
+            const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const double time) const;
         
         void
         printErrorStatistics(

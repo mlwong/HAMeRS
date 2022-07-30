@@ -573,7 +573,7 @@ void runSimulation(
     t_write_stat->stop();
     
     /*
-     * Time step loop.  Note that the step count and integration
+     * Time step loop. Note that the step count and integration
      * time are maintained by algs::TimeRefinementIntegrator.
      */
     
@@ -675,12 +675,12 @@ void runSimulation(
         {
             case EULER:
             {
-                Euler_app->printDataStatistics(tbox::pout, patch_hierarchy);
+                Euler_app->computeAndPrintDataStatistics(tbox::pout, patch_hierarchy, loop_time);
                 break;
             }
             case NAVIER_STOKES:
             {
-                Navier_Stokes_app->printDataStatistics(tbox::pout, patch_hierarchy);
+                Navier_Stokes_app->computeAndPrintDataStatistics(tbox::pout, patch_hierarchy, loop_time);
                 break;
             }
         }

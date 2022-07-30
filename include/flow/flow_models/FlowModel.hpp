@@ -10,6 +10,7 @@
 #include "flow/flow_models/FlowModelBasicUtilities.hpp"
 #include "flow/flow_models/FlowModelBoundaryUtilities.hpp"
 #include "flow/flow_models/FlowModelDiffusiveFluxUtilities.hpp"
+#include "flow/flow_models/FlowModelMonitoringStatisticsUtilities.hpp"
 #include "flow/flow_models/FlowModelRiemannSolver.hpp"
 #include "flow/flow_models/FlowModelSourceUtilities.hpp"
 #include "flow/flow_models/FlowModelStatisticsUtilities.hpp"
@@ -46,6 +47,7 @@ class FlowModelRiemannSolver;
 class FlowModelBasicUtilities;
 class FlowModelDiffusiveFluxUtilities;
 class FlowModelSourceUtilities;
+class FlowModelMonitoringStatisticsUtilities;
 class FlowModelStatisticsUtilities;
 
 /*
@@ -66,23 +68,7 @@ class FlowModel:
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
             const int& num_eqn,
-            const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db):
-                d_object_name(object_name),
-                d_project_name(project_name),
-                d_dim(dim),
-                d_grid_geometry(grid_geometry),
-                d_num_species(num_species),
-                d_num_eqn(num_eqn),
-                d_flow_model_db(flow_model_db),
-                d_num_ghosts(-hier::IntVector::getOne(d_dim)),
-                d_patch(nullptr),
-                d_interior_box(hier::Box::getEmptyBox(d_dim)),
-                d_ghost_box(hier::Box::getEmptyBox(d_dim)),
-                d_interior_dims(hier::IntVector::getZero(d_dim)),
-                d_ghostcell_dims(hier::IntVector::getZero(d_dim)),
-                d_subdomain_box(hier::Box::getEmptyBox(d_dim)),
-                d_derived_cell_data_computed(false)
-        {}
+            const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db);
         
         virtual ~FlowModel() {}
         
@@ -192,6 +178,15 @@ class FlowModel:
         }
         
         /*
+         * Return the HAMERS_SHARED_PTR to the monitoring statistics utilities object.
+         */
+        const HAMERS_SHARED_PTR<FlowModelMonitoringStatisticsUtilities>&
+        getFlowModelMonitoringStatisticsUtilities() const
+        {
+            return d_flow_model_monitoring_statistics_utilities;
+        }
+        
+        /*
          * Return the HAMERS_SHARED_PTR to the statistics utilities object.
          */
         const HAMERS_SHARED_PTR<FlowModelStatisticsUtilities>&
@@ -210,7 +205,7 @@ class FlowModel:
          */
         virtual void
         putToRestart(
-            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const = 0;
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
         
         /*
          * Register the conservative variables.
@@ -383,6 +378,12 @@ class FlowModel:
         setupSourceUtilities();
         
         /*
+         * Setup the monitoring statistics utilties object.
+         */
+        void
+        setupMonitoringStatisticsUtilities();
+        
+        /*
          * Setup the statistics utilties object.
          */
         void
@@ -411,6 +412,13 @@ class FlowModel:
 #endif
         
     protected:
+        /*
+         * Put the characteristics of the base flow model class into the restart database.
+         */
+        void
+        putToRestartBase(
+            const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const;
+        
         /*
          * Set the context for data on a patch.
          */
@@ -550,6 +558,11 @@ class FlowModel:
          * HAMERS_SHARED_PTR to the boundary utilities object for the flow model.
          */
         HAMERS_SHARED_PTR<FlowModelBoundaryUtilities> d_flow_model_boundary_utilities;
+        
+        /*
+         * HAMERS_SHARED_PTR to the monitoring statistics utilities object for the flow model.
+         */
+        HAMERS_SHARED_PTR<FlowModelMonitoringStatisticsUtilities> d_flow_model_monitoring_statistics_utilities;
         
         /*
          * HAMERS_SHARED_PTR to the statistics utilities object for the flow model.

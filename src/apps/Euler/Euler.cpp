@@ -2434,9 +2434,10 @@ Euler::printErrorStatistics(
 
 
 void
-Euler::printDataStatistics(
+Euler::computeAndPrintDataStatistics(
     std::ostream& os,
-    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy) const
+    const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const double time) const
 {
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
     
@@ -2485,6 +2486,20 @@ Euler::printDataStatistics(
             os << "Max/min " << variable_names[vi] << ": " << var_max_global << "/" << var_min_global << std::endl;
         }
     }
+    
+    d_flow_model->setupMonitoringStatisticsUtilities();
+    
+    HAMERS_SHARED_PTR<FlowModelMonitoringStatisticsUtilities> monitoring_statistics_utilities =
+        d_flow_model->getFlowModelMonitoringStatisticsUtilities();
+    
+    monitoring_statistics_utilities->computeMonitoringStatistics(
+        patch_hierarchy,
+        d_plot_context,
+        time);
+    
+    monitoring_statistics_utilities->outputMonitoringStatistics(
+        os,
+        time);
 }
 
 

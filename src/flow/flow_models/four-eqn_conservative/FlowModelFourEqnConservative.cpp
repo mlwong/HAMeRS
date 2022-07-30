@@ -3,6 +3,7 @@
 #include "flow/flow_models/four-eqn_conservative/FlowModelBasicUtilitiesFourEqnConservative.hpp"
 #include "flow/flow_models/four-eqn_conservative/FlowModelBoundaryUtilitiesFourEqnConservative.hpp"
 #include "flow/flow_models/four-eqn_conservative/FlowModelDiffusiveFluxUtilitiesFourEqnConservative.hpp"
+#include "flow/flow_models/four-eqn_conservative/FlowModelMonitoringStatisticsUtilitiesFourEqnConservative.hpp"
 #include "flow/flow_models/four-eqn_conservative/FlowModelRiemannSolverFourEqnConservative.hpp"
 #include "flow/flow_models/four-eqn_conservative/FlowModelSourceUtilitiesFourEqnConservative.hpp"
 #include "flow/flow_models/four-eqn_conservative/FlowModelStatisticsUtilitiesFourEqnConservative.hpp"
@@ -435,6 +436,27 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
         d_equation_of_state_mixing_rules));
     
     /*
+     * Initialize boundary utilities object.
+     */
+    d_flow_model_boundary_utilities.reset(
+        new FlowModelBoundaryUtilitiesFourEqnConservative(
+            "d_flow_model_boundary_utilities",
+            d_dim,
+            d_num_species,
+            d_num_eqn,
+            d_equation_of_state_mixing_rules));
+    
+    /*
+     * Initialize monitoring statistics utilities object.
+     */
+    d_flow_model_monitoring_statistics_utilities.reset(new FlowModelMonitoringStatisticsUtilitiesFourEqnConservative(
+        "d_flow_model_monitoring_statistics_utilities",
+        d_dim,
+        d_grid_geometry,
+        d_num_species,
+        flow_model_db));
+    
+    /*
      * Initialize statistics utilities object.
      */
     d_flow_model_statistics_utilities.reset(new FlowModelStatisticsUtilitiesFourEqnConservative(
@@ -448,17 +470,6 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
         d_equation_of_shear_viscosity_mixing_rules,
         d_equation_of_bulk_viscosity_mixing_rules,
         d_equation_of_thermal_conductivity_mixing_rules));
-    
-    /*
-     * Initialize boundary utilities object.
-     */
-    d_flow_model_boundary_utilities.reset(
-        new FlowModelBoundaryUtilitiesFourEqnConservative(
-            "d_flow_model_boundary_utilities",
-            d_dim,
-            d_num_species,
-            d_num_eqn,
-            d_equation_of_state_mixing_rules));
     
     /*
      * Initialize pointers to species cell data.
@@ -495,6 +506,8 @@ void
 FlowModelFourEqnConservative::putToRestart(
     const HAMERS_SHARED_PTR<tbox::Database>& restart_db) const
 {
+    putToRestartBase(restart_db);
+    
     /*
      * Put the properties of d_equation_of_state_mixing_rules into the restart database.
      */
@@ -565,6 +578,11 @@ FlowModelFourEqnConservative::putToRestart(
      * Put the properties of d_flow_model_source_utilities into the restart database.
      */
     d_flow_model_source_utilities->putToRestart(restart_db);
+    
+    /*
+     * Put the properties of d_flow_model_monitoring_statistics_utilities into the restart database.
+     */
+    d_flow_model_monitoring_statistics_utilities->putToRestart(restart_db);
     
     /*
      * Put the properties of d_flow_model_statistics_utilities into the restart database.
