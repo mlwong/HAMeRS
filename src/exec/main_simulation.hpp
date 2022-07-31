@@ -675,12 +675,12 @@ void runSimulation(
         {
             case EULER:
             {
-                Euler_app->computeAndPrintDataStatistics(tbox::pout, patch_hierarchy, loop_time);
+                Euler_app->computeAndPrintDataStatistics(tbox::pout, patch_hierarchy, iteration_num, loop_time);
                 break;
             }
             case NAVIER_STOKES:
             {
-                Navier_Stokes_app->computeAndPrintDataStatistics(tbox::pout, patch_hierarchy, loop_time);
+                Navier_Stokes_app->computeAndPrintDataStatistics(tbox::pout, patch_hierarchy, iteration_num, loop_time);
                 break;
             }
         }

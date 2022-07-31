@@ -25,7 +25,8 @@ class FlowModelMonitoringStatisticsUtilities
                 d_object_name(object_name),
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
-                d_num_species(num_species)
+                d_num_species(num_species),
+                d_monitoring_time_step_interval(-1)
         {
             /*
              * Get the monitoring statistics database.
@@ -38,6 +39,19 @@ class FlowModelMonitoringStatisticsUtilities
             else if (flow_model_db->keyExists("d_monitoring_statistics"))
             {
                 d_monitoring_statistics = flow_model_db->getStringVector("d_monitoring_statistics");
+            }
+            
+            /*
+             * Get the monitoring time step interval.
+             */
+            
+            if (flow_model_db->keyExists("monitoring_time_step_interval"))
+            {
+                d_monitoring_time_step_interval = flow_model_db->getInteger("monitoring_time_step_interval");
+            }
+            else if (flow_model_db->keyExists("d_monitoring_time_step_interval"))
+            {
+                d_monitoring_time_step_interval = flow_model_db->getInteger("d_monitoring_time_step_interval");
             }
         }
         
@@ -62,6 +76,8 @@ class FlowModelMonitoringStatisticsUtilities
             {
                 restart_db->putStringVector("d_monitoring_statistics", d_monitoring_statistics);
             }
+            
+            restart_db->putInteger("d_monitoring_time_step_interval", d_monitoring_time_step_interval);
         }
         
         /*
@@ -71,6 +87,7 @@ class FlowModelMonitoringStatisticsUtilities
         computeMonitoringStatistics(
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const int step_num,
             const double time) = 0;
         
         /*
@@ -111,6 +128,11 @@ class FlowModelMonitoringStatisticsUtilities
          * Names of monitoring statistical quantities to output.
          */
         std::vector<std::string> d_monitoring_statistics;
+        
+        /*
+         * The monitoring time step interval.
+         */
+        int d_monitoring_time_step_interval;
 };
 
 #endif /* FLOW_MODEL_MONITORING_STATISTICS_UTILITIES_HPP */

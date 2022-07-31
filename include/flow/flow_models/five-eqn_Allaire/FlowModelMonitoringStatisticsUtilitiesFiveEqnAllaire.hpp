@@ -29,6 +29,7 @@ class FlowModelMonitoringStatisticsUtilitiesFiveEqnAllaire: public FlowModelMoni
         computeMonitoringStatistics(
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
             const HAMERS_SHARED_PTR<hier::VariableContext>& data_context,
+            const int step_num,
             const double time);
         
         /*

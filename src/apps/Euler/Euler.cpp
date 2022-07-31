@@ -2437,6 +2437,7 @@ void
 Euler::computeAndPrintDataStatistics(
     std::ostream& os,
     const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+    const int step_num,
     const double time) const
 {
     const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
@@ -2495,6 +2496,7 @@ Euler::computeAndPrintDataStatistics(
     monitoring_statistics_utilities->computeMonitoringStatistics(
         patch_hierarchy,
         d_plot_context,
+        step_num,
         time);
     
     monitoring_statistics_utilities->outputMonitoringStatistics(

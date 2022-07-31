@@ -425,6 +425,7 @@ class NavierStokes:
         computeAndPrintDataStatistics(
             std::ostream& os,
             const HAMERS_SHARED_PTR<hier::PatchHierarchy>& patch_hierarchy,
+            const int step_num,
             const double time) const;
         
         void
