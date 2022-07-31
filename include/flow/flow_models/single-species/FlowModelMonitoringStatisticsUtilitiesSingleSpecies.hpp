@@ -39,6 +39,7 @@ class FlowModelMonitoringStatisticsUtilitiesSingleSpecies: public FlowModelMonit
          */
          
         double d_kinetic_energy_avg;
+        
 };
 
 #endif /* FLOW_MODEL_MONITORING_STATISTICS_UTILITIES_SINGLE_SPECIES_HPP */

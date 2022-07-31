@@ -11,14 +11,7 @@ class FlowModelMonitoringStatisticsUtilitiesFourEqnConservative: public FlowMode
             const tbox::Dimension& dim,
             const HAMERS_SHARED_PTR<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
-            const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db):
-                FlowModelMonitoringStatisticsUtilities(
-                    object_name,
-                    dim,
-                    grid_geometry,
-                    num_species,
-                    flow_model_db)
-        {}
+            const HAMERS_SHARED_PTR<tbox::Database>& flow_model_db);
         
         ~FlowModelMonitoringStatisticsUtilitiesFourEqnConservative() {}
         
@@ -39,6 +32,13 @@ class FlowModelMonitoringStatisticsUtilitiesFourEqnConservative: public FlowMode
         outputMonitoringStatistics(
             std::ostream& os,
             const double time);
+        
+    private:
+        /*
+         * Monitoring statistical quantities.
+         */
+         
+        double d_kinetic_energy_avg;
         
 };
 

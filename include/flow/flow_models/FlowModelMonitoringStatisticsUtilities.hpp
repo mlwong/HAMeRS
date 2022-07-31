@@ -98,6 +98,22 @@ class FlowModelMonitoringStatisticsUtilities
             std::ostream& os,
             const double time) = 0;
         
+        /*
+         * Get names of monitoring statistical quantities to output.
+         */
+        const std::vector<std::string>& getMonitoringStatistics() const
+        {
+            return d_monitoring_statistics;
+        }
+        
+        /*
+         * Get monitoring time step interval.
+         */
+        int getMonitoringTimeStepInterval() const
+        {
+            return d_monitoring_time_step_interval;
+        }
+        
     protected:
         /*
          * The object name is used for error/warning reporting.

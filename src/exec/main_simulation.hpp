@@ -588,7 +588,25 @@ void runSimulation(
         stat_dump_time_interval)*stat_dump_time_interval;
     bool dump_stat = true;
     
-    int iteration_num = 0;
+    int iteration_num = time_integrator->getIntegratorStep();
+    
+    tbox::pout << "At timestep # " << iteration_num << std::endl;
+    tbox::pout << "Simulation time is " << loop_time << std::endl;
+    switch (app_label)
+    {
+        case EULER:
+        {
+            Euler_app->computeAndPrintDataStatistics(tbox::pout, patch_hierarchy, iteration_num, loop_time);
+            break;
+        }
+        case NAVIER_STOKES:
+        {
+            Navier_Stokes_app->computeAndPrintDataStatistics(tbox::pout, patch_hierarchy, iteration_num, loop_time);
+            break;
+        }
+    }
+    tbox::pout << "--------------------------------------------------------------------------------";
+    tbox::pout << std::endl;
     
     tbox::pout << "Start simulation..." << std::endl;
     tbox::pout << std::endl;

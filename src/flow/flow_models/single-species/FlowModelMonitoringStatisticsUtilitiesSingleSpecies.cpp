@@ -25,7 +25,8 @@ FlowModelMonitoringStatisticsUtilitiesSingleSpecies::FlowModelMonitoringStatisti
         if (statistical_quantity_key != "KINETIC_ENERGY_AVG") // &&
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelMonitoringStatisticsUtilitiesSingleSpecies::FlowModelMonitoringStatisticsUtilitiesSingleSpecies()\n"
+                << ": FlowModelMonitoringStatisticsUtilitiesSingleSpecies::"
+                << "FlowModelMonitoringStatisticsUtilitiesSingleSpecies()\n"
                 << "Unknown monitoring statistics with variable_key = '" << statistical_quantity_key
                 << "' requested."
                 << std::endl);
@@ -71,7 +72,7 @@ FlowModelMonitoringStatisticsUtilitiesSingleSpecies::computeMonitoringStatistics
                 double v_sq_avg = double(0);
                 double w_sq_avg = double(0);
                 
-                if (d_dim == tbox::Dimension(1))
+                if (d_dim == tbox::Dimension(1) || d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
                 {
                     quantity_names.push_back("VELOCITY");
                     component_indices.push_back(0);
@@ -87,7 +88,7 @@ FlowModelMonitoringStatisticsUtilitiesSingleSpecies::computeMonitoringStatistics
                     component_indices.clear();
                 }
                 
-                if (d_dim == tbox::Dimension(2))
+                if (d_dim == tbox::Dimension(2) || d_dim == tbox::Dimension(3))
                 {
                     quantity_names.push_back("VELOCITY");
                     component_indices.push_back(1);
