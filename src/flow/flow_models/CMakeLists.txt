@@ -4,6 +4,7 @@ set(flow_models_source_files
     FlowModelManager.cpp
     FlowModel.cpp
     FlowModelDiffusiveFluxUtilities.cpp
+    FlowModelMonitoringStatisticsUtilities.cpp
     FlowModelSourceUtilities.cpp
     FlowModelSpecialSourceTerms.cpp
     ./MPI_helpers/FlowModelMPIHelper.cpp
