@@ -219,6 +219,12 @@ class FlowModelFourEqnConservative: public FlowModel
             const hier::Box& domain);
         
         /*
+         * Compute the cell data of volume fractions with species densities in the registered patch.
+         */
+        void computeCellDataOfVolumeFractionsWithSpeciesDensities(
+            const hier::Box& domain);
+        
+        /*
          * Compute the cell data of velocity with density in the registered patch.
          */
         void computeCellDataOfVelocityWithDensity(
@@ -295,6 +301,7 @@ class FlowModelFourEqnConservative: public FlowModel
         hier::IntVector d_num_subghosts_density;
         hier::IntVector d_num_subghosts_mass_fractions;
         hier::IntVector d_num_subghosts_mole_fractions;
+        hier::IntVector d_num_subghosts_volume_fractions;
         hier::IntVector d_num_subghosts_velocity;
         hier::IntVector d_num_subghosts_internal_energy;
         hier::IntVector d_num_subghosts_pressure;
@@ -316,6 +323,7 @@ class FlowModelFourEqnConservative: public FlowModel
         hier::Box d_subghost_box_density;
         hier::Box d_subghost_box_mass_fractions;
         hier::Box d_subghost_box_mole_fractions;
+        hier::Box d_subghost_box_volume_fractions;
         hier::Box d_subghost_box_velocity;
         hier::Box d_subghost_box_internal_energy;
         hier::Box d_subghost_box_pressure;
@@ -337,6 +345,7 @@ class FlowModelFourEqnConservative: public FlowModel
         hier::IntVector d_subghostcell_dims_density;
         hier::IntVector d_subghostcell_dims_mass_fractions;
         hier::IntVector d_subghostcell_dims_mole_fractions;
+        hier::IntVector d_subghostcell_dims_volume_fractions;
         hier::IntVector d_subghostcell_dims_velocity;
         hier::IntVector d_subghostcell_dims_internal_energy;
         hier::IntVector d_subghostcell_dims_pressure;
@@ -358,6 +367,7 @@ class FlowModelFourEqnConservative: public FlowModel
         HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_density;
         HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_mass_fractions;
         HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_mole_fractions;
+        HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_volume_fractions;
         HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_velocity;
         HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_internal_energy;
         HAMERS_SHARED_PTR<pdat::CellData<double> > d_data_pressure;
@@ -379,6 +389,7 @@ class FlowModelFourEqnConservative: public FlowModel
         bool d_cell_data_computed_density;
         bool d_cell_data_computed_mass_fractions;
         bool d_cell_data_computed_mole_fractions;
+        bool d_cell_data_computed_volume_fractions;
         bool d_cell_data_computed_velocity;
         bool d_cell_data_computed_internal_energy;
         bool d_cell_data_computed_pressure;
